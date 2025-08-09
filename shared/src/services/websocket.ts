@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { WebSocketMessage, Game, PlayerStat } from '../types';
+import type { WebSocketMessage, Game, PlayerStat } from '../types';
 
 export type WebSocketEventHandler = (data: WebSocketMessage) => void;
 export type ConnectionStatusHandler = (status: 'connected' | 'connecting' | 'disconnected' | 'error') => void;

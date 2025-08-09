@@ -1,4 +1,4 @@
-import { PlayerStat, Player, Game, Position } from '../types';
+import type { PlayerStat, Player, Game, Position } from '../types';
 import { format, formatDistanceToNow } from 'date-fns';
 
 // Basketball calculation utilities

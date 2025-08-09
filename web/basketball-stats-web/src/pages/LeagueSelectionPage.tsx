@@ -8,7 +8,17 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function LeagueSelectionPage() {
-  const { userLeagues, selectedLeague, selectLeague, joinLeagueByCode, loadUserLeagues, isLoading, user, logout } = useAuthStore();
+  const { 
+    userLeagues, 
+    selectedLeague, 
+    selectLeague, 
+    joinLeagueByCode, 
+    loadUserLeagues, 
+    isLoading, 
+    user, 
+    logout,
+    joinLeague
+  } = useAuthStore();
   const [availableLeagues, setAvailableLeagues] = useState<League[]>([]);
   const [inviteCode, setInviteCode] = useState('');
   const [showJoinForm, setShowJoinForm] = useState(false);
@@ -22,7 +32,7 @@ export default function LeagueSelectionPage() {
     try {
       const response = await basketballAPI.getLeagues();
       const publicLeagues = response.leagues.filter(league => 
-        league.is_public && !userLeagues.some(ul => ul.id === league.id)
+        league.is_public && !userLeagues.some((ul: League) => ul.id === league.id)
       );
       setAvailableLeagues(publicLeagues);
     } catch (error) {
@@ -42,7 +52,7 @@ export default function LeagueSelectionPage() {
 
   const handleJoinLeague = async (leagueId: number) => {
     try {
-      await useAuthStore.getState().joinLeague(leagueId);
+      await joinLeague(leagueId);
       await loadAvailableLeagues();
     } catch (error) {
       console.error('Failed to join league:', error);
@@ -113,7 +123,7 @@ export default function LeagueSelectionPage() {
               </div>
               
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {userLeagues.map((league) => {
+                {userLeagues.map((league: League) => {
                   const isSelected = selectedLeague?.id === league.id;
                   return (
                     <div
@@ -216,7 +226,7 @@ export default function LeagueSelectionPage() {
             <div className="mb-8">
               <h2 className="text-lg font-medium text-white mb-4">Public Leagues</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {availableLeagues.map((league) => (
+                {availableLeagues.map((league: League) => (
                   <div key={league.id} className="border border-gray-700 bg-gray-800 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-medium text-white">{league.name}</h3>

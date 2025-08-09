@@ -18,7 +18,8 @@
     "declarationMap": true,
     "outDir": "dist",
     "rootDir": "src",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "importHelpers": false
   },
   "include": [
     "src/**/*"
@@ -27,6 +28,7 @@
     "node_modules",
     "dist",
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "src/services/bak/**/*"
   ]
 }

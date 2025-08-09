@@ -11,7 +11,13 @@
     "lint": "eslint src/**/*.ts",
     "clean": "rm -rf dist"
   },
-  "keywords": ["basketball", "stats", "react", "react-native", "typescript"],
+  "keywords": [
+    "basketball",
+    "stats",
+    "react",
+    "react-native",
+    "typescript"
+  ],
   "author": "Basketball Stats Team",
   "license": "MIT",
   "type": "commonjs",
@@ -25,13 +31,13 @@
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
     "jest": "^29.0.0",
-    "typescript": "^5.2.0"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
-    "axios": "^1.6.0",
+    "date-fns": "^2.30.0",
     "socket.io-client": "^4.7.0",
-    "zustand": "^4.4.0",
-    "date-fns": "^2.30.0"
+    "tslib": "^2.8.1",
+    "zustand": "^4.4.0"
   },
   "peerDependencies": {
     "react": "^18.0.0"
