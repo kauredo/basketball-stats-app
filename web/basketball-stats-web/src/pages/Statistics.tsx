@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useAuthStore } from "@basketball-stats/shared";
+import { useAuthStore } from "../hooks/useAuthStore";
 import basketballAPI from "../services/api";
 import {
   TrophyIcon,

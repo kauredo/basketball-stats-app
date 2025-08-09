@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuthStore } from '@basketball-stats/shared';
+import { useAuthStore } from '../hooks/useAuthStore';
 import {
   HomeIcon,
   TrophyIcon,

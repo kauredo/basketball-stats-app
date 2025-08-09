@@ -92,7 +92,7 @@ const Teams: React.FC = () => {
   };
 
   const renderTeamCard = (team: Team) => (
-    <div key={team.id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+    <div key={team.id} className="card">
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-xl font-bold text-white">{team.name}</h3>
@@ -169,7 +169,7 @@ const Teams: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-content space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-white">Teams</h1>
@@ -177,7 +177,7 @@ const Teams: React.FC = () => {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+          className="btn btn-primary"
         >
           <PlusIcon className="w-4 h-4 mr-2" />
           Create Team
@@ -199,7 +199,7 @@ const Teams: React.FC = () => {
           <div className="mt-6">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700"
+              className="btn btn-primary"
             >
               <PlusIcon className="w-4 h-4 mr-2" />
               Create Team

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuthStore } from '@basketball-stats/shared';
+import { useAuthStore } from './hooks/useAuthStore';
 
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -27,11 +27,11 @@ const queryClient = new QueryClient({
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-6xl mb-4">🏀</div>
-        <div className="text-2xl font-bold text-white mb-2">Basketball Stats</div>
-        <div className="text-gray-400">Loading...</div>
+    <div className="loading-container">
+      <div className="loading-content">
+        <div className="loading-basketball">🏀</div>
+        <div className="loading-title">Basketball Stats</div>
+        <div className="loading-subtitle">Loading...</div>
       </div>
     </div>
   );
@@ -61,7 +61,7 @@ function AuthenticatedApp() {
   );
 }
 
-function App() {
+function AppContent() {
   const { isAuthenticated, initialize } = useAuthStore();
   const [isInitializing, setIsInitializing] = useState(true);
 
@@ -84,11 +84,17 @@ function App() {
   }
 
   return (
+    <div className="App min-h-screen bg-gray-900">
+      {isAuthenticated ? <AuthenticatedApp /> : <AuthPage />}
+    </div>
+  );
+}
+
+function App() {
+  return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <div className="App min-h-screen bg-gray-900">
-          {isAuthenticated ? <AuthenticatedApp /> : <AuthPage />}
-        </div>
+        <AppContent />
       </Router>
     </QueryClientProvider>
   );

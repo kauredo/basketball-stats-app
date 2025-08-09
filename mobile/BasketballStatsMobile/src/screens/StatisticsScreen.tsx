@@ -763,4 +763,18 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontSize: 12,
   },
+  chartContainer: {
+    backgroundColor: '#374151',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  chartLabel: {
+    color: '#9CA3AF',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 8,
+    fontWeight: '500',
+  },
 });

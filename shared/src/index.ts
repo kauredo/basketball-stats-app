@@ -10,7 +10,7 @@ export {
 
 // Stores
 export { useGameStore } from "./stores/gameStore";
-export { useAuthStore } from "./stores/authStore";
+export * from "./stores/simpleAuthStore";
 
 // Utils
 export { BasketballUtils } from "./utils/basketball";

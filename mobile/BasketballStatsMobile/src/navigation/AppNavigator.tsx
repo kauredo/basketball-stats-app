@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet } from 'react-native';
-import { useAuthStore } from '@basketball-stats/shared';
+import { useAuthStore, AuthProvider } from '@basketball-stats/shared';
 
 // Import screens
 import HomeScreen from '../screens/HomeScreen';
@@ -107,7 +107,7 @@ function LoadingScreen() {
   );
 }
 
-export default function AppNavigator() {
+function AppContent() {
   const { isAuthenticated, selectedLeague, initialize } = useAuthStore();
   const [isInitializing, setIsInitializing] = useState(true);
 
@@ -170,6 +170,14 @@ export default function AppNavigator() {
         </Stack.Navigator>
       )}
     </NavigationContainer>
+  );
+}
+
+export default function AppNavigator() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

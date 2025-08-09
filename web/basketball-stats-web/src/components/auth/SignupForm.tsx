@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useAuthStore, SignupCredentials } from '@basketball-stats/shared';
+import { SignupCredentials } from '@basketball-stats/shared';
+import { useAuthStore } from '../../hooks/useAuthStore';
 import '../../Auth.css';
 
 interface SignupFormProps {

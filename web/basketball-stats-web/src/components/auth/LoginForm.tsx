@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useAuthStore, LoginCredentials } from '@basketball-stats/shared';
+import { LoginCredentials } from '@basketball-stats/shared';
+import { useAuthStore } from '../../hooks/useAuthStore';
 import '../../Auth.css';
 
 interface LoginFormProps {

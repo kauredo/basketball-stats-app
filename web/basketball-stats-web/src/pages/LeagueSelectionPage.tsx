@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useAuthStore, League, basketballAPI } from '@basketball-stats/shared';
+import { League, basketballAPI } from '@basketball-stats/shared';
+import { useAuthStore } from '../hooks/useAuthStore';
 import {
   PlusIcon,
   UsersIcon,
