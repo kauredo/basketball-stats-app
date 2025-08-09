@@ -12,6 +12,9 @@ export {
 export { useGameStore } from "./stores/gameStore";
 export * from "./stores/simpleAuthStore";
 
+// UI Components
+export * from "./components";
+
 // Utils
 export { BasketballUtils } from "./utils/basketball";
 

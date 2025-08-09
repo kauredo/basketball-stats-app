@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { LoginCredentials } from '@basketball-stats/shared';
 import { useAuthStore } from '../../hooks/useAuthStore';
-import '../../Auth.css';
 
 interface LoginFormProps {
   onSwitchToSignup: () => void;

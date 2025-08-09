@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../hooks/useAuthStore';
-import '../../Auth.css';
 
 interface ForgotPasswordFormProps {
   onBackToLogin: () => void;

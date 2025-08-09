@@ -28,7 +28,6 @@ import {
   PolarRadiusAxis,
   Radar,
 } from "recharts";
-import "../Statistics.css";
 
 interface StatCardProps {
   title: string;
