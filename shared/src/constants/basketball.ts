@@ -157,8 +157,10 @@ export const GAME_STATUSES = {
 
 // API configuration
 export const API_CONFIG = {
-  BASE_URL: "http://localhost:3000/api/v1",
-  WEBSOCKET_URL: "ws://localhost:3000",
+  // BASE_URL: "http://localhost:3000/api/v1",
+  BASE_URL: "http://192.168.1.55:3000/api/v1",
+  // WEBSOCKET_URL: "ws://localhost:3000",
+  WEBSOCKET_URL: "ws://192.168.1.55:3000",
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,

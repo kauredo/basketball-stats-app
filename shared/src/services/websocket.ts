@@ -1,8 +1,10 @@
-import { io, Socket } from 'socket.io-client';
-import type { WebSocketMessage, Game, PlayerStat } from '../types';
+import { io, Socket } from "socket.io-client";
+import type { WebSocketMessage, Game, PlayerStat } from "../types";
 
 export type WebSocketEventHandler = (data: WebSocketMessage) => void;
-export type ConnectionStatusHandler = (status: 'connected' | 'connecting' | 'disconnected' | 'error') => void;
+export type ConnectionStatusHandler = (
+  status: "connected" | "connecting" | "disconnected" | "error"
+) => void;
 
 export class BasketballWebSocketService {
   private socket: Socket | null = null;
@@ -13,18 +15,19 @@ export class BasketballWebSocketService {
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
 
-  constructor(private baseURL: string = 'ws://localhost:3000') {}
+  // constructor(private baseURL: string = "ws://localhost:3000") {}
+  constructor(private baseURL: string = "ws://192.168.1.55:3000") {}
 
   connect(): void {
     if (this.socket?.connected) {
-      console.log('WebSocket already connected');
+      console.log("WebSocket already connected");
       return;
     }
 
-    this.notifyConnectionStatus('connecting');
-    
+    this.notifyConnectionStatus("connecting");
+
     this.socket = io(this.baseURL, {
-      transports: ['websocket', 'polling'],
+      transports: ["websocket", "polling"],
       timeout: 10000,
       forceNew: true,
     });
@@ -37,27 +40,27 @@ export class BasketballWebSocketService {
       this.socket.disconnect();
       this.socket = null;
       this.gameId = null;
-      this.notifyConnectionStatus('disconnected');
-      console.log('WebSocket disconnected');
+      this.notifyConnectionStatus("disconnected");
+      console.log("WebSocket disconnected");
     }
   }
 
   subscribeToGame(gameId: number): void {
     if (!this.socket) {
-      throw new Error('WebSocket not connected. Call connect() first.');
+      throw new Error("WebSocket not connected. Call connect() first.");
     }
 
     this.gameId = gameId;
-    
+
     // Subscribe to game channel
-    this.socket.emit('subscribe', {
-      channel: 'GameChannel',
+    this.socket.emit("subscribe", {
+      channel: "GameChannel",
       game_id: gameId,
     });
 
     // Subscribe to stats channel
-    this.socket.emit('subscribe', {
-      channel: 'StatsChannel', 
+    this.socket.emit("subscribe", {
+      channel: "StatsChannel",
       game_id: gameId,
     });
 
@@ -69,28 +72,28 @@ export class BasketballWebSocketService {
       return;
     }
 
-    this.socket.emit('unsubscribe', {
-      channel: 'GameChannel',
+    this.socket.emit("unsubscribe", {
+      channel: "GameChannel",
       game_id: this.gameId,
     });
 
-    this.socket.emit('unsubscribe', {
-      channel: 'StatsChannel',
+    this.socket.emit("unsubscribe", {
+      channel: "StatsChannel",
       game_id: this.gameId,
     });
 
     this.gameId = null;
-    console.log('Unsubscribed from game channels');
+    console.log("Unsubscribed from game channels");
   }
 
   updateTimer(timeRemaining: number, quarter: number): void {
     if (!this.socket || !this.gameId) {
-      console.error('Cannot update timer: not connected to game');
+      console.error("Cannot update timer: not connected to game");
       return;
     }
 
-    this.socket.emit('game_action', {
-      action: 'update_timer',
+    this.socket.emit("game_action", {
+      action: "update_timer",
       game_id: this.gameId,
       time_remaining_seconds: timeRemaining,
       current_quarter: quarter,
@@ -99,21 +102,21 @@ export class BasketballWebSocketService {
 
   ping(): void {
     if (!this.socket) {
-      console.error('Cannot ping: WebSocket not connected');
+      console.error("Cannot ping: WebSocket not connected");
       return;
     }
 
-    this.socket.emit('ping');
+    this.socket.emit("ping");
   }
 
   requestStats(): void {
     if (!this.socket || !this.gameId) {
-      console.error('Cannot request stats: not connected to game');
+      console.error("Cannot request stats: not connected to game");
       return;
     }
 
-    this.socket.emit('stats_action', {
-      action: 'request_stats',
+    this.socket.emit("stats_action", {
+      action: "request_stats",
       game_id: this.gameId,
     });
   }
@@ -165,69 +168,69 @@ export class BasketballWebSocketService {
   private setupEventListeners(): void {
     if (!this.socket) return;
 
-    this.socket.on('connect', () => {
-      console.log('WebSocket connected');
+    this.socket.on("connect", () => {
+      console.log("WebSocket connected");
       this.reconnectAttempts = 0;
-      this.notifyConnectionStatus('connected');
+      this.notifyConnectionStatus("connected");
     });
 
-    this.socket.on('disconnect', (reason) => {
-      console.log('WebSocket disconnected:', reason);
-      this.notifyConnectionStatus('disconnected');
-      
-      if (reason === 'io server disconnect') {
+    this.socket.on("disconnect", reason => {
+      console.log("WebSocket disconnected:", reason);
+      this.notifyConnectionStatus("disconnected");
+
+      if (reason === "io server disconnect") {
         // Server disconnected, reconnect manually
         this.handleReconnect();
       }
     });
 
-    this.socket.on('connect_error', (error) => {
-      console.error('WebSocket connection error:', error);
-      this.notifyConnectionStatus('error');
+    this.socket.on("connect_error", error => {
+      console.error("WebSocket connection error:", error);
+      this.notifyConnectionStatus("error");
       this.handleReconnect();
     });
 
     // Game events
-    this.socket.on('game_update', (data: WebSocketMessage) => {
-      this.emitEvent('game_update', data);
+    this.socket.on("game_update", (data: WebSocketMessage) => {
+      this.emitEvent("game_update", data);
     });
 
-    this.socket.on('game_connected', (data: WebSocketMessage) => {
-      console.log('Connected to game:', data.message);
-      this.emitEvent('game_connected', data);
+    this.socket.on("game_connected", (data: WebSocketMessage) => {
+      console.log("Connected to game:", data.message);
+      this.emitEvent("game_connected", data);
     });
 
-    this.socket.on('timer_update', (data: WebSocketMessage) => {
-      this.emitEvent('timer_update', data);
+    this.socket.on("timer_update", (data: WebSocketMessage) => {
+      this.emitEvent("timer_update", data);
     });
 
-    this.socket.on('quarter_end', (data: WebSocketMessage) => {
-      this.emitEvent('quarter_end', data);
+    this.socket.on("quarter_end", (data: WebSocketMessage) => {
+      this.emitEvent("quarter_end", data);
     });
 
     // Stats events
-    this.socket.on('stat_update', (data: WebSocketMessage) => {
-      this.emitEvent('stat_update', data);
+    this.socket.on("stat_update", (data: WebSocketMessage) => {
+      this.emitEvent("stat_update", data);
     });
 
-    this.socket.on('stats_connected', (data: WebSocketMessage) => {
-      console.log('Connected to stats:', data.message);
-      this.emitEvent('stats_connected', data);
+    this.socket.on("stats_connected", (data: WebSocketMessage) => {
+      console.log("Connected to stats:", data.message);
+      this.emitEvent("stats_connected", data);
     });
 
-    this.socket.on('stats_state', (data: WebSocketMessage) => {
-      this.emitEvent('stats_state', data);
+    this.socket.on("stats_state", (data: WebSocketMessage) => {
+      this.emitEvent("stats_state", data);
     });
 
     // General events
-    this.socket.on('pong', (data: WebSocketMessage) => {
-      console.log('Pong received:', data.timestamp);
-      this.emitEvent('pong', data);
+    this.socket.on("pong", (data: WebSocketMessage) => {
+      console.log("Pong received:", data.timestamp);
+      this.emitEvent("pong", data);
     });
 
-    this.socket.on('error', (data: WebSocketMessage) => {
-      console.error('WebSocket error:', data.message);
-      this.emitEvent('error', data);
+    this.socket.on("error", (data: WebSocketMessage) => {
+      console.error("WebSocket error:", data.message);
+      this.emitEvent("error", data);
     });
   }
 
@@ -244,30 +247,34 @@ export class BasketballWebSocketService {
     }
   }
 
-  private notifyConnectionStatus(status: 'connected' | 'connecting' | 'disconnected' | 'error'): void {
+  private notifyConnectionStatus(
+    status: "connected" | "connecting" | "disconnected" | "error"
+  ): void {
     this.connectionHandlers.forEach(handler => {
       try {
         handler(status);
       } catch (error) {
-        console.error('Error in connection status handler:', error);
+        console.error("Error in connection status handler:", error);
       }
     });
   }
 
   private handleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('Max reconnection attempts reached');
-      this.notifyConnectionStatus('error');
+      console.error("Max reconnection attempts reached");
+      this.notifyConnectionStatus("error");
       return;
     }
 
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts);
-    console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
-    
+    console.log(
+      `Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`
+    );
+
     setTimeout(() => {
       this.reconnectAttempts++;
       this.connect();
-      
+
       if (this.gameId) {
         setTimeout(() => {
           this.subscribeToGame(this.gameId!);

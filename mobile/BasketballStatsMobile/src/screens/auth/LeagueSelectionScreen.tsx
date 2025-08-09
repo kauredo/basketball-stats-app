@@ -36,7 +36,7 @@ export default function LeagueSelectionScreen() {
     try {
       const response = await basketballAPI.getLeagues();
       const publicLeagues = response.leagues.filter(
-        league =>
+        (league: League) =>
           league.is_public && !userLeagues.some(ul => ul.id === league.id)
       );
       setAvailableLeagues(publicLeagues);

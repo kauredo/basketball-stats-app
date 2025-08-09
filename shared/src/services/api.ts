@@ -16,7 +16,7 @@ import type {
   StatAction,
 } from "../types";
 
-type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+type RequestMethod = "GET" | "POST" | "PUT" | "DELETE";
 
 interface RequestOptions {
   method: RequestMethod;
@@ -28,7 +28,8 @@ export class BasketballStatsAPI {
   private baseURL: string;
   private accessToken: string | null = null;
 
-  constructor(baseURL: string = "http://localhost:3000/api/v1") {
+  // constructor(baseURL: string = "http://localhost:3000/api/v1") {
+  constructor(baseURL: string = "http://192.168.1.55:3000/api/v1") {
     this.baseURL = baseURL;
     this.loadStoredToken();
   }
@@ -40,7 +41,7 @@ export class BasketballStatsAPI {
     data?: any
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const options: RequestOptions = {
       method,
       headers: {
@@ -62,25 +63,28 @@ export class BasketballStatsAPI {
 
     try {
       // Use query parameters for GET requests with data
-      const fullUrl = method === "GET" && data 
-        ? `${url}?${new URLSearchParams(data).toString()}`
-        : url;
+      const fullUrl =
+        method === "GET" && data
+          ? `${url}?${new URLSearchParams(data).toString()}`
+          : url;
 
       const response = await fetch(fullUrl, options);
-      
+
       // Handle 401 Unauthorized - attempt token refresh
       if (response.status === 401) {
         try {
           await this.refreshToken();
-          
+
           // Retry request with new token
           options.headers.Authorization = `Bearer ${this.accessToken}`;
           const retryResponse = await fetch(fullUrl, options);
-          
+
           if (!retryResponse.ok) {
-            throw new Error(`API error: ${retryResponse.status} ${retryResponse.statusText}`);
+            throw new Error(
+              `API error: ${retryResponse.status} ${retryResponse.statusText}`
+            );
           }
-          
+
           return await retryResponse.json();
         } catch (refreshError) {
           // Refresh failed, clear tokens and rethrow
@@ -88,7 +92,7 @@ export class BasketballStatsAPI {
           throw refreshError;
         }
       }
-      
+
       // Handle other errors
       if (!response.ok) {
         throw new Error(`API error: ${response.status} ${response.statusText}`);
@@ -208,7 +212,9 @@ export class BasketballStatsAPI {
     id: number,
     player: Partial<Player>
   ): Promise<{ player: Player }> {
-    return this.request<{ player: Player }>(`/players/${id}`, "PUT", { player });
+    return this.request<{ player: Player }>(`/players/${id}`, "PUT", {
+      player,
+    });
   }
 
   async deletePlayer(id: number): Promise<void> {
@@ -276,9 +282,9 @@ export class BasketballStatsAPI {
     gameId: number,
     page: number = 1
   ): Promise<PaginatedResponse<PlayerStat> & { stats: PlayerStat[] }> {
-    return this.request<PaginatedResponse<PlayerStat> & { stats: PlayerStat[] }>(
-      `/games/${gameId}/stats?page=${page}`
-    );
+    return this.request<
+      PaginatedResponse<PlayerStat> & { stats: PlayerStat[] }
+    >(`/games/${gameId}/stats?page=${page}`);
   }
 
   async recordStat(
@@ -405,11 +411,9 @@ export class BasketballStatsAPI {
   }
 
   async forgotPassword(email: string): Promise<{ message: string }> {
-    return this.request<{ message: string }>(
-      "/auth/forgot_password",
-      "POST",
-      { email }
-    );
+    return this.request<{ message: string }>("/auth/forgot_password", "POST", {
+      email,
+    });
   }
 
   async resetPassword(
@@ -469,10 +473,7 @@ export class BasketballStatsAPI {
   }
 
   async deleteLeague(leagueId: number): Promise<{ message: string }> {
-    return this.request<{ message: string }>(
-      `/leagues/${leagueId}`,
-      "DELETE"
-    );
+    return this.request<{ message: string }>(`/leagues/${leagueId}`, "DELETE");
   }
 
   async joinLeague(
@@ -518,9 +519,7 @@ export class BasketballStatsAPI {
   }
 
   async getLeagueStandings(leagueId: number): Promise<{ standings: any[] }> {
-    return this.request<{ standings: any[] }>(
-      `/leagues/${leagueId}/standings`
-    );
+    return this.request<{ standings: any[] }>(`/leagues/${leagueId}/standings`);
   }
 
   async getLeagueInviteCode(
@@ -571,9 +570,7 @@ export class BasketballStatsAPI {
         total_pages: number;
         total_count: number;
       };
-    }>(
-      `/leagues/${leagueId}/statistics/players?${queryParams.toString()}`
-    );
+    }>(`/leagues/${leagueId}/statistics/players?${queryParams.toString()}`);
   }
 
   async getPlayerStatistics(
