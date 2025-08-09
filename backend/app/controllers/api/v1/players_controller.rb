@@ -3,7 +3,15 @@ class Api::V1::PlayersController < Api::V1::BaseController
   before_action :set_player, only: [:show, :update, :destroy]
 
   def index
-    players = @team.players.includes(:team)
+    if @team
+      # Get players for a specific team
+      players = @team.players.includes(:team)
+    else
+      # Get all players the user has access to
+      accessible_leagues = current_user.leagues.pluck(:id)
+      players = Player.includes(:team).where(team: Team.where(league_id: accessible_leagues))
+    end
+    
     result = paginate_collection(players)
     
     render_success({

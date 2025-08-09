@@ -58,7 +58,7 @@ Rails.application.routes.draw do
       end
 
       # Players (standalone operations)
-      resources :players, only: [:show, :update, :destroy] do
+      resources :players, only: [:index, :show, :update, :destroy] do
         member do
           get :stats
         end
