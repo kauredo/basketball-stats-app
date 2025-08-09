@@ -5,7 +5,7 @@ class ApplicationController < ActionController::API
   rescue_from ActiveRecord::RecordInvalid, with: :unprocessable_entity
   rescue_from StandardError, with: :handle_standard_error
 
-  before_action :authenticate_user, except: [:index, :show]
+  before_action :authenticate_user
 
   attr_reader :current_user
 
@@ -13,13 +13,25 @@ class ApplicationController < ActionController::API
 
   def authenticate_user
     token = extract_token_from_header
-    return render_unauthorized unless token
+    
+    if token.nil?
+      Rails.logger.warn "No authentication token provided"
+      render_unauthorized
+      return
+    end
 
     begin
       decoded_token = JwtService.decode(token)
       @current_user = User.find(decoded_token[:user_id])
+    rescue JWT::DecodeError, JWT::ExpiredSignature => e
+      Rails.logger.error "JWT error: #{e.message}"
+      render_unauthorized("Invalid or expired token")
+    rescue ActiveRecord::RecordNotFound => e
+      Rails.logger.error "User not found: #{e.message}"
+      render_unauthorized("User not found")
     rescue StandardError => e
-      render_unauthorized("Invalid token: #{e.message}")
+      Rails.logger.error "Authentication error: #{e.message}"
+      render_unauthorized("Authentication error")
     end
   end
 

@@ -1,19 +1,14 @@
 class Api::V1::LeaguesController < ApplicationController
+  before_action :authenticate_user
   before_action :set_league, only: [:show, :update, :destroy, :join, :leave, :members, :standings]
   before_action :require_league_access, only: [:show, :members, :standings]
   before_action :require_league_management, only: [:update, :destroy]
 
   # GET /api/v1/leagues
   def index
-    if current_user
-      # Show user's leagues and public leagues
-      user_leagues = current_user.leagues.includes(:owner, :league_memberships)
-      public_leagues = League.public_leagues.includes(:owner).where.not(id: user_leagues.ids)
-      leagues = (user_leagues + public_leagues).uniq
-    else
-      # Show only public leagues for non-authenticated users
-      leagues = League.public_leagues.includes(:owner)
-    end
+    user_leagues = current_user.leagues.includes(:owner, :league_memberships)
+    public_leagues = League.public_leagues.includes(:owner).where.not(id: user_leagues.ids)
+    leagues = (user_leagues + public_leagues).uniq
 
     render_success({
       leagues: leagues.map { |league| league_json(league, include_membership: true) }

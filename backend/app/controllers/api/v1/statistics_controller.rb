@@ -1,5 +1,5 @@
 class Api::V1::StatisticsController < Api::V1::BaseController
-  before_action :authenticate_user!
+  before_action :authenticate_user
   before_action :set_league
   before_action :ensure_league_access
   
