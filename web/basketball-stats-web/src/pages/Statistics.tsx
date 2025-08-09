@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useAuthStore, basketballAPI } from '@basketball-stats/shared';
-import { 
-  TrophyIcon, 
-  UsersIcon, 
+import React, { useState, useEffect } from "react";
+import { useAuthStore } from "@basketball-stats/shared";
+import basketballAPI from "../services/api";
+import {
+  TrophyIcon,
+  UsersIcon,
   ChartBarIcon,
   ArrowUpIcon,
-  ArrowDownIcon
-} from '@heroicons/react/24/outline';
+  ArrowDownIcon,
+} from "@heroicons/react/24/outline";
 import {
   ResponsiveContainer,
   LineChart,
@@ -25,22 +26,24 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  Radar
-} from 'recharts';
-import '../Statistics.css';
+  Radar,
+} from "recharts";
+import "../Statistics.css";
 
 interface StatCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
   icon?: React.ReactNode;
-  trend?: 'up' | 'down' | 'neutral';
+  trend?: "up" | "down" | "neutral";
 }
 
 function StatCard({ title, value, subtitle, icon, trend }: StatCardProps) {
   const getTrendIcon = () => {
-    if (trend === 'up') return <ArrowUpIcon className="stat-trend-icon green" />;
-    if (trend === 'down') return <ArrowDownIcon className="stat-trend-icon red" />;
+    if (trend === "up")
+      return <ArrowUpIcon className="stat-trend-icon green" />;
+    if (trend === "down")
+      return <ArrowDownIcon className="stat-trend-icon red" />;
     return null;
   };
 
@@ -67,7 +70,7 @@ interface LeadersBoardProps {
   unit?: string;
 }
 
-function LeadersBoard({ title, leaders, unit = '' }: LeadersBoardProps) {
+function LeadersBoard({ title, leaders, unit = "" }: LeadersBoardProps) {
   const leadersList = Object.entries(leaders).slice(0, 5);
 
   return (
@@ -79,7 +82,10 @@ function LeadersBoard({ title, leaders, unit = '' }: LeadersBoardProps) {
             <div className="leader-rank">{index + 1}</div>
             <div className="leader-info">
               <span className="leader-name">{player}</span>
-              <span className="leader-value">{value.toFixed(1)}{unit}</span>
+              <span className="leader-value">
+                {value.toFixed(1)}
+                {unit}
+              </span>
             </div>
           </div>
         ))}
@@ -118,8 +124,12 @@ function StandingsTable({ standings }: StandingsTableProps) {
                 </td>
                 <td className="stat-number">{team.wins}</td>
                 <td className="stat-number">{team.losses}</td>
-                <td className="stat-number">{team.win_percentage.toFixed(1)}%</td>
-                <td className="stat-number">{team.avg_points?.toFixed(1) || '0.0'}</td>
+                <td className="stat-number">
+                  {team.win_percentage.toFixed(1)}%
+                </td>
+                <td className="stat-number">
+                  {team.avg_points?.toFixed(1) || "0.0"}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -135,9 +145,11 @@ export default function Statistics() {
   const [playersData, setPlayersData] = useState<any>(null);
   const [teamsData, setTeamsData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'players' | 'teams' | 'charts'>('overview');
-  const [sortBy, setSortBy] = useState('avg_points');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "players" | "teams" | "charts"
+  >("overview");
+  const [sortBy, setSortBy] = useState("avg_points");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
     if (selectedLeague) {
@@ -147,46 +159,54 @@ export default function Statistics() {
 
   const loadStatistics = async () => {
     if (!selectedLeague) return;
-    
+
     setLoading(true);
     try {
       // Load dashboard data
-      const dashboard = await basketballAPI.getStatisticsDashboard(selectedLeague.id);
+      const dashboard = await basketballAPI.getStatisticsDashboard(
+        selectedLeague.id
+      );
       setDashboardData(dashboard);
 
       // Load players data
-      const players = await basketballAPI.getPlayersStatistics(selectedLeague.id, {
-        per_page: 20,
-        sort_by: sortBy,
-        order: sortOrder
-      });
+      const players = await basketballAPI.getPlayersStatistics(
+        selectedLeague.id,
+        {
+          per_page: 20,
+          sort_by: sortBy,
+          order: sortOrder,
+        }
+      );
       setPlayersData(players);
 
       // Load teams data
       const teams = await basketballAPI.getTeamsStatistics(selectedLeague.id, {
-        sort_by: 'win_percentage',
-        order: 'desc'
+        sort_by: "win_percentage",
+        order: "desc",
       });
       setTeamsData(teams);
-
     } catch (error) {
-      console.error('Failed to load statistics:', error);
+      console.error("Failed to load statistics:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSortChange = async (newSortBy: string) => {
-    const newOrder = newSortBy === sortBy && sortOrder === 'desc' ? 'asc' : 'desc';
+    const newOrder =
+      newSortBy === sortBy && sortOrder === "desc" ? "asc" : "desc";
     setSortBy(newSortBy);
     setSortOrder(newOrder);
-    
+
     if (selectedLeague) {
-      const players = await basketballAPI.getPlayersStatistics(selectedLeague.id, {
-        per_page: 20,
-        sort_by: newSortBy,
-        order: newOrder
-      });
+      const players = await basketballAPI.getPlayersStatistics(
+        selectedLeague.id,
+        {
+          per_page: 20,
+          sort_by: newSortBy,
+          order: newOrder,
+        }
+      );
       setPlayersData(players);
     }
   };
@@ -218,39 +238,41 @@ export default function Statistics() {
     <div className="statistics-container">
       <div className="statistics-header">
         <h1 className="page-title">Statistics Dashboard</h1>
-        <p className="page-subtitle">{selectedLeague.name} - {selectedLeague.season}</p>
+        <p className="page-subtitle">
+          {selectedLeague.name} - {selectedLeague.season}
+        </p>
       </div>
 
       {/* Tab Navigation */}
       <div className="tab-navigation">
         <button
-          className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
+          className={`tab-button ${activeTab === "overview" ? "active" : ""}`}
+          onClick={() => setActiveTab("overview")}
         >
           Overview
         </button>
         <button
-          className={`tab-button ${activeTab === 'players' ? 'active' : ''}`}
-          onClick={() => setActiveTab('players')}
+          className={`tab-button ${activeTab === "players" ? "active" : ""}`}
+          onClick={() => setActiveTab("players")}
         >
           Players
         </button>
         <button
-          className={`tab-button ${activeTab === 'teams' ? 'active' : ''}`}
-          onClick={() => setActiveTab('teams')}
+          className={`tab-button ${activeTab === "teams" ? "active" : ""}`}
+          onClick={() => setActiveTab("teams")}
         >
           Teams
         </button>
         <button
-          className={`tab-button ${activeTab === 'charts' ? 'active' : ''}`}
-          onClick={() => setActiveTab('charts')}
+          className={`tab-button ${activeTab === "charts" ? "active" : ""}`}
+          onClick={() => setActiveTab("charts")}
         >
           Charts
         </button>
       </div>
 
       {/* Overview Tab */}
-      {activeTab === 'overview' && dashboardData && (
+      {activeTab === "overview" && dashboardData && (
         <div className="overview-content">
           {/* League Stats Overview */}
           <div className="stats-grid">
@@ -277,10 +299,12 @@ export default function Statistics() {
               value={
                 dashboardData.recent_games?.length > 0
                   ? (
-                      dashboardData.recent_games.reduce((sum: number, game: any) => sum + game.total_points, 0) /
-                      dashboardData.recent_games.length
+                      dashboardData.recent_games.reduce(
+                        (sum: number, game: any) => sum + game.total_points,
+                        0
+                      ) / dashboardData.recent_games.length
                     ).toFixed(1)
-                  : '0.0'
+                  : "0.0"
               }
               subtitle="Points per game"
               icon={<ChartBarIcon className="stat-card-icon" />}
@@ -322,16 +346,16 @@ export default function Statistics() {
       )}
 
       {/* Players Tab */}
-      {activeTab === 'players' && playersData && (
+      {activeTab === "players" && playersData && (
         <div className="players-content">
           <div className="players-table">
             <div className="table-header">
               <h3>Player Statistics</h3>
               <div className="sort-controls">
                 <label>Sort by:</label>
-                <select 
-                  value={sortBy} 
-                  onChange={(e) => handleSortChange(e.target.value)}
+                <select
+                  value={sortBy}
+                  onChange={e => handleSortChange(e.target.value)}
                   className="sort-select"
                 >
                   <option value="avg_points">Points</option>
@@ -342,7 +366,7 @@ export default function Statistics() {
                 </select>
               </div>
             </div>
-            
+
             <div className="table-container">
               <table>
                 <thead>
@@ -363,20 +387,36 @@ export default function Statistics() {
                     <tr key={player.player_id}>
                       <td>
                         <div className="player-info">
-                          <span className="player-name">{player.player_name}</span>
+                          <span className="player-name">
+                            {player.player_name}
+                          </span>
                           {player.position && (
-                            <span className="player-position">{player.position}</span>
+                            <span className="player-position">
+                              {player.position}
+                            </span>
                           )}
                         </div>
                       </td>
                       <td>{player.team}</td>
                       <td className="stat-number">{player.games_played}</td>
-                      <td className="stat-number">{player.avg_points?.toFixed(1) || '0.0'}</td>
-                      <td className="stat-number">{player.avg_rebounds?.toFixed(1) || '0.0'}</td>
-                      <td className="stat-number">{player.avg_assists?.toFixed(1) || '0.0'}</td>
-                      <td className="stat-number">{player.field_goal_percentage?.toFixed(1) || '0.0'}%</td>
-                      <td className="stat-number">{player.three_point_percentage?.toFixed(1) || '0.0'}%</td>
-                      <td className="stat-number">{player.free_throw_percentage?.toFixed(1) || '0.0'}%</td>
+                      <td className="stat-number">
+                        {player.avg_points?.toFixed(1) || "0.0"}
+                      </td>
+                      <td className="stat-number">
+                        {player.avg_rebounds?.toFixed(1) || "0.0"}
+                      </td>
+                      <td className="stat-number">
+                        {player.avg_assists?.toFixed(1) || "0.0"}
+                      </td>
+                      <td className="stat-number">
+                        {player.field_goal_percentage?.toFixed(1) || "0.0"}%
+                      </td>
+                      <td className="stat-number">
+                        {player.three_point_percentage?.toFixed(1) || "0.0"}%
+                      </td>
+                      <td className="stat-number">
+                        {player.free_throw_percentage?.toFixed(1) || "0.0"}%
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -387,7 +427,7 @@ export default function Statistics() {
       )}
 
       {/* Teams Tab */}
-      {activeTab === 'teams' && teamsData && (
+      {activeTab === "teams" && teamsData && (
         <div className="teams-content">
           <div className="teams-table">
             <h3>Team Statistics</h3>
@@ -416,11 +456,21 @@ export default function Statistics() {
                       </td>
                       <td className="stat-number">{team.wins}</td>
                       <td className="stat-number">{team.losses}</td>
-                      <td className="stat-number">{team.win_percentage?.toFixed(1) || '0.0'}%</td>
-                      <td className="stat-number">{team.avg_points?.toFixed(1) || '0.0'}</td>
-                      <td className="stat-number">{team.avg_rebounds?.toFixed(1) || '0.0'}</td>
-                      <td className="stat-number">{team.avg_assists?.toFixed(1) || '0.0'}</td>
-                      <td className="stat-number">{team.field_goal_percentage?.toFixed(1) || '0.0'}%</td>
+                      <td className="stat-number">
+                        {team.win_percentage?.toFixed(1) || "0.0"}%
+                      </td>
+                      <td className="stat-number">
+                        {team.avg_points?.toFixed(1) || "0.0"}
+                      </td>
+                      <td className="stat-number">
+                        {team.avg_rebounds?.toFixed(1) || "0.0"}
+                      </td>
+                      <td className="stat-number">
+                        {team.avg_assists?.toFixed(1) || "0.0"}
+                      </td>
+                      <td className="stat-number">
+                        {team.field_goal_percentage?.toFixed(1) || "0.0"}%
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -431,7 +481,7 @@ export default function Statistics() {
       )}
 
       {/* Charts Tab */}
-      {activeTab === 'charts' && dashboardData && playersData && teamsData && (
+      {activeTab === "charts" && dashboardData && playersData && teamsData && (
         <div className="charts-content">
           <div className="charts-grid">
             {/* Team Performance Comparison */}
@@ -440,8 +490,8 @@ export default function Statistics() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={teamsData.teams?.slice(0, 8) || []}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis 
-                    dataKey="team_name" 
+                  <XAxis
+                    dataKey="team_name"
                     stroke="#9CA3AF"
                     fontSize={12}
                     angle={-45}
@@ -449,13 +499,13 @@ export default function Statistics() {
                     height={80}
                   />
                   <YAxis stroke="#9CA3AF" fontSize={12} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #374151',
-                      borderRadius: '8px',
-                      color: '#F9FAFB'
-                    }} 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1F2937",
+                      border: "1px solid #374151",
+                      borderRadius: "8px",
+                      color: "#F9FAFB",
+                    }}
                   />
                   <Legend />
                   <Bar dataKey="avg_points" fill="#EA580C" name="Points" />
@@ -471,25 +521,31 @@ export default function Statistics() {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={teamsData.teams?.slice(0, 6).map((team: any, index: number) => ({
-                      name: team.team_name,
-                      value: team.win_percentage || 0,
-                      fill: `hsl(${index * 60}, 70%, 50%)`
-                    })) || []}
+                    data={
+                      teamsData.teams
+                        ?.slice(0, 6)
+                        .map((team: any, index: number) => ({
+                          name: team.team_name,
+                          value: team.win_percentage || 0,
+                          fill: `hsl(${index * 60}, 70%, 50%)`,
+                        })) || []
+                    }
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, value }) => `${name}: ${value.toFixed(1)}%`}
+                    label={({ name, value }) =>
+                      `${name}: ${(value ?? 0).toFixed(1)}%`
+                    }
                     outerRadius={80}
                     dataKey="value"
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #374151',
-                      borderRadius: '8px',
-                      color: '#F9FAFB'
-                    }} 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1F2937",
+                      border: "1px solid #374151",
+                      borderRadius: "8px",
+                      color: "#F9FAFB",
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -499,82 +555,105 @@ export default function Statistics() {
             <div className="chart-section">
               <h3>Top Players Performance Comparison</h3>
               <ResponsiveContainer width="100%" height={400}>
-                <RadarChart data={[
-                  {
-                    metric: 'Points',
-                    player1: playersData.players?.[0]?.avg_points || 0,
-                    player2: playersData.players?.[1]?.avg_points || 0,
-                    player3: playersData.players?.[2]?.avg_points || 0,
-                    fullMark: Math.max(...(playersData.players?.slice(0, 10).map((p: any) => p.avg_points) || [20]))
-                  },
-                  {
-                    metric: 'Rebounds',
-                    player1: playersData.players?.[0]?.avg_rebounds || 0,
-                    player2: playersData.players?.[1]?.avg_rebounds || 0,
-                    player3: playersData.players?.[2]?.avg_rebounds || 0,
-                    fullMark: Math.max(...(playersData.players?.slice(0, 10).map((p: any) => p.avg_rebounds) || [10]))
-                  },
-                  {
-                    metric: 'Assists',
-                    player1: playersData.players?.[0]?.avg_assists || 0,
-                    player2: playersData.players?.[1]?.avg_assists || 0,
-                    player3: playersData.players?.[2]?.avg_assists || 0,
-                    fullMark: Math.max(...(playersData.players?.slice(0, 10).map((p: any) => p.avg_assists) || [10]))
-                  },
-                  {
-                    metric: 'FG%',
-                    player1: playersData.players?.[0]?.field_goal_percentage || 0,
-                    player2: playersData.players?.[1]?.field_goal_percentage || 0,
-                    player3: playersData.players?.[2]?.field_goal_percentage || 0,
-                    fullMark: 100
-                  },
-                  {
-                    metric: 'FT%',
-                    player1: playersData.players?.[0]?.free_throw_percentage || 0,
-                    player2: playersData.players?.[1]?.free_throw_percentage || 0,
-                    player3: playersData.players?.[2]?.free_throw_percentage || 0,
-                    fullMark: 100
-                  }
-                ]}>
+                <RadarChart
+                  data={[
+                    {
+                      metric: "Points",
+                      player1: playersData.players?.[0]?.avg_points || 0,
+                      player2: playersData.players?.[1]?.avg_points || 0,
+                      player3: playersData.players?.[2]?.avg_points || 0,
+                      fullMark: Math.max(
+                        ...(playersData.players
+                          ?.slice(0, 10)
+                          .map((p: any) => p.avg_points) || [20])
+                      ),
+                    },
+                    {
+                      metric: "Rebounds",
+                      player1: playersData.players?.[0]?.avg_rebounds || 0,
+                      player2: playersData.players?.[1]?.avg_rebounds || 0,
+                      player3: playersData.players?.[2]?.avg_rebounds || 0,
+                      fullMark: Math.max(
+                        ...(playersData.players
+                          ?.slice(0, 10)
+                          .map((p: any) => p.avg_rebounds) || [10])
+                      ),
+                    },
+                    {
+                      metric: "Assists",
+                      player1: playersData.players?.[0]?.avg_assists || 0,
+                      player2: playersData.players?.[1]?.avg_assists || 0,
+                      player3: playersData.players?.[2]?.avg_assists || 0,
+                      fullMark: Math.max(
+                        ...(playersData.players
+                          ?.slice(0, 10)
+                          .map((p: any) => p.avg_assists) || [10])
+                      ),
+                    },
+                    {
+                      metric: "FG%",
+                      player1:
+                        playersData.players?.[0]?.field_goal_percentage || 0,
+                      player2:
+                        playersData.players?.[1]?.field_goal_percentage || 0,
+                      player3:
+                        playersData.players?.[2]?.field_goal_percentage || 0,
+                      fullMark: 100,
+                    },
+                    {
+                      metric: "FT%",
+                      player1:
+                        playersData.players?.[0]?.free_throw_percentage || 0,
+                      player2:
+                        playersData.players?.[1]?.free_throw_percentage || 0,
+                      player3:
+                        playersData.players?.[2]?.free_throw_percentage || 0,
+                      fullMark: 100,
+                    },
+                  ]}
+                >
                   <PolarGrid stroke="#374151" />
-                  <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fill: '#9CA3AF' }} />
-                  <PolarRadiusAxis 
-                    angle={90} 
-                    domain={[0, 'dataMax']}
-                    tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                  <PolarAngleAxis
+                    dataKey="metric"
+                    tick={{ fontSize: 12, fill: "#9CA3AF" }}
                   />
-                  <Radar 
-                    name={playersData.players?.[0]?.player_name || 'Player 1'} 
-                    dataKey="player1" 
-                    stroke="#EA580C" 
-                    fill="#EA580C" 
+                  <PolarRadiusAxis
+                    angle={90}
+                    domain={[0, "dataMax"]}
+                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                  />
+                  <Radar
+                    name={playersData.players?.[0]?.player_name || "Player 1"}
+                    dataKey="player1"
+                    stroke="#EA580C"
+                    fill="#EA580C"
                     fillOpacity={0.1}
                     strokeWidth={2}
                   />
-                  <Radar 
-                    name={playersData.players?.[1]?.player_name || 'Player 2'} 
-                    dataKey="player2" 
-                    stroke="#3B82F6" 
-                    fill="#3B82F6" 
+                  <Radar
+                    name={playersData.players?.[1]?.player_name || "Player 2"}
+                    dataKey="player2"
+                    stroke="#3B82F6"
+                    fill="#3B82F6"
                     fillOpacity={0.1}
                     strokeWidth={2}
                   />
-                  <Radar 
-                    name={playersData.players?.[2]?.player_name || 'Player 3'} 
-                    dataKey="player3" 
-                    stroke="#10B981" 
-                    fill="#10B981" 
+                  <Radar
+                    name={playersData.players?.[2]?.player_name || "Player 3"}
+                    dataKey="player3"
+                    stroke="#10B981"
+                    fill="#10B981"
                     fillOpacity={0.1}
                     strokeWidth={2}
                   />
-                  <Legend wrapperStyle={{ color: '#F9FAFB' }} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #374151',
-                      borderRadius: '8px',
-                      color: '#F9FAFB'
-                    }} 
+                  <Legend wrapperStyle={{ color: "#F9FAFB" }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1F2937",
+                      border: "1px solid #374151",
+                      borderRadius: "8px",
+                      color: "#F9FAFB",
+                    }}
                   />
                 </RadarChart>
               </ResponsiveContainer>
@@ -586,8 +665,8 @@ export default function Statistics() {
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={teamsData.teams?.slice(0, 8) || []}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis 
-                    dataKey="team_name" 
+                  <XAxis
+                    dataKey="team_name"
                     stroke="#9CA3AF"
                     fontSize={12}
                     angle={-45}
@@ -595,37 +674,37 @@ export default function Statistics() {
                     height={80}
                   />
                   <YAxis stroke="#9CA3AF" fontSize={12} domain={[0, 100]} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #374151',
-                      borderRadius: '8px',
-                      color: '#F9FAFB'
-                    }} 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1F2937",
+                      border: "1px solid #374151",
+                      borderRadius: "8px",
+                      color: "#F9FAFB",
+                    }}
                   />
                   <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="field_goal_percentage" 
-                    stroke="#EA580C" 
+                  <Line
+                    type="monotone"
+                    dataKey="field_goal_percentage"
+                    stroke="#EA580C"
                     strokeWidth={3}
-                    dot={{ fill: '#EA580C', strokeWidth: 2, r: 4 }}
+                    dot={{ fill: "#EA580C", strokeWidth: 2, r: 4 }}
                     name="Field Goal %"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="three_point_percentage" 
-                    stroke="#3B82F6" 
+                  <Line
+                    type="monotone"
+                    dataKey="three_point_percentage"
+                    stroke="#3B82F6"
                     strokeWidth={3}
-                    dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                    dot={{ fill: "#3B82F6", strokeWidth: 2, r: 4 }}
                     name="3-Point %"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="free_throw_percentage" 
-                    stroke="#10B981" 
+                  <Line
+                    type="monotone"
+                    dataKey="free_throw_percentage"
+                    stroke="#10B981"
                     strokeWidth={3}
-                    dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
+                    dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
                     name="Free Throw %"
                   />
                 </LineChart>
