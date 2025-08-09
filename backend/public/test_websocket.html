@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basketball Stats WebSocket Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@rails/actioncable@7.0.0/app/assets/javascripts/actioncable.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .stats { display: flex; flex-wrap: wrap; gap: 10px; }
+        .player-card { border: 1px solid #ccc; padding: 10px; width: 250px; }
+        .controls { margin: 20px 0; }
+        button { margin: 5px; padding: 10px; }
+        #messages { border: 1px solid #ddd; height: 200px; overflow-y: scroll; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Basketball Stats Real-time Test</h1>
+    
+    <div class="controls">
+        <button onclick="connectToGame()">Connect to Game 1</button>
+        <button onclick="disconnect()">Disconnect</button>
+        <button onclick="recordStat('shot2', 1, true)">LeBron 2pt Made</button>
+        <button onclick="recordStat('shot3', 6, true)">Tatum 3pt Made</button>
+        <button onclick="recordStat('assists', 3)">Westbrook Assist</button>
+    </div>
+
+    <div id="game-info">
+        <h3>Game Status: <span id="game-status">Not Connected</span></h3>
+        <p>Score: <span id="home-team">Home</span> <span id="home-score">0</span> - <span id="away-score">0</span> <span id="away-team">Away</span></p>
+        <p>Quarter: <span id="quarter">-</span> | Time: <span id="time">--:--</span></p>
+    </div>
+
+    <div id="messages"></div>
+
+    <div class="stats" id="stats-container"></div>
+
+    <script>
+        let cable;
+        let gameChannel;
+        let statsChannel;
+
+        function log(message) {
+            const messages = document.getElementById('messages');
+            const time = new Date().toLocaleTimeString();
+            messages.innerHTML += `<div><strong>${time}</strong>: ${message}</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function connectToGame() {
+            cable = ActionCable.createConsumer('ws://localhost:3000/cable');
+            
+            gameChannel = cable.subscriptions.create(
+                { channel: 'GameChannel', game_id: 1 },
+                {
+                    connected() {
+                        log('Connected to GameChannel');
+                    },
+                    disconnected() {
+                        log('Disconnected from GameChannel');
+                    },
+                    received(data) {
+                        log(`Game update: ${data.type}`);
+                        if (data.game) {
+                            updateGameInfo(data.game);
+                        }
+                    }
+                }
+            );
+
+            statsChannel = cable.subscriptions.create(
+                { channel: 'StatsChannel', game_id: 1 },
+                {
+                    connected() {
+                        log('Connected to StatsChannel');
+                    },
+                    disconnected() {
+                        log('Disconnected from StatsChannel');
+                    },
+                    received(data) {
+                        log(`Stats update: ${data.type}`);
+                        if (data.stats) {
+                            updateStats(data.stats);
+                        }
+                    }
+                }
+            );
+        }
+
+        function disconnect() {
+            if (cable) {
+                cable.disconnect();
+                cable = null;
+                log('Disconnected from all channels');
+                document.getElementById('game-status').textContent = 'Not Connected';
+            }
+        }
+
+        function updateGameInfo(game) {
+            document.getElementById('game-status').textContent = game.status.charAt(0).toUpperCase() + game.status.slice(1);
+            document.getElementById('home-team').textContent = game.home_team.name;
+            document.getElementById('away-team').textContent = game.away_team.name;
+            document.getElementById('home-score').textContent = game.home_score;
+            document.getElementById('away-score').textContent = game.away_score;
+            document.getElementById('quarter').textContent = game.current_quarter;
+            document.getElementById('time').textContent = game.time_display;
+        }
+
+        function updateStats(stats) {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = '';
+            
+            stats.forEach(stat => {
+                const card = document.createElement('div');
+                card.className = 'player-card';
+                card.innerHTML = `
+                    <h4>${stat.player.name} (#${stat.player.number})</h4>
+                    <p><strong>Points:</strong> ${stat.points}</p>
+                    <p><strong>FG:</strong> ${stat.field_goals_made}/${stat.field_goals_attempted} (${stat.field_goal_percentage}%)</p>
+                    <p><strong>3PT:</strong> ${stat.three_pointers_made}/${stat.three_pointers_attempted} (${stat.three_point_percentage}%)</p>
+                    <p><strong>Rebounds:</strong> ${stat.rebounds} | <strong>Assists:</strong> ${stat.assists}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function recordStat(statType, playerId, made = true) {
+            try {
+                const response = await fetch('http://localhost:3000/api/v1/games/1/stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        stat: {
+                            player_id: playerId,
+                            stat_type: statType,
+                            made: made.toString()
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                log(`Stat recorded: ${result.message || 'Success'}`);
+            } catch (error) {
+                log(`Error recording stat: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
