@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,25 +9,29 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-} from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { useAuthStore, LoginCredentials } from '@basketball-stats/shared';
+} from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { LoginCredentials } from "@basketball-stats/shared";
+import { useAuthStore } from "../../hooks/useAuthStore";
 
 interface LoginScreenProps {
   onNavigateToSignup: () => void;
   onNavigateToForgotPassword: () => void;
 }
 
-export default function LoginScreen({ onNavigateToSignup, onNavigateToForgotPassword }: LoginScreenProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function LoginScreen({
+  onNavigateToSignup,
+  onNavigateToForgotPassword,
+}: LoginScreenProps) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  
+
   const { login, isLoading, error, clearError } = useAuthStore();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please enter both email and password');
+      Alert.alert("Error", "Please enter both email and password");
       return;
     }
 
@@ -37,30 +41,30 @@ export default function LoginScreen({ onNavigateToSignup, onNavigateToForgotPass
         email: email.trim().toLowerCase(),
         password,
       };
-      
+
       await login(credentials);
       // Navigation will be handled by the auth state change
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       // Error is already handled by the store
     }
   };
 
   const handleForgotPassword = () => {
     if (!email.trim()) {
-      Alert.alert('Enter Email', 'Please enter your email address first');
+      Alert.alert("Enter Email", "Please enter your email address first");
       return;
     }
     onNavigateToForgotPassword();
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <StatusBar style="light" />
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
@@ -109,7 +113,7 @@ export default function LoginScreen({ onNavigateToSignup, onNavigateToForgotPass
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               >
                 <Text style={styles.passwordToggleText}>
-                  {isPasswordVisible ? '🙈' : '👁️'}
+                  {isPasswordVisible ? "🙈" : "👁️"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -121,7 +125,7 @@ export default function LoginScreen({ onNavigateToSignup, onNavigateToForgotPass
             disabled={isLoading}
           >
             <Text style={styles.loginButtonText}>
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? "Signing in..." : "Sign In"}
             </Text>
           </TouchableOpacity>
 
@@ -136,10 +140,7 @@ export default function LoginScreen({ onNavigateToSignup, onNavigateToForgotPass
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account?</Text>
-          <TouchableOpacity
-            onPress={onNavigateToSignup}
-            disabled={isLoading}
-          >
+          <TouchableOpacity onPress={onNavigateToSignup} disabled={isLoading}>
             <Text style={styles.signupLink}>Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -151,16 +152,16 @@ export default function LoginScreen({ onNavigateToSignup, onNavigateToForgotPass
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111827',
+    backgroundColor: "#111827",
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 32,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 48,
   },
   logo: {
@@ -169,58 +170,58 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#F9FAFB',
+    fontWeight: "bold",
+    color: "#F9FAFB",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#9CA3AF',
-    textAlign: 'center',
+    color: "#9CA3AF",
+    textAlign: "center",
   },
   form: {
     marginBottom: 32,
   },
   errorContainer: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: "#FEE2E2",
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: "#FECACA",
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
   },
   errorText: {
-    color: '#DC2626',
+    color: "#DC2626",
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
   },
   inputGroup: {
     marginBottom: 20,
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#F9FAFB',
+    fontWeight: "600",
+    color: "#F9FAFB",
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#1F2937',
+    backgroundColor: "#1F2937",
     borderWidth: 1,
-    borderColor: '#374151',
+    borderColor: "#374151",
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#F9FAFB',
+    color: "#F9FAFB",
   },
   passwordContainer: {
-    position: 'relative',
+    position: "relative",
   },
   passwordInput: {
     paddingRight: 48,
   },
   passwordToggle: {
-    position: 'absolute',
+    position: "absolute",
     right: 12,
     top: 12,
     padding: 4,
@@ -229,42 +230,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   loginButton: {
-    backgroundColor: '#EF4444',
+    backgroundColor: "#EF4444",
     borderRadius: 8,
     paddingVertical: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 8,
   },
   disabledButton: {
     opacity: 0.5,
   },
   loginButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   forgotPasswordButton: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 16,
   },
   forgotPasswordText: {
-    color: '#EF4444',
+    color: "#EF4444",
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     gap: 8,
   },
   footerText: {
-    color: '#9CA3AF',
+    color: "#9CA3AF",
     fontSize: 14,
   },
   signupLink: {
-    color: '#EF4444',
+    color: "#EF4444",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

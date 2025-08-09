@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,9 +9,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-} from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { useAuthStore, SignupCredentials } from '@basketball-stats/shared';
+} from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { SignupCredentials } from "@basketball-stats/shared";
+import { useAuthStore } from "../../hooks/useAuthStore";
 
 interface SignupScreenProps {
   onNavigateToLogin: () => void;
@@ -19,15 +20,16 @@ interface SignupScreenProps {
 
 export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    passwordConfirmation: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    passwordConfirmation: "",
   });
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
-  
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
+
   const { signup, isLoading, error, clearError } = useAuthStore();
 
   const handleInputChange = (field: string, value: string) => {
@@ -35,38 +37,39 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
   };
 
   const validateForm = () => {
-    const { firstName, lastName, email, password, passwordConfirmation } = formData;
-    
+    const { firstName, lastName, email, password, passwordConfirmation } =
+      formData;
+
     if (!firstName.trim()) {
-      Alert.alert('Validation Error', 'Please enter your first name');
+      Alert.alert("Validation Error", "Please enter your first name");
       return false;
     }
-    
+
     if (!lastName.trim()) {
-      Alert.alert('Validation Error', 'Please enter your last name');
+      Alert.alert("Validation Error", "Please enter your last name");
       return false;
     }
-    
+
     if (!email.trim()) {
-      Alert.alert('Validation Error', 'Please enter your email');
+      Alert.alert("Validation Error", "Please enter your email");
       return false;
     }
-    
-    if (!email.includes('@')) {
-      Alert.alert('Validation Error', 'Please enter a valid email address');
+
+    if (!email.includes("@")) {
+      Alert.alert("Validation Error", "Please enter a valid email address");
       return false;
     }
-    
+
     if (password.length < 6) {
-      Alert.alert('Validation Error', 'Password must be at least 6 characters');
+      Alert.alert("Validation Error", "Password must be at least 6 characters");
       return false;
     }
-    
+
     if (password !== passwordConfirmation) {
-      Alert.alert('Validation Error', 'Passwords do not match');
+      Alert.alert("Validation Error", "Passwords do not match");
       return false;
     }
-    
+
     return true;
   };
 
@@ -82,22 +85,22 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
         password: formData.password,
         password_confirmation: formData.passwordConfirmation,
       };
-      
+
       await signup(credentials);
       // Navigation will be handled by the auth state change
     } catch (error) {
-      console.error('Signup error:', error);
+      console.error("Signup error:", error);
       // Error is already handled by the store
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <StatusBar style="light" />
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -121,7 +124,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
               <TextInput
                 style={styles.input}
                 value={formData.firstName}
-                onChangeText={(value) => handleInputChange('firstName', value)}
+                onChangeText={value => handleInputChange("firstName", value)}
                 placeholder="John"
                 placeholderTextColor="#6B7280"
                 autoCapitalize="words"
@@ -134,7 +137,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
               <TextInput
                 style={styles.input}
                 value={formData.lastName}
-                onChangeText={(value) => handleInputChange('lastName', value)}
+                onChangeText={value => handleInputChange("lastName", value)}
                 placeholder="Doe"
                 placeholderTextColor="#6B7280"
                 autoCapitalize="words"
@@ -148,7 +151,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
             <TextInput
               style={styles.input}
               value={formData.email}
-              onChangeText={(value) => handleInputChange('email', value)}
+              onChangeText={value => handleInputChange("email", value)}
               placeholder="john.doe@example.com"
               placeholderTextColor="#6B7280"
               keyboardType="email-address"
@@ -164,7 +167,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
               <TextInput
                 style={[styles.input, styles.passwordInput]}
                 value={formData.password}
-                onChangeText={(value) => handleInputChange('password', value)}
+                onChangeText={value => handleInputChange("password", value)}
                 placeholder="Enter password (min. 6 chars)"
                 placeholderTextColor="#6B7280"
                 secureTextEntry={!isPasswordVisible}
@@ -175,7 +178,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               >
                 <Text style={styles.passwordToggleText}>
-                  {isPasswordVisible ? '🙈' : '👁️'}
+                  {isPasswordVisible ? "🙈" : "👁️"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -187,7 +190,9 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
               <TextInput
                 style={[styles.input, styles.passwordInput]}
                 value={formData.passwordConfirmation}
-                onChangeText={(value) => handleInputChange('passwordConfirmation', value)}
+                onChangeText={value =>
+                  handleInputChange("passwordConfirmation", value)
+                }
                 placeholder="Confirm your password"
                 placeholderTextColor="#6B7280"
                 secureTextEntry={!isConfirmPasswordVisible}
@@ -195,10 +200,12 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
               />
               <TouchableOpacity
                 style={styles.passwordToggle}
-                onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                onPress={() =>
+                  setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
+                }
               >
                 <Text style={styles.passwordToggleText}>
-                  {isConfirmPasswordVisible ? '🙈' : '👁️'}
+                  {isConfirmPasswordVisible ? "🙈" : "👁️"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -210,17 +217,14 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
             disabled={isLoading}
           >
             <Text style={styles.signupButtonText}>
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {isLoading ? "Creating Account..." : "Create Account"}
             </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Already have an account?</Text>
-          <TouchableOpacity
-            onPress={onNavigateToLogin}
-            disabled={isLoading}
-          >
+          <TouchableOpacity onPress={onNavigateToLogin} disabled={isLoading}>
             <Text style={styles.loginLink}>Sign In</Text>
           </TouchableOpacity>
         </View>
@@ -232,16 +236,16 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111827',
+    backgroundColor: "#111827",
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 32,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 32,
   },
   logo: {
@@ -250,33 +254,33 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#F9FAFB',
+    fontWeight: "bold",
+    color: "#F9FAFB",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#9CA3AF',
-    textAlign: 'center',
+    color: "#9CA3AF",
+    textAlign: "center",
   },
   form: {
     marginBottom: 32,
   },
   errorContainer: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: "#FEE2E2",
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: "#FECACA",
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
   },
   errorText: {
-    color: '#DC2626',
+    color: "#DC2626",
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   inputGroup: {
@@ -287,28 +291,28 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#F9FAFB',
+    fontWeight: "600",
+    color: "#F9FAFB",
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#1F2937',
+    backgroundColor: "#1F2937",
     borderWidth: 1,
-    borderColor: '#374151',
+    borderColor: "#374151",
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#F9FAFB',
+    color: "#F9FAFB",
   },
   passwordContainer: {
-    position: 'relative',
+    position: "relative",
   },
   passwordInput: {
     paddingRight: 48,
   },
   passwordToggle: {
-    position: 'absolute',
+    position: "absolute",
     right: 12,
     top: 12,
     padding: 4,
@@ -317,33 +321,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   signupButton: {
-    backgroundColor: '#EF4444',
+    backgroundColor: "#EF4444",
     borderRadius: 8,
     paddingVertical: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 8,
   },
   disabledButton: {
     opacity: 0.5,
   },
   signupButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     gap: 8,
   },
   footerText: {
-    color: '#9CA3AF',
+    color: "#9CA3AF",
     fontSize: 14,
   },
   loginLink: {
-    color: '#EF4444',
+    color: "#EF4444",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
