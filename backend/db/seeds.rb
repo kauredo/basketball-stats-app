@@ -220,7 +220,7 @@ Game.find_or_create_by!(
 end
 
 Game.find_or_create_by!(
-  home_team: lakers, 
+  home_team: lakers,
   away_team: celtics,
   scheduled_at: 1.day.ago
 ) do |game|

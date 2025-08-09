@@ -2,13 +2,13 @@ class StatsChannel < ApplicationCable::Channel
   def subscribed
     game = Game.find(params[:game_id])
     stream_from "game_#{game.id}_stats"
-    
+
     Rails.logger.info "User #{current_user.id} subscribed to stats for game #{game.id}"
 
     # Send current stats state on connection
     stats = game.player_stats.includes(:player)
     transmit({
-      type: 'stats_connected',
+      type: "stats_connected",
       message: "Connected to live stats",
       stats: stats.map { |stat| detailed_player_stat_json(stat) }
     })
@@ -21,15 +21,15 @@ class StatsChannel < ApplicationCable::Channel
   def request_stats
     game = Game.find(params[:game_id])
     stats = game.player_stats.includes(:player)
-    
+
     transmit({
-      type: 'stats_update',
+      type: "stats_update",
       stats: stats.map { |stat| detailed_player_stat_json(stat) }
     })
   rescue ActiveRecord::RecordNotFound
-    transmit({ type: 'error', message: 'Game not found' })
+    transmit({ type: "error", message: "Game not found" })
   rescue => e
-    transmit({ type: 'error', message: e.message })
+    transmit({ type: "error", message: e.message })
   end
 
   private

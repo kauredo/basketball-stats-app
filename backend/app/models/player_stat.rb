@@ -42,14 +42,14 @@ class PlayerStat < ApplicationRecord
 
   def update_stat(stat_type, value = 1, made = true)
     case stat_type.to_s
-    when 'shot2'
+    when "shot2"
       increment!(:field_goals_attempted)
       if made
         increment!(:field_goals_made)
         increment!(:points, 2)
         update_team_score(2)
       end
-    when 'shot3'
+    when "shot3"
       increment!(:three_pointers_attempted)
       increment!(:field_goals_attempted)
       if made
@@ -58,7 +58,7 @@ class PlayerStat < ApplicationRecord
         increment!(:points, 3)
         update_team_score(3)
       end
-    when 'freethrow'
+    when "freethrow"
       increment!(:free_throws_attempted)
       if made
         increment!(:free_throws_made)
@@ -74,17 +74,17 @@ class PlayerStat < ApplicationRecord
 
   def field_goals_made_not_greater_than_attempted
     return unless field_goals_made > field_goals_attempted
-    errors.add(:field_goals_made, 'cannot be greater than attempts')
+    errors.add(:field_goals_made, "cannot be greater than attempts")
   end
 
   def three_pointers_made_not_greater_than_attempted
     return unless three_pointers_made > three_pointers_attempted
-    errors.add(:three_pointers_made, 'cannot be greater than attempts')
+    errors.add(:three_pointers_made, "cannot be greater than attempts")
   end
 
   def free_throws_made_not_greater_than_attempted
     return unless free_throws_made > free_throws_attempted
-    errors.add(:free_throws_made, 'cannot be greater than attempts')
+    errors.add(:free_throws_made, "cannot be greater than attempts")
   end
 
   def update_team_score(points)
@@ -97,7 +97,7 @@ class PlayerStat < ApplicationRecord
 
   def broadcast_stat_update
     ActionCable.server.broadcast("game_#{game_id}_stats", {
-      type: 'stat_update',
+      type: "stat_update",
       player_id: player_id,
       stats: as_json,
       game_score: {

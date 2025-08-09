@@ -1,11 +1,11 @@
 class Api::V1::StatsController < Api::V1::BaseController
   before_action :set_game
-  before_action :set_stat, only: [:update, :destroy]
+  before_action :set_stat, only: [ :update, :destroy ]
 
   def index
     stats = @game.player_stats.includes(:player)
     result = paginate_collection(stats)
-    
+
     render_success({
       stats: result[:data].map(&method(:player_stat_json)),
       meta: result[:meta]
@@ -17,7 +17,7 @@ class Api::V1::StatsController < Api::V1::BaseController
     @stat = @game.player_stats.find_by(player: player)
 
     unless @stat
-      render_error('Player not found in game', :not_found)
+      render_error("Player not found in game", :not_found)
       return
     end
 
@@ -27,9 +27,9 @@ class Api::V1::StatsController < Api::V1::BaseController
         @stat.update_stat(
           stat_params[:stat_type],
           stat_params[:value] || 1,
-          stat_params[:made] == 'true'
+          stat_params[:made] == "true"
         )
-        
+
         render_success({
           stat: player_stat_json(@stat),
           game_score: {

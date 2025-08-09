@@ -16,7 +16,7 @@ class CreateGames < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :games, [:home_team_id, :away_team_id]
+    add_index :games, [ :home_team_id, :away_team_id ]
     add_index :games, :scheduled_at
     add_index :games, :status
   end

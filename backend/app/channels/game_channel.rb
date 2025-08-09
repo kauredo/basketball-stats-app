@@ -2,12 +2,12 @@ class GameChannel < ApplicationCable::Channel
   def subscribed
     game = Game.find(params[:game_id])
     stream_from "game_#{game.id}"
-    
+
     Rails.logger.info "User #{current_user.id} subscribed to game #{game.id}"
 
     # Send current game state on connection
     transmit({
-      type: 'game_connected',
+      type: "game_connected",
       message: "Connected to game: #{game.home_team.name} vs #{game.away_team.name}",
       game: game_json(game)
     })
@@ -15,7 +15,7 @@ class GameChannel < ApplicationCable::Channel
     # Send current live stats
     stats = game.player_stats.includes(:player)
     transmit({
-      type: 'stats_state',
+      type: "stats_state",
       stats: stats.map { |stat| player_stat_json(stat) }
     })
   end
@@ -26,26 +26,26 @@ class GameChannel < ApplicationCable::Channel
 
   def update_timer(data)
     game = Game.find(params[:game_id])
-    
+
     if game.update(
-      time_remaining_seconds: data['time_remaining_seconds'],
-      current_quarter: data['current_quarter']
+      time_remaining_seconds: data["time_remaining_seconds"],
+      current_quarter: data["current_quarter"]
     )
       ActionCable.server.broadcast("game_#{game.id}", {
-        type: 'timer_update',
+        type: "timer_update",
         time_remaining_seconds: game.time_remaining_seconds,
         current_quarter: game.current_quarter,
         time_display: game.time_display
       })
     end
   rescue ActiveRecord::RecordNotFound
-    transmit({ type: 'error', message: 'Game not found' })
+    transmit({ type: "error", message: "Game not found" })
   rescue => e
-    transmit({ type: 'error', message: e.message })
+    transmit({ type: "error", message: e.message })
   end
 
   def ping
-    transmit({ type: 'pong', timestamp: Time.current })
+    transmit({ type: "pong", timestamp: Time.current })
   end
 
   private

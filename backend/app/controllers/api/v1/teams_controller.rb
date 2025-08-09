@@ -1,7 +1,7 @@
 class Api::V1::TeamsController < ApplicationController
-  before_action :set_team, only: [:show, :update, :destroy]
-  before_action :set_league, only: [:create], if: -> { params[:league_id] }
-  before_action :require_team_management, only: [:update, :destroy]
+  before_action :set_team, only: [ :show, :update, :destroy ]
+  before_action :set_league, only: [ :create ], if: -> { params[:league_id] }
+  before_action :require_team_management, only: [ :update, :destroy ]
 
   def index
     if current_user
@@ -13,7 +13,7 @@ class Api::V1::TeamsController < ApplicationController
       public_leagues = League.public_leagues.pluck(:id)
       teams = Team.includes(:players, :league).where(league_id: public_leagues)
     end
-    
+
     render_success({
       teams: teams.map { |team| team_json(team) }
     })
@@ -69,11 +69,11 @@ class Api::V1::TeamsController < ApplicationController
   end
 
   def require_team_management
-    return render_forbidden unless @team.can_be_managed_by?(current_user)
+    render_forbidden unless @team.can_be_managed_by?(current_user)
   end
 
   def team_params
-    permitted = [:name, :city, :logo_url, :description]
+    permitted = [ :name, :city, :logo_url, :description ]
     permitted << :league_id if params[:league_id].blank? && current_user&.admin?
     params.require(:team).permit(*permitted)
   end

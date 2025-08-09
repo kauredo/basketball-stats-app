@@ -1,12 +1,12 @@
 class Api::V1::GamesController < Api::V1::BaseController
-  before_action :set_game, only: [:show, :update, :destroy, :start, :pause, :resume, :end, :box_score, :live_stats]
-  before_action :set_team, only: [:index, :create]
+  before_action :set_game, only: [ :show, :update, :destroy, :start, :pause, :resume, :end, :box_score, :live_stats ]
+  before_action :set_team, only: [ :index, :create ]
 
   def index
     games = @team ? @team.games.includes(:home_team, :away_team) : Game.includes(:home_team, :away_team)
     games = games.order(scheduled_at: :desc)
     result = paginate_collection(games)
-    
+
     render_success({
       games: result[:data].map(&method(:game_json)),
       meta: result[:meta]
@@ -51,7 +51,7 @@ class Api::V1::GamesController < Api::V1::BaseController
     @game.start_game!
     render_success({
       game: game_json(@game),
-      message: 'Game started successfully'
+      message: "Game started successfully"
     })
   end
 
@@ -59,7 +59,7 @@ class Api::V1::GamesController < Api::V1::BaseController
     @game.pause_game!
     render_success({
       game: game_json(@game),
-      message: 'Game paused successfully'
+      message: "Game paused successfully"
     })
   end
 
@@ -67,7 +67,7 @@ class Api::V1::GamesController < Api::V1::BaseController
     @game.resume_game!
     render_success({
       game: game_json(@game),
-      message: 'Game resumed successfully'
+      message: "Game resumed successfully"
     })
   end
 
@@ -75,13 +75,13 @@ class Api::V1::GamesController < Api::V1::BaseController
     @game.end_game!
     render_success({
       game: game_json(@game),
-      message: 'Game ended successfully'
+      message: "Game ended successfully"
     })
   end
 
   def box_score
     box_score_data = @game.box_score
-    
+
     render_success({
       game: game_json(@game),
       box_score: {
@@ -101,7 +101,7 @@ class Api::V1::GamesController < Api::V1::BaseController
 
   def live_stats
     stats = @game.player_stats.includes(:player)
-    
+
     render_success({
       game: game_json(@game),
       stats: stats.map(&method(:player_stat_json))
@@ -196,7 +196,7 @@ class Api::V1::GamesController < Api::V1::BaseController
 
   def broadcast_game_update
     ActionCable.server.broadcast("game_#{@game.id}", {
-      type: 'game_update',
+      type: "game_update",
       game: game_json(@game)
     })
   end

@@ -1,7 +1,7 @@
 class Game < ApplicationRecord
   # Associations
-  belongs_to :home_team, class_name: 'Team'
-  belongs_to :away_team, class_name: 'Team'
+  belongs_to :home_team, class_name: "Team"
+  belongs_to :away_team, class_name: "Team"
   belongs_to :user, optional: true  # Game creator/manager
   has_many :player_stats, dependent: :destroy
   has_many :players, through: :player_stats
@@ -75,7 +75,7 @@ class Game < ApplicationRecord
     return false unless user
     return true if self.user == user
     return true if league&.owner == user
-    return true if league&.league_memberships&.active&.exists?(user: user, role: ['admin', 'coach', 'scorekeeper'])
+    return true if league&.league_memberships&.active&.exists?(user: user, role: [ "admin", "coach", "scorekeeper" ])
     false
   end
 
@@ -89,16 +89,16 @@ class Game < ApplicationRecord
 
   def teams_in_same_league
     return unless home_team && away_team
-    
+
     if home_team.league_id != away_team.league_id
-      errors.add(:away_team, 'must be in the same league as home team')
+      errors.add(:away_team, "must be in the same league as home team")
     end
   end
 
   def broadcast_game_update
     ActionCable.server.broadcast("game_#{id}", {
-      type: 'game_update',
-      game: as_json(include: [:home_team, :away_team])
+      type: "game_update",
+      game: as_json(include: [ :home_team, :away_team ])
     })
   end
 end

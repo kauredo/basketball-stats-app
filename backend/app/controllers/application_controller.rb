@@ -13,7 +13,7 @@ class ApplicationController < ActionController::API
 
   def authenticate_user
     token = extract_token_from_header
-    
+
     if token.nil?
       Rails.logger.warn "No authentication token provided"
       render_unauthorized
@@ -42,23 +42,23 @@ class ApplicationController < ActionController::API
 
   def require_league_access(league)
     return render_forbidden unless current_user
-    return render_forbidden unless league.can_user_access?(current_user)
+    render_forbidden unless league.can_user_access?(current_user)
   end
 
   def require_league_management(league)
     return render_forbidden unless current_user
-    return render_forbidden unless current_user.can_manage_league?(league)
+    render_forbidden unless current_user.can_manage_league?(league)
   end
 
   def extract_token_from_header
-    auth_header = request.headers['Authorization']
-    return nil unless auth_header&.start_with?('Bearer ')
-    
-    auth_header.split(' ').last
+    auth_header = request.headers["Authorization"]
+    return nil unless auth_header&.start_with?("Bearer ")
+
+    auth_header.split(" ").last
   end
 
   def not_found
-    render json: { error: 'Record not found' }, status: :not_found
+    render json: { error: "Record not found" }, status: :not_found
   end
 
   def unprocessable_entity(exception)
@@ -67,7 +67,7 @@ class ApplicationController < ActionController::API
 
   def handle_standard_error(exception)
     Rails.logger.error "Unhandled error: #{exception.message}\n#{exception.backtrace.join("\n")}"
-    render json: { error: 'Internal server error' }, status: :internal_server_error
+    render json: { error: "Internal server error" }, status: :internal_server_error
   end
 
   def render_error(message, status = :bad_request)
@@ -78,11 +78,11 @@ class ApplicationController < ActionController::API
     render json: data, status: status
   end
 
-  def render_unauthorized(message = 'Unauthorized')
+  def render_unauthorized(message = "Unauthorized")
     render json: { error: message }, status: :unauthorized
   end
 
-  def render_forbidden(message = 'Forbidden')
+  def render_forbidden(message = "Forbidden")
     render json: { error: message }, status: :forbidden
   end
 end

@@ -3,8 +3,8 @@ class Team < ApplicationRecord
   belongs_to :league, optional: true  # Optional during transition
   belongs_to :user, optional: true  # Team owner/manager
   has_many :players, dependent: :destroy
-  has_many :home_games, class_name: 'Game', foreign_key: 'home_team_id'
-  has_many :away_games, class_name: 'Game', foreign_key: 'away_team_id'
+  has_many :home_games, class_name: "Game", foreign_key: "home_team_id"
+  has_many :away_games, class_name: "Game", foreign_key: "away_team_id"
 
   # Validations
   validates :name, presence: true, uniqueness: { scope: :league_id }
@@ -14,27 +14,27 @@ class Team < ApplicationRecord
   scope :in_league, ->(league) { where(league: league) }
 
   def games
-    Game.where('home_team_id = ? OR away_team_id = ?', id, id)
+    Game.where("home_team_id = ? OR away_team_id = ?", id, id)
   end
 
   def active_players
     players.where(active: true)
   end
-  
+
   def active_players_count
     active_players.count
   end
 
   def wins
     games.completed.where(
-      '(home_team_id = ? AND home_score > away_score) OR (away_team_id = ? AND away_score > home_score)',
+      "(home_team_id = ? AND home_score > away_score) OR (away_team_id = ? AND away_score > home_score)",
       id, id
     ).count
   end
 
   def losses
     games.completed.where(
-      '(home_team_id = ? AND home_score < away_score) OR (away_team_id = ? AND away_score < home_score)',
+      "(home_team_id = ? AND home_score < away_score) OR (away_team_id = ? AND away_score < home_score)",
       id, id
     ).count
   end
@@ -52,7 +52,7 @@ class Team < ApplicationRecord
     return false unless user
     return true if league.owner == user
     return true if self.user == user
-    return true if league.league_memberships.active.exists?(user: user, role: ['admin', 'coach'])
+    return true if league.league_memberships.active.exists?(user: user, role: [ "admin", "coach" ])
     false
   end
 end

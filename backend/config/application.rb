@@ -24,25 +24,25 @@ module BasketballStatsApp
     # CORS configuration
     config.middleware.insert_before 0, Rack::Cors do
       allow do
-        origins '*'
-        resource '*',
+        origins "*"
+        resource "*",
           headers: :any,
-          methods: [:get, :post, :put, :patch, :delete, :options, :head],
-          expose: ['Authorization']
+          methods: [ :get, :post, :put, :patch, :delete, :options, :head ],
+          expose: [ "Authorization" ]
       end
     end
 
     # Action Cable configuration
-    config.action_cable.mount_path = '/cable'
-    config.action_cable.url = 'ws://localhost:3000/cable'
+    config.action_cable.mount_path = "/cable"
+    config.action_cable.url = "ws://localhost:3000/cable"
 
     # Redis configuration
-    config.cache_store = :redis_cache_store, { url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/0') }
+    config.cache_store = :redis_cache_store, { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0") }
 
     # Background job configuration
     config.active_job.queue_adapter = :sidekiq
 
     # Time zone
-    config.time_zone = 'UTC'
+    config.time_zone = "UTC"
   end
 end
