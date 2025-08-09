@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,22 +7,26 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { StatusBar } from 'expo-status-bar';
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { StatusBar } from "expo-status-bar";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 // Import shared library
-import { 
-  basketballAPI, 
-  Game, 
-  BasketballUtils, 
-  GAME_STATUSES 
-} from '@basketball-stats/shared';
+import {
+  basketballAPI,
+  Game,
+  BasketballUtils,
+  GAME_STATUSES,
+} from "@basketball-stats/shared";
 
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { RootStackParamList, TabParamList } from "../navigation/AppNavigator";
 
-type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
+type HomeScreenNavigationProp = NativeStackNavigationProp<
+  TabParamList & RootStackParamList,
+  "Home"
+>;
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
@@ -34,19 +38,23 @@ export default function HomeScreen() {
   const loadData = async (isRefresh = false) => {
     try {
       if (!isRefresh) setLoading(true);
-      
+
       const response = await basketballAPI.getGames();
       const allGames = response.games;
-      
+
       // Separate live and recent games
-      const live = allGames.filter(game => game.status === 'active' || game.status === 'paused');
-      const recent = allGames.filter(game => game.status === 'completed').slice(0, 5);
-      
+      const live = allGames.filter(
+        game => game.status === "active" || game.status === "paused"
+      );
+      const recent = allGames
+        .filter(game => game.status === "completed")
+        .slice(0, 5);
+
       setLiveGames(live);
       setRecentGames(recent);
     } catch (error) {
-      console.error('Failed to load games:', error);
-      Alert.alert('Error', 'Failed to load games');
+      console.error("Failed to load games:", error);
+      Alert.alert("Error", "Failed to load games");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -63,16 +71,17 @@ export default function HomeScreen() {
   };
 
   const handleGamePress = (game: Game) => {
-    if (game.status === 'active' || game.status === 'paused') {
-      navigation.navigate('LiveGame', { gameId: game.id });
+    if (game.status === "active" || game.status === "paused") {
+      navigation.navigate("LiveGame", { gameId: game.id });
     }
   };
 
   const renderGameCard = (game: Game, isLive = false) => {
-    const gameStatus = GAME_STATUSES[game.status.toUpperCase() as keyof typeof GAME_STATUSES];
+    const gameStatus =
+      GAME_STATUSES[game.status.toUpperCase() as keyof typeof GAME_STATUSES];
     const isGameLive = BasketballUtils.isGameLive(game);
     const winner = BasketballUtils.getWinningTeam(game);
-    
+
     return (
       <TouchableOpacity
         key={game.id}
@@ -83,31 +92,47 @@ export default function HomeScreen() {
         <View style={styles.gameHeader}>
           <View style={styles.teamsContainer}>
             <View style={styles.teamRow}>
-              <Text style={[
-                styles.teamName, 
-                winner === 'away' && game.status === 'completed' && styles.winnerText
-              ]}>
+              <Text
+                style={[
+                  styles.teamName,
+                  winner === "away" &&
+                    game.status === "completed" &&
+                    styles.winnerText,
+                ]}
+              >
                 {game.away_team.name}
               </Text>
-              <Text style={[
-                styles.score,
-                winner === 'away' && game.status === 'completed' && styles.winnerText
-              ]}>
+              <Text
+                style={[
+                  styles.score,
+                  winner === "away" &&
+                    game.status === "completed" &&
+                    styles.winnerText,
+                ]}
+              >
                 {game.away_score}
               </Text>
             </View>
             <Text style={styles.vsText}>@</Text>
             <View style={styles.teamRow}>
-              <Text style={[
-                styles.teamName,
-                winner === 'home' && game.status === 'completed' && styles.winnerText
-              ]}>
+              <Text
+                style={[
+                  styles.teamName,
+                  winner === "home" &&
+                    game.status === "completed" &&
+                    styles.winnerText,
+                ]}
+              >
                 {game.home_team.name}
               </Text>
-              <Text style={[
-                styles.score,
-                winner === 'home' && game.status === 'completed' && styles.winnerText
-              ]}>
+              <Text
+                style={[
+                  styles.score,
+                  winner === "home" &&
+                    game.status === "completed" &&
+                    styles.winnerText,
+                ]}
+              >
                 {game.home_score}
               </Text>
             </View>
@@ -115,27 +140,35 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.gameInfo}>
-          <View style={[styles.statusBadge, { backgroundColor: gameStatus?.color || '#6B7280' }]}>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: gameStatus?.color || "#6B7280" },
+            ]}
+          >
             <Text style={styles.statusText}>
               {BasketballUtils.getGameStatusDisplayName(game.status)}
             </Text>
           </View>
-          
+
           {isGameLive && (
             <Text style={styles.gameTime}>
               Q{game.current_quarter} • {game.time_display}
             </Text>
           )}
-          
-          {game.status === 'completed' && (
+
+          {game.status === "completed" && (
             <Text style={styles.gameTime}>
-              Final • {BasketballUtils.formatGameDate(game.ended_at || game.created_at)}
+              Final •{" "}
+              {BasketballUtils.formatGameDate(game.ended_at || game.created_at)}
             </Text>
           )}
-          
-          {game.status === 'scheduled' && (
+
+          {game.status === "scheduled" && (
             <Text style={styles.gameTime}>
-              {BasketballUtils.formatGameDate(game.scheduled_at || game.created_at)}
+              {BasketballUtils.formatGameDate(
+                game.scheduled_at || game.created_at
+              )}
             </Text>
           )}
         </View>
@@ -160,6 +193,44 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        {/* Quick Navigation Cards */}
+        <View style={styles.quickNavSection}>
+          <Text style={styles.sectionTitle}>Quick Navigation</Text>
+          <View style={styles.navCardsContainer}>
+            <TouchableOpacity
+              style={styles.navCard}
+              onPress={() => navigation.navigate("Games")}
+            >
+              <FontAwesome5 name="basketball-ball" size={24} color="#EF4444" />
+              <Text style={styles.navCardText}>All Games</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navCard}
+              onPress={() => navigation.navigate("Teams")}
+            >
+              <FontAwesome5 name="users" size={24} color="#3B82F6" />
+              <Text style={styles.navCardText}>Teams</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navCard}
+              onPress={() => navigation.navigate("Statistics")}
+            >
+              <FontAwesome5 name="chart-bar" size={24} color="#10B981" />
+              <Text style={styles.navCardText}>Statistics</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navCard}
+              onPress={() => navigation.navigate("Profile")}
+            >
+              <FontAwesome5 name="user" size={24} color="#8B5CF6" />
+              <Text style={styles.navCardText}>Profile</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Live Games Section */}
         {liveGames.length > 0 && (
           <View style={styles.section}>
@@ -194,16 +265,16 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111827',
+    backgroundColor: "#111827",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#111827',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#111827",
   },
   loadingText: {
-    color: '#F9FAFB',
+    color: "#F9FAFB",
     fontSize: 16,
   },
   content: {
@@ -213,23 +284,23 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionTitle: {
-    color: '#F9FAFB',
+    color: "#F9FAFB",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 12,
   },
   gameCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: "#1F2937",
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#374151',
+    borderColor: "#374151",
   },
   liveGameCard: {
-    borderColor: '#EF4444',
+    borderColor: "#EF4444",
     borderWidth: 2,
-    shadowColor: '#EF4444',
+    shadowColor: "#EF4444",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -239,40 +310,40 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   teamsContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   teamRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
     paddingVertical: 4,
   },
   teamName: {
-    color: '#F9FAFB',
+    color: "#F9FAFB",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     flex: 1,
   },
   score: {
-    color: '#F9FAFB',
+    color: "#F9FAFB",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     minWidth: 30,
-    textAlign: 'right',
+    textAlign: "right",
   },
   winnerText: {
-    color: '#10B981',
+    color: "#10B981",
   },
   vsText: {
-    color: '#9CA3AF',
+    color: "#9CA3AF",
     fontSize: 12,
     marginVertical: 4,
   },
   gameInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -280,17 +351,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   gameTime: {
-    color: '#9CA3AF',
+    color: "#9CA3AF",
     fontSize: 12,
   },
   emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingTop: 60,
   },
   emptyText: {
@@ -298,15 +369,45 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   emptyTitle: {
-    color: '#F9FAFB',
+    color: "#F9FAFB",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   emptyDescription: {
-    color: '#9CA3AF',
+    color: "#9CA3AF",
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 20,
+  },
+  // Quick Navigation Styles
+  quickNavSection: {
+    marginBottom: 24,
+  },
+  navCardsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginHorizontal: -4,
+  },
+  navCard: {
+    width: "48%",
+    backgroundColor: "#1F2937",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  navCardText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#F9FAFB",
+    marginTop: 8,
   },
 });
