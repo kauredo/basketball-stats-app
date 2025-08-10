@@ -14,7 +14,6 @@ import StatisticsScreen from "./src/screens/StatisticsScreen";
 import LeagueSelectionScreen from "./src/screens/auth/LeagueSelectionScreen";
 import LoginScreen from "./src/screens/auth/LoginScreen";
 import SignupScreen from "./src/screens/auth/SignupScreen";
-import "./global.css";
 
 function App() {
   // Wrapper for PlayerStatisticsScreen to pass navigation props

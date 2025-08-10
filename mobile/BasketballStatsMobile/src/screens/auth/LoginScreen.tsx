@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
   Alert,
@@ -13,6 +12,8 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { LoginCredentials } from "@basketball-stats/shared";
 import { useAuthStore } from "../../hooks/useAuthStore";
+import Button from "../../components/Button";
+import Icon from "../../components/Icon";
 
 interface LoginScreenProps {
   onNavigateToSignup: () => void;
@@ -60,47 +61,73 @@ export default function LoginScreen({
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      className="flex-1 bg-dark-950 "
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <StatusBar style="light" />
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          paddingHorizontal: 24,
+          paddingVertical: 32,
+        }}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.header}>
-          <Text style={styles.logo}>🏀</Text>
-          <Text style={styles.title}>Basketball Stats</Text>
-          <Text style={styles.subtitle}>Sign in to your account</Text>
+        <View className="items-center mb-12">
+          <Icon name="basketball" size={64} color="#EA580C" className="mb-4" />
+          <Text className="text-3xl font-bold text-white mb-2">
+            Basketball Stats
+          </Text>
+          <Text className="text-base text-gray-400 text-center">
+            Sign in to your account
+          </Text>
         </View>
 
-        <View style={styles.form}>
+        <View className="mb-8">
           {error && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
+            <View className="bg-red-100 border border-red-200 rounded-lg p-3 mb-4">
+              <Text className="text-red-600 text-sm text-center">{error}</Text>
             </View>
           )}
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your email"
-              placeholderTextColor="#6B7280"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!isLoading}
-            />
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">Email</Text>
+            <View className="relative">
+              <Icon
+                name="mail"
+                size={20}
+                color="#6B7280"
+                className="absolute left-4 top-3 z-10"
+              />
+              <TextInput
+                className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-4 py-3 text-base text-white"
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Enter your email"
+                placeholderTextColor="#6B7280"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={!isLoading}
+              />
+            </View>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordContainer}>
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">
+              Password
+            </Text>
+            <View className="relative">
+              <Icon
+                name="lock"
+                size={20}
+                color="#6B7280"
+                className="absolute left-4 top-3 z-10"
+              />
               <TextInput
-                style={[styles.input, styles.passwordInput]}
+                className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-white"
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Enter your password"
@@ -109,163 +136,52 @@ export default function LoginScreen({
                 editable={!isLoading}
               />
               <TouchableOpacity
-                style={styles.passwordToggle}
+                className="absolute right-4 top-3"
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               >
-                <Text style={styles.passwordToggleText}>
-                  {isPasswordVisible ? "🙈" : "👁️"}
-                </Text>
+                <Icon
+                  name={isPasswordVisible ? "eye-off" : "eye"}
+                  size={20}
+                  color="#6B7280"
+                />
               </TouchableOpacity>
             </View>
           </View>
 
-          <TouchableOpacity
-            style={[styles.loginButton, isLoading && styles.disabledButton]}
+          <Button
             onPress={handleLogin}
+            variant="primary"
+            size="lg"
             disabled={isLoading}
+            loading={isLoading}
+            fullWidth
+            className="mt-2"
           >
-            <Text style={styles.loginButtonText}>
-              {isLoading ? "Signing in..." : "Sign In"}
-            </Text>
-          </TouchableOpacity>
+            Sign In
+          </Button>
 
           <TouchableOpacity
-            style={styles.forgotPasswordButton}
+            className="items-center mt-4"
             onPress={handleForgotPassword}
             disabled={isLoading}
           >
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            <Text className="text-primary-500 text-sm font-medium">
+              Forgot Password?
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account?</Text>
+        <View className="flex-row justify-center items-center">
+          <Text className="text-gray-400 text-sm mr-2">
+            Don't have an account?
+          </Text>
           <TouchableOpacity onPress={onNavigateToSignup} disabled={isLoading}>
-            <Text style={styles.signupLink}>Sign Up</Text>
+            <Text className="text-primary-500 text-sm font-semibold">
+              Sign Up
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#111827",
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 48,
-  },
-  logo: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    textAlign: "center",
-  },
-  form: {
-    marginBottom: 32,
-  },
-  errorContainer: {
-    backgroundColor: "#FEE2E2",
-    borderWidth: 1,
-    borderColor: "#FECACA",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  errorText: {
-    color: "#DC2626",
-    fontSize: 14,
-    textAlign: "center",
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#F9FAFB",
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#1F2937",
-    borderWidth: 1,
-    borderColor: "#374151",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: "#F9FAFB",
-  },
-  passwordContainer: {
-    position: "relative",
-  },
-  passwordInput: {
-    paddingRight: 48,
-  },
-  passwordToggle: {
-    position: "absolute",
-    right: 12,
-    top: 12,
-    padding: 4,
-  },
-  passwordToggleText: {
-    fontSize: 16,
-  },
-  loginButton: {
-    backgroundColor: "#EF4444",
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  disabledButton: {
-    opacity: 0.5,
-  },
-  loginButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  forgotPasswordButton: {
-    alignItems: "center",
-    marginTop: 16,
-  },
-  forgotPasswordText: {
-    color: "#EF4444",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
-  },
-  footerText: {
-    color: "#9CA3AF",
-    fontSize: 14,
-  },
-  signupLink: {
-    color: "#EF4444",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-});

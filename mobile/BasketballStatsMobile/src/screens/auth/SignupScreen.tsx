@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
   Alert,
@@ -13,6 +12,8 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { SignupCredentials } from "@basketball-stats/shared";
 import { useAuthStore } from "../../hooks/useAuthStore";
+import Button from "../../components/Button";
+import Icon from "../../components/Icon";
 
 interface SignupScreenProps {
   onNavigateToLogin: () => void;
@@ -96,76 +97,87 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      className="flex-1 bg-dark-950"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <StatusBar style="light" />
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 32 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Text style={styles.logo}>🏀</Text>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join the basketball community</Text>
+        <View className="items-center mb-8">
+          <Icon name="basketball" size={64} color="#EA580C" className="mb-4" />
+          <Text className="text-3xl font-bold text-white mb-2">Create Account</Text>
+          <Text className="text-base text-gray-400 text-center">Join the basketball community</Text>
         </View>
 
-        <View style={styles.form}>
+        <View className="mb-8">
           {error && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
+            <View className="bg-red-100 border border-red-200 rounded-lg p-3 mb-4">
+              <Text className="text-red-600 text-sm text-center">{error}</Text>
             </View>
           )}
 
-          <View style={styles.row}>
-            <View style={[styles.inputGroup, styles.halfWidth]}>
-              <Text style={styles.label}>First Name</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.firstName}
-                onChangeText={value => handleInputChange("firstName", value)}
-                placeholder="John"
-                placeholderTextColor="#6B7280"
-                autoCapitalize="words"
-                editable={!isLoading}
-              />
+          <View className="flex-row gap-3">
+            <View className="flex-1 mb-5">
+              <Text className="text-sm font-semibold text-white mb-2">First Name</Text>
+              <View className="relative">
+                <Icon name="user" size={18} color="#6B7280" className="absolute left-4 top-3 z-10" />
+                <TextInput
+                  className="bg-gray-800 border border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-white"
+                  value={formData.firstName}
+                  onChangeText={value => handleInputChange("firstName", value)}
+                  placeholder="John"
+                  placeholderTextColor="#6B7280"
+                  autoCapitalize="words"
+                  editable={!isLoading}
+                />
+              </View>
             </View>
 
-            <View style={[styles.inputGroup, styles.halfWidth]}>
-              <Text style={styles.label}>Last Name</Text>
+            <View className="flex-1 mb-5">
+              <Text className="text-sm font-semibold text-white mb-2">Last Name</Text>
+              <View className="relative">
+                <Icon name="user" size={18} color="#6B7280" className="absolute left-4 top-3 z-10" />
+                <TextInput
+                  className="bg-gray-800 border border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-white"
+                  value={formData.lastName}
+                  onChangeText={value => handleInputChange("lastName", value)}
+                  placeholder="Doe"
+                  placeholderTextColor="#6B7280"
+                  autoCapitalize="words"
+                  editable={!isLoading}
+                />
+              </View>
+            </View>
+          </View>
+
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">Email</Text>
+            <View className="relative">
+              <Icon name="mail" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
               <TextInput
-                style={styles.input}
-                value={formData.lastName}
-                onChangeText={value => handleInputChange("lastName", value)}
-                placeholder="Doe"
+                className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-4 py-3 text-base text-white"
+                value={formData.email}
+                onChangeText={value => handleInputChange("email", value)}
+                placeholder="john.doe@example.com"
                 placeholderTextColor="#6B7280"
-                autoCapitalize="words"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
                 editable={!isLoading}
               />
             </View>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.email}
-              onChangeText={value => handleInputChange("email", value)}
-              placeholder="john.doe@example.com"
-              placeholderTextColor="#6B7280"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!isLoading}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordContainer}>
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">Password</Text>
+            <View className="relative">
+              <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
               <TextInput
-                style={[styles.input, styles.passwordInput]}
+                className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-white"
                 value={formData.password}
                 onChangeText={value => handleInputChange("password", value)}
                 placeholder="Enter password (min. 6 chars)"
@@ -174,21 +186,24 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                 editable={!isLoading}
               />
               <TouchableOpacity
-                style={styles.passwordToggle}
+                className="absolute right-4 top-3"
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               >
-                <Text style={styles.passwordToggleText}>
-                  {isPasswordVisible ? "🙈" : "👁️"}
-                </Text>
+                <Icon 
+                  name={isPasswordVisible ? "eye-off" : "eye"} 
+                  size={20} 
+                  color="#6B7280" 
+                />
               </TouchableOpacity>
             </View>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Confirm Password</Text>
-            <View style={styles.passwordContainer}>
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">Confirm Password</Text>
+            <View className="relative">
+              <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
               <TextInput
-                style={[styles.input, styles.passwordInput]}
+                className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-white"
                 value={formData.passwordConfirmation}
                 onChangeText={value =>
                   handleInputChange("passwordConfirmation", value)
@@ -199,155 +214,40 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                 editable={!isLoading}
               />
               <TouchableOpacity
-                style={styles.passwordToggle}
+                className="absolute right-4 top-3"
                 onPress={() =>
                   setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
                 }
               >
-                <Text style={styles.passwordToggleText}>
-                  {isConfirmPasswordVisible ? "🙈" : "👁️"}
-                </Text>
+                <Icon 
+                  name={isConfirmPasswordVisible ? "eye-off" : "eye"} 
+                  size={20} 
+                  color="#6B7280" 
+                />
               </TouchableOpacity>
             </View>
           </View>
 
-          <TouchableOpacity
-            style={[styles.signupButton, isLoading && styles.disabledButton]}
+          <Button
             onPress={handleSignup}
+            variant="primary"
+            size="lg"
             disabled={isLoading}
+            loading={isLoading}
+            fullWidth
+            className="mt-2"
           >
-            <Text style={styles.signupButtonText}>
-              {isLoading ? "Creating Account..." : "Create Account"}
-            </Text>
-          </TouchableOpacity>
+            Create Account
+          </Button>
         </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Already have an account?</Text>
+        <View className="flex-row justify-center items-center">
+          <Text className="text-gray-400 text-sm mr-2">Already have an account?</Text>
           <TouchableOpacity onPress={onNavigateToLogin} disabled={isLoading}>
-            <Text style={styles.loginLink}>Sign In</Text>
+            <Text className="text-primary-500 text-sm font-semibold">Sign In</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#111827",
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 32,
-  },
-  logo: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    textAlign: "center",
-  },
-  form: {
-    marginBottom: 32,
-  },
-  errorContainer: {
-    backgroundColor: "#FEE2E2",
-    borderWidth: 1,
-    borderColor: "#FECACA",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  errorText: {
-    color: "#DC2626",
-    fontSize: 14,
-    textAlign: "center",
-  },
-  row: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  halfWidth: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#F9FAFB",
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#1F2937",
-    borderWidth: 1,
-    borderColor: "#374151",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: "#F9FAFB",
-  },
-  passwordContainer: {
-    position: "relative",
-  },
-  passwordInput: {
-    paddingRight: 48,
-  },
-  passwordToggle: {
-    position: "absolute",
-    right: 12,
-    top: 12,
-    padding: 4,
-  },
-  passwordToggleText: {
-    fontSize: 16,
-  },
-  signupButton: {
-    backgroundColor: "#EF4444",
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  disabledButton: {
-    opacity: 0.5,
-  },
-  signupButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
-  },
-  footerText: {
-    color: "#9CA3AF",
-    fontSize: 14,
-  },
-  loginLink: {
-    color: "#EF4444",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-});
