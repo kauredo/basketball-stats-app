@@ -1,0 +1,54 @@
+version: "3.8"
+
+# Production overrides
+services:
+  postgres:
+    restart: always
+    environment:
+      POSTGRES_DB: basketball_stats_production
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+
+  redis:
+    restart: always
+    volumes:
+      - redis_prod_data:/data
+
+  shared:
+    build:
+      args:
+        NODE_ENV: production
+    command: echo "Shared library built for production"
+    restart: "no"  # Only needed during build
+
+  backend:
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@postgres:5432/basketball_stats_production
+      REDIS_URL: redis://redis:6379/0
+      RAILS_ENV: production
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_SERVE_STATIC_FILES: "true"
+    ports:
+      - "80:80"  # Map to standard HTTP port
+
+  web:
+    restart: always
+    build:
+      args:
+        NODE_ENV: production
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=/api  # Assuming we'll use a reverse proxy in production
+    command: serve -s build -l 3001
+
+  # No Expo server in production
+  expo:
+    profiles: ["development"]
+
+volumes:
+  postgres_prod_data:
+  redis_prod_data:
