@@ -112,11 +112,21 @@ function StandingsTable({ standings }: StandingsTableProps) {
         <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-gray-750">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Team</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">W</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">L</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Win%</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">PPG</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Team
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                W
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                L
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Win%
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                PPG
+              </th>
             </tr>
           </thead>
           <tbody className="bg-gray-800 divide-y divide-gray-700">
@@ -127,11 +137,17 @@ function StandingsTable({ standings }: StandingsTableProps) {
                     <span className="w-6 h-6 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center justify-center mr-3">
                       {index + 1}
                     </span>
-                    <span className="text-white font-medium">{team.team_name}</span>
+                    <span className="text-white font-medium">
+                      {team.team_name}
+                    </span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.wins}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.losses}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  {team.wins}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  {team.losses}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                   {team.win_percentage.toFixed(1)}%
                 </td>
@@ -721,10 +737,9 @@ export default function Statistics() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -459,11 +459,11 @@ const LiveGame: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-700">
                   {awayPlayers.map((playerStat) => {
-                    const player = game.away_team.players?.find(p => p.id === playerStat.playerId);
+                    const player = game.away_team.players?.find((p: Player) => p.id === playerStat.playerId);
                     return (
                       <tr key={playerStat.playerId}>
                         <td className="py-2 px-3 text-sm text-white">
-                          {player?.first_name} {player?.last_name}
+                          {player?.name || `Player ${playerStat.playerId}`}
                         </td>
                         <td className="py-2 px-2 text-center text-sm text-white">{playerStat.points}</td>
                         <td className="py-2 px-2 text-center text-sm text-white">{playerStat.rebounds}</td>
@@ -516,11 +516,11 @@ const LiveGame: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-700">
                   {homePlayers.map((playerStat) => {
-                    const player = game.home_team.players?.find(p => p.id === playerStat.playerId);
+                    const player = game.home_team.players?.find((p: Player) => p.id === playerStat.playerId);
                     return (
                       <tr key={playerStat.playerId}>
                         <td className="py-2 px-3 text-sm text-white">
-                          {player?.first_name} {player?.last_name}
+                          {player?.name || `Player ${playerStat.playerId}`}
                         </td>
                         <td className="py-2 px-2 text-center text-sm text-white">{playerStat.points}</td>
                         <td className="py-2 px-2 text-center text-sm text-white">{playerStat.rebounds}</td>

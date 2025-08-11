@@ -1,4 +1,5 @@
-import { createConsumer, Cable, Subscription } from "@rails/actioncable";
+import { createConsumer } from "@rails/actioncable";
+import type { Consumer, Subscription } from "@rails/actioncable";
 import type { WebSocketMessage, Game, PlayerStat } from "../types";
 
 export type WebSocketEventHandler = (data: any) => void;
@@ -7,7 +8,7 @@ export type ConnectionStatusHandler = (
 ) => void;
 
 export class BasketballWebSocketService {
-  private cable: Cable | null = null;
+  private cable: Consumer | null = null;
   private gameChannel: Subscription | null = null;
   private statsChannel: Subscription | null = null;
   private gameId: number | null = null;
@@ -21,7 +22,7 @@ export class BasketballWebSocketService {
   constructor(private baseURL: string = "ws://192.168.1.55:3000/cable") {}
 
   connect(): void {
-    if (this.cable?.connection?.isOpen()) {
+    if (this.cable) {
       console.log("ActionCable already connected");
       return;
     }
@@ -29,7 +30,9 @@ export class BasketballWebSocketService {
     this.notifyConnectionStatus("connecting");
 
     this.cable = createConsumer(this.baseURL);
-    this.setupConnectionHandlers();
+
+    // Connection status will be handled by individual channel subscriptions
+    console.log("ActionCable consumer created");
   }
 
   disconnect(): void {
@@ -37,7 +40,7 @@ export class BasketballWebSocketService {
       this.gameChannel.unsubscribe();
       this.gameChannel = null;
     }
-    
+
     if (this.statsChannel) {
       this.statsChannel.unsubscribe();
       this.statsChannel = null;
@@ -66,7 +69,9 @@ export class BasketballWebSocketService {
         connected: () => {
           console.log(`Connected to GameChannel for game ${gameId}`);
           this.notifyConnectionStatus("connected");
-          this.emitEvent("game_connected", { message: `Connected to game ${gameId}` });
+          this.emitEvent("game_connected", {
+            message: `Connected to game ${gameId}`,
+          });
         },
 
         disconnected: () => {
@@ -76,7 +81,7 @@ export class BasketballWebSocketService {
 
         received: (data: any) => {
           console.log("GameChannel received:", data);
-          
+
           switch (data.type) {
             case "game_update":
               this.emitEvent("game_update", data);
@@ -98,7 +103,7 @@ export class BasketballWebSocketService {
         rejected: () => {
           console.error("GameChannel subscription rejected");
           this.notifyConnectionStatus("error");
-        }
+        },
       }
     );
 
@@ -108,7 +113,9 @@ export class BasketballWebSocketService {
       {
         connected: () => {
           console.log(`Connected to StatsChannel for game ${gameId}`);
-          this.emitEvent("stats_connected", { message: `Connected to stats for game ${gameId}` });
+          this.emitEvent("stats_connected", {
+            message: `Connected to stats for game ${gameId}`,
+          });
         },
 
         disconnected: () => {
@@ -117,7 +124,7 @@ export class BasketballWebSocketService {
 
         received: (data: any) => {
           console.log("StatsChannel received:", data);
-          
+
           switch (data.type) {
             case "stat_update":
               this.emitEvent("stat_update", data);
@@ -132,7 +139,7 @@ export class BasketballWebSocketService {
 
         rejected: () => {
           console.error("StatsChannel subscription rejected");
-        }
+        },
       }
     );
   }
@@ -255,35 +262,17 @@ export class BasketballWebSocketService {
 
   // Getters
   get isConnected(): boolean {
-    return this.cable?.connection?.isOpen() || false;
+    return (
+      this.cable !== null &&
+      (this.gameChannel !== null || this.statsChannel !== null)
+    );
   }
 
   get currentGameId(): number | null {
     return this.gameId;
   }
 
-  private setupConnectionHandlers(): void {
-    if (!this.cable) return;
-
-    // ActionCable connection events
-    this.cable.connection.monitor.on("connected", () => {
-      console.log("ActionCable connected");
-      this.reconnectAttempts = 0;
-      this.notifyConnectionStatus("connected");
-    });
-
-    this.cable.connection.monitor.on("disconnected", () => {
-      console.log("ActionCable disconnected");
-      this.notifyConnectionStatus("disconnected");
-      this.handleReconnect();
-    });
-
-    this.cable.connection.monitor.on("rejected", () => {
-      console.error("ActionCable connection rejected");
-      this.notifyConnectionStatus("error");
-      this.handleReconnect();
-    });
-  }
+  // Connection handling is managed through channel subscriptions
 
   private emitEvent(event: string, data: any): void {
     const handlers = this.eventHandlers.get(event);

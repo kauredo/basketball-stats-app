@@ -193,6 +193,7 @@ export interface TeamSummary {
   name: string;
   city: string;
   logo_url?: string;
+  players?: Player[];
 }
 
 export interface PlayerAverages {

@@ -302,6 +302,25 @@ export class BasketballStatsAPI {
     }>(`/games/${gameId}/stats`, "POST", { stat: action });
   }
 
+  async recordPlayerStat(
+    gameId: number,
+    playerId: number,
+    data: {
+      stat_type: string;
+      value: number;
+    }
+  ): Promise<{
+    stat: PlayerStat;
+    game_score: { home_score: number; away_score: number };
+    message: string;
+  }> {
+    return this.request<{
+      stat: PlayerStat;
+      game_score: { home_score: number; away_score: number };
+      message: string;
+    }>(`/games/${gameId}/players/${playerId}/stats`, "POST", data);
+  }
+
   async updateStat(
     gameId: number,
     statId: number,
