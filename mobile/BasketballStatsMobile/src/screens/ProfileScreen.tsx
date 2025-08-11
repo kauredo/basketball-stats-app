@@ -1,14 +1,8 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useAuthStore } from "../hooks/useAuthStore";
+import Icon from "../components/Icon";
 
 export default function ProfileScreen() {
   const { user, selectedLeague, userLeagues, logout, selectLeague } =
@@ -40,21 +34,23 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-dark-950">
       <StatusBar style="light" />
-      <ScrollView style={styles.content}>
+      <ScrollView className="flex-1 px-4">
         {/* User Info */}
-        <View style={styles.userSection}>
-          <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>
+        <View className="items-center py-8">
+          <View className="w-20 h-20 rounded-full bg-red-500 items-center justify-center mb-4">
+            <Text className="text-white text-2xl font-bold">
               {user?.first_name?.[0]}
               {user?.last_name?.[0]}
             </Text>
           </View>
-          <Text style={styles.userName}>{user?.full_name}</Text>
-          <Text style={styles.userEmail}>{user?.email}</Text>
-          <View style={styles.userBadge}>
-            <Text style={styles.userBadgeText}>
+          <Text className="text-2xl font-bold text-white mb-1">
+            {user?.full_name}
+          </Text>
+          <Text className="text-base text-gray-400 mb-3">{user?.email}</Text>
+          <View className="bg-green-900 px-3 py-1 rounded-xl">
+            <Text className="text-green-400 text-xs font-semibold">
               {user?.role === "admin" ? "Administrator" : "User"}
             </Text>
           </View>
@@ -62,260 +58,106 @@ export default function ProfileScreen() {
 
         {/* Current League */}
         {selectedLeague && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Current League</Text>
-            <View style={styles.leagueCard}>
-              <View style={styles.leagueInfo}>
-                <Text style={styles.leagueName}>{selectedLeague.name}</Text>
-                <Text style={styles.leagueType}>
+          <View className="mb-8">
+            <Text className="text-lg font-bold text-white mb-4">
+              Current League
+            </Text>
+            <View className="bg-gray-800 rounded-xl p-4 flex-row justify-between items-center border border-gray-700">
+              <View className="flex-1">
+                <Text className="text-base font-bold text-white mb-1">
+                  {selectedLeague.name}
+                </Text>
+                <Text className="text-sm text-gray-400 capitalize">
                   {selectedLeague.league_type}
                 </Text>
-                <Text style={styles.leagueSeason}>
+                <Text className="text-sm text-gray-400 mt-0.5">
                   Season: {selectedLeague.season}
                 </Text>
                 {selectedLeague.membership && (
-                  <View style={styles.roleBadge}>
-                    <Text style={styles.roleBadgeText}>
+                  <View className="self-start bg-green-900 px-2 py-1 rounded-md mt-2">
+                    <Text className="text-green-400 text-xs font-semibold">
                       {selectedLeague.membership.display_role}
                     </Text>
                   </View>
                 )}
               </View>
               <TouchableOpacity
-                style={styles.switchButton}
+                className="bg-gray-700 px-3 py-2 rounded-md"
                 onPress={handleSwitchLeague}
               >
-                <Text style={styles.switchButtonText}>Switch</Text>
+                <Text className="text-white text-sm font-semibold">Switch</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
 
         {/* League Stats */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>My Leagues</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{userLeagues.length}</Text>
-              <Text style={styles.statLabel}>Total Leagues</Text>
+        <View className="mb-8">
+          <Text className="text-lg font-bold text-white mb-4">My Leagues</Text>
+          <View className="flex-row flex-wrap gap-3">
+            <View className="bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-700">
+              <Text className="text-2xl font-bold text-red-500 mb-1">
+                {userLeagues.length}
+              </Text>
+              <Text className="text-xs text-gray-400 text-center">
+                Total Leagues
+              </Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
+            <View className="bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-700">
+              <Text className="text-2xl font-bold text-red-500 mb-1">
                 {userLeagues.filter(l => l.membership?.role === "admin").length}
               </Text>
-              <Text style={styles.statLabel}>As Admin</Text>
+              <Text className="text-xs text-gray-400 text-center">
+                As Admin
+              </Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
+            <View className="bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-700">
+              <Text className="text-2xl font-bold text-red-500 mb-1">
                 {userLeagues.filter(l => l.membership?.role === "coach").length}
               </Text>
-              <Text style={styles.statLabel}>As Coach</Text>
+              <Text className="text-xs text-gray-400 text-center">
+                As Coach
+              </Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
+            <View className="bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-700">
+              <Text className="text-2xl font-bold text-red-500 mb-1">
                 {userLeagues.filter(l => l.status === "active").length}
               </Text>
-              <Text style={styles.statLabel}>Active</Text>
+              <Text className="text-xs text-gray-400 text-center">Active</Text>
             </View>
           </View>
         </View>
 
         {/* Settings */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Settings</Text>
+        <View className="mb-8">
+          <Text className="text-lg font-bold text-white mb-4">Settings</Text>
 
-          <TouchableOpacity style={styles.settingItem}>
-            <Text style={styles.settingText}>Account Settings</Text>
-            <Text style={styles.settingArrow}>→</Text>
+          <TouchableOpacity className="bg-gray-800 rounded-lg p-4 flex-row justify-between items-center mb-2 border border-gray-700">
+            <Text className="text-base text-white">Account Settings</Text>
+            <Icon name="arrow-right" size={16} color="#9CA3AF" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem}>
-            <Text style={styles.settingText}>Notifications</Text>
-            <Text style={styles.settingArrow}>→</Text>
+          <TouchableOpacity className="bg-gray-800 rounded-lg p-4 flex-row justify-between items-center mb-2 border border-gray-700">
+            <Text className="text-base text-white">Notifications</Text>
+            <Icon name="arrow-right" size={16} color="#9CA3AF" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem}>
-            <Text style={styles.settingText}>Help & Support</Text>
-            <Text style={styles.settingArrow}>→</Text>
+          <TouchableOpacity className="bg-gray-800 rounded-lg p-4 flex-row justify-between items-center mb-2 border border-gray-700">
+            <Text className="text-base text-white">Help & Support</Text>
+            <Icon name="arrow-right" size={16} color="#9CA3AF" />
           </TouchableOpacity>
         </View>
 
         {/* Logout */}
-        <View style={styles.section}>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Text style={styles.logoutButtonText}>Sign Out</Text>
+        <View className="mb-8">
+          <TouchableOpacity
+            className="bg-red-600 rounded-lg p-4 items-center"
+            onPress={handleLogout}
+          >
+            <Text className="text-white text-base font-semibold">Sign Out</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#111827",
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
-  userSection: {
-    alignItems: "center",
-    paddingVertical: 32,
-  },
-  avatarPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#EF4444",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  avatarText: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    marginBottom: 12,
-  },
-  userBadge: {
-    backgroundColor: "#065F46",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  userBadgeText: {
-    color: "#10B981",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  section: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 16,
-  },
-  leagueCard: {
-    backgroundColor: "#1F2937",
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#374151",
-  },
-  leagueInfo: {
-    flex: 1,
-  },
-  leagueName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 4,
-  },
-  leagueType: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    textTransform: "capitalize",
-  },
-  leagueSeason: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginTop: 2,
-  },
-  roleBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: "#065F46",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginTop: 8,
-  },
-  roleBadgeText: {
-    color: "#10B981",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  switchButton: {
-    backgroundColor: "#374151",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  switchButtonText: {
-    color: "#F9FAFB",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  statItem: {
-    backgroundColor: "#1F2937",
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-    flex: 1,
-    minWidth: "45%",
-    borderWidth: 1,
-    borderColor: "#374151",
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#EF4444",
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    textAlign: "center",
-  },
-  settingItem: {
-    backgroundColor: "#1F2937",
-    borderRadius: 8,
-    padding: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#374151",
-  },
-  settingText: {
-    fontSize: 16,
-    color: "#F9FAFB",
-  },
-  settingArrow: {
-    fontSize: 16,
-    color: "#9CA3AF",
-  },
-  logoutButton: {
-    backgroundColor: "#DC2626",
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-  },
-  logoutButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

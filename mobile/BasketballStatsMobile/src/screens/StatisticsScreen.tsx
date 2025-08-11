@@ -3,7 +3,6 @@ import {
   View,
   Text,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
   RefreshControl,
   Alert,
@@ -13,6 +12,7 @@ import {
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
 import { basketballAPI } from "@basketball-stats/shared";
 import { useAuthStore } from "../hooks/useAuthStore";
+import Icon from "../components/Icon";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -30,14 +30,19 @@ function StatCard({
   color = "#EA580C",
 }: StatCardProps) {
   return (
-    <View style={styles.statCard}>
-      <View style={[styles.statIconContainer, { backgroundColor: color }]}>
-        <Text style={styles.statIcon}>📊</Text>
+    <View className="bg-gray-700 rounded-xl p-4 flex-row items-center w-[48%] border border-gray-600">
+      <View
+        className="w-10 h-10 rounded-full justify-center items-center mr-3"
+        style={{ backgroundColor: color }}
+      >
+        <Icon name="stats" size={16} color="#FFFFFF" />
       </View>
-      <View style={styles.statContent}>
-        <Text style={styles.statTitle}>{title}</Text>
-        <Text style={styles.statValue}>{value}</Text>
-        {subtitle && <Text style={styles.statSubtitle}>{subtitle}</Text>}
+      <View className="flex-1">
+        <Text className="text-gray-400 text-xs font-medium mb-0.5">
+          {title}
+        </Text>
+        <Text className="text-white text-xl font-bold mb-0.5">{value}</Text>
+        {subtitle && <Text className="text-gray-500 text-xs">{subtitle}</Text>}
       </View>
     </View>
   );
@@ -52,13 +57,13 @@ interface LeaderItemProps {
 
 function LeaderItem({ rank, playerName, value, unit = "" }: LeaderItemProps) {
   return (
-    <View style={styles.leaderItem}>
-      <View style={styles.leaderRank}>
-        <Text style={styles.leaderRankText}>{rank}</Text>
+    <View className="flex-row items-center bg-gray-700 p-3 rounded-lg mb-2">
+      <View className="w-6 h-6 rounded-full bg-primary-500 justify-center items-center mr-3">
+        <Text className="text-white text-xs font-bold">{rank}</Text>
       </View>
-      <View style={styles.leaderInfo}>
-        <Text style={styles.leaderName}>{playerName}</Text>
-        <Text style={styles.leaderValue}>
+      <View className="flex-1 flex-row justify-between items-center">
+        <Text className="text-white text-sm font-medium">{playerName}</Text>
+        <Text className="text-gray-400 text-sm">
           {value.toFixed(1)}
           {unit}
         </Text>
@@ -85,22 +90,24 @@ function StandingsItem({
   avgPoints,
 }: StandingsItemProps) {
   return (
-    <View style={styles.standingsItem}>
-      <View style={styles.standingsRank}>
-        <Text style={styles.standingsRankText}>{rank}</Text>
+    <View className="flex-row items-center bg-gray-700 p-3 rounded-lg mb-2">
+      <View className="w-6 h-6 rounded-full bg-gray-500 justify-center items-center mr-3">
+        <Text className="text-white text-xs font-bold">{rank}</Text>
       </View>
-      <View style={styles.standingsTeam}>
-        <Text style={styles.standingsTeamName}>{teamName}</Text>
+      <View className="flex-1">
+        <Text className="text-white text-sm font-medium">{teamName}</Text>
       </View>
-      <View style={styles.standingsStats}>
-        <Text style={styles.standingsWins}>
+      <View className="items-end">
+        <Text className="text-white text-sm font-medium">
           {wins}-{losses}
         </Text>
-        <Text style={styles.standingsPercentage}>
+        <Text className="text-gray-400 text-xs">
           {winPercentage.toFixed(1)}%
         </Text>
         {avgPoints && (
-          <Text style={styles.standingsPoints}>{avgPoints.toFixed(1)} PPG</Text>
+          <Text className="text-gray-400 text-xs">
+            {avgPoints.toFixed(1)} PPG
+          </Text>
         )}
       </View>
     </View>
@@ -147,19 +154,23 @@ export default function StatisticsScreen() {
 
   if (loading && !dashboardData) {
     return (
-      <View style={styles.loadingContainer}>
+      <View className="flex-1 justify-center items-center bg-gray-800">
         <ActivityIndicator size="large" color="#EA580C" />
-        <Text style={styles.loadingText}>Loading statistics...</Text>
+        <Text className="text-gray-400 mt-4 text-base">
+          Loading statistics...
+        </Text>
       </View>
     );
   }
 
   if (!selectedLeague) {
     return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyIcon}>🏀</Text>
-        <Text style={styles.emptyTitle}>No League Selected</Text>
-        <Text style={styles.emptySubtitle}>
+      <View className="flex-1 justify-center items-center bg-gray-800 p-8">
+        <Icon name="basketball" size={64} color="#6B7280" className="mb-4" />
+        <Text className="text-white text-2xl font-bold mb-2">
+          No League Selected
+        </Text>
+        <Text className="text-gray-400 text-base text-center">
           Please select a league to view statistics.
         </Text>
       </View>
@@ -167,65 +178,77 @@ export default function StatisticsScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-gray-800">
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Statistics Dashboard</Text>
-        <Text style={styles.headerSubtitle}>
+      <View className="bg-gray-700 p-5 pt-15">
+        <Text className="text-white text-2xl font-bold mb-1">
+          Statistics Dashboard
+        </Text>
+        <Text className="text-gray-400 text-base">
           {selectedLeague.name} • {selectedLeague.season}
         </Text>
       </View>
 
       {/* Tab Navigation */}
-      <View style={styles.tabContainer}>
+      <View className="flex-row bg-gray-700 border-b border-gray-600">
         <TouchableOpacity
-          style={[styles.tab, activeTab === "overview" && styles.activeTab]}
+          className={`flex-1 py-4 items-center border-b-2 ${
+            activeTab === "overview"
+              ? "border-primary-500"
+              : "border-transparent"
+          }`}
           onPress={() => setActiveTab("overview")}
         >
           <Text
-            style={[
-              styles.tabText,
-              activeTab === "overview" && styles.activeTabText,
-            ]}
+            className={`text-base font-medium ${
+              activeTab === "overview" ? "text-primary-500" : "text-gray-400"
+            }`}
           >
             Overview
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === "leaders" && styles.activeTab]}
+          className={`flex-1 py-4 items-center border-b-2 ${
+            activeTab === "leaders"
+              ? "border-primary-500"
+              : "border-transparent"
+          }`}
           onPress={() => setActiveTab("leaders")}
         >
           <Text
-            style={[
-              styles.tabText,
-              activeTab === "leaders" && styles.activeTabText,
-            ]}
+            className={`text-base font-medium ${
+              activeTab === "leaders" ? "text-primary-500" : "text-gray-400"
+            }`}
           >
             Leaders
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === "standings" && styles.activeTab]}
+          className={`flex-1 py-4 items-center border-b-2 ${
+            activeTab === "standings"
+              ? "border-primary-500"
+              : "border-transparent"
+          }`}
           onPress={() => setActiveTab("standings")}
         >
           <Text
-            style={[
-              styles.tabText,
-              activeTab === "standings" && styles.activeTabText,
-            ]}
+            className={`text-base font-medium ${
+              activeTab === "standings" ? "text-primary-500" : "text-gray-400"
+            }`}
           >
             Standings
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === "charts" && styles.activeTab]}
+          className={`flex-1 py-4 items-center border-b-2 ${
+            activeTab === "charts" ? "border-primary-500" : "border-transparent"
+          }`}
           onPress={() => setActiveTab("charts")}
         >
           <Text
-            style={[
-              styles.tabText,
-              activeTab === "charts" && styles.activeTabText,
-            ]}
+            className={`text-base font-medium ${
+              activeTab === "charts" ? "text-primary-500" : "text-gray-400"
+            }`}
           >
             Charts
           </Text>
@@ -233,18 +256,20 @@ export default function StatisticsScreen() {
       </View>
 
       <ScrollView
-        style={styles.scrollView}
+        className="flex-1"
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {/* Overview Tab */}
         {activeTab === "overview" && dashboardData && (
-          <View style={styles.tabContent}>
+          <View className="p-4">
             {/* League Stats Overview */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>League Overview</Text>
-              <View style={styles.statsGrid}>
+            <View className="mb-6">
+              <Text className="text-white text-xl font-bold mb-4">
+                League Overview
+              </Text>
+              <View className="flex-row flex-wrap gap-4">
                 <StatCard
                   title="Total Games"
                   value={dashboardData.league_info?.total_games || 0}
@@ -283,26 +308,31 @@ export default function StatisticsScreen() {
 
             {/* Recent Games */}
             {dashboardData.recent_games?.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Recent Games</Text>
+              <View className="mb-6">
+                <Text className="text-white text-xl font-bold mb-4">
+                  Recent Games
+                </Text>
                 {dashboardData.recent_games
                   .slice(0, 5)
                   .map((game: any, index: number) => (
-                    <View key={game.id} style={styles.gameItem}>
-                      <View style={styles.gameTeams}>
-                        <Text style={styles.gameTeamName}>
+                    <View
+                      key={game.id}
+                      className="bg-gray-700 p-4 rounded-lg mb-2 flex-row justify-between items-center"
+                    >
+                      <View className="flex-row items-center flex-1">
+                        <Text className="text-white text-sm font-medium">
                           {game.home_team}
                         </Text>
-                        <Text style={styles.gameVs}>vs</Text>
-                        <Text style={styles.gameTeamName}>
+                        <Text className="text-gray-400 text-xs mx-2">vs</Text>
+                        <Text className="text-white text-sm font-medium">
                           {game.away_team}
                         </Text>
                       </View>
-                      <View style={styles.gameScore}>
-                        <Text style={styles.gameScoreText}>
+                      <View className="items-end">
+                        <Text className="text-white text-base font-bold">
                           {game.home_score} - {game.away_score}
                         </Text>
-                        <Text style={styles.gameTotal}>
+                        <Text className="text-gray-400 text-xs">
                           ({game.total_points} pts)
                         </Text>
                       </View>
@@ -315,10 +345,12 @@ export default function StatisticsScreen() {
 
         {/* Leaders Tab */}
         {activeTab === "leaders" && dashboardData && (
-          <View style={styles.tabContent}>
+          <View className="p-4">
             {/* Scoring Leaders */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Scoring Leaders</Text>
+            <View className="mb-6">
+              <Text className="text-white text-xl font-bold mb-4">
+                Scoring Leaders
+              </Text>
               {Object.entries(dashboardData.leaders?.scoring || {})
                 .slice(0, 5)
                 .map(([player, points], index) => (
@@ -333,8 +365,10 @@ export default function StatisticsScreen() {
             </View>
 
             {/* Rebounding Leaders */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Rebounding Leaders</Text>
+            <View className="mb-6">
+              <Text className="text-white text-xl font-bold mb-4">
+                Rebounding Leaders
+              </Text>
               {Object.entries(dashboardData.leaders?.rebounding || {})
                 .slice(0, 5)
                 .map(([player, rebounds], index) => (
@@ -349,8 +383,10 @@ export default function StatisticsScreen() {
             </View>
 
             {/* Assists Leaders */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Assists Leaders</Text>
+            <View className="mb-6">
+              <Text className="text-white text-xl font-bold mb-4">
+                Assists Leaders
+              </Text>
               {Object.entries(dashboardData.leaders?.assists || {})
                 .slice(0, 5)
                 .map(([player, assists], index) => (
@@ -365,8 +401,10 @@ export default function StatisticsScreen() {
             </View>
 
             {/* Shooting Leaders */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Shooting Leaders (FG%)</Text>
+            <View className="mb-6">
+              <Text className="text-white text-xl font-bold mb-4">
+                Shooting Leaders (FG%)
+              </Text>
               {Object.entries(dashboardData.leaders?.shooting || {})
                 .slice(0, 5)
                 .map(([player, percentage], index) => (
@@ -384,9 +422,11 @@ export default function StatisticsScreen() {
 
         {/* Standings Tab */}
         {activeTab === "standings" && dashboardData && (
-          <View style={styles.tabContent}>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>League Standings</Text>
+          <View className="p-4">
+            <View className="mb-6">
+              <Text className="text-white text-xl font-bold mb-4">
+                League Standings
+              </Text>
               {dashboardData.standings
                 ?.slice(0, 10)
                 .map((team: any, index: number) => (
@@ -406,12 +446,14 @@ export default function StatisticsScreen() {
 
         {/* Charts Tab */}
         {activeTab === "charts" && dashboardData && (
-          <View style={styles.tabContent}>
+          <View className="p-4">
             {/* Team Performance Chart */}
             {dashboardData.standings?.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Team Performance</Text>
-                <View style={styles.chartContainer}>
+              <View className="mb-6">
+                <Text className="text-white text-xl font-bold mb-4">
+                  Team Performance
+                </Text>
+                <View className="bg-gray-700 rounded-xl p-4 mb-4 items-center">
                   <BarChart
                     data={{
                       labels: dashboardData.standings
@@ -455,16 +497,20 @@ export default function StatisticsScreen() {
                     showBarTops={false}
                     fromZero
                   />
-                  <Text style={styles.chartLabel}>Average Points Per Game</Text>
+                  <Text className="text-gray-400 text-xs text-center mt-2 font-medium">
+                    Average Points Per Game
+                  </Text>
                 </View>
               </View>
             )}
 
             {/* Win Distribution Pie Chart */}
             {dashboardData.standings?.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Win Distribution</Text>
-                <View style={styles.chartContainer}>
+              <View className="mb-6">
+                <Text className="text-white text-xl font-bold mb-4">
+                  Win Distribution
+                </Text>
+                <View className="bg-gray-700 rounded-xl p-4 mb-4 items-center">
                   <PieChart
                     data={dashboardData.standings
                       .slice(0, 5)
@@ -496,7 +542,9 @@ export default function StatisticsScreen() {
                       borderRadius: 16,
                     }}
                   />
-                  <Text style={styles.chartLabel}>Total Wins by Team</Text>
+                  <Text className="text-gray-400 text-xs text-center mt-2 font-medium">
+                    Total Wins by Team
+                  </Text>
                 </View>
               </View>
             )}
@@ -504,9 +552,11 @@ export default function StatisticsScreen() {
             {/* Scoring Leaders Chart */}
             {dashboardData.leaders?.scoring &&
               Object.keys(dashboardData.leaders.scoring).length > 0 && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Top Scorers</Text>
-                  <View style={styles.chartContainer}>
+                <View className="mb-6">
+                  <Text className="text-white text-xl font-bold mb-4">
+                    Top Scorers
+                  </Text>
+                  <View className="bg-gray-700 rounded-xl p-4 mb-4 items-center">
                     <BarChart
                       data={{
                         labels: Object.keys(dashboardData.leaders.scoring)
@@ -551,16 +601,20 @@ export default function StatisticsScreen() {
                       showBarTops={false}
                       fromZero
                     />
-                    <Text style={styles.chartLabel}>Points Per Game</Text>
+                    <Text className="text-gray-400 text-xs text-center mt-2 font-medium">
+                      Points Per Game
+                    </Text>
                   </View>
                 </View>
               )}
 
             {/* Recent Games Trend */}
             {dashboardData.recent_games?.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Scoring Trends</Text>
-                <View style={styles.chartContainer}>
+              <View className="mb-6">
+                <Text className="text-white text-xl font-bold mb-4">
+                  Scoring Trends
+                </Text>
+                <View className="bg-gray-700 rounded-xl p-4 mb-4 items-center">
                   <LineChart
                     data={{
                       labels: dashboardData.recent_games
@@ -605,7 +659,7 @@ export default function StatisticsScreen() {
                       borderRadius: 16,
                     }}
                   />
-                  <Text style={styles.chartLabel}>
+                  <Text className="text-gray-400 text-xs text-center mt-2 font-medium">
                     Recent Games Total Points
                   </Text>
                 </View>
@@ -617,275 +671,3 @@ export default function StatisticsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#1F2937",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1F2937",
-  },
-  loadingText: {
-    color: "#9CA3AF",
-    marginTop: 16,
-    fontSize: 16,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1F2937",
-    padding: 32,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    color: "#9CA3AF",
-    fontSize: 16,
-    textAlign: "center",
-  },
-  header: {
-    backgroundColor: "#374151",
-    padding: 20,
-    paddingTop: 60,
-  },
-  headerTitle: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    color: "#9CA3AF",
-    fontSize: 16,
-  },
-  tabContainer: {
-    flexDirection: "row",
-    backgroundColor: "#374151",
-    borderBottomWidth: 1,
-    borderBottomColor: "#4B5563",
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 16,
-    alignItems: "center",
-    borderBottomWidth: 2,
-    borderBottomColor: "transparent",
-  },
-  activeTab: {
-    borderBottomColor: "#EA580C",
-  },
-  tabText: {
-    color: "#9CA3AF",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  activeTabText: {
-    color: "#EA580C",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  tabContent: {
-    padding: 16,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 16,
-  },
-  statCard: {
-    backgroundColor: "#374151",
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    width: "48%",
-    borderWidth: 1,
-    borderColor: "#4B5563",
-  },
-  statIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  statIcon: {
-    fontSize: 20,
-  },
-  statContent: {
-    flex: 1,
-  },
-  statTitle: {
-    color: "#9CA3AF",
-    fontSize: 12,
-    fontWeight: "500",
-    marginBottom: 2,
-  },
-  statValue: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 2,
-  },
-  statSubtitle: {
-    color: "#6B7280",
-    fontSize: 10,
-  },
-  leaderItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#374151",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  leaderRank: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#EA580C",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  leaderRankText: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "bold",
-  },
-  leaderInfo: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  leaderName: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  leaderValue: {
-    color: "#9CA3AF",
-    fontSize: 14,
-  },
-  standingsItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#374151",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  standingsRank: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#6B7280",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  standingsRankText: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "bold",
-  },
-  standingsTeam: {
-    flex: 1,
-  },
-  standingsTeamName: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  standingsStats: {
-    alignItems: "flex-end",
-  },
-  standingsWins: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  standingsPercentage: {
-    color: "#9CA3AF",
-    fontSize: 12,
-  },
-  standingsPoints: {
-    color: "#9CA3AF",
-    fontSize: 10,
-  },
-  gameItem: {
-    backgroundColor: "#374151",
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  gameTeams: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  gameTeamName: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  gameVs: {
-    color: "#9CA3AF",
-    fontSize: 12,
-    marginHorizontal: 8,
-  },
-  gameScore: {
-    alignItems: "flex-end",
-  },
-  gameScoreText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  gameTotal: {
-    color: "#9CA3AF",
-    fontSize: 12,
-  },
-  chartContainer: {
-    backgroundColor: "#374151",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    alignItems: "center",
-  },
-  chartLabel: {
-    color: "#9CA3AF",
-    fontSize: 12,
-    textAlign: "center",
-    marginTop: 8,
-    fontWeight: "500",
-  },
-});

@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
   RefreshControl,
   Alert,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import Icon from "../components/Icon";
 
 import { basketballAPI, Team } from "@basketball-stats/shared";
 
@@ -42,20 +42,25 @@ export default function TeamsScreen() {
   };
 
   const renderTeam = ({ item: team }: { item: Team }) => (
-    <TouchableOpacity style={styles.teamCard}>
-      <View style={styles.teamHeader}>
-        <Text style={styles.teamName}>{team.name}</Text>
-        {team.city && <Text style={styles.teamCity}>{team.city}</Text>}
+    <TouchableOpacity className="bg-gray-800 rounded-xl p-4 mb-3 border border-gray-700">
+      <View className="mb-2">
+        <Text className="text-white text-lg font-bold">{team.name}</Text>
+        {team.city && (
+          <Text className="text-gray-400 text-sm mt-0.5">{team.city}</Text>
+        )}
       </View>
 
-      <View style={styles.teamStats}>
-        <Text style={styles.playersCount}>
+      <View className="mb-2">
+        <Text className="text-green-400 text-sm font-semibold">
           {team.active_players_count} Active Players
         </Text>
       </View>
 
       {team.description && (
-        <Text style={styles.teamDescription} numberOfLines={2}>
+        <Text
+          className="text-gray-300 text-sm leading-[18px]"
+          numberOfLines={2}
+        >
           {team.description}
         </Text>
       )}
@@ -64,28 +69,35 @@ export default function TeamsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading teams...</Text>
+      <View className="flex-1 justify-center items-center bg-dark-950">
+        <Text className="text-white text-base">Loading teams...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-dark-950">
       <StatusBar style="light" />
       <FlatList
         data={teams}
         renderItem={renderTeam}
         keyExtractor={item => item.id.toString()}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={{ padding: 16 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>🏀</Text>
-            <Text style={styles.emptyTitle}>No teams found</Text>
-            <Text style={styles.emptyDescription}>
+          <View className="items-center justify-center pt-15">
+            <Icon
+              name="basketball"
+              size={48}
+              color="#6B7280"
+              className="mb-4"
+            />
+            <Text className="text-white text-lg font-bold mb-2">
+              No teams found
+            </Text>
+            <Text className="text-gray-400 text-sm text-center leading-5">
               Teams will appear here once they're added
             </Text>
           </View>
@@ -94,78 +106,3 @@ export default function TeamsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#111827",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#111827",
-  },
-  loadingText: {
-    color: "#F9FAFB",
-    fontSize: 16,
-  },
-  content: {
-    padding: 16,
-  },
-  teamCard: {
-    backgroundColor: "#1F2937",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#374151",
-  },
-  teamHeader: {
-    marginBottom: 8,
-  },
-  teamName: {
-    color: "#F9FAFB",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  teamCity: {
-    color: "#9CA3AF",
-    fontSize: 14,
-    marginTop: 2,
-  },
-  teamStats: {
-    marginBottom: 8,
-  },
-  playersCount: {
-    color: "#10B981",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  teamDescription: {
-    color: "#D1D5DB",
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 60,
-  },
-  emptyText: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    color: "#F9FAFB",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  emptyDescription: {
-    color: "#9CA3AF",
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
-  },
-});
