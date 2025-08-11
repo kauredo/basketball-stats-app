@@ -97,29 +97,59 @@ const LiveGame: React.FC = () => {
         }
       });
 
+      basketballWebSocket.on('timer_update', (data) => {
+        if (data.gameState) {
+          setGameState(prev => ({
+            ...prev,
+            timeRemaining: data.gameState.timeRemaining,
+            period: data.gameState.period,
+          }));
+        }
+      });
+
+      basketballWebSocket.on('stats_update', (data) => {
+        if (data.playerStats) {
+          const { playerId, team, stats } = data.playerStats;
+          const setPlayers = team === 'home' ? setHomePlayers : setAwayPlayers;
+          
+          setPlayers(prev => prev.map(player => 
+            player.playerId === playerId ? { ...player, ...stats } : player
+          ));
+        }
+      });
+
       return () => {
         basketballWebSocket.unsubscribeFromGame();
       };
     }
   }, [gameId]);
 
-  // Game timer effect
+  // Game timer effect with WebSocket sync
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
     if (gameState.isActive && !gameState.isPaused && gameState.timeRemaining > 0) {
       interval = setInterval(() => {
-        setGameState(prev => ({
-          ...prev,
-          timeRemaining: Math.max(0, prev.timeRemaining - 1)
-        }));
+        setGameState(prev => {
+          const newState = {
+            ...prev,
+            timeRemaining: Math.max(0, prev.timeRemaining - 1)
+          };
+          
+          // Sync timer update via WebSocket
+          if (gameId) {
+            basketballWebSocket.updateTimer(newState.timeRemaining, newState.period);
+          }
+          
+          return newState;
+        });
       }, 1000);
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [gameState.isActive, gameState.isPaused, gameState.timeRemaining]);
+  }, [gameState.isActive, gameState.isPaused, gameState.timeRemaining, gameId]);
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -127,35 +157,70 @@ const LiveGame: React.FC = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const handleGameControl = (action: 'start' | 'pause' | 'stop') => {
-    switch (action) {
-      case 'start':
-        setGameState(prev => ({ ...prev, isActive: true, isPaused: false }));
-        break;
-      case 'pause':
-        setGameState(prev => ({ ...prev, isPaused: !prev.isPaused }));
-        break;
-      case 'stop':
-        setGameState(prev => ({ ...prev, isActive: false, isPaused: false }));
-        break;
+  const handleGameControl = async (action: 'start' | 'pause' | 'stop') => {
+    if (!game || !gameId) return;
+    
+    try {
+      let response;
+      switch (action) {
+        case 'start':
+          response = await basketballAPI.startGame(parseInt(gameId));
+          break;
+        case 'pause':
+          response = await basketballAPI.pauseGame(parseInt(gameId));
+          break;
+        case 'stop':
+          response = await basketballAPI.endGame(parseInt(gameId));
+          break;
+      }
+      
+      // Game state will be updated via WebSocket broadcast from backend
+      if (response?.game) {
+        setGame(response.game);
+      }
+    } catch (error) {
+      console.error(`Failed to ${action} game:`, error);
     }
   };
 
   const updateScore = (team: 'home' | 'away', points: number) => {
+    // Update local state immediately for responsive UI
     setGameState(prev => ({
       ...prev,
       [team === 'home' ? 'homeScore' : 'awayScore']: Math.max(0, prev[team === 'home' ? 'homeScore' : 'awayScore'] + points)
     }));
+    
+    // Note: In a real implementation, score updates would be handled through
+    // specific stat recording (field goals, free throws, etc.) which automatically
+    // update the score and broadcast via ActionCable
   };
 
-  const updatePlayerStat = (playerId: number, team: 'home' | 'away', stat: keyof Omit<PlayerStats, 'playerId' | 'isPlaying'>, change: number) => {
-    const setPlayers = team === 'home' ? setHomePlayers : setAwayPlayers;
+  const updatePlayerStat = async (playerId: number, team: 'home' | 'away', stat: keyof Omit<PlayerStats, 'playerId' | 'isPlaying'>, change: number) => {
+    if (!gameId || change === 0) return;
     
+    // Update local state immediately for responsive UI
+    const setPlayers = team === 'home' ? setHomePlayers : setAwayPlayers;
     setPlayers(prev => prev.map(player => 
       player.playerId === playerId
         ? { ...player, [stat]: Math.max(0, player[stat] + change) }
         : player
     ));
+    
+    try {
+      // Record the stat via API, which will broadcast via ActionCable
+      await basketballAPI.recordPlayerStat(parseInt(gameId), playerId, {
+        stat_type: stat,
+        value: change,
+      });
+    } catch (error) {
+      console.error('Failed to record player stat:', error);
+      // Revert the optimistic update on error
+      setPlayers(prev => prev.map(player => 
+        player.playerId === playerId
+          ? { ...player, [stat]: Math.max(0, player[stat] - change) }
+          : player
+      ));
+    }
   };
 
   if (isLoading) {
