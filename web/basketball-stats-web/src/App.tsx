@@ -2,12 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "./hooks/useAuthStore";
-import {
-  getPageStyles,
-  getBasketballIconStyles,
-  getTitleStyles,
-  getSubtitleStyles,
-} from "@basketball-stats/shared";
+import Icon from "./components/Icon";
 
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
@@ -32,11 +27,11 @@ const queryClient = new QueryClient({
 
 function LoadingScreen() {
   return (
-    <div className={getPageStyles({ variant: "centered", padding: "lg" })}>
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-8">
       <div className="text-center">
-        <div className={getBasketballIconStyles("xl", true)}>🏀</div>
-        <div className={getTitleStyles("lg")}>Basketball Stats</div>
-        <div className={getSubtitleStyles()}>Loading...</div>
+        <Icon name="basketball" size={64} className="mx-auto mb-4 text-orange-600" />
+        <h1 className="text-2xl font-bold text-white mb-2">Basketball Stats</h1>
+        <p className="text-gray-400">Loading...</p>
       </div>
     </div>
   );
@@ -92,7 +87,7 @@ function AppContent() {
   }
 
   return (
-    <div className={getPageStyles()}>
+    <div>
       {isAuthenticated ? <AuthenticatedApp /> : <AuthPage />}
     </div>
   );

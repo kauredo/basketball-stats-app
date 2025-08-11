@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../hooks/useAuthStore';
+import Icon from '../Icon';
 
 interface ForgotPasswordFormProps {
   onBackToLogin: () => void;
@@ -33,7 +34,7 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
         <div className="max-w-md w-full space-y-8">
           <div>
             <div className="mx-auto h-12 w-12 flex items-center justify-center">
-              <span className="text-4xl">🏀</span>
+              <Icon name="basketball" size={32} className="text-orange-600" />
             </div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
               Check your email
@@ -68,7 +69,7 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="mx-auto h-12 w-12 flex items-center justify-center">
-            <span className="text-4xl">🏀</span>
+            <Icon name="basketball" size={32} className="text-orange-600" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
             Reset your password

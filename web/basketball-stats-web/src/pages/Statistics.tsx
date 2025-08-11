@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useAuthStore } from "../hooks/useAuthStore";
 import basketballAPI from "../services/api";
+import Icon from "../components/Icon";
 import {
   TrophyIcon,
   UsersIcon,
   ChartBarIcon,
   ArrowUpIcon,
   ArrowDownIcon,
+  FunnelIcon,
+  ArrowsUpDownIcon,
 } from "@heroicons/react/24/outline";
 import {
   ResponsiveContainer,
@@ -40,23 +43,23 @@ interface StatCardProps {
 function StatCard({ title, value, subtitle, icon, trend }: StatCardProps) {
   const getTrendIcon = () => {
     if (trend === "up")
-      return <ArrowUpIcon className="stat-trend-icon green" />;
+      return <ArrowUpIcon className="h-4 w-4 text-green-500" />;
     if (trend === "down")
-      return <ArrowDownIcon className="stat-trend-icon red" />;
+      return <ArrowDownIcon className="h-4 w-4 text-red-500" />;
     return null;
   };
 
   return (
-    <div className="stat-card">
-      <div className="stat-header">
-        {icon && <div className="stat-icon">{icon}</div>}
-        <div className="stat-content">
-          <h3 className="stat-title">{title}</h3>
-          <div className="stat-value-container">
-            <span className="stat-value">{value}</span>
+    <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+      <div className="flex items-center">
+        {icon && <div className="flex-shrink-0 mr-4">{icon}</div>}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-medium text-gray-300 mb-1">{title}</h3>
+          <div className="flex items-center">
+            <span className="text-2xl font-bold text-white mr-2">{value}</span>
             {getTrendIcon()}
           </div>
-          {subtitle && <p className="stat-subtitle">{subtitle}</p>}
+          {subtitle && <p className="text-sm text-gray-400 mt-1">{subtitle}</p>}
         </div>
       </div>
     </div>
@@ -73,19 +76,21 @@ function LeadersBoard({ title, leaders, unit = "" }: LeadersBoardProps) {
   const leadersList = Object.entries(leaders).slice(0, 5);
 
   return (
-    <div className="leaders-board">
-      <h3 className="leaders-title">{title}</h3>
-      <div className="leaders-list">
+    <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+      <h3 className="text-lg font-semibold text-white mb-4">{title}</h3>
+      <div className="space-y-3">
         {leadersList.map(([player, value], index) => (
-          <div key={player} className="leader-item">
-            <div className="leader-rank">{index + 1}</div>
-            <div className="leader-info">
-              <span className="leader-name">{player}</span>
-              <span className="leader-value">
-                {value.toFixed(1)}
-                {unit}
-              </span>
+          <div key={player} className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-6 h-6 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center justify-center mr-3">
+                {index + 1}
+              </div>
+              <span className="text-white font-medium">{player}</span>
             </div>
+            <span className="text-gray-300 font-semibold">
+              {value.toFixed(1)}
+              {unit}
+            </span>
           </div>
         ))}
       </div>
@@ -99,34 +104,38 @@ interface StandingsTableProps {
 
 function StandingsTable({ standings }: StandingsTableProps) {
   return (
-    <div className="standings-table">
-      <h3 className="standings-title">League Standings</h3>
-      <div className="table-container">
-        <table>
-          <thead>
+    <div className="bg-gray-800 rounded-lg border border-gray-700">
+      <div className="p-6 border-b border-gray-700">
+        <h3 className="text-lg font-semibold text-white">League Standings</h3>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-700">
+          <thead className="bg-gray-750">
             <tr>
-              <th>Team</th>
-              <th>W</th>
-              <th>L</th>
-              <th>Win%</th>
-              <th>PPG</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Team</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">W</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">L</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Win%</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">PPG</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-gray-800 divide-y divide-gray-700">
             {standings.slice(0, 10).map((team, index) => (
-              <tr key={team.team_id}>
-                <td>
-                  <div className="team-info">
-                    <span className="team-rank">{index + 1}</span>
-                    <span className="team-name">{team.team_name}</span>
+              <tr key={team.team_id} className="hover:bg-gray-750">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <span className="w-6 h-6 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center justify-center mr-3">
+                      {index + 1}
+                    </span>
+                    <span className="text-white font-medium">{team.team_name}</span>
                   </div>
                 </td>
-                <td className="stat-number">{team.wins}</td>
-                <td className="stat-number">{team.losses}</td>
-                <td className="stat-number">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.wins}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.losses}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                   {team.win_percentage.toFixed(1)}%
                 </td>
-                <td className="stat-number">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                   {team.avg_points?.toFixed(1) || "0.0"}
                 </td>
               </tr>
@@ -149,6 +158,9 @@ export default function Statistics() {
   >("overview");
   const [sortBy, setSortBy] = useState("avg_points");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filterBy, setFilterBy] = useState<string>("");
+  const [minGames, setMinGames] = useState<number>(0);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
     if (selectedLeague) {
@@ -709,9 +721,10 @@ export default function Statistics() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

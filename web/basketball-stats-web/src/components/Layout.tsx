@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../hooks/useAuthStore';
+import Icon from './Icon';
 import {
   HomeIcon,
   TrophyIcon,
@@ -41,7 +42,7 @@ export default function Layout({ children }: LayoutProps) {
       <div className="fixed inset-y-0 left-0 z-50 w-64 bg-gray-800">
         <div className="flex h-16 shrink-0 items-center px-6">
           <div className="flex items-center">
-            <span className="text-2xl mr-2">🏀</span>
+            <Icon name="basketball" size={24} className="mr-2 text-orange-600" />
             <span className="text-lg font-bold text-white">
               Basketball Stats
             </span>

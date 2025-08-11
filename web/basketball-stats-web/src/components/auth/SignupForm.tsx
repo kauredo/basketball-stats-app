@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SignupCredentials } from '@basketball-stats/shared';
 import { useAuthStore } from '../../hooks/useAuthStore';
+import Icon from '../Icon';
 
 interface SignupFormProps {
   onSwitchToLogin: () => void;
@@ -85,7 +86,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="mx-auto h-12 w-12 flex items-center justify-center">
-            <span className="text-4xl">🏀</span>
+            <Icon name="basketball" size={32} className="text-orange-600" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
             Create your account
@@ -188,7 +189,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   <span className="text-gray-400 hover:text-gray-300">
-                    {showPassword ? '🙈' : '👁️'}
+                    <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} className="text-gray-400 hover:text-gray-300" />
                   </span>
                 </button>
               </div>
@@ -217,7 +218,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   <span className="text-gray-400 hover:text-gray-300">
-                    {showConfirmPassword ? '🙈' : '👁️'}
+                    <Icon name={showConfirmPassword ? 'eye-off' : 'eye'} size={20} className="text-gray-400 hover:text-gray-300" />
                   </span>
                 </button>
               </div>

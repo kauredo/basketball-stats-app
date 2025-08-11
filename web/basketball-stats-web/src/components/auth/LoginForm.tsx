@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LoginCredentials } from '@basketball-stats/shared';
 import { useAuthStore } from '../../hooks/useAuthStore';
+import Icon from '../Icon';
 
 interface LoginFormProps {
   onSwitchToSignup: () => void;
@@ -37,95 +38,99 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <div className="auth-logo">
-            <span className="basketball-icon">🏀</span>
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <div className="mx-auto h-12 w-12 flex items-center justify-center">
+            <Icon name="basketball" size={32} className="text-orange-600" />
           </div>
-          <h2 className="auth-title">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
             Sign in to your account
           </h2>
-          <p className="auth-subtitle">
+          <p className="mt-2 text-center text-sm text-gray-400">
             Or{' '}
             <button
               onClick={onSwitchToSignup}
-              className="auth-link"
+              className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none"
             >
               create a new account
             </button>
           </p>
         </div>
         
-        <form onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="error-message">
+            <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded-md">
               {error}
             </div>
           )}
           
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
-              Email address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="form-input"
-              placeholder="Enter your email"
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
-              Password
-            </label>
-            <div className="password-input-container">
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+                Email address
+              </label>
               <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="form-input"
-                placeholder="Enter your password"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 relative block w-full px-3 py-2 border border-gray-600 bg-gray-800 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+                placeholder="Enter your email"
                 disabled={isLoading}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="password-toggle"
-              >
-                {showPassword ? '🙈' : '👁️'}
-              </button>
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+                Password
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="relative block w-full px-3 py-2 pr-10 border border-gray-600 bg-gray-800 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                  placeholder="Enter your password"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} className="text-gray-400 hover:text-gray-300" />
+                </button>
+              </div>
             </div>
           </div>
 
-          <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+          <div className="text-center">
             <button
               type="button"
               onClick={onSwitchToForgotPassword}
-              className="auth-link"
+              className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none text-sm"
             >
               Forgot your password?
             </button>
           </div>
 
-          <button
-            type="submit"
-            disabled={isLoading || !email.trim() || !password.trim()}
-            className="submit-button"
-          >
-            {isLoading ? 'Signing in...' : 'Sign in'}
-          </button>
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading || !email.trim() || !password.trim()}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </div>
         </form>
       </div>
     </div>

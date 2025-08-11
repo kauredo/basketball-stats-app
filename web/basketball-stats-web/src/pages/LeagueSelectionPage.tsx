@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { League, basketballAPI } from "@basketball-stats/shared";
 import { useAuthStore } from "../hooks/useAuthStore";
+import Icon from "../components/Icon";
 import {
   PlusIcon,
   UsersIcon,
@@ -87,7 +88,7 @@ export default function LeagueSelectionPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <span className="text-2xl mr-3">🏀</span>
+              <Icon name="basketball" size={32} className="mr-3 text-orange-600" />
               <div>
                 <h1 className="text-2xl font-bold text-white">
                   Basketball Stats
