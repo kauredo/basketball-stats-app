@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
   RefreshControl,
   Alert,
   ActivityIndicator,
-} from 'react-native';
-import { useAuthStore, basketballAPI } from '@basketball-stats/shared';
+} from "react-native";
+import { basketballAPI } from "@basketball-stats/shared";
+import { useAuthStore } from "../hooks/useAuthStore";
+import Icon from "../components/Icon";
 
 interface StatRowProps {
   label: string;
@@ -19,9 +20,19 @@ interface StatRowProps {
 
 function StatRow({ label, value, isHeader = false }: StatRowProps) {
   return (
-    <View style={[styles.statRow, isHeader && styles.statRowHeader]}>
-      <Text style={[styles.statLabel, isHeader && styles.statLabelHeader]}>{label}</Text>
-      <Text style={[styles.statValue, isHeader && styles.statValueHeader]}>{value}</Text>
+    <View className={`flex-row justify-between items-center px-4 py-3 border-b border-gray-600 ${
+      isHeader ? "bg-gray-600" : ""
+    }`}>
+      <Text className={`text-sm flex-1 ${
+        isHeader ? "text-white font-medium" : "text-gray-300"
+      }`}>
+        {label}
+      </Text>
+      <Text className={`text-sm font-medium ${
+        isHeader ? "text-white font-bold" : "text-white"
+      }`}>
+        {value}
+      </Text>
     </View>
   );
 }
@@ -32,7 +43,7 @@ interface GameLogItemProps {
     game_date: string;
     opponent: string;
     home_game: boolean;
-    result: 'W' | 'L' | 'N/A';
+    result: "W" | "L" | "N/A";
     points: number;
     rebounds: number;
     assists: number;
@@ -42,40 +53,47 @@ interface GameLogItemProps {
 }
 
 function GameLogItem({ game }: GameLogItemProps) {
-  const resultColor = game.result === 'W' ? '#10B981' : game.result === 'L' ? '#EF4444' : '#6B7280';
-  
+  const resultColorClass =
+    game.result === "W"
+      ? "text-green-400"
+      : game.result === "L"
+      ? "text-red-400"
+      : "text-gray-500";
+
   return (
-    <View style={styles.gameLogItem}>
-      <View style={styles.gameLogHeader}>
-        <Text style={styles.gameLogOpponent}>
-          {game.home_game ? 'vs' : '@'} {game.opponent}
+    <View className="bg-gray-700 rounded-lg p-4 mb-2">
+      <View className="flex-row justify-between items-center mb-3">
+        <Text className="text-white text-base font-medium">
+          {game.home_game ? "vs" : "@"} {game.opponent}
         </Text>
-        <View style={styles.gameLogResult}>
-          <Text style={[styles.gameLogResultText, { color: resultColor }]}>
+        <View className="w-6 h-6 rounded-xl justify-center items-center">
+          <Text className={`text-xs font-bold ${resultColorClass}`}>
             {game.result}
           </Text>
         </View>
       </View>
-      <View style={styles.gameLogStats}>
-        <View style={styles.gameLogStat}>
-          <Text style={styles.gameLogStatValue}>{game.points}</Text>
-          <Text style={styles.gameLogStatLabel}>PTS</Text>
+      <View className="flex-row justify-around">
+        <View className="items-center">
+          <Text className="text-white text-base font-bold">{game.points}</Text>
+          <Text className="text-gray-400 text-xs mt-0.5">PTS</Text>
         </View>
-        <View style={styles.gameLogStat}>
-          <Text style={styles.gameLogStatValue}>{game.rebounds}</Text>
-          <Text style={styles.gameLogStatLabel}>REB</Text>
+        <View className="items-center">
+          <Text className="text-white text-base font-bold">{game.rebounds}</Text>
+          <Text className="text-gray-400 text-xs mt-0.5">REB</Text>
         </View>
-        <View style={styles.gameLogStat}>
-          <Text style={styles.gameLogStatValue}>{game.assists}</Text>
-          <Text style={styles.gameLogStatLabel}>AST</Text>
+        <View className="items-center">
+          <Text className="text-white text-base font-bold">{game.assists}</Text>
+          <Text className="text-gray-400 text-xs mt-0.5">AST</Text>
         </View>
-        <View style={styles.gameLogStat}>
-          <Text style={styles.gameLogStatValue}>{game.field_goal_percentage}%</Text>
-          <Text style={styles.gameLogStatLabel}>FG%</Text>
+        <View className="items-center">
+          <Text className="text-white text-base font-bold">
+            {game.field_goal_percentage}%
+          </Text>
+          <Text className="text-gray-400 text-xs mt-0.5">FG%</Text>
         </View>
-        <View style={styles.gameLogStat}>
-          <Text style={styles.gameLogStatValue}>{game.minutes}</Text>
-          <Text style={styles.gameLogStatLabel}>MIN</Text>
+        <View className="items-center">
+          <Text className="text-white text-base font-bold">{game.minutes}</Text>
+          <Text className="text-gray-400 text-xs mt-0.5">MIN</Text>
         </View>
       </View>
     </View>
@@ -91,11 +109,13 @@ interface PlayerStatisticsScreenProps {
   };
 }
 
-export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreenProps) {
+export default function PlayerStatisticsScreen({
+  route,
+}: PlayerStatisticsScreenProps) {
   const { playerId, playerName } = route.params;
   const { selectedLeague } = useAuthStore();
   const [playerStats, setPlayerStats] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'season' | 'games'>('season');
+  const [activeTab, setActiveTab] = useState<"season" | "games">("season");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -107,14 +127,20 @@ export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreen
 
   const loadPlayerStats = async () => {
     if (!selectedLeague) return;
-    
+
     try {
       setLoading(true);
-      const stats = await basketballAPI.getPlayerStatistics(selectedLeague.id, playerId);
+      const stats = await basketballAPI.getPlayerStatistics(
+        selectedLeague.id,
+        playerId
+      );
       setPlayerStats(stats);
     } catch (error) {
-      console.error('Failed to load player statistics:', error);
-      Alert.alert('Error', 'Failed to load player statistics. Please try again.');
+      console.error("Failed to load player statistics:", error);
+      Alert.alert(
+        "Error",
+        "Failed to load player statistics. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -128,155 +154,266 @@ export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreen
 
   if (loading && !playerStats) {
     return (
-      <View style={styles.loadingContainer}>
+      <View className="flex-1 justify-center items-center bg-gray-800">
         <ActivityIndicator size="large" color="#EA580C" />
-        <Text style={styles.loadingText}>Loading player statistics...</Text>
+        <Text className="text-gray-400 mt-4 text-base">Loading player statistics...</Text>
       </View>
     );
   }
 
   if (!selectedLeague || !playerStats) {
     return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyIcon}>🏀</Text>
-        <Text style={styles.emptyTitle}>No Data Available</Text>
-        <Text style={styles.emptySubtitle}>Player statistics could not be loaded.</Text>
+      <View className="flex-1 justify-center items-center bg-gray-800 p-8">
+        <Icon name="basketball" size={64} color="#6B7280" className="mb-4" />
+        <Text className="text-white text-2xl font-bold mb-2">No Data Available</Text>
+        <Text className="text-gray-400 text-base text-center">
+          Player statistics could not be loaded.
+        </Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-gray-800">
       {/* Player Info Header */}
-      <View style={styles.header}>
-        <Text style={styles.playerName}>{playerName}</Text>
-        <Text style={styles.playerTeam}>{playerStats.player?.team || 'Unknown Team'}</Text>
-        <Text style={styles.playerPosition}>{playerStats.player?.position || ''}</Text>
+      <View className="bg-gray-700 p-5 items-center">
+        <Text className="text-white text-2xl font-bold mb-1">{playerName}</Text>
+        <Text className="text-primary-500 text-base font-medium mb-0.5">
+          {playerStats.player?.team || "Unknown Team"}
+        </Text>
+        <Text className="text-gray-400 text-sm">
+          {playerStats.player?.position || ""}
+        </Text>
       </View>
 
       {/* Tab Navigation */}
-      <View style={styles.tabContainer}>
+      <View className="flex-row bg-gray-700 border-b border-gray-600">
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'season' && styles.activeTab]}
-          onPress={() => setActiveTab('season')}
+          className={`flex-1 py-4 items-center border-b-2 ${
+            activeTab === "season" ? "border-primary-500" : "border-transparent"
+          }`}
+          onPress={() => setActiveTab("season")}
         >
-          <Text style={[styles.tabText, activeTab === 'season' && styles.activeTabText]}>
+          <Text
+            className={`text-base font-medium ${
+              activeTab === "season" ? "text-primary-500" : "text-gray-400"
+            }`}
+          >
             Season Stats
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'games' && styles.activeTab]}
-          onPress={() => setActiveTab('games')}
+          className={`flex-1 py-4 items-center border-b-2 ${
+            activeTab === "games" ? "border-primary-500" : "border-transparent"
+          }`}
+          onPress={() => setActiveTab("games")}
         >
-          <Text style={[styles.tabText, activeTab === 'games' && styles.activeTabText]}>
+          <Text
+            className={`text-base font-medium ${
+              activeTab === "games" ? "text-primary-500" : "text-gray-400"
+            }`}
+          >
             Game Log
           </Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView
-        style={styles.scrollView}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        className="flex-1"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         {/* Season Stats Tab */}
-        {activeTab === 'season' && playerStats.season_stats && (
-          <View style={styles.tabContent}>
+        {activeTab === "season" && playerStats.season_stats && (
+          <View className="p-4">
             {/* Basic Stats */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Basic Statistics</Text>
-              <View style={styles.statsTable}>
-                <StatRow label="Games Played" value={playerStats.season_stats.games_played} isHeader />
-                <StatRow label="Points per Game" value={playerStats.season_stats.avg_points?.toFixed(1) || '0.0'} />
-                <StatRow label="Rebounds per Game" value={playerStats.season_stats.avg_rebounds?.toFixed(1) || '0.0'} />
-                <StatRow label="Assists per Game" value={playerStats.season_stats.avg_assists?.toFixed(1) || '0.0'} />
-                <StatRow label="Steals per Game" value={playerStats.season_stats.avg_steals?.toFixed(1) || '0.0'} />
-                <StatRow label="Blocks per Game" value={playerStats.season_stats.avg_blocks?.toFixed(1) || '0.0'} />
-                <StatRow label="Minutes per Game" value={playerStats.season_stats.avg_minutes?.toFixed(1) || '0.0'} />
+            <View className="mb-6">
+              <Text className="text-white text-lg font-bold mb-3">Basic Statistics</Text>
+              <View className="bg-gray-700 rounded-lg overflow-hidden">
+                <StatRow
+                  label="Games Played"
+                  value={playerStats.season_stats.games_played}
+                  isHeader
+                />
+                <StatRow
+                  label="Points per Game"
+                  value={
+                    playerStats.season_stats.avg_points?.toFixed(1) || "0.0"
+                  }
+                />
+                <StatRow
+                  label="Rebounds per Game"
+                  value={
+                    playerStats.season_stats.avg_rebounds?.toFixed(1) || "0.0"
+                  }
+                />
+                <StatRow
+                  label="Assists per Game"
+                  value={
+                    playerStats.season_stats.avg_assists?.toFixed(1) || "0.0"
+                  }
+                />
+                <StatRow
+                  label="Steals per Game"
+                  value={
+                    playerStats.season_stats.avg_steals?.toFixed(1) || "0.0"
+                  }
+                />
+                <StatRow
+                  label="Blocks per Game"
+                  value={
+                    playerStats.season_stats.avg_blocks?.toFixed(1) || "0.0"
+                  }
+                />
+                <StatRow
+                  label="Minutes per Game"
+                  value={
+                    playerStats.season_stats.avg_minutes?.toFixed(1) || "0.0"
+                  }
+                />
               </View>
             </View>
 
             {/* Shooting Stats */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Shooting Statistics</Text>
-              <View style={styles.statsTable}>
-                <StatRow 
-                  label="Field Goal %" 
-                  value={`${playerStats.season_stats.field_goal_percentage?.toFixed(1) || '0.0'}%`} 
-                  isHeader 
+            <View className="mb-6">
+              <Text className="text-white text-lg font-bold mb-3">Shooting Statistics</Text>
+              <View className="bg-gray-700 rounded-lg overflow-hidden">
+                <StatRow
+                  label="Field Goal %"
+                  value={`${
+                    playerStats.season_stats.field_goal_percentage?.toFixed(
+                      1
+                    ) || "0.0"
+                  }%`}
+                  isHeader
                 />
-                <StatRow 
-                  label="Three Point %" 
-                  value={`${playerStats.season_stats.three_point_percentage?.toFixed(1) || '0.0'}%`} 
+                <StatRow
+                  label="Three Point %"
+                  value={`${
+                    playerStats.season_stats.three_point_percentage?.toFixed(
+                      1
+                    ) || "0.0"
+                  }%`}
                 />
-                <StatRow 
-                  label="Free Throw %" 
-                  value={`${playerStats.season_stats.free_throw_percentage?.toFixed(1) || '0.0'}%`} 
+                <StatRow
+                  label="Free Throw %"
+                  value={`${
+                    playerStats.season_stats.free_throw_percentage?.toFixed(
+                      1
+                    ) || "0.0"
+                  }%`}
                 />
-                <StatRow 
-                  label="Effective FG%" 
-                  value={`${playerStats.season_stats.effective_field_goal_percentage?.toFixed(1) || '0.0'}%`} 
+                <StatRow
+                  label="Effective FG%"
+                  value={`${
+                    playerStats.season_stats.effective_field_goal_percentage?.toFixed(
+                      1
+                    ) || "0.0"
+                  }%`}
                 />
-                <StatRow 
-                  label="True Shooting %" 
-                  value={`${playerStats.season_stats.true_shooting_percentage?.toFixed(1) || '0.0'}%`} 
+                <StatRow
+                  label="True Shooting %"
+                  value={`${
+                    playerStats.season_stats.true_shooting_percentage?.toFixed(
+                      1
+                    ) || "0.0"
+                  }%`}
                 />
               </View>
             </View>
 
             {/* Advanced Stats */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Advanced Statistics</Text>
-              <View style={styles.statsTable}>
-                <StatRow 
-                  label="Player Efficiency Rating" 
-                  value={playerStats.season_stats.player_efficiency_rating?.toFixed(1) || '0.0'} 
-                  isHeader 
+            <View className="mb-6">
+              <Text className="text-white text-lg font-bold mb-3">Advanced Statistics</Text>
+              <View className="bg-gray-700 rounded-lg overflow-hidden">
+                <StatRow
+                  label="Player Efficiency Rating"
+                  value={
+                    playerStats.season_stats.player_efficiency_rating?.toFixed(
+                      1
+                    ) || "0.0"
+                  }
+                  isHeader
                 />
-                <StatRow 
-                  label="Usage Rate" 
-                  value={`${playerStats.season_stats.usage_rate?.toFixed(1) || '0.0'}%`} 
+                <StatRow
+                  label="Usage Rate"
+                  value={`${
+                    playerStats.season_stats.usage_rate?.toFixed(1) || "0.0"
+                  }%`}
                 />
-                <StatRow 
-                  label="Assist/Turnover Ratio" 
-                  value={playerStats.season_stats.assist_to_turnover_ratio?.toFixed(2) || '0.00'} 
+                <StatRow
+                  label="Assist/Turnover Ratio"
+                  value={
+                    playerStats.season_stats.assist_to_turnover_ratio?.toFixed(
+                      2
+                    ) || "0.00"
+                  }
                 />
-                <StatRow 
-                  label="Turnovers per Game" 
-                  value={playerStats.season_stats.avg_turnovers?.toFixed(1) || '0.0'} 
+                <StatRow
+                  label="Turnovers per Game"
+                  value={
+                    playerStats.season_stats.avg_turnovers?.toFixed(1) || "0.0"
+                  }
                 />
-                <StatRow 
-                  label="Fouls per Game" 
-                  value={playerStats.season_stats.avg_fouls?.toFixed(1) || '0.0'} 
+                <StatRow
+                  label="Fouls per Game"
+                  value={
+                    playerStats.season_stats.avg_fouls?.toFixed(1) || "0.0"
+                  }
                 />
               </View>
             </View>
 
             {/* Season Totals */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Season Totals</Text>
-              <View style={styles.statsTable}>
-                <StatRow label="Total Points" value={playerStats.season_stats.total_points || 0} isHeader />
-                <StatRow label="Total Rebounds" value={playerStats.season_stats.total_rebounds || 0} />
-                <StatRow label="Total Assists" value={playerStats.season_stats.total_assists || 0} />
-                <StatRow label="Total Minutes" value={playerStats.season_stats.total_minutes || 0} />
-                <StatRow label="Field Goals Made" value={playerStats.season_stats.total_field_goals_made || 0} />
-                <StatRow label="Field Goals Attempted" value={playerStats.season_stats.total_field_goals_attempted || 0} />
+            <View className="mb-6">
+              <Text className="text-white text-lg font-bold mb-3">Season Totals</Text>
+              <View className="bg-gray-700 rounded-lg overflow-hidden">
+                <StatRow
+                  label="Total Points"
+                  value={playerStats.season_stats.total_points || 0}
+                  isHeader
+                />
+                <StatRow
+                  label="Total Rebounds"
+                  value={playerStats.season_stats.total_rebounds || 0}
+                />
+                <StatRow
+                  label="Total Assists"
+                  value={playerStats.season_stats.total_assists || 0}
+                />
+                <StatRow
+                  label="Total Minutes"
+                  value={playerStats.season_stats.total_minutes || 0}
+                />
+                <StatRow
+                  label="Field Goals Made"
+                  value={playerStats.season_stats.total_field_goals_made || 0}
+                />
+                <StatRow
+                  label="Field Goals Attempted"
+                  value={
+                    playerStats.season_stats.total_field_goals_attempted || 0
+                  }
+                />
               </View>
             </View>
           </View>
         )}
 
         {/* Game Log Tab */}
-        {activeTab === 'games' && playerStats.recent_games && (
-          <View style={styles.tabContent}>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Recent Games</Text>
+        {activeTab === "games" && playerStats.recent_games && (
+          <View className="p-4">
+            <View className="mb-6">
+              <Text className="text-white text-lg font-bold mb-3">Recent Games</Text>
               {playerStats.recent_games.length > 0 ? (
                 playerStats.recent_games.map((game: any, index: number) => (
                   <GameLogItem key={game.game_id || index} game={game} />
                 ))
               ) : (
-                <Text style={styles.noGamesText}>No games played yet this season.</Text>
+                <Text className="text-gray-400 text-base text-center italic mt-8">
+                  No games played yet this season.
+                </Text>
               )}
             </View>
           </View>
@@ -286,188 +423,3 @@ export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreen
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1F2937',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1F2937',
-  },
-  loadingText: {
-    color: '#9CA3AF',
-    marginTop: 16,
-    fontSize: 16,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1F2937',
-    padding: 32,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    color: '#9CA3AF',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  header: {
-    backgroundColor: '#374151',
-    padding: 20,
-    alignItems: 'center',
-  },
-  playerName: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  playerTeam: {
-    color: '#EA580C',
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-  playerPosition: {
-    color: '#9CA3AF',
-    fontSize: 14,
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#374151',
-    borderBottomWidth: 1,
-    borderBottomColor: '#4B5563',
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 16,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  activeTab: {
-    borderBottomColor: '#EA580C',
-  },
-  tabText: {
-    color: '#9CA3AF',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  activeTabText: {
-    color: '#EA580C',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  tabContent: {
-    padding: 16,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  statsTable: {
-    backgroundColor: '#374151',
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#4B5563',
-  },
-  statRowHeader: {
-    backgroundColor: '#4B5563',
-  },
-  statLabel: {
-    color: '#D1D5DB',
-    fontSize: 14,
-    flex: 1,
-  },
-  statLabelHeader: {
-    color: 'white',
-    fontWeight: '500',
-  },
-  statValue: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  statValueHeader: {
-    fontWeight: 'bold',
-  },
-  gameLogItem: {
-    backgroundColor: '#374151',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 8,
-  },
-  gameLogHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  gameLogOpponent: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  gameLogResult: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  gameLogResultText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  gameLogStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  gameLogStat: {
-    alignItems: 'center',
-  },
-  gameLogStatValue: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  gameLogStatLabel: {
-    color: '#9CA3AF',
-    fontSize: 10,
-    marginTop: 2,
-  },
-  noGamesText: {
-    color: '#9CA3AF',
-    fontSize: 16,
-    textAlign: 'center',
-    fontStyle: 'italic',
-    marginTop: 32,
-  },
-});

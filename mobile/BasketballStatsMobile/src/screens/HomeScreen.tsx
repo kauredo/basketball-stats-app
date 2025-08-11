@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
@@ -11,7 +10,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import { FontAwesome5 } from "@expo/vector-icons";
+import Icon from "../components/Icon";
 
 // Import shared library
 import {
@@ -85,53 +84,51 @@ export default function HomeScreen() {
     return (
       <TouchableOpacity
         key={game.id}
-        style={[styles.gameCard, isLive && styles.liveGameCard]}
+        className={`bg-gray-800 rounded-xl p-4 mb-3 border ${
+          isLive ? "border-primary-500 border-2 shadow-lg" : "border-gray-700"
+        }`}
         onPress={() => handleGamePress(game)}
         disabled={!isLive}
       >
-        <View style={styles.gameHeader}>
-          <View style={styles.teamsContainer}>
-            <View style={styles.teamRow}>
+        <View className="mb-3">
+          <View className="items-center">
+            <View className="flex-row justify-between items-center w-full py-1">
               <Text
-                style={[
-                  styles.teamName,
-                  winner === "away" &&
-                    game.status === "completed" &&
-                    styles.winnerText,
-                ]}
+                className={`text-white text-base font-semibold flex-1 ${
+                  winner === "away" && game.status === "completed"
+                    ? "text-green-400"
+                    : ""
+                }`}
               >
                 {game.away_team.name}
               </Text>
               <Text
-                style={[
-                  styles.score,
-                  winner === "away" &&
-                    game.status === "completed" &&
-                    styles.winnerText,
-                ]}
+                className={`text-white text-lg font-bold min-w-[30px] text-right ${
+                  winner === "away" && game.status === "completed"
+                    ? "text-green-400"
+                    : ""
+                }`}
               >
                 {game.away_score}
               </Text>
             </View>
-            <Text style={styles.vsText}>@</Text>
-            <View style={styles.teamRow}>
+            <Text className="text-gray-400 text-xs my-1">@</Text>
+            <View className="flex-row justify-between items-center w-full py-1">
               <Text
-                style={[
-                  styles.teamName,
-                  winner === "home" &&
-                    game.status === "completed" &&
-                    styles.winnerText,
-                ]}
+                className={`text-white text-base font-semibold flex-1 ${
+                  winner === "home" && game.status === "completed"
+                    ? "text-green-400"
+                    : ""
+                }`}
               >
                 {game.home_team.name}
               </Text>
               <Text
-                style={[
-                  styles.score,
-                  winner === "home" &&
-                    game.status === "completed" &&
-                    styles.winnerText,
-                ]}
+                className={`text-white text-lg font-bold min-w-[30px] text-right ${
+                  winner === "home" && game.status === "completed"
+                    ? "text-green-400"
+                    : ""
+                }`}
               >
                 {game.home_score}
               </Text>
@@ -139,33 +136,31 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View style={styles.gameInfo}>
+        <View className="flex-row justify-between items-center">
           <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: gameStatus?.color || "#6B7280" },
-            ]}
+            className="px-2 py-1 rounded-xl"
+            style={{ backgroundColor: gameStatus?.color || "#6B7280" }}
           >
-            <Text style={styles.statusText}>
+            <Text className="text-white text-xs font-semibold">
               {BasketballUtils.getGameStatusDisplayName(game.status)}
             </Text>
           </View>
 
           {isGameLive && (
-            <Text style={styles.gameTime}>
+            <Text className="text-gray-400 text-xs">
               Q{game.current_quarter} • {game.time_display}
             </Text>
           )}
 
           {game.status === "completed" && (
-            <Text style={styles.gameTime}>
+            <Text className="text-gray-400 text-xs">
               Final •{" "}
               {BasketballUtils.formatGameDate(game.ended_at || game.created_at)}
             </Text>
           )}
 
           {game.status === "scheduled" && (
-            <Text style={styles.gameTime}>
+            <Text className="text-gray-400 text-xs">
               {BasketballUtils.formatGameDate(
                 game.scheduled_at || game.created_at
               )}
@@ -178,81 +173,102 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading games...</Text>
+      <View className="flex-1 justify-center items-center bg-dark-950">
+        <Text className="text-white text-base">Loading games...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-dark-950">
       <StatusBar style="light" />
       <ScrollView
-        contentContainerStyle={styles.content}
+        className="p-4"
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {/* Quick Navigation Cards */}
-        <View style={styles.quickNavSection}>
-          <Text style={styles.sectionTitle}>Quick Navigation</Text>
-          <View style={styles.navCardsContainer}>
+        <View className="mb-6">
+          <Text className="text-white text-lg font-bold mb-3">
+            Quick Navigation
+          </Text>
+          <View className="flex-row flex-wrap justify-between -mx-1">
             <TouchableOpacity
-              style={styles.navCard}
+              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 items-center justify-center shadow-sm"
               onPress={() => navigation.navigate("Games")}
             >
-              <FontAwesome5 name="basketball-ball" size={24} color="#EF4444" />
-              <Text style={styles.navCardText}>All Games</Text>
+              <Icon name="basketball" size={24} color="#EA580C" />
+              <Text className="text-white text-base font-bold mt-2">
+                All Games
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.navCard}
+              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 items-center justify-center shadow-sm"
               onPress={() => navigation.navigate("Teams")}
             >
-              <FontAwesome5 name="users" size={24} color="#3B82F6" />
-              <Text style={styles.navCardText}>Teams</Text>
+              <Icon name="users" size={24} color="#3B82F6" />
+              <Text className="text-white text-base font-bold mt-2">Teams</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.navCard}
+              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 items-center justify-center shadow-sm"
               onPress={() => navigation.navigate("Statistics")}
             >
-              <FontAwesome5 name="chart-bar" size={24} color="#10B981" />
-              <Text style={styles.navCardText}>Statistics</Text>
+              <Icon name="stats" size={24} color="#10B981" />
+              <Text className="text-white text-base font-bold mt-2">
+                Statistics
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.navCard}
+              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 items-center justify-center shadow-sm"
               onPress={() => navigation.navigate("Profile")}
             >
-              <FontAwesome5 name="user" size={24} color="#8B5CF6" />
-              <Text style={styles.navCardText}>Profile</Text>
+              <Icon name="user" size={24} color="#8B5CF6" />
+              <Text className="text-white text-base font-bold mt-2">
+                Profile
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Live Games Section */}
         {liveGames.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🔴 Live Games</Text>
+          <View className="mb-6">
+            <View className="flex-row items-center mb-3">
+              <View className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse" />
+              <Text className="text-white text-lg font-bold">Live Games</Text>
+            </View>
             {liveGames.map(game => renderGameCard(game, true))}
           </View>
         )}
 
         {/* Recent Games Section */}
         {recentGames.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📊 Recent Games</Text>
+          <View className="mb-6">
+            <View className="flex-row items-center mb-3">
+              <Icon name="stats" size={16} color="#10B981" className="mr-2" />
+              <Text className="text-white text-lg font-bold">Recent Games</Text>
+            </View>
             {recentGames.map(game => renderGameCard(game, false))}
           </View>
         )}
 
         {/* Empty State */}
         {liveGames.length === 0 && recentGames.length === 0 && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>🏀</Text>
-            <Text style={styles.emptyTitle}>No games found</Text>
-            <Text style={styles.emptyDescription}>
+          <View className="items-center justify-center pt-15">
+            <Icon
+              name="basketball"
+              size={48}
+              color="#6B7280"
+              className="mb-4"
+            />
+            <Text className="text-white text-lg font-bold mb-2">
+              No games found
+            </Text>
+            <Text className="text-gray-400 text-sm text-center leading-5">
               Create a game to start tracking basketball statistics
             </Text>
           </View>
@@ -261,153 +277,3 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#111827",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#111827",
-  },
-  loadingText: {
-    color: "#F9FAFB",
-    fontSize: 16,
-  },
-  content: {
-    padding: 16,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    color: "#F9FAFB",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 12,
-  },
-  gameCard: {
-    backgroundColor: "#1F2937",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#374151",
-  },
-  liveGameCard: {
-    borderColor: "#EF4444",
-    borderWidth: 2,
-    shadowColor: "#EF4444",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  gameHeader: {
-    marginBottom: 12,
-  },
-  teamsContainer: {
-    alignItems: "center",
-  },
-  teamRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-    paddingVertical: 4,
-  },
-  teamName: {
-    color: "#F9FAFB",
-    fontSize: 16,
-    fontWeight: "600",
-    flex: 1,
-  },
-  score: {
-    color: "#F9FAFB",
-    fontSize: 18,
-    fontWeight: "bold",
-    minWidth: 30,
-    textAlign: "right",
-  },
-  winnerText: {
-    color: "#10B981",
-  },
-  vsText: {
-    color: "#9CA3AF",
-    fontSize: 12,
-    marginVertical: 4,
-  },
-  gameInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  gameTime: {
-    color: "#9CA3AF",
-    fontSize: 12,
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 60,
-  },
-  emptyText: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    color: "#F9FAFB",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  emptyDescription: {
-    color: "#9CA3AF",
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  // Quick Navigation Styles
-  quickNavSection: {
-    marginBottom: 24,
-  },
-  navCardsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginHorizontal: -4,
-  },
-  navCard: {
-    width: "48%",
-    backgroundColor: "#1F2937",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  navCardText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginTop: 8,
-  },
-});

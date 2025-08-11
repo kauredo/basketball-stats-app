@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-} from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+} from "react-native";
+import { StatusBar } from "expo-status-bar";
 
-import { basketballAPI, Team } from '@basketball-stats/shared';
+import { basketballAPI, Team } from "@basketball-stats/shared";
 
 export default function TeamsScreen() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -20,12 +20,12 @@ export default function TeamsScreen() {
   const loadTeams = async (isRefresh = false) => {
     try {
       if (!isRefresh) setLoading(true);
-      
+
       const response = await basketballAPI.getTeams();
       setTeams(response.teams);
     } catch (error) {
-      console.error('Failed to load teams:', error);
-      Alert.alert('Error', 'Failed to load teams');
+      console.error("Failed to load teams:", error);
+      Alert.alert("Error", "Failed to load teams");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -47,13 +47,13 @@ export default function TeamsScreen() {
         <Text style={styles.teamName}>{team.name}</Text>
         {team.city && <Text style={styles.teamCity}>{team.city}</Text>}
       </View>
-      
+
       <View style={styles.teamStats}>
         <Text style={styles.playersCount}>
           {team.active_players_count} Active Players
         </Text>
       </View>
-      
+
       {team.description && (
         <Text style={styles.teamDescription} numberOfLines={2}>
           {team.description}
@@ -76,7 +76,7 @@ export default function TeamsScreen() {
       <FlatList
         data={teams}
         renderItem={renderTeam}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={item => item.id.toString()}
         contentContainerStyle={styles.content}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -98,39 +98,39 @@ export default function TeamsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111827',
+    backgroundColor: "#111827",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#111827',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#111827",
   },
   loadingText: {
-    color: '#F9FAFB',
+    color: "#F9FAFB",
     fontSize: 16,
   },
   content: {
     padding: 16,
   },
   teamCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: "#1F2937",
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#374151',
+    borderColor: "#374151",
   },
   teamHeader: {
     marginBottom: 8,
   },
   teamName: {
-    color: '#F9FAFB',
+    color: "#F9FAFB",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   teamCity: {
-    color: '#9CA3AF',
+    color: "#9CA3AF",
     fontSize: 14,
     marginTop: 2,
   },
@@ -138,18 +138,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   playersCount: {
-    color: '#10B981',
+    color: "#10B981",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   teamDescription: {
-    color: '#D1D5DB',
+    color: "#D1D5DB",
     fontSize: 14,
     lineHeight: 18,
   },
   emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingTop: 60,
   },
   emptyText: {
@@ -157,15 +157,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   emptyTitle: {
-    color: '#F9FAFB',
+    color: "#F9FAFB",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   emptyDescription: {
-    color: '#9CA3AF',
+    color: "#9CA3AF",
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 20,
   },
 });

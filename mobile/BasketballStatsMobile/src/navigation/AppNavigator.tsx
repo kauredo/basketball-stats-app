@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useAuthStore } from "../hooks/useAuthStore";
+import Icon from "../components/Icon";
 
 // Import screens
 import HomeScreen from "../screens/HomeScreen";
@@ -121,10 +122,10 @@ function TabNavigator() {
 
 function LoadingScreen() {
   return (
-    <View style={styles.loadingContainer}>
-      <Text style={styles.loadingText}>🏀</Text>
-      <Text style={styles.loadingTitle}>Basketball Stats</Text>
-      <Text style={styles.loadingSubtitle}>Loading...</Text>
+    <View className="flex-1 justify-center items-center bg-dark-950">
+      <Icon name="basketball" size={64} color="#EA580C" className="mb-4" />
+      <Text className="text-2xl font-bold text-white mb-2">Basketball Stats</Text>
+      <Text className="text-base text-gray-400">Loading...</Text>
     </View>
   );
 }
@@ -202,25 +203,3 @@ export default function AppNavigator() {
   return <AppContent />;
 }
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#111827",
-  },
-  loadingText: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  loadingTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 8,
-  },
-  loadingSubtitle: {
-    fontSize: 16,
-    color: "#9CA3AF",
-  },
-});

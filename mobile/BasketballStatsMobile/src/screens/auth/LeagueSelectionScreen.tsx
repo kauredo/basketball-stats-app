@@ -88,28 +88,38 @@ export default function LeagueSelectionScreen() {
     return (
       <TouchableOpacity
         className={`bg-gray-800 rounded-xl p-4 mb-3 border-2 ${
-          isSelected ? 'border-primary-500 bg-primary-900' : 'border-gray-700'
+          isSelected ? "border-primary-500 bg-primary-900" : "border-gray-700"
         }`}
         onPress={() => selectLeague(league)}
       >
         <View className="flex-row justify-between items-start mb-2">
-          <Text className="text-lg font-bold text-white flex-1 mr-3">{league.name}</Text>
+          <Text className="text-lg font-bold text-white flex-1 mr-3">
+            {league.name}
+          </Text>
           <View className="bg-gray-700 px-2 py-1 rounded">
-            <Text className="text-white text-xs font-semibold capitalize">{league.league_type}</Text>
+            <Text className="text-white text-xs font-semibold capitalize">
+              {league.league_type}
+            </Text>
           </View>
         </View>
 
         {league.description && (
-          <Text className="text-gray-300 text-sm leading-5 mb-3" numberOfLines={2}>
+          <Text
+            className="text-gray-300 text-sm leading-5 mb-3"
+            numberOfLines={2}
+          >
             {league.description}
           </Text>
         )}
 
         <View className="mb-2">
           <Text className="text-gray-400 text-xs">
-            {league.teams_count || 0} teams • {league.members_count || 0} members
+            {league.teams_count || 0} teams • {league.members_count || 0}{" "}
+            members
           </Text>
-          <Text className="text-gray-400 text-xs mt-0.5">Season: {league.season}</Text>
+          <Text className="text-gray-400 text-xs mt-0.5">
+            Season: {league.season}
+          </Text>
         </View>
 
         {league.membership && (
@@ -124,7 +134,9 @@ export default function LeagueSelectionScreen() {
           <View className="items-center mt-3">
             <View className="flex-row items-center">
               <Icon name="check" size={16} color="#10B981" className="mr-1" />
-              <Text className="text-green-400 text-sm font-semibold">Selected</Text>
+              <Text className="text-green-400 text-sm font-semibold">
+                Selected
+              </Text>
             </View>
           </View>
         )}
@@ -138,14 +150,19 @@ export default function LeagueSelectionScreen() {
       onPress={() => handleJoinLeague(league.id)}
     >
       <View className="flex-row justify-between items-start mb-2">
-        <Text className="text-lg font-bold text-white flex-1 mr-3">{league.name}</Text>
+        <Text className="text-lg font-bold text-white flex-1 mr-3">
+          {league.name}
+        </Text>
         <View className="bg-court-800 px-2 py-1 rounded">
           <Text className="text-white text-xs font-semibold">Public</Text>
         </View>
       </View>
 
       {league.description && (
-        <Text className="text-gray-300 text-sm leading-5 mb-3" numberOfLines={2}>
+        <Text
+          className="text-gray-300 text-sm leading-5 mb-3"
+          numberOfLines={2}
+        >
           {league.description}
         </Text>
       )}
@@ -170,7 +187,9 @@ export default function LeagueSelectionScreen() {
       <StatusBar style="light" />
 
       <View className="px-6 pt-6 pb-4">
-        <Text className="text-3xl font-bold text-white mb-2">Select League</Text>
+        <Text className="text-3xl font-bold text-white mb-2">
+          Select League
+        </Text>
         <Text className="text-base text-gray-400">
           {userLeagues.length > 0
             ? "Choose a league to continue"
@@ -200,7 +219,9 @@ export default function LeagueSelectionScreen() {
             {/* Join by Code Section */}
             <View className="my-4">
               <View className="flex-row justify-between items-center mb-4 mt-6">
-                <Text className="text-lg font-bold text-white">Join by Invite Code</Text>
+                <Text className="text-lg font-bold text-white">
+                  Join by Invite Code
+                </Text>
                 <TouchableOpacity
                   onPress={() => setShowJoinForm(!showJoinForm)}
                   className="px-3 py-1.5 bg-gray-700 rounded"
@@ -223,7 +244,9 @@ export default function LeagueSelectionScreen() {
                     autoCorrect={false}
                   />
                   <TouchableOpacity
-                    className={`bg-primary-500 rounded-lg py-3 items-center ${isLoading ? 'opacity-50' : ''}`}
+                    className={`bg-primary-500 rounded-lg py-3 items-center ${
+                      isLoading ? "opacity-50" : ""
+                    }`}
                     onPress={handleJoinByCode}
                     disabled={isLoading}
                   >
@@ -239,7 +262,9 @@ export default function LeagueSelectionScreen() {
             {availableLeagues.length > 0 && (
               <>
                 <View className="flex-row justify-between items-center mb-4 mt-6">
-                  <Text className="text-lg font-bold text-white">Public Leagues</Text>
+                  <Text className="text-lg font-bold text-white">
+                    Public Leagues
+                  </Text>
                 </View>
                 {availableLeagues.map(league => (
                   <View key={`available-${league.id}`}>
@@ -252,8 +277,15 @@ export default function LeagueSelectionScreen() {
             {/* Empty State */}
             {userLeagues.length === 0 && availableLeagues.length === 0 && (
               <View className="items-center justify-center py-16">
-                <Icon name="basketball" size={48} color="#6B7280" className="mb-4" />
-                <Text className="text-white text-lg font-bold mb-2">No Leagues Available</Text>
+                <Icon
+                  name="basketball"
+                  size={48}
+                  color="#6B7280"
+                  className="mb-4"
+                />
+                <Text className="text-white text-lg font-bold mb-2">
+                  No Leagues Available
+                </Text>
                 <Text className="text-gray-400 text-sm text-center leading-5 px-8">
                   Ask a league administrator for an invite code to join a league
                 </Text>
@@ -276,4 +308,3 @@ export default function LeagueSelectionScreen() {
     </View>
   );
 }
-

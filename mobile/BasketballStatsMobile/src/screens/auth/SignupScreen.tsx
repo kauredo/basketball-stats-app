@@ -103,14 +103,23 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
       <StatusBar style="light" />
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 32 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          paddingHorizontal: 24,
+          paddingVertical: 32,
+        }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         <View className="items-center mb-8">
           <Icon name="basketball" size={64} color="#EA580C" className="mb-4" />
-          <Text className="text-3xl font-bold text-white mb-2">Create Account</Text>
-          <Text className="text-base text-gray-400 text-center">Join the basketball community</Text>
+          <Text className="text-3xl font-bold text-white mb-2">
+            Create Account
+          </Text>
+          <Text className="text-base text-gray-400 text-center">
+            Join the basketball community
+          </Text>
         </View>
 
         <View className="mb-8">
@@ -122,9 +131,16 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
 
           <View className="flex-row gap-3">
             <View className="flex-1 mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">First Name</Text>
+              <Text className="text-sm font-semibold text-white mb-2">
+                First Name
+              </Text>
               <View className="relative">
-                <Icon name="user" size={18} color="#6B7280" className="absolute left-4 top-3 z-10" />
+                <Icon
+                  name="user"
+                  size={18}
+                  color="#6B7280"
+                  className="absolute left-4 top-3 z-10"
+                />
                 <TextInput
                   className="bg-gray-800 border border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-white"
                   value={formData.firstName}
@@ -138,9 +154,16 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
             </View>
 
             <View className="flex-1 mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">Last Name</Text>
+              <Text className="text-sm font-semibold text-white mb-2">
+                Last Name
+              </Text>
               <View className="relative">
-                <Icon name="user" size={18} color="#6B7280" className="absolute left-4 top-3 z-10" />
+                <Icon
+                  name="user"
+                  size={18}
+                  color="#6B7280"
+                  className="absolute left-4 top-3 z-10"
+                />
                 <TextInput
                   className="bg-gray-800 border border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-white"
                   value={formData.lastName}
@@ -157,7 +180,12 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
           <View className="mb-5">
             <Text className="text-sm font-semibold text-white mb-2">Email</Text>
             <View className="relative">
-              <Icon name="mail" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
+              <Icon
+                name="mail"
+                size={20}
+                color="#6B7280"
+                className="absolute left-4 top-3 z-10"
+              />
               <TextInput
                 className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-4 py-3 text-base text-white"
                 value={formData.email}
@@ -173,9 +201,16 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
           </View>
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-white mb-2">Password</Text>
+            <Text className="text-sm font-semibold text-white mb-2">
+              Password
+            </Text>
             <View className="relative">
-              <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
+              <Icon
+                name="lock"
+                size={20}
+                color="#6B7280"
+                className="absolute left-4 top-3 z-10"
+              />
               <TextInput
                 className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-white"
                 value={formData.password}
@@ -189,19 +224,26 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                 className="absolute right-4 top-3"
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               >
-                <Icon 
-                  name={isPasswordVisible ? "eye-off" : "eye"} 
-                  size={20} 
-                  color="#6B7280" 
+                <Icon
+                  name={isPasswordVisible ? "eye-off" : "eye"}
+                  size={20}
+                  color="#6B7280"
                 />
               </TouchableOpacity>
             </View>
           </View>
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-white mb-2">Confirm Password</Text>
+            <Text className="text-sm font-semibold text-white mb-2">
+              Confirm Password
+            </Text>
             <View className="relative">
-              <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
+              <Icon
+                name="lock"
+                size={20}
+                color="#6B7280"
+                className="absolute left-4 top-3 z-10"
+              />
               <TextInput
                 className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-white"
                 value={formData.passwordConfirmation}
@@ -219,10 +261,10 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                   setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
                 }
               >
-                <Icon 
-                  name={isConfirmPasswordVisible ? "eye-off" : "eye"} 
-                  size={20} 
-                  color="#6B7280" 
+                <Icon
+                  name={isConfirmPasswordVisible ? "eye-off" : "eye"}
+                  size={20}
+                  color="#6B7280"
                 />
               </TouchableOpacity>
             </View>
@@ -242,9 +284,13 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
         </View>
 
         <View className="flex-row justify-center items-center">
-          <Text className="text-gray-400 text-sm mr-2">Already have an account?</Text>
+          <Text className="text-gray-400 text-sm mr-2">
+            Already have an account?
+          </Text>
           <TouchableOpacity onPress={onNavigateToLogin} disabled={isLoading}>
-            <Text className="text-primary-500 text-sm font-semibold">Sign In</Text>
+            <Text className="text-primary-500 text-sm font-semibold">
+              Sign In
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
