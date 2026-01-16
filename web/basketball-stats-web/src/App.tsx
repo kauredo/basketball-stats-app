@@ -60,11 +60,7 @@ function AppContent() {
     return <LoadingScreen />;
   }
 
-  return (
-    <div>
-      {isAuthenticated ? <AuthenticatedApp /> : <AuthPage />}
-    </div>
-  );
+  return <div>{isAuthenticated ? <AuthenticatedApp /> : <AuthPage />}</div>;
 }
 
 function App() {

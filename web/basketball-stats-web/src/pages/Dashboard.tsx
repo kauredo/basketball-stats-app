@@ -1,61 +1,69 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useQuery } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
-import { useAuth } from '../contexts/AuthContext';
-import {
-  PlayIcon,
-  ClockIcon,
-  TrophyIcon,
-  ChartBarIcon,
-} from '@heroicons/react/24/outline';
+import React from "react";
+import { Link } from "react-router-dom";
+import { useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { useAuth } from "../contexts/AuthContext";
+import { PlayIcon, ClockIcon, TrophyIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 
 const Dashboard: React.FC = () => {
   const { token, selectedLeague } = useAuth();
 
   const gamesData = useQuery(
     api.games.list,
-    token && selectedLeague
-      ? { token, leagueId: selectedLeague.id }
-      : "skip"
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
   );
 
   const games = gamesData?.games || [];
-  const liveGames = games.filter(game => game.status === 'active' || game.status === 'paused');
-  const recentGames = games.filter(game => game.status === 'completed').slice(0, 5);
-  const upcomingGames = games.filter(game => game.status === 'scheduled').slice(0, 5);
+  const liveGames = games.filter((game) => game.status === "active" || game.status === "paused");
+  const recentGames = games.filter((game) => game.status === "completed").slice(0, 5);
+  const upcomingGames = games.filter((game) => game.status === "scheduled").slice(0, 5);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return '#EF4444';
-      case 'paused': return '#F59E0B';
-      case 'completed': return '#10B981';
-      case 'scheduled': return '#3B82F6';
-      default: return '#6B7280';
+      case "active":
+        return "#EF4444";
+      case "paused":
+        return "#F59E0B";
+      case "completed":
+        return "#10B981";
+      case "scheduled":
+        return "#3B82F6";
+      default:
+        return "#6B7280";
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'active': return 'Live';
-      case 'paused': return 'Paused';
-      case 'completed': return 'Final';
-      case 'scheduled': return 'Scheduled';
-      default: return status;
+      case "active":
+        return "Live";
+      case "paused":
+        return "Paused";
+      case "completed":
+        return "Final";
+      case "scheduled":
+        return "Scheduled";
+      default:
+        return status;
     }
   };
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   const renderGameCard = (game: any, showActions = false) => {
-    const isGameLive = game.status === 'active';
-    const winner = game.status === 'completed'
-      ? game.homeScore > game.awayScore ? 'home' : game.awayScore > game.homeScore ? 'away' : 'tie'
-      : null;
+    const isGameLive = game.status === "active";
+    const winner =
+      game.status === "completed"
+        ? game.homeScore > game.awayScore
+          ? "home"
+          : game.awayScore > game.homeScore
+            ? "away"
+            : "tie"
+        : null;
 
     return (
       <div key={game.id} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
@@ -67,12 +75,10 @@ const Dashboard: React.FC = () => {
             >
               {getStatusLabel(game.status)}
             </div>
-            {isGameLive && (
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-            )}
+            {isGameLive && <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>}
           </div>
 
-          {(game.status === 'active' || game.status === 'paused') && (
+          {(game.status === "active" || game.status === "paused") && (
             <div className="text-right text-sm text-gray-300">
               <div>Q{game.currentQuarter}</div>
               <div className="font-mono">{formatTime(game.timeRemainingSeconds)}</div>
@@ -82,36 +88,42 @@ const Dashboard: React.FC = () => {
 
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <span className={`font-medium ${winner === 'away' ? 'text-green-400' : 'text-gray-200'}`}>
-              {game.awayTeam?.name || 'Away Team'}
+            <span
+              className={`font-medium ${winner === "away" ? "text-green-400" : "text-gray-200"}`}
+            >
+              {game.awayTeam?.name || "Away Team"}
             </span>
-            <span className={`font-bold text-lg ${winner === 'away' ? 'text-green-400' : 'text-gray-200'}`}>
+            <span
+              className={`font-bold text-lg ${winner === "away" ? "text-green-400" : "text-gray-200"}`}
+            >
               {game.awayScore}
             </span>
           </div>
           <div className="text-center text-gray-500 text-sm">@</div>
           <div className="flex justify-between items-center">
-            <span className={`font-medium ${winner === 'home' ? 'text-green-400' : 'text-gray-200'}`}>
-              {game.homeTeam?.name || 'Home Team'}
+            <span
+              className={`font-medium ${winner === "home" ? "text-green-400" : "text-gray-200"}`}
+            >
+              {game.homeTeam?.name || "Home Team"}
             </span>
-            <span className={`font-bold text-lg ${winner === 'home' ? 'text-green-400' : 'text-gray-200'}`}>
+            <span
+              className={`font-bold text-lg ${winner === "home" ? "text-green-400" : "text-gray-200"}`}
+            >
               {game.homeScore}
             </span>
           </div>
         </div>
 
-        {game.status === 'completed' && (
+        {game.status === "completed" && (
           <div className="mt-3 pt-3 border-t border-gray-700 text-sm text-gray-400">
             <div className="flex justify-between">
               <span>Final Score</span>
-              {winner !== 'tie' && (
-                <span>Margin: {Math.abs(game.homeScore - game.awayScore)}</span>
-              )}
+              {winner !== "tie" && <span>Margin: {Math.abs(game.homeScore - game.awayScore)}</span>}
             </div>
           </div>
         )}
 
-        {game.status === 'scheduled' && game.scheduledAt && (
+        {game.status === "scheduled" && game.scheduledAt && (
           <div className="mt-3 pt-3 border-t border-gray-700 text-sm text-gray-400">
             <div className="flex items-center">
               <ClockIcon className="w-4 h-4 mr-1" />
@@ -120,7 +132,7 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
-        {showActions && (game.status === 'active' || game.status === 'paused') && (
+        {showActions && (game.status === "active" || game.status === "paused") && (
           <div className="mt-4 flex space-x-2">
             <Link
               to={`/games/${game.id}/live`}
@@ -214,15 +226,12 @@ const Dashboard: React.FC = () => {
               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse mr-2"></div>
               Live Games
             </h2>
-            <Link
-              to="/games"
-              className="text-orange-500 hover:text-orange-400 font-medium"
-            >
+            <Link to="/games" className="text-orange-500 hover:text-orange-400 font-medium">
               View All Games
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {liveGames.map(game => renderGameCard(game, true))}
+            {liveGames.map((game) => renderGameCard(game, true))}
           </div>
         </div>
       )}
@@ -232,15 +241,12 @@ const Dashboard: React.FC = () => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-white">Recent Games</h2>
-            <Link
-              to="/games"
-              className="text-orange-500 hover:text-orange-400 font-medium"
-            >
+            <Link to="/games" className="text-orange-500 hover:text-orange-400 font-medium">
               View All Games
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recentGames.map(game => renderGameCard(game))}
+            {recentGames.map((game) => renderGameCard(game))}
           </div>
         </div>
       )}
@@ -250,15 +256,12 @@ const Dashboard: React.FC = () => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-white">Upcoming Games</h2>
-            <Link
-              to="/games"
-              className="text-orange-500 hover:text-orange-400 font-medium"
-            >
+            <Link to="/games" className="text-orange-500 hover:text-orange-400 font-medium">
               View All Games
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {upcomingGames.map(game => renderGameCard(game))}
+            {upcomingGames.map((game) => renderGameCard(game))}
           </div>
         </div>
       )}
@@ -268,9 +271,7 @@ const Dashboard: React.FC = () => {
         <div className="text-center py-12">
           <TrophyIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-white">No games</h3>
-          <p className="mt-1 text-sm text-gray-400">
-            Get started by creating your first game.
-          </p>
+          <p className="mt-1 text-sm text-gray-400">Get started by creating your first game.</p>
           <div className="mt-6">
             <Link
               to="/games"

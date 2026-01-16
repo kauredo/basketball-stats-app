@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  subscribeToAuth,
-  getAuthState,
-  authActions,
-  AuthState,
-} from "@basketball-stats/shared";
+import { subscribeToAuth, getAuthState, authActions, AuthState } from "@basketball-stats/shared";
 
 export function useAuth() {
   const [auth, setAuth] = useState<AuthState>(getAuthState());

@@ -41,10 +41,7 @@ export default function LeagueSelectionScreen() {
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
 
-  const leaguesData = useQuery(
-    api.leagues.list,
-    token ? { token } : "skip"
-  );
+  const leaguesData = useQuery(api.leagues.list, token ? { token } : "skip");
 
   const joinLeagueMutation = useMutation(api.leagues.join);
   const joinByCodeMutation = useMutation(api.leagues.joinByCode);
@@ -113,21 +110,14 @@ export default function LeagueSelectionScreen() {
         onPress={() => handleSelectLeague(league)}
       >
         <View className="flex-row justify-between items-start mb-2">
-          <Text className="text-lg font-bold text-white flex-1 mr-3">
-            {league.name}
-          </Text>
+          <Text className="text-lg font-bold text-white flex-1 mr-3">{league.name}</Text>
           <View className="bg-gray-700 px-2 py-1 rounded">
-            <Text className="text-white text-xs font-semibold capitalize">
-              {league.leagueType}
-            </Text>
+            <Text className="text-white text-xs font-semibold capitalize">{league.leagueType}</Text>
           </View>
         </View>
 
         {league.description && (
-          <Text
-            className="text-gray-300 text-sm leading-5 mb-3"
-            numberOfLines={2}
-          >
+          <Text className="text-gray-300 text-sm leading-5 mb-3" numberOfLines={2}>
             {league.description}
           </Text>
         )}
@@ -136,9 +126,7 @@ export default function LeagueSelectionScreen() {
           <Text className="text-gray-400 text-xs">
             {league.teamsCount || 0} teams • {league.membersCount || 0} members
           </Text>
-          <Text className="text-gray-400 text-xs mt-0.5">
-            Season: {league.season}
-          </Text>
+          <Text className="text-gray-400 text-xs mt-0.5">Season: {league.season}</Text>
         </View>
 
         {league.membership && (
@@ -153,9 +141,7 @@ export default function LeagueSelectionScreen() {
           <View className="items-center mt-3">
             <View className="flex-row items-center">
               <Icon name="check" size={16} color="#10B981" className="mr-1" />
-              <Text className="text-green-400 text-sm font-semibold">
-                Selected
-              </Text>
+              <Text className="text-green-400 text-sm font-semibold">Selected</Text>
             </View>
           </View>
         )}
@@ -170,19 +156,14 @@ export default function LeagueSelectionScreen() {
       disabled={isJoining}
     >
       <View className="flex-row justify-between items-start mb-2">
-        <Text className="text-lg font-bold text-white flex-1 mr-3">
-          {league.name}
-        </Text>
+        <Text className="text-lg font-bold text-white flex-1 mr-3">{league.name}</Text>
         <View className="bg-court-800 px-2 py-1 rounded">
           <Text className="text-white text-xs font-semibold">Public</Text>
         </View>
       </View>
 
       {league.description && (
-        <Text
-          className="text-gray-300 text-sm leading-5 mb-3"
-          numberOfLines={2}
-        >
+        <Text className="text-gray-300 text-sm leading-5 mb-3" numberOfLines={2}>
           {league.description}
         </Text>
       )}
@@ -194,12 +175,12 @@ export default function LeagueSelectionScreen() {
       </View>
 
       <TouchableOpacity
-        className={`bg-primary-500 rounded-lg py-3 items-center mt-3 ${isJoining ? 'opacity-50' : ''}`}
+        className={`bg-primary-500 rounded-lg py-3 items-center mt-3 ${isJoining ? "opacity-50" : ""}`}
         onPress={() => handleJoinLeague(league.id)}
         disabled={isJoining}
       >
         <Text className="text-white text-sm font-semibold">
-          {isJoining ? 'Joining...' : 'Join League'}
+          {isJoining ? "Joining..." : "Join League"}
         </Text>
       </TouchableOpacity>
     </TouchableOpacity>
@@ -218,9 +199,7 @@ export default function LeagueSelectionScreen() {
       <StatusBar style="light" />
 
       <View className="px-6 pt-6 pb-4">
-        <Text className="text-3xl font-bold text-white mb-2">
-          Select League
-        </Text>
+        <Text className="text-3xl font-bold text-white mb-2">Select League</Text>
         <Text className="text-base text-gray-400">
           {userLeagues.length > 0
             ? "Choose a league to continue"
@@ -231,11 +210,9 @@ export default function LeagueSelectionScreen() {
       <FlatList
         data={userLeagues}
         renderItem={renderUserLeague}
-        keyExtractor={item => `user-${item.id}`}
+        keyExtractor={(item) => `user-${item.id}`}
         className="px-6"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListHeaderComponent={() => (
           <>
             {userLeagues.length > 0 && (
@@ -250,9 +227,7 @@ export default function LeagueSelectionScreen() {
             {/* Join by Code Section */}
             <View className="my-4">
               <View className="flex-row justify-between items-center mb-4 mt-6">
-                <Text className="text-lg font-bold text-white">
-                  Join by Invite Code
-                </Text>
+                <Text className="text-lg font-bold text-white">Join by Invite Code</Text>
                 <TouchableOpacity
                   onPress={() => setShowJoinForm(!showJoinForm)}
                   className="px-3 py-1.5 bg-gray-700 rounded"
@@ -293,9 +268,7 @@ export default function LeagueSelectionScreen() {
             {availableLeagues.length > 0 && (
               <>
                 <View className="flex-row justify-between items-center mb-4 mt-6">
-                  <Text className="text-lg font-bold text-white">
-                    Public Leagues
-                  </Text>
+                  <Text className="text-lg font-bold text-white">Public Leagues</Text>
                 </View>
                 {availableLeagues.map((league: League) => (
                   <View key={`available-${league.id}`}>
@@ -308,15 +281,8 @@ export default function LeagueSelectionScreen() {
             {/* Empty State */}
             {userLeagues.length === 0 && availableLeagues.length === 0 && (
               <View className="items-center justify-center py-16">
-                <Icon
-                  name="basketball"
-                  size={48}
-                  color="#6B7280"
-                  className="mb-4"
-                />
-                <Text className="text-white text-lg font-bold mb-2">
-                  No Leagues Available
-                </Text>
+                <Icon name="basketball" size={48} color="#6B7280" className="mb-4" />
+                <Text className="text-white text-lg font-bold mb-2">No Leagues Available</Text>
                 <Text className="text-gray-400 text-sm text-center leading-5 px-8">
                   Ask a league administrator for an invite code to join a league
                 </Text>

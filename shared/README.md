@@ -5,30 +5,35 @@ A TypeScript library containing shared components, utilities, and services for t
 ## 🏀 Features
 
 ### **Type-Safe API Client**
+
 - Complete TypeScript definitions for basketball domain models
 - RESTful API client with automatic request/response handling
 - Error handling and retry logic
 - Configurable base URLs and authentication
 
 ### **Real-Time WebSocket Service**
+
 - Socket.io client for live game updates
 - Auto-reconnection with exponential backoff
 - Event-driven architecture for game and stats updates
 - Connection status monitoring
 
 ### **Basketball Utilities**
+
 - Advanced basketball calculations (FG%, eFG%, TS%, PER)
 - Time and date formatting utilities
 - Player and game data validation
 - Sorting and filtering helpers
 
 ### **State Management**
+
 - Zustand store for game state management
 - Real-time synchronization with backend
 - Optimistic updates for better UX
 - WebSocket event integration
 
 ### **Constants & Configuration**
+
 - Basketball game rules and constants
 - Validation parameters
 - API configuration
@@ -45,42 +50,42 @@ npm install @basketball-stats/shared
 ### API Client
 
 ```typescript
-import { basketballAPI, Team, Player } from '@basketball-stats/shared';
+import { basketballAPI, Team, Player } from "@basketball-stats/shared";
 
 // Get teams
 const { teams } = await basketballAPI.getTeams();
 
 // Create a player
 const { player } = await basketballAPI.createPlayer(teamId, {
-  name: 'LeBron James',
+  name: "LeBron James",
   number: 6,
-  position: 'SF'
+  position: "SF",
 });
 
 // Record a stat
 await basketballAPI.recordStat(gameId, {
   player_id: playerId,
-  stat_type: 'shot3',
-  made: true
+  stat_type: "shot3",
+  made: true,
 });
 ```
 
 ### WebSocket Service
 
 ```typescript
-import { basketballWebSocket } from '@basketball-stats/shared';
+import { basketballWebSocket } from "@basketball-stats/shared";
 
 // Connect to game
 basketballWebSocket.connect();
 basketballWebSocket.subscribeToGame(gameId);
 
 // Listen for updates
-basketballWebSocket.on('stat_update', (data) => {
-  console.log('Stat updated:', data.stat);
+basketballWebSocket.on("stat_update", (data) => {
+  console.log("Stat updated:", data.stat);
 });
 
-basketballWebSocket.on('game_update', (data) => {
-  console.log('Game updated:', data.game);
+basketballWebSocket.on("game_update", (data) => {
+  console.log("Game updated:", data.game);
 });
 ```
 
@@ -129,7 +134,7 @@ function GameComponent() {
 ### Basketball Utilities
 
 ```typescript
-import { BasketballUtils, STAT_TYPES, POSITIONS } from '@basketball-stats/shared';
+import { BasketballUtils, STAT_TYPES, POSITIONS } from "@basketball-stats/shared";
 
 // Calculate shooting percentages
 const fgPercent = BasketballUtils.fieldGoalPercentage(playerStat);
@@ -139,7 +144,7 @@ const tsPercent = BasketballUtils.trueShootingPercentage(playerStat);
 const timeDisplay = BasketballUtils.formatGameTime(seconds);
 
 // Get position info
-const positionName = BasketballUtils.getPositionFullName('PG'); // "Point Guard"
+const positionName = BasketballUtils.getPositionFullName("PG"); // "Point Guard"
 
 // Validate stats
 const errors = BasketballUtils.validateStatEntry(playerStat);
@@ -155,7 +160,7 @@ src/
 ├── types/           # TypeScript type definitions
 ├── services/        # API and WebSocket services
 ├── stores/          # Zustand state management
-├── utils/           # Utility functions and calculations  
+├── utils/           # Utility functions and calculations
 ├── constants/       # Basketball constants and configuration
 └── index.ts         # Main export file
 ```
@@ -190,18 +195,21 @@ This library is designed to work seamlessly across:
 ## 🏆 Basketball Features
 
 ### Comprehensive Statistics
+
 - Points, rebounds, assists, steals, blocks, turnovers, fouls
 - Field goals (2pt/3pt), free throws with percentages
 - Advanced metrics (eFG%, TS%, PER, +/-)
 - Team totals and player comparisons
 
 ### Real-Time Game Management
+
 - Live game timer with quarter tracking
 - Play-by-play stat recording
 - Instant score updates
 - WebSocket broadcasting to all connected clients
 
 ### Professional Box Scores
+
 - Traditional basketball statistics format
 - Team and individual player stats
 - Shooting percentages and efficiency metrics

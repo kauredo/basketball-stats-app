@@ -52,12 +52,14 @@ make stop
 For production environments:
 
 1. Set required environment variables:
+
 ```bash
 export RAILS_MASTER_KEY=your_rails_master_key
 export DB_PASSWORD=your_secure_database_password
 ```
 
 2. Deploy:
+
 ```bash
 make deploy-prod
 ```

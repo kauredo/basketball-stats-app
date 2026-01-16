@@ -40,10 +40,8 @@ interface StatCardProps {
 
 function StatCard({ title, value, subtitle, icon, trend }: StatCardProps) {
   const getTrendIcon = () => {
-    if (trend === "up")
-      return <ArrowUpIcon className="h-4 w-4 text-green-500" />;
-    if (trend === "down")
-      return <ArrowDownIcon className="h-4 w-4 text-red-500" />;
+    if (trend === "up") return <ArrowUpIcon className="h-4 w-4 text-green-500" />;
+    if (trend === "down") return <ArrowDownIcon className="h-4 w-4 text-red-500" />;
     return null;
   };
 
@@ -89,9 +87,7 @@ function LeadersBoard({ title, leaders, unit = "" }: LeadersBoardProps) {
             </span>
           </div>
         ))}
-        {leaders.length === 0 && (
-          <p className="text-gray-400 text-sm">No data available</p>
-        )}
+        {leaders.length === 0 && <p className="text-gray-400 text-sm">No data available</p>}
       </div>
     </div>
   );
@@ -136,17 +132,11 @@ function StandingsTable({ standings }: StandingsTableProps) {
                     <span className="w-6 h-6 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center justify-center mr-3">
                       {index + 1}
                     </span>
-                    <span className="text-white font-medium">
-                      {team.teamName}
-                    </span>
+                    <span className="text-white font-medium">{team.teamName}</span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  {team.wins}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  {team.losses}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.wins}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.losses}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                   {team.winPercentage.toFixed(1)}%
                 </td>
@@ -164,9 +154,9 @@ function StandingsTable({ standings }: StandingsTableProps) {
 
 export default function Statistics() {
   const { token, selectedLeague } = useAuth();
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "players" | "teams" | "charts"
-  >("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "players" | "teams" | "charts">(
+    "overview"
+  );
   const [sortBy, setSortBy] = useState("avgPoints");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -191,8 +181,7 @@ export default function Statistics() {
   );
 
   const handleSortChange = (newSortBy: string) => {
-    const newOrder =
-      newSortBy === sortBy && sortOrder === "desc" ? "asc" : "desc";
+    const newOrder = newSortBy === sortBy && sortOrder === "desc" ? "asc" : "desc";
     setSortBy(newSortBy);
     setSortOrder(newOrder);
   };
@@ -295,14 +284,15 @@ export default function Statistics() {
             />
             <StatCard
               title="Average PPG"
-              value={dashboardData?.recentGames?.length > 0
-                ? (
-                    dashboardData.recentGames.reduce(
-                      (sum: number, game: any) => sum + (game.homeScore + game.awayScore),
-                      0
-                    ) / dashboardData.recentGames.length
-                  ).toFixed(1)
-                : "0.0"
+              value={
+                dashboardData?.recentGames?.length > 0
+                  ? (
+                      dashboardData.recentGames.reduce(
+                        (sum: number, game: any) => sum + (game.homeScore + game.awayScore),
+                        0
+                      ) / dashboardData.recentGames.length
+                    ).toFixed(1)
+                  : "0.0"
               }
               subtitle="Points per game"
               icon={<ChartBarIcon className="h-8 w-8 text-purple-500" />}
@@ -312,26 +302,10 @@ export default function Statistics() {
           {/* Leaders and Standings */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <LeadersBoard
-                title="Scoring Leaders"
-                leaders={leaders.scoring}
-                unit=" PPG"
-              />
-              <LeadersBoard
-                title="Rebounding Leaders"
-                leaders={leaders.rebounding}
-                unit=" RPG"
-              />
-              <LeadersBoard
-                title="Assists Leaders"
-                leaders={leaders.assists}
-                unit=" APG"
-              />
-              <LeadersBoard
-                title="Shooting Leaders"
-                leaders={leaders.shooting}
-                unit="%"
-              />
+              <LeadersBoard title="Scoring Leaders" leaders={leaders.scoring} unit=" PPG" />
+              <LeadersBoard title="Rebounding Leaders" leaders={leaders.rebounding} unit=" RPG" />
+              <LeadersBoard title="Assists Leaders" leaders={leaders.assists} unit=" APG" />
+              <LeadersBoard title="Shooting Leaders" leaders={leaders.shooting} unit="%" />
             </div>
 
             <div>
@@ -350,7 +324,7 @@ export default function Statistics() {
               <label className="text-gray-400 text-sm">Sort by:</label>
               <select
                 value={sortBy}
-                onChange={e => handleSortChange(e.target.value)}
+                onChange={(e) => handleSortChange(e.target.value)}
                 className="bg-gray-700 border border-gray-600 rounded-md px-3 py-1 text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="avgPoints">Points</option>
@@ -366,15 +340,33 @@ export default function Statistics() {
             <table className="min-w-full divide-y divide-gray-700">
               <thead className="bg-gray-750">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Player</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Team</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">GP</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">PPG</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">RPG</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">APG</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">FG%</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">3P%</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">FT%</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    Player
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    Team
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    GP
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    PPG
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    RPG
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    APG
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    FG%
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    3P%
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    FT%
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-gray-800 divide-y divide-gray-700">
@@ -388,14 +380,30 @@ export default function Statistics() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{player.teamName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{player.gamesPlayed}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{player.avgPoints?.toFixed(1) || "0.0"}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{player.avgRebounds?.toFixed(1) || "0.0"}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{player.avgAssists?.toFixed(1) || "0.0"}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{player.fieldGoalPercentage?.toFixed(1) || "0.0"}%</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{player.threePointPercentage?.toFixed(1) || "0.0"}%</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{player.freeThrowPercentage?.toFixed(1) || "0.0"}%</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {player.teamName}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {player.gamesPlayed}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {player.avgPoints?.toFixed(1) || "0.0"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {player.avgRebounds?.toFixed(1) || "0.0"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {player.avgAssists?.toFixed(1) || "0.0"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {player.fieldGoalPercentage?.toFixed(1) || "0.0"}%
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {player.threePointPercentage?.toFixed(1) || "0.0"}%
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {player.freeThrowPercentage?.toFixed(1) || "0.0"}%
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -414,14 +422,30 @@ export default function Statistics() {
             <table className="min-w-full divide-y divide-gray-700">
               <thead className="bg-gray-750">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Team</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">W</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">L</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Win%</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">PPG</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">RPG</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">APG</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">FG%</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    Team
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    W
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    L
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    Win%
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    PPG
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    RPG
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    APG
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    FG%
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-gray-800 divide-y divide-gray-700">
@@ -435,13 +459,27 @@ export default function Statistics() {
                         <span className="text-white font-medium">{team.teamName}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.wins}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.losses}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.winPercentage?.toFixed(1) || "0.0"}%</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.avgPoints?.toFixed(1) || "0.0"}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.avgRebounds?.toFixed(1) || "0.0"}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.avgAssists?.toFixed(1) || "0.0"}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{team.fieldGoalPercentage?.toFixed(1) || "0.0"}%</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {team.wins}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {team.losses}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {team.winPercentage?.toFixed(1) || "0.0"}%
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {team.avgPoints?.toFixed(1) || "0.0"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {team.avgRebounds?.toFixed(1) || "0.0"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {team.avgAssists?.toFixed(1) || "0.0"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {team.fieldGoalPercentage?.toFixed(1) || "0.0"}%
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -491,20 +529,16 @@ export default function Statistics() {
               <PieChart>
                 <Pie
                   data={
-                    teamsData.teams
-                      ?.slice(0, 6)
-                      .map((team: any, index: number) => ({
-                        name: team.teamName,
-                        value: team.winPercentage || 0,
-                        fill: `hsl(${index * 60}, 70%, 50%)`,
-                      })) || []
+                    teamsData.teams?.slice(0, 6).map((team: any, index: number) => ({
+                      name: team.teamName,
+                      value: team.winPercentage || 0,
+                      fill: `hsl(${index * 60}, 70%, 50%)`,
+                    })) || []
                   }
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, value }) =>
-                    `${name}: ${(value ?? 0).toFixed(1)}%`
-                  }
+                  label={({ name, value }) => `${name}: ${(value ?? 0).toFixed(1)}%`}
                   outerRadius={80}
                   dataKey="value"
                 />
@@ -522,7 +556,9 @@ export default function Statistics() {
 
           {/* Top Players Performance Radar */}
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <h3 className="text-lg font-semibold text-white mb-4">Top Players Performance Comparison</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Top Players Performance Comparison
+            </h3>
             <ResponsiveContainer width="100%" height={400}>
               <RadarChart
                 data={[
@@ -560,10 +596,7 @@ export default function Statistics() {
               >
                 <PolarGrid stroke="#374151" />
                 {/* @ts-expect-error Recharts type compatibility with React 18 */}
-                <PolarAngleAxis
-                  dataKey="metric"
-                  tick={{ fontSize: 12, fill: "#9CA3AF" }}
-                />
+                <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fill: "#9CA3AF" }} />
                 <PolarRadiusAxis
                   angle={90}
                   domain={[0, "dataMax"]}

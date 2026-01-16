@@ -10,10 +10,7 @@ export default function ProfileScreen() {
   const { user, token, selectedLeague, userLeagues, logout, selectLeague } = useAuth();
 
   // Fetch user leagues from Convex
-  const leaguesData = useQuery(
-    api.leagues.list,
-    token ? { token } : "skip"
-  );
+  const leaguesData = useQuery(api.leagues.list, token ? { token } : "skip");
 
   const leagues = leaguesData?.leagues?.filter((l: any) => l.membership) || userLeagues;
 
@@ -73,14 +70,10 @@ export default function ProfileScreen() {
         {/* Current League */}
         {selectedLeague && (
           <View className="mb-8">
-            <Text className="text-lg font-bold text-white mb-4">
-              Current League
-            </Text>
+            <Text className="text-lg font-bold text-white mb-4">Current League</Text>
             <View className="bg-gray-800 rounded-xl p-4 flex-row justify-between items-center border border-gray-700">
               <View className="flex-1">
-                <Text className="text-base font-bold text-white mb-1">
-                  {selectedLeague.name}
-                </Text>
+                <Text className="text-base font-bold text-white mb-1">{selectedLeague.name}</Text>
                 <Text className="text-sm text-gray-400 capitalize">
                   {selectedLeague.leagueType}
                 </Text>
@@ -110,28 +103,20 @@ export default function ProfileScreen() {
           <Text className="text-lg font-bold text-white mb-4">My Leagues</Text>
           <View className="flex-row flex-wrap gap-3">
             <View className="bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-700">
-              <Text className="text-2xl font-bold text-red-500 mb-1">
-                {leagues.length}
-              </Text>
-              <Text className="text-xs text-gray-400 text-center">
-                Total Leagues
-              </Text>
+              <Text className="text-2xl font-bold text-red-500 mb-1">{leagues.length}</Text>
+              <Text className="text-xs text-gray-400 text-center">Total Leagues</Text>
             </View>
             <View className="bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-700">
               <Text className="text-2xl font-bold text-red-500 mb-1">
                 {leagues.filter((l: any) => l.membership?.role === "admin").length}
               </Text>
-              <Text className="text-xs text-gray-400 text-center">
-                As Admin
-              </Text>
+              <Text className="text-xs text-gray-400 text-center">As Admin</Text>
             </View>
             <View className="bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-700">
               <Text className="text-2xl font-bold text-red-500 mb-1">
                 {leagues.filter((l: any) => l.membership?.role === "coach").length}
               </Text>
-              <Text className="text-xs text-gray-400 text-center">
-                As Coach
-              </Text>
+              <Text className="text-xs text-gray-400 text-center">As Coach</Text>
             </View>
             <View className="bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-700">
               <Text className="text-2xl font-bold text-red-500 mb-1">

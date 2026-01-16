@@ -23,17 +23,15 @@ interface StatRowProps {
 
 function StatRow({ label, value, isHeader = false }: StatRowProps) {
   return (
-    <View className={`flex-row justify-between items-center px-4 py-3 border-b border-gray-600 ${
-      isHeader ? "bg-gray-600" : ""
-    }`}>
-      <Text className={`text-sm flex-1 ${
-        isHeader ? "text-white font-medium" : "text-gray-300"
-      }`}>
+    <View
+      className={`flex-row justify-between items-center px-4 py-3 border-b border-gray-600 ${
+        isHeader ? "bg-gray-600" : ""
+      }`}
+    >
+      <Text className={`text-sm flex-1 ${isHeader ? "text-white font-medium" : "text-gray-300"}`}>
         {label}
       </Text>
-      <Text className={`text-sm font-medium ${
-        isHeader ? "text-white font-bold" : "text-white"
-      }`}>
+      <Text className={`text-sm font-medium ${isHeader ? "text-white font-bold" : "text-white"}`}>
         {value}
       </Text>
     </View>
@@ -57,11 +55,7 @@ interface GameLogItemProps {
 
 function GameLogItem({ game }: GameLogItemProps) {
   const resultColorClass =
-    game.result === "W"
-      ? "text-green-400"
-      : game.result === "L"
-      ? "text-red-400"
-      : "text-gray-500";
+    game.result === "W" ? "text-green-400" : game.result === "L" ? "text-red-400" : "text-gray-500";
 
   return (
     <View className="bg-gray-700 rounded-lg p-4 mb-2">
@@ -70,9 +64,7 @@ function GameLogItem({ game }: GameLogItemProps) {
           {game.homeGame ? "vs" : "@"} {game.opponent}
         </Text>
         <View className="w-6 h-6 rounded-xl justify-center items-center">
-          <Text className={`text-xs font-bold ${resultColorClass}`}>
-            {game.result}
-          </Text>
+          <Text className={`text-xs font-bold ${resultColorClass}`}>{game.result}</Text>
         </View>
       </View>
       <View className="flex-row justify-around">
@@ -105,9 +97,7 @@ function GameLogItem({ game }: GameLogItemProps) {
 
 type PlayerStatisticsScreenProps = NativeStackScreenProps<RootStackParamList, "PlayerStatistics">;
 
-export default function PlayerStatisticsScreen({
-  route,
-}: PlayerStatisticsScreenProps) {
+export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreenProps) {
   const { playerId, playerName } = route.params;
   const { token, selectedLeague } = useAuth();
   const [activeTab, setActiveTab] = useState<"season" | "games">("season");
@@ -150,7 +140,17 @@ export default function PlayerStatisticsScreen({
 
   const stats = playerStats.stats;
   // Note: recentGames would need a separate endpoint if needed
-  const recentGames: Array<{gameId: string; gameDate?: string; opponent: string; homeGame: boolean; result: "W" | "L" | "N/A"; points: number; rebounds: number; assists: number; minutesPlayed: number;}> = [];
+  const recentGames: Array<{
+    gameId: string;
+    gameDate?: string;
+    opponent: string;
+    homeGame: boolean;
+    result: "W" | "L" | "N/A";
+    points: number;
+    rebounds: number;
+    assists: number;
+    minutesPlayed: number;
+  }> = [];
 
   return (
     <View className="flex-1 bg-gray-800">
@@ -160,9 +160,7 @@ export default function PlayerStatisticsScreen({
         <Text className="text-orange-500 text-base font-medium mb-0.5">
           {stats.team || "Unknown Team"}
         </Text>
-        <Text className="text-gray-400 text-sm">
-          {stats.position || ""}
-        </Text>
+        <Text className="text-gray-400 text-sm">{stats.position || ""}</Text>
       </View>
 
       {/* Tab Navigation */}
@@ -199,9 +197,7 @@ export default function PlayerStatisticsScreen({
 
       <ScrollView
         className="flex-1"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Season Stats Tab */}
         {activeTab === "season" && stats && (
@@ -210,35 +206,13 @@ export default function PlayerStatisticsScreen({
             <View className="mb-6">
               <Text className="text-white text-lg font-bold mb-3">Basic Statistics</Text>
               <View className="bg-gray-700 rounded-lg overflow-hidden">
-                <StatRow
-                  label="Games Played"
-                  value={stats.gamesPlayed || 0}
-                  isHeader
-                />
-                <StatRow
-                  label="Points per Game"
-                  value={stats.avgPoints?.toFixed(1) || "0.0"}
-                />
-                <StatRow
-                  label="Rebounds per Game"
-                  value={stats.avgRebounds?.toFixed(1) || "0.0"}
-                />
-                <StatRow
-                  label="Assists per Game"
-                  value={stats.avgAssists?.toFixed(1) || "0.0"}
-                />
-                <StatRow
-                  label="Steals per Game"
-                  value={stats.avgSteals?.toFixed(1) || "0.0"}
-                />
-                <StatRow
-                  label="Blocks per Game"
-                  value={stats.avgBlocks?.toFixed(1) || "0.0"}
-                />
-                <StatRow
-                  label="Minutes per Game"
-                  value={stats.avgMinutes?.toFixed(1) || "0.0"}
-                />
+                <StatRow label="Games Played" value={stats.gamesPlayed || 0} isHeader />
+                <StatRow label="Points per Game" value={stats.avgPoints?.toFixed(1) || "0.0"} />
+                <StatRow label="Rebounds per Game" value={stats.avgRebounds?.toFixed(1) || "0.0"} />
+                <StatRow label="Assists per Game" value={stats.avgAssists?.toFixed(1) || "0.0"} />
+                <StatRow label="Steals per Game" value={stats.avgSteals?.toFixed(1) || "0.0"} />
+                <StatRow label="Blocks per Game" value={stats.avgBlocks?.toFixed(1) || "0.0"} />
+                <StatRow label="Minutes per Game" value={stats.avgMinutes?.toFixed(1) || "0.0"} />
               </View>
             </View>
 
@@ -274,27 +248,11 @@ export default function PlayerStatisticsScreen({
             <View className="mb-6">
               <Text className="text-white text-lg font-bold mb-3">Season Totals</Text>
               <View className="bg-gray-700 rounded-lg overflow-hidden">
-                <StatRow
-                  label="Total Points"
-                  value={stats.totalPoints || 0}
-                  isHeader
-                />
-                <StatRow
-                  label="Total Rebounds"
-                  value={stats.totalRebounds || 0}
-                />
-                <StatRow
-                  label="Total Assists"
-                  value={stats.totalAssists || 0}
-                />
-                <StatRow
-                  label="Total Minutes"
-                  value={Math.round(stats.totalMinutes || 0)}
-                />
-                <StatRow
-                  label="Field Goals Made"
-                  value={stats.totalFieldGoalsMade || 0}
-                />
+                <StatRow label="Total Points" value={stats.totalPoints || 0} isHeader />
+                <StatRow label="Total Rebounds" value={stats.totalRebounds || 0} />
+                <StatRow label="Total Assists" value={stats.totalAssists || 0} />
+                <StatRow label="Total Minutes" value={Math.round(stats.totalMinutes || 0)} />
+                <StatRow label="Field Goals Made" value={stats.totalFieldGoalsMade || 0} />
                 <StatRow
                   label="Field Goals Attempted"
                   value={stats.totalFieldGoalsAttempted || 0}

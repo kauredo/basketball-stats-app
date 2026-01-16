@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-  Alert,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert } from "react-native";
 import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
@@ -18,10 +11,7 @@ import Icon from "../components/Icon";
 import { RootStackParamList } from "../navigation/AppNavigator";
 
 type PlayerStatsRouteProp = RouteProp<RootStackParamList, "PlayerStats">;
-type PlayerStatsNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "PlayerStats"
->;
+type PlayerStatsNavigationProp = NativeStackNavigationProp<RootStackParamList, "PlayerStats">;
 
 interface StatCategory {
   title: string;
@@ -39,16 +29,12 @@ export default function PlayerStatsScreen() {
   const { token, selectedLeague } = useAuth();
 
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState<"season" | "recent">(
-    "season"
-  );
+  const [selectedPeriod, setSelectedPeriod] = useState<"season" | "recent">("season");
 
   // Fetch player data from Convex
   const playerData = useQuery(
     api.players.get,
-    token && playerId
-      ? { token, playerId: playerId as unknown as Id<"players"> }
-      : "skip"
+    token && playerId ? { token, playerId: playerId as unknown as Id<"players"> } : "skip"
   );
 
   // Fetch player season stats
@@ -160,7 +146,10 @@ export default function PlayerStatsScreen() {
       <View className="mt-2">
         <Text className="text-white text-lg font-bold mb-3">Recent Games</Text>
         {recentGames.slice(0, 5).map((game: any, index: number) => (
-          <View key={game.gameId || index} className="bg-gray-800 rounded-lg p-3 mb-2 border border-gray-700">
+          <View
+            key={game.gameId || index}
+            className="bg-gray-800 rounded-lg p-3 mb-2 border border-gray-700"
+          >
             <View className="flex-row justify-between items-center mb-2">
               <Text className="text-gray-400 text-xs">
                 {game.gameDate ? new Date(game.gameDate).toLocaleDateString() : ""}
@@ -225,7 +214,8 @@ export default function PlayerStatsScreen() {
           <View className="flex-1">
             <Text className="text-white text-xl font-bold">{player.name}</Text>
             <Text className="text-gray-400 text-sm mt-0.5">
-              {player.position} {player.heightCm ? `• ${player.heightCm}cm` : ""} {player.weightKg ? `• ${player.weightKg}kg` : ""}
+              {player.position} {player.heightCm ? `• ${player.heightCm}cm` : ""}{" "}
+              {player.weightKg ? `• ${player.weightKg}kg` : ""}
             </Text>
             <Text className="text-green-400 text-sm font-semibold mt-1">{player.team?.name}</Text>
           </View>
@@ -266,12 +256,10 @@ export default function PlayerStatsScreen() {
 
       <ScrollView
         className="flex-1 p-4"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Stats Cards */}
-        {statCategories.map(category => renderStatCard(category))}
+        {statCategories.map((category) => renderStatCard(category))}
 
         {/* Recent Games */}
         {renderRecentGames()}

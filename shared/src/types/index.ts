@@ -388,21 +388,11 @@ export interface DashboardData {
 // Enums
 export type UserRole = "admin" | "user";
 
-export type LeagueType =
-  | "professional"
-  | "college"
-  | "high_school"
-  | "youth"
-  | "recreational";
+export type LeagueType = "professional" | "college" | "high_school" | "youth" | "recreational";
 
 export type LeagueStatus = "draft" | "active" | "completed" | "archived";
 
-export type LeagueRole =
-  | "admin"
-  | "coach"
-  | "scorekeeper"
-  | "member"
-  | "viewer";
+export type LeagueRole = "admin" | "coach" | "scorekeeper" | "member" | "viewer";
 
 export type MembershipStatus = "pending" | "active" | "suspended" | "removed";
 

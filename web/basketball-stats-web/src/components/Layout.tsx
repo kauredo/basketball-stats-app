@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import Icon from './Icon';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import Icon from "./Icon";
 import {
   HomeIcon,
   TrophyIcon,
@@ -12,18 +12,18 @@ import {
   UserIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: HomeIcon },
-  { name: 'Statistics', href: '/statistics', icon: ChartBarIcon },
-  { name: 'Games', href: '/games', icon: TrophyIcon },
-  { name: 'Teams', href: '/teams', icon: UserGroupIcon },
-  { name: 'Players', href: '/players', icon: UsersIcon },
+  { name: "Dashboard", href: "/", icon: HomeIcon },
+  { name: "Statistics", href: "/statistics", icon: ChartBarIcon },
+  { name: "Games", href: "/games", icon: TrophyIcon },
+  { name: "Teams", href: "/teams", icon: UserGroupIcon },
+  { name: "Players", href: "/players", icon: UsersIcon },
 ];
 
 export default function Layout({ children }: LayoutProps) {
@@ -43,18 +43,18 @@ export default function Layout({ children }: LayoutProps) {
         <div className="flex h-16 shrink-0 items-center px-6">
           <div className="flex items-center">
             <Icon name="basketball" size={24} className="mr-2 text-orange-600" />
-            <span className="text-lg font-bold text-white">
-              Basketball Stats
-            </span>
+            <span className="text-lg font-bold text-white">Basketball Stats</span>
           </div>
         </div>
-        
+
         {/* League info */}
         {selectedLeague && (
           <div className="px-6 py-3 border-b border-gray-700">
             <div className="text-xs text-gray-400 uppercase tracking-wide">Current League</div>
             <div className="text-sm font-medium text-white mt-1">{selectedLeague.name}</div>
-            <div className="text-xs text-gray-400">{selectedLeague.leagueType} • {selectedLeague.season}</div>
+            <div className="text-xs text-gray-400">
+              {selectedLeague.leagueType} • {selectedLeague.season}
+            </div>
           </div>
         )}
         <nav className="mt-6">
@@ -67,13 +67,13 @@ export default function Layout({ children }: LayoutProps) {
                     to={item.href}
                     className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors ${
                       isActive
-                        ? 'bg-orange-600 text-white'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                        ? "bg-orange-600 text-white"
+                        : "text-gray-300 hover:text-white hover:bg-gray-700"
                     }`}
                   >
                     <item.icon
                       className={`h-6 w-6 shrink-0 ${
-                        isActive ? 'text-white' : 'text-gray-400 group-hover:text-white'
+                        isActive ? "text-white" : "text-gray-400 group-hover:text-white"
                       }`}
                       aria-hidden="true"
                     />
@@ -84,7 +84,7 @@ export default function Layout({ children }: LayoutProps) {
             })}
           </ul>
         </nav>
-        
+
         {/* User menu at bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
           <div className="relative">
@@ -95,21 +95,20 @@ export default function Layout({ children }: LayoutProps) {
               <div className="flex items-center">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600">
                   <span className="text-sm font-medium text-white">
-                    {user?.firstName?.[0]}{user?.lastName?.[0]}
+                    {user?.firstName?.[0]}
+                    {user?.lastName?.[0]}
                   </span>
                 </div>
                 <div className="ml-3">
                   <div className="text-sm font-medium text-white">
                     {user?.firstName} {user?.lastName}
                   </div>
-                  <div className="text-xs text-gray-400">
-                    {selectedLeague?.role || 'Member'}
-                  </div>
+                  <div className="text-xs text-gray-400">{selectedLeague?.role || "Member"}</div>
                 </div>
               </div>
               <ChevronDownIcon className="h-5 w-5 text-gray-400" />
             </button>
-            
+
             {showUserMenu && (
               <div className="absolute bottom-full left-0 right-0 mb-2 rounded-md bg-gray-700 py-1 shadow-lg ring-1 ring-black ring-opacity-5">
                 <Link
@@ -148,30 +147,23 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             <div className="flex items-center">
               <h1 className="text-2xl font-bold text-white">
-                {selectedLeague?.name || 'Basketball Stats'}
+                {selectedLeague?.name || "Basketball Stats"}
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-300">
-                Welcome back, {user?.firstName}!
-              </span>
+              <span className="text-sm text-gray-300">Welcome back, {user?.firstName}!</span>
             </div>
           </div>
         </div>
-        
+
         <main className="py-6">
-          <div className="px-4 sm:px-6 lg:px-8">
-            {children}
-          </div>
+          <div className="px-4 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>
-      
+
       {/* Click outside to close user menu */}
       {showUserMenu && (
-        <div 
-          className="fixed inset-0 z-30" 
-          onClick={() => setShowUserMenu(false)}
-        />
+        <div className="fixed inset-0 z-30" onClick={() => setShowUserMenu(false)} />
       )}
     </div>
   );

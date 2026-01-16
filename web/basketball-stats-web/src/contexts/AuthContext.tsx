@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
 import { useMutation, useConvex } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -44,8 +51,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const TOKEN_KEY = 'basketball_convex_token';
-const LEAGUE_KEY = 'basketball_selected_league';
+const TOKEN_KEY = "basketball_convex_token";
+const LEAGUE_KEY = "basketball_selected_league";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -102,31 +109,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initialize();
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const result = await loginMutation({ email, password });
-    setUser({
-      id: result.user.id,
-      email: result.user.email,
-      firstName: result.user.firstName,
-      lastName: result.user.lastName,
-      role: result.user.role,
-    });
-    setToken(result.tokens.accessToken);
-    localStorage.setItem(TOKEN_KEY, result.tokens.accessToken);
-  }, [loginMutation]);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const result = await loginMutation({ email, password });
+      setUser({
+        id: result.user.id,
+        email: result.user.email,
+        firstName: result.user.firstName,
+        lastName: result.user.lastName,
+        role: result.user.role,
+      });
+      setToken(result.tokens.accessToken);
+      localStorage.setItem(TOKEN_KEY, result.tokens.accessToken);
+    },
+    [loginMutation]
+  );
 
-  const signup = useCallback(async (email: string, password: string, firstName: string, lastName: string) => {
-    const result = await signupMutation({ email, password, passwordConfirmation: password, firstName, lastName });
-    setUser({
-      id: result.user.id,
-      email: result.user.email,
-      firstName: result.user.firstName,
-      lastName: result.user.lastName,
-      role: result.user.role,
-    });
-    setToken(result.tokens.accessToken);
-    localStorage.setItem(TOKEN_KEY, result.tokens.accessToken);
-  }, [signupMutation]);
+  const signup = useCallback(
+    async (email: string, password: string, firstName: string, lastName: string) => {
+      const result = await signupMutation({
+        email,
+        password,
+        passwordConfirmation: password,
+        firstName,
+        lastName,
+      });
+      setUser({
+        id: result.user.id,
+        email: result.user.email,
+        firstName: result.user.firstName,
+        lastName: result.user.lastName,
+        role: result.user.role,
+      });
+      setToken(result.tokens.accessToken);
+      localStorage.setItem(TOKEN_KEY, result.tokens.accessToken);
+    },
+    [signupMutation]
+  );
 
   const logout = useCallback(async () => {
     if (token) {
@@ -152,15 +171,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const forgotPassword = useCallback(async (email: string) => {
-    setError(null);
-    try {
-      await requestPasswordResetMutation({ email });
-    } catch (err: any) {
-      setError(err.message || 'Failed to send reset email');
-      throw err;
-    }
-  }, [requestPasswordResetMutation]);
+  const forgotPassword = useCallback(
+    async (email: string) => {
+      setError(null);
+      try {
+        await requestPasswordResetMutation({ email });
+      } catch (err: any) {
+        setError(err.message || "Failed to send reset email");
+        throw err;
+      }
+    },
+    [requestPasswordResetMutation]
+  );
 
   const clearError = useCallback(() => {
     setError(null);
@@ -182,17 +204,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initialize,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

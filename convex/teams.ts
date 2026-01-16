@@ -25,9 +25,7 @@ export const list = query({
         // Get active players count
         const players = await ctx.db
           .query("players")
-          .withIndex("by_team_active", (q) =>
-            q.eq("teamId", team._id).eq("active", true)
-          )
+          .withIndex("by_team_active", (q) => q.eq("teamId", team._id).eq("active", true))
           .collect();
 
         // Get completed games for win/loss record
@@ -202,9 +200,7 @@ export const create = mutation({
     // Check for duplicate team name in league
     const existingTeam = await ctx.db
       .query("teams")
-      .withIndex("by_name_league", (q) =>
-        q.eq("leagueId", args.leagueId).eq("name", args.name)
-      )
+      .withIndex("by_name_league", (q) => q.eq("leagueId", args.leagueId).eq("name", args.name))
       .first();
 
     if (existingTeam) {
@@ -263,9 +259,7 @@ export const update = mutation({
       const newName = args.name;
       const existingTeam = await ctx.db
         .query("teams")
-        .withIndex("by_name_league", (q) =>
-          q.eq("leagueId", team.leagueId).eq("name", newName)
-        )
+        .withIndex("by_name_league", (q) => q.eq("leagueId", team.leagueId).eq("name", newName))
         .first();
 
       if (existingTeam) {

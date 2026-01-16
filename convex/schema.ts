@@ -102,13 +102,7 @@ export default defineSchema({
     name: v.string(),
     number: v.number(),
     position: v.optional(
-      v.union(
-        v.literal("PG"),
-        v.literal("SG"),
-        v.literal("SF"),
-        v.literal("PF"),
-        v.literal("C")
-      )
+      v.union(v.literal("PG"), v.literal("SG"), v.literal("SF"), v.literal("PF"), v.literal("C"))
     ),
     heightCm: v.optional(v.number()),
     weightKg: v.optional(v.number()),

@@ -1,12 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
-import {
-  getUserFromToken,
-  canAccessLeague,
-  canManageLeague,
-  generateToken,
-} from "./lib/auth";
+import { getUserFromToken, canAccessLeague, canManageLeague, generateToken } from "./lib/auth";
 
 // List leagues (user's leagues + public leagues)
 export const list = query({
@@ -74,9 +69,7 @@ export const list = query({
 
         const members = await ctx.db
           .query("leagueMemberships")
-          .withIndex("by_league_status", (q) =>
-            q.eq("leagueId", league._id).eq("status", "active")
-          )
+          .withIndex("by_league_status", (q) => q.eq("leagueId", league._id).eq("status", "active"))
           .collect();
 
         const games = await ctx.db
@@ -147,9 +140,7 @@ export const get = query({
 
     const members = await ctx.db
       .query("leagueMemberships")
-      .withIndex("by_league_status", (q) =>
-        q.eq("leagueId", league._id).eq("status", "active")
-      )
+      .withIndex("by_league_status", (q) => q.eq("leagueId", league._id).eq("status", "active"))
       .collect();
 
     const games = await ctx.db
@@ -160,9 +151,7 @@ export const get = query({
     // Get user's membership
     const membership = await ctx.db
       .query("leagueMemberships")
-      .withIndex("by_user_league", (q) =>
-        q.eq("userId", user._id).eq("leagueId", league._id)
-      )
+      .withIndex("by_user_league", (q) => q.eq("userId", user._id).eq("leagueId", league._id))
       .first();
 
     return {
@@ -191,9 +180,7 @@ export const get = query({
               status: membership.status,
               joinedAt: membership.joinedAt,
               canManageTeams: ["admin", "coach"].includes(membership.role),
-              canRecordStats: ["admin", "coach", "scorekeeper"].includes(
-                membership.role
-              ),
+              canRecordStats: ["admin", "coach", "scorekeeper"].includes(membership.role),
               canViewAnalytics: ["admin", "coach"].includes(membership.role),
               canManageLeague: membership.role === "admin",
             }
@@ -392,13 +379,7 @@ export const join = mutation({
   args: {
     token: v.string(),
     leagueId: v.id("leagues"),
-    role: v.optional(
-      v.union(
-        v.literal("member"),
-        v.literal("viewer"),
-        v.literal("scorekeeper")
-      )
-    ),
+    role: v.optional(v.union(v.literal("member"), v.literal("viewer"), v.literal("scorekeeper"))),
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
@@ -410,9 +391,7 @@ export const join = mutation({
     // Check if already a member
     const existingMembership = await ctx.db
       .query("leagueMemberships")
-      .withIndex("by_user_league", (q) =>
-        q.eq("userId", user._id).eq("leagueId", args.leagueId)
-      )
+      .withIndex("by_user_league", (q) => q.eq("userId", user._id).eq("leagueId", args.leagueId))
       .first();
 
     if (existingMembership) {
@@ -466,9 +445,7 @@ export const joinByCode = mutation({
     // Check if already a member
     const existingMembership = await ctx.db
       .query("leagueMemberships")
-      .withIndex("by_user_league", (q) =>
-        q.eq("userId", user._id).eq("leagueId", league._id)
-      )
+      .withIndex("by_user_league", (q) => q.eq("userId", user._id).eq("leagueId", league._id))
       .first();
 
     if (existingMembership) {
@@ -522,9 +499,7 @@ export const leave = mutation({
 
     const membership = await ctx.db
       .query("leagueMemberships")
-      .withIndex("by_user_league", (q) =>
-        q.eq("userId", user._id).eq("leagueId", args.leagueId)
-      )
+      .withIndex("by_user_league", (q) => q.eq("userId", user._id).eq("leagueId", args.leagueId))
       .first();
 
     if (!membership) {
@@ -573,9 +548,7 @@ export const getMembers = query({
             : null,
           permissions: {
             canManageTeams: ["admin", "coach"].includes(membership.role),
-            canRecordStats: ["admin", "coach", "scorekeeper"].includes(
-              membership.role
-            ),
+            canRecordStats: ["admin", "coach", "scorekeeper"].includes(membership.role),
             canViewAnalytics: ["admin", "coach"].includes(membership.role),
             canManageLeague: membership.role === "admin",
           },

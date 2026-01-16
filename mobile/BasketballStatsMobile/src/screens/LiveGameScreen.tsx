@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  SafeAreaView,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert, SafeAreaView } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
@@ -59,21 +52,15 @@ export default function LiveGameScreen() {
   const { token } = useAuth();
   const gameId = route.params.gameId as Id<"games">;
 
-  const [activeTab, setActiveTab] = React.useState<
-    "scoreboard" | "stats" | "substitutions"
-  >("scoreboard");
+  const [activeTab, setActiveTab] = React.useState<"scoreboard" | "stats" | "substitutions">(
+    "scoreboard"
+  );
 
   // Real-time game data from Convex
-  const gameData = useQuery(
-    api.games.get,
-    token && gameId ? { token, gameId } : "skip"
-  );
+  const gameData = useQuery(api.games.get, token && gameId ? { token, gameId } : "skip");
 
   // Real-time player stats from Convex
-  const liveStats = useQuery(
-    api.stats.getLiveStats,
-    token && gameId ? { token, gameId } : "skip"
-  );
+  const liveStats = useQuery(api.stats.getLiveStats, token && gameId ? { token, gameId } : "skip");
 
   // Mutations
   const startGame = useMutation(api.games.start);
@@ -121,11 +108,7 @@ export default function LiveGameScreen() {
     }
   };
 
-  const handleRecordStat = async (
-    playerId: Id<"players">,
-    statType: string,
-    made?: boolean
-  ) => {
+  const handleRecordStat = async (playerId: Id<"players">, statType: string, made?: boolean) => {
     if (!token) return;
 
     try {
@@ -158,11 +141,7 @@ export default function LiveGameScreen() {
     }
   };
 
-  const renderScoreCard = (
-    teamName: string,
-    score: number,
-    team: "home" | "away"
-  ) => (
+  const renderScoreCard = (teamName: string, score: number, team: "home" | "away") => (
     <View className="flex-1 items-center">
       <Text className="text-white text-lg font-bold mb-2">{teamName}</Text>
       <Text className="text-primary-500 text-5xl font-bold mb-4">{score}</Text>
@@ -274,14 +253,10 @@ export default function LiveGameScreen() {
           <Text className="text-white text-base font-bold">
             #{player.number} {player.name}
           </Text>
-          <Text className="text-gray-400 text-sm">
-            {player.position || "N/A"}
-          </Text>
+          <Text className="text-gray-400 text-sm">{player.position || "N/A"}</Text>
         </View>
         <View
-          className={`px-3 py-2 rounded ${
-            playerStat.isOnCourt ? "bg-green-600" : "bg-gray-600"
-          }`}
+          className={`px-3 py-2 rounded ${playerStat.isOnCourt ? "bg-green-600" : "bg-gray-600"}`}
         >
           <Text className="text-white text-sm font-semibold">
             {playerStat.isOnCourt ? "On Court" : "Bench"}
@@ -306,12 +281,8 @@ export default function LiveGameScreen() {
       <SafeAreaView className="flex-1 bg-dark-950">
         <View className="flex-1 justify-center items-center">
           <Icon name="basketball" size={48} color="#9CA3AF" />
-          <Text className="text-white text-lg font-semibold mt-4 mb-2">
-            Game not found
-          </Text>
-          <Text className="text-gray-400 text-center">
-            The requested game could not be found.
-          </Text>
+          <Text className="text-white text-lg font-semibold mt-4 mb-2">Game not found</Text>
+          <Text className="text-gray-400 text-center">The requested game could not be found.</Text>
         </View>
       </SafeAreaView>
     );
@@ -330,9 +301,7 @@ export default function LiveGameScreen() {
 
       {/* Header */}
       <View className="px-4 pt-2 pb-4">
-        <Text className="text-white text-xl font-bold text-center mb-1">
-          Live Game Control
-        </Text>
+        <Text className="text-white text-xl font-bold text-center mb-1">Live Game Control</Text>
         <Text className="text-gray-400 text-center">
           {game.awayTeam?.name || "Away"} @ {game.homeTeam?.name || "Home"}
         </Text>
@@ -342,11 +311,7 @@ export default function LiveGameScreen() {
       <View className="bg-gray-800 mx-4 rounded-xl p-4 mb-4 border border-gray-700">
         <View className="flex-row items-center">
           {/* Away Team */}
-          {renderScoreCard(
-            game.awayTeam?.name || "Away",
-            game.awayScore,
-            "away"
-          )}
+          {renderScoreCard(game.awayTeam?.name || "Away", game.awayScore, "away")}
 
           {/* Game Clock and Controls */}
           <View className="flex-1 items-center mx-4">
@@ -399,11 +364,7 @@ export default function LiveGameScreen() {
           </View>
 
           {/* Home Team */}
-          {renderScoreCard(
-            game.homeTeam?.name || "Home",
-            game.homeScore,
-            "home"
-          )}
+          {renderScoreCard(game.homeTeam?.name || "Home", game.homeScore, "home")}
         </View>
       </View>
 
@@ -425,9 +386,7 @@ export default function LiveGameScreen() {
               />
               <Text
                 className={`text-xs mt-1 ${
-                  activeTab === tab.key
-                    ? "text-white font-semibold"
-                    : "text-gray-400"
+                  activeTab === tab.key ? "text-white font-semibold" : "text-gray-400"
                 }`}
               >
                 {tab.label}
@@ -441,14 +400,10 @@ export default function LiveGameScreen() {
       <ScrollView className="flex-1 px-4">
         {activeTab === "scoreboard" && (
           <View className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-            <Text className="text-white text-lg font-bold mb-4">
-              Game Summary
-            </Text>
+            <Text className="text-white text-lg font-bold mb-4">Game Summary</Text>
             <View className="space-y-4">
               <View>
-                <Text className="text-white font-semibold mb-2">
-                  Game Status
-                </Text>
+                <Text className="text-white font-semibold mb-2">Game Status</Text>
                 <View className="flex-row justify-between items-center py-1">
                   <Text className="text-gray-400">Status:</Text>
                   <Text
@@ -456,17 +411,17 @@ export default function LiveGameScreen() {
                       isGameActive
                         ? "text-green-400"
                         : isGamePaused
-                        ? "text-yellow-400"
-                        : "text-gray-400"
+                          ? "text-yellow-400"
+                          : "text-gray-400"
                     }`}
                   >
                     {isGameActive
                       ? "Live"
                       : isGamePaused
-                      ? "Paused"
-                      : game.status === "completed"
-                      ? "Final"
-                      : "Not Started"}
+                        ? "Paused"
+                        : game.status === "completed"
+                          ? "Final"
+                          : "Not Started"}
                   </Text>
                 </View>
                 <View className="flex-row justify-between items-center py-1">
@@ -482,24 +437,14 @@ export default function LiveGameScreen() {
               </View>
 
               <View>
-                <Text className="text-white font-semibold mb-2">
-                  Score Summary
-                </Text>
+                <Text className="text-white font-semibold mb-2">Score Summary</Text>
                 <View className="flex-row justify-between items-center py-1">
-                  <Text className="text-gray-400">
-                    {game.awayTeam?.name || "Away"}:
-                  </Text>
-                  <Text className="text-white font-bold text-lg">
-                    {game.awayScore}
-                  </Text>
+                  <Text className="text-gray-400">{game.awayTeam?.name || "Away"}:</Text>
+                  <Text className="text-white font-bold text-lg">{game.awayScore}</Text>
                 </View>
                 <View className="flex-row justify-between items-center py-1">
-                  <Text className="text-gray-400">
-                    {game.homeTeam?.name || "Home"}:
-                  </Text>
-                  <Text className="text-white font-bold text-lg">
-                    {game.homeScore}
-                  </Text>
+                  <Text className="text-gray-400">{game.homeTeam?.name || "Home"}:</Text>
+                  <Text className="text-white font-bold text-lg">{game.homeScore}</Text>
                 </View>
                 <View className="flex-row justify-between items-center py-2 border-t border-gray-600 mt-2">
                   <Text className="text-gray-400">Lead:</Text>

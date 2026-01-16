@@ -1,9 +1,9 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
-import { useAuth } from '../contexts/AuthContext';
-import { Id } from '../../../../convex/_generated/dataModel';
+import React from "react";
+import { useParams } from "react-router-dom";
+import { useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { useAuth } from "../contexts/AuthContext";
+import { Id } from "../../../../convex/_generated/dataModel";
 
 const GameAnalysis: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -11,9 +11,7 @@ const GameAnalysis: React.FC = () => {
 
   const gameData = useQuery(
     api.games.get,
-    token && gameId
-      ? { token, gameId: gameId as Id<"games"> }
-      : "skip"
+    token && gameId ? { token, gameId: gameId as Id<"games"> } : "skip"
   );
 
   if (gameData === undefined) {
@@ -42,9 +40,8 @@ const GameAnalysis: React.FC = () => {
           Post-game analysis for {game.awayTeam?.name} @ {game.homeTeam?.name}
         </p>
         <p className="text-orange-400 mt-2">
-          This is a placeholder for the game analysis page.
-          Full implementation would include detailed statistics,
-          performance metrics, and analytical insights.
+          This is a placeholder for the game analysis page. Full implementation would include
+          detailed statistics, performance metrics, and analytical insights.
         </p>
       </div>
     </div>

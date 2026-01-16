@@ -26,9 +26,7 @@ export const list = query({
       if (args.activeOnly) {
         players = await ctx.db
           .query("players")
-          .withIndex("by_team_active", (q) =>
-            q.eq("teamId", args.teamId!).eq("active", true)
-          )
+          .withIndex("by_team_active", (q) => q.eq("teamId", args.teamId!).eq("active", true))
           .collect();
       } else {
         players = await ctx.db
@@ -54,9 +52,7 @@ export const list = query({
           if (args.activeOnly) {
             return ctx.db
               .query("players")
-              .withIndex("by_team_active", (q) =>
-                q.eq("teamId", teamId).eq("active", true)
-              )
+              .withIndex("by_team_active", (q) => q.eq("teamId", teamId).eq("active", true))
               .collect();
           }
           return ctx.db
@@ -135,10 +131,7 @@ export const list = query({
           const today = new Date();
           age = today.getFullYear() - birthDate.getFullYear();
           const monthDiff = today.getMonth() - birthDate.getMonth();
-          if (
-            monthDiff < 0 ||
-            (monthDiff === 0 && today.getDate() < birthDate.getDate())
-          ) {
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
             age--;
           }
         }
@@ -266,20 +259,15 @@ export const get = query({
         blocks: Math.round((totals.blocks / gamesPlayed) * 10) / 10,
         turnovers: Math.round((totals.turnovers / gamesPlayed) * 10) / 10,
         fouls: Math.round((totals.fouls / gamesPlayed) * 10) / 10,
-        minutesPlayed:
-          Math.round((totals.minutesPlayed / gamesPlayed) * 10) / 10,
+        minutesPlayed: Math.round((totals.minutesPlayed / gamesPlayed) * 10) / 10,
         fieldGoalPercentage:
-          totals.fgAttempted > 0
-            ? Math.round((totals.fgMade / totals.fgAttempted) * 1000) / 10
-            : 0,
+          totals.fgAttempted > 0 ? Math.round((totals.fgMade / totals.fgAttempted) * 1000) / 10 : 0,
         threePointPercentage:
           totals.threeAttempted > 0
             ? Math.round((totals.threeMade / totals.threeAttempted) * 1000) / 10
             : 0,
         freeThrowPercentage:
-          totals.ftAttempted > 0
-            ? Math.round((totals.ftMade / totals.ftAttempted) * 1000) / 10
-            : 0,
+          totals.ftAttempted > 0 ? Math.round((totals.ftMade / totals.ftAttempted) * 1000) / 10 : 0,
       };
     }
 
@@ -290,10 +278,7 @@ export const get = query({
       const today = new Date();
       age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < birthDate.getDate())
-      ) {
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
         age--;
       }
     }
@@ -330,13 +315,7 @@ export const create = mutation({
     name: v.string(),
     number: v.number(),
     position: v.optional(
-      v.union(
-        v.literal("PG"),
-        v.literal("SG"),
-        v.literal("SF"),
-        v.literal("PF"),
-        v.literal("C")
-      )
+      v.union(v.literal("PG"), v.literal("SG"), v.literal("SF"), v.literal("PF"), v.literal("C"))
     ),
     heightCm: v.optional(v.number()),
     weightKg: v.optional(v.number()),
@@ -358,9 +337,7 @@ export const create = mutation({
     // Check for duplicate jersey number on team
     const existingPlayer = await ctx.db
       .query("players")
-      .withIndex("by_team_number", (q) =>
-        q.eq("teamId", args.teamId).eq("number", args.number)
-      )
+      .withIndex("by_team_number", (q) => q.eq("teamId", args.teamId).eq("number", args.number))
       .first();
 
     if (existingPlayer) {
@@ -405,13 +382,7 @@ export const update = mutation({
     name: v.optional(v.string()),
     number: v.optional(v.number()),
     position: v.optional(
-      v.union(
-        v.literal("PG"),
-        v.literal("SG"),
-        v.literal("SF"),
-        v.literal("PF"),
-        v.literal("C")
-      )
+      v.union(v.literal("PG"), v.literal("SG"), v.literal("SF"), v.literal("PF"), v.literal("C"))
     ),
     heightCm: v.optional(v.number()),
     weightKg: v.optional(v.number()),
@@ -505,9 +476,7 @@ export const remove = mutation({
       .first();
 
     if (stats) {
-      throw new Error(
-        "Cannot delete player with game statistics. Set inactive instead."
-      );
+      throw new Error("Cannot delete player with game statistics. Set inactive instead.");
     }
 
     await ctx.db.delete(args.playerId);

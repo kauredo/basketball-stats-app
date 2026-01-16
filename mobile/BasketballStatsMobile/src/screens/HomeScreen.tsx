@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
@@ -55,9 +49,7 @@ export default function HomeScreen() {
   const liveGames = games.filter(
     (game: Game) => game.status === "active" || game.status === "paused"
   );
-  const recentGames = games
-    .filter((game: Game) => game.status === "completed")
-    .slice(0, 5);
+  const recentGames = games.filter((game: Game) => game.status === "completed").slice(0, 5);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -117,18 +109,14 @@ export default function HomeScreen() {
             <View className="flex-row justify-between items-center w-full py-1">
               <Text
                 className={`text-white text-base font-semibold flex-1 ${
-                  winner === "away" && game.status === "completed"
-                    ? "text-green-400"
-                    : ""
+                  winner === "away" && game.status === "completed" ? "text-green-400" : ""
                 }`}
               >
                 {game.awayTeam?.name || "Away Team"}
               </Text>
               <Text
                 className={`text-white text-lg font-bold min-w-[30px] text-right ${
-                  winner === "away" && game.status === "completed"
-                    ? "text-green-400"
-                    : ""
+                  winner === "away" && game.status === "completed" ? "text-green-400" : ""
                 }`}
               >
                 {game.awayScore}
@@ -138,18 +126,14 @@ export default function HomeScreen() {
             <View className="flex-row justify-between items-center w-full py-1">
               <Text
                 className={`text-white text-base font-semibold flex-1 ${
-                  winner === "home" && game.status === "completed"
-                    ? "text-green-400"
-                    : ""
+                  winner === "home" && game.status === "completed" ? "text-green-400" : ""
                 }`}
               >
                 {game.homeTeam?.name || "Home Team"}
               </Text>
               <Text
                 className={`text-white text-lg font-bold min-w-[30px] text-right ${
-                  winner === "home" && game.status === "completed"
-                    ? "text-green-400"
-                    : ""
+                  winner === "home" && game.status === "completed" ? "text-green-400" : ""
                 }`}
               >
                 {game.homeScore}
@@ -163,9 +147,7 @@ export default function HomeScreen() {
             className="px-2 py-1 rounded-xl"
             style={{ backgroundColor: GAME_STATUS_COLORS[game.status] || "#6B7280" }}
           >
-            <Text className="text-white text-xs font-semibold">
-              {getStatusLabel(game.status)}
-            </Text>
+            <Text className="text-white text-xs font-semibold">{getStatusLabel(game.status)}</Text>
           </View>
 
           {isGameLive && (
@@ -203,24 +185,18 @@ export default function HomeScreen() {
       <StatusBar style="light" />
       <ScrollView
         className="p-4"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Quick Navigation Cards */}
         <View className="mb-6">
-          <Text className="text-white text-lg font-bold mb-3">
-            Quick Navigation
-          </Text>
+          <Text className="text-white text-lg font-bold mb-3">Quick Navigation</Text>
           <View className="flex-row flex-wrap justify-between -mx-1">
             <TouchableOpacity
               className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 items-center justify-center shadow-sm"
               onPress={() => navigation.navigate("Games")}
             >
               <Icon name="basketball" size={24} color="#EA580C" />
-              <Text className="text-white text-base font-bold mt-2">
-                All Games
-              </Text>
+              <Text className="text-white text-base font-bold mt-2">All Games</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -236,9 +212,7 @@ export default function HomeScreen() {
               onPress={() => navigation.navigate("Statistics")}
             >
               <Icon name="stats" size={24} color="#10B981" />
-              <Text className="text-white text-base font-bold mt-2">
-                Statistics
-              </Text>
+              <Text className="text-white text-base font-bold mt-2">Statistics</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -246,9 +220,7 @@ export default function HomeScreen() {
               onPress={() => navigation.navigate("Profile")}
             >
               <Icon name="user" size={24} color="#8B5CF6" />
-              <Text className="text-white text-base font-bold mt-2">
-                Profile
-              </Text>
+              <Text className="text-white text-base font-bold mt-2">Profile</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -278,15 +250,8 @@ export default function HomeScreen() {
         {/* Empty State */}
         {liveGames.length === 0 && recentGames.length === 0 && (
           <View className="items-center justify-center pt-15">
-            <Icon
-              name="basketball"
-              size={48}
-              color="#6B7280"
-              className="mb-4"
-            />
-            <Text className="text-white text-lg font-bold mb-2">
-              No games found
-            </Text>
+            <Icon name="basketball" size={48} color="#6B7280" className="mb-4" />
+            <Text className="text-white text-lg font-bold mb-2">No games found</Text>
             <Text className="text-gray-400 text-sm text-center leading-5">
               Create a game to start tracking basketball statistics
             </Text>

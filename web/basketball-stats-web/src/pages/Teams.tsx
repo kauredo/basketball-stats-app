@@ -1,28 +1,28 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
-import { Id } from '../../../../convex/_generated/dataModel';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { useAuth } from "../contexts/AuthContext";
 import {
   PlusIcon,
   UsersIcon,
   UserPlusIcon,
   PencilIcon,
   TrashIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 
 const Teams: React.FC = () => {
   const { token, selectedLeague } = useAuth();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCreatePlayerModal, setShowCreatePlayerModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<any>(null);
-  const [teamForm, setTeamForm] = useState({ name: '', city: '', description: '' });
+  const [teamForm, setTeamForm] = useState({ name: "", city: "", description: "" });
   const [playerForm, setPlayerForm] = useState({
-    name: '',
-    number: '',
-    position: 'PG' as 'PG' | 'SG' | 'SF' | 'PF' | 'C',
-    heightCm: '',
-    weightKg: '',
+    name: "",
+    number: "",
+    position: "PG" as "PG" | "SG" | "SF" | "PF" | "C",
+    heightCm: "",
+    weightKg: "",
   });
   const [isCreating, setIsCreating] = useState(false);
 
@@ -49,7 +49,7 @@ const Teams: React.FC = () => {
         description: teamForm.description.trim() || undefined,
       });
       setShowCreateModal(false);
-      setTeamForm({ name: '', city: '', description: '' });
+      setTeamForm({ name: "", city: "", description: "" });
     } catch (error) {
       console.error("Failed to create team:", error);
     } finally {
@@ -72,7 +72,7 @@ const Teams: React.FC = () => {
         weightKg: playerForm.weightKg ? parseInt(playerForm.weightKg) : undefined,
       });
       setShowCreatePlayerModal(false);
-      setPlayerForm({ name: '', number: '', position: 'PG', heightCm: '', weightKg: '' });
+      setPlayerForm({ name: "", number: "", position: "PG", heightCm: "", weightKg: "" });
       setSelectedTeam(null);
     } catch (error) {
       console.error("Failed to create player:", error);
@@ -196,7 +196,7 @@ const Teams: React.FC = () => {
                 <input
                   type="text"
                   value={teamForm.name}
-                  onChange={(e) => setTeamForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) => setTeamForm((prev) => ({ ...prev, name: e.target.value }))}
                   className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter team name"
                 />
@@ -207,7 +207,7 @@ const Teams: React.FC = () => {
                 <input
                   type="text"
                   value={teamForm.city}
-                  onChange={(e) => setTeamForm(prev => ({ ...prev, city: e.target.value }))}
+                  onChange={(e) => setTeamForm((prev) => ({ ...prev, city: e.target.value }))}
                   className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter city"
                 />
@@ -217,7 +217,9 @@ const Teams: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
                 <textarea
                   value={teamForm.description}
-                  onChange={(e) => setTeamForm(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setTeamForm((prev) => ({ ...prev, description: e.target.value }))
+                  }
                   className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter team description"
                   rows={3}
@@ -229,7 +231,7 @@ const Teams: React.FC = () => {
               <button
                 onClick={() => {
                   setShowCreateModal(false);
-                  setTeamForm({ name: '', city: '', description: '' });
+                  setTeamForm({ name: "", city: "", description: "" });
                 }}
                 className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700"
               >
@@ -240,7 +242,7 @@ const Teams: React.FC = () => {
                 disabled={!teamForm.name.trim() || isCreating}
                 className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isCreating ? 'Creating...' : 'Create Team'}
+                {isCreating ? "Creating..." : "Create Team"}
               </button>
             </div>
           </div>
@@ -257,11 +259,13 @@ const Teams: React.FC = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Player Name *</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Player Name *
+                </label>
                 <input
                   type="text"
                   value={playerForm.name}
-                  onChange={(e) => setPlayerForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) => setPlayerForm((prev) => ({ ...prev, name: e.target.value }))}
                   className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter player name"
                 />
@@ -273,7 +277,7 @@ const Teams: React.FC = () => {
                   <input
                     type="number"
                     value={playerForm.number}
-                    onChange={(e) => setPlayerForm(prev => ({ ...prev, number: e.target.value }))}
+                    onChange={(e) => setPlayerForm((prev) => ({ ...prev, number: e.target.value }))}
                     className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="00"
                     min="0"
@@ -285,7 +289,9 @@ const Teams: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-2">Position *</label>
                   <select
                     value={playerForm.position}
-                    onChange={(e) => setPlayerForm(prev => ({ ...prev, position: e.target.value as any }))}
+                    onChange={(e) =>
+                      setPlayerForm((prev) => ({ ...prev, position: e.target.value as any }))
+                    }
                     className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="PG">Point Guard</option>
@@ -299,22 +305,30 @@ const Teams: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Height (cm)</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Height (cm)
+                  </label>
                   <input
                     type="number"
                     value={playerForm.heightCm}
-                    onChange={(e) => setPlayerForm(prev => ({ ...prev, heightCm: e.target.value }))}
+                    onChange={(e) =>
+                      setPlayerForm((prev) => ({ ...prev, heightCm: e.target.value }))
+                    }
                     className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="183"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Weight (kg)</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Weight (kg)
+                  </label>
                   <input
                     type="number"
                     value={playerForm.weightKg}
-                    onChange={(e) => setPlayerForm(prev => ({ ...prev, weightKg: e.target.value }))}
+                    onChange={(e) =>
+                      setPlayerForm((prev) => ({ ...prev, weightKg: e.target.value }))
+                    }
                     className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="82"
                   />
@@ -326,7 +340,13 @@ const Teams: React.FC = () => {
               <button
                 onClick={() => {
                   setShowCreatePlayerModal(false);
-                  setPlayerForm({ name: '', number: '', position: 'PG', heightCm: '', weightKg: '' });
+                  setPlayerForm({
+                    name: "",
+                    number: "",
+                    position: "PG",
+                    heightCm: "",
+                    weightKg: "",
+                  });
                   setSelectedTeam(null);
                 }}
                 className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700"
@@ -338,7 +358,7 @@ const Teams: React.FC = () => {
                 disabled={!playerForm.name.trim() || !playerForm.number || isCreating}
                 className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isCreating ? 'Adding...' : 'Add Player'}
+                {isCreating ? "Adding..." : "Add Player"}
               </button>
             </div>
           </div>

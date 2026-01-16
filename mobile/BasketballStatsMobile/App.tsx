@@ -50,9 +50,7 @@ function AuthLoginScreen({ navigation }: any) {
 }
 
 function AuthSignupScreen({ navigation }: any) {
-  return (
-    <SignupScreen onNavigateToLogin={() => navigation.navigate("Login")} />
-  );
+  return <SignupScreen onNavigateToLogin={() => navigation.navigate("Login")} />;
 }
 
 function AuthStack() {
@@ -108,16 +106,10 @@ function AppContent() {
             <Stack.Screen name="Teams" component={TeamsScreen} />
             <Stack.Screen name="LiveGame" component={LiveGameScreen} />
             <Stack.Screen name="PlayerStats" component={PlayerStatsScreen} />
-            <Stack.Screen
-              name="PlayerStatistics"
-              component={PlayerStatisticsScreen}
-            />
+            <Stack.Screen name="PlayerStatistics" component={PlayerStatisticsScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="Statistics" component={StatisticsScreen} />
-            <Stack.Screen
-              name="LeagueSelection"
-              component={LeagueSelectionScreen}
-            />
+            <Stack.Screen name="LeagueSelection" component={LeagueSelectionScreen} />
           </Stack.Navigator>
         ) : (
           <LeagueSelectionScreen />

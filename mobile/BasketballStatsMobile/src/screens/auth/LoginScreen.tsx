@@ -71,12 +71,8 @@ export default function LoginScreen({
       >
         <View className="items-center mb-12">
           <Icon name="basketball" size={64} color="#EA580C" className="mb-4" />
-          <Text className="text-3xl font-bold text-white mb-2">
-            Basketball Stats
-          </Text>
-          <Text className="text-base text-gray-400 text-center">
-            Sign in to your account
-          </Text>
+          <Text className="text-3xl font-bold text-white mb-2">Basketball Stats</Text>
+          <Text className="text-base text-gray-400 text-center">Sign in to your account</Text>
         </View>
 
         <View className="mb-8">
@@ -89,12 +85,7 @@ export default function LoginScreen({
           <View className="mb-5">
             <Text className="text-sm font-semibold text-white mb-2">Email</Text>
             <View className="relative">
-              <Icon
-                name="mail"
-                size={20}
-                color="#6B7280"
-                className="absolute left-4 top-3 z-10"
-              />
+              <Icon name="mail" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
               <TextInput
                 className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-4 py-3 text-base text-white"
                 value={email}
@@ -110,16 +101,9 @@ export default function LoginScreen({
           </View>
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-white mb-2">
-              Password
-            </Text>
+            <Text className="text-sm font-semibold text-white mb-2">Password</Text>
             <View className="relative">
-              <Icon
-                name="lock"
-                size={20}
-                color="#6B7280"
-                className="absolute left-4 top-3 z-10"
-              />
+              <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
               <TextInput
                 className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-white"
                 value={password}
@@ -133,11 +117,7 @@ export default function LoginScreen({
                 className="absolute right-4 top-3"
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               >
-                <Icon
-                  name={isPasswordVisible ? "eye-off" : "eye"}
-                  size={20}
-                  color="#6B7280"
-                />
+                <Icon name={isPasswordVisible ? "eye-off" : "eye"} size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
           </View>
@@ -159,20 +139,14 @@ export default function LoginScreen({
             onPress={handleForgotPassword}
             disabled={isLoading}
           >
-            <Text className="text-primary-500 text-sm font-medium">
-              Forgot Password?
-            </Text>
+            <Text className="text-primary-500 text-sm font-medium">Forgot Password?</Text>
           </TouchableOpacity>
         </View>
 
         <View className="flex-row justify-center items-center">
-          <Text className="text-gray-400 text-sm mr-2">
-            Don't have an account?
-          </Text>
+          <Text className="text-gray-400 text-sm mr-2">Don't have an account?</Text>
           <TouchableOpacity onPress={onNavigateToSignup} disabled={isLoading}>
-            <Text className="text-primary-500 text-sm font-semibold">
-              Sign Up
-            </Text>
+            <Text className="text-primary-500 text-sm font-semibold">Sign Up</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

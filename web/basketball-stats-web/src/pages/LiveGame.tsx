@@ -14,12 +14,23 @@ import {
 } from "@heroicons/react/24/outline";
 import Icon from "../components/Icon";
 
-type StatType = "shot2" | "shot3" | "freethrow" | "rebound" | "assist" | "steal" | "block" | "turnover" | "foul";
+type StatType =
+  | "shot2"
+  | "shot3"
+  | "freethrow"
+  | "rebound"
+  | "assist"
+  | "steal"
+  | "block"
+  | "turnover"
+  | "foul";
 
 const LiveGame: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const { token } = useAuth();
-  const [activeTab, setActiveTab] = useState<"scoreboard" | "stats" | "substitutions">("scoreboard");
+  const [activeTab, setActiveTab] = useState<"scoreboard" | "stats" | "substitutions">(
+    "scoreboard"
+  );
 
   // Convex queries - automatically update in real-time
   const gameData = useQuery(
@@ -44,8 +55,8 @@ const LiveGame: React.FC = () => {
   const game = gameData?.game;
   const stats = liveStats?.stats || [];
 
-  const homeStats = stats.filter(s => s.isHomeTeam);
-  const awayStats = stats.filter(s => !s.isHomeTeam);
+  const homeStats = stats.filter((s) => s.isHomeTeam);
+  const awayStats = stats.filter((s) => !s.isHomeTeam);
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -216,10 +227,10 @@ const LiveGame: React.FC = () => {
                     isActive
                       ? "bg-green-600 text-white"
                       : isPaused
-                      ? "bg-yellow-600 text-white"
-                      : isCompleted
-                      ? "bg-gray-600 text-white"
-                      : "bg-blue-600 text-white"
+                        ? "bg-yellow-600 text-white"
+                        : isCompleted
+                          ? "bg-gray-600 text-white"
+                          : "bg-blue-600 text-white"
                   }`}
                 >
                   {isActive ? "LIVE" : isPaused ? "PAUSED" : isCompleted ? "FINAL" : "SCHEDULED"}
@@ -346,7 +357,9 @@ const LiveGame: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Time:</span>
-                  <span className="text-white font-mono">{formatTime(game.timeRemainingSeconds)}</span>
+                  <span className="text-white font-mono">
+                    {formatTime(game.timeRemainingSeconds)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -381,16 +394,28 @@ const LiveGame: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Away Team Stats */}
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <h3 className="text-lg font-semibold text-white mb-4">{game.awayTeam?.name} - Player Stats</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">
+              {game.awayTeam?.name} - Player Stats
+            </h3>
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
                   <tr className="border-b border-gray-600">
-                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-300 uppercase">Player</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">PTS</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">REB</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">AST</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">Actions</th>
+                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-300 uppercase">
+                      Player
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">
+                      PTS
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">
+                      REB
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">
+                      AST
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
@@ -437,16 +462,28 @@ const LiveGame: React.FC = () => {
 
           {/* Home Team Stats */}
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <h3 className="text-lg font-semibold text-white mb-4">{game.homeTeam?.name} - Player Stats</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">
+              {game.homeTeam?.name} - Player Stats
+            </h3>
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
                   <tr className="border-b border-gray-600">
-                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-300 uppercase">Player</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">PTS</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">REB</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">AST</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">Actions</th>
+                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-300 uppercase">
+                      Player
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">
+                      PTS
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">
+                      REB
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">
+                      AST
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
@@ -497,7 +534,9 @@ const LiveGame: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Away Team Substitutions */}
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <h3 className="text-lg font-semibold text-white mb-4">{game.awayTeam?.name} - Roster</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">
+              {game.awayTeam?.name} - Roster
+            </h3>
             <div className="space-y-2">
               {awayStats.map((stat) => (
                 <div
@@ -530,7 +569,9 @@ const LiveGame: React.FC = () => {
 
           {/* Home Team Substitutions */}
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <h3 className="text-lg font-semibold text-white mb-4">{game.homeTeam?.name} - Roster</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">
+              {game.homeTeam?.name} - Roster
+            </h3>
             <div className="space-y-2">
               {homeStats.map((stat) => (
                 <div

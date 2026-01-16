@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -42,9 +36,7 @@ export default function TeamsScreen() {
     <TouchableOpacity className="bg-gray-800 rounded-xl p-4 mb-3 border border-gray-700">
       <View className="mb-2">
         <Text className="text-white text-lg font-bold">{team.name}</Text>
-        {team.city && (
-          <Text className="text-gray-400 text-sm mt-0.5">{team.city}</Text>
-        )}
+        {team.city && <Text className="text-gray-400 text-sm mt-0.5">{team.city}</Text>}
       </View>
 
       <View className="mb-2">
@@ -54,10 +46,7 @@ export default function TeamsScreen() {
       </View>
 
       {team.description && (
-        <Text
-          className="text-gray-300 text-sm leading-[18px]"
-          numberOfLines={2}
-        >
+        <Text className="text-gray-300 text-sm leading-[18px]" numberOfLines={2}>
           {team.description}
         </Text>
       )}
@@ -78,22 +67,13 @@ export default function TeamsScreen() {
       <FlatList
         data={teams}
         renderItem={renderTeam}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListEmptyComponent={
           <View className="items-center justify-center pt-15">
-            <Icon
-              name="basketball"
-              size={48}
-              color="#6B7280"
-              className="mb-4"
-            />
-            <Text className="text-white text-lg font-bold mb-2">
-              No teams found
-            </Text>
+            <Icon name="basketball" size={48} color="#6B7280" className="mb-4" />
+            <Text className="text-white text-lg font-bold mb-2">No teams found</Text>
             <Text className="text-gray-400 text-sm text-center leading-5">
               Teams will appear here once they're added
             </Text>

@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-  Dimensions,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Dimensions } from "react-native";
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -22,12 +15,7 @@ interface StatCardProps {
   color?: string;
 }
 
-function StatCard({
-  title,
-  value,
-  subtitle,
-  color = "#EA580C",
-}: StatCardProps) {
+function StatCard({ title, value, subtitle, color = "#EA580C" }: StatCardProps) {
   return (
     <View className="bg-gray-700 rounded-xl p-4 flex-row items-center w-[48%] border border-gray-600">
       <View
@@ -37,9 +25,7 @@ function StatCard({
         <Icon name="stats" size={16} color="#FFFFFF" />
       </View>
       <View className="flex-1">
-        <Text className="text-gray-400 text-xs font-medium mb-0.5">
-          {title}
-        </Text>
+        <Text className="text-gray-400 text-xs font-medium mb-0.5">{title}</Text>
         <Text className="text-white text-xl font-bold mb-0.5">{value}</Text>
         {subtitle && <Text className="text-gray-500 text-xs">{subtitle}</Text>}
       </View>
@@ -100,13 +86,9 @@ function StandingsItem({
         <Text className="text-white text-sm font-medium">
           {wins}-{losses}
         </Text>
-        <Text className="text-gray-400 text-xs">
-          {winPercentage.toFixed(1)}%
-        </Text>
+        <Text className="text-gray-400 text-xs">{winPercentage.toFixed(1)}%</Text>
         {avgPoints !== undefined && (
-          <Text className="text-gray-400 text-xs">
-            {avgPoints.toFixed(1)} PPG
-          </Text>
+          <Text className="text-gray-400 text-xs">{avgPoints.toFixed(1)} PPG</Text>
         )}
       </View>
     </View>
@@ -115,17 +97,15 @@ function StandingsItem({
 
 export default function StatisticsScreen() {
   const { token, selectedLeague } = useAuth();
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "leaders" | "standings" | "charts"
-  >("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "leaders" | "standings" | "charts">(
+    "overview"
+  );
   const [refreshing, setRefreshing] = useState(false);
 
   // Fetch statistics dashboard from Convex
   const dashboardData = useQuery(
     api.statistics.getDashboard,
-    token && selectedLeague
-      ? { token, leagueId: selectedLeague.id }
-      : "skip"
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
   );
 
   const onRefresh = () => {
@@ -137,9 +117,7 @@ export default function StatisticsScreen() {
   if (dashboardData === undefined) {
     return (
       <View className="flex-1 justify-center items-center bg-gray-800">
-        <Text className="text-gray-400 mt-4 text-base">
-          Loading statistics...
-        </Text>
+        <Text className="text-gray-400 mt-4 text-base">Loading statistics...</Text>
       </View>
     );
   }
@@ -148,9 +126,7 @@ export default function StatisticsScreen() {
     return (
       <View className="flex-1 justify-center items-center bg-gray-800 p-8">
         <Icon name="basketball" size={64} color="#6B7280" className="mb-4" />
-        <Text className="text-white text-2xl font-bold mb-2">
-          No League Selected
-        </Text>
+        <Text className="text-white text-2xl font-bold mb-2">No League Selected</Text>
         <Text className="text-gray-400 text-base text-center">
           Please select a league to view statistics.
         </Text>
@@ -166,9 +142,7 @@ export default function StatisticsScreen() {
     <View className="flex-1 bg-gray-800">
       {/* Header */}
       <View className="bg-gray-700 p-5 pt-15">
-        <Text className="text-white text-2xl font-bold mb-1">
-          Statistics Dashboard
-        </Text>
+        <Text className="text-white text-2xl font-bold mb-1">Statistics Dashboard</Text>
         <Text className="text-gray-400 text-base">
           {selectedLeague.name} • {selectedLeague.season}
         </Text>
@@ -178,9 +152,7 @@ export default function StatisticsScreen() {
       <View className="flex-row bg-gray-700 border-b border-gray-600">
         <TouchableOpacity
           className={`flex-1 py-4 items-center border-b-2 ${
-            activeTab === "overview"
-              ? "border-primary-500"
-              : "border-transparent"
+            activeTab === "overview" ? "border-primary-500" : "border-transparent"
           }`}
           onPress={() => setActiveTab("overview")}
         >
@@ -194,9 +166,7 @@ export default function StatisticsScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           className={`flex-1 py-4 items-center border-b-2 ${
-            activeTab === "leaders"
-              ? "border-primary-500"
-              : "border-transparent"
+            activeTab === "leaders" ? "border-primary-500" : "border-transparent"
           }`}
           onPress={() => setActiveTab("leaders")}
         >
@@ -210,9 +180,7 @@ export default function StatisticsScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           className={`flex-1 py-4 items-center border-b-2 ${
-            activeTab === "standings"
-              ? "border-primary-500"
-              : "border-transparent"
+            activeTab === "standings" ? "border-primary-500" : "border-transparent"
           }`}
           onPress={() => setActiveTab("standings")}
         >
@@ -242,18 +210,14 @@ export default function StatisticsScreen() {
 
       <ScrollView
         className="flex-1"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <View className="p-4">
             {/* League Stats Overview */}
             <View className="mb-6">
-              <Text className="text-white text-xl font-bold mb-4">
-                League Overview
-              </Text>
+              <Text className="text-white text-xl font-bold mb-4">League Overview</Text>
               <View className="flex-row flex-wrap gap-4">
                 <StatCard
                   title="Total Games"
@@ -269,11 +233,7 @@ export default function StatisticsScreen() {
                 />
                 <StatCard
                   title="Total Players"
-                  value={
-                    leaders.scoring?.length ||
-                    leaders.rebounding?.length ||
-                    0
-                  }
+                  value={leaders.scoring?.length || leaders.rebounding?.length || 0}
                   subtitle="Registered players"
                   color="#8B5CF6"
                 />
@@ -299,9 +259,7 @@ export default function StatisticsScreen() {
             {/* Recent Games */}
             {recentGames.length > 0 && (
               <View className="mb-6">
-                <Text className="text-white text-xl font-bold mb-4">
-                  Recent Games
-                </Text>
+                <Text className="text-white text-xl font-bold mb-4">Recent Games</Text>
                 {recentGames.slice(0, 5).map((game: any, index: number) => (
                   <View
                     key={game.id || index}
@@ -336,9 +294,7 @@ export default function StatisticsScreen() {
           <View className="p-4">
             {/* Scoring Leaders */}
             <View className="mb-6">
-              <Text className="text-white text-xl font-bold mb-4">
-                Scoring Leaders
-              </Text>
+              <Text className="text-white text-xl font-bold mb-4">Scoring Leaders</Text>
               {(leaders.scoring || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
                   key={leader.playerId || index}
@@ -355,9 +311,7 @@ export default function StatisticsScreen() {
 
             {/* Rebounding Leaders */}
             <View className="mb-6">
-              <Text className="text-white text-xl font-bold mb-4">
-                Rebounding Leaders
-              </Text>
+              <Text className="text-white text-xl font-bold mb-4">Rebounding Leaders</Text>
               {(leaders.rebounding || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
                   key={leader.playerId || index}
@@ -374,9 +328,7 @@ export default function StatisticsScreen() {
 
             {/* Assists Leaders */}
             <View className="mb-6">
-              <Text className="text-white text-xl font-bold mb-4">
-                Assists Leaders
-              </Text>
+              <Text className="text-white text-xl font-bold mb-4">Assists Leaders</Text>
               {(leaders.assists || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
                   key={leader.playerId || index}
@@ -397,9 +349,7 @@ export default function StatisticsScreen() {
         {activeTab === "standings" && (
           <View className="p-4">
             <View className="mb-6">
-              <Text className="text-white text-xl font-bold mb-4">
-                League Standings
-              </Text>
+              <Text className="text-white text-xl font-bold mb-4">League Standings</Text>
               {standings.slice(0, 10).map((team: any, index: number) => (
                 <StandingsItem
                   key={team.teamId || index}
@@ -424,9 +374,7 @@ export default function StatisticsScreen() {
             {/* Team Performance Chart */}
             {standings.length > 0 && (
               <View className="mb-6">
-                <Text className="text-white text-xl font-bold mb-4">
-                  Team Performance
-                </Text>
+                <Text className="text-white text-xl font-bold mb-4">Team Performance</Text>
                 <View className="bg-gray-700 rounded-xl p-4 mb-4 items-center">
                   <BarChart
                     data={{
@@ -439,9 +387,7 @@ export default function StatisticsScreen() {
                         ),
                       datasets: [
                         {
-                          data: standings
-                            .slice(0, 6)
-                            .map((team: any) => team.avgPoints || 0),
+                          data: standings.slice(0, 6).map((team: any) => team.avgPoints || 0),
                         },
                       ],
                     }}
@@ -455,8 +401,7 @@ export default function StatisticsScreen() {
                       backgroundGradientTo: "#374151",
                       decimalPlaces: 1,
                       color: (opacity = 1) => `rgba(234, 88, 12, ${opacity})`,
-                      labelColor: (opacity = 1) =>
-                        `rgba(156, 163, 175, ${opacity})`,
+                      labelColor: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`,
                       style: {
                         borderRadius: 16,
                       },
@@ -481,23 +426,19 @@ export default function StatisticsScreen() {
             {/* Win Distribution Pie Chart */}
             {standings.length > 0 && (
               <View className="mb-6">
-                <Text className="text-white text-xl font-bold mb-4">
-                  Win Distribution
-                </Text>
+                <Text className="text-white text-xl font-bold mb-4">Win Distribution</Text>
                 <View className="bg-gray-700 rounded-xl p-4 mb-4 items-center">
                   <PieChart
-                    data={standings
-                      .slice(0, 5)
-                      .map((team: any, index: number) => ({
-                        name:
-                          (team.teamName || "").length > 10
-                            ? (team.teamName || "").substring(0, 10) + "..."
-                            : team.teamName || "",
-                        population: team.wins || 1,
-                        color: `hsl(${index * 72}, 70%, 50%)`,
-                        legendFontColor: "#9CA3AF",
-                        legendFontSize: 12,
-                      }))}
+                    data={standings.slice(0, 5).map((team: any, index: number) => ({
+                      name:
+                        (team.teamName || "").length > 10
+                          ? (team.teamName || "").substring(0, 10) + "..."
+                          : team.teamName || "",
+                      population: team.wins || 1,
+                      color: `hsl(${index * 72}, 70%, 50%)`,
+                      legendFontColor: "#9CA3AF",
+                      legendFontSize: 12,
+                    }))}
                     width={screenWidth - 64}
                     height={220}
                     chartConfig={{
@@ -505,8 +446,7 @@ export default function StatisticsScreen() {
                       backgroundGradientFrom: "#1F2937",
                       backgroundGradientTo: "#374151",
                       color: (opacity = 1) => `rgba(234, 88, 12, ${opacity})`,
-                      labelColor: (opacity = 1) =>
-                        `rgba(156, 163, 175, ${opacity})`,
+                      labelColor: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`,
                     }}
                     accessor="population"
                     backgroundColor="transparent"
@@ -526,23 +466,16 @@ export default function StatisticsScreen() {
             {/* Recent Games Trend */}
             {recentGames.length > 0 && (
               <View className="mb-6">
-                <Text className="text-white text-xl font-bold mb-4">
-                  Scoring Trends
-                </Text>
+                <Text className="text-white text-xl font-bold mb-4">Scoring Trends</Text>
                 <View className="bg-gray-700 rounded-xl p-4 mb-4 items-center">
                   <LineChart
                     data={{
-                      labels: recentGames
-                        .slice(-7)
-                        .map((_: any, index: number) => `G${index + 1}`),
+                      labels: recentGames.slice(-7).map((_: any, index: number) => `G${index + 1}`),
                       datasets: [
                         {
                           data: recentGames
                             .slice(-7)
-                            .map(
-                              (game: any) =>
-                                (game.homeScore || 0) + (game.awayScore || 0)
-                            ),
+                            .map((game: any) => (game.homeScore || 0) + (game.awayScore || 0)),
                           strokeWidth: 3,
                         },
                       ],
@@ -557,8 +490,7 @@ export default function StatisticsScreen() {
                       backgroundGradientTo: "#374151",
                       decimalPlaces: 0,
                       color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
-                      labelColor: (opacity = 1) =>
-                        `rgba(156, 163, 175, ${opacity})`,
+                      labelColor: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`,
                       style: {
                         borderRadius: 16,
                       },

@@ -38,9 +38,7 @@ export const recordStat = mutation({
     // Find player stat
     const playerStat = await ctx.db
       .query("playerStats")
-      .withIndex("by_game_player", (q) =>
-        q.eq("gameId", args.gameId).eq("playerId", args.playerId)
-      )
+      .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", args.playerId))
       .first();
 
     if (!playerStat) throw new Error("Player stat not found");
@@ -182,9 +180,7 @@ export const undoStat = mutation({
 
     const playerStat = await ctx.db
       .query("playerStats")
-      .withIndex("by_game_player", (q) =>
-        q.eq("gameId", args.gameId).eq("playerId", args.playerId)
-      )
+      .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", args.playerId))
       .first();
 
     if (!playerStat) throw new Error("Player stat not found");
@@ -198,10 +194,7 @@ export const undoStat = mutation({
 
     switch (args.statType) {
       case "shot2":
-        updates.fieldGoalsAttempted = Math.max(
-          0,
-          playerStat.fieldGoalsAttempted - 1
-        );
+        updates.fieldGoalsAttempted = Math.max(0, playerStat.fieldGoalsAttempted - 1);
         if (args.wasMade) {
           updates.fieldGoalsMade = Math.max(0, playerStat.fieldGoalsMade - 1);
           updates.points = Math.max(0, playerStat.points - 2);
@@ -210,30 +203,18 @@ export const undoStat = mutation({
         break;
 
       case "shot3":
-        updates.fieldGoalsAttempted = Math.max(
-          0,
-          playerStat.fieldGoalsAttempted - 1
-        );
-        updates.threePointersAttempted = Math.max(
-          0,
-          playerStat.threePointersAttempted - 1
-        );
+        updates.fieldGoalsAttempted = Math.max(0, playerStat.fieldGoalsAttempted - 1);
+        updates.threePointersAttempted = Math.max(0, playerStat.threePointersAttempted - 1);
         if (args.wasMade) {
           updates.fieldGoalsMade = Math.max(0, playerStat.fieldGoalsMade - 1);
-          updates.threePointersMade = Math.max(
-            0,
-            playerStat.threePointersMade - 1
-          );
+          updates.threePointersMade = Math.max(0, playerStat.threePointersMade - 1);
           updates.points = Math.max(0, playerStat.points - 3);
           pointsRemoved = 3;
         }
         break;
 
       case "freethrow":
-        updates.freeThrowsAttempted = Math.max(
-          0,
-          playerStat.freeThrowsAttempted - 1
-        );
+        updates.freeThrowsAttempted = Math.max(0, playerStat.freeThrowsAttempted - 1);
         if (args.wasMade) {
           updates.freeThrowsMade = Math.max(0, playerStat.freeThrowsMade - 1);
           updates.points = Math.max(0, playerStat.points - 1);
@@ -310,9 +291,7 @@ export const substitute = mutation({
 
     const playerStat = await ctx.db
       .query("playerStats")
-      .withIndex("by_game_player", (q) =>
-        q.eq("gameId", args.gameId).eq("playerId", args.playerId)
-      )
+      .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", args.playerId))
       .first();
 
     if (!playerStat) throw new Error("Player stat not found");
@@ -325,9 +304,7 @@ export const substitute = mutation({
     });
 
     return {
-      message: args.isOnCourt
-        ? `${player.name} entered the game`
-        : `${player.name} left the game`,
+      message: args.isOnCourt ? `${player.name} entered the game` : `${player.name} left the game`,
       isOnCourt: args.isOnCourt,
     };
   },
@@ -426,9 +403,7 @@ export const updateMinutes = mutation({
 
     const playerStat = await ctx.db
       .query("playerStats")
-      .withIndex("by_game_player", (q) =>
-        q.eq("gameId", args.gameId).eq("playerId", args.playerId)
-      )
+      .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", args.playerId))
       .first();
 
     if (!playerStat) throw new Error("Player stat not found");

@@ -50,10 +50,7 @@ interface IconProps {
   className?: string;
 }
 
-const iconMap: Record<
-  IconName,
-  { library: "ionicons" | "material" | "feather"; name: string }
-> = {
+const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; name: string }> = {
   // Auth & User
   eye: { library: "ionicons", name: "eye" },
   "eye-off": { library: "ionicons", name: "eye-off" },
@@ -100,12 +97,7 @@ const iconMap: Record<
   "chevron-up": { library: "ionicons", name: "chevron-up" },
 };
 
-export default function Icon({
-  name,
-  size = 24,
-  color = "#6B7280",
-  className,
-}: IconProps) {
+export default function Icon({ name, size = 24, color = "#6B7280", className }: IconProps) {
   const iconConfig = iconMap[name];
 
   if (!iconConfig) {
@@ -120,11 +112,6 @@ export default function Icon({
   }[iconConfig.library];
 
   return (
-    <IconComponent
-      name={iconConfig.name as any}
-      size={size}
-      color={color}
-      className={className}
-    />
+    <IconComponent name={iconConfig.name as any} size={size} color={color} className={className} />
   );
 }

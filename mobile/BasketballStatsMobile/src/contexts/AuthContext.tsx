@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useMutation } from 'convex/react';
-import { api } from '../../../../convex/_generated/api';
-import { Id } from '../../../../convex/_generated/dataModel';
-import * as SecureStore from 'expo-secure-store';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+import * as SecureStore from "expo-secure-store";
 
 interface User {
   id: Id<"users">;
@@ -49,9 +49,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const TOKEN_KEY = 'basketball_stats_token';
-const USER_KEY = 'basketball_stats_user';
-const LEAGUE_KEY = 'basketball_stats_league';
+const TOKEN_KEY = "basketball_stats_token";
+const USER_KEY = "basketball_stats_user";
+const LEAGUE_KEY = "basketball_stats_league";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (err) {
-      console.error('Failed to initialize auth:', err);
+      console.error("Failed to initialize auth:", err);
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       setIsAuthenticated(true);
     } catch (err: any) {
-      const errorMessage = err.message || 'Login failed';
+      const errorMessage = err.message || "Login failed";
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -148,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       setIsAuthenticated(true);
     } catch (err: any) {
-      const errorMessage = err.message || 'Signup failed';
+      const errorMessage = err.message || "Signup failed";
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -162,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await logoutMutation({ token });
       }
     } catch (err) {
-      console.error('Logout error:', err);
+      console.error("Logout error:", err);
     } finally {
       await SecureStore.deleteItemAsync(TOKEN_KEY);
       await SecureStore.deleteItemAsync(USER_KEY);
@@ -209,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

@@ -130,11 +130,7 @@ export const getPlayersStats = query({
         const gamesPlayed = stats.length;
         const averages = calculateAverages(aggregated, gamesPlayed);
         const percentages = calculatePercentages(aggregated);
-        const advanced = calculateAdvancedStats(
-          aggregated,
-          averages,
-          gamesPlayed
-        );
+        const advanced = calculateAdvancedStats(aggregated, averages, gamesPlayed);
 
         return {
           playerId: player._id,
@@ -228,12 +224,8 @@ export const getTeamsStats = query({
         }
 
         // Calculate wins/losses
-        const homeGames = completedGames.filter(
-          (g) => g.homeTeamId === team._id
-        );
-        const awayGames = completedGames.filter(
-          (g) => g.awayTeamId === team._id
-        );
+        const homeGames = completedGames.filter((g) => g.homeTeamId === team._id);
+        const awayGames = completedGames.filter((g) => g.awayTeamId === team._id);
 
         let wins = 0;
         let losses = 0;
@@ -257,28 +249,17 @@ export const getTeamsStats = query({
           gamesPlayed,
           wins,
           losses,
-          winPercentage:
-            gamesPlayed > 0
-              ? Math.round((wins / gamesPlayed) * 1000) / 10
-              : 0,
+          winPercentage: gamesPlayed > 0 ? Math.round((wins / gamesPlayed) * 1000) / 10 : 0,
           avgPoints:
-            gamesPlayed > 0
-              ? Math.round((aggregated.totalPoints / gamesPlayed) * 10) / 10
-              : 0,
+            gamesPlayed > 0 ? Math.round((aggregated.totalPoints / gamesPlayed) * 10) / 10 : 0,
           avgRebounds:
-            gamesPlayed > 0
-              ? Math.round((aggregated.totalRebounds / gamesPlayed) * 10) / 10
-              : 0,
+            gamesPlayed > 0 ? Math.round((aggregated.totalRebounds / gamesPlayed) * 10) / 10 : 0,
           avgAssists:
-            gamesPlayed > 0
-              ? Math.round((aggregated.totalAssists / gamesPlayed) * 10) / 10
-              : 0,
+            gamesPlayed > 0 ? Math.round((aggregated.totalAssists / gamesPlayed) * 10) / 10 : 0,
           fieldGoalPercentage:
             aggregated.totalFieldGoalsAttempted > 0
               ? Math.round(
-                  (aggregated.totalFieldGoalsMade /
-                    aggregated.totalFieldGoalsAttempted) *
-                    1000
+                  (aggregated.totalFieldGoalsMade / aggregated.totalFieldGoalsAttempted) * 1000
                 ) / 10
               : 0,
         };
@@ -381,24 +362,16 @@ export const getLeagueLeaders = query({
             break;
           case "fieldGoalPercentage":
             if (aggregated.totalFieldGoalsAttempted < 10) return null;
-            value =
-              (aggregated.totalFieldGoalsMade /
-                aggregated.totalFieldGoalsAttempted) *
-              100;
+            value = (aggregated.totalFieldGoalsMade / aggregated.totalFieldGoalsAttempted) * 100;
             break;
           case "threePointPercentage":
             if (aggregated.totalThreePointersAttempted < 5) return null;
             value =
-              (aggregated.totalThreePointersMade /
-                aggregated.totalThreePointersAttempted) *
-              100;
+              (aggregated.totalThreePointersMade / aggregated.totalThreePointersAttempted) * 100;
             break;
           case "freeThrowPercentage":
             if (aggregated.totalFreeThrowsAttempted < 5) return null;
-            value =
-              (aggregated.totalFreeThrowsMade /
-                aggregated.totalFreeThrowsAttempted) *
-              100;
+            value = (aggregated.totalFreeThrowsMade / aggregated.totalFreeThrowsAttempted) * 100;
             break;
           default:
             value = 0;
@@ -492,16 +465,12 @@ export const getDashboard = query({
           team: team?.name || "Unknown",
           gamesPlayed,
           avgPoints: Math.round((aggregated.totalPoints / gamesPlayed) * 10) / 10,
-          avgRebounds:
-            Math.round((aggregated.totalRebounds / gamesPlayed) * 10) / 10,
-          avgAssists:
-            Math.round((aggregated.totalAssists / gamesPlayed) * 10) / 10,
+          avgRebounds: Math.round((aggregated.totalRebounds / gamesPlayed) * 10) / 10,
+          avgAssists: Math.round((aggregated.totalAssists / gamesPlayed) * 10) / 10,
           fieldGoalPercentage:
             aggregated.totalFieldGoalsAttempted > 0
               ? Math.round(
-                  (aggregated.totalFieldGoalsMade /
-                    aggregated.totalFieldGoalsAttempted) *
-                    1000
+                  (aggregated.totalFieldGoalsMade / aggregated.totalFieldGoalsAttempted) * 1000
                 ) / 10
               : 0,
         };
@@ -535,12 +504,8 @@ export const getDashboard = query({
     // Calculate standings
     const standings = await Promise.all(
       teams.map(async (team) => {
-        const homeGames = completedGames.filter(
-          (g) => g.homeTeamId === team._id
-        );
-        const awayGames = completedGames.filter(
-          (g) => g.awayTeamId === team._id
-        );
+        const homeGames = completedGames.filter((g) => g.homeTeamId === team._id);
+        const awayGames = completedGames.filter((g) => g.awayTeamId === team._id);
 
         let wins = 0;
         let losses = 0;
@@ -556,8 +521,7 @@ export const getDashboard = query({
         }
 
         const gamesPlayed = wins + losses;
-        const winPercentage =
-          gamesPlayed > 0 ? Math.round((wins / gamesPlayed) * 1000) / 10 : 0;
+        const winPercentage = gamesPlayed > 0 ? Math.round((wins / gamesPlayed) * 1000) / 10 : 0;
 
         return {
           teamId: team._id,
@@ -615,10 +579,7 @@ export const getDashboard = query({
 });
 
 // Helper functions
-function emptyPlayerStats(
-  player: Doc<"players">,
-  team: Doc<"teams"> | undefined
-) {
+function emptyPlayerStats(player: Doc<"players">, team: Doc<"teams"> | undefined) {
   return {
     playerId: player._id,
     playerName: player.name,
@@ -663,14 +624,11 @@ function aggregateStats(stats: Doc<"playerStats">[]) {
     (acc, s) => ({
       totalPoints: acc.totalPoints + s.points,
       totalFieldGoalsMade: acc.totalFieldGoalsMade + s.fieldGoalsMade,
-      totalFieldGoalsAttempted:
-        acc.totalFieldGoalsAttempted + s.fieldGoalsAttempted,
+      totalFieldGoalsAttempted: acc.totalFieldGoalsAttempted + s.fieldGoalsAttempted,
       totalThreePointersMade: acc.totalThreePointersMade + s.threePointersMade,
-      totalThreePointersAttempted:
-        acc.totalThreePointersAttempted + s.threePointersAttempted,
+      totalThreePointersAttempted: acc.totalThreePointersAttempted + s.threePointersAttempted,
       totalFreeThrowsMade: acc.totalFreeThrowsMade + s.freeThrowsMade,
-      totalFreeThrowsAttempted:
-        acc.totalFreeThrowsAttempted + s.freeThrowsAttempted,
+      totalFreeThrowsAttempted: acc.totalFreeThrowsAttempted + s.freeThrowsAttempted,
       totalRebounds: acc.totalRebounds + s.rebounds,
       totalAssists: acc.totalAssists + s.assists,
       totalSteals: acc.totalSteals + s.steals,
@@ -732,8 +690,7 @@ function calculatePercentages(totals: ReturnType<typeof aggregateStats>) {
 
   const threePct =
     totals.totalThreePointersAttempted > 0
-      ? (totals.totalThreePointersMade / totals.totalThreePointersAttempted) *
-        100
+      ? (totals.totalThreePointersMade / totals.totalThreePointersAttempted) * 100
       : 0;
 
   const ftPct =
@@ -750,8 +707,7 @@ function calculatePercentages(totals: ReturnType<typeof aggregateStats>) {
       : 0;
 
   // True Shooting Percentage
-  const tsa =
-    totals.totalFieldGoalsAttempted + 0.44 * totals.totalFreeThrowsAttempted;
+  const tsa = totals.totalFieldGoalsAttempted + 0.44 * totals.totalFreeThrowsAttempted;
   const tsPct = tsa > 0 ? (totals.totalPoints / (2 * tsa)) * 100 : 0;
 
   return {
@@ -803,15 +759,11 @@ function calculateAdvancedStats(
     totals.totalTurnovers;
   const estimatedTeamPossessions = gamesPlayed * 100;
   const usageRate =
-    estimatedTeamPossessions > 0
-      ? (playerPossessions / estimatedTeamPossessions) * 100
-      : 0;
+    estimatedTeamPossessions > 0 ? (playerPossessions / estimatedTeamPossessions) * 100 : 0;
 
   // Assist to Turnover Ratio
   const astTo =
-    totals.totalTurnovers > 0
-      ? totals.totalAssists / totals.totalTurnovers
-      : totals.totalAssists;
+    totals.totalTurnovers > 0 ? totals.totalAssists / totals.totalTurnovers : totals.totalAssists;
 
   return {
     playerEfficiencyRating: Math.round(Math.max(per, 0) * 10) / 10,

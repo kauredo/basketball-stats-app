@@ -4,12 +4,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-import {
-  PlusIcon,
-  UsersIcon,
-  TrophyIcon,
-  CalendarIcon,
-} from "@heroicons/react/24/outline";
+import { PlusIcon, UsersIcon, TrophyIcon, CalendarIcon } from "@heroicons/react/24/outline";
 
 export default function LeagueSelectionPage() {
   const { token, selectedLeague, selectLeague, user, logout } = useAuth();
@@ -86,9 +81,7 @@ export default function LeagueSelectionPage() {
             <div className="flex items-center">
               <Icon name="basketball" size={32} className="mr-3 text-orange-600" />
               <div>
-                <h1 className="text-2xl font-bold text-white">
-                  Basketball Stats
-                </h1>
+                <h1 className="text-2xl font-bold text-white">Basketball Stats</h1>
                 <p className="text-gray-400">Select a league to continue</p>
               </div>
             </div>
@@ -99,10 +92,7 @@ export default function LeagueSelectionPage() {
                 </p>
                 <p className="text-xs text-gray-400">{user?.email}</p>
               </div>
-              <button
-                onClick={handleLogout}
-                className="text-gray-400 hover:text-white text-sm"
-              >
+              <button onClick={handleLogout} className="text-gray-400 hover:text-white text-sm">
                 Sign Out
               </button>
             </div>
@@ -139,9 +129,7 @@ export default function LeagueSelectionPage() {
                       onClick={() => handleSelectLeague(league)}
                     >
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-medium text-white">
-                          {league.name}
-                        </h3>
+                        <h3 className="text-lg font-medium text-white">{league.name}</h3>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                           {league.leagueType}
                         </span>
@@ -195,9 +183,7 @@ export default function LeagueSelectionPage() {
           <div className="mb-8">
             <div className="bg-gray-800 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4 w-full">
-                <h2 className="text-lg font-medium text-white">
-                  Join a League
-                </h2>
+                <h2 className="text-lg font-medium text-white">Join a League</h2>
                 <button
                   onClick={() => setShowJoinForm(!showJoinForm)}
                   className="inline-flex items-center px-3 py-2 border border-gray-600 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700"
@@ -212,7 +198,7 @@ export default function LeagueSelectionPage() {
                   <input
                     type="text"
                     value={inviteCode}
-                    onChange={e => setInviteCode(e.target.value)}
+                    onChange={(e) => setInviteCode(e.target.value)}
                     placeholder="Enter invite code (e.g., league-name-123)"
                     className="flex-1 px-3 py-2 border border-gray-600 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   />
@@ -232,9 +218,7 @@ export default function LeagueSelectionPage() {
           {userLeagues.length === 0 && (
             <div className="text-center py-12">
               <TrophyIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-white">
-                No leagues available
-              </h3>
+              <h3 className="mt-2 text-sm font-medium text-white">No leagues available</h3>
               <p className="mt-1 text-sm text-gray-400">
                 Ask a league administrator for an invite code to join a league.
               </p>

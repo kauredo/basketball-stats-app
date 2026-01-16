@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
@@ -110,9 +104,7 @@ export default function GamesScreen() {
     return (
       <TouchableOpacity
         className={`bg-gray-800 rounded-xl p-4 mb-3 border ${
-          isGameLive
-            ? "border-primary-500 border-2 shadow-lg"
-            : "border-gray-700"
+          isGameLive ? "border-primary-500 border-2 shadow-lg" : "border-gray-700"
         }`}
         onPress={() => handleGamePress(game)}
         disabled={!canPress}
@@ -127,9 +119,7 @@ export default function GamesScreen() {
                 {getStatusLabel(game.status)}
               </Text>
             </View>
-            {isGameLive && (
-              <View className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />
-            )}
+            {isGameLive && <View className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />}
           </View>
 
           <View className="items-end">
@@ -157,18 +147,14 @@ export default function GamesScreen() {
           <View className="flex-row justify-between items-center w-full py-1">
             <Text
               className={`text-white text-base font-semibold flex-1 ${
-                winner === "away" && game.status === "completed"
-                  ? "text-green-400"
-                  : ""
+                winner === "away" && game.status === "completed" ? "text-green-400" : ""
               }`}
             >
               {game.awayTeam?.name || "Away Team"}
             </Text>
             <Text
               className={`text-white text-lg font-bold min-w-[30px] text-right ${
-                winner === "away" && game.status === "completed"
-                  ? "text-green-400"
-                  : ""
+                winner === "away" && game.status === "completed" ? "text-green-400" : ""
               }`}
             >
               {game.awayScore}
@@ -180,18 +166,14 @@ export default function GamesScreen() {
           <View className="flex-row justify-between items-center w-full py-1">
             <Text
               className={`text-white text-base font-semibold flex-1 ${
-                winner === "home" && game.status === "completed"
-                  ? "text-green-400"
-                  : ""
+                winner === "home" && game.status === "completed" ? "text-green-400" : ""
               }`}
             >
               {game.homeTeam?.name || "Home Team"}
             </Text>
             <Text
               className={`text-white text-lg font-bold min-w-[30px] text-right ${
-                winner === "home" && game.status === "completed"
-                  ? "text-green-400"
-                  : ""
+                winner === "home" && game.status === "completed" ? "text-green-400" : ""
               }`}
             >
               {game.homeScore}
@@ -203,9 +185,7 @@ export default function GamesScreen() {
           <View className="flex-row justify-between mt-2 pt-2 border-t border-gray-700">
             <Text className="text-gray-400 text-xs">Final</Text>
             {winner !== "tie" && (
-              <Text className="text-gray-400 text-xs">
-                Margin: {getPointDifferential(game)}
-              </Text>
+              <Text className="text-gray-400 text-xs">Margin: {getPointDifferential(game)}</Text>
             )}
           </View>
         )}
@@ -227,22 +207,13 @@ export default function GamesScreen() {
       <FlatList
         data={sortedGames}
         renderItem={renderGame}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         className="p-4"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListEmptyComponent={
           <View className="items-center justify-center pt-15">
-            <Icon
-              name="basketball"
-              size={48}
-              color="#6B7280"
-              className="mb-4"
-            />
-            <Text className="text-white text-lg font-bold mb-2">
-              No games found
-            </Text>
+            <Icon name="basketball" size={48} color="#6B7280" className="mb-4" />
+            <Text className="text-white text-lg font-bold mb-2">No games found</Text>
             <Text className="text-gray-400 text-sm text-center leading-5">
               Games will appear here once they're scheduled
             </Text>

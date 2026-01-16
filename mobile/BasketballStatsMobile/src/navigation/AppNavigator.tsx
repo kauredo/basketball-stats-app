@@ -52,9 +52,7 @@ function TabNavigator() {
           } else if (route.name === "Teams") {
             return <FontAwesome5 name="users" size={size} color={color} />;
           } else if (route.name === "Games") {
-            return (
-              <FontAwesome5 name="basketball-ball" size={size} color={color} />
-            );
+            return <FontAwesome5 name="basketball-ball" size={size} color={color} />;
           } else if (route.name === "Profile") {
             return <FontAwesome5 name="user" size={size} color={color} />;
           }
@@ -143,10 +141,7 @@ function AppContent() {
         <AuthNavigator />
       ) : !selectedLeague ? (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen
-            name="LeagueSelection"
-            component={LeagueSelectionScreen}
-          />
+          <Stack.Screen name="LeagueSelection" component={LeagueSelectionScreen} />
         </Stack.Navigator>
       ) : (
         <Stack.Navigator
@@ -160,11 +155,7 @@ function AppContent() {
             },
           }}
         >
-          <Stack.Screen
-            name="Main"
-            component={TabNavigator}
-            options={{ headerShown: false }}
-          />
+          <Stack.Screen name="Main" component={TabNavigator} options={{ headerShown: false }} />
           <Stack.Screen
             name="LiveGame"
             component={LiveGameScreen}
@@ -187,4 +178,3 @@ function AppContent() {
 export default function AppNavigator() {
   return <AppContent />;
 }
-

@@ -1,6 +1,6 @@
-import React from 'react';
-import { TouchableOpacity, Text, ActivityIndicator, View } from 'react-native';
-import { getButtonStyles, ButtonProps } from '@basketball-stats/shared/src/components/Button';
+import React from "react";
+import { TouchableOpacity, Text, ActivityIndicator, View } from "react-native";
+import { getButtonStyles, ButtonProps } from "@basketball-stats/shared/src/components/Button";
 
 interface NativeButtonProps extends ButtonProps {
   onPress: () => void;
@@ -11,19 +11,19 @@ interface NativeButtonProps extends ButtonProps {
 export default function Button({
   onPress,
   children,
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   disabled = false,
   loading = false,
   fullWidth = false,
-  className = ''
+  className = "",
 }: NativeButtonProps) {
   const buttonStyles = getButtonStyles({
     variant,
     size,
     disabled: disabled || loading,
     loading,
-    fullWidth
+    fullWidth,
   });
 
   return (
@@ -35,19 +35,17 @@ export default function Button({
     >
       {loading ? (
         <View className="flex-row items-center">
-          <ActivityIndicator 
-            color={variant === 'primary' ? '#FFFFFF' : '#EA580C'}
+          <ActivityIndicator
+            color={variant === "primary" ? "#FFFFFF" : "#EA580C"}
             size="small"
             className="mr-2"
           />
           <Text className="text-current font-medium">
-            {typeof children === 'string' ? children : 'Loading...'}
+            {typeof children === "string" ? children : "Loading..."}
           </Text>
         </View>
       ) : (
-        <Text className="text-current font-medium">
-          {children}
-        </Text>
+        <Text className="text-current font-medium">{children}</Text>
       )}
     </TouchableOpacity>
   );

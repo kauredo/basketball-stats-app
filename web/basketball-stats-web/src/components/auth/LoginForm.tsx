@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import Icon from '../Icon';
+import React, { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import Icon from "../Icon";
 
 interface LoginFormProps {
   onSwitchToSignup: () => void;
@@ -8,8 +8,8 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }: LoginFormProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +30,8 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
       await login(email.trim().toLowerCase(), password);
       // Navigation will be handled by the auth state change
     } catch (err: any) {
-      console.error('Login error:', err);
-      setError(err.message || 'Failed to sign in. Please check your credentials.');
+      console.error("Login error:", err);
+      setError(err.message || "Failed to sign in. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +48,7 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
             Sign in to your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-400">
-            Or{' '}
+            Or{" "}
             <button
               onClick={onSwitchToSignup}
               className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none"
@@ -92,7 +92,7 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
                   value={password}
@@ -106,7 +106,11 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
-                  <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} className="text-gray-400 hover:text-gray-300" />
+                  <Icon
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={20}
+                    className="text-gray-400 hover:text-gray-300"
+                  />
                 </button>
               </div>
             </div>
@@ -128,7 +132,7 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
               disabled={isLoading || !email.trim() || !password.trim()}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>

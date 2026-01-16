@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import Icon from '../Icon';
+import React, { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import Icon from "../Icon";
 
 interface SignupFormProps {
   onSwitchToLogin: () => void;
@@ -8,11 +8,11 @@ interface SignupFormProps {
 
 export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    passwordConfirmation: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    passwordConfirmation: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -22,34 +22,34 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
   const { signup } = useAuth();
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const validateForm = () => {
     const { firstName, lastName, email, password, passwordConfirmation } = formData;
 
     if (!firstName.trim()) {
-      return 'Please enter your first name';
+      return "Please enter your first name";
     }
 
     if (!lastName.trim()) {
-      return 'Please enter your last name';
+      return "Please enter your last name";
     }
 
     if (!email.trim()) {
-      return 'Please enter your email';
+      return "Please enter your email";
     }
 
-    if (!email.includes('@')) {
-      return 'Please enter a valid email address';
+    if (!email.includes("@")) {
+      return "Please enter a valid email address";
     }
 
     if (password.length < 6) {
-      return 'Password must be at least 6 characters';
+      return "Password must be at least 6 characters";
     }
 
     if (password !== passwordConfirmation) {
-      return 'Passwords do not match';
+      return "Passwords do not match";
     }
 
     return null;
@@ -76,8 +76,8 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
       );
       // Navigation will be handled by the auth state change
     } catch (err: any) {
-      console.error('Signup error:', err);
-      setError(err.message || 'Failed to create account. Please try again.');
+      console.error("Signup error:", err);
+      setError(err.message || "Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +94,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
             Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-400">
-            Or{' '}
+            Or{" "}
             <button
               onClick={onSwitchToLogin}
               className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none"
@@ -124,7 +124,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   autoComplete="given-name"
                   required
                   value={formData.firstName}
-                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  onChange={(e) => handleInputChange("firstName", e.target.value)}
                   className="mt-1 relative block w-full px-3 py-2 border border-gray-600 bg-gray-800 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                   placeholder="John"
                   disabled={isLoading}
@@ -142,7 +142,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   autoComplete="family-name"
                   required
                   value={formData.lastName}
-                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  onChange={(e) => handleInputChange("lastName", e.target.value)}
                   className="mt-1 relative block w-full px-3 py-2 border border-gray-600 bg-gray-800 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                   placeholder="Doe"
                   disabled={isLoading}
@@ -161,7 +161,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                 autoComplete="email"
                 required
                 value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                onChange={(e) => handleInputChange("email", e.target.value)}
                 className="mt-1 relative block w-full px-3 py-2 border border-gray-600 bg-gray-800 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                 placeholder="john.doe@example.com"
                 disabled={isLoading}
@@ -176,11 +176,11 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   required
                   value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
                   className="relative block w-full px-3 py-2 pr-10 border border-gray-600 bg-gray-800 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                   placeholder="Enter password (min. 6 chars)"
                   disabled={isLoading}
@@ -191,25 +191,32 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   <span className="text-gray-400 hover:text-gray-300">
-                    <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} className="text-gray-400 hover:text-gray-300" />
+                    <Icon
+                      name={showPassword ? "eye-off" : "eye"}
+                      size={20}
+                      className="text-gray-400 hover:text-gray-300"
+                    />
                   </span>
                 </button>
               </div>
             </div>
 
             <div>
-              <label htmlFor="passwordConfirmation" className="block text-sm font-medium text-gray-300">
+              <label
+                htmlFor="passwordConfirmation"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Confirm password
               </label>
               <div className="mt-1 relative">
                 <input
                   id="passwordConfirmation"
                   name="passwordConfirmation"
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   autoComplete="new-password"
                   required
                   value={formData.passwordConfirmation}
-                  onChange={(e) => handleInputChange('passwordConfirmation', e.target.value)}
+                  onChange={(e) => handleInputChange("passwordConfirmation", e.target.value)}
                   className="relative block w-full px-3 py-2 pr-10 border border-gray-600 bg-gray-800 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                   placeholder="Confirm your password"
                   disabled={isLoading}
@@ -220,7 +227,11 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   <span className="text-gray-400 hover:text-gray-300">
-                    <Icon name={showConfirmPassword ? 'eye-off' : 'eye'} size={20} className="text-gray-400 hover:text-gray-300" />
+                    <Icon
+                      name={showConfirmPassword ? "eye-off" : "eye"}
+                      size={20}
+                      className="text-gray-400 hover:text-gray-300"
+                    />
                   </span>
                 </button>
               </div>
@@ -233,7 +244,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading ? "Creating account..." : "Create account"}
             </button>
           </div>
         </form>

@@ -45,9 +45,7 @@ export const list = query({
 
     // Filter by team if specified
     if (args.teamId) {
-      games = games.filter(
-        (g) => g.homeTeamId === args.teamId || g.awayTeamId === args.teamId
-      );
+      games = games.filter((g) => g.homeTeamId === args.teamId || g.awayTeamId === args.teamId);
     }
 
     // Sort by scheduled date (newest first)
@@ -123,18 +121,14 @@ export const get = query({
     const homePlayers = homeTeam
       ? await ctx.db
           .query("players")
-          .withIndex("by_team_active", (q) =>
-            q.eq("teamId", homeTeam._id).eq("active", true)
-          )
+          .withIndex("by_team_active", (q) => q.eq("teamId", homeTeam._id).eq("active", true))
           .collect()
       : [];
 
     const awayPlayers = awayTeam
       ? await ctx.db
           .query("players")
-          .withIndex("by_team_active", (q) =>
-            q.eq("teamId", awayTeam._id).eq("active", true)
-          )
+          .withIndex("by_team_active", (q) => q.eq("teamId", awayTeam._id).eq("active", true))
           .collect()
       : [];
 
@@ -157,25 +151,19 @@ export const get = query({
           fieldGoalsAttempted: stat.fieldGoalsAttempted,
           fieldGoalPercentage:
             stat.fieldGoalsAttempted > 0
-              ? Math.round(
-                  (stat.fieldGoalsMade / stat.fieldGoalsAttempted) * 1000
-                ) / 10
+              ? Math.round((stat.fieldGoalsMade / stat.fieldGoalsAttempted) * 1000) / 10
               : 0,
           threePointersMade: stat.threePointersMade,
           threePointersAttempted: stat.threePointersAttempted,
           threePointPercentage:
             stat.threePointersAttempted > 0
-              ? Math.round(
-                  (stat.threePointersMade / stat.threePointersAttempted) * 1000
-                ) / 10
+              ? Math.round((stat.threePointersMade / stat.threePointersAttempted) * 1000) / 10
               : 0,
           freeThrowsMade: stat.freeThrowsMade,
           freeThrowsAttempted: stat.freeThrowsAttempted,
           freeThrowPercentage:
             stat.freeThrowsAttempted > 0
-              ? Math.round(
-                  (stat.freeThrowsMade / stat.freeThrowsAttempted) * 1000
-                ) / 10
+              ? Math.round((stat.freeThrowsMade / stat.freeThrowsAttempted) * 1000) / 10
               : 0,
           rebounds: stat.rebounds,
           assists: stat.assists,
@@ -301,16 +289,12 @@ export const create = mutation({
     // Initialize player stats for all active players from both teams
     const homePlayers = await ctx.db
       .query("players")
-      .withIndex("by_team_active", (q) =>
-        q.eq("teamId", args.homeTeamId).eq("active", true)
-      )
+      .withIndex("by_team_active", (q) => q.eq("teamId", args.homeTeamId).eq("active", true))
       .collect();
 
     const awayPlayers = await ctx.db
       .query("players")
-      .withIndex("by_team_active", (q) =>
-        q.eq("teamId", args.awayTeamId).eq("active", true)
-      )
+      .withIndex("by_team_active", (q) => q.eq("teamId", args.awayTeamId).eq("active", true))
       .collect();
 
     // Create player stat records
@@ -498,8 +482,7 @@ export const timerTick = internalMutation({
     if (game.status !== "active") return;
 
     const newTime = Math.max(0, game.timeRemainingSeconds - 1);
-    const quarterMinutes =
-      (game.gameSettings as any)?.quarterMinutes || 12;
+    const quarterMinutes = (game.gameSettings as any)?.quarterMinutes || 12;
 
     if (newTime === 0) {
       if (game.currentQuarter < 4) {
@@ -556,16 +539,12 @@ export const getBoxScore = query({
     // Get stats by team
     const homeStats = await ctx.db
       .query("playerStats")
-      .withIndex("by_game_team", (q) =>
-        q.eq("gameId", args.gameId).eq("teamId", game.homeTeamId)
-      )
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", game.homeTeamId))
       .collect();
 
     const awayStats = await ctx.db
       .query("playerStats")
-      .withIndex("by_game_team", (q) =>
-        q.eq("gameId", args.gameId).eq("teamId", game.awayTeamId)
-      )
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", game.awayTeamId))
       .collect();
 
     const formatStats = async (stats: typeof homeStats) => {
@@ -609,16 +588,12 @@ export const getBoxScore = query({
       },
       boxScore: {
         homeTeam: {
-          team: homeTeam
-            ? { id: homeTeam._id, name: homeTeam.name, city: homeTeam.city }
-            : null,
+          team: homeTeam ? { id: homeTeam._id, name: homeTeam.name, city: homeTeam.city } : null,
           score: game.homeScore,
           players: await formatStats(homeStats),
         },
         awayTeam: {
-          team: awayTeam
-            ? { id: awayTeam._id, name: awayTeam.name, city: awayTeam.city }
-            : null,
+          team: awayTeam ? { id: awayTeam._id, name: awayTeam.name, city: awayTeam.city } : null,
           score: game.awayScore,
           players: await formatStats(awayStats),
         },

@@ -1,24 +1,29 @@
-import React, { useState } from 'react';
-import LoginForm from '../components/auth/LoginForm';
-import SignupForm from '../components/auth/SignupForm';
-import ForgotPasswordForm from '../components/auth/ForgotPasswordForm';
+import React, { useState } from "react";
+import LoginForm from "../components/auth/LoginForm";
+import SignupForm from "../components/auth/SignupForm";
+import ForgotPasswordForm from "../components/auth/ForgotPasswordForm";
 
-type AuthMode = 'login' | 'signup' | 'forgot-password';
+type AuthMode = "login" | "signup" | "forgot-password";
 
 export default function AuthPage() {
-  const [mode, setMode] = useState<AuthMode>('login');
+  const [mode, setMode] = useState<AuthMode>("login");
 
-  const handleSwitchToLogin = () => setMode('login');
-  const handleSwitchToSignup = () => setMode('signup');
-  const handleSwitchToForgotPassword = () => setMode('forgot-password');
+  const handleSwitchToLogin = () => setMode("login");
+  const handleSwitchToSignup = () => setMode("signup");
+  const handleSwitchToForgotPassword = () => setMode("forgot-password");
 
   switch (mode) {
-    case 'signup':
+    case "signup":
       return <SignupForm onSwitchToLogin={handleSwitchToLogin} />;
-    case 'forgot-password':
+    case "forgot-password":
       return <ForgotPasswordForm onBackToLogin={handleSwitchToLogin} />;
-    case 'login':
+    case "login":
     default:
-      return <LoginForm onSwitchToSignup={handleSwitchToSignup} onSwitchToForgotPassword={handleSwitchToForgotPassword} />;
+      return (
+        <LoginForm
+          onSwitchToSignup={handleSwitchToSignup}
+          onSwitchToForgotPassword={handleSwitchToForgotPassword}
+        />
+      );
   }
 }

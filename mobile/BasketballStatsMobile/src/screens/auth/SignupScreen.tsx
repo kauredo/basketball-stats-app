@@ -27,18 +27,16 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
     passwordConfirmation: "",
   });
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-    useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
 
   const { signup, isLoading, error, clearError } = useAuth();
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const validateForm = () => {
-    const { firstName, lastName, email, password, passwordConfirmation } =
-      formData;
+    const { firstName, lastName, email, password, passwordConfirmation } = formData;
 
     if (!firstName.trim()) {
       Alert.alert("Validation Error", "Please enter your first name");
@@ -110,12 +108,8 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
       >
         <View className="items-center mb-8">
           <Icon name="basketball" size={64} color="#EA580C" className="mb-4" />
-          <Text className="text-3xl font-bold text-white mb-2">
-            Create Account
-          </Text>
-          <Text className="text-base text-gray-400 text-center">
-            Join the basketball community
-          </Text>
+          <Text className="text-3xl font-bold text-white mb-2">Create Account</Text>
+          <Text className="text-base text-gray-400 text-center">Join the basketball community</Text>
         </View>
 
         <View className="mb-8">
@@ -127,9 +121,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
 
           <View className="flex-row gap-3">
             <View className="flex-1 mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">
-                First Name
-              </Text>
+              <Text className="text-sm font-semibold text-white mb-2">First Name</Text>
               <View className="relative">
                 <Icon
                   name="user"
@@ -140,7 +132,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                 <TextInput
                   className="bg-gray-800 border border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-white"
                   value={formData.firstName}
-                  onChangeText={value => handleInputChange("firstName", value)}
+                  onChangeText={(value) => handleInputChange("firstName", value)}
                   placeholder="John"
                   placeholderTextColor="#6B7280"
                   autoCapitalize="words"
@@ -150,9 +142,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
             </View>
 
             <View className="flex-1 mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">
-                Last Name
-              </Text>
+              <Text className="text-sm font-semibold text-white mb-2">Last Name</Text>
               <View className="relative">
                 <Icon
                   name="user"
@@ -163,7 +153,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                 <TextInput
                   className="bg-gray-800 border border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-white"
                   value={formData.lastName}
-                  onChangeText={value => handleInputChange("lastName", value)}
+                  onChangeText={(value) => handleInputChange("lastName", value)}
                   placeholder="Doe"
                   placeholderTextColor="#6B7280"
                   autoCapitalize="words"
@@ -176,16 +166,11 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
           <View className="mb-5">
             <Text className="text-sm font-semibold text-white mb-2">Email</Text>
             <View className="relative">
-              <Icon
-                name="mail"
-                size={20}
-                color="#6B7280"
-                className="absolute left-4 top-3 z-10"
-              />
+              <Icon name="mail" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
               <TextInput
                 className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-4 py-3 text-base text-white"
                 value={formData.email}
-                onChangeText={value => handleInputChange("email", value)}
+                onChangeText={(value) => handleInputChange("email", value)}
                 placeholder="john.doe@example.com"
                 placeholderTextColor="#6B7280"
                 keyboardType="email-address"
@@ -197,20 +182,13 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
           </View>
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-white mb-2">
-              Password
-            </Text>
+            <Text className="text-sm font-semibold text-white mb-2">Password</Text>
             <View className="relative">
-              <Icon
-                name="lock"
-                size={20}
-                color="#6B7280"
-                className="absolute left-4 top-3 z-10"
-              />
+              <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
               <TextInput
                 className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-white"
                 value={formData.password}
-                onChangeText={value => handleInputChange("password", value)}
+                onChangeText={(value) => handleInputChange("password", value)}
                 placeholder="Enter password (min. 6 chars)"
                 placeholderTextColor="#6B7280"
                 secureTextEntry={!isPasswordVisible}
@@ -220,32 +198,19 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                 className="absolute right-4 top-3"
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               >
-                <Icon
-                  name={isPasswordVisible ? "eye-off" : "eye"}
-                  size={20}
-                  color="#6B7280"
-                />
+                <Icon name={isPasswordVisible ? "eye-off" : "eye"} size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
           </View>
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-white mb-2">
-              Confirm Password
-            </Text>
+            <Text className="text-sm font-semibold text-white mb-2">Confirm Password</Text>
             <View className="relative">
-              <Icon
-                name="lock"
-                size={20}
-                color="#6B7280"
-                className="absolute left-4 top-3 z-10"
-              />
+              <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
               <TextInput
                 className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-white"
                 value={formData.passwordConfirmation}
-                onChangeText={value =>
-                  handleInputChange("passwordConfirmation", value)
-                }
+                onChangeText={(value) => handleInputChange("passwordConfirmation", value)}
                 placeholder="Confirm your password"
                 placeholderTextColor="#6B7280"
                 secureTextEntry={!isConfirmPasswordVisible}
@@ -253,9 +218,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
               />
               <TouchableOpacity
                 className="absolute right-4 top-3"
-                onPress={() =>
-                  setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
-                }
+                onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
               >
                 <Icon
                   name={isConfirmPasswordVisible ? "eye-off" : "eye"}
@@ -280,13 +243,9 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
         </View>
 
         <View className="flex-row justify-center items-center">
-          <Text className="text-gray-400 text-sm mr-2">
-            Already have an account?
-          </Text>
+          <Text className="text-gray-400 text-sm mr-2">Already have an account?</Text>
           <TouchableOpacity onPress={onNavigateToLogin} disabled={isLoading}>
-            <Text className="text-primary-500 text-sm font-semibold">
-              Sign In
-            </Text>
+            <Text className="text-primary-500 text-sm font-semibold">Sign In</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
