@@ -8,15 +8,22 @@
     "mobile/BasketballStatsMobile"
   ],
   "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "convex:dev": "convex dev",
-    "convex:deploy": "convex deploy",
-    "typecheck": "tsc --noEmit"
+    "convex:deploy": "convex deploy"
   },
   "devDependencies": {
-    "convex": "^1.31.5"
+    "convex": "^1.31.5",
+    "prettier": "^3.8.0",
+    "turbo": "^2.7.4"
   },
   "dependencies": {
     "@convex-dev/auth": "^0.0.90",
     "typescript": "^5.9.3"
-  }
+  },
+  "packageManager": "npm@10.9.2"
 }

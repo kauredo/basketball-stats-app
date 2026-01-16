@@ -70,3 +70,6 @@ coverage/
 # Expo
 **/.expo/
 **/web-build/
+
+# Turborepo
+.turbo/

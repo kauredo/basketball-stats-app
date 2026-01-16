@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+.expo/
+
+# Generated files
+convex/_generated/
+*.lock
+
+# Misc
+.turbo/
+coverage/
+*.log
