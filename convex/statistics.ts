@@ -771,3 +771,277 @@ function calculateAdvancedStats(
     assistToTurnoverRatio: Math.round(astTo * 100) / 100,
   };
 }
+
+// Compare two players
+export const comparePlayersStats = query({
+  args: {
+    token: v.string(),
+    player1Id: v.id("players"),
+    player2Id: v.id("players"),
+    leagueId: v.id("leagues"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const hasAccess = await canAccessLeague(ctx, user._id, args.leagueId);
+    if (!hasAccess) throw new Error("Access denied");
+
+    const player1 = await ctx.db.get(args.player1Id);
+    const player2 = await ctx.db.get(args.player2Id);
+
+    if (!player1 || !player2) throw new Error("Player not found");
+
+    const team1 = await ctx.db.get(player1.teamId);
+    const team2 = await ctx.db.get(player2.teamId);
+
+    // Get completed games in this league
+    const games = await ctx.db
+      .query("games")
+      .withIndex("by_league_status", (q) =>
+        q.eq("leagueId", args.leagueId).eq("status", "completed")
+      )
+      .collect();
+    const gameIds = new Set(games.map((g) => g._id));
+
+    // Get stats for both players
+    const getPlayerStats = async (playerId: typeof args.player1Id) => {
+      const allStats = await ctx.db
+        .query("playerStats")
+        .withIndex("by_player", (q) => q.eq("playerId", playerId))
+        .collect();
+      return allStats.filter((s) => gameIds.has(s.gameId));
+    };
+
+    const stats1 = await getPlayerStats(args.player1Id);
+    const stats2 = await getPlayerStats(args.player2Id);
+
+    const calculatePlayerComparison = (
+      player: typeof player1,
+      team: typeof team1,
+      stats: typeof stats1
+    ) => {
+      const gamesPlayed = stats.length;
+      if (gamesPlayed === 0) {
+        return {
+          playerId: player!._id,
+          playerName: player!.name,
+          teamName: team?.name || "Unknown",
+          position: player!.position,
+          number: player!.number,
+          gamesPlayed: 0,
+          avgPoints: 0,
+          avgRebounds: 0,
+          avgAssists: 0,
+          avgSteals: 0,
+          avgBlocks: 0,
+          avgTurnovers: 0,
+          avgMinutes: 0,
+          fieldGoalPercentage: 0,
+          threePointPercentage: 0,
+          freeThrowPercentage: 0,
+          totalPoints: 0,
+          totalRebounds: 0,
+          totalAssists: 0,
+        };
+      }
+
+      const totals = aggregateStats(stats);
+      const avgPoints = totals.totalPoints / gamesPlayed;
+      const avgRebounds = totals.totalRebounds / gamesPlayed;
+      const avgAssists = totals.totalAssists / gamesPlayed;
+      const avgSteals = totals.totalSteals / gamesPlayed;
+      const avgBlocks = totals.totalBlocks / gamesPlayed;
+      const avgTurnovers = totals.totalTurnovers / gamesPlayed;
+      const avgMinutes = totals.totalMinutes / gamesPlayed;
+
+      const fgPct =
+        totals.totalFieldGoalsAttempted > 0
+          ? (totals.totalFieldGoalsMade / totals.totalFieldGoalsAttempted) * 100
+          : 0;
+      const threePct =
+        totals.totalThreePointersAttempted > 0
+          ? (totals.totalThreePointersMade / totals.totalThreePointersAttempted) * 100
+          : 0;
+      const ftPct =
+        totals.totalFreeThrowsAttempted > 0
+          ? (totals.totalFreeThrowsMade / totals.totalFreeThrowsAttempted) * 100
+          : 0;
+
+      return {
+        playerId: player!._id,
+        playerName: player!.name,
+        teamName: team?.name || "Unknown",
+        position: player!.position,
+        number: player!.number,
+        gamesPlayed,
+        avgPoints: Math.round(avgPoints * 10) / 10,
+        avgRebounds: Math.round(avgRebounds * 10) / 10,
+        avgAssists: Math.round(avgAssists * 10) / 10,
+        avgSteals: Math.round(avgSteals * 10) / 10,
+        avgBlocks: Math.round(avgBlocks * 10) / 10,
+        avgTurnovers: Math.round(avgTurnovers * 10) / 10,
+        avgMinutes: Math.round(avgMinutes * 10) / 10,
+        fieldGoalPercentage: Math.round(fgPct * 10) / 10,
+        threePointPercentage: Math.round(threePct * 10) / 10,
+        freeThrowPercentage: Math.round(ftPct * 10) / 10,
+        totalPoints: totals.totalPoints,
+        totalRebounds: totals.totalRebounds,
+        totalAssists: totals.totalAssists,
+      };
+    };
+
+    return {
+      player1: calculatePlayerComparison(player1, team1, stats1),
+      player2: calculatePlayerComparison(player2, team2, stats2),
+    };
+  },
+});
+
+// Get comprehensive league standings
+export const getStandings = query({
+  args: {
+    token: v.string(),
+    leagueId: v.id("leagues"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const hasAccess = await canAccessLeague(ctx, user._id, args.leagueId);
+    if (!hasAccess) throw new Error("Access denied");
+
+    const league = await ctx.db.get(args.leagueId);
+
+    // Get all teams
+    const teams = await ctx.db
+      .query("teams")
+      .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
+      .collect();
+
+    // Get completed games
+    const completedGames = await ctx.db
+      .query("games")
+      .withIndex("by_league_status", (q) =>
+        q.eq("leagueId", args.leagueId).eq("status", "completed")
+      )
+      .collect();
+
+    // Calculate standings for each team
+    const standings = teams.map((team) => {
+      const homeGames = completedGames.filter((g) => g.homeTeamId === team._id);
+      const awayGames = completedGames.filter((g) => g.awayTeamId === team._id);
+      const allTeamGames = [...homeGames, ...awayGames].sort(
+        (a, b) => (b.endedAt || 0) - (a.endedAt || 0)
+      );
+
+      let wins = 0;
+      let losses = 0;
+      let homeWins = 0;
+      let homeLosses = 0;
+      let awayWins = 0;
+      let awayLosses = 0;
+      let pointsFor = 0;
+      let pointsAgainst = 0;
+
+      for (const game of homeGames) {
+        pointsFor += game.homeScore;
+        pointsAgainst += game.awayScore;
+        if (game.homeScore > game.awayScore) {
+          wins++;
+          homeWins++;
+        } else {
+          losses++;
+          homeLosses++;
+        }
+      }
+
+      for (const game of awayGames) {
+        pointsFor += game.awayScore;
+        pointsAgainst += game.homeScore;
+        if (game.awayScore > game.homeScore) {
+          wins++;
+          awayWins++;
+        } else {
+          losses++;
+          awayLosses++;
+        }
+      }
+
+      // Calculate last 5 games streak
+      const last5 = allTeamGames.slice(0, 5).map((game) => {
+        const isHome = game.homeTeamId === team._id;
+        const teamScore = isHome ? game.homeScore : game.awayScore;
+        const oppScore = isHome ? game.awayScore : game.homeScore;
+        return teamScore > oppScore ? "W" : "L";
+      });
+
+      // Calculate current streak
+      let streak = 0;
+      let streakType: "W" | "L" | null = null;
+      for (const result of last5) {
+        if (streakType === null) {
+          streakType = result as "W" | "L";
+          streak = 1;
+        } else if (result === streakType) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+
+      const gamesPlayed = wins + losses;
+      const winPercentage = gamesPlayed > 0 ? wins / gamesPlayed : 0;
+      const pointDiff = pointsFor - pointsAgainst;
+      const avgPointsFor = gamesPlayed > 0 ? pointsFor / gamesPlayed : 0;
+      const avgPointsAgainst = gamesPlayed > 0 ? pointsAgainst / gamesPlayed : 0;
+
+      return {
+        teamId: team._id,
+        teamName: team.name,
+        city: team.city,
+        gamesPlayed,
+        wins,
+        losses,
+        winPercentage: Math.round(winPercentage * 1000) / 10,
+        homeRecord: `${homeWins}-${homeLosses}`,
+        awayRecord: `${awayWins}-${awayLosses}`,
+        pointsFor,
+        pointsAgainst,
+        pointDiff,
+        avgPointsFor: Math.round(avgPointsFor * 10) / 10,
+        avgPointsAgainst: Math.round(avgPointsAgainst * 10) / 10,
+        last5,
+        streak: streakType ? `${streakType}${streak}` : "-",
+        streakCount: streak,
+        streakType,
+      };
+    });
+
+    // Sort by wins, then win percentage, then point differential
+    standings.sort((a, b) => {
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
+      return b.pointDiff - a.pointDiff;
+    });
+
+    // Add ranking
+    const rankedStandings = standings.map((team, index) => ({
+      ...team,
+      rank: index + 1,
+      gamesBack:
+        index === 0 ? 0 : (standings[0].wins - team.wins + (team.losses - standings[0].losses)) / 2,
+    }));
+
+    return {
+      standings: rankedStandings,
+      league: {
+        id: league?._id,
+        name: league?.name,
+        season: league?.season,
+        status: league?.status,
+      },
+      totalGames: completedGames.length,
+    };
+  },
+});

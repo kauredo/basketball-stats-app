@@ -9,7 +9,10 @@ import {
   ChartBarIcon,
   ArrowUpIcon,
   ArrowDownIcon,
+  ArrowDownTrayIcon,
+  PrinterIcon,
 } from "@heroicons/react/24/outline";
+import { exportToCSV, playerStatsColumns, printPage } from "../utils/export";
 import {
   ResponsiveContainer,
   LineChart,
@@ -224,11 +227,38 @@ export default function Statistics() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-white">Statistics Dashboard</h1>
-        <p className="text-gray-400">
-          {selectedLeague.name} - {selectedLeague.season}
-        </p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Statistics Dashboard</h1>
+          <p className="text-gray-400">
+            {selectedLeague.name} - {selectedLeague.season}
+          </p>
+        </div>
+        {/* Export Buttons */}
+        <div className="flex space-x-2">
+          <button
+            onClick={() => {
+              if (playersData?.players && playersData.players.length > 0) {
+                const filename = `player_stats_${selectedLeague.name}_${new Date().toISOString().split("T")[0]}`;
+                exportToCSV(playersData.players, playerStatsColumns, filename);
+              }
+            }}
+            disabled={!playersData?.players?.length}
+            className="flex items-center space-x-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Export Player Stats to CSV"
+          >
+            <ArrowDownTrayIcon className="w-4 h-4" />
+            <span>Export CSV</span>
+          </button>
+          <button
+            onClick={printPage}
+            className="flex items-center space-x-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm transition-colors"
+            title="Print / Save as PDF"
+          >
+            <PrinterIcon className="w-4 h-4" />
+            <span>Print</span>
+          </button>
+        </div>
       </div>
 
       {/* Tab Navigation */}

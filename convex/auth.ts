@@ -56,6 +56,14 @@ export const signup = mutation({
     // Generate confirmation token
     const confirmationToken = generateToken(32);
 
+    // TODO: Send confirmation email with Resend
+    // When you have a domain and Resend API key configured:
+    // 1. Install resend: npm install resend
+    // 2. Create a Convex action to send email (actions can make external API calls)
+    // 3. Call the action here with: { to: args.email, confirmationToken, firstName: args.firstName }
+    // 4. Email should contain link: https://yourdomain.com/confirm-email?token={confirmationToken}
+    // For now, users can log in without email confirmation (see login handler)
+
     // Create user
     const userId = await ctx.db.insert("users", {
       email: args.email.toLowerCase(),
@@ -295,8 +303,21 @@ export const requestPasswordReset = mutation({
       resetPasswordSentAt: Date.now(),
     });
 
-    // TODO: Send email with reset link
-    // In production, you would trigger an email here
+    // TODO: Send password reset email with Resend
+    // When you have a domain and Resend API key configured:
+    // 1. Create a Convex action (e.g., sendPasswordResetEmail) that uses Resend SDK
+    // 2. Call the action with: { to: user.email, resetToken, firstName: user.firstName }
+    // 3. Email should contain link: https://yourdomain.com/reset-password?token={resetToken}
+    // 4. The token expires in 1 hour (RESET_TOKEN_EXPIRY in lib/auth.ts)
+    // Example Resend action:
+    //   import { Resend } from 'resend';
+    //   const resend = new Resend(process.env.RESEND_API_KEY);
+    //   await resend.emails.send({
+    //     from: 'noreply@yourdomain.com',
+    //     to: email,
+    //     subject: 'Reset your password',
+    //     html: `<p>Click <a href="https://yourdomain.com/reset-password?token=${resetToken}">here</a> to reset your password.</p>`
+    //   });
 
     return { message: "If an account exists with this email, a reset link has been sent." };
   },
@@ -397,5 +418,75 @@ export const validateToken = query({
       valid: true,
       user: formatUser(user),
     };
+  },
+});
+
+// Update user profile
+export const updateProfile = mutation({
+  args: {
+    token: v.string(),
+    firstName: v.string(),
+    lastName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    if (!args.firstName.trim() || !args.lastName.trim()) {
+      throw new Error("First name and last name are required");
+    }
+
+    await ctx.db.patch(user._id, {
+      firstName: args.firstName.trim(),
+      lastName: args.lastName.trim(),
+    });
+
+    const updatedUser = await ctx.db.get(user._id);
+    if (!updatedUser) throw new Error("User not found");
+
+    return {
+      user: formatUser(updatedUser),
+      message: "Profile updated successfully",
+    };
+  },
+});
+
+// Change password
+export const changePassword = mutation({
+  args: {
+    token: v.string(),
+    currentPassword: v.string(),
+    newPassword: v.string(),
+    newPasswordConfirmation: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    // Verify current password
+    const isValid = await verifyPassword(args.currentPassword, user.passwordHash);
+    if (!isValid) {
+      throw new Error("Current password is incorrect");
+    }
+
+    // Validate new password
+    const passwordCheck = isValidPassword(args.newPassword);
+    if (!passwordCheck.valid) {
+      throw new Error(passwordCheck.message!);
+    }
+
+    if (args.newPassword !== args.newPasswordConfirmation) {
+      throw new Error("New passwords do not match");
+    }
+
+    // Hash and update password
+    const passwordHash = await hashPassword(args.newPassword);
+    await ctx.db.patch(user._id, { passwordHash });
+
+    return { message: "Password changed successfully" };
   },
 });

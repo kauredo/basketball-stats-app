@@ -12,6 +12,8 @@ import {
   UserIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
+  TableCellsIcon,
+  ArrowsRightLeftIcon,
 } from "@heroicons/react/24/outline";
 
 interface LayoutProps {
@@ -20,7 +22,9 @@ interface LayoutProps {
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: HomeIcon },
+  { name: "Standings", href: "/standings", icon: TableCellsIcon },
   { name: "Statistics", href: "/statistics", icon: ChartBarIcon },
+  { name: "Compare", href: "/compare", icon: ArrowsRightLeftIcon },
   { name: "Games", href: "/games", icon: TrophyIcon },
   { name: "Teams", href: "/teams", icon: UserGroupIcon },
   { name: "Players", href: "/players", icon: UsersIcon },
