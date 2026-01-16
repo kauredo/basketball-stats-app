@@ -9,27 +9,21 @@ import React, {
 import { useMutation, useConvex } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
+import type { User as SharedUser, League as SharedLeague, LeagueRole } from "@basketball-stats/shared";
 
-interface User {
+// Extend shared types with Convex-specific ID types
+interface User extends Omit<SharedUser, "id"> {
   id: Id<"users">;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: "admin" | "user";
 }
 
-interface League {
+interface League extends Omit<SharedLeague, "id" | "ownerId" | "createdById" | "leagueType" | "status"> {
   id: Id<"leagues">;
-  name: string;
-  description?: string;
   leagueType: string;
-  season: string;
   status: string;
-  isPublic: boolean;
   teamsCount: number;
   membersCount: number;
   gamesCount: number;
-  role?: string;
+  role?: LeagueRole;
   createdAt: number;
 }
 

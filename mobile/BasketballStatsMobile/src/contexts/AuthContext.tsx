@@ -3,26 +3,19 @@ import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import * as SecureStore from "expo-secure-store";
+import type { User as SharedUser, League as SharedLeague } from "@basketball-stats/shared";
 
-interface User {
+// Extend shared types with Convex-specific ID types
+interface User extends Omit<SharedUser, "id"> {
   id: Id<"users">;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
 }
 
-interface League {
+interface League extends Omit<SharedLeague, "id" | "ownerId" | "createdById" | "leagueType" | "status"> {
   id: Id<"leagues">;
-  name: string;
-  description?: string;
-  leagueType: string;
-  season: string;
+  leagueType: string; // String to match Convex API response
   status: string;
-  isPublic: boolean;
-  teamsCount?: number;
-  membersCount?: number;
-  gamesCount?: number;
+  ownerId?: string;
+  createdById?: string;
   membership?: {
     id?: string;
     role: string;

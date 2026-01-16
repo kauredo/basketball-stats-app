@@ -85,16 +85,23 @@ export const getGameShots = query({
     }
 
     // Get player info for each shot
-    const playerIds = [...new Set(shots.map((s) => s.playerId))];
+    const playerIds = Array.from(new Set(shots.map((s) => s.playerId)));
     const players = await Promise.all(playerIds.map((id) => ctx.db.get(id)));
-    const playerMap = new Map(players.filter(Boolean).map((p) => [p!._id, p!]));
+    const playerMap = new Map(
+      players
+        .filter((p): p is NonNullable<typeof p> => p !== null)
+        .map((p) => [p._id, p])
+    );
 
     return {
-      shots: shots.map((shot) => ({
-        ...shot,
-        playerName: playerMap.get(shot.playerId)?.name || "Unknown",
-        playerNumber: playerMap.get(shot.playerId)?.number || 0,
-      })),
+      shots: shots.map((shot) => {
+        const player = playerMap.get(shot.playerId);
+        return {
+          ...shot,
+          playerName: player?.name || "Unknown",
+          playerNumber: player?.number || 0,
+        };
+      }),
     };
   },
 });

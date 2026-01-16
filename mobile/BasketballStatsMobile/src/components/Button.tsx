@@ -1,6 +1,6 @@
 import React from "react";
 import { TouchableOpacity, Text, ActivityIndicator, View } from "react-native";
-import { getButtonStyles, ButtonProps } from "@basketball-stats/shared/src/components/Button";
+import { getButtonStyles, ButtonProps } from "@basketball-stats/shared";
 
 interface NativeButtonProps extends ButtonProps {
   onPress: () => void;

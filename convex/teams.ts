@@ -78,6 +78,14 @@ export const list = query({
               }
             : null,
           createdAt: team._creationTime,
+          // Include players for frontend use (player comparison, shot charts, etc.)
+          players: players.map((p) => ({
+            id: p._id,
+            name: p.name,
+            number: p.number,
+            position: p.position,
+            active: p.active,
+          })),
         };
       })
     );

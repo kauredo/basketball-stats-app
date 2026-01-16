@@ -1,4 +1,4 @@
-import type { PlayerStat, Player, Game, Position } from "../types";
+import type { PlayerStat, Game, Position } from "../types";
 import { format, formatDistanceToNow } from "date-fns";
 
 // Basketball calculation utilities
@@ -10,43 +10,43 @@ export class BasketballUtils {
   }
 
   static fieldGoalPercentage(stat: PlayerStat): number {
-    return this.calculatePercentage(stat.field_goals_made, stat.field_goals_attempted);
+    return this.calculatePercentage(stat.fieldGoalsMade, stat.fieldGoalsAttempted);
   }
 
   static threePointPercentage(stat: PlayerStat): number {
-    return this.calculatePercentage(stat.three_pointers_made, stat.three_pointers_attempted);
+    return this.calculatePercentage(stat.threePointersMade, stat.threePointersAttempted);
   }
 
   static freeThrowPercentage(stat: PlayerStat): number {
-    return this.calculatePercentage(stat.free_throws_made, stat.free_throws_attempted);
+    return this.calculatePercentage(stat.freeThrowsMade, stat.freeThrowsAttempted);
   }
 
   static effectiveFieldGoalPercentage(stat: PlayerStat): number {
-    if (stat.field_goals_attempted === 0) return 0;
-    const effectiveFGM = stat.field_goals_made + 0.5 * stat.three_pointers_made;
-    return this.calculatePercentage(effectiveFGM, stat.field_goals_attempted);
+    if (stat.fieldGoalsAttempted === 0) return 0;
+    const effectiveFGM = stat.fieldGoalsMade + 0.5 * stat.threePointersMade;
+    return this.calculatePercentage(effectiveFGM, stat.fieldGoalsAttempted);
   }
 
   static trueShootingPercentage(stat: PlayerStat): number {
-    const trueShootingAttempts = stat.field_goals_attempted + 0.44 * stat.free_throws_attempted;
+    const trueShootingAttempts = stat.fieldGoalsAttempted + 0.44 * stat.freeThrowsAttempted;
     if (trueShootingAttempts === 0) return 0;
     return Math.round((stat.points / (2 * trueShootingAttempts)) * 100 * 10) / 10;
   }
 
   // Player efficiency rating (simplified)
   static playerEfficiencyRating(stat: PlayerStat): number {
-    if (stat.minutes_played === 0) return 0;
+    if (stat.minutesPlayed === 0) return 0;
 
     const positive = stat.points + stat.rebounds + stat.assists + stat.steals + stat.blocks;
     const negative =
-      stat.field_goals_attempted -
-      stat.field_goals_made +
-      stat.free_throws_attempted -
-      stat.free_throws_made +
+      stat.fieldGoalsAttempted -
+      stat.fieldGoalsMade +
+      stat.freeThrowsAttempted -
+      stat.freeThrowsMade +
       stat.turnovers +
       stat.fouls;
 
-    return Math.round(((positive - negative) / stat.minutes_played) * 10) / 10;
+    return Math.round(((positive - negative) / stat.minutesPlayed) * 10) / 10;
   }
 
   // Game flow utilities
@@ -145,13 +145,13 @@ export class BasketballUtils {
 
   // Team and game utilities
   static getWinningTeam(game: Game): "home" | "away" | "tie" {
-    if (game.home_score > game.away_score) return "home";
-    if (game.away_score > game.home_score) return "away";
+    if (game.homeScore > game.awayScore) return "home";
+    if (game.awayScore > game.homeScore) return "away";
     return "tie";
   }
 
   static getPointDifferential(game: Game): number {
-    return Math.abs(game.home_score - game.away_score);
+    return Math.abs(game.homeScore - game.awayScore);
   }
 
   static isGameLive(game: Game): boolean {
@@ -166,31 +166,31 @@ export class BasketballUtils {
   static validateStatEntry(stat: PlayerStat): string[] {
     const errors: string[] = [];
 
-    if (stat.field_goals_made > stat.field_goals_attempted) {
+    if (stat.fieldGoalsMade > stat.fieldGoalsAttempted) {
       errors.push("Field goals made cannot exceed attempts");
     }
 
-    if (stat.three_pointers_made > stat.three_pointers_attempted) {
+    if (stat.threePointersMade > stat.threePointersAttempted) {
       errors.push("Three-pointers made cannot exceed attempts");
     }
 
-    if (stat.free_throws_made > stat.free_throws_attempted) {
+    if (stat.freeThrowsMade > stat.freeThrowsAttempted) {
       errors.push("Free throws made cannot exceed attempts");
     }
 
-    if (stat.three_pointers_made > stat.field_goals_made) {
+    if (stat.threePointersMade > stat.fieldGoalsMade) {
       errors.push("Three-pointers made cannot exceed total field goals made");
     }
 
-    if (stat.three_pointers_attempted > stat.field_goals_attempted) {
+    if (stat.threePointersAttempted > stat.fieldGoalsAttempted) {
       errors.push("Three-pointer attempts cannot exceed total field goal attempts");
     }
 
     // Validate points calculation
     const calculatedPoints =
-      (stat.field_goals_made - stat.three_pointers_made) * 2 +
-      stat.three_pointers_made * 3 +
-      stat.free_throws_made;
+      (stat.fieldGoalsMade - stat.threePointersMade) * 2 +
+      stat.threePointersMade * 3 +
+      stat.freeThrowsMade;
 
     if (stat.points !== calculatedPoints) {
       errors.push(`Points mismatch: expected ${calculatedPoints}, got ${stat.points}`);
@@ -229,12 +229,12 @@ export class BasketballUtils {
         blocks: acc.blocks + stat.blocks,
         turnovers: acc.turnovers + stat.turnovers,
         fouls: acc.fouls + stat.fouls,
-        field_goals_made: acc.field_goals_made + stat.field_goals_made,
-        field_goals_attempted: acc.field_goals_attempted + stat.field_goals_attempted,
-        three_pointers_made: acc.three_pointers_made + stat.three_pointers_made,
-        three_pointers_attempted: acc.three_pointers_attempted + stat.three_pointers_attempted,
-        free_throws_made: acc.free_throws_made + stat.free_throws_made,
-        free_throws_attempted: acc.free_throws_attempted + stat.free_throws_attempted,
+        fieldGoalsMade: acc.fieldGoalsMade + stat.fieldGoalsMade,
+        fieldGoalsAttempted: acc.fieldGoalsAttempted + stat.fieldGoalsAttempted,
+        threePointersMade: acc.threePointersMade + stat.threePointersMade,
+        threePointersAttempted: acc.threePointersAttempted + stat.threePointersAttempted,
+        freeThrowsMade: acc.freeThrowsMade + stat.freeThrowsMade,
+        freeThrowsAttempted: acc.freeThrowsAttempted + stat.freeThrowsAttempted,
       }),
       {
         points: 0,
@@ -244,28 +244,28 @@ export class BasketballUtils {
         blocks: 0,
         turnovers: 0,
         fouls: 0,
-        field_goals_made: 0,
-        field_goals_attempted: 0,
-        three_pointers_made: 0,
-        three_pointers_attempted: 0,
-        free_throws_made: 0,
-        free_throws_attempted: 0,
+        fieldGoalsMade: 0,
+        fieldGoalsAttempted: 0,
+        threePointersMade: 0,
+        threePointersAttempted: 0,
+        freeThrowsMade: 0,
+        freeThrowsAttempted: 0,
       }
     );
 
     return {
       ...totals,
-      field_goal_percentage: this.calculatePercentage(
-        totals.field_goals_made,
-        totals.field_goals_attempted
+      fieldGoalPercentage: this.calculatePercentage(
+        totals.fieldGoalsMade,
+        totals.fieldGoalsAttempted
       ),
-      three_point_percentage: this.calculatePercentage(
-        totals.three_pointers_made,
-        totals.three_pointers_attempted
+      threePointPercentage: this.calculatePercentage(
+        totals.threePointersMade,
+        totals.threePointersAttempted
       ),
-      free_throw_percentage: this.calculatePercentage(
-        totals.free_throws_made,
-        totals.free_throws_attempted
+      freeThrowPercentage: this.calculatePercentage(
+        totals.freeThrowsMade,
+        totals.freeThrowsAttempted
       ),
     };
   }

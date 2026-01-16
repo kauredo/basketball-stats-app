@@ -8,9 +8,9 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-import { RootStackParamList } from "../../App";
+import { RootStackParamList } from "../navigation/AppNavigator";
 
-type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Home">;
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface Game {
   id: Id<"games">;
@@ -187,41 +187,76 @@ export default function HomeScreen() {
         className="p-4"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {/* Quick Navigation Cards */}
+        {/* Quick Actions */}
         <View className="mb-6">
-          <Text className="text-white text-lg font-bold mb-3">Quick Navigation</Text>
-          <View className="flex-row flex-wrap justify-between -mx-1">
+          <Text className="text-white text-lg font-bold mb-3">Quick Actions</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-1">
             <TouchableOpacity
-              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 items-center justify-center shadow-sm"
-              onPress={() => navigation.navigate("Games")}
+              className="bg-primary-500 rounded-xl p-4 mr-3 items-center justify-center min-w-[100px]"
+              onPress={() => navigation.navigate("CreateGame")}
             >
-              <Icon name="basketball" size={24} color="#EA580C" />
-              <Text className="text-white text-base font-bold mt-2">All Games</Text>
+              <Icon name="basketball" size={24} color="#FFFFFF" />
+              <Text className="text-white text-sm font-bold mt-2">New Game</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 items-center justify-center shadow-sm"
-              onPress={() => navigation.navigate("Teams")}
+              className="bg-blue-600 rounded-xl p-4 mr-3 items-center justify-center min-w-[100px]"
+              onPress={() => navigation.navigate("CreateTeam")}
             >
-              <Icon name="users" size={24} color="#3B82F6" />
-              <Text className="text-white text-base font-bold mt-2">Teams</Text>
+              <Icon name="users" size={24} color="#FFFFFF" />
+              <Text className="text-white text-sm font-bold mt-2">New Team</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 items-center justify-center shadow-sm"
-              onPress={() => navigation.navigate("Statistics")}
+              className="bg-green-600 rounded-xl p-4 mr-3 items-center justify-center min-w-[100px]"
+              onPress={() => navigation.navigate("CreatePlayer")}
             >
-              <Icon name="stats" size={24} color="#10B981" />
-              <Text className="text-white text-base font-bold mt-2">Statistics</Text>
+              <Icon name="user" size={24} color="#FFFFFF" />
+              <Text className="text-white text-sm font-bold mt-2">Add Player</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 items-center justify-center shadow-sm"
-              onPress={() => navigation.navigate("Profile")}
+              className="bg-purple-600 rounded-xl p-4 mr-3 items-center justify-center min-w-[100px]"
+              onPress={() => navigation.navigate("Settings")}
             >
-              <Icon name="user" size={24} color="#8B5CF6" />
-              <Text className="text-white text-base font-bold mt-2">Profile</Text>
+              <Icon name="user" size={24} color="#FFFFFF" />
+              <Text className="text-white text-sm font-bold mt-2">Settings</Text>
             </TouchableOpacity>
+          </ScrollView>
+        </View>
+
+        {/* Analytics & Tools */}
+        <View className="mb-6">
+          <Text className="text-white text-lg font-bold mb-3">Analytics & Tools</Text>
+          <View className="flex-row flex-wrap justify-between">
+            <TouchableOpacity
+              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 flex-row items-center border border-gray-700"
+              onPress={() => navigation.navigate("PlayerComparison")}
+            >
+              <Icon name="users" size={20} color="#F97316" />
+              <Text className="text-white text-sm font-medium ml-3">Compare Players</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 flex-row items-center border border-gray-700"
+              onPress={() => navigation.navigate("ShotChart")}
+            >
+              <Icon name="stats" size={20} color="#3B82F6" />
+              <Text className="text-white text-sm font-medium ml-3">Shot Charts</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 flex-row items-center border border-gray-700"
+              onPress={() => navigation.navigate("Settings")}
+            >
+              <Icon name="settings" size={20} color="#10B981" />
+              <Text className="text-white text-sm font-medium ml-3">Settings</Text>
+            </TouchableOpacity>
+
+            <View className="w-[48%] bg-gray-700 rounded-xl p-4 mb-3 flex-row items-center border border-gray-600 opacity-70">
+              <Icon name="stats" size={20} color="#8B5CF6" />
+              <Text className="text-gray-400 text-sm font-medium ml-3">More via tabs</Text>
+            </View>
           </View>
         </View>
 

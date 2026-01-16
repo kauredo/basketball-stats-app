@@ -17,13 +17,25 @@ import PlayerStatsScreen from "../screens/PlayerStatsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import AuthNavigator from "./AuthNavigator";
 import LeagueSelectionScreen from "../screens/auth/LeagueSelectionScreen";
+import PlayerComparisonScreen from "../screens/PlayerComparisonScreen";
+import ShotChartScreen from "../screens/ShotChartScreen";
+import CreateGameScreen from "../screens/CreateGameScreen";
+import CreateTeamScreen from "../screens/CreateTeamScreen";
+import CreatePlayerScreen from "../screens/CreatePlayerScreen";
+import SettingsScreen from "../screens/SettingsScreen";
 
 // Navigation parameter types
 export type RootStackParamList = {
   Main: undefined;
-  LiveGame: { gameId: number };
-  PlayerStats: { playerId: number };
+  LiveGame: { gameId: string };
+  PlayerStats: { playerId: string };
   LeagueSelection: undefined;
+  PlayerComparison: undefined;
+  ShotChart: undefined;
+  CreateGame: undefined;
+  CreateTeam: undefined;
+  CreatePlayer: { teamId?: string } | undefined;
+  Settings: undefined;
 };
 
 export type TabParamList = {
@@ -168,6 +180,36 @@ function AppContent() {
             name="PlayerStats"
             component={PlayerStatsScreen}
             options={{ title: "Player Stats" }}
+          />
+          <Stack.Screen
+            name="PlayerComparison"
+            component={PlayerComparisonScreen}
+            options={{ title: "Player Comparison", headerShown: false }}
+          />
+          <Stack.Screen
+            name="ShotChart"
+            component={ShotChartScreen}
+            options={{ title: "Shot Chart", headerShown: false }}
+          />
+          <Stack.Screen
+            name="CreateGame"
+            component={CreateGameScreen}
+            options={{ title: "Create Game", headerShown: false }}
+          />
+          <Stack.Screen
+            name="CreateTeam"
+            component={CreateTeamScreen}
+            options={{ title: "Create Team", headerShown: false }}
+          />
+          <Stack.Screen
+            name="CreatePlayer"
+            component={CreatePlayerScreen}
+            options={{ title: "Add Player", headerShown: false }}
+          />
+          <Stack.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{ title: "Settings", headerShown: false }}
           />
         </Stack.Navigator>
       )}

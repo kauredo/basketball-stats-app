@@ -41,7 +41,9 @@ export type IconName =
   | "arrow-up"
   | "arrow-down"
   | "chevron-down"
-  | "chevron-up";
+  | "chevron-up"
+  | "chevron-right"
+  | "close";
 
 interface IconProps {
   name: IconName;
@@ -95,6 +97,8 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   "arrow-down": { library: "ionicons", name: "arrow-down" },
   "chevron-down": { library: "ionicons", name: "chevron-down" },
   "chevron-up": { library: "ionicons", name: "chevron-up" },
+  "chevron-right": { library: "ionicons", name: "chevron-forward" },
+  close: { library: "ionicons", name: "close" },
 };
 
 export default function Icon({ name, size = 24, color = "#6B7280", className }: IconProps) {

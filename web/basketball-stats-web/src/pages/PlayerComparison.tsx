@@ -354,6 +354,7 @@ const PlayerComparison: React.FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="#374151" />
+                  {/* @ts-expect-error - recharts types not fully compatible with React 19 */}
                   <PolarAngleAxis dataKey="stat" tick={{ fill: "#9CA3AF" }} />
                   <PolarRadiusAxis tick={{ fill: "#9CA3AF" }} />
                   <Radar

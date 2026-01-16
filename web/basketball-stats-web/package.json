@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@basketball-stats/shared": "*",
     "@convex-dev/auth": "0.0.90",
     "@heroicons/react": "^2.2.0",
     "@testing-library/dom": "^10.4.1",
