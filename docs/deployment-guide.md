@@ -1,131 +1,167 @@
 # Deployment Guide
 
-This guide explains how to deploy the Basketball Stats App. The application consists of multiple components (backend, web, mobile, shared) that can be deployed together using Docker.
+This guide explains how to deploy the Basketball Stats App.
+
+## Architecture
+
+- **Backend**: Convex (serverless, managed by Convex)
+- **Web**: React app (deploy to Vercel/Netlify)
+- **Mobile**: React Native + Expo (deploy via EAS)
 
 ## Prerequisites
 
-- Docker and Docker Compose installed
-- Node.js (for local development)
-- Ruby (for local development)
-- Git
+- Node.js 18+
+- npm 10+
+- Convex account ([convex.dev](https://convex.dev))
+- Expo account (for mobile builds)
 
-## Deployment Options
+## Backend Deployment (Convex)
 
-### Option 1: Local Docker Deployment
-
-This is the simplest way to run the entire stack locally:
+Convex handles backend infrastructure automatically. To deploy:
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/basketball-stats-app.git
-cd basketball-stats-app
-
-# Make the deploy script executable
-chmod +x deploy.sh
-
-# Deploy in development mode (interactive with logs)
-./deploy.sh development
-
-# Or deploy in production mode (detached)
-./deploy.sh production
+# Deploy to production
+npx convex deploy
 ```
 
-Alternatively, you can use the Makefile:
+This deploys all functions in `convex/` to your Convex project.
 
-```bash
-# Setup dependencies
-make setup
+### Environment Variables
 
-# Build and start the application
-make build
-make start
+Set production environment variables in the Convex dashboard:
+1. Go to [dashboard.convex.dev](https://dashboard.convex.dev)
+2. Select your project
+3. Go to Settings → Environment Variables
+4. Add any required variables
 
-# View logs
-make logs
+## Web Deployment
 
-# Stop the application
-make stop
-```
-
-### Option 2: Production Deployment with Docker
-
-For production environments:
-
-1. Set required environment variables:
-
-```bash
-export RAILS_MASTER_KEY=your_rails_master_key
-export DB_PASSWORD=your_secure_database_password
-```
-
-2. Deploy:
-
-```bash
-make deploy-prod
-```
-
-### Option 3: Deploying Individual Components
-
-If you prefer to deploy components separately:
-
-#### Backend (Rails API)
-
-```bash
-cd backend
-# Deploy using your preferred Rails hosting (Heroku, Railway, etc.)
-# Example for Heroku:
-heroku create
-git subtree push --prefix backend heroku main
-```
-
-#### Web Application (React)
+### Option 1: Vercel (Recommended)
 
 ```bash
 cd web/basketball-stats-web
-# Build the application
-npm run build
-# Deploy to Netlify, Vercel, etc.
+
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
 ```
 
-#### Mobile Application (React Native)
+Or connect your GitHub repo to Vercel for automatic deployments.
+
+### Option 2: Netlify
+
+```bash
+cd web/basketball-stats-web
+
+# Build
+npm run build
+
+# Deploy build/ folder to Netlify
+```
+
+### Environment Variables
+
+Set in your hosting platform:
+- `REACT_APP_CONVEX_URL` - Your Convex deployment URL (if not hardcoded)
+
+## Mobile Deployment
+
+### Setup EAS (Expo Application Services)
 
 ```bash
 cd mobile/BasketballStatsMobile
-# Build for iOS/Android
-expo build:ios
-expo build:android
-# Submit to app stores
+
+# Install EAS CLI
+npm install -g eas-cli
+
+# Login to Expo
+eas login
+
+# Configure project
+eas build:configure
 ```
 
-## Environment Configuration
+### Build for App Stores
 
-For production deployments, make sure to set the appropriate environment variables:
+```bash
+# iOS (requires Apple Developer account)
+eas build --platform ios
 
-- `RAILS_MASTER_KEY`: Required for Rails credentials
-- `DB_PASSWORD`: Secure password for the PostgreSQL database
-- `REACT_APP_API_URL`: URL of the backend API for the web app
-- `NODE_ENV`: Set to "production" for optimized builds
+# Android
+eas build --platform android
 
-## Continuous Integration / Continuous Deployment
+# Both platforms
+eas build --platform all
+```
 
-For CI/CD, you can use GitHub Actions or similar services:
+### Submit to Stores
 
-1. Create `.github/workflows/deploy.yml` with appropriate steps
-2. Configure secrets in your GitHub repository settings
-3. Deploy automatically on pushes to the main branch
+```bash
+# iOS App Store
+eas submit --platform ios
+
+# Google Play Store
+eas submit --platform android
+```
+
+## CI/CD
+
+### GitHub Actions Example
+
+Create `.github/workflows/deploy.yml`:
+
+```yaml
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-convex:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npx convex deploy
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
+  deploy-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: cd web/basketball-stats-web && npm run build
+      # Add your hosting provider's deploy action here
+```
+
+## Monitoring
+
+- **Convex Dashboard**: View logs, data, and function performance at [dashboard.convex.dev](https://dashboard.convex.dev)
+- **Web**: Use your hosting provider's analytics
+- **Mobile**: Use Expo's crash reporting and analytics
 
 ## Troubleshooting
 
-If you encounter issues:
+### Convex deployment fails
+- Check `npx convex dev` works locally first
+- Verify schema changes are valid
+- Check the Convex dashboard for error logs
 
-1. Check logs: `docker-compose logs`
-2. Verify environment variables are set correctly
-3. Ensure all containers are running: `docker-compose ps`
-4. Restart the application: `make restart`
+### Web build fails
+- Run `npm run typecheck` to find type errors
+- Ensure shared package is built: `cd shared && npm run build`
 
-## Additional Resources
-
-- Docker Documentation: https://docs.docker.com/
-- Rails Deployment Guides: https://guides.rubyonrails.org/deployment.html
-- React Deployment: https://create-react-app.dev/docs/deployment/
-- Expo Deployment: https://docs.expo.dev/distribution/app-stores/
+### Mobile build fails
+- Check Expo status: [status.expo.dev](https://status.expo.dev)
+- Review EAS build logs in Expo dashboard
+- Ensure `app.json` configuration is correct

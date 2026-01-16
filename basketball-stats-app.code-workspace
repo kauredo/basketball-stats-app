@@ -5,8 +5,8 @@
       "path": "."
     },
     {
-      "name": "Backend (Rails)",
-      "path": "./backend"
+      "name": "Convex (Backend)",
+      "path": "./convex"
     },
     {
       "name": "Web (React)",
@@ -19,10 +19,6 @@
     {
       "name": "Shared (TypeScript)",
       "path": "./shared"
-    },
-    {
-      "name": "Documentation",
-      "path": "./docs"
     },
     {
       "name": "VS Code Settings",
@@ -40,16 +36,15 @@
       "**/build": true,
       "**/coverage": true,
       "**/tmp": true,
-      "**/log": true
+      "**/.expo": true
     },
     "search.exclude": {
       "**/node_modules": true,
-      "**/bower_components": true,
       "**/build": true,
       "**/dist": true,
       "**/coverage": true,
-      "**/tmp": true,
-      "**/log": true
+      "**/.expo": true,
+      "**/convex/_generated": true
     },
     "[typescript]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -63,30 +58,16 @@
     "[javascriptreact]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "[ruby]": {
-      "editor.defaultFormatter": "rebornix.ruby"
+    "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "ruby.useBundler": true,
-    "ruby.useLanguageServer": true,
-    "ruby.lint": {
-      "rubocop": {
-        "useBundler": true
-      }
-    },
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "files.associations": {
-      "*.erb": "erb"
-    }
+    "typescript.tsdk": "node_modules/typescript/lib"
   },
   "extensions": {
     "recommendations": [
       "dbaeumer.vscode-eslint",
       "esbenp.prettier-vscode",
-      "rebornix.ruby",
-      "castwide.solargraph",
-      "kaiwood.endwise",
-      "ms-azuretools.vscode-docker",
-      "ms-vscode.vscode-typescript-tslint-plugin",
+      "bradlc.vscode-tailwindcss",
       "naumovs.color-highlight",
       "mikestead.dotenv",
       "eamodio.gitlens",
@@ -97,34 +78,76 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "Run Rails Server",
-        "type": "Ruby",
+        "name": "Web: Chrome",
+        "type": "chrome",
         "request": "launch",
-        "cwd": "${workspaceFolder}/backend",
-        "program": "${workspaceFolder}/backend/bin/rails",
-        "args": ["server", "-p", "3000"]
+        "url": "http://localhost:3000",
+        "webRoot": "${workspaceFolder}/web/basketball-stats-web/src"
       },
       {
-        "name": "Debug Rails",
-        "type": "Ruby",
+        "name": "Mobile: Debug iOS",
+        "type": "reactnative",
         "request": "launch",
-        "cwd": "${workspaceFolder}/backend",
-        "program": "${workspaceFolder}/backend/bin/rails",
-        "args": ["server"]
+        "platform": "ios",
+        "cwd": "${workspaceFolder}/mobile/BasketballStatsMobile"
       },
       {
-        "name": "Start React Web App",
-        "type": "node",
+        "name": "Mobile: Debug Android",
+        "type": "reactnative",
         "request": "launch",
-        "cwd": "${workspaceFolder}/web/basketball-stats-web",
-        "runtimeExecutable": "npm",
-        "runtimeArgs": ["start"]
+        "platform": "android",
+        "cwd": "${workspaceFolder}/mobile/BasketballStatsMobile"
       }
-    ],
-    "compounds": [
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
       {
-        "name": "Backend + Web",
-        "configurations": ["Run Rails Server", "Start React Web App"]
+        "label": "Convex: Dev Server",
+        "type": "shell",
+        "command": "npx convex dev",
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "Web: Start",
+        "type": "shell",
+        "command": "npm start",
+        "options": {
+          "cwd": "${workspaceFolder}/web/basketball-stats-web"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Mobile: Start Expo",
+        "type": "shell",
+        "command": "npx expo start",
+        "options": {
+          "cwd": "${workspaceFolder}/mobile/BasketballStatsMobile"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Shared: Build",
+        "type": "shell",
+        "command": "npm run build",
+        "options": {
+          "cwd": "${workspaceFolder}/shared"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Root: Type Check",
+        "type": "shell",
+        "command": "npm run typecheck",
+        "problemMatcher": []
+      },
+      {
+        "label": "Root: Format",
+        "type": "shell",
+        "command": "npm run format",
+        "problemMatcher": []
       }
     ]
   }
