@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../hooks/useAuthStore';
+import { useAuth } from '../contexts/AuthContext';
 import Icon from './Icon';
 import {
   HomeIcon,
@@ -28,7 +28,7 @@ const navigation = [
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
-  const { user, selectedLeague, logout } = useAuthStore();
+  const { user, selectedLeague, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleLogout = () => {

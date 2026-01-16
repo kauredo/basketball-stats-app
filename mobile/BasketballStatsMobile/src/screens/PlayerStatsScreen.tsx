@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,20 +6,15 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-  Dimensions,
 } from "react-native";
 import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
+import { useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-
-import {
-  basketballAPI,
-  Player,
-  PlayerStat,
-  BasketballUtils,
-} from "@basketball-stats/shared";
-
 import { RootStackParamList } from "../navigation/AppNavigator";
 
 type PlayerStatsRouteProp = RouteProp<RootStackParamList, "PlayerStats">;
@@ -27,8 +22,6 @@ type PlayerStatsNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "PlayerStats"
 >;
-
-const { width: screenWidth } = Dimensions.get("window");
 
 interface StatCategory {
   title: string;
@@ -43,193 +36,88 @@ export default function PlayerStatsScreen() {
   const route = useRoute<PlayerStatsRouteProp>();
   const navigation = useNavigation<PlayerStatsNavigationProp>();
   const { playerId } = route.params;
+  const { token } = useAuth();
 
-  const [player, setPlayer] = useState<Player | null>(null);
-  const [playerStats, setPlayerStats] = useState<PlayerStat[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<"season" | "recent">(
     "season"
   );
 
-  useEffect(() => {
-    loadPlayerData();
-  }, [playerId]);
+  // Fetch player data from Convex
+  const playerData = useQuery(
+    api.players.get,
+    token && playerId
+      ? { token, playerId: playerId as unknown as Id<"players"> }
+      : "skip"
+  );
 
-  const loadPlayerData = async (isRefresh = false) => {
-    try {
-      if (!isRefresh) setLoading(true);
-
-      // Load player details and stats
-      const [playerResponse, statsResponse] = await Promise.all([
-        basketballAPI.getPlayer(playerId),
-        basketballAPI.getPlayerStats(playerId),
-      ]);
-
-      setPlayer(playerResponse.player);
-      setPlayerStats(statsResponse.stats);
-
-      // Set navigation title to player name
-      navigation.setOptions({
-        title: `${playerResponse.player.name} Stats`,
-      });
-    } catch (error) {
-      console.error("Failed to load player data:", error);
-      Alert.alert("Error", "Failed to load player data");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+  // Fetch player season stats
+  const playerStats = useQuery(
+    api.statistics.getPlayerSeasonStats,
+    token && playerId
+      ? { token, playerId: playerId as unknown as Id<"players"> }
+      : "skip"
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
-    loadPlayerData(true);
-  };
-
-  const calculateAggregatedStats = () => {
-    if (!playerStats.length) return null;
-
-    // Filter stats based on selected period
-    const filteredStats =
-      selectedPeriod === "recent"
-        ? playerStats.slice(-10) // Last 10 games
-        : playerStats;
-
-    // Calculate totals
-    const totals = filteredStats.reduce(
-      (acc, stat) => {
-        acc.points += stat.points || 0;
-        acc.field_goals_made += stat.field_goals_made || 0;
-        acc.field_goals_attempted += stat.field_goals_attempted || 0;
-        acc.three_pointers_made += stat.three_pointers_made || 0;
-        acc.three_pointers_attempted += stat.three_pointers_attempted || 0;
-        acc.free_throws_made += stat.free_throws_made || 0;
-        acc.free_throws_attempted += stat.free_throws_attempted || 0;
-        acc.rebounds_offensive += stat.rebounds_offensive || 0;
-        acc.rebounds_defensive += stat.rebounds_defensive || 0;
-        acc.assists += stat.assists || 0;
-        acc.steals += stat.steals || 0;
-        acc.blocks += stat.blocks || 0;
-        acc.turnovers += stat.turnovers || 0;
-        acc.fouls_personal += stat.fouls_personal || 0;
-        acc.minutes_played += stat.minutes_played || 0;
-        return acc;
-      },
-      {
-        points: 0,
-        field_goals_made: 0,
-        field_goals_attempted: 0,
-        three_pointers_made: 0,
-        three_pointers_attempted: 0,
-        free_throws_made: 0,
-        free_throws_attempted: 0,
-        rebounds_offensive: 0,
-        rebounds_defensive: 0,
-        assists: 0,
-        steals: 0,
-        blocks: 0,
-        turnovers: 0,
-        fouls_personal: 0,
-        minutes_played: 0,
-      }
-    );
-
-    const games = filteredStats.length;
-    const totalRebounds = totals.rebounds_offensive + totals.rebounds_defensive;
-
-    // Calculate averages and percentages
-    const averages = {
-      points: games > 0 ? (totals.points / games).toFixed(1) : "0.0",
-      rebounds: games > 0 ? (totalRebounds / games).toFixed(1) : "0.0",
-      assists: games > 0 ? (totals.assists / games).toFixed(1) : "0.0",
-      fg_percentage:
-        totals.field_goals_attempted > 0
-          ? (
-              (totals.field_goals_made / totals.field_goals_attempted) *
-              100
-            ).toFixed(1)
-          : "0.0",
-      three_percentage:
-        totals.three_pointers_attempted > 0
-          ? (
-              (totals.three_pointers_made / totals.three_pointers_attempted) *
-              100
-            ).toFixed(1)
-          : "0.0",
-      ft_percentage:
-        totals.free_throws_attempted > 0
-          ? (
-              (totals.free_throws_made / totals.free_throws_attempted) *
-              100
-            ).toFixed(1)
-          : "0.0",
-    };
-
-    return { totals, averages, games };
+    setTimeout(() => setRefreshing(false), 500);
   };
 
   const getStatCategories = (): StatCategory[] => {
-    const stats = calculateAggregatedStats();
-    if (!stats) return [];
+    if (!playerStats?.stats) return [];
 
-    const { totals, averages, games } = stats;
+    const stats = playerStats.stats;
 
     return [
       {
         title: "Scoring",
         stats: [
-          { label: "PPG", value: averages.points, highlight: true },
-          { label: "Total Points", value: totals.points },
-          { label: "FG%", value: `${averages.fg_percentage}%` },
+          { label: "PPG", value: stats.avgPoints?.toFixed(1) || "0.0", highlight: true },
+          { label: "Total Points", value: stats.totalPoints || 0 },
+          { label: "FG%", value: `${stats.fieldGoalPercentage?.toFixed(1) || "0.0"}%` },
           {
             label: "FGM/FGA",
-            value: `${totals.field_goals_made}/${totals.field_goals_attempted}`,
+            value: `${stats.totalFieldGoalsMade || 0}/${stats.totalFieldGoalsAttempted || 0}`,
           },
-          { label: "3P%", value: `${averages.three_percentage}%` },
+          { label: "3P%", value: `${stats.threePointPercentage?.toFixed(1) || "0.0"}%` },
           {
             label: "3PM/3PA",
-            value: `${totals.three_pointers_made}/${totals.three_pointers_attempted}`,
+            value: `${stats.totalThreePointersMade || 0}/${stats.totalThreePointersAttempted || 0}`,
           },
-          { label: "FT%", value: `${averages.ft_percentage}%` },
+          { label: "FT%", value: `${stats.freeThrowPercentage?.toFixed(1) || "0.0"}%` },
           {
             label: "FTM/FTA",
-            value: `${totals.free_throws_made}/${totals.free_throws_attempted}`,
+            value: `${stats.totalFreeThrowsMade || 0}/${stats.totalFreeThrowsAttempted || 0}`,
           },
         ],
       },
       {
         title: "Rebounds & Assists",
         stats: [
-          { label: "RPG", value: averages.rebounds, highlight: true },
-          {
-            label: "Total Rebounds",
-            value: totals.rebounds_offensive + totals.rebounds_defensive,
-          },
-          { label: "Offensive Rebounds", value: totals.rebounds_offensive },
-          { label: "Defensive Rebounds", value: totals.rebounds_defensive },
-          { label: "APG", value: averages.assists, highlight: true },
-          { label: "Total Assists", value: totals.assists },
+          { label: "RPG", value: stats.avgRebounds?.toFixed(1) || "0.0", highlight: true },
+          { label: "Total Rebounds", value: stats.totalRebounds || 0 },
+          { label: "APG", value: stats.avgAssists?.toFixed(1) || "0.0", highlight: true },
+          { label: "Total Assists", value: stats.totalAssists || 0 },
         ],
       },
       {
         title: "Defense & Hustle",
         stats: [
-          { label: "Steals", value: totals.steals },
-          { label: "Blocks", value: totals.blocks },
-          { label: "Turnovers", value: totals.turnovers },
-          { label: "Personal Fouls", value: totals.fouls_personal },
+          { label: "Steals", value: stats.totalSteals || 0 },
+          { label: "Blocks", value: stats.totalBlocks || 0 },
+          { label: "Turnovers", value: stats.totalTurnovers || 0 },
+          { label: "Personal Fouls", value: stats.totalFouls || 0 },
         ],
       },
       {
         title: "Game Info",
         stats: [
-          { label: "Games Played", value: games },
-          { label: "Total Minutes", value: Math.round(totals.minutes_played) },
+          { label: "Games Played", value: stats.gamesPlayed || 0 },
+          { label: "Total Minutes", value: Math.round(stats.totalMinutes || 0) },
           {
             label: "Avg Minutes",
-            value:
-              games > 0 ? (totals.minutes_played / games).toFixed(1) : "0.0",
+            value: stats.avgMinutes?.toFixed(1) || "0.0",
           },
         ],
       },
@@ -257,7 +145,7 @@ export default function PlayerStatsScreen() {
   );
 
   const renderRecentGames = () => {
-    const recentGames = playerStats.slice(-5).reverse(); // Last 5 games, most recent first
+    const recentGames = playerStats?.recentGames || [];
 
     if (!recentGames.length) {
       return (
@@ -270,43 +158,32 @@ export default function PlayerStatsScreen() {
     return (
       <View className="mt-2">
         <Text className="text-white text-lg font-bold mb-3">Recent Games</Text>
-        {recentGames.map((stat, index) => (
-          <View key={stat.id} className="bg-gray-800 rounded-lg p-3 mb-2 border border-gray-700">
+        {recentGames.slice(0, 5).map((game: any, index: number) => (
+          <View key={game.gameId || index} className="bg-gray-800 rounded-lg p-3 mb-2 border border-gray-700">
             <View className="flex-row justify-between items-center mb-2">
               <Text className="text-gray-400 text-xs">
-                {BasketballUtils.formatGameDate(stat.created_at)}
+                {game.gameDate ? new Date(game.gameDate).toLocaleDateString() : ""}
               </Text>
               <Text className="text-white text-xs font-semibold">
-                vs{" "}
-                {stat.game?.away_team?.name ||
-                  stat.game?.home_team?.name ||
-                  "Opponent"}
+                vs {game.opponent || "Opponent"}
               </Text>
             </View>
             <View className="flex-row justify-around">
               <View className="items-center">
-                <Text className="text-white text-base font-bold">{stat.points || 0}</Text>
+                <Text className="text-white text-base font-bold">{game.points || 0}</Text>
                 <Text className="text-gray-400 text-xs mt-0.5">PTS</Text>
               </View>
               <View className="items-center">
-                <Text className="text-white text-base font-bold">
-                  {(stat.rebounds_offensive || 0) +
-                    (stat.rebounds_defensive || 0)}
-                </Text>
+                <Text className="text-white text-base font-bold">{game.rebounds || 0}</Text>
                 <Text className="text-gray-400 text-xs mt-0.5">REB</Text>
               </View>
               <View className="items-center">
-                <Text className="text-white text-base font-bold">{stat.assists || 0}</Text>
+                <Text className="text-white text-base font-bold">{game.assists || 0}</Text>
                 <Text className="text-gray-400 text-xs mt-0.5">AST</Text>
               </View>
               <View className="items-center">
                 <Text className="text-white text-base font-bold">
-                  {stat.field_goals_attempted > 0
-                    ? `${(
-                        (stat.field_goals_made / stat.field_goals_attempted) *
-                        100
-                      ).toFixed(0)}%`
-                    : "0%"}
+                  {game.fieldGoalPercentage?.toFixed(0) || 0}%
                 </Text>
                 <Text className="text-gray-400 text-xs mt-0.5">FG%</Text>
               </View>
@@ -317,7 +194,7 @@ export default function PlayerStatsScreen() {
     );
   };
 
-  if (loading) {
+  if (playerData === undefined || playerStats === undefined) {
     return (
       <View className="flex-1 justify-center items-center bg-dark-950">
         <Text className="text-white text-base">Loading player stats...</Text>
@@ -325,7 +202,7 @@ export default function PlayerStatsScreen() {
     );
   }
 
-  if (!player) {
+  if (!playerData?.player) {
     return (
       <View className="flex-1 justify-center items-center bg-dark-950">
         <Text className="text-white text-base">Player not found</Text>
@@ -333,6 +210,7 @@ export default function PlayerStatsScreen() {
     );
   }
 
+  const player = playerData.player;
   const statCategories = getStatCategories();
 
   return (
@@ -342,11 +220,11 @@ export default function PlayerStatsScreen() {
       {/* Player Header */}
       <View className="bg-gray-800 p-4 border-b border-gray-700">
         <View className="flex-row items-center mb-4">
-          <Text className="text-red-500 text-4xl font-bold mr-4">#{player.jersey_number}</Text>
+          <Text className="text-red-500 text-4xl font-bold mr-4">#{player.number}</Text>
           <View className="flex-1">
             <Text className="text-white text-xl font-bold">{player.name}</Text>
             <Text className="text-gray-400 text-sm mt-0.5">
-              {player.position} • {player.height}" • {player.weight}lbs
+              {player.position} {player.heightCm ? `• ${player.heightCm}cm` : ""} {player.weightKg ? `• ${player.weightKg}kg` : ""}
             </Text>
             <Text className="text-green-400 text-sm font-semibold mt-1">{player.team?.name}</Text>
           </View>
@@ -370,7 +248,7 @@ export default function PlayerStatsScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             className={`flex-1 py-2 px-4 rounded-md items-center ${
-              selectedPeriod === "recent" ? "bg-red-500" : "
+              selectedPeriod === "recent" ? "bg-red-500" : ""
             }`}
             onPress={() => setSelectedPeriod("recent")}
           >
@@ -400,4 +278,3 @@ export default function PlayerStatsScreen() {
     </View>
   );
 }
-

@@ -1,5 +1,0 @@
-class AddLeagueToTeams < ActiveRecord::Migration[8.0]
-  def change
-    add_reference :teams, :league, null: true, foreign_key: true
-  end
-end

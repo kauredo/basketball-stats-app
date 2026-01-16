@@ -1,44 +1,41 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   RefreshControl,
-  Alert,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 
-import { basketballAPI, Team } from "@basketball-stats/shared";
+interface Team {
+  id: Id<"teams">;
+  name: string;
+  city?: string;
+  description?: string;
+  activePlayersCount?: number;
+}
 
 export default function TeamsScreen() {
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const { token, selectedLeague } = useAuth();
+  const [refreshing, setRefreshing] = React.useState(false);
 
-  const loadTeams = async (isRefresh = false) => {
-    try {
-      if (!isRefresh) setLoading(true);
+  const teamsData = useQuery(
+    api.teams.list,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
 
-      const response = await basketballAPI.getTeams();
-      setTeams(response.teams);
-    } catch (error) {
-      console.error("Failed to load teams:", error);
-      Alert.alert("Error", "Failed to load teams");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    loadTeams();
-  }, []);
+  const teams = teamsData?.teams || [];
 
   const onRefresh = () => {
     setRefreshing(true);
-    loadTeams(true);
+    // Data auto-refreshes with Convex
+    setTimeout(() => setRefreshing(false), 500);
   };
 
   const renderTeam = ({ item: team }: { item: Team }) => (
@@ -52,7 +49,7 @@ export default function TeamsScreen() {
 
       <View className="mb-2">
         <Text className="text-green-400 text-sm font-semibold">
-          {team.active_players_count} Active Players
+          {team.activePlayersCount || 0} Active Players
         </Text>
       </View>
 
@@ -67,7 +64,7 @@ export default function TeamsScreen() {
     </TouchableOpacity>
   );
 
-  if (loading) {
+  if (teamsData === undefined) {
     return (
       <View className="flex-1 justify-center items-center bg-dark-950">
         <Text className="text-white text-base">Loading teams...</Text>
@@ -81,7 +78,7 @@ export default function TeamsScreen() {
       <FlatList
         data={teams}
         renderItem={renderTeam}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item.id}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

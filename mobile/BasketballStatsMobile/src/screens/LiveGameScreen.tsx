@@ -1,346 +1,248 @@
-import React, { useEffect, useState, useRef } from "react";
+import React from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   Alert,
-  Dimensions,
   SafeAreaView,
 } from "react-native";
-import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useRoute, RouteProp } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-
-import {
-  basketballAPI,
-  Game,
-  Player,
-  BasketballUtils,
-  gameStore,
-  websocketService,
-  basketballWebSocket,
-} from "@basketball-stats/shared";
-
-import { RootStackParamList } from "../navigation/AppNavigator";
+import { RootStackParamList } from "../../App";
 
 type LiveGameRouteProp = RouteProp<RootStackParamList, "LiveGame">;
-type LiveGameNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "LiveGame"
->;
 
-interface GameState {
-  isActive: boolean;
-  isPaused: boolean;
-  period: number;
-  timeRemaining: number; // in seconds
-  homeScore: number;
-  awayScore: number;
-}
-
-interface PlayerStats {
-  playerId: number;
+interface PlayerStat {
+  id: Id<"playerStats">;
+  playerId: Id<"players">;
+  player?: {
+    id: Id<"players">;
+    name: string;
+    number: number;
+    position?: string;
+  };
   points: number;
   rebounds: number;
   assists: number;
+  steals: number;
+  blocks: number;
+  turnovers: number;
   fouls: number;
-  isPlaying: boolean;
+  fieldGoalsMade: number;
+  fieldGoalsAttempted: number;
+  threePointersMade: number;
+  threePointersAttempted: number;
+  freeThrowsMade: number;
+  freeThrowsAttempted: number;
+  isOnCourt: boolean;
 }
 
 const TABS = [
-  { key: 'scoreboard', label: 'Scoreboard', icon: 'basketball' },
-  { key: 'stats', label: 'Player Stats', icon: 'stats' },
-  { key: 'substitutions', label: 'Subs', icon: 'users' },
+  { key: "scoreboard", label: "Scoreboard", icon: "basketball" },
+  { key: "stats", label: "Player Stats", icon: "stats" },
+  { key: "substitutions", label: "Subs", icon: "users" },
 ];
 
 export default function LiveGameScreen() {
   const route = useRoute<LiveGameRouteProp>();
-  const navigation = useNavigation<LiveGameNavigationProp>();
-  const { gameId } = route.params;
+  const { token } = useAuth();
+  const gameId = route.params.gameId as Id<"games">;
 
-  const [game, setGame] = useState<Game | null>(null);
-  const [gameState, setGameState] = useState<GameState>({
-    isActive: false,
-    isPaused: false,
-    period: 1,
-    timeRemaining: 12 * 60, // 12 minutes in seconds
-    homeScore: 0,
-    awayScore: 0,
-  });
-  const [homePlayers, setHomePlayers] = useState<PlayerStats[]>([]);
-  const [awayPlayers, setAwayPlayers] = useState<PlayerStats[]>([]);
-  const [activeTab, setActiveTab] = useState<'scoreboard' | 'stats' | 'substitutions'>('scoreboard');
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = React.useState<
+    "scoreboard" | "stats" | "substitutions"
+  >("scoreboard");
 
-  useEffect(() => {
-    loadGameData();
-    
-    // Connect to WebSocket for real-time updates
-    basketballWebSocket.connect();
-    basketballWebSocket.subscribeToGame(gameId);
-    
-    basketballWebSocket.on('game_update', (data) => {
-      if (data.game) {
-        setGame(data.game);
-      }
-      if (data.gameState) {
-        setGameState(data.gameState);
-      }
-    });
+  // Real-time game data from Convex
+  const gameData = useQuery(
+    api.games.get,
+    token && gameId ? { token, gameId } : "skip"
+  );
 
-    basketballWebSocket.on('timer_update', (data) => {
-      if (data.gameState) {
-        setGameState(prev => ({
-          ...prev,
-          timeRemaining: data.gameState.timeRemaining,
-          period: data.gameState.period,
-        }));
-      }
-    });
+  // Real-time player stats from Convex
+  const liveStats = useQuery(
+    api.stats.getLiveStats,
+    token && gameId ? { token, gameId } : "skip"
+  );
 
-    basketballWebSocket.on('stats_update', (data) => {
-      if (data.playerStats) {
-        const { playerId, team, stats } = data.playerStats;
-        const setPlayers = team === 'home' ? setHomePlayers : setAwayPlayers;
-        
-        setPlayers(prev => prev.map(player => 
-          player.playerId === playerId ? { ...player, ...stats } : player
-        ));
-      }
-    });
+  // Mutations
+  const startGame = useMutation(api.games.start);
+  const pauseGame = useMutation(api.games.pause);
+  const resumeGame = useMutation(api.games.resume);
+  const endGame = useMutation(api.games.end);
+  const recordStat = useMutation(api.stats.recordStat);
+  const substituteMutation = useMutation(api.stats.substitute);
 
-    return () => {
-      basketballWebSocket.unsubscribeFromGame();
-    };
-  }, [gameId]);
-
-  // Game timer effect with WebSocket sync
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (gameState.isActive && !gameState.isPaused && gameState.timeRemaining > 0) {
-      interval = setInterval(() => {
-        setGameState(prev => {
-          const newState = {
-            ...prev,
-            timeRemaining: Math.max(0, prev.timeRemaining - 1)
-          };
-          
-          // Sync timer update via WebSocket
-          basketballWebSocket.updateTimer(newState.timeRemaining, newState.period);
-          
-          return newState;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [gameState.isActive, gameState.isPaused, gameState.timeRemaining]);
-
-  const loadGameData = async () => {
-    try {
-      setLoading(true);
-
-      // Load game details
-      const gameResponse = await basketballAPI.getGame(gameId);
-      setGame(gameResponse.game);
-
-      // Load players for both teams
-      const [homePlayersResponse, awayPlayersResponse] = await Promise.all([
-        basketballAPI.getTeamPlayers(gameResponse.game.home_team_id),
-        basketballAPI.getTeamPlayers(gameResponse.game.away_team_id),
-      ]);
-
-      // Initialize player stats
-      const initHomeStats: PlayerStats[] = homePlayersResponse.players?.map((player: Player) => ({
-        playerId: player.id,
-        points: 0,
-        rebounds: 0,
-        assists: 0,
-        fouls: 0,
-        isPlaying: true,
-      })) || [];
-      
-      const initAwayStats: PlayerStats[] = awayPlayersResponse.players?.map((player: Player) => ({
-        playerId: player.id,
-        points: 0,
-        rebounds: 0,
-        assists: 0,
-        fouls: 0,
-        isPlaying: true,
-      })) || [];
-      
-      setHomePlayers(initHomeStats.slice(0, 5)); // Starting 5
-      setAwayPlayers(initAwayStats.slice(0, 5));
-    } catch (error) {
-      console.error("Failed to load game data:", error);
-      Alert.alert("Error", "Failed to load game data");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const game = gameData?.game;
+  const homePlayerStats = liveStats?.homePlayerStats || [];
+  const awayPlayerStats = liveStats?.awayPlayerStats || [];
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  const handleGameControl = async (action: 'start' | 'pause' | 'stop') => {
-    if (!game) return;
-    
+  const handleGameControl = async (action: "start" | "pause" | "resume" | "end") => {
+    if (!game || !token) return;
+
     try {
-      let response;
       switch (action) {
-        case 'start':
-          response = await basketballAPI.startGame(gameId);
+        case "start":
+          await startGame({ token, gameId });
           break;
-        case 'pause':
-          response = await basketballAPI.pauseGame(gameId);
+        case "pause":
+          await pauseGame({ token, gameId });
           break;
-        case 'stop':
-          response = await basketballAPI.endGame(gameId);
+        case "resume":
+          await resumeGame({ token, gameId });
+          break;
+        case "end":
+          await endGame({ token, gameId });
           break;
       }
-      
-      // Game state will be updated via WebSocket broadcast from backend
-      if (response?.game) {
-        setGame(response.game);
-      }
-      
+
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Failed to ${action} game:`, error);
       Alert.alert("Error", `Failed to ${action} game`);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
 
-  const updateScore = (team: 'home' | 'away', points: number) => {
-    // Update local state immediately for responsive UI
-    setGameState(prev => ({
-      ...prev,
-      [team === 'home' ? 'homeScore' : 'awayScore']: Math.max(0, prev[team === 'home' ? 'homeScore' : 'awayScore'] + points)
-    }));
-    
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
-    // Note: In a real implementation, score updates would be handled through
-    // specific stat recording (field goals, free throws, etc.) which automatically
-    // update the score and broadcast via ActionCable
-  };
+  const handleRecordStat = async (
+    playerStatId: Id<"playerStats">,
+    statType: string,
+    made?: boolean
+  ) => {
+    if (!token) return;
 
-  const updatePlayerStat = async (playerId: number, team: 'home' | 'away', stat: keyof Omit<PlayerStats, 'playerId' | 'isPlaying'>, change: number) => {
-    if (change === 0) return;
-    
-    // Update local state immediately for responsive UI
-    const setPlayers = team === 'home' ? setHomePlayers : setAwayPlayers;
-    setPlayers(prev => prev.map(player => 
-      player.playerId === playerId
-        ? { ...player, [stat]: Math.max(0, player[stat] + change) }
-        : player
-    ));
-    
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
     try {
-      // Record the stat via API, which will broadcast via ActionCable
-      await basketballAPI.recordPlayerStat(gameId, playerId, {
-        stat_type: stat,
-        value: change,
+      await recordStat({
+        token,
+        playerStatId,
+        statType: statType as any,
+        made,
       });
-      
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (error) {
-      console.error('Failed to record player stat:', error);
+
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error: any) {
+      console.error("Failed to record stat:", error);
       Alert.alert("Error", "Failed to record stat");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      
-      // Revert the optimistic update on error
-      setPlayers(prev => prev.map(player => 
-        player.playerId === playerId
-          ? { ...player, [stat]: Math.max(0, player[stat] - change) }
-          : player
-      ));
     }
   };
 
-  const renderScoreCard = (teamName: string, score: number, team: 'home' | 'away') => (
+  const handleSubstitute = async (playerStatId: Id<"playerStats">) => {
+    if (!token) return;
+
+    try {
+      await substituteMutation({ token, playerStatId });
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (error: any) {
+      console.error("Failed to substitute:", error);
+      Alert.alert("Error", error.message || "Failed to substitute player");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  };
+
+  const renderScoreCard = (
+    teamName: string,
+    score: number,
+    team: "home" | "away"
+  ) => (
     <View className="flex-1 items-center">
       <Text className="text-white text-lg font-bold mb-2">{teamName}</Text>
       <Text className="text-primary-500 text-5xl font-bold mb-4">{score}</Text>
-      <View className="flex-row gap-2">
-        <TouchableOpacity
-          onPress={() => updateScore(team, 1)}
-          className="bg-green-600 px-3 py-2 rounded-lg"
-        >
-          <Text className="text-white text-sm font-bold">+1</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => updateScore(team, 2)}
-          className="bg-green-600 px-3 py-2 rounded-lg"
-        >
-          <Text className="text-white text-sm font-bold">+2</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => updateScore(team, 3)}
-          className="bg-green-600 px-3 py-2 rounded-lg"
-        >
-          <Text className="text-white text-sm font-bold">+3</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => updateScore(team, -1)}
-          className="bg-red-600 px-3 py-2 rounded-lg"
-        >
-          <Text className="text-white text-sm font-bold">-1</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 
-  const renderPlayerStatsCard = (playerStats: PlayerStats, team: 'home' | 'away') => {
-    const players = team === 'home' ? game?.home_team.players : game?.away_team.players;
-    const player = players?.find(p => p.id === playerStats.playerId);
-    
+  const renderPlayerStatsCard = (playerStat: PlayerStat, team: "home" | "away") => {
+    const player = playerStat.player;
     if (!player) return null;
 
     return (
-      <View key={playerStats.playerId} className="bg-gray-800 rounded-xl p-4 mb-3 border border-gray-700">
-        <Text className="text-white text-base font-bold mb-2">
-          #{player.jersey_number} {player.first_name} {player.last_name}
-        </Text>
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-gray-300 text-sm">PTS: {playerStats.points}</Text>
-          <Text className="text-gray-300 text-sm">REB: {playerStats.rebounds}</Text>
-          <Text className="text-gray-300 text-sm">AST: {playerStats.assists}</Text>
-          <Text className="text-gray-300 text-sm">FOULS: {playerStats.fouls}</Text>
+      <View
+        key={playerStat.id}
+        className={`bg-gray-800 rounded-xl p-4 mb-3 border ${
+          playerStat.isOnCourt ? "border-green-500" : "border-gray-700"
+        }`}
+      >
+        <View className="flex-row justify-between items-center mb-2">
+          <Text className="text-white text-base font-bold">
+            #{player.number} {player.name}
+          </Text>
+          {playerStat.isOnCourt && (
+            <View className="bg-green-600 px-2 py-1 rounded">
+              <Text className="text-white text-xs font-semibold">On Court</Text>
+            </View>
+          )}
         </View>
-        <View className="flex-row justify-center gap-2">
+
+        <View className="flex-row justify-between items-center mb-3">
+          <Text className="text-gray-300 text-sm">PTS: {playerStat.points}</Text>
+          <Text className="text-gray-300 text-sm">REB: {playerStat.rebounds}</Text>
+          <Text className="text-gray-300 text-sm">AST: {playerStat.assists}</Text>
+          <Text className="text-gray-300 text-sm">FOULS: {playerStat.fouls}</Text>
+        </View>
+
+        <View className="flex-row flex-wrap justify-center gap-2">
           <TouchableOpacity
-            onPress={() => updatePlayerStat(playerStats.playerId, team, 'points', 2)}
+            onPress={() => handleRecordStat(playerStat.id, "shot2", true)}
             className="bg-green-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+2 PTS</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => updatePlayerStat(playerStats.playerId, team, 'rebounds', 1)}
+            onPress={() => handleRecordStat(playerStat.id, "shot3", true)}
+            className="bg-green-600 px-2 py-1 rounded"
+          >
+            <Text className="text-white text-xs">+3 PTS</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleRecordStat(playerStat.id, "freethrow", true)}
+            className="bg-green-600 px-2 py-1 rounded"
+          >
+            <Text className="text-white text-xs">+FT</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleRecordStat(playerStat.id, "rebounds")}
             className="bg-blue-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+REB</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => updatePlayerStat(playerStats.playerId, team, 'assists', 1)}
+            onPress={() => handleRecordStat(playerStat.id, "assists")}
             className="bg-purple-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+AST</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => updatePlayerStat(playerStats.playerId, team, 'fouls', 1)}
+            onPress={() => handleRecordStat(playerStat.id, "steals")}
+            className="bg-teal-600 px-2 py-1 rounded"
+          >
+            <Text className="text-white text-xs">+STL</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleRecordStat(playerStat.id, "blocks")}
+            className="bg-indigo-600 px-2 py-1 rounded"
+          >
+            <Text className="text-white text-xs">+BLK</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleRecordStat(playerStat.id, "turnovers")}
+            className="bg-orange-600 px-2 py-1 rounded"
+          >
+            <Text className="text-white text-xs">+TO</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleRecordStat(playerStat.id, "fouls")}
             className="bg-yellow-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+FOUL</Text>
@@ -350,7 +252,40 @@ export default function LiveGameScreen() {
     );
   };
 
-  if (loading) {
+  const renderSubstitutionCard = (playerStat: PlayerStat, team: "home" | "away") => {
+    const player = playerStat.player;
+    if (!player) return null;
+
+    return (
+      <TouchableOpacity
+        key={playerStat.id}
+        className={`bg-gray-800 rounded-xl p-4 mb-3 border flex-row justify-between items-center ${
+          playerStat.isOnCourt ? "border-green-500" : "border-gray-700"
+        }`}
+        onPress={() => handleSubstitute(playerStat.id)}
+      >
+        <View>
+          <Text className="text-white text-base font-bold">
+            #{player.number} {player.name}
+          </Text>
+          <Text className="text-gray-400 text-sm">
+            {player.position || "N/A"}
+          </Text>
+        </View>
+        <View
+          className={`px-3 py-2 rounded ${
+            playerStat.isOnCourt ? "bg-green-600" : "bg-gray-600"
+          }`}
+        >
+          <Text className="text-white text-sm font-semibold">
+            {playerStat.isOnCourt ? "On Court" : "Bench"}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  if (gameData === undefined || liveStats === undefined) {
     return (
       <SafeAreaView className="flex-1 bg-dark-950">
         <View className="flex-1 justify-center items-center">
@@ -365,22 +300,35 @@ export default function LiveGameScreen() {
       <SafeAreaView className="flex-1 bg-dark-950">
         <View className="flex-1 justify-center items-center">
           <Icon name="basketball" size={48} color="#9CA3AF" />
-          <Text className="text-white text-lg font-semibold mt-4 mb-2">Game not found</Text>
-          <Text className="text-gray-400 text-center">The requested game could not be found.</Text>
+          <Text className="text-white text-lg font-semibold mt-4 mb-2">
+            Game not found
+          </Text>
+          <Text className="text-gray-400 text-center">
+            The requested game could not be found.
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
+  const isGameActive = game.status === "active";
+  const isGamePaused = game.status === "paused";
+  const canStart = game.status === "scheduled";
+  const canPause = game.status === "active";
+  const canResume = game.status === "paused";
+  const canEnd = game.status === "active" || game.status === "paused";
+
   return (
     <SafeAreaView className="flex-1 bg-dark-950">
       <StatusBar style="light" />
-      
+
       {/* Header */}
       <View className="px-4 pt-2 pb-4">
-        <Text className="text-white text-xl font-bold text-center mb-1">Live Game Control</Text>
+        <Text className="text-white text-xl font-bold text-center mb-1">
+          Live Game Control
+        </Text>
         <Text className="text-gray-400 text-center">
-          {game.away_team.name} @ {game.home_team.name}
+          {game.awayTeam?.name || "Away"} @ {game.homeTeam?.name || "Home"}
         </Text>
       </View>
 
@@ -388,73 +336,92 @@ export default function LiveGameScreen() {
       <View className="bg-gray-800 mx-4 rounded-xl p-4 mb-4 border border-gray-700">
         <View className="flex-row items-center">
           {/* Away Team */}
-          {renderScoreCard(game.away_team.name, gameState.awayScore, 'away')}
+          {renderScoreCard(
+            game.awayTeam?.name || "Away",
+            game.awayScore,
+            "away"
+          )}
 
           {/* Game Clock and Controls */}
           <View className="flex-1 items-center mx-4">
             <View className="bg-dark-950 rounded-lg p-3 mb-3">
-              <Text className="text-gray-400 text-xs text-center mb-1">PERIOD {gameState.period}</Text>
+              <Text className="text-gray-400 text-xs text-center mb-1">
+                PERIOD {game.currentQuarter}
+              </Text>
               <View className="flex-row items-center justify-center">
                 <Icon name="clock" size={16} color="#FFFFFF" />
                 <Text className="text-white text-2xl font-mono font-bold ml-2">
-                  {formatTime(gameState.timeRemaining)}
+                  {formatTime(game.timeRemainingSeconds)}
                 </Text>
               </View>
             </View>
-            
+
             <View className="flex-row gap-2">
-              <TouchableOpacity
-                onPress={() => handleGameControl('start')}
-                disabled={gameState.isActive && !gameState.isPaused}
-                className={`flex-row items-center px-3 py-2 rounded-lg ${
-                  gameState.isActive && !gameState.isPaused 
-                    ? 'bg-gray-600' : 'bg-green-600'
-                }`}
-              >
-                <Icon name="play" size={12} color="#FFFFFF" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleGameControl('pause')}
-                disabled={!gameState.isActive}
-                className={`flex-row items-center px-3 py-2 rounded-lg ${
-                  !gameState.isActive ? 'bg-gray-600' : 'bg-yellow-600'
-                }`}
-              >
-                <Icon name="pause" size={12} color="#FFFFFF" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleGameControl('stop')}
-                className="flex-row items-center px-3 py-2 bg-red-600 rounded-lg"
-              >
-                <Icon name="stop" size={12} color="#FFFFFF" />
-              </TouchableOpacity>
+              {canStart && (
+                <TouchableOpacity
+                  onPress={() => handleGameControl("start")}
+                  className="flex-row items-center px-3 py-2 rounded-lg bg-green-600"
+                >
+                  <Icon name="play" size={12} color="#FFFFFF" />
+                </TouchableOpacity>
+              )}
+              {canPause && (
+                <TouchableOpacity
+                  onPress={() => handleGameControl("pause")}
+                  className="flex-row items-center px-3 py-2 rounded-lg bg-yellow-600"
+                >
+                  <Icon name="pause" size={12} color="#FFFFFF" />
+                </TouchableOpacity>
+              )}
+              {canResume && (
+                <TouchableOpacity
+                  onPress={() => handleGameControl("resume")}
+                  className="flex-row items-center px-3 py-2 rounded-lg bg-blue-600"
+                >
+                  <Icon name="play" size={12} color="#FFFFFF" />
+                </TouchableOpacity>
+              )}
+              {canEnd && (
+                <TouchableOpacity
+                  onPress={() => handleGameControl("end")}
+                  className="flex-row items-center px-3 py-2 bg-red-600 rounded-lg"
+                >
+                  <Icon name="stop" size={12} color="#FFFFFF" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
           {/* Home Team */}
-          {renderScoreCard(game.home_team.name, gameState.homeScore, 'home')}
+          {renderScoreCard(
+            game.homeTeam?.name || "Home",
+            game.homeScore,
+            "home"
+          )}
         </View>
       </View>
 
       {/* Tab Navigation */}
       <View className="flex-row mx-4 mb-4">
-        {TABS.map(tab => (
+        {TABS.map((tab) => (
           <TouchableOpacity
             key={tab.key}
             onPress={() => setActiveTab(tab.key as any)}
             className={`flex-1 py-3 rounded-lg mx-1 ${
-              activeTab === tab.key ? 'bg-primary-500' : 'bg-gray-700'
+              activeTab === tab.key ? "bg-primary-500" : "bg-gray-700"
             }`}
           >
             <View className="items-center">
               <Icon
                 name={tab.icon as any}
                 size={16}
-                color={activeTab === tab.key ? '#FFFFFF' : '#9CA3AF'}
+                color={activeTab === tab.key ? "#FFFFFF" : "#9CA3AF"}
               />
               <Text
                 className={`text-xs mt-1 ${
-                  activeTab === tab.key ? 'text-white font-semibold' : 'text-gray-400'
+                  activeTab === tab.key
+                    ? "text-white font-semibold"
+                    : "text-gray-400"
                 }`}
               >
                 {tab.label}
@@ -466,49 +433,78 @@ export default function LiveGameScreen() {
 
       {/* Tab Content */}
       <ScrollView className="flex-1 px-4">
-        {activeTab === 'scoreboard' && (
+        {activeTab === "scoreboard" && (
           <View className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-            <Text className="text-white text-lg font-bold mb-4">Game Summary</Text>
+            <Text className="text-white text-lg font-bold mb-4">
+              Game Summary
+            </Text>
             <View className="space-y-4">
               <View>
-                <Text className="text-white font-semibold mb-2">Game Status</Text>
+                <Text className="text-white font-semibold mb-2">
+                  Game Status
+                </Text>
                 <View className="flex-row justify-between items-center py-1">
                   <Text className="text-gray-400">Status:</Text>
-                  <Text className={`font-semibold ${
-                    gameState.isActive 
-                      ? gameState.isPaused ? 'text-yellow-400' : 'text-green-400'
-                      : 'text-gray-400'
-                  }`}>
-                    {gameState.isActive ? (gameState.isPaused ? 'Paused' : 'Live') : 'Not Started'}
+                  <Text
+                    className={`font-semibold ${
+                      isGameActive
+                        ? "text-green-400"
+                        : isGamePaused
+                        ? "text-yellow-400"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {isGameActive
+                      ? "Live"
+                      : isGamePaused
+                      ? "Paused"
+                      : game.status === "completed"
+                      ? "Final"
+                      : "Not Started"}
                   </Text>
                 </View>
                 <View className="flex-row justify-between items-center py-1">
                   <Text className="text-gray-400">Period:</Text>
-                  <Text className="text-white">{gameState.period}</Text>
+                  <Text className="text-white">{game.currentQuarter}</Text>
                 </View>
                 <View className="flex-row justify-between items-center py-1">
                   <Text className="text-gray-400">Time:</Text>
-                  <Text className="text-white font-mono">{formatTime(gameState.timeRemaining)}</Text>
+                  <Text className="text-white font-mono">
+                    {formatTime(game.timeRemainingSeconds)}
+                  </Text>
                 </View>
               </View>
-              
+
               <View>
-                <Text className="text-white font-semibold mb-2">Score Summary</Text>
+                <Text className="text-white font-semibold mb-2">
+                  Score Summary
+                </Text>
                 <View className="flex-row justify-between items-center py-1">
-                  <Text className="text-gray-400">{game.away_team.name}:</Text>
-                  <Text className="text-white font-bold text-lg">{gameState.awayScore}</Text>
+                  <Text className="text-gray-400">
+                    {game.awayTeam?.name || "Away"}:
+                  </Text>
+                  <Text className="text-white font-bold text-lg">
+                    {game.awayScore}
+                  </Text>
                 </View>
                 <View className="flex-row justify-between items-center py-1">
-                  <Text className="text-gray-400">{game.home_team.name}:</Text>
-                  <Text className="text-white font-bold text-lg">{gameState.homeScore}</Text>
+                  <Text className="text-gray-400">
+                    {game.homeTeam?.name || "Home"}:
+                  </Text>
+                  <Text className="text-white font-bold text-lg">
+                    {game.homeScore}
+                  </Text>
                 </View>
                 <View className="flex-row justify-between items-center py-2 border-t border-gray-600 mt-2">
                   <Text className="text-gray-400">Lead:</Text>
                   <Text className="text-primary-400 font-semibold">
-                    {gameState.homeScore === gameState.awayScore 
-                      ? 'Tied' 
-                      : `${gameState.homeScore > gameState.awayScore ? game.home_team.name : game.away_team.name} by ${Math.abs(gameState.homeScore - gameState.awayScore)}`
-                    }
+                    {game.homeScore === game.awayScore
+                      ? "Tied"
+                      : `${
+                          game.homeScore > game.awayScore
+                            ? game.homeTeam?.name || "Home"
+                            : game.awayTeam?.name || "Away"
+                        } by ${Math.abs(game.homeScore - game.awayScore)}`}
                   </Text>
                 </View>
               </View>
@@ -516,26 +512,39 @@ export default function LiveGameScreen() {
           </View>
         )}
 
-        {activeTab === 'stats' && (
+        {activeTab === "stats" && (
           <View>
-            <Text className="text-white text-lg font-bold mb-4">{game.away_team.name} - Player Stats</Text>
-            {awayPlayers.map(playerStats => renderPlayerStatsCard(playerStats, 'away'))}
-            
-            <Text className="text-white text-lg font-bold mb-4 mt-6">{game.home_team.name} - Player Stats</Text>
-            {homePlayers.map(playerStats => renderPlayerStatsCard(playerStats, 'home'))}
+            <Text className="text-white text-lg font-bold mb-4">
+              {game.awayTeam?.name || "Away"} - Player Stats
+            </Text>
+            {awayPlayerStats.map((playerStat: PlayerStat) =>
+              renderPlayerStatsCard(playerStat, "away")
+            )}
+
+            <Text className="text-white text-lg font-bold mb-4 mt-6">
+              {game.homeTeam?.name || "Home"} - Player Stats
+            </Text>
+            {homePlayerStats.map((playerStat: PlayerStat) =>
+              renderPlayerStatsCard(playerStat, "home")
+            )}
           </View>
         )}
 
-        {activeTab === 'substitutions' && (
-          <View className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <Text className="text-white text-lg font-bold mb-4">Player Substitutions</Text>
-            <Text className="text-gray-400 mb-4">
-              Manage player rotations and substitutions during the game.
+        {activeTab === "substitutions" && (
+          <View>
+            <Text className="text-white text-lg font-bold mb-4">
+              {game.awayTeam?.name || "Away"} - Substitutions
             </Text>
-            <View className="items-center py-8">
-              <Icon name="users" size={48} color="#9CA3AF" />
-              <Text className="text-gray-400 mt-4">Substitution system coming soon...</Text>
-            </View>
+            {awayPlayerStats.map((playerStat: PlayerStat) =>
+              renderSubstitutionCard(playerStat, "away")
+            )}
+
+            <Text className="text-white text-lg font-bold mb-4 mt-6">
+              {game.homeTeam?.name || "Home"} - Substitutions
+            </Text>
+            {homePlayerStats.map((playerStat: PlayerStat) =>
+              renderSubstitutionCard(playerStat, "home")
+            )}
           </View>
         )}
       </ScrollView>

@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { League, basketballAPI } from "@basketball-stats/shared";
-import { useAuthStore } from "../hooks/useAuthStore";
+import React, { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import {
   PlusIcon,
@@ -10,71 +12,65 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function LeagueSelectionPage() {
-  const {
-    userLeagues,
-    selectedLeague,
-    selectLeague,
-    joinLeagueByCode,
-    loadUserLeagues,
-    isLoading,
-    user,
-    logout,
-    joinLeague,
-  } = useAuthStore();
-  const [availableLeagues, setAvailableLeagues] = useState<League[]>([]);
+  const { token, selectedLeague, selectLeague, user, logout } = useAuth();
   const [inviteCode, setInviteCode] = useState("");
   const [showJoinForm, setShowJoinForm] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadAvailableLeagues();
-  }, []);
+  const leaguesData = useQuery(api.leagues.list, token ? { token } : "skip");
+  const joinLeagueMutation = useMutation(api.leagues.join);
+  const joinByCodeMutation = useMutation(api.leagues.joinByCode);
 
-  const loadAvailableLeagues = async () => {
+  const userLeagues = leaguesData?.leagues || [];
+
+  const handleJoinLeague = async (leagueId: Id<"leagues">) => {
+    if (!token) return;
+    setIsJoining(true);
+    setError(null);
     try {
-      const response = await basketballAPI.getLeagues();
-      const publicLeagues = response.leagues.filter(
-        league =>
-          league.is_public &&
-          !userLeagues.some((ul: League) => ul.id === league.id)
-      );
-      setAvailableLeagues(publicLeagues);
-    } catch (error) {
-      console.error("Failed to load available leagues:", error);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await loadUserLeagues();
-      await loadAvailableLeagues();
+      await joinLeagueMutation({ token, leagueId });
+    } catch (err: any) {
+      console.error("Failed to join league:", err);
+      setError(err.message || "Failed to join league");
     } finally {
-      setRefreshing(false);
-    }
-  };
-
-  const handleJoinLeague = async (leagueId: number) => {
-    try {
-      await joinLeague(leagueId);
-      await loadAvailableLeagues();
-    } catch (error) {
-      console.error("Failed to join league:", error);
+      setIsJoining(false);
     }
   };
 
   const handleJoinByCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteCode.trim()) return;
+    if (!inviteCode.trim() || !token) return;
 
+    setIsJoining(true);
+    setError(null);
     try {
-      await joinLeagueByCode(inviteCode.trim());
+      await joinByCodeMutation({ token, code: inviteCode.trim() });
       setInviteCode("");
       setShowJoinForm(false);
-      await loadAvailableLeagues();
-    } catch (error) {
-      console.error("Failed to join league by code:", error);
+    } catch (err: any) {
+      console.error("Failed to join league by code:", err);
+      setError(err.message || "Failed to join league");
+    } finally {
+      setIsJoining(false);
     }
+  };
+
+  const handleSelectLeague = (league: any) => {
+    selectLeague({
+      id: league.id,
+      name: league.name,
+      description: league.description,
+      leagueType: league.leagueType,
+      season: league.season,
+      status: league.status,
+      isPublic: league.isPublic,
+      teamsCount: league.teamsCount,
+      membersCount: league.membersCount,
+      gamesCount: league.gamesCount,
+      role: league.role,
+      createdAt: league.createdAt,
+    });
   };
 
   const handleLogout = () => {
@@ -99,7 +95,7 @@ export default function LeagueSelectionPage() {
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <p className="text-sm font-medium text-white">
-                  {user?.full_name}
+                  {user?.firstName} {user?.lastName}
                 </p>
                 <p className="text-xs text-gray-400">{user?.email}</p>
               </div>
@@ -116,22 +112,21 @@ export default function LeagueSelectionPage() {
 
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
+          {error && (
+            <div className="mb-4 bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded-md">
+              {error}
+            </div>
+          )}
+
           {/* My Leagues */}
           {userLeagues.length > 0 && (
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-white">My Leagues</h2>
-                <button
-                  onClick={handleRefresh}
-                  disabled={refreshing}
-                  className="text-orange-500 hover:text-orange-400 text-sm disabled:opacity-50"
-                >
-                  {refreshing ? "Refreshing..." : "Refresh"}
-                </button>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {userLeagues.map((league: League) => {
+                {userLeagues.map((league: any) => {
                   const isSelected = selectedLeague?.id === league.id;
                   return (
                     <div
@@ -141,14 +136,14 @@ export default function LeagueSelectionPage() {
                           ? "border-orange-500 bg-orange-900/20 ring-2 ring-orange-500"
                           : "border-gray-700 bg-gray-800 hover:border-gray-600"
                       }`}
-                      onClick={() => selectLeague(league)}
+                      onClick={() => handleSelectLeague(league)}
                     >
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-medium text-white">
                           {league.name}
                         </h3>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          {league.league_type}
+                          {league.leagueType}
                         </span>
                       </div>
 
@@ -161,11 +156,11 @@ export default function LeagueSelectionPage() {
                       <div className="flex items-center justify-between text-sm text-gray-400">
                         <div className="flex items-center">
                           <TrophyIcon className="h-4 w-4 mr-1" />
-                          <span>{league.teams_count || 0} teams</span>
+                          <span>{league.teamsCount || 0} teams</span>
                         </div>
                         <div className="flex items-center">
                           <UsersIcon className="h-4 w-4 mr-1" />
-                          <span>{league.members_count || 0} members</span>
+                          <span>{league.membersCount || 0} members</span>
                         </div>
                       </div>
 
@@ -176,10 +171,10 @@ export default function LeagueSelectionPage() {
                         </div>
                       </div>
 
-                      {league.membership && (
+                      {league.role && (
                         <div className="mt-3">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {league.membership.display_role}
+                            {league.role}
                           </span>
                         </div>
                       )}
@@ -223,69 +218,18 @@ export default function LeagueSelectionPage() {
                   />
                   <button
                     type="submit"
-                    disabled={isLoading || !inviteCode.trim()}
+                    disabled={isJoining || !inviteCode.trim()}
                     className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isLoading ? "Joining..." : "Join"}
+                    {isJoining ? "Joining..." : "Join"}
                   </button>
                 </form>
               )}
             </div>
           </div>
 
-          {/* Public Leagues */}
-          {availableLeagues.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-lg font-medium text-white mb-4">
-                Public Leagues
-              </h2>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {availableLeagues.map((league: League) => (
-                  <div
-                    key={league.id}
-                    className="border border-gray-700 bg-gray-800 rounded-lg p-6"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-medium text-white">
-                        {league.name}
-                      </h3>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Public
-                      </span>
-                    </div>
-
-                    {league.description && (
-                      <p className="text-gray-400 text-sm mb-4">
-                        {league.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
-                      <div className="flex items-center">
-                        <TrophyIcon className="h-4 w-4 mr-1" />
-                        <span>{league.teams_count || 0} teams</span>
-                      </div>
-                      <div className="flex items-center">
-                        <UsersIcon className="h-4 w-4 mr-1" />
-                        <span>{league.members_count || 0} members</span>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => handleJoinLeague(league.id)}
-                      disabled={isLoading}
-                      className="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Join League
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Empty State */}
-          {userLeagues.length === 0 && availableLeagues.length === 0 && (
+          {userLeagues.length === 0 && (
             <div className="text-center py-12">
               <TrophyIcon className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-white">

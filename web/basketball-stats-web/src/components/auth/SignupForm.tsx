@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { SignupCredentials } from '@basketball-stats/shared';
-import { useAuthStore } from '../../hooks/useAuthStore';
+import { useAuth } from '../../contexts/AuthContext';
 import Icon from '../Icon';
 
 interface SignupFormProps {
@@ -17,8 +16,10 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  const { signup, isLoading, error, clearError } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { signup } = useAuth();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -26,58 +27,59 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
 
   const validateForm = () => {
     const { firstName, lastName, email, password, passwordConfirmation } = formData;
-    
+
     if (!firstName.trim()) {
       return 'Please enter your first name';
     }
-    
+
     if (!lastName.trim()) {
       return 'Please enter your last name';
     }
-    
+
     if (!email.trim()) {
       return 'Please enter your email';
     }
-    
+
     if (!email.includes('@')) {
       return 'Please enter a valid email address';
     }
-    
+
     if (password.length < 6) {
       return 'Password must be at least 6 characters';
     }
-    
+
     if (password !== passwordConfirmation) {
       return 'Passwords do not match';
     }
-    
+
     return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const validationError = validateForm();
     if (validationError) {
-      // You could set a local error state here
+      setError(validationError);
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
+
     try {
-      clearError();
-      const credentials: SignupCredentials = {
-        first_name: formData.firstName.trim(),
-        last_name: formData.lastName.trim(),
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password,
-        password_confirmation: formData.passwordConfirmation,
-      };
-      
-      await signup(credentials);
+      await signup(
+        formData.email.trim().toLowerCase(),
+        formData.password,
+        formData.firstName.trim(),
+        formData.lastName.trim()
+      );
       // Navigation will be handled by the auth state change
-    } catch (error) {
-      console.error('Signup error:', error);
-      // Error is already handled by the store
+    } catch (err: any) {
+      console.error('Signup error:', err);
+      setError(err.message || 'Failed to create account. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -101,14 +103,14 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
             </button>
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded-md">
               {error}
             </div>
           )}
-          
+
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -128,7 +130,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   disabled={isLoading}
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-300">
                   Last name
@@ -147,7 +149,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                 />
               </div>
             </div>
-            
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300">
                 Email address
@@ -165,7 +167,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                 disabled={isLoading}
               />
             </div>
-            
+
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300">
                 Password
@@ -194,7 +196,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                 </button>
               </div>
             </div>
-            
+
             <div>
               <label htmlFor="passwordConfirmation" className="block text-sm font-medium text-gray-300">
                 Confirm password

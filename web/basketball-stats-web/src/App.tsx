@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useAuthStore } from "./hooks/useAuthStore";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Icon from "./components/Icon";
 
 import Layout from "./components/Layout";
@@ -14,16 +13,6 @@ import LiveGame from "./pages/LiveGame";
 import GameAnalysis from "./pages/GameAnalysis";
 import AuthPage from "./pages/AuthPage";
 import LeagueSelectionPage from "./pages/LeagueSelectionPage";
-
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
-    },
-  },
-});
 
 function LoadingScreen() {
   return (
@@ -38,7 +27,7 @@ function LoadingScreen() {
 }
 
 function AuthenticatedApp() {
-  const { selectedLeague } = useAuthStore();
+  const { selectedLeague } = useAuth();
 
   if (!selectedLeague) {
     return <LeagueSelectionPage />;
@@ -65,24 +54,9 @@ function AuthenticatedApp() {
 }
 
 function AppContent() {
-  const { isAuthenticated, initialize } = useAuthStore();
-  const [isInitializing, setIsInitializing] = useState(true);
+  const { isAuthenticated, isLoading } = useAuth();
 
-  useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        await initialize();
-      } catch (error) {
-        console.error("App initialization error:", error);
-      } finally {
-        setIsInitializing(false);
-      }
-    };
-
-    initializeApp();
-  }, [initialize]);
-
-  if (isInitializing) {
+  if (isLoading) {
     return <LoadingScreen />;
   }
 
@@ -95,11 +69,11 @@ function AppContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
+    <Router>
+      <AuthProvider>
         <AppContent />
-      </Router>
-    </QueryClientProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

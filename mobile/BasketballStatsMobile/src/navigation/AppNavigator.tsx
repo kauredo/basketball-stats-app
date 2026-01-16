@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { View, Text, TouchableOpacity } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import { useAuthStore } from "../hooks/useAuthStore";
+import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 
 // Import screens
@@ -131,24 +131,9 @@ function LoadingScreen() {
 }
 
 function AppContent() {
-  const { isAuthenticated, selectedLeague, initialize } = useAuthStore();
-  const [isInitializing, setIsInitializing] = useState(true);
+  const { isAuthenticated, selectedLeague, isLoading } = useAuth();
 
-  useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        await initialize();
-      } catch (error) {
-        console.error("App initialization error:", error);
-      } finally {
-        setIsInitializing(false);
-      }
-    };
-
-    initializeApp();
-  }, [initialize]);
-
-  if (isInitializing) {
+  if (isLoading) {
     return <LoadingScreen />;
   }
 

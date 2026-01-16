@@ -10,8 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { SignupCredentials } from "@basketball-stats/shared";
-import { useAuthStore } from "../../hooks/useAuthStore";
+import { useAuth } from "../../contexts/AuthContext";
 import Button from "../../components/Button";
 import Icon from "../../components/Icon";
 
@@ -31,7 +30,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
     useState(false);
 
-  const { signup, isLoading, error, clearError } = useAuthStore();
+  const { signup, isLoading, error, clearError } = useAuth();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -79,19 +78,16 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
 
     try {
       clearError();
-      const credentials: SignupCredentials = {
-        first_name: formData.firstName.trim(),
-        last_name: formData.lastName.trim(),
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password,
-        password_confirmation: formData.passwordConfirmation,
-      };
-
-      await signup(credentials);
+      await signup(
+        formData.firstName.trim(),
+        formData.lastName.trim(),
+        formData.email.trim().toLowerCase(),
+        formData.password
+      );
       // Navigation will be handled by the auth state change
-    } catch (error) {
-      console.error("Signup error:", error);
-      // Error is already handled by the store
+    } catch (err) {
+      console.error("Signup error:", err);
+      // Error is already handled by the context
     }
   };
 

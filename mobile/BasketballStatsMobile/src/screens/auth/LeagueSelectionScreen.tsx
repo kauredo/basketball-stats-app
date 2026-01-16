@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,77 +9,94 @@ import {
   RefreshControl,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { League, basketballAPI } from "@basketball-stats/shared";
-import { useAuthStore } from "../../hooks/useAuthStore";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../../convex/_generated/api";
+import { Id } from "../../../../../convex/_generated/dataModel";
+import { useAuth } from "../../contexts/AuthContext";
 import Icon from "../../components/Icon";
 
+interface League {
+  id: Id<"leagues">;
+  name: string;
+  description?: string;
+  leagueType: string;
+  season: string;
+  status: string;
+  isPublic: boolean;
+  teamsCount?: number;
+  membersCount?: number;
+  membership?: {
+    role: string;
+    displayRole: string;
+  };
+}
+
 export default function LeagueSelectionScreen() {
-  const {
-    userLeagues,
-    selectedLeague,
-    selectLeague,
-    joinLeague,
-    joinLeagueByCode,
-    loadUserLeagues,
-    isLoading,
-  } = useAuthStore();
-  const [availableLeagues, setAvailableLeagues] = useState<League[]>([]);
+  const { token, selectedLeague, selectLeague, setUserLeagues, isLoading: authLoading } = useAuth();
   const [inviteCode, setInviteCode] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [showJoinForm, setShowJoinForm] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
 
-  useEffect(() => {
-    loadAvailableLeagues();
-  }, []);
+  const leaguesData = useQuery(
+    api.leagues.list,
+    token ? { token } : "skip"
+  );
 
-  const loadAvailableLeagues = async () => {
-    try {
-      const response = await basketballAPI.getLeagues();
-      const publicLeagues = response.leagues.filter(
-        (league: League) =>
-          league.is_public && !userLeagues.some(ul => ul.id === league.id)
-      );
-      setAvailableLeagues(publicLeagues);
-    } catch (error) {
-      console.error("Failed to load available leagues:", error);
-    }
-  };
+  const joinLeagueMutation = useMutation(api.leagues.join);
+  const joinByCodeMutation = useMutation(api.leagues.joinByCode);
+
+  const userLeagues = leaguesData?.userLeagues || [];
+  const publicLeagues = leaguesData?.publicLeagues || [];
+
+  // Filter public leagues to exclude ones user already belongs to
+  const availableLeagues = publicLeagues.filter(
+    (league: League) => !userLeagues.some((ul: League) => ul.id === league.id)
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
-    try {
-      await loadUserLeagues();
-      await loadAvailableLeagues();
-    } finally {
-      setRefreshing(false);
-    }
+    // Data will auto-refresh with Convex
+    setTimeout(() => setRefreshing(false), 500);
   };
 
-  const handleJoinLeague = async (leagueId: number) => {
+  const handleJoinLeague = async (leagueId: Id<"leagues">) => {
+    if (!token) return;
+
+    setIsJoining(true);
     try {
-      await joinLeague(leagueId);
-      await loadAvailableLeagues();
+      await joinLeagueMutation({ token, leagueId });
       Alert.alert("Success", "Successfully joined the league!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to join league:", error);
+      Alert.alert("Error", error.message || "Failed to join league");
+    } finally {
+      setIsJoining(false);
     }
   };
 
   const handleJoinByCode = async () => {
-    if (!inviteCode.trim()) {
+    if (!inviteCode.trim() || !token) {
       Alert.alert("Error", "Please enter an invite code");
       return;
     }
 
+    setIsJoining(true);
     try {
-      await joinLeagueByCode(inviteCode.trim());
+      await joinByCodeMutation({ token, inviteCode: inviteCode.trim() });
       setInviteCode("");
       setShowJoinForm(false);
-      await loadAvailableLeagues();
       Alert.alert("Success", "Successfully joined the league!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to join league by code:", error);
+      Alert.alert("Error", error.message || "Failed to join league");
+    } finally {
+      setIsJoining(false);
     }
+  };
+
+  const handleSelectLeague = (league: League) => {
+    selectLeague(league);
   };
 
   const renderUserLeague = ({ item: league }: { item: League }) => {
@@ -90,7 +107,7 @@ export default function LeagueSelectionScreen() {
         className={`bg-gray-800 rounded-xl p-4 mb-3 border-2 ${
           isSelected ? "border-primary-500 bg-primary-900" : "border-gray-700"
         }`}
-        onPress={() => selectLeague(league)}
+        onPress={() => handleSelectLeague(league)}
       >
         <View className="flex-row justify-between items-start mb-2">
           <Text className="text-lg font-bold text-white flex-1 mr-3">
@@ -98,7 +115,7 @@ export default function LeagueSelectionScreen() {
           </Text>
           <View className="bg-gray-700 px-2 py-1 rounded">
             <Text className="text-white text-xs font-semibold capitalize">
-              {league.league_type}
+              {league.leagueType}
             </Text>
           </View>
         </View>
@@ -114,8 +131,7 @@ export default function LeagueSelectionScreen() {
 
         <View className="mb-2">
           <Text className="text-gray-400 text-xs">
-            {league.teams_count || 0} teams • {league.members_count || 0}{" "}
-            members
+            {league.teamsCount || 0} teams • {league.membersCount || 0} members
           </Text>
           <Text className="text-gray-400 text-xs mt-0.5">
             Season: {league.season}
@@ -125,7 +141,7 @@ export default function LeagueSelectionScreen() {
         {league.membership && (
           <View className="self-start bg-court-800 px-2 py-1 rounded mt-2">
             <Text className="text-court-400 text-xs font-semibold">
-              {league.membership.display_role}
+              {league.membership.displayRole}
             </Text>
           </View>
         )}
@@ -148,6 +164,7 @@ export default function LeagueSelectionScreen() {
     <TouchableOpacity
       className="bg-gray-800 rounded-xl p-4 mb-3 border border-gray-700"
       onPress={() => handleJoinLeague(league.id)}
+      disabled={isJoining}
     >
       <View className="flex-row justify-between items-start mb-2">
         <Text className="text-lg font-bold text-white flex-1 mr-3">
@@ -169,18 +186,29 @@ export default function LeagueSelectionScreen() {
 
       <View className="mb-3">
         <Text className="text-gray-400 text-xs">
-          {league.teams_count || 0} teams • {league.members_count || 0} members
+          {league.teamsCount || 0} teams • {league.membersCount || 0} members
         </Text>
       </View>
 
       <TouchableOpacity
-        className="bg-primary-500 rounded-lg py-3 items-center mt-3"
+        className={`bg-primary-500 rounded-lg py-3 items-center mt-3 ${isJoining ? 'opacity-50' : ''}`}
         onPress={() => handleJoinLeague(league.id)}
+        disabled={isJoining}
       >
-        <Text className="text-white text-sm font-semibold">Join League</Text>
+        <Text className="text-white text-sm font-semibold">
+          {isJoining ? 'Joining...' : 'Join League'}
+        </Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
+
+  if (leaguesData === undefined) {
+    return (
+      <View className="flex-1 bg-dark-950 justify-center items-center">
+        <Text className="text-white text-base">Loading leagues...</Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-dark-950">
@@ -245,13 +273,13 @@ export default function LeagueSelectionScreen() {
                   />
                   <TouchableOpacity
                     className={`bg-primary-500 rounded-lg py-3 items-center ${
-                      isLoading ? "opacity-50" : ""
+                      isJoining ? "opacity-50" : ""
                     }`}
                     onPress={handleJoinByCode}
-                    disabled={isLoading}
+                    disabled={isJoining}
                   >
                     <Text className="text-white text-sm font-semibold">
-                      {isLoading ? "Joining..." : "Join League"}
+                      {isJoining ? "Joining..." : "Join League"}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -266,7 +294,7 @@ export default function LeagueSelectionScreen() {
                     Public Leagues
                   </Text>
                 </View>
-                {availableLeagues.map(league => (
+                {availableLeagues.map((league: League) => (
                   <View key={`available-${league.id}`}>
                     {renderAvailableLeague({ item: league })}
                   </View>

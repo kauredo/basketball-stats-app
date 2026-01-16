@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuthStore } from '../../hooks/useAuthStore';
+import { useAuth } from '../../contexts/AuthContext';
 import Icon from '../Icon';
 
 interface ForgotPasswordFormProps {
@@ -10,7 +10,7 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   
-  const { forgotPassword, isLoading, error, clearError } = useAuthStore();
+  const { forgotPassword, isLoading, error, clearError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

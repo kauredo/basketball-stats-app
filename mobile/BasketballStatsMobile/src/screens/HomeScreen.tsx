@@ -1,72 +1,89 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
+import { useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import { RootStackParamList } from "../../App";
 
-// Import shared library
-import {
-  basketballAPI,
-  Game,
-  BasketballUtils,
-  GAME_STATUSES,
-} from "@basketball-stats/shared";
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Home">;
 
-import { RootStackParamList, TabParamList } from "../navigation/AppNavigator";
+interface Game {
+  id: Id<"games">;
+  homeTeam?: { id: Id<"teams">; name: string };
+  awayTeam?: { id: Id<"teams">; name: string };
+  homeScore: number;
+  awayScore: number;
+  status: string;
+  currentQuarter: number;
+  timeRemainingSeconds: number;
+  scheduledAt?: number;
+  startedAt?: number;
+  endedAt?: number;
+}
 
-type HomeScreenNavigationProp = NativeStackNavigationProp<
-  TabParamList & RootStackParamList,
-  "Home"
->;
+const GAME_STATUS_COLORS: Record<string, string> = {
+  active: "#EF4444",
+  paused: "#F59E0B",
+  completed: "#10B981",
+  scheduled: "#3B82F6",
+};
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const [liveGames, setLiveGames] = useState<Game[]>([]);
-  const [recentGames, setRecentGames] = useState<Game[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const { token, selectedLeague } = useAuth();
+  const [refreshing, setRefreshing] = React.useState(false);
 
-  const loadData = async (isRefresh = false) => {
-    try {
-      if (!isRefresh) setLoading(true);
+  const gamesData = useQuery(
+    api.games.list,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
 
-      const response = await basketballAPI.getGames();
-      const allGames = response.games;
+  const games = gamesData?.games || [];
 
-      // Separate live and recent games
-      const live = allGames.filter(
-        game => game.status === "active" || game.status === "paused"
-      );
-      const recent = allGames
-        .filter(game => game.status === "completed")
-        .slice(0, 5);
-
-      setLiveGames(live);
-      setRecentGames(recent);
-    } catch (error) {
-      console.error("Failed to load games:", error);
-      Alert.alert("Error", "Failed to load games");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
+  // Separate live and recent games
+  const liveGames = games.filter(
+    (game: Game) => game.status === "active" || game.status === "paused"
+  );
+  const recentGames = games
+    .filter((game: Game) => game.status === "completed")
+    .slice(0, 5);
 
   const onRefresh = () => {
     setRefreshing(true);
-    loadData(true);
+    // Data auto-refreshes with Convex
+    setTimeout(() => setRefreshing(false), 500);
+  };
+
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "active":
+        return "Live";
+      case "paused":
+        return "Paused";
+      case "completed":
+        return "Final";
+      case "scheduled":
+        return "Scheduled";
+      default:
+        return status;
+    }
   };
 
   const handleGamePress = (game: Game) => {
@@ -75,11 +92,16 @@ export default function HomeScreen() {
     }
   };
 
+  const getWinner = (game: Game) => {
+    if (game.status !== "completed") return null;
+    if (game.homeScore > game.awayScore) return "home";
+    if (game.awayScore > game.homeScore) return "away";
+    return "tie";
+  };
+
   const renderGameCard = (game: Game, isLive = false) => {
-    const gameStatus =
-      GAME_STATUSES[game.status.toUpperCase() as keyof typeof GAME_STATUSES];
-    const isGameLive = BasketballUtils.isGameLive(game);
-    const winner = BasketballUtils.getWinningTeam(game);
+    const isGameLive = game.status === "active" || game.status === "paused";
+    const winner = getWinner(game);
 
     return (
       <TouchableOpacity
@@ -100,7 +122,7 @@ export default function HomeScreen() {
                     : ""
                 }`}
               >
-                {game.away_team.name}
+                {game.awayTeam?.name || "Away Team"}
               </Text>
               <Text
                 className={`text-white text-lg font-bold min-w-[30px] text-right ${
@@ -109,7 +131,7 @@ export default function HomeScreen() {
                     : ""
                 }`}
               >
-                {game.away_score}
+                {game.awayScore}
               </Text>
             </View>
             <Text className="text-gray-400 text-xs my-1">@</Text>
@@ -121,7 +143,7 @@ export default function HomeScreen() {
                     : ""
                 }`}
               >
-                {game.home_team.name}
+                {game.homeTeam?.name || "Home Team"}
               </Text>
               <Text
                 className={`text-white text-lg font-bold min-w-[30px] text-right ${
@@ -130,7 +152,7 @@ export default function HomeScreen() {
                     : ""
                 }`}
               >
-                {game.home_score}
+                {game.homeScore}
               </Text>
             </View>
           </View>
@@ -139,31 +161,28 @@ export default function HomeScreen() {
         <View className="flex-row justify-between items-center">
           <View
             className="px-2 py-1 rounded-xl"
-            style={{ backgroundColor: gameStatus?.color || "#6B7280" }}
+            style={{ backgroundColor: GAME_STATUS_COLORS[game.status] || "#6B7280" }}
           >
             <Text className="text-white text-xs font-semibold">
-              {BasketballUtils.getGameStatusDisplayName(game.status)}
+              {getStatusLabel(game.status)}
             </Text>
           </View>
 
           {isGameLive && (
             <Text className="text-gray-400 text-xs">
-              Q{game.current_quarter} • {game.time_display}
+              Q{game.currentQuarter} • {formatTime(game.timeRemainingSeconds)}
             </Text>
           )}
 
-          {game.status === "completed" && (
+          {game.status === "completed" && game.endedAt && (
             <Text className="text-gray-400 text-xs">
-              Final •{" "}
-              {BasketballUtils.formatGameDate(game.ended_at || game.created_at)}
+              Final • {new Date(game.endedAt).toLocaleDateString()}
             </Text>
           )}
 
-          {game.status === "scheduled" && (
+          {game.status === "scheduled" && game.scheduledAt && (
             <Text className="text-gray-400 text-xs">
-              {BasketballUtils.formatGameDate(
-                game.scheduled_at || game.created_at
-              )}
+              {new Date(game.scheduledAt).toLocaleDateString()}
             </Text>
           )}
         </View>
@@ -171,7 +190,7 @@ export default function HomeScreen() {
     );
   };
 
-  if (loading) {
+  if (gamesData === undefined) {
     return (
       <View className="flex-1 justify-center items-center bg-dark-950">
         <Text className="text-white text-base">Loading games...</Text>
@@ -241,7 +260,7 @@ export default function HomeScreen() {
               <View className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse" />
               <Text className="text-white text-lg font-bold">Live Games</Text>
             </View>
-            {liveGames.map(game => renderGameCard(game, true))}
+            {liveGames.map((game: Game) => renderGameCard(game, true))}
           </View>
         )}
 
@@ -252,7 +271,7 @@ export default function HomeScreen() {
               <Icon name="stats" size={16} color="#10B981" className="mr-2" />
               <Text className="text-white text-lg font-bold">Recent Games</Text>
             </View>
-            {recentGames.map(game => renderGameCard(game, false))}
+            {recentGames.map((game: Game) => renderGameCard(game, false))}
           </View>
         )}
 

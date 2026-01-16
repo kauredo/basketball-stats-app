@@ -10,8 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { LoginCredentials } from "@basketball-stats/shared";
-import { useAuthStore } from "../../hooks/useAuthStore";
+import { useAuth } from "../../contexts/AuthContext";
 import Button from "../../components/Button";
 import Icon from "../../components/Icon";
 
@@ -28,7 +27,7 @@ export default function LoginScreen({
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, isLoading, error, clearError } = useAuth();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -38,16 +37,11 @@ export default function LoginScreen({
 
     try {
       clearError();
-      const credentials: LoginCredentials = {
-        email: email.trim().toLowerCase(),
-        password,
-      };
-
-      await login(credentials);
+      await login(email.trim().toLowerCase(), password);
       // Navigation will be handled by the auth state change
-    } catch (error) {
-      console.error("Login error:", error);
-      // Error is already handled by the store
+    } catch (err) {
+      console.error("Login error:", err);
+      // Error is already handled by the context
     }
   };
 

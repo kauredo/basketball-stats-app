@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
+import { useAuth } from '../contexts/AuthContext';
 import {
   UserIcon,
   ChartBarIcon,
@@ -7,58 +9,44 @@ import {
   FunnelIcon,
 } from '@heroicons/react/24/outline';
 
-import { basketballAPI, Player, Team } from '@basketball-stats/shared';
-
 const Players: React.FC = () => {
+  const { token, selectedLeague } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTeam, setSelectedTeam] = useState<string>('');
   const [selectedPosition, setSelectedPosition] = useState<string>('');
 
-  const {
-    data: playersData,
-    isLoading: playersLoading,
-  } = useQuery({
-    queryKey: ['players'],
-    queryFn: () => basketballAPI.getAllPlayers(),
-  });
+  const playersData = useQuery(
+    api.players.list,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
 
-  const {
-    data: teamsData,
-    isLoading: teamsLoading,
-  } = useQuery({
-    queryKey: ['teams'],
-    queryFn: () => basketballAPI.getTeams(),
-  });
+  const teamsData = useQuery(
+    api.teams.list,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
 
   const players = playersData?.players || [];
   const teams = teamsData?.teams || [];
 
-  const positions = [
-    'Point Guard',
-    'Shooting Guard',
-    'Small Forward',
-    'Power Forward',
-    'Center',
-    'Guard',
-    'Forward',
-  ];
+  const positions = ['PG', 'SG', 'SF', 'PF', 'C'];
+  const positionLabels: Record<string, string> = {
+    'PG': 'Point Guard',
+    'SG': 'Shooting Guard',
+    'SF': 'Small Forward',
+    'PF': 'Power Forward',
+    'C': 'Center',
+  };
 
-  // Filter players based on search and filters
-  const filteredPlayers = players.filter((player) => {
+  const filteredPlayers = players.filter((player: any) => {
     const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          player.number.toString().includes(searchTerm);
-    const matchesTeam = !selectedTeam || player.team?.id.toString() === selectedTeam;
+    const matchesTeam = !selectedTeam || player.team?.id === selectedTeam;
     const matchesPosition = !selectedPosition || player.position === selectedPosition;
-    
+
     return matchesSearch && matchesTeam && matchesPosition;
   });
 
-  const getTeamName = (teamId: number) => {
-    const team = teams.find(t => t.id === teamId);
-    return team?.name || 'Unknown Team';
-  };
-
-  const renderPlayerCard = (player: Player) => (
+  const renderPlayerCard = (player: any) => (
     <div key={player.id} className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-4">
@@ -71,7 +59,7 @@ const Players: React.FC = () => {
             <p className="text-gray-400 text-sm">{player.team?.name || 'Unknown Team'}</p>
           </div>
         </div>
-        
+
         <button
           className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors"
           title="View Stats"
@@ -83,31 +71,30 @@ const Players: React.FC = () => {
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <span className="text-gray-400">Position</span>
-          <span className="text-gray-200 font-medium">{player.position}</span>
+          <span className="text-gray-200 font-medium">
+            {positionLabels[player.position] || player.position}
+          </span>
         </div>
-        
-        {player.height_cm && (
+
+        {player.heightCm && (
           <div className="flex justify-between items-center">
             <span className="text-gray-400">Height</span>
-            <span className="text-gray-200 font-medium">
-              {Math.floor(player.height_cm / 30.48)}'
-              {Math.round(((player.height_cm / 30.48) % 1) * 12)}"
-            </span>
+            <span className="text-gray-200 font-medium">{player.heightCm} cm</span>
           </div>
         )}
-        
-        {player.weight_kg && (
+
+        {player.weightKg && (
           <div className="flex justify-between items-center">
             <span className="text-gray-400">Weight</span>
-            <span className="text-gray-200 font-medium">{Math.round(player.weight_kg * 2.205)} lbs</span>
+            <span className="text-gray-200 font-medium">{player.weightKg} kg</span>
           </div>
         )}
 
         <div className="flex justify-between items-center">
           <span className="text-gray-400">Status</span>
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            player.active 
-              ? 'bg-green-900 text-green-200' 
+            player.active
+              ? 'bg-green-900 text-green-200'
               : 'bg-red-900 text-red-200'
           }`}>
             {player.active ? 'Active' : 'Inactive'}
@@ -115,24 +102,23 @@ const Players: React.FC = () => {
         </div>
       </div>
 
-      {/* Player Statistics Preview */}
       <div className="mt-4 pt-4 border-t border-gray-700">
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <div className="text-lg font-bold text-white">
-              {player.season_averages?.points?.toFixed(1) || '0.0'}
+              {player.seasonAverages?.points?.toFixed(1) || '0.0'}
             </div>
             <div className="text-xs text-gray-400">PPG</div>
           </div>
           <div>
             <div className="text-lg font-bold text-white">
-              {player.season_averages?.rebounds?.toFixed(1) || '0.0'}
+              {player.seasonAverages?.rebounds?.toFixed(1) || '0.0'}
             </div>
             <div className="text-xs text-gray-400">RPG</div>
           </div>
           <div>
             <div className="text-lg font-bold text-white">
-              {player.season_averages?.assists?.toFixed(1) || '0.0'}
+              {player.seasonAverages?.assists?.toFixed(1) || '0.0'}
             </div>
             <div className="text-xs text-gray-400">APG</div>
           </div>
@@ -141,7 +127,7 @@ const Players: React.FC = () => {
     </div>
   );
 
-  if (playersLoading || teamsLoading) {
+  if (playersData === undefined || teamsData === undefined) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
@@ -159,7 +145,6 @@ const Players: React.FC = () => {
       {/* Search and Filters */}
       <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
             <input
@@ -171,7 +156,6 @@ const Players: React.FC = () => {
             />
           </div>
 
-          {/* Team Filter */}
           <div className="relative">
             <FunnelIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
             <select
@@ -180,15 +164,14 @@ const Players: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none"
             >
               <option value="">All Teams</option>
-              {teams.map((team) => (
-                <option key={team.id} value={team.id.toString()}>
+              {teams.map((team: any) => (
+                <option key={team.id} value={team.id}>
                   {team.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Position Filter */}
           <div>
             <select
               value={selectedPosition}
@@ -198,14 +181,13 @@ const Players: React.FC = () => {
               <option value="">All Positions</option>
               {positions.map((position) => (
                 <option key={position} value={position}>
-                  {position}
+                  {positionLabels[position]}
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Active Filters Display */}
         {(searchTerm || selectedTeam || selectedPosition) && (
           <div className="mt-4 flex flex-wrap gap-2">
             {searchTerm && (
@@ -215,29 +197,29 @@ const Players: React.FC = () => {
                   onClick={() => setSearchTerm('')}
                   className="ml-2 inline-flex items-center p-0.5 rounded-full text-orange-600 hover:bg-orange-200"
                 >
-                  ×
+                  x
                 </button>
               </span>
             )}
             {selectedTeam && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                Team: {getTeamName(parseInt(selectedTeam))}
+                Team: {teams.find((t: any) => t.id === selectedTeam)?.name}
                 <button
                   onClick={() => setSelectedTeam('')}
                   className="ml-2 inline-flex items-center p-0.5 rounded-full text-blue-600 hover:bg-blue-200"
                 >
-                  ×
+                  x
                 </button>
               </span>
             )}
             {selectedPosition && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
-                Position: {selectedPosition}
+                Position: {positionLabels[selectedPosition]}
                 <button
                   onClick={() => setSelectedPosition('')}
                   className="ml-2 inline-flex items-center p-0.5 rounded-full text-green-600 hover:bg-green-200"
                 >
-                  ×
+                  x
                 </button>
               </span>
             )}
@@ -245,7 +227,6 @@ const Players: React.FC = () => {
         )}
       </div>
 
-      {/* Players Grid */}
       {filteredPlayers.length > 0 ? (
         <>
           <div className="flex justify-between items-center">
@@ -264,7 +245,7 @@ const Players: React.FC = () => {
             {players.length === 0 ? 'No players found' : 'No players match your filters'}
           </h3>
           <p className="mt-1 text-sm text-gray-400">
-            {players.length === 0 
+            {players.length === 0
               ? 'Players will appear here once teams are created and players are added.'
               : 'Try adjusting your search terms or filters.'
             }

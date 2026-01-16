@@ -1,27 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
+import { useAuth } from '../contexts/AuthContext';
 import {
   PlayIcon,
-  PauseIcon,
-  StopIcon,
   ClockIcon,
   TrophyIcon,
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
 
-import { basketballAPI, Game, BasketballUtils, GAME_STATUSES } from '@basketball-stats/shared';
-
 const Dashboard: React.FC = () => {
-  const {
-    data: gamesData,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['games'],
-    queryFn: () => basketballAPI.getGames(),
-    refetchInterval: 30000, // Refetch every 30 seconds for live updates
-  });
+  const { token, selectedLeague } = useAuth();
+
+  const gamesData = useQuery(
+    api.games.list,
+    token && selectedLeague
+      ? { token, leagueId: selectedLeague.id }
+      : "skip"
+  );
 
   const games = gamesData?.games || [];
   const liveGames = games.filter(game => game.status === 'active' || game.status === 'paused');
@@ -29,13 +26,36 @@ const Dashboard: React.FC = () => {
   const upcomingGames = games.filter(game => game.status === 'scheduled').slice(0, 5);
 
   const getStatusColor = (status: string) => {
-    const gameStatus = GAME_STATUSES[status.toUpperCase() as keyof typeof GAME_STATUSES];
-    return gameStatus?.color || '#6B7280';
+    switch (status) {
+      case 'active': return '#EF4444';
+      case 'paused': return '#F59E0B';
+      case 'completed': return '#10B981';
+      case 'scheduled': return '#3B82F6';
+      default: return '#6B7280';
+    }
   };
 
-  const renderGameCard = (game: Game, showActions = false) => {
-    const isGameLive = BasketballUtils.isGameLive(game);
-    const winner = BasketballUtils.getWinningTeam(game);
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'active': return 'Live';
+      case 'paused': return 'Paused';
+      case 'completed': return 'Final';
+      case 'scheduled': return 'Scheduled';
+      default: return status;
+    }
+  };
+
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const renderGameCard = (game: any, showActions = false) => {
+    const isGameLive = game.status === 'active';
+    const winner = game.status === 'completed'
+      ? game.homeScore > game.awayScore ? 'home' : game.awayScore > game.homeScore ? 'away' : 'tie'
+      : null;
 
     return (
       <div key={game.id} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
@@ -45,37 +65,37 @@ const Dashboard: React.FC = () => {
               className="px-2 py-1 rounded-full text-xs font-medium text-white"
               style={{ backgroundColor: getStatusColor(game.status) }}
             >
-              {BasketballUtils.getGameStatusDisplayName(game.status)}
+              {getStatusLabel(game.status)}
             </div>
             {isGameLive && (
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
             )}
           </div>
-          
-          {isGameLive && (
+
+          {(game.status === 'active' || game.status === 'paused') && (
             <div className="text-right text-sm text-gray-300">
-              <div>Q{game.current_quarter}</div>
-              <div className="font-mono">{game.time_display}</div>
+              <div>Q{game.currentQuarter}</div>
+              <div className="font-mono">{formatTime(game.timeRemainingSeconds)}</div>
             </div>
           )}
         </div>
 
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <span className={`font-medium ${winner === 'away' && game.status === 'completed' ? 'text-green-400' : 'text-gray-200'}`}>
-              {game.away_team.name}
+            <span className={`font-medium ${winner === 'away' ? 'text-green-400' : 'text-gray-200'}`}>
+              {game.awayTeam?.name || 'Away Team'}
             </span>
-            <span className={`font-bold text-lg ${winner === 'away' && game.status === 'completed' ? 'text-green-400' : 'text-gray-200'}`}>
-              {game.away_score}
+            <span className={`font-bold text-lg ${winner === 'away' ? 'text-green-400' : 'text-gray-200'}`}>
+              {game.awayScore}
             </span>
           </div>
           <div className="text-center text-gray-500 text-sm">@</div>
           <div className="flex justify-between items-center">
-            <span className={`font-medium ${winner === 'home' && game.status === 'completed' ? 'text-green-400' : 'text-gray-200'}`}>
-              {game.home_team.name}
+            <span className={`font-medium ${winner === 'home' ? 'text-green-400' : 'text-gray-200'}`}>
+              {game.homeTeam?.name || 'Home Team'}
             </span>
-            <span className={`font-bold text-lg ${winner === 'home' && game.status === 'completed' ? 'text-green-400' : 'text-gray-200'}`}>
-              {game.home_score}
+            <span className={`font-bold text-lg ${winner === 'home' ? 'text-green-400' : 'text-gray-200'}`}>
+              {game.homeScore}
             </span>
           </div>
         </div>
@@ -83,24 +103,24 @@ const Dashboard: React.FC = () => {
         {game.status === 'completed' && (
           <div className="mt-3 pt-3 border-t border-gray-700 text-sm text-gray-400">
             <div className="flex justify-between">
-              <span>Duration: {game.duration_minutes} min</span>
+              <span>Final Score</span>
               {winner !== 'tie' && (
-                <span>Margin: {BasketballUtils.getPointDifferential(game)}</span>
+                <span>Margin: {Math.abs(game.homeScore - game.awayScore)}</span>
               )}
             </div>
           </div>
         )}
 
-        {game.status === 'scheduled' && (
+        {game.status === 'scheduled' && game.scheduledAt && (
           <div className="mt-3 pt-3 border-t border-gray-700 text-sm text-gray-400">
             <div className="flex items-center">
               <ClockIcon className="w-4 h-4 mr-1" />
-              {BasketballUtils.formatGameDate(game.scheduled_at || game.created_at)}
+              {new Date(game.scheduledAt).toLocaleDateString()}
             </div>
           </div>
         )}
 
-        {showActions && isGameLive && (
+        {showActions && (game.status === 'active' || game.status === 'paused') && (
           <div className="mt-4 flex space-x-2">
             <Link
               to={`/games/${game.id}/live`}
@@ -120,7 +140,7 @@ const Dashboard: React.FC = () => {
     );
   };
 
-  if (isLoading) {
+  if (gamesData === undefined) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
@@ -156,7 +176,7 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="ml-4">
               <div className="text-2xl font-bold text-white">{recentGames.length}</div>
-              <div className="text-gray-400">Completed Today</div>
+              <div className="text-gray-400">Completed</div>
             </div>
           </div>
         </div>
@@ -198,7 +218,7 @@ const Dashboard: React.FC = () => {
               to="/games"
               className="text-orange-500 hover:text-orange-400 font-medium"
             >
-              View All Games →
+              View All Games
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -216,7 +236,7 @@ const Dashboard: React.FC = () => {
               to="/games"
               className="text-orange-500 hover:text-orange-400 font-medium"
             >
-              View All Games →
+              View All Games
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -234,7 +254,7 @@ const Dashboard: React.FC = () => {
               to="/games"
               className="text-orange-500 hover:text-orange-400 font-medium"
             >
-              View All Games →
+              View All Games
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

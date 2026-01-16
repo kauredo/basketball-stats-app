@@ -1,17 +1,6 @@
 // Types
 export * from "./types";
 
-// Services
-export { BasketballStatsAPI, basketballAPI } from "./services/api";
-export {
-  BasketballWebSocketService,
-  basketballWebSocket,
-} from "./services/websocket";
-
-// Stores
-export { useGameStore } from "./stores/gameStore";
-export * from "./stores/simpleAuthStore";
-
 // UI Components
 export * from "./components";
 

@@ -1,0 +1,20 @@
+{
+  "name": "basketball-stats-app",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "web/basketball-stats-web",
+    "mobile/BasketballStatsMobile"
+  ],
+  "scripts": {
+    "convex:dev": "convex dev",
+    "convex:deploy": "convex deploy"
+  },
+  "devDependencies": {
+    "convex": "^1.17.0"
+  },
+  "dependencies": {
+    "@convex-dev/auth": "^0.0.90"
+  }
+}

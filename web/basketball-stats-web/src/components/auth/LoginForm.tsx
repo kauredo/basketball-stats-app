@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { LoginCredentials } from '@basketball-stats/shared';
-import { useAuthStore } from '../../hooks/useAuthStore';
+import { useAuth } from '../../contexts/AuthContext';
 import Icon from '../Icon';
 
 interface LoginFormProps {
@@ -12,28 +11,29 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email.trim() || !password.trim()) {
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
+
     try {
-      clearError();
-      const credentials: LoginCredentials = {
-        email: email.trim().toLowerCase(),
-        password,
-      };
-      
-      await login(credentials);
+      await login(email.trim().toLowerCase(), password);
       // Navigation will be handled by the auth state change
-    } catch (error) {
-      console.error('Login error:', error);
-      // Error is already handled by the store
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.message || 'Failed to sign in. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -57,14 +57,14 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
             </button>
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded-md">
               {error}
             </div>
           )}
-          
+
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300">
@@ -83,7 +83,7 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
                 disabled={isLoading}
               />
             </div>
-            
+
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300">
                 Password
