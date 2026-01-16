@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import Icon from "../Icon";
+import { LogoIcon } from "../Logo";
 
 interface ForgotPasswordFormProps {
   onBackToLogin: () => void;
@@ -33,8 +34,8 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
       <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div>
-            <div className="mx-auto h-12 w-12 flex items-center justify-center">
-              <Icon name="basketball" size={32} className="text-orange-600" />
+            <div className="mx-auto flex items-center justify-center">
+              <LogoIcon variant="light" size="xl" />
             </div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
               Check your email

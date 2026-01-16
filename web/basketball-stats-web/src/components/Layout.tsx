@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "./Icon";
+import Logo from "./Logo";
 import NotificationBell from "./NotificationBell";
 import {
   HomeIcon,
@@ -48,10 +49,7 @@ export default function Layout({ children }: LayoutProps) {
       {/* Sidebar */}
       <div className="fixed inset-y-0 left-0 z-50 w-64 bg-gray-800">
         <div className="flex h-16 shrink-0 items-center px-6">
-          <div className="flex items-center">
-            <Icon name="basketball" size={24} className="mr-2 text-orange-600" />
-            <span className="text-lg font-bold text-white">Basketball Stats</span>
-          </div>
+          <Logo variant="light" size="md" />
         </div>
 
         {/* League info */}
