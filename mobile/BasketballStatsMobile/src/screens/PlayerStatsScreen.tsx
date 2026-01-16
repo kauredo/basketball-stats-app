@@ -36,7 +36,7 @@ export default function PlayerStatsScreen() {
   const route = useRoute<PlayerStatsRouteProp>();
   const navigation = useNavigation<PlayerStatsNavigationProp>();
   const { playerId } = route.params;
-  const { token } = useAuth();
+  const { token, selectedLeague } = useAuth();
 
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<"season" | "recent">(
@@ -54,8 +54,8 @@ export default function PlayerStatsScreen() {
   // Fetch player season stats
   const playerStats = useQuery(
     api.statistics.getPlayerSeasonStats,
-    token && playerId
-      ? { token, playerId: playerId as unknown as Id<"players"> }
+    token && playerId && selectedLeague
+      ? { token, leagueId: selectedLeague.id, playerId: playerId as unknown as Id<"players"> }
       : "skip"
   );
 
@@ -145,7 +145,8 @@ export default function PlayerStatsScreen() {
   );
 
   const renderRecentGames = () => {
-    const recentGames = playerStats?.recentGames || [];
+    // Note: recentGames would need a separate endpoint if needed
+    const recentGames: any[] = [];
 
     if (!recentGames.length) {
       return (

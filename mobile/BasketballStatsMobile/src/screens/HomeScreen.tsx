@@ -20,8 +20,8 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "H
 
 interface Game {
   id: Id<"games">;
-  homeTeam?: { id: Id<"teams">; name: string };
-  awayTeam?: { id: Id<"teams">; name: string };
+  homeTeam: { id: Id<"teams">; name: string; city?: string; logoUrl?: string } | null;
+  awayTeam: { id: Id<"teams">; name: string; city?: string; logoUrl?: string } | null;
   homeScore: number;
   awayScore: number;
   status: string;

@@ -178,6 +178,123 @@ export const getPlayersStats = query({
   },
 });
 
+// Get team statistics for a league
+export const getTeamsStats = query({
+  args: {
+    token: v.string(),
+    leagueId: v.id("leagues"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const hasAccess = await canAccessLeague(ctx, user._id, args.leagueId);
+    if (!hasAccess) throw new Error("Access denied");
+
+    // Get all teams in league
+    const teams = await ctx.db
+      .query("teams")
+      .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
+      .collect();
+
+    // Get completed games
+    const completedGames = await ctx.db
+      .query("games")
+      .withIndex("by_league_status", (q) =>
+        q.eq("leagueId", args.leagueId).eq("status", "completed")
+      )
+      .collect();
+
+    const gameIds = new Set(completedGames.map((g) => g._id));
+
+    // Calculate team stats
+    const teamStats = await Promise.all(
+      teams.map(async (team) => {
+        // Get all players on team
+        const players = await ctx.db
+          .query("players")
+          .withIndex("by_team", (q) => q.eq("teamId", team._id))
+          .collect();
+
+        // Get all player stats from completed games
+        let allPlayerStats: Doc<"playerStats">[] = [];
+        for (const player of players) {
+          const stats = await ctx.db
+            .query("playerStats")
+            .withIndex("by_player", (q) => q.eq("playerId", player._id))
+            .collect();
+          const filteredStats = stats.filter((s) => gameIds.has(s.gameId));
+          allPlayerStats = [...allPlayerStats, ...filteredStats];
+        }
+
+        // Calculate wins/losses
+        const homeGames = completedGames.filter(
+          (g) => g.homeTeamId === team._id
+        );
+        const awayGames = completedGames.filter(
+          (g) => g.awayTeamId === team._id
+        );
+
+        let wins = 0;
+        let losses = 0;
+
+        for (const game of homeGames) {
+          if (game.homeScore > game.awayScore) wins++;
+          else losses++;
+        }
+
+        for (const game of awayGames) {
+          if (game.awayScore > game.homeScore) wins++;
+          else losses++;
+        }
+
+        const gamesPlayed = wins + losses;
+        const aggregated = aggregateStats(allPlayerStats);
+
+        return {
+          teamId: team._id,
+          teamName: team.name,
+          gamesPlayed,
+          wins,
+          losses,
+          winPercentage:
+            gamesPlayed > 0
+              ? Math.round((wins / gamesPlayed) * 1000) / 10
+              : 0,
+          avgPoints:
+            gamesPlayed > 0
+              ? Math.round((aggregated.totalPoints / gamesPlayed) * 10) / 10
+              : 0,
+          avgRebounds:
+            gamesPlayed > 0
+              ? Math.round((aggregated.totalRebounds / gamesPlayed) * 10) / 10
+              : 0,
+          avgAssists:
+            gamesPlayed > 0
+              ? Math.round((aggregated.totalAssists / gamesPlayed) * 10) / 10
+              : 0,
+          fieldGoalPercentage:
+            aggregated.totalFieldGoalsAttempted > 0
+              ? Math.round(
+                  (aggregated.totalFieldGoalsMade /
+                    aggregated.totalFieldGoalsAttempted) *
+                    1000
+                ) / 10
+              : 0,
+        };
+      })
+    );
+
+    // Sort by wins
+    teamStats.sort((a, b) => {
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      return b.winPercentage - a.winPercentage;
+    });
+
+    return { teams: teamStats };
+  },
+});
+
 // Get league leaders by category
 export const getLeagueLeaders = query({
   args: {

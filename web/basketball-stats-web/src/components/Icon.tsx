@@ -86,7 +86,8 @@ interface IconProps {
   color?: string;
 }
 
-const iconMap: Record<IconName, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const iconMap: Record<IconName, React.ComponentType<any>> = {
   // Auth & User
   eye: EyeIcon,
   'eye-off': EyeSlashIcon,

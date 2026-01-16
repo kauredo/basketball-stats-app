@@ -25,10 +25,13 @@ interface League {
   isPublic: boolean;
   teamsCount?: number;
   membersCount?: number;
+  gamesCount?: number;
   membership?: {
+    id?: string;
     role: string;
-    displayRole: string;
-  };
+    status?: string;
+    joinedAt?: number;
+  } | null;
 }
 
 export default function LeagueSelectionScreen() {
@@ -46,12 +49,12 @@ export default function LeagueSelectionScreen() {
   const joinLeagueMutation = useMutation(api.leagues.join);
   const joinByCodeMutation = useMutation(api.leagues.joinByCode);
 
-  const userLeagues = leaguesData?.userLeagues || [];
-  const publicLeagues = leaguesData?.publicLeagues || [];
+  const allLeagues = leaguesData?.leagues || [];
 
-  // Filter public leagues to exclude ones user already belongs to
-  const availableLeagues = publicLeagues.filter(
-    (league: League) => !userLeagues.some((ul: League) => ul.id === league.id)
+  // Separate user's leagues (has membership) from public ones (no membership)
+  const userLeagues = allLeagues.filter((league: League) => league.membership);
+  const availableLeagues = allLeagues.filter(
+    (league: League) => !league.membership && league.isPublic
   );
 
   const onRefresh = async () => {
@@ -83,7 +86,7 @@ export default function LeagueSelectionScreen() {
 
     setIsJoining(true);
     try {
-      await joinByCodeMutation({ token, inviteCode: inviteCode.trim() });
+      await joinByCodeMutation({ token, code: inviteCode.trim() });
       setInviteCode("");
       setShowJoinForm(false);
       Alert.alert("Success", "Successfully joined the league!");
@@ -140,8 +143,8 @@ export default function LeagueSelectionScreen() {
 
         {league.membership && (
           <View className="self-start bg-court-800 px-2 py-1 rounded mt-2">
-            <Text className="text-court-400 text-xs font-semibold">
-              {league.membership.displayRole}
+            <Text className="text-court-400 text-xs font-semibold capitalize">
+              {league.membership.role}
             </Text>
           </View>
         )}

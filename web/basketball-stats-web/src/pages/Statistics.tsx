@@ -180,7 +180,7 @@ export default function Statistics() {
   const playersData = useQuery(
     api.statistics.getPlayersStats,
     token && selectedLeague
-      ? { token, leagueId: selectedLeague.id, sortBy, sortOrder, limit: 20 }
+      ? { token, leagueId: selectedLeague.id, sortBy, order: sortOrder, perPage: 20 }
       : "skip"
   );
 
@@ -221,7 +221,7 @@ export default function Statistics() {
 
   const leaders = dashboardData?.leaders || {
     scoring: [],
-    rebounds: [],
+    rebounding: [],
     assists: [],
     shooting: [],
   };
@@ -319,7 +319,7 @@ export default function Statistics() {
               />
               <LeadersBoard
                 title="Rebounding Leaders"
-                leaders={leaders.rebounds}
+                leaders={leaders.rebounding}
                 unit=" RPG"
               />
               <LeadersBoard
@@ -559,6 +559,7 @@ export default function Statistics() {
                 ]}
               >
                 <PolarGrid stroke="#374151" />
+                {/* @ts-expect-error Recharts type compatibility with React 18 */}
                 <PolarAngleAxis
                   dataKey="metric"
                   tick={{ fontSize: 12, fill: "#9CA3AF" }}

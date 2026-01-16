@@ -8,10 +8,12 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useQuery } from "convex/react";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import { RootStackParamList } from "../../App";
 
 interface StatRowProps {
   label: string;
@@ -101,14 +103,7 @@ function GameLogItem({ game }: GameLogItemProps) {
   );
 }
 
-interface PlayerStatisticsScreenProps {
-  route: {
-    params: {
-      playerId: string;
-      playerName: string;
-    };
-  };
-}
+type PlayerStatisticsScreenProps = NativeStackScreenProps<RootStackParamList, "PlayerStatistics">;
 
 export default function PlayerStatisticsScreen({
   route,
@@ -122,7 +117,7 @@ export default function PlayerStatisticsScreen({
   const playerStats = useQuery(
     api.statistics.getPlayerSeasonStats,
     token && selectedLeague && playerId
-      ? { token, playerId: playerId as Id<"players"> }
+      ? { token, leagueId: selectedLeague.id, playerId: playerId as Id<"players"> }
       : "skip"
   );
 
@@ -154,7 +149,8 @@ export default function PlayerStatisticsScreen({
   }
 
   const stats = playerStats.stats;
-  const recentGames = playerStats.recentGames || [];
+  // Note: recentGames would need a separate endpoint if needed
+  const recentGames: Array<{gameId: string; gameDate?: string; opponent: string; homeGame: boolean; result: "W" | "L" | "N/A"; points: number; rebounds: number; assists: number; minutesPlayed: number;}> = [];
 
   return (
     <View className="flex-1 bg-gray-800">
@@ -162,10 +158,10 @@ export default function PlayerStatisticsScreen({
       <View className="bg-gray-700 p-5 items-center">
         <Text className="text-white text-2xl font-bold mb-1">{playerName}</Text>
         <Text className="text-orange-500 text-base font-medium mb-0.5">
-          {playerStats.player?.teamName || "Unknown Team"}
+          {stats.team || "Unknown Team"}
         </Text>
         <Text className="text-gray-400 text-sm">
-          {playerStats.player?.position || ""}
+          {stats.position || ""}
         </Text>
       </View>
 

@@ -15,7 +15,7 @@ export default function ProfileScreen() {
     token ? { token } : "skip"
   );
 
-  const leagues = leaguesData?.userLeagues || userLeagues;
+  const leagues = leaguesData?.leagues?.filter((l: any) => l.membership) || userLeagues;
 
   const handleLogout = () => {
     Alert.alert("Confirm Logout", "Are you sure you want to sign out?", [
@@ -89,8 +89,8 @@ export default function ProfileScreen() {
                 </Text>
                 {selectedLeague.membership && (
                   <View className="self-start bg-green-900 px-2 py-1 rounded-md mt-2">
-                    <Text className="text-green-400 text-xs font-semibold">
-                      {selectedLeague.membership.displayRole}
+                    <Text className="text-green-400 text-xs font-semibold capitalize">
+                      {selectedLeague.membership.role}
                     </Text>
                   </View>
                 )}

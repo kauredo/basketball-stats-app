@@ -22,10 +22,13 @@ interface League {
   isPublic: boolean;
   teamsCount?: number;
   membersCount?: number;
+  gamesCount?: number;
   membership?: {
+    id?: string;
     role: string;
-    displayRole: string;
-  };
+    status?: string;
+    joinedAt?: number;
+  } | null;
 }
 
 interface AuthContextType {
@@ -96,16 +99,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const result = await loginMutation({ email, password });
 
-      if (result.success && result.token && result.user) {
-        await SecureStore.setItemAsync(TOKEN_KEY, result.token);
-        await SecureStore.setItemAsync(USER_KEY, JSON.stringify(result.user));
+      const accessToken = result.tokens.accessToken;
+      await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(result.user));
 
-        setToken(result.token);
-        setUser(result.user as User);
-        setIsAuthenticated(true);
-      } else {
-        throw new Error(result.error || 'Login failed');
-      }
+      setToken(accessToken);
+      setUser({
+        id: result.user.id,
+        email: result.user.email,
+        firstName: result.user.firstName,
+        lastName: result.user.lastName,
+        role: result.user.role,
+      });
+      setIsAuthenticated(true);
     } catch (err: any) {
       const errorMessage = err.message || 'Login failed';
       setError(errorMessage);
@@ -124,19 +130,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         firstName,
         lastName,
         email,
-        password
+        password,
+        passwordConfirmation: password,
       });
 
-      if (result.success && result.token && result.user) {
-        await SecureStore.setItemAsync(TOKEN_KEY, result.token);
-        await SecureStore.setItemAsync(USER_KEY, JSON.stringify(result.user));
+      const accessToken = result.tokens.accessToken;
+      await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(result.user));
 
-        setToken(result.token);
-        setUser(result.user as User);
-        setIsAuthenticated(true);
-      } else {
-        throw new Error(result.error || 'Signup failed');
-      }
+      setToken(accessToken);
+      setUser({
+        id: result.user.id,
+        email: result.user.email,
+        firstName: result.user.firstName,
+        lastName: result.user.lastName,
+        role: result.user.role,
+      });
+      setIsAuthenticated(true);
     } catch (err: any) {
       const errorMessage = err.message || 'Signup failed';
       setError(errorMessage);

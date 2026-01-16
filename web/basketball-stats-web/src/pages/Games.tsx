@@ -78,7 +78,6 @@ const Games: React.FC = () => {
     try {
       await createGame({
         token,
-        leagueId: selectedLeague.id,
         homeTeamId: selectedTeams.home as Id<"teams">,
         awayTeamId: selectedTeams.away as Id<"teams">,
       });

@@ -390,6 +390,12 @@ export const validateToken = query({
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
-    return { valid: !!user };
+    if (!user) {
+      return { valid: false, user: null };
+    }
+    return {
+      valid: true,
+      user: formatUser(user),
+    };
   },
 });

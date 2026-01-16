@@ -271,7 +271,7 @@ export default function StatisticsScreen() {
                   title="Total Players"
                   value={
                     leaders.scoring?.length ||
-                    leaders.rebounds?.length ||
+                    leaders.rebounding?.length ||
                     0
                   }
                   subtitle="Registered players"
@@ -358,7 +358,7 @@ export default function StatisticsScreen() {
               <Text className="text-white text-xl font-bold mb-4">
                 Rebounding Leaders
               </Text>
-              {(leaders.rebounds || []).slice(0, 5).map((leader: any, index: number) => (
+              {(leaders.rebounding || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
                   key={leader.playerId || index}
                   rank={index + 1}
@@ -367,7 +367,7 @@ export default function StatisticsScreen() {
                   unit=" RPG"
                 />
               ))}
-              {(!leaders.rebounds || leaders.rebounds.length === 0) && (
+              {(!leaders.rebounding || leaders.rebounding.length === 0) && (
                 <Text className="text-gray-400 text-sm">No rebounding data available</Text>
               )}
             </View>

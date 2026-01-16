@@ -54,7 +54,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="px-6 py-3 border-b border-gray-700">
             <div className="text-xs text-gray-400 uppercase tracking-wide">Current League</div>
             <div className="text-sm font-medium text-white mt-1">{selectedLeague.name}</div>
-            <div className="text-xs text-gray-400">{selectedLeague.league_type} • {selectedLeague.season}</div>
+            <div className="text-xs text-gray-400">{selectedLeague.leagueType} • {selectedLeague.season}</div>
           </div>
         )}
         <nav className="mt-6">
@@ -95,15 +95,15 @@ export default function Layout({ children }: LayoutProps) {
               <div className="flex items-center">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600">
                   <span className="text-sm font-medium text-white">
-                    {user?.first_name?.[0]}{user?.last_name?.[0]}
+                    {user?.firstName?.[0]}{user?.lastName?.[0]}
                   </span>
                 </div>
                 <div className="ml-3">
                   <div className="text-sm font-medium text-white">
-                    {user?.full_name}
+                    {user?.firstName} {user?.lastName}
                   </div>
                   <div className="text-xs text-gray-400">
-                    {selectedLeague?.membership?.display_role || 'Member'}
+                    {selectedLeague?.role || 'Member'}
                   </div>
                 </div>
               </div>
@@ -153,7 +153,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-300">
-                Welcome back, {user?.first_name}!
+                Welcome back, {user?.firstName}!
               </span>
             </div>
           </div>

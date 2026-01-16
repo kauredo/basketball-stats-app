@@ -22,12 +22,13 @@ type LiveGameRouteProp = RouteProp<RootStackParamList, "LiveGame">;
 interface PlayerStat {
   id: Id<"playerStats">;
   playerId: Id<"players">;
-  player?: {
+  teamId: Id<"teams">;
+  player: {
     id: Id<"players">;
     name: string;
     number: number;
     position?: string;
-  };
+  } | null;
   points: number;
   rebounds: number;
   assists: number;
@@ -41,7 +42,10 @@ interface PlayerStat {
   threePointersAttempted: number;
   freeThrowsMade: number;
   freeThrowsAttempted: number;
+  minutesPlayed: number;
+  plusMinus: number;
   isOnCourt: boolean;
+  isHomeTeam: boolean;
 }
 
 const TABS = [
@@ -80,8 +84,9 @@ export default function LiveGameScreen() {
   const substituteMutation = useMutation(api.stats.substitute);
 
   const game = gameData?.game;
-  const homePlayerStats = liveStats?.homePlayerStats || [];
-  const awayPlayerStats = liveStats?.awayPlayerStats || [];
+  const allStats = liveStats?.stats || [];
+  const homePlayerStats = allStats.filter((s: PlayerStat) => s.isHomeTeam);
+  const awayPlayerStats = allStats.filter((s: PlayerStat) => !s.isHomeTeam);
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -117,7 +122,7 @@ export default function LiveGameScreen() {
   };
 
   const handleRecordStat = async (
-    playerStatId: Id<"playerStats">,
+    playerId: Id<"players">,
     statType: string,
     made?: boolean
   ) => {
@@ -126,7 +131,8 @@ export default function LiveGameScreen() {
     try {
       await recordStat({
         token,
-        playerStatId,
+        gameId,
+        playerId,
         statType: statType as any,
         made,
       });
@@ -139,11 +145,11 @@ export default function LiveGameScreen() {
     }
   };
 
-  const handleSubstitute = async (playerStatId: Id<"playerStats">) => {
+  const handleSubstitute = async (playerId: Id<"players">, isOnCourt: boolean) => {
     if (!token) return;
 
     try {
-      await substituteMutation({ token, playerStatId });
+      await substituteMutation({ token, gameId, playerId, isOnCourt: !isOnCourt });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } catch (error: any) {
       console.error("Failed to substitute:", error);
@@ -194,55 +200,55 @@ export default function LiveGameScreen() {
 
         <View className="flex-row flex-wrap justify-center gap-2">
           <TouchableOpacity
-            onPress={() => handleRecordStat(playerStat.id, "shot2", true)}
+            onPress={() => handleRecordStat(playerStat.playerId, "shot2", true)}
             className="bg-green-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+2 PTS</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleRecordStat(playerStat.id, "shot3", true)}
+            onPress={() => handleRecordStat(playerStat.playerId, "shot3", true)}
             className="bg-green-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+3 PTS</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleRecordStat(playerStat.id, "freethrow", true)}
+            onPress={() => handleRecordStat(playerStat.playerId, "freethrow", true)}
             className="bg-green-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+FT</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleRecordStat(playerStat.id, "rebounds")}
+            onPress={() => handleRecordStat(playerStat.playerId, "rebounds")}
             className="bg-blue-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+REB</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleRecordStat(playerStat.id, "assists")}
+            onPress={() => handleRecordStat(playerStat.playerId, "assists")}
             className="bg-purple-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+AST</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleRecordStat(playerStat.id, "steals")}
+            onPress={() => handleRecordStat(playerStat.playerId, "steals")}
             className="bg-teal-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+STL</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleRecordStat(playerStat.id, "blocks")}
+            onPress={() => handleRecordStat(playerStat.playerId, "blocks")}
             className="bg-indigo-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+BLK</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleRecordStat(playerStat.id, "turnovers")}
+            onPress={() => handleRecordStat(playerStat.playerId, "turnovers")}
             className="bg-orange-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+TO</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleRecordStat(playerStat.id, "fouls")}
+            onPress={() => handleRecordStat(playerStat.playerId, "fouls")}
             className="bg-yellow-600 px-2 py-1 rounded"
           >
             <Text className="text-white text-xs">+FOUL</Text>
@@ -262,7 +268,7 @@ export default function LiveGameScreen() {
         className={`bg-gray-800 rounded-xl p-4 mb-3 border flex-row justify-between items-center ${
           playerStat.isOnCourt ? "border-green-500" : "border-gray-700"
         }`}
-        onPress={() => handleSubstitute(playerStat.id)}
+        onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
       >
         <View>
           <Text className="text-white text-base font-bold">
@@ -349,7 +355,7 @@ export default function LiveGameScreen() {
                 PERIOD {game.currentQuarter}
               </Text>
               <View className="flex-row items-center justify-center">
-                <Icon name="clock" size={16} color="#FFFFFF" />
+                <Icon name="activity" size={16} color="#FFFFFF" />
                 <Text className="text-white text-2xl font-mono font-bold ml-2">
                   {formatTime(game.timeRemainingSeconds)}
                 </Text>

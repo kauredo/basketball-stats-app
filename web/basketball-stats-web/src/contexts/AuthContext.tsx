@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, useConvex } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 
@@ -54,10 +54,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const convex = useConvex();
   const loginMutation = useMutation(api.auth.login);
   const signupMutation = useMutation(api.auth.signup);
   const logoutMutation = useMutation(api.auth.logout);
-  const validateTokenMutation = useMutation(api.auth.validateToken);
   const requestPasswordResetMutation = useMutation(api.auth.requestPasswordReset);
 
   const initialize = useCallback(async () => {
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (storedToken) {
         try {
-          const result = await validateTokenMutation({ token: storedToken });
+          const result = await convex.query(api.auth.validateToken, { token: storedToken });
           if (result.valid && result.user) {
             setToken(storedToken);
             setUser({
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [validateTokenMutation]);
+  }, [convex]);
 
   useEffect(() => {
     initialize();
@@ -116,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loginMutation]);
 
   const signup = useCallback(async (email: string, password: string, firstName: string, lastName: string) => {
-    const result = await signupMutation({ email, password, firstName, lastName });
+    const result = await signupMutation({ email, password, passwordConfirmation: password, firstName, lastName });
     setUser({
       id: result.user.id,
       email: result.user.email,

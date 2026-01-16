@@ -29,7 +29,7 @@ export type RootStackParamList = {
   Teams: undefined;
   LiveGame: { gameId: string };
   PlayerStats: { playerId: string };
-  PlayerStatistics: { playerId: string };
+  PlayerStatistics: { playerId: string; playerName: string };
   Profile: undefined;
   Statistics: undefined;
   LeagueSelection: undefined;

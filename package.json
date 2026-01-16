@@ -9,12 +9,14 @@
   ],
   "scripts": {
     "convex:dev": "convex dev",
-    "convex:deploy": "convex deploy"
+    "convex:deploy": "convex deploy",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "convex": "^1.17.0"
+    "convex": "^1.31.5"
   },
   "dependencies": {
-    "@convex-dev/auth": "^0.0.90"
+    "@convex-dev/auth": "^0.0.90",
+    "typescript": "^5.9.3"
   }
 }
