@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import Icon from "./components/Icon";
 
 import Layout from "./components/Layout";
@@ -16,6 +17,7 @@ import LeagueSelectionPage from "./pages/LeagueSelectionPage";
 import Profile from "./pages/Profile";
 import Standings from "./pages/Standings";
 import PlayerComparison from "./pages/PlayerComparison";
+import ShotCharts from "./pages/ShotCharts";
 
 function LoadingScreen() {
   return (
@@ -37,21 +39,24 @@ function AuthenticatedApp() {
   }
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/games" element={<Games />} />
-        <Route path="/teams" element={<Teams />} />
-        <Route path="/players" element={<Players />} />
-        <Route path="/statistics" element={<Statistics />} />
-        <Route path="/standings" element={<Standings />} />
-        <Route path="/compare" element={<PlayerComparison />} />
-        <Route path="/games/:gameId/live" element={<LiveGame />} />
-        <Route path="/games/:gameId/analysis" element={<GameAnalysis />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/leagues" element={<LeagueSelectionPage />} />
-      </Routes>
-    </Layout>
+    <NotificationProvider>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/games" element={<Games />} />
+          <Route path="/teams" element={<Teams />} />
+          <Route path="/players" element={<Players />} />
+          <Route path="/statistics" element={<Statistics />} />
+          <Route path="/standings" element={<Standings />} />
+          <Route path="/compare" element={<PlayerComparison />} />
+          <Route path="/shot-charts" element={<ShotCharts />} />
+          <Route path="/games/:gameId/live" element={<LiveGame />} />
+          <Route path="/games/:gameId/analysis" element={<GameAnalysis />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/leagues" element={<LeagueSelectionPage />} />
+        </Routes>
+      </Layout>
+    </NotificationProvider>
   );
 }
 

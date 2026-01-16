@@ -2,16 +2,18 @@ import React, { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
+import NotificationPreferences from "../components/NotificationPreferences";
 import {
   UserCircleIcon,
   KeyIcon,
+  BellIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 
 const Profile: React.FC = () => {
   const { user, token, initialize } = useAuth();
-  const [activeTab, setActiveTab] = useState<"profile" | "password">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "password" | "notifications">("profile");
 
   // Profile form state
   const [firstName, setFirstName] = useState(user?.firstName || "");
@@ -140,6 +142,17 @@ const Profile: React.FC = () => {
         >
           <KeyIcon className="w-5 h-5" />
           <span>Password</span>
+        </button>
+        <button
+          onClick={() => setActiveTab("notifications")}
+          className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+            activeTab === "notifications"
+              ? "bg-orange-600 text-white"
+              : "text-gray-400 hover:text-white hover:bg-gray-700"
+          }`}
+        >
+          <BellIcon className="w-5 h-5" />
+          <span>Notifications</span>
         </button>
       </div>
 
@@ -301,6 +314,9 @@ const Profile: React.FC = () => {
           </form>
         </div>
       )}
+
+      {/* Notifications Tab */}
+      {activeTab === "notifications" && <NotificationPreferences />}
     </div>
   );
 };

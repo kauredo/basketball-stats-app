@@ -168,4 +168,93 @@ export default defineSchema({
     .index("by_game_player", ["gameId", "playerId"])
     .index("by_team", ["teamId"])
     .index("by_game_team", ["gameId", "teamId"]),
+
+  // Shot attempts with location data for shot charts
+  shots: defineTable({
+    playerId: v.id("players"),
+    gameId: v.id("games"),
+    teamId: v.id("teams"),
+    // Court coordinates (0-100 normalized, origin at basket)
+    x: v.number(), // -50 to 50 (left to right from shooter's perspective)
+    y: v.number(), // 0 to 94 (baseline to opposite baseline)
+    // Shot details
+    shotType: v.union(
+      v.literal("2pt"),
+      v.literal("3pt"),
+      v.literal("ft") // free throw
+    ),
+    made: v.boolean(),
+    quarter: v.number(),
+    timeRemaining: v.number(), // seconds remaining in quarter
+    assisted: v.optional(v.boolean()),
+    assistedBy: v.optional(v.id("players")),
+    shotZone: v.optional(
+      v.union(
+        v.literal("paint"),
+        v.literal("midrange"),
+        v.literal("corner3"),
+        v.literal("wing3"),
+        v.literal("top3"),
+        v.literal("ft")
+      )
+    ),
+  })
+    .index("by_game", ["gameId"])
+    .index("by_player", ["playerId"])
+    .index("by_game_player", ["gameId", "playerId"])
+    .index("by_team", ["teamId"]),
+
+  // Push subscriptions for web push notifications
+  pushSubscriptions: defineTable({
+    userId: v.id("users"),
+    endpoint: v.string(),
+    p256dh: v.string(), // Public key for encryption
+    auth: v.string(), // Auth secret
+    createdAt: v.number(),
+    userAgent: v.optional(v.string()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_endpoint", ["endpoint"]),
+
+  // Notification preferences per user per league
+  notificationPreferences: defineTable({
+    userId: v.id("users"),
+    leagueId: v.optional(v.id("leagues")), // null = global preferences
+    // Notification types
+    gameReminders: v.boolean(), // Remind before games start
+    gameStart: v.boolean(), // When a game starts
+    gameEnd: v.boolean(), // When a game ends
+    scoreUpdates: v.boolean(), // Major score updates during games
+    teamUpdates: v.boolean(), // Team roster changes, etc.
+    leagueAnnouncements: v.boolean(), // League-wide announcements
+    // Timing preferences
+    reminderMinutesBefore: v.optional(v.number()), // Minutes before game to send reminder
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_league", ["userId", "leagueId"]),
+
+  // In-app notifications
+  notifications: defineTable({
+    userId: v.id("users"),
+    leagueId: v.optional(v.id("leagues")),
+    type: v.union(
+      v.literal("game_reminder"),
+      v.literal("game_start"),
+      v.literal("game_end"),
+      v.literal("score_update"),
+      v.literal("team_update"),
+      v.literal("league_announcement"),
+      v.literal("system")
+    ),
+    title: v.string(),
+    body: v.string(),
+    data: v.optional(v.any()), // Additional data like gameId, teamId, etc.
+    read: v.boolean(),
+    createdAt: v.number(),
+    expiresAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_read", ["userId", "read"])
+    .index("by_user_league", ["userId", "leagueId"])
+    .index("by_created", ["createdAt"]),
 });

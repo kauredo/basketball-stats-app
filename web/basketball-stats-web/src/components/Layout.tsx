@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "./Icon";
+import NotificationBell from "./NotificationBell";
 import {
   HomeIcon,
   TrophyIcon,
@@ -14,6 +15,7 @@ import {
   ArrowRightOnRectangleIcon,
   TableCellsIcon,
   ArrowsRightLeftIcon,
+  MapPinIcon,
 } from "@heroicons/react/24/outline";
 
 interface LayoutProps {
@@ -24,6 +26,7 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: HomeIcon },
   { name: "Standings", href: "/standings", icon: TableCellsIcon },
   { name: "Statistics", href: "/statistics", icon: ChartBarIcon },
+  { name: "Shot Charts", href: "/shot-charts", icon: MapPinIcon },
   { name: "Compare", href: "/compare", icon: ArrowsRightLeftIcon },
   { name: "Games", href: "/games", icon: TrophyIcon },
   { name: "Teams", href: "/teams", icon: UserGroupIcon },
@@ -156,6 +159,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-300">Welcome back, {user?.firstName}!</span>
+              <NotificationBell />
             </div>
           </div>
         </div>
