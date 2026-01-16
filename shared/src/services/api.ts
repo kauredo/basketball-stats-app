@@ -589,7 +589,7 @@ export class BasketballStatsAPI {
         total_pages: number;
         total_count: number;
       };
-    }>(`/leagues/${leagueId}/statistics/players?${queryParams.toString()}`);
+    }>(`/statistics/leagues/${leagueId}/players?${queryParams.toString()}`);
   }
 
   async getPlayerStatistics(
@@ -601,7 +601,7 @@ export class BasketballStatsAPI {
     if (season) queryParams.append("season", season);
 
     return this.request<any>(
-      `/leagues/${leagueId}/statistics/players/${playerId}?${queryParams.toString()}`
+      `/statistics/leagues/${leagueId}/players/${playerId}?${queryParams.toString()}`
     );
   }
 
@@ -619,7 +619,7 @@ export class BasketballStatsAPI {
     if (params?.order) queryParams.append("order", params.order);
 
     return this.request<{ teams: any[] }>(
-      `/leagues/${leagueId}/statistics/teams?${queryParams.toString()}`
+      `/statistics/leagues/${leagueId}/teams?${queryParams.toString()}`
     );
   }
 
@@ -632,7 +632,7 @@ export class BasketballStatsAPI {
     if (season) queryParams.append("season", season);
 
     return this.request<any>(
-      `/leagues/${leagueId}/statistics/teams/${teamId}?${queryParams.toString()}`
+      `/statistics/leagues/${leagueId}/teams/${teamId}?${queryParams.toString()}`
     );
   }
 
@@ -650,7 +650,7 @@ export class BasketballStatsAPI {
     if (params?.limit) queryParams.append("limit", params.limit.toString());
 
     return this.request<{ category: string; leaders: any }>(
-      `/leagues/${leagueId}/statistics/leaders?${queryParams.toString()}`
+      `/statistics/leagues/${leagueId}/leaders?${queryParams.toString()}`
     );
   }
 
@@ -661,8 +661,9 @@ export class BasketballStatsAPI {
     const queryParams = new URLSearchParams();
     if (season) queryParams.append("season", season);
 
+    // Match the exact route that Rails is generating
     return this.request<any>(
-      `/leagues/${leagueId}/statistics/dashboard?${queryParams.toString()}`
+      `/statistics/leagues/${leagueId}/dashboard?${queryParams.toString()}`
     );
   }
 

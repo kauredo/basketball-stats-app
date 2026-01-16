@@ -9,8 +9,8 @@ class Api::V1::StatisticsController < Api::V1::BaseController
     season = params[:season]
     page = params[:page] || 1
     per_page = params[:per_page] || 20
-    sort_by = params[:sort_by] || "avg_points"
-    order = params[:order] || "desc"
+    sort_by = params[:sort_by] || 'avg_points'
+    order = params[:order] || 'desc'
 
     players = @league.players.includes(:team, player_stats: :game)
 
@@ -20,7 +20,7 @@ class Api::V1::StatisticsController < Api::V1::BaseController
 
     # Sort the results
     player_stats = player_stats.sort_by { |stats| stats[sort_by.to_sym] || 0 }
-    player_stats.reverse! if order == "desc"
+    player_stats.reverse! if order == 'desc'
 
     # Apply pagination
     total = player_stats.count
@@ -60,15 +60,15 @@ class Api::V1::StatisticsController < Api::V1::BaseController
       recent_games: game_log
     }
   rescue ActiveRecord::RecordNotFound
-    render json: { error: "Player not found" }, status: :not_found
+    render json: { error: 'Player not found' }, status: :not_found
   end
 
   # GET /api/v1/statistics/teams
   # Get all teams statistics for the league
   def teams
     season = params[:season]
-    sort_by = params[:sort_by] || "win_percentage"
-    order = params[:order] || "desc"
+    sort_by = params[:sort_by] || 'win_percentage'
+    order = params[:order] || 'desc'
 
     teams_stats = @league.teams.map do |team|
       StatisticsService.team_season_stats(team, season)
@@ -76,7 +76,7 @@ class Api::V1::StatisticsController < Api::V1::BaseController
 
     # Sort the results
     teams_stats = teams_stats.sort_by { |stats| stats[sort_by.to_sym] || 0 }
-    teams_stats.reverse! if order == "desc"
+    teams_stats.reverse! if order == 'desc'
 
     render json: {
       teams: teams_stats
@@ -96,6 +96,7 @@ class Api::V1::StatisticsController < Api::V1::BaseController
     top_scorers = team_players.map do |player|
       stats = StatisticsService.player_season_stats(player, @league, season)
       next if stats[:games_played].zero?
+
       {
         player_id: player.id,
         player_name: player.name,
@@ -106,6 +107,7 @@ class Api::V1::StatisticsController < Api::V1::BaseController
     top_rebounders = team_players.map do |player|
       stats = StatisticsService.player_season_stats(player, @league, season)
       next if stats[:games_played].zero?
+
       {
         player_id: player.id,
         player_name: player.name,
@@ -124,34 +126,46 @@ class Api::V1::StatisticsController < Api::V1::BaseController
       top_rebounders: top_rebounders
     }
   rescue ActiveRecord::RecordNotFound
-    render json: { error: "Team not found" }, status: :not_found
+    render json: { error: 'Team not found' }, status: :not_found
   end
 
-  # GET /api/v1/statistics/leaders
-  # Get league leaders in various categories
+  # GET /api/v1/statistics/leagues/:league_id/leaders
+  # Get statistical leaders for the league
   def leaders
     season = params[:season]
-    category = params[:category] || "points"
-    limit = params[:limit] || 10
 
-    leaders = StatisticsService.league_leaders(@league, category, season, limit.to_i)
+    # Get all players with their stats for the league
+    players = @league.players.includes(:team, player_stats: :game)
 
+    # Calculate stats for each player
+    player_stats = players.map do |player|
+      StatisticsService.player_season_stats(player, @league, season)
+    end
+
+    # Filter out players with no games
+    player_stats.reject { |stats| stats[:games_played].zero? }
+
+    # Create leaderboards for key stats
     render json: {
-      category: category,
-      leaders: leaders
+      league: {
+        id: @league.id,
+        name: @league.name,
+        season: @league.season || 'Current',
+        total_teams: @league.teams.count,
+        total_players: @league.players.count
+      }
     }
   end
 
-  # GET /api/v1/statistics/dashboard
-  # Get dashboard summary statistics
+  # GET /api/v1/statistics/leagues/:league_id/dashboard
   def dashboard
     season = params[:season]
 
     # League leaders in key categories
-    scoring_leaders = StatisticsService.league_leaders(@league, "points", season, 5)
-    rebounding_leaders = StatisticsService.league_leaders(@league, "rebounds", season, 5)
-    assists_leaders = StatisticsService.league_leaders(@league, "assists", season, 5)
-    shooting_leaders = StatisticsService.league_leaders(@league, "field_goal_percentage", season, 5)
+    scoring_leaders = StatisticsService.league_leaders(@league, 'points', season, 5)
+    rebounding_leaders = StatisticsService.league_leaders(@league, 'rebounds', season, 5)
+    assists_leaders = StatisticsService.league_leaders(@league, 'assists', season, 5)
+    shooting_leaders = StatisticsService.league_leaders(@league, 'field_goal_percentage', season, 5)
 
     # Team standings
     team_standings = @league.teams.map do |team|
@@ -160,10 +174,10 @@ class Api::V1::StatisticsController < Api::V1::BaseController
 
     # Recent high-scoring games
     recent_games = @league.games
-                          .where(status: "completed")
-                          .order(game_date: :desc)
-                          .limit(5)
-                          .map do |game|
+                     .where(status: 'completed')
+                     .order(game_date: :desc)
+                     .limit(5)
+                     .map do |game|
       {
         id: game.id,
         date: game.game_date,
@@ -197,12 +211,12 @@ class Api::V1::StatisticsController < Api::V1::BaseController
   def set_league
     @league = current_user.leagues.find(params[:league_id] || current_user.selected_league&.id)
   rescue ActiveRecord::RecordNotFound
-    render json: { error: "League not found or access denied" }, status: :forbidden
+    render json: { error: 'League not found or access denied' }, status: :forbidden
   end
 
   def ensure_league_access
-    unless current_user.can_access_league?(@league)
-      render json: { error: "Access denied to this league" }, status: :forbidden
-    end
+    return if current_user.can_access_league?(@league)
+
+    render json: { error: 'Access denied to this league' }, status: :forbidden
   end
 end

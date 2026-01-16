@@ -211,7 +211,7 @@ export interface PlayerSeasonStats {
   team: string;
   position?: Position;
   games_played: number;
-  
+
   // Totals
   total_points: number;
   total_field_goals_made: number;
@@ -227,7 +227,7 @@ export interface PlayerSeasonStats {
   total_turnovers: number;
   total_fouls: number;
   total_minutes: number;
-  
+
   // Averages
   avg_points: number;
   avg_field_goals_made: number;
@@ -243,14 +243,14 @@ export interface PlayerSeasonStats {
   avg_turnovers: number;
   avg_fouls: number;
   avg_minutes: number;
-  
+
   // Percentages
   field_goal_percentage: number;
   three_point_percentage: number;
   free_throw_percentage: number;
   effective_field_goal_percentage: number;
   true_shooting_percentage: number;
-  
+
   // Advanced Stats
   player_efficiency_rating: number;
   usage_rate: number;
@@ -264,7 +264,7 @@ export interface TeamSeasonStats {
   wins: number;
   losses: number;
   win_percentage: number;
-  
+
   // Team totals and averages
   total_points: number;
   avg_points: number;
@@ -282,7 +282,7 @@ export interface PlayerGameLog {
   game_date: string;
   opponent: string;
   home_game: boolean;
-  result: 'W' | 'L' | 'N/A';
+  result: "W" | "L" | "N/A";
   minutes: number;
   points: number;
   rebounds: number;
@@ -386,30 +386,52 @@ export interface DashboardData {
 }
 
 // Enums
-export type UserRole = 'admin' | 'user';
+export type UserRole = "admin" | "user";
 
-export type LeagueType = 'professional' | 'college' | 'high_school' | 'youth' | 'recreational';
+export type LeagueType =
+  | "professional"
+  | "college"
+  | "high_school"
+  | "youth"
+  | "recreational";
 
-export type LeagueStatus = 'draft' | 'active' | 'completed' | 'archived';
+export type LeagueStatus = "draft" | "active" | "completed" | "archived";
 
-export type LeagueRole = 'admin' | 'coach' | 'scorekeeper' | 'member' | 'viewer';
+export type LeagueRole =
+  | "admin"
+  | "coach"
+  | "scorekeeper"
+  | "member"
+  | "viewer";
 
-export type MembershipStatus = 'pending' | 'active' | 'suspended' | 'removed';
+export type MembershipStatus = "pending" | "active" | "suspended" | "removed";
 
-export type Position = 'PG' | 'SG' | 'SF' | 'PF' | 'C' | 'Point Guard' | 'Shooting Guard' | 'Small Forward' | 'Power Forward' | 'Center' | 'Guard' | 'Forward';
+export type Position =
+  | "PG"
+  | "SG"
+  | "SF"
+  | "PF"
+  | "C"
+  | "Point Guard"
+  | "Shooting Guard"
+  | "Small Forward"
+  | "Power Forward"
+  | "Center"
+  | "Guard"
+  | "Forward";
 
-export type GameStatus = 'scheduled' | 'active' | 'paused' | 'completed';
+export type GameStatus = "scheduled" | "active" | "paused" | "completed";
 
-export type StatType = 
-  | 'shot2' 
-  | 'shot3' 
-  | 'freethrow' 
-  | 'rebounds' 
-  | 'assists' 
-  | 'steals' 
-  | 'blocks' 
-  | 'turnovers' 
-  | 'fouls';
+export type StatType =
+  | "shot2"
+  | "shot3"
+  | "freethrow"
+  | "rebounds"
+  | "assists"
+  | "steals"
+  | "blocks"
+  | "turnovers"
+  | "fouls";
 
 // API Response types
 export interface ApiResponse<T> {
@@ -466,5 +488,5 @@ export interface UIState {
   selectedPlayer?: Player;
   selectedAction?: StatType;
   isRecording: boolean;
-  connectionStatus: 'connected' | 'connecting' | 'disconnected' | 'error';
+  connectionStatus: "connected" | "connecting" | "disconnected" | "error";
 }
