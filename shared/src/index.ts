@@ -11,6 +11,10 @@ export { BasketballUtils } from "./utils/basketball";
 export * from "./constants/basketball";
 export { default as CONSTANTS } from "./constants/basketball";
 
+// Theme - unified design system constants
+export * from "./constants/theme";
+export { default as THEME } from "./constants/theme";
+
 // Re-export commonly used types for convenience
 export type {
   // Auth

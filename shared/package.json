@@ -22,7 +22,7 @@
   ],
   "author": "Basketball Stats Team",
   "license": "MIT",
-  "type": "commonjs",
+  "type": "module",
   "files": [
     "dist/**/*"
   ],
