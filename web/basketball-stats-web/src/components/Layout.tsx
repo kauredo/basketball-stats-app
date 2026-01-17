@@ -28,14 +28,14 @@ interface LayoutProps {
 }
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: HomeIcon },
-  { name: "Standings", href: "/standings", icon: TableCellsIcon },
-  { name: "Statistics", href: "/statistics", icon: ChartBarIcon },
-  { name: "Shot Charts", href: "/shot-charts", icon: MapPinIcon },
-  { name: "Compare", href: "/compare", icon: ArrowsRightLeftIcon },
-  { name: "Games", href: "/games", icon: TrophyIcon },
-  { name: "Teams", href: "/teams", icon: UserGroupIcon },
-  { name: "Players", href: "/players", icon: UsersIcon },
+  { name: "Dashboard", href: "/app", icon: HomeIcon },
+  { name: "Standings", href: "/app/standings", icon: TableCellsIcon },
+  { name: "Statistics", href: "/app/statistics", icon: ChartBarIcon },
+  { name: "Shot Charts", href: "/app/shot-charts", icon: MapPinIcon },
+  { name: "Compare", href: "/app/compare", icon: ArrowsRightLeftIcon },
+  { name: "Games", href: "/app/games", icon: TrophyIcon },
+  { name: "Teams", href: "/app/teams", icon: UserGroupIcon },
+  { name: "Players", href: "/app/players", icon: UsersIcon },
 ];
 
 const themeOptions: { mode: ThemeMode; icon: typeof SunIcon; label: string }[] = [
@@ -157,7 +157,7 @@ export default function Layout({ children }: LayoutProps) {
             {showUserMenu && (
               <div className="absolute bottom-full left-0 right-0 mb-2 rounded-md bg-white dark:bg-gray-700 py-1 shadow-lg ring-1 ring-black ring-opacity-5">
                 <Link
-                  to="/profile"
+                  to="/app/profile"
                   className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white"
                   onClick={() => setShowUserMenu(false)}
                 >
@@ -165,7 +165,7 @@ export default function Layout({ children }: LayoutProps) {
                   Profile
                 </Link>
                 <Link
-                  to="/leagues"
+                  to="/app/leagues"
                   className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white"
                   onClick={() => setShowUserMenu(false)}
                 >

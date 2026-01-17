@@ -172,7 +172,7 @@ const GameCard: React.FC<GameCardProps> = ({
   );
 
   if (showLink && !onClick) {
-    return <Link to={`/games/${id}/live`}>{content}</Link>;
+    return <Link to={`/app/games/${id}/live`}>{content}</Link>;
   }
 
   return content;
@@ -241,7 +241,7 @@ export const GameCardCompact: React.FC<GameCardProps> = ({
   );
 
   if (showLink && !onClick) {
-    return <Link to={`/games/${id}/live`}>{content}</Link>;
+    return <Link to={`/app/games/${id}/live`}>{content}</Link>;
   }
 
   return content;

@@ -1,11 +1,21 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Icon from "./components/Icon";
 
 import Layout from "./components/Layout";
+import PublicLayout from "./components/layouts/PublicLayout";
+
+// Public pages
+import LandingPage from "./pages/public/LandingPage";
+import FAQPage from "./pages/public/FAQPage";
+
+// Auth pages
+import AuthPage from "./pages/AuthPage";
+
+// App pages
 import Dashboard from "./pages/Dashboard";
 import Games from "./pages/Games";
 import Teams from "./pages/Teams";
@@ -13,7 +23,6 @@ import Players from "./pages/Players";
 import Statistics from "./pages/Statistics";
 import LiveGame from "./pages/LiveGame";
 import GameAnalysis from "./pages/GameAnalysis";
-import AuthPage from "./pages/AuthPage";
 import LeagueSelectionPage from "./pages/LeagueSelectionPage";
 import Profile from "./pages/Profile";
 import Standings from "./pages/Standings";
@@ -55,20 +64,94 @@ function AuthenticatedApp() {
           <Route path="/games/:gameId/analysis" element={<GameAnalysis />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/leagues" element={<LeagueSelectionPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
     </NotificationProvider>
   );
 }
 
-function AppContent() {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
-  return <div>{isAuthenticated ? <AuthenticatedApp /> : <AuthPage />}</div>;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/app" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* Public marketing pages */}
+      <Route
+        path="/"
+        element={
+          <PublicLayout>
+            <LandingPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/faq"
+        element={
+          <PublicLayout>
+            <FAQPage />
+          </PublicLayout>
+        }
+      />
+
+      {/* Auth pages - redirect to /app if already logged in */}
+      <Route
+        path="/login"
+        element={
+          <PublicOnlyRoute>
+            <AuthPage initialMode="login" />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <PublicOnlyRoute>
+            <AuthPage initialMode="signup" />
+          </PublicOnlyRoute>
+        }
+      />
+
+      {/* Protected app routes */}
+      <Route
+        path="/app/*"
+        element={
+          <ProtectedRoute>
+            <AuthenticatedApp />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Catch-all redirect */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
 
 function App() {
@@ -76,7 +159,7 @@ function App() {
     <ThemeProvider>
       <Router>
         <AuthProvider>
-          <AppContent />
+          <AppRoutes />
         </AuthProvider>
       </Router>
     </ThemeProvider>

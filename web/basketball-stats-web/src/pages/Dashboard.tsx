@@ -239,7 +239,7 @@ const Dashboard: React.FC = () => {
               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse mr-2"></div>
               Live Games
             </h2>
-            <Link to="/games" className="text-orange-500 hover:text-orange-400 font-medium">
+            <Link to="/app/games" className="text-orange-500 hover:text-orange-400 font-medium">
               View All Games
             </Link>
           </div>
@@ -254,7 +254,7 @@ const Dashboard: React.FC = () => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Recent Games</h2>
-            <Link to="/games" className="text-orange-500 hover:text-orange-400 font-medium">
+            <Link to="/app/games" className="text-orange-500 hover:text-orange-400 font-medium">
               View All Games
             </Link>
           </div>
@@ -269,7 +269,7 @@ const Dashboard: React.FC = () => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Upcoming Games</h2>
-            <Link to="/games" className="text-orange-500 hover:text-orange-400 font-medium">
+            <Link to="/app/games" className="text-orange-500 hover:text-orange-400 font-medium">
               View All Games
             </Link>
           </div>
@@ -289,7 +289,7 @@ const Dashboard: React.FC = () => {
           </p>
           <div className="mt-6">
             <Link
-              to="/games"
+              to="/app/games"
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
               Create Game

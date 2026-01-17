@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LoginForm from "../components/auth/LoginForm";
 import SignupForm from "../components/auth/SignupForm";
 import ForgotPasswordForm from "../components/auth/ForgotPasswordForm";
 
 type AuthMode = "login" | "signup" | "forgot-password";
 
-export default function AuthPage() {
-  const [mode, setMode] = useState<AuthMode>("login");
+interface AuthPageProps {
+  initialMode?: AuthMode;
+}
+
+export default function AuthPage({ initialMode = "login" }: AuthPageProps) {
+  const [mode, setMode] = useState<AuthMode>(initialMode);
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
 
   const handleSwitchToLogin = () => setMode("login");
   const handleSwitchToSignup = () => setMode("signup");
