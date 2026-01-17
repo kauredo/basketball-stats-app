@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, ViewStyle } from "react-native";
+import { View, Text, Image, StyleSheet, ViewStyle, useColorScheme } from "react-native";
 import { COLORS } from "@basketball-stats/shared";
 
 interface PlayerAvatarProps {
@@ -56,6 +56,10 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
 }) => {
   const config = sizeConfig[size];
   const backgroundColor = getBackgroundColor(number);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const indicatorBorderColor = isDark ? "#1F2937" : "#FFFFFF";
+  const offCourtColor = isDark ? "#6B7280" : "#9CA3AF";
 
   return (
     <View style={[styles.container, style]}>
@@ -83,13 +87,9 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
             ]}
           />
         ) : showNumber && number !== undefined ? (
-          <Text style={[styles.number, { fontSize: config.numberSize }]}>
-            #{number}
-          </Text>
+          <Text style={[styles.number, { fontSize: config.numberSize }]}>#{number}</Text>
         ) : (
-          <Text style={[styles.initials, { fontSize: config.fontSize }]}>
-            {getInitials(name)}
-          </Text>
+          <Text style={[styles.initials, { fontSize: config.fontSize }]}>{getInitials(name)}</Text>
         )}
       </View>
 
@@ -101,7 +101,8 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
               width: config.indicatorSize,
               height: config.indicatorSize,
               borderRadius: config.indicatorSize / 2,
-              backgroundColor: isOnCourt ? COLORS.accent.success : "#6B7280",
+              backgroundColor: isOnCourt ? COLORS.accent.success : offCourtColor,
+              borderColor: indicatorBorderColor,
             },
           ]}
         />
@@ -134,6 +135,13 @@ export const PlayerAvatarWithDetails: React.FC<PlayerAvatarWithDetailsProps> = (
   style,
   containerStyle,
 }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const nameColor = isDark ? "#FFFFFF" : "#111827";
+  const numberSmallColor = isDark ? "#9CA3AF" : "#6B7280";
+  const subtitleColor = isDark ? "#9CA3AF" : "#6B7280";
+  const statsColor = isDark ? "#6B7280" : "#9CA3AF";
+
   return (
     <View style={[styles.detailsContainer, containerStyle]}>
       <PlayerAvatar
@@ -146,18 +154,18 @@ export const PlayerAvatarWithDetails: React.FC<PlayerAvatarWithDetailsProps> = (
       />
       <View style={styles.details}>
         <View style={styles.nameRow}>
-          <Text style={styles.name}>{name || "Unknown"}</Text>
+          <Text style={[styles.name, { color: nameColor }]}>{name || "Unknown"}</Text>
           {number !== undefined && (
-            <Text style={styles.numberSmall}>#{number}</Text>
+            <Text style={[styles.numberSmall, { color: numberSmallColor }]}>#{number}</Text>
           )}
         </View>
         {(position || team) && (
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, { color: subtitleColor }]}>
             {[position, team].filter(Boolean).join(" • ")}
           </Text>
         )}
         {stats && (
-          <Text style={styles.stats}>
+          <Text style={[styles.stats, { color: statsColor }]}>
             {stats.points !== undefined && `PTS: ${stats.points}  `}
             {stats.rebounds !== undefined && `REB: ${stats.rebounds}  `}
             {stats.assists !== undefined && `AST: ${stats.assists}`}
@@ -182,6 +190,11 @@ export const PlayerAvatarRow: React.FC<{
 }> = ({ players, size = "sm", maxDisplay = 5, style }) => {
   const displayPlayers = players.slice(0, maxDisplay);
   const overflow = players.length - maxDisplay;
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const avatarRowItemBorderColor = isDark ? "#1F2937" : "#FFFFFF";
+  const overflowBadgeBg = isDark ? "#374151" : "#E5E7EB";
+  const overflowBadgeBorderColor = isDark ? "#1F2937" : "#FFFFFF";
 
   return (
     <View style={[styles.avatarRow, style]}>
@@ -190,7 +203,11 @@ export const PlayerAvatarRow: React.FC<{
           key={index}
           style={[
             styles.avatarRowItem,
-            { marginLeft: index > 0 ? -8 : 0, zIndex: displayPlayers.length - index },
+            {
+              marginLeft: index > 0 ? -8 : 0,
+              zIndex: displayPlayers.length - index,
+              borderColor: avatarRowItemBorderColor,
+            },
           ]}
         >
           <PlayerAvatar
@@ -203,7 +220,16 @@ export const PlayerAvatarRow: React.FC<{
         </View>
       ))}
       {overflow > 0 && (
-        <View style={[styles.overflowBadge, { marginLeft: -8 }]}>
+        <View
+          style={[
+            styles.overflowBadge,
+            {
+              marginLeft: -8,
+              backgroundColor: overflowBadgeBg,
+              borderColor: overflowBadgeBorderColor,
+            },
+          ]}
+        >
           <Text style={styles.overflowText}>+{overflow}</Text>
         </View>
       )}

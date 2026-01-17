@@ -103,8 +103,10 @@ export default function GamesScreen() {
 
     return (
       <TouchableOpacity
-        className={`bg-gray-800 rounded-xl p-4 mb-3 border ${
-          isGameLive ? "border-primary-500 border-2 shadow-lg" : "border-gray-700"
+        className={`bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 border ${
+          isGameLive
+            ? "border-primary-500 border-2 shadow-lg"
+            : "border-gray-200 dark:border-gray-700"
         }`}
         onPress={() => handleGamePress(game)}
         disabled={!canPress}
@@ -124,19 +126,19 @@ export default function GamesScreen() {
 
           <View className="items-end">
             {isGameLive && (
-              <Text className="text-gray-400 text-xs">
+              <Text className="text-gray-600 dark:text-gray-400 text-xs">
                 Q{game.currentQuarter} • {formatTime(game.timeRemainingSeconds)}
               </Text>
             )}
 
             {game.status === "completed" && game.endedAt && (
-              <Text className="text-gray-400 text-xs">
+              <Text className="text-gray-600 dark:text-gray-400 text-xs">
                 {new Date(game.endedAt).toLocaleDateString()}
               </Text>
             )}
 
             {game.status === "scheduled" && game.scheduledAt && (
-              <Text className="text-gray-400 text-xs">
+              <Text className="text-gray-600 dark:text-gray-400 text-xs">
                 {new Date(game.scheduledAt).toLocaleDateString()}
               </Text>
             )}
@@ -146,14 +148,14 @@ export default function GamesScreen() {
         <View className="items-center">
           <View className="flex-row justify-between items-center w-full py-1">
             <Text
-              className={`text-white text-base font-semibold flex-1 ${
+              className={`text-gray-900 dark:text-white text-base font-semibold flex-1 ${
                 winner === "away" && game.status === "completed" ? "text-green-400" : ""
               }`}
             >
               {game.awayTeam?.name || "Away Team"}
             </Text>
             <Text
-              className={`text-white text-lg font-bold min-w-[30px] text-right ${
+              className={`text-gray-900 dark:text-white text-lg font-bold min-w-[30px] text-right ${
                 winner === "away" && game.status === "completed" ? "text-green-400" : ""
               }`}
             >
@@ -161,18 +163,18 @@ export default function GamesScreen() {
             </Text>
           </View>
 
-          <Text className="text-gray-400 text-xs my-1">@</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-xs my-1">@</Text>
 
           <View className="flex-row justify-between items-center w-full py-1">
             <Text
-              className={`text-white text-base font-semibold flex-1 ${
+              className={`text-gray-900 dark:text-white text-base font-semibold flex-1 ${
                 winner === "home" && game.status === "completed" ? "text-green-400" : ""
               }`}
             >
               {game.homeTeam?.name || "Home Team"}
             </Text>
             <Text
-              className={`text-white text-lg font-bold min-w-[30px] text-right ${
+              className={`text-gray-900 dark:text-white text-lg font-bold min-w-[30px] text-right ${
                 winner === "home" && game.status === "completed" ? "text-green-400" : ""
               }`}
             >
@@ -182,10 +184,12 @@ export default function GamesScreen() {
         </View>
 
         {game.status === "completed" && (
-          <View className="flex-row justify-between mt-2 pt-2 border-t border-gray-700">
-            <Text className="text-gray-400 text-xs">Final</Text>
+          <View className="flex-row justify-between mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+            <Text className="text-gray-600 dark:text-gray-400 text-xs">Final</Text>
             {winner !== "tie" && (
-              <Text className="text-gray-400 text-xs">Margin: {getPointDifferential(game)}</Text>
+              <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                Margin: {getPointDifferential(game)}
+              </Text>
             )}
           </View>
         )}
@@ -195,14 +199,14 @@ export default function GamesScreen() {
 
   if (gamesData === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-dark-950">
-        <Text className="text-white text-base">Loading games...</Text>
+      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
+        <Text className="text-gray-900 dark:text-white text-base">Loading games...</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-dark-950">
+    <View className="flex-1 bg-gray-50 dark:bg-dark-950">
       <StatusBar style="light" />
       <FlatList
         data={sortedGames}
@@ -213,8 +217,10 @@ export default function GamesScreen() {
         ListEmptyComponent={
           <View className="items-center justify-center pt-15">
             <Icon name="basketball" size={48} color="#6B7280" className="mb-4" />
-            <Text className="text-white text-lg font-bold mb-2">No games found</Text>
-            <Text className="text-gray-400 text-sm text-center leading-5">
+            <Text className="text-gray-900 dark:text-white text-lg font-bold mb-2">
+              No games found
+            </Text>
+            <Text className="text-gray-600 dark:text-gray-400 text-sm text-center leading-5">
               Games will appear here once they're scheduled
             </Text>
           </View>

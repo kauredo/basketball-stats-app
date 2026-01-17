@@ -165,7 +165,7 @@ const MiniCourt: React.FC<MiniCourtProps> = ({ onCourtClick, disabled, recentSho
       </svg>
 
       {!disabled && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 px-3 py-1 rounded text-xs text-gray-300">
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 px-3 py-1 rounded text-xs text-gray-700 dark:text-gray-300">
           Click to record shot location
         </div>
       )}
@@ -187,11 +187,11 @@ const ShotModal: React.FC<ShotModalProps> = ({ isOpen, onClose, onMade, onMissed
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-2xl p-6 w-96 border border-gray-700">
-        <h3 className="text-xl font-bold text-white text-center mb-2">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-96 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white text-center mb-2">
           {shotType === "3pt" ? "3-Point Shot" : "2-Point Shot"}
         </h3>
-        <p className="text-gray-400 text-center mb-6">Did the shot go in?</p>
+        <p className="text-gray-600 dark:text-gray-400 text-center mb-6">Did the shot go in?</p>
 
         <div className="flex gap-4">
           <button
@@ -210,7 +210,10 @@ const ShotModal: React.FC<ShotModalProps> = ({ isOpen, onClose, onMade, onMissed
           </button>
         </div>
 
-        <button onClick={onClose} className="w-full mt-4 py-3 text-gray-400 hover:text-white transition-colors">
+        <button
+          onClick={onClose}
+          className="w-full mt-4 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+        >
           Cancel
         </button>
       </div>
@@ -233,15 +236,20 @@ const PlayerModal: React.FC<PlayerModalProps> = ({ isOpen, onClose, onSelect, pl
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-2xl w-96 max-h-[70vh] overflow-hidden border border-gray-700">
-        <div className="flex justify-between items-center p-4 border-b border-gray-700">
-          <h3 className="text-lg font-bold text-white">Select Player</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl w-96 max-h-[70vh] overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Select Player</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          >
             <Icon name="x" size={24} />
           </button>
         </div>
         <div className="overflow-y-auto max-h-[calc(70vh-60px)]">
-          <div className="px-4 py-2 bg-gray-900 text-gray-400 text-xs uppercase">On Court</div>
+          <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 text-xs uppercase">
+            On Court
+          </div>
           {onCourtPlayers.map((player) => (
             <button
               key={player.id}
@@ -249,14 +257,16 @@ const PlayerModal: React.FC<PlayerModalProps> = ({ isOpen, onClose, onSelect, pl
                 onSelect(player);
                 onClose();
               }}
-              className="w-full p-4 border-b border-gray-700 flex items-center hover:bg-gray-700 transition-colors"
+              className="w-full p-4 border-b border-gray-200 dark:border-gray-700 flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center mr-3">
                 <span className="text-white font-bold">#{player.player?.number}</span>
               </div>
               <div className="flex-1 text-left">
-                <div className="text-white font-medium">{player.player?.name}</div>
-                <div className="text-gray-400 text-sm">
+                <div className="text-gray-900 dark:text-white font-medium">
+                  {player.player?.name}
+                </div>
+                <div className="text-gray-600 dark:text-gray-400 text-sm">
                   PTS: {player.points} • REB: {player.rebounds} • AST: {player.assists}
                 </div>
               </div>
@@ -283,7 +293,9 @@ const StatButton: React.FC<StatButtonProps> = ({ label, shortLabel, color, onCli
     onClick={onClick}
     disabled={disabled}
     className={`flex-1 py-4 rounded-xl font-bold transition-all ${
-      disabled ? "opacity-50 cursor-not-allowed bg-gray-700" : "hover:scale-105 active:scale-95"
+      disabled
+        ? "opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-700"
+        : "hover:scale-105 active:scale-95"
     }`}
     style={{ backgroundColor: disabled ? undefined : color }}
   >
@@ -298,7 +310,9 @@ const LiveGame: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"court" | "stats" | "substitutions">("court");
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerStat | null>(null);
   const [showPlayerModal, setShowPlayerModal] = useState(false);
-  const [pendingShot, setPendingShot] = useState<{ x: number; y: number; is3pt: boolean } | null>(null);
+  const [pendingShot, setPendingShot] = useState<{ x: number; y: number; is3pt: boolean } | null>(
+    null
+  );
   const [recentShots, setRecentShots] = useState<ShotLocation[]>([]);
 
   // Convex queries
@@ -409,16 +423,19 @@ const LiveGame: React.FC = () => {
     if (!pendingShot || !selectedPlayer) return;
 
     const statType = pendingShot.is3pt ? "shot3" : "shot2";
-    handleRecordStat(selectedPlayer.playerId, statType, made, { x: pendingShot.x, y: pendingShot.y });
+    handleRecordStat(selectedPlayer.playerId, statType, made, {
+      x: pendingShot.x,
+      y: pendingShot.y,
+    });
     setPendingShot(null);
   };
 
   if (gameData === undefined || liveStats === undefined) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading game...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading game...</p>
         </div>
       </div>
     );
@@ -426,11 +443,15 @@ const LiveGame: React.FC = () => {
 
   if (!game) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center py-12">
-          <Icon name="basketball" size={48} className="mx-auto mb-4 text-gray-400" />
-          <h3 className="text-lg font-medium text-white mb-2">Game not found</h3>
-          <p className="text-gray-400">The requested game could not be found.</p>
+          <Icon
+            name="basketball"
+            size={48}
+            className="mx-auto mb-4 text-gray-600 dark:text-gray-400"
+          />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Game not found</h3>
+          <p className="text-gray-600 dark:text-gray-400">The requested game could not be found.</p>
         </div>
       </div>
     );
@@ -442,21 +463,25 @@ const LiveGame: React.FC = () => {
   const canRecordStats = isActive;
 
   return (
-    <div className="min-h-screen bg-gray-900 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       {/* Compact Header with Scoreboard */}
-      <div className="bg-gray-800 rounded-2xl p-6 mb-6 border border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-3 gap-8 items-center">
           {/* Away Team */}
           <div className="text-center">
-            <h2 className="text-lg font-bold text-gray-300 mb-2">{game.awayTeam?.name}</h2>
-            <div className="text-5xl font-bold text-white">{game.awayScore}</div>
+            <h2 className="text-lg font-bold text-gray-700 dark:text-gray-300 mb-2">
+              {game.awayTeam?.name}
+            </h2>
+            <div className="text-5xl font-bold text-gray-900 dark:text-white">{game.awayScore}</div>
           </div>
 
           {/* Game Clock and Controls */}
           <div className="text-center">
-            <div className="bg-gray-900 rounded-xl p-4 mb-4">
-              <div className="text-sm text-gray-400 mb-1">PERIOD {game.currentQuarter}</div>
-              <div className="text-4xl font-mono font-bold text-white flex items-center justify-center">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 mb-4">
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                PERIOD {game.currentQuarter}
+              </div>
+              <div className="text-4xl font-mono font-bold text-gray-900 dark:text-white flex items-center justify-center">
                 <ClockIcon className="h-8 w-8 mr-2" />
                 {formatTime(game.timeRemainingSeconds)}
               </div>
@@ -510,8 +535,10 @@ const LiveGame: React.FC = () => {
 
           {/* Home Team */}
           <div className="text-center">
-            <h2 className="text-lg font-bold text-gray-300 mb-2">{game.homeTeam?.name}</h2>
-            <div className="text-5xl font-bold text-white">{game.homeScore}</div>
+            <h2 className="text-lg font-bold text-gray-700 dark:text-gray-300 mb-2">
+              {game.homeTeam?.name}
+            </h2>
+            <div className="text-5xl font-bold text-gray-900 dark:text-white">{game.homeScore}</div>
           </div>
         </div>
       </div>
@@ -528,7 +555,7 @@ const LiveGame: React.FC = () => {
             className={`flex-1 flex items-center justify-center py-3 px-4 rounded-xl font-medium transition-colors ${
               activeTab === tab.key
                 ? "bg-orange-600 text-white"
-                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
             onClick={() => setActiveTab(tab.key as any)}
           >
@@ -544,11 +571,11 @@ const LiveGame: React.FC = () => {
           {/* Left Column - Court and Player Selection */}
           <div className="space-y-6">
             {/* Player Selection */}
-            <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-              <h3 className="text-white font-semibold mb-3">Selected Player</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-gray-900 dark:text-white font-semibold mb-3">Selected Player</h3>
               <button
                 onClick={() => setShowPlayerModal(true)}
-                className="w-full p-3 rounded-lg border border-gray-600 flex items-center hover:bg-gray-700 transition-colors"
+                className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 {selectedPlayer ? (
                   <>
@@ -556,21 +583,25 @@ const LiveGame: React.FC = () => {
                       <span className="text-white font-bold">#{selectedPlayer.player?.number}</span>
                     </div>
                     <div className="flex-1 text-left">
-                      <div className="text-white font-medium">{selectedPlayer.player?.name}</div>
-                      <div className="text-gray-400 text-sm">
+                      <div className="text-gray-900 dark:text-white font-medium">
+                        {selectedPlayer.player?.name}
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-400 text-sm">
                         {selectedPlayer.isHomeTeam ? game.homeTeam?.name : game.awayTeam?.name}
                       </div>
                     </div>
-                    <span className="text-gray-400 text-sm">Change</span>
+                    <span className="text-gray-600 dark:text-gray-400 text-sm">Change</span>
                   </>
                 ) : (
                   <>
-                    <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center mr-3">
-                      <Icon name="user" size={20} className="text-gray-400" />
+                    <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mr-3">
+                      <Icon name="user" size={20} className="text-gray-600 dark:text-gray-400" />
                     </div>
                     <div className="flex-1 text-left">
-                      <div className="text-gray-400">Select Player</div>
-                      <div className="text-gray-500 text-sm">Click to choose who to record stats for</div>
+                      <div className="text-gray-600 dark:text-gray-400">Select Player</div>
+                      <div className="text-gray-500 text-sm">
+                        Click to choose who to record stats for
+                      </div>
                     </div>
                   </>
                 )}
@@ -578,8 +609,8 @@ const LiveGame: React.FC = () => {
             </div>
 
             {/* Mini Court */}
-            <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-              <h3 className="text-white font-semibold mb-3">Shot Location</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-gray-900 dark:text-white font-semibold mb-3">Shot Location</h3>
               <MiniCourt
                 onCourtClick={handleCourtClick}
                 disabled={!canRecordStats}
@@ -589,8 +620,8 @@ const LiveGame: React.FC = () => {
           </div>
 
           {/* Right Column - Stat Buttons */}
-          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-            <h3 className="text-white font-semibold mb-4">Quick Stats</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <h3 className="text-gray-900 dark:text-white font-semibold mb-4">Quick Stats</h3>
 
             {/* Scoring */}
             <div className="mb-4">
@@ -601,28 +632,36 @@ const LiveGame: React.FC = () => {
                   shortLabel="+2"
                   color="#22C55E"
                   disabled={!canRecordStats || !selectedPlayer}
-                  onClick={() => selectedPlayer && handleRecordStat(selectedPlayer.playerId, "shot2", true)}
+                  onClick={() =>
+                    selectedPlayer && handleRecordStat(selectedPlayer.playerId, "shot2", true)
+                  }
                 />
                 <StatButton
                   label="3PT"
                   shortLabel="+3"
                   color="#22C55E"
                   disabled={!canRecordStats || !selectedPlayer}
-                  onClick={() => selectedPlayer && handleRecordStat(selectedPlayer.playerId, "shot3", true)}
+                  onClick={() =>
+                    selectedPlayer && handleRecordStat(selectedPlayer.playerId, "shot3", true)
+                  }
                 />
                 <StatButton
                   label="FT"
                   shortLabel="+1"
                   color="#22C55E"
                   disabled={!canRecordStats || !selectedPlayer}
-                  onClick={() => selectedPlayer && handleRecordStat(selectedPlayer.playerId, "freethrow", true)}
+                  onClick={() =>
+                    selectedPlayer && handleRecordStat(selectedPlayer.playerId, "freethrow", true)
+                  }
                 />
                 <StatButton
                   label="MISS"
                   shortLabel="×"
                   color="#EF4444"
                   disabled={!canRecordStats || !selectedPlayer}
-                  onClick={() => selectedPlayer && handleRecordStat(selectedPlayer.playerId, "shot2", false)}
+                  onClick={() =>
+                    selectedPlayer && handleRecordStat(selectedPlayer.playerId, "shot2", false)
+                  }
                 />
               </div>
             </div>
@@ -636,28 +675,36 @@ const LiveGame: React.FC = () => {
                   shortLabel="+R"
                   color="#3B82F6"
                   disabled={!canRecordStats || !selectedPlayer}
-                  onClick={() => selectedPlayer && handleRecordStat(selectedPlayer.playerId, "rebound")}
+                  onClick={() =>
+                    selectedPlayer && handleRecordStat(selectedPlayer.playerId, "rebound")
+                  }
                 />
                 <StatButton
                   label="AST"
                   shortLabel="+A"
                   color="#8B5CF6"
                   disabled={!canRecordStats || !selectedPlayer}
-                  onClick={() => selectedPlayer && handleRecordStat(selectedPlayer.playerId, "assist")}
+                  onClick={() =>
+                    selectedPlayer && handleRecordStat(selectedPlayer.playerId, "assist")
+                  }
                 />
                 <StatButton
                   label="STL"
                   shortLabel="+S"
                   color="#06B6D4"
                   disabled={!canRecordStats || !selectedPlayer}
-                  onClick={() => selectedPlayer && handleRecordStat(selectedPlayer.playerId, "steal")}
+                  onClick={() =>
+                    selectedPlayer && handleRecordStat(selectedPlayer.playerId, "steal")
+                  }
                 />
                 <StatButton
                   label="BLK"
                   shortLabel="+B"
                   color="#06B6D4"
                   disabled={!canRecordStats || !selectedPlayer}
-                  onClick={() => selectedPlayer && handleRecordStat(selectedPlayer.playerId, "block")}
+                  onClick={() =>
+                    selectedPlayer && handleRecordStat(selectedPlayer.playerId, "block")
+                  }
                 />
               </div>
               <div className="flex gap-2">
@@ -666,14 +713,18 @@ const LiveGame: React.FC = () => {
                   shortLabel="+T"
                   color="#F59E0B"
                   disabled={!canRecordStats || !selectedPlayer}
-                  onClick={() => selectedPlayer && handleRecordStat(selectedPlayer.playerId, "turnover")}
+                  onClick={() =>
+                    selectedPlayer && handleRecordStat(selectedPlayer.playerId, "turnover")
+                  }
                 />
                 <StatButton
                   label="FOUL"
                   shortLabel="+F"
                   color="#F59E0B"
                   disabled={!canRecordStats || !selectedPlayer}
-                  onClick={() => selectedPlayer && handleRecordStat(selectedPlayer.playerId, "foul")}
+                  onClick={() =>
+                    selectedPlayer && handleRecordStat(selectedPlayer.playerId, "foul")
+                  }
                 />
                 <div className="flex-1" />
                 <div className="flex-1" />
@@ -686,28 +737,44 @@ const LiveGame: React.FC = () => {
       {activeTab === "stats" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Away Team Stats */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <h3 className="text-lg font-semibold text-white mb-4">{game.awayTeam?.name} - Player Stats</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {game.awayTeam?.name} - Player Stats
+            </h3>
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
-                  <tr className="border-b border-gray-600">
-                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-300 uppercase">Player</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">PTS</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">REB</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">AST</th>
+                  <tr className="border-b border-gray-300 dark:border-gray-600">
+                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      Player
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      PTS
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      REB
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      AST
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {awayStats.map((stat) => (
                     <tr key={stat.id} className={stat.isOnCourt ? "" : "opacity-50"}>
-                      <td className="py-3 px-3 text-sm text-white">
+                      <td className="py-3 px-3 text-sm text-gray-900 dark:text-white">
                         #{stat.player?.number} {stat.player?.name}
                         {stat.isOnCourt && <span className="ml-2 text-green-400 text-xs">ON</span>}
                       </td>
-                      <td className="py-3 px-2 text-center text-sm text-white font-bold">{stat.points}</td>
-                      <td className="py-3 px-2 text-center text-sm text-white">{stat.rebounds}</td>
-                      <td className="py-3 px-2 text-center text-sm text-white">{stat.assists}</td>
+                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white font-bold">
+                        {stat.points}
+                      </td>
+                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        {stat.rebounds}
+                      </td>
+                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        {stat.assists}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -716,28 +783,44 @@ const LiveGame: React.FC = () => {
           </div>
 
           {/* Home Team Stats */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <h3 className="text-lg font-semibold text-white mb-4">{game.homeTeam?.name} - Player Stats</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {game.homeTeam?.name} - Player Stats
+            </h3>
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
-                  <tr className="border-b border-gray-600">
-                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-300 uppercase">Player</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">PTS</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">REB</th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-300 uppercase">AST</th>
+                  <tr className="border-b border-gray-300 dark:border-gray-600">
+                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      Player
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      PTS
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      REB
+                    </th>
+                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      AST
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {homeStats.map((stat) => (
                     <tr key={stat.id} className={stat.isOnCourt ? "" : "opacity-50"}>
-                      <td className="py-3 px-3 text-sm text-white">
+                      <td className="py-3 px-3 text-sm text-gray-900 dark:text-white">
                         #{stat.player?.number} {stat.player?.name}
                         {stat.isOnCourt && <span className="ml-2 text-green-400 text-xs">ON</span>}
                       </td>
-                      <td className="py-3 px-2 text-center text-sm text-white font-bold">{stat.points}</td>
-                      <td className="py-3 px-2 text-center text-sm text-white">{stat.rebounds}</td>
-                      <td className="py-3 px-2 text-center text-sm text-white">{stat.assists}</td>
+                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white font-bold">
+                        {stat.points}
+                      </td>
+                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        {stat.rebounds}
+                      </td>
+                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        {stat.assists}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -750,21 +833,27 @@ const LiveGame: React.FC = () => {
       {activeTab === "substitutions" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Away Team Substitutions */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <h3 className="text-lg font-semibold text-white mb-4">{game.awayTeam?.name} - Roster</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {game.awayTeam?.name} - Roster
+            </h3>
             <div className="space-y-2">
               {awayStats.map((stat) => (
                 <div
                   key={stat.id}
                   className={`flex items-center justify-between p-3 rounded-lg ${
-                    stat.isOnCourt ? "bg-green-900/30 border border-green-700" : "bg-gray-700"
+                    stat.isOnCourt
+                      ? "bg-green-900/30 border border-green-700"
+                      : "bg-gray-100 dark:bg-gray-700"
                   }`}
                 >
                   <div>
-                    <span className="text-white font-medium">
+                    <span className="text-gray-900 dark:text-white font-medium">
                       #{stat.player?.number} {stat.player?.name}
                     </span>
-                    <span className="ml-2 text-gray-400 text-sm">{stat.player?.position}</span>
+                    <span className="ml-2 text-gray-600 dark:text-gray-400 text-sm">
+                      {stat.player?.position}
+                    </span>
                   </div>
                   <button
                     onClick={() => handleSubstitute(stat.playerId, !stat.isOnCourt)}
@@ -783,21 +872,27 @@ const LiveGame: React.FC = () => {
           </div>
 
           {/* Home Team Substitutions */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <h3 className="text-lg font-semibold text-white mb-4">{game.homeTeam?.name} - Roster</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {game.homeTeam?.name} - Roster
+            </h3>
             <div className="space-y-2">
               {homeStats.map((stat) => (
                 <div
                   key={stat.id}
                   className={`flex items-center justify-between p-3 rounded-lg ${
-                    stat.isOnCourt ? "bg-green-900/30 border border-green-700" : "bg-gray-700"
+                    stat.isOnCourt
+                      ? "bg-green-900/30 border border-green-700"
+                      : "bg-gray-100 dark:bg-gray-700"
                   }`}
                 >
                   <div>
-                    <span className="text-white font-medium">
+                    <span className="text-gray-900 dark:text-white font-medium">
                       #{stat.player?.number} {stat.player?.name}
                     </span>
-                    <span className="ml-2 text-gray-400 text-sm">{stat.player?.position}</span>
+                    <span className="ml-2 text-gray-600 dark:text-gray-400 text-sm">
+                      {stat.player?.position}
+                    </span>
                   </div>
                   <button
                     onClick={() => handleSubstitute(stat.playerId, !stat.isOnCourt)}

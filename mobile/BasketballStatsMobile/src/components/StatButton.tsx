@@ -1,11 +1,7 @@
 import React from "react";
-import { TouchableOpacity, Text, View, StyleSheet, ViewStyle } from "react-native";
+import { TouchableOpacity, Text, View, StyleSheet, ViewStyle, useColorScheme } from "react-native";
 import * as Haptics from "expo-haptics";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { COLORS, TOUCH_TARGETS } from "@basketball-stats/shared";
 
 interface StatButtonProps {
@@ -32,6 +28,8 @@ const StatButton: React.FC<StatButtonProps> = ({
   style,
 }) => {
   const scale = useSharedValue(1);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   const handlePressIn = () => {
     scale.value = withSpring(0.95, { damping: 15 });
@@ -56,15 +54,18 @@ const StatButton: React.FC<StatButtonProps> = ({
     large: TOUCH_TARGETS.large,
   }[size];
 
+  const disabledBgColor = isDark ? "#374151" : "#D1D5DB";
+  const disabledBorderColor = isDark ? "#374151" : "#D1D5DB";
+
   const buttonStyle = {
     filled: {
-      backgroundColor: disabled ? "#374151" : color,
+      backgroundColor: disabled ? disabledBgColor : color,
       borderWidth: 0,
     },
     outlined: {
       backgroundColor: "transparent",
       borderWidth: 2,
-      borderColor: disabled ? "#374151" : color,
+      borderColor: disabled ? disabledBorderColor : color,
     },
   }[variant];
 
@@ -107,7 +108,9 @@ export const ScoringButton: React.FC<{
     miss: { label: "MISS", shortLabel: "×", color: COLORS.shots.missed2pt },
   }[type];
 
-  return <StatButton {...config} onPress={onPress} disabled={disabled} size="large" style={style} />;
+  return (
+    <StatButton {...config} onPress={onPress} disabled={disabled} size="large" style={style} />
+  );
 };
 
 export const DefenseButton: React.FC<{
@@ -143,9 +146,7 @@ export const NegativeButton: React.FC<{
 export const StatButtonRow: React.FC<{
   children: React.ReactNode;
   style?: ViewStyle;
-}> = ({ children, style }) => (
-  <View style={[styles.row, style]}>{children}</View>
-);
+}> = ({ children, style }) => <View style={[styles.row, style]}>{children}</View>;
 
 const styles = StyleSheet.create({
   button: {

@@ -1,11 +1,12 @@
 import React from "react";
-import { View, Image, Text, StyleSheet, ViewStyle } from "react-native";
+import { View, Image, Text, StyleSheet, ViewStyle, useColorScheme } from "react-native";
 
 interface LogoProps {
   variant?: "light" | "dark" | "auto";
   size?: "sm" | "md" | "lg" | "xl";
   style?: ViewStyle;
   showText?: boolean;
+  textColor?: string;
 }
 
 const sizeMap = {
@@ -27,31 +28,33 @@ const sizeMap = {
  * - logo-light.png (light logo for dark backgrounds)
  */
 const Logo: React.FC<LogoProps> = ({
-  variant = "light",
+  variant = "auto",
   size = "md",
   style,
   showText = true,
+  textColor,
 }) => {
   const { width, height, fontSize } = sizeMap[size];
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
 
-  // For auto variant, we'd check theme context here
-  // Currently defaulting to light (for dark backgrounds) since app is dark theme
-  const effectiveVariant = variant === "auto" ? "light" : variant;
+  // For auto variant, select based on system color scheme
+  const effectiveVariant = variant === "auto" ? (isDark ? "light" : "dark") : variant;
 
   // Select the appropriate logo based on variant
-  const logoSource = effectiveVariant === "light"
-    ? require("../../assets/logo-light.png")
-    : require("../../assets/logo.png");
+  const logoSource =
+    effectiveVariant === "light"
+      ? require("../../assets/logo-light.png")
+      : require("../../assets/logo.png");
+
+  // Determine text color: use prop if provided, otherwise based on theme
+  const effectiveTextColor = textColor ?? (isDark ? "#FFFFFF" : "#111827");
 
   return (
     <View style={[styles.container, style]}>
-      <Image
-        source={logoSource}
-        style={{ width, height }}
-        resizeMode="contain"
-      />
+      <Image source={logoSource} style={{ width, height }} resizeMode="contain" />
       {showText && (
-        <Text style={[styles.text, { fontSize }]}>Basketball Stats</Text>
+        <Text style={[styles.text, { fontSize, color: effectiveTextColor }]}>Basketball Stats</Text>
       )}
     </View>
   );
@@ -59,11 +62,14 @@ const Logo: React.FC<LogoProps> = ({
 
 // Compact logo without text
 export const LogoIcon: React.FC<Omit<LogoProps, "showText">> = ({
-  variant = "light",
+  variant = "auto",
   size = "md",
   style,
+  textColor,
 }) => {
-  return <Logo variant={variant} size={size} style={style} showText={false} />;
+  return (
+    <Logo variant={variant} size={size} style={style} showText={false} textColor={textColor} />
+  );
 };
 
 const styles = StyleSheet.create({

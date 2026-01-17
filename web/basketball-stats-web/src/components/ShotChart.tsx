@@ -60,37 +60,40 @@ const ShotChart: React.FC<ShotChartProps> = ({
   };
 
   // Handle court click
-  const handleCourtClick = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
-    if (!interactive || !onCourtTap || !svgRef.current) return;
+  const handleCourtClick = useCallback(
+    (event: React.MouseEvent<SVGSVGElement>) => {
+      if (!interactive || !onCourtTap || !svgRef.current) return;
 
-    const svg = svgRef.current;
-    const rect = svg.getBoundingClientRect();
+      const svg = svgRef.current;
+      const rect = svg.getBoundingClientRect();
 
-    // Get click position relative to SVG
-    const scaleX = COURT_DIMENSIONS.webViewBox.width / rect.width;
-    const scaleY = COURT_DIMENSIONS.webViewBox.height / rect.height;
+      // Get click position relative to SVG
+      const scaleX = COURT_DIMENSIONS.webViewBox.width / rect.width;
+      const scaleY = COURT_DIMENSIONS.webViewBox.height / rect.height;
 
-    const svgX = (event.clientX - rect.left) * scaleX;
-    const svgY = (event.clientY - rect.top) * scaleY;
+      const svgX = (event.clientX - rect.left) * scaleX;
+      const svgY = (event.clientY - rect.top) * scaleY;
 
-    // Convert SVG coordinates to court coordinates
-    const { x, y } = svgToCourtCoords(svgX, svgY, 'web');
+      // Convert SVG coordinates to court coordinates
+      const { x, y } = svgToCourtCoords(svgX, svgY, "web");
 
-    // Determine shot zone
-    const shotZone = getShotZone(x, y);
+      // Determine shot zone
+      const shotZone = getShotZone(x, y);
 
-    // Add ripple effect
-    const rippleId = rippleIdRef.current++;
-    setRipples(prev => [...prev, { id: rippleId, x: svgX, y: svgY }]);
+      // Add ripple effect
+      const rippleId = rippleIdRef.current++;
+      setRipples((prev) => [...prev, { id: rippleId, x: svgX, y: svgY }]);
 
-    // Remove ripple after animation
-    setTimeout(() => {
-      setRipples(prev => prev.filter(r => r.id !== rippleId));
-    }, 600);
+      // Remove ripple after animation
+      setTimeout(() => {
+        setRipples((prev) => prev.filter((r) => r.id !== rippleId));
+      }, 600);
 
-    // Call the callback
-    onCourtTap(x, y, shotZone);
-  }, [interactive, onCourtTap]);
+      // Call the callback
+      onCourtTap(x, y, shotZone);
+    },
+    [interactive, onCourtTap]
+  );
 
   // Calculate heat zones if needed
   const getHeatmapColor = (zone: string | undefined): string => {
@@ -125,7 +128,7 @@ const ShotChart: React.FC<ShotChartProps> = ({
         width={width}
         height={height}
         className={`bg-gray-800 rounded-lg transition-shadow ${
-          interactive ? 'cursor-crosshair hover:shadow-lg hover:shadow-orange-500/20' : ''
+          interactive ? "cursor-crosshair hover:shadow-lg hover:shadow-orange-500/20" : ""
         }`}
         onClick={handleCourtClick}
         role={interactive ? "button" : undefined}
@@ -189,14 +192,8 @@ const ShotChart: React.FC<ShotChartProps> = ({
         {/* Wing 3 zones (for heatmap) */}
         {showHeatmap && (
           <>
-            <path
-              d="M 30 330 Q 30 200 150 150 L 150 330 Z"
-              fill={getHeatmapColor("wing3")}
-            />
-            <path
-              d="M 470 330 Q 470 200 350 150 L 350 330 Z"
-              fill={getHeatmapColor("wing3")}
-            />
+            <path d="M 30 330 Q 30 200 150 150 L 150 330 Z" fill={getHeatmapColor("wing3")} />
+            <path d="M 470 330 Q 470 200 350 150 L 350 330 Z" fill={getHeatmapColor("wing3")} />
           </>
         )}
 
@@ -234,20 +231,14 @@ const ShotChart: React.FC<ShotChartProps> = ({
               className={shot.isNew ? "animate-shot-marker" : ""}
               style={{
                 transformOrigin: `${cx}px ${cy}px`,
-                animationDelay: shot.isNew ? '0ms' : `${index * 30}ms`
+                animationDelay: shot.isNew ? "0ms" : `${index * 30}ms`,
               }}
             >
               {shot.made ? (
                 // Made shot - filled circle with glow effect
                 <>
                   {/* Glow effect */}
-                  <circle
-                    cx={cx}
-                    cy={cy}
-                    r="10"
-                    fill={markerColor}
-                    opacity="0.2"
-                  />
+                  <circle cx={cx} cy={cy} r="10" fill={markerColor} opacity="0.2" />
                   {/* Main marker */}
                   <circle
                     cx={cx}
@@ -282,14 +273,7 @@ const ShotChart: React.FC<ShotChartProps> = ({
               fill={COLORS.primary[500]}
               className="animate-pulse-glow"
             />
-            <text
-              x="250"
-              y="250"
-              textAnchor="middle"
-              fill="#9CA3AF"
-              fontSize="11"
-              fontWeight="500"
-            >
+            <text x="250" y="250" textAnchor="middle" fill="#9CA3AF" fontSize="11" fontWeight="500">
               TAP TO RECORD SHOT
             </text>
           </g>
@@ -307,19 +291,29 @@ const ShotChart: React.FC<ShotChartProps> = ({
       {/* Legend */}
       <div className="flex justify-center space-x-6 mt-4 text-sm">
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: COLORS.shots.made3pt }}></div>
+          <div
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: COLORS.shots.made3pt }}
+          ></div>
           <span className="text-gray-400">Made 3PT</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: COLORS.shots.made2pt }}></div>
+          <div
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: COLORS.shots.made2pt }}
+          ></div>
           <span className="text-gray-400">Made 2PT</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 font-bold" style={{ color: COLORS.shots.missed3pt }}>✕</div>
+          <div className="w-4 h-4 font-bold" style={{ color: COLORS.shots.missed3pt }}>
+            ✕
+          </div>
           <span className="text-gray-400">Missed 3PT</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 font-bold" style={{ color: COLORS.shots.missed2pt }}>✕</div>
+          <div className="w-4 h-4 font-bold" style={{ color: COLORS.shots.missed2pt }}>
+            ✕
+          </div>
           <span className="text-gray-400">Missed 2PT</span>
         </div>
       </div>

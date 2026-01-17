@@ -28,9 +28,10 @@ const NotificationPreferences: React.FC = () => {
   });
 
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; text: string } | null>(
-    null
-  );
+  const [saveMessage, setSaveMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   // Load preferences when available
   useEffect(() => {
@@ -99,13 +100,13 @@ const NotificationPreferences: React.FC = () => {
   }> = ({ label, description, checked, onChange }) => (
     <div className="flex items-center justify-between py-3">
       <div>
-        <p className="text-sm font-medium text-white">{label}</p>
-        <p className="text-xs text-gray-400">{description}</p>
+        <p className="text-sm font-medium text-gray-900 dark:text-white">{label}</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400">{description}</p>
       </div>
       <button
         onClick={onChange}
-        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800 ${
-          checked ? "bg-orange-600" : "bg-gray-600"
+        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 ${
+          checked ? "bg-orange-600" : "bg-gray-300 dark:bg-gray-600"
         }`}
         role="switch"
         aria-checked={checked}
@@ -120,20 +121,22 @@ const NotificationPreferences: React.FC = () => {
   );
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-      <h3 className="text-lg font-semibold text-white mb-6 flex items-center">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
         <BellIcon className="w-5 h-5 mr-2 text-orange-500" />
         Notification Preferences
       </h3>
 
       {/* Push Notifications Section */}
-      <div className="mb-6 pb-6 border-b border-gray-700">
+      <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <DevicePhoneMobileIcon className="w-5 h-5 text-gray-400 mr-3" />
+            <DevicePhoneMobileIcon className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-3" />
             <div>
-              <p className="text-sm font-medium text-white">Push Notifications</p>
-              <p className="text-xs text-gray-400">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                Push Notifications
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 {isPushSupported
                   ? isPushEnabled
                     ? "Enabled - You'll receive notifications even when the app is closed"
@@ -147,7 +150,7 @@ const NotificationPreferences: React.FC = () => {
               onClick={handlePushToggle}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isPushEnabled
-                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  ? "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                   : "bg-orange-600 text-white hover:bg-orange-700"
               }`}
             >
@@ -159,7 +162,9 @@ const NotificationPreferences: React.FC = () => {
 
       {/* In-App Notification Preferences */}
       <div className="space-y-1">
-        <h4 className="text-sm font-medium text-gray-300 mb-4">Notification Types</h4>
+        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+          Notification Types
+        </h4>
 
         <PreferenceToggle
           label="Game Reminders"
@@ -174,7 +179,7 @@ const NotificationPreferences: React.FC = () => {
             <select
               value={localPrefs.reminderMinutesBefore}
               onChange={(e) => handleReminderTimeChange(Number(e.target.value))}
-              className="bg-gray-700 border border-gray-600 rounded-md px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value={15}>15 minutes before</option>
               <option value={30}>30 minutes before</option>
@@ -222,7 +227,7 @@ const NotificationPreferences: React.FC = () => {
       </div>
 
       {/* Save Button */}
-      <div className="mt-6 pt-6 border-t border-gray-700">
+      <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         {saveMessage && (
           <div
             className={`mb-4 px-4 py-2 rounded-lg text-sm ${

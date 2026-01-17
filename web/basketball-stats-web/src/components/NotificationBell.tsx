@@ -5,13 +5,8 @@ import { useNotifications } from "../contexts/NotificationContext";
 import { Id } from "../../../../convex/_generated/dataModel";
 
 const NotificationBell: React.FC = () => {
-  const {
-    notifications,
-    unreadCount,
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
-  } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } =
+    useNotifications();
 
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -80,7 +75,10 @@ const NotificationBell: React.FC = () => {
     }
   };
 
-  const handleNotificationClick = async (notification: { _id: Id<"notifications">; read: boolean }) => {
+  const handleNotificationClick = async (notification: {
+    _id: Id<"notifications">;
+    read: boolean;
+  }) => {
     if (!notification.read) {
       await markAsRead(notification._id);
     }
@@ -92,7 +90,7 @@ const NotificationBell: React.FC = () => {
       {/* Bell Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
+        className="relative p-2 rounded-full text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
       >
         {unreadCount > 0 ? (
@@ -109,10 +107,10 @@ const NotificationBell: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-gray-800 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
-            <h3 className="text-lg font-semibold text-white">Notifications</h3>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllAsRead()}
@@ -127,19 +125,19 @@ const NotificationBell: React.FC = () => {
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <BellIcon className="mx-auto h-12 w-12 text-gray-600 mb-3" />
-                <p className="text-gray-400">No notifications yet</p>
+                <BellIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-3" />
+                <p className="text-gray-600 dark:text-gray-400">No notifications yet</p>
                 <p className="text-sm text-gray-500 mt-1">
                   You'll see game updates and announcements here
                 </p>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-700">
+              <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                 {notifications.map((notification) => (
                   <li
                     key={notification._id}
-                    className={`relative px-4 py-3 hover:bg-gray-700/50 transition-colors cursor-pointer ${
-                      !notification.read ? "bg-gray-700/30" : ""
+                    className={`relative px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${
+                      !notification.read ? "bg-gray-100 dark:bg-gray-700/30" : ""
                     }`}
                     onClick={() => handleNotificationClick(notification)}
                   >
@@ -151,7 +149,7 @@ const NotificationBell: React.FC = () => {
 
                       {/* Icon */}
                       <div
-                        className={`flex-shrink-0 w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center ${getTypeColor(
+                        className={`flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center ${getTypeColor(
                           notification.type
                         )}`}
                       >
@@ -170,12 +168,16 @@ const NotificationBell: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <p
                           className={`text-sm font-medium ${
-                            notification.read ? "text-gray-300" : "text-white"
+                            notification.read
+                              ? "text-gray-700 dark:text-gray-300"
+                              : "text-gray-900 dark:text-white"
                           }`}
                         >
                           {notification.title}
                         </p>
-                        <p className="text-sm text-gray-400 line-clamp-2">{notification.body}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                          {notification.body}
+                        </p>
                         <p className="text-xs text-gray-500 mt-1">
                           {formatTime(notification.createdAt)}
                         </p>
@@ -215,10 +217,10 @@ const NotificationBell: React.FC = () => {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-gray-700 text-center">
+            <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-center">
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-sm text-gray-400 hover:text-white transition-colors"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 Close
               </button>

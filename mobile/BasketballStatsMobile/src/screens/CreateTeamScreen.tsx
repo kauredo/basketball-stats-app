@@ -59,10 +59,12 @@ export default function CreateTeamScreen() {
 
   if (!selectedLeague) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-800 p-8">
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-8">
         <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-white text-2xl font-bold mb-2 mt-4">No League Selected</Text>
-        <Text className="text-gray-400 text-base text-center">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-2 mt-4">
+          No League Selected
+        </Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base text-center">
           Please select a league to create a team.
         </Text>
       </View>
@@ -72,20 +74,22 @@ export default function CreateTeamScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-gray-800"
+      className="flex-1 bg-gray-50 dark:bg-gray-800"
     >
       {/* Header */}
-      <View className="bg-gray-700 p-5 pt-15">
-        <Text className="text-white text-2xl font-bold mb-1">Create Team</Text>
-        <Text className="text-gray-400 text-base">Add a new team to {selectedLeague.name}</Text>
+      <View className="bg-gray-100 dark:bg-gray-700 p-5 pt-15">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">Create Team</Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base">
+          Add a new team to {selectedLeague.name}
+        </Text>
       </View>
 
       <ScrollView className="flex-1 p-4">
         {/* Team Name */}
         <View className="mb-4">
-          <Text className="text-gray-400 text-sm mb-2">Team Name *</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Team Name *</Text>
           <TextInput
-            className="bg-gray-700 rounded-xl p-4 text-white text-base border border-gray-600"
+            className="bg-white dark:bg-gray-700 rounded-xl p-4 text-gray-900 dark:text-white text-base border border-gray-200 dark:border-gray-600"
             placeholder="Enter team name"
             placeholderTextColor="#6B7280"
             value={name}
@@ -96,9 +100,9 @@ export default function CreateTeamScreen() {
 
         {/* City */}
         <View className="mb-4">
-          <Text className="text-gray-400 text-sm mb-2">City (optional)</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">City (optional)</Text>
           <TextInput
-            className="bg-gray-700 rounded-xl p-4 text-white text-base border border-gray-600"
+            className="bg-white dark:bg-gray-700 rounded-xl p-4 text-gray-900 dark:text-white text-base border border-gray-200 dark:border-gray-600"
             placeholder="Enter city"
             placeholderTextColor="#6B7280"
             value={city}
@@ -109,9 +113,11 @@ export default function CreateTeamScreen() {
 
         {/* Description */}
         <View className="mb-6">
-          <Text className="text-gray-400 text-sm mb-2">Description (optional)</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+            Description (optional)
+          </Text>
           <TextInput
-            className="bg-gray-700 rounded-xl p-4 text-white text-base border border-gray-600"
+            className="bg-white dark:bg-gray-700 rounded-xl p-4 text-gray-900 dark:text-white text-base border border-gray-200 dark:border-gray-600"
             placeholder="Enter team description"
             placeholderTextColor="#6B7280"
             value={description}
@@ -126,7 +132,7 @@ export default function CreateTeamScreen() {
         {/* Create Button */}
         <TouchableOpacity
           className={`rounded-xl p-4 items-center mb-8 ${
-            name.trim() && !isSubmitting ? "bg-primary-500" : "bg-gray-600"
+            name.trim() && !isSubmitting ? "bg-primary-500" : "bg-gray-300 dark:bg-gray-600"
           }`}
           onPress={handleCreateTeam}
           disabled={!name.trim() || isSubmitting}

@@ -29,6 +29,7 @@ This deploys all functions in `convex/` to your Convex project.
 ### Environment Variables
 
 Set production environment variables in the Convex dashboard:
+
 1. Go to [dashboard.convex.dev](https://dashboard.convex.dev)
 2. Select your project
 3. Go to Settings → Environment Variables
@@ -64,6 +65,7 @@ npm run build
 ### Environment Variables
 
 Set in your hosting platform:
+
 - `REACT_APP_CONVEX_URL` - Your Convex deployment URL (if not hardcoded)
 
 ## Mobile Deployment
@@ -126,7 +128,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
       - run: npm ci
       - run: npx convex deploy
         env:
@@ -138,7 +140,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
       - run: npm ci
       - run: cd web/basketball-stats-web && npm run build
       # Add your hosting provider's deploy action here
@@ -153,15 +155,18 @@ jobs:
 ## Troubleshooting
 
 ### Convex deployment fails
+
 - Check `npx convex dev` works locally first
 - Verify schema changes are valid
 - Check the Convex dashboard for error logs
 
 ### Web build fails
+
 - Run `npm run typecheck` to find type errors
 - Ensure shared package is built: `cd shared && npm run build`
 
 ### Mobile build fails
+
 - Check Expo status: [status.expo.dev](https://status.expo.dev)
 - Review EAS build logs in Expo dashboard
 - Ensure `app.json` configuration is correct

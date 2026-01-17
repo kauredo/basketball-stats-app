@@ -251,9 +251,7 @@ export const getNotifications = query({
 
     // Filter by league if specified
     if (args.leagueId) {
-      notifications = notifications.filter(
-        (n) => n.leagueId === args.leagueId || !n.leagueId
-      );
+      notifications = notifications.filter((n) => n.leagueId === args.leagueId || !n.leagueId);
     }
 
     // Filter by unread if specified
@@ -263,9 +261,7 @@ export const getNotifications = query({
 
     // Filter expired notifications
     const now = Date.now();
-    notifications = notifications.filter(
-      (n) => !n.expiresAt || n.expiresAt > now
-    );
+    notifications = notifications.filter((n) => !n.expiresAt || n.expiresAt > now);
 
     // Count unread
     const unreadCount = notifications.filter((n) => !n.read).length;
@@ -325,15 +321,11 @@ export const markAllAsRead = mutation({
 
     let notifications = await ctx.db
       .query("notifications")
-      .withIndex("by_user_read", (q) =>
-        q.eq("userId", session.userId).eq("read", false)
-      )
+      .withIndex("by_user_read", (q) => q.eq("userId", session.userId).eq("read", false))
       .collect();
 
     if (args.leagueId) {
-      notifications = notifications.filter(
-        (n) => n.leagueId === args.leagueId || !n.leagueId
-      );
+      notifications = notifications.filter((n) => n.leagueId === args.leagueId || !n.leagueId);
     }
 
     for (const notification of notifications) {
@@ -429,9 +421,7 @@ export const notifyLeagueMembers = mutation({
     // Get all active league members
     const memberships = await ctx.db
       .query("leagueMemberships")
-      .withIndex("by_league_status", (q) =>
-        q.eq("leagueId", args.leagueId).eq("status", "active")
-      )
+      .withIndex("by_league_status", (q) => q.eq("leagueId", args.leagueId).eq("status", "active"))
       .collect();
 
     const notificationIds: Id<"notifications">[] = [];

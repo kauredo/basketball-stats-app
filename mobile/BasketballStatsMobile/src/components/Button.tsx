@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, Text, ActivityIndicator, View } from "react-native";
+import { TouchableOpacity, Text, ActivityIndicator, View, useColorScheme } from "react-native";
 import { getButtonStyles, ButtonProps } from "@basketball-stats/shared";
 
 interface NativeButtonProps extends ButtonProps {
@@ -18,6 +18,9 @@ export default function Button({
   fullWidth = false,
   className = "",
 }: NativeButtonProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+
   const buttonStyles = getButtonStyles({
     variant,
     size,
@@ -25,6 +28,32 @@ export default function Button({
     loading,
     fullWidth,
   });
+
+  // Determine spinner color based on variant and theme
+  const getSpinnerColor = () => {
+    if (variant === "primary" || variant === "danger") {
+      return "#FFFFFF";
+    }
+    // For secondary and ghost variants
+    return "#EA580C"; // primary orange color
+  };
+
+  // Determine text color class based on variant and theme
+  const getTextColorClass = () => {
+    switch (variant) {
+      case "primary":
+      case "danger":
+        return "text-white";
+      case "secondary":
+        return isDark ? "text-gray-300" : "text-gray-700";
+      case "ghost":
+        return isDark ? "text-gray-400" : "text-gray-600";
+      default:
+        return "text-white";
+    }
+  };
+
+  const textColorClass = getTextColorClass();
 
   return (
     <TouchableOpacity
@@ -35,17 +64,13 @@ export default function Button({
     >
       {loading ? (
         <View className="flex-row items-center">
-          <ActivityIndicator
-            color={variant === "primary" ? "#FFFFFF" : "#EA580C"}
-            size="small"
-            className="mr-2"
-          />
-          <Text className="text-current font-medium">
+          <ActivityIndicator color={getSpinnerColor()} size="small" className="mr-2" />
+          <Text className={`${textColorClass} font-medium`}>
             {typeof children === "string" ? children : "Loading..."}
           </Text>
         </View>
       ) : (
-        <Text className="text-current font-medium">{children}</Text>
+        <Text className={`${textColorClass} font-medium`}>{children}</Text>
       )}
     </TouchableOpacity>
   );

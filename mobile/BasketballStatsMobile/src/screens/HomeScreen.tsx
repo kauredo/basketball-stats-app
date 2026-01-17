@@ -98,8 +98,8 @@ export default function HomeScreen() {
     return (
       <TouchableOpacity
         key={game.id}
-        className={`bg-gray-800 rounded-xl p-4 mb-3 border ${
-          isLive ? "border-primary-500 border-2 shadow-lg" : "border-gray-700"
+        className={`bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 border ${
+          isLive ? "border-primary-500 border-2 shadow-lg" : "border-gray-200 dark:border-gray-700"
         }`}
         onPress={() => handleGamePress(game)}
         disabled={!isLive}
@@ -108,31 +108,31 @@ export default function HomeScreen() {
           <View className="items-center">
             <View className="flex-row justify-between items-center w-full py-1">
               <Text
-                className={`text-white text-base font-semibold flex-1 ${
+                className={`text-gray-900 dark:text-white text-base font-semibold flex-1 ${
                   winner === "away" && game.status === "completed" ? "text-green-400" : ""
                 }`}
               >
                 {game.awayTeam?.name || "Away Team"}
               </Text>
               <Text
-                className={`text-white text-lg font-bold min-w-[30px] text-right ${
+                className={`text-gray-900 dark:text-white text-lg font-bold min-w-[30px] text-right ${
                   winner === "away" && game.status === "completed" ? "text-green-400" : ""
                 }`}
               >
                 {game.awayScore}
               </Text>
             </View>
-            <Text className="text-gray-400 text-xs my-1">@</Text>
+            <Text className="text-gray-600 dark:text-gray-400 text-xs my-1">@</Text>
             <View className="flex-row justify-between items-center w-full py-1">
               <Text
-                className={`text-white text-base font-semibold flex-1 ${
+                className={`text-gray-900 dark:text-white text-base font-semibold flex-1 ${
                   winner === "home" && game.status === "completed" ? "text-green-400" : ""
                 }`}
               >
                 {game.homeTeam?.name || "Home Team"}
               </Text>
               <Text
-                className={`text-white text-lg font-bold min-w-[30px] text-right ${
+                className={`text-gray-900 dark:text-white text-lg font-bold min-w-[30px] text-right ${
                   winner === "home" && game.status === "completed" ? "text-green-400" : ""
                 }`}
               >
@@ -151,19 +151,19 @@ export default function HomeScreen() {
           </View>
 
           {isGameLive && (
-            <Text className="text-gray-400 text-xs">
+            <Text className="text-gray-600 dark:text-gray-400 text-xs">
               Q{game.currentQuarter} • {formatTime(game.timeRemainingSeconds)}
             </Text>
           )}
 
           {game.status === "completed" && game.endedAt && (
-            <Text className="text-gray-400 text-xs">
+            <Text className="text-gray-600 dark:text-gray-400 text-xs">
               Final • {new Date(game.endedAt).toLocaleDateString()}
             </Text>
           )}
 
           {game.status === "scheduled" && game.scheduledAt && (
-            <Text className="text-gray-400 text-xs">
+            <Text className="text-gray-600 dark:text-gray-400 text-xs">
               {new Date(game.scheduledAt).toLocaleDateString()}
             </Text>
           )}
@@ -174,14 +174,14 @@ export default function HomeScreen() {
 
   if (gamesData === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-dark-950">
-        <Text className="text-white text-base">Loading games...</Text>
+      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
+        <Text className="text-gray-900 dark:text-white text-base">Loading games...</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-dark-950">
+    <View className="flex-1 bg-gray-50 dark:bg-dark-950">
       <StatusBar style="light" />
       <ScrollView
         className="p-4"
@@ -189,7 +189,9 @@ export default function HomeScreen() {
       >
         {/* Quick Actions */}
         <View className="mb-6">
-          <Text className="text-white text-lg font-bold mb-3">Quick Actions</Text>
+          <Text className="text-gray-900 dark:text-white text-lg font-bold mb-3">
+            Quick Actions
+          </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-1">
             <TouchableOpacity
               className="bg-primary-500 rounded-xl p-4 mr-3 items-center justify-center min-w-[100px]"
@@ -227,35 +229,45 @@ export default function HomeScreen() {
 
         {/* Analytics & Tools */}
         <View className="mb-6">
-          <Text className="text-white text-lg font-bold mb-3">Analytics & Tools</Text>
+          <Text className="text-gray-900 dark:text-white text-lg font-bold mb-3">
+            Analytics & Tools
+          </Text>
           <View className="flex-row flex-wrap justify-between">
             <TouchableOpacity
-              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 flex-row items-center border border-gray-700"
+              className="w-[48%] bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 flex-row items-center border border-gray-200 dark:border-gray-700"
               onPress={() => navigation.navigate("PlayerComparison")}
             >
               <Icon name="users" size={20} color="#F97316" />
-              <Text className="text-white text-sm font-medium ml-3">Compare Players</Text>
+              <Text className="text-gray-900 dark:text-white text-sm font-medium ml-3">
+                Compare Players
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 flex-row items-center border border-gray-700"
+              className="w-[48%] bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 flex-row items-center border border-gray-200 dark:border-gray-700"
               onPress={() => navigation.navigate("ShotChart")}
             >
               <Icon name="stats" size={20} color="#3B82F6" />
-              <Text className="text-white text-sm font-medium ml-3">Shot Charts</Text>
+              <Text className="text-gray-900 dark:text-white text-sm font-medium ml-3">
+                Shot Charts
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="w-[48%] bg-gray-800 rounded-xl p-4 mb-3 flex-row items-center border border-gray-700"
+              className="w-[48%] bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 flex-row items-center border border-gray-200 dark:border-gray-700"
               onPress={() => navigation.navigate("Settings")}
             >
               <Icon name="settings" size={20} color="#10B981" />
-              <Text className="text-white text-sm font-medium ml-3">Settings</Text>
+              <Text className="text-gray-900 dark:text-white text-sm font-medium ml-3">
+                Settings
+              </Text>
             </TouchableOpacity>
 
-            <View className="w-[48%] bg-gray-700 rounded-xl p-4 mb-3 flex-row items-center border border-gray-600 opacity-70">
+            <View className="w-[48%] bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-3 flex-row items-center border border-gray-200 dark:border-gray-600 opacity-70">
               <Icon name="stats" size={20} color="#8B5CF6" />
-              <Text className="text-gray-400 text-sm font-medium ml-3">More via tabs</Text>
+              <Text className="text-gray-600 dark:text-gray-400 text-sm font-medium ml-3">
+                More via tabs
+              </Text>
             </View>
           </View>
         </View>
@@ -265,7 +277,7 @@ export default function HomeScreen() {
           <View className="mb-6">
             <View className="flex-row items-center mb-3">
               <View className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse" />
-              <Text className="text-white text-lg font-bold">Live Games</Text>
+              <Text className="text-gray-900 dark:text-white text-lg font-bold">Live Games</Text>
             </View>
             {liveGames.map((game: Game) => renderGameCard(game, true))}
           </View>
@@ -276,7 +288,7 @@ export default function HomeScreen() {
           <View className="mb-6">
             <View className="flex-row items-center mb-3">
               <Icon name="stats" size={16} color="#10B981" className="mr-2" />
-              <Text className="text-white text-lg font-bold">Recent Games</Text>
+              <Text className="text-gray-900 dark:text-white text-lg font-bold">Recent Games</Text>
             </View>
             {recentGames.map((game: Game) => renderGameCard(game, false))}
           </View>
@@ -286,8 +298,10 @@ export default function HomeScreen() {
         {liveGames.length === 0 && recentGames.length === 0 && (
           <View className="items-center justify-center pt-15">
             <Icon name="basketball" size={48} color="#6B7280" className="mb-4" />
-            <Text className="text-white text-lg font-bold mb-2">No games found</Text>
-            <Text className="text-gray-400 text-sm text-center leading-5">
+            <Text className="text-gray-900 dark:text-white text-lg font-bold mb-2">
+              No games found
+            </Text>
+            <Text className="text-gray-600 dark:text-gray-400 text-sm text-center leading-5">
               Create a game to start tracking basketball statistics
             </Text>
           </View>

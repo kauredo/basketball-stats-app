@@ -126,10 +126,12 @@ export default function CreatePlayerScreen() {
 
   if (!selectedLeague) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-800 p-8">
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-8">
         <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-white text-2xl font-bold mb-2 mt-4">No League Selected</Text>
-        <Text className="text-gray-400 text-base text-center">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-2 mt-4">
+          No League Selected
+        </Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base text-center">
           Please select a league to add a player.
         </Text>
       </View>
@@ -139,20 +141,20 @@ export default function CreatePlayerScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-gray-800"
+      className="flex-1 bg-gray-50 dark:bg-gray-800"
     >
       {/* Header */}
-      <View className="bg-gray-700 p-5 pt-15">
-        <Text className="text-white text-2xl font-bold mb-1">Add Player</Text>
-        <Text className="text-gray-400 text-base">Create a new player</Text>
+      <View className="bg-gray-100 dark:bg-gray-700 p-5 pt-15">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">Add Player</Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base">Create a new player</Text>
       </View>
 
       <ScrollView className="flex-1 p-4">
         {/* Team Selection */}
         <View className="mb-4">
-          <Text className="text-gray-400 text-sm mb-2">Team *</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Team *</Text>
           <TouchableOpacity
-            className="bg-gray-700 rounded-xl p-4 border border-gray-600 flex-row items-center"
+            className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600 flex-row items-center"
             onPress={() => setShowTeamModal(true)}
           >
             {selectedTeam ? (
@@ -161,19 +163,23 @@ export default function CreatePlayerScreen() {
                   <Icon name="basketball" size={20} color="#FFFFFF" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white font-medium">{selectedTeam.name}</Text>
+                  <Text className="text-gray-900 dark:text-white font-medium">
+                    {selectedTeam.name}
+                  </Text>
                   {selectedTeam.city && (
-                    <Text className="text-gray-400 text-sm">{selectedTeam.city}</Text>
+                    <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                      {selectedTeam.city}
+                    </Text>
                   )}
                 </View>
                 <Icon name="chevron-right" size={20} color="#9CA3AF" />
               </>
             ) : (
               <>
-                <View className="w-10 h-10 bg-gray-600 rounded-full justify-center items-center mr-3">
+                <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
                   <Icon name="basketball" size={20} color="#9CA3AF" />
                 </View>
-                <Text className="text-gray-400 flex-1">Select a team</Text>
+                <Text className="text-gray-600 dark:text-gray-400 flex-1">Select a team</Text>
                 <Icon name="chevron-right" size={20} color="#9CA3AF" />
               </>
             )}
@@ -182,9 +188,9 @@ export default function CreatePlayerScreen() {
 
         {/* Player Name */}
         <View className="mb-4">
-          <Text className="text-gray-400 text-sm mb-2">Player Name *</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Player Name *</Text>
           <TextInput
-            className="bg-gray-700 rounded-xl p-4 text-white text-base border border-gray-600"
+            className="bg-white dark:bg-gray-700 rounded-xl p-4 text-gray-900 dark:text-white text-base border border-gray-200 dark:border-gray-600"
             placeholder="Enter player name"
             placeholderTextColor="#6B7280"
             value={name}
@@ -195,9 +201,9 @@ export default function CreatePlayerScreen() {
 
         {/* Jersey Number */}
         <View className="mb-4">
-          <Text className="text-gray-400 text-sm mb-2">Jersey Number *</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Jersey Number *</Text>
           <TextInput
-            className="bg-gray-700 rounded-xl p-4 text-white text-base border border-gray-600"
+            className="bg-white dark:bg-gray-700 rounded-xl p-4 text-gray-900 dark:text-white text-base border border-gray-200 dark:border-gray-600"
             placeholder="Enter jersey number"
             placeholderTextColor="#6B7280"
             value={number}
@@ -209,15 +215,17 @@ export default function CreatePlayerScreen() {
 
         {/* Position */}
         <View className="mb-4">
-          <Text className="text-gray-400 text-sm mb-2">Position (optional)</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Position (optional)</Text>
           <TouchableOpacity
-            className="bg-gray-700 rounded-xl p-4 border border-gray-600 flex-row items-center justify-between"
+            className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600 flex-row items-center justify-between"
             onPress={() => setShowPositionModal(true)}
           >
-            <Text className={position ? "text-white" : "text-gray-400"}>
-              {position
-                ? POSITIONS.find((p) => p.value === position)?.label
-                : "Select position"}
+            <Text
+              className={
+                position ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400"
+              }
+            >
+              {position ? POSITIONS.find((p) => p.value === position)?.label : "Select position"}
             </Text>
             <Icon name="chevron-right" size={20} color="#9CA3AF" />
           </TouchableOpacity>
@@ -226,9 +234,9 @@ export default function CreatePlayerScreen() {
         {/* Height & Weight */}
         <View className="flex-row gap-3 mb-6">
           <View className="flex-1">
-            <Text className="text-gray-400 text-sm mb-2">Height (cm)</Text>
+            <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Height (cm)</Text>
             <TextInput
-              className="bg-gray-700 rounded-xl p-4 text-white text-base border border-gray-600"
+              className="bg-white dark:bg-gray-700 rounded-xl p-4 text-gray-900 dark:text-white text-base border border-gray-200 dark:border-gray-600"
               placeholder="e.g., 185"
               placeholderTextColor="#6B7280"
               value={heightCm}
@@ -238,9 +246,9 @@ export default function CreatePlayerScreen() {
             />
           </View>
           <View className="flex-1">
-            <Text className="text-gray-400 text-sm mb-2">Weight (kg)</Text>
+            <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Weight (kg)</Text>
             <TextInput
-              className="bg-gray-700 rounded-xl p-4 text-white text-base border border-gray-600"
+              className="bg-white dark:bg-gray-700 rounded-xl p-4 text-gray-900 dark:text-white text-base border border-gray-200 dark:border-gray-600"
               placeholder="e.g., 80"
               placeholderTextColor="#6B7280"
               value={weightKg}
@@ -256,7 +264,7 @@ export default function CreatePlayerScreen() {
           className={`rounded-xl p-4 items-center mb-8 ${
             name.trim() && number.trim() && selectedTeam && !isSubmitting
               ? "bg-primary-500"
-              : "bg-gray-600"
+              : "bg-gray-300 dark:bg-gray-600"
           }`}
           onPress={handleCreatePlayer}
           disabled={!name.trim() || !number.trim() || !selectedTeam || isSubmitting}
@@ -270,9 +278,9 @@ export default function CreatePlayerScreen() {
       {/* Team Selection Modal */}
       <Modal visible={showTeamModal} animationType="slide" transparent>
         <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-gray-800 rounded-t-3xl max-h-[70%]">
-            <View className="flex-row justify-between items-center p-4 border-b border-gray-700">
-              <Text className="text-white text-lg font-bold">Select Team</Text>
+          <View className="bg-white dark:bg-gray-800 rounded-t-3xl max-h-[70%]">
+            <View className="flex-row justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+              <Text className="text-gray-900 dark:text-white text-lg font-bold">Select Team</Text>
               <TouchableOpacity onPress={() => setShowTeamModal(false)}>
                 <Icon name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -282,7 +290,7 @@ export default function CreatePlayerScreen() {
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  className="p-4 border-b border-gray-700 flex-row items-center"
+                  className="p-4 border-b border-gray-200 dark:border-gray-700 flex-row items-center"
                   onPress={() => {
                     setSelectedTeam(item);
                     setShowTeamModal(false);
@@ -292,14 +300,18 @@ export default function CreatePlayerScreen() {
                     <Icon name="basketball" size={20} color="#FFFFFF" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-white font-medium text-base">{item.name}</Text>
-                    {item.city && <Text className="text-gray-400 text-sm">{item.city}</Text>}
+                    <Text className="text-gray-900 dark:text-white font-medium text-base">
+                      {item.name}
+                    </Text>
+                    {item.city && (
+                      <Text className="text-gray-600 dark:text-gray-400 text-sm">{item.city}</Text>
+                    )}
                   </View>
                 </TouchableOpacity>
               )}
               ListEmptyComponent={
                 <View className="p-8 items-center">
-                  <Text className="text-gray-400">No teams available</Text>
+                  <Text className="text-gray-600 dark:text-gray-400">No teams available</Text>
                 </View>
               }
             />
@@ -310,9 +322,11 @@ export default function CreatePlayerScreen() {
       {/* Position Selection Modal */}
       <Modal visible={showPositionModal} animationType="slide" transparent>
         <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-gray-800 rounded-t-3xl">
-            <View className="flex-row justify-between items-center p-4 border-b border-gray-700">
-              <Text className="text-white text-lg font-bold">Select Position</Text>
+          <View className="bg-white dark:bg-gray-800 rounded-t-3xl">
+            <View className="flex-row justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+              <Text className="text-gray-900 dark:text-white text-lg font-bold">
+                Select Position
+              </Text>
               <TouchableOpacity onPress={() => setShowPositionModal(false)}>
                 <Icon name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -320,8 +334,8 @@ export default function CreatePlayerScreen() {
             {POSITIONS.map((pos) => (
               <TouchableOpacity
                 key={pos.value}
-                className={`p-4 border-b border-gray-700 flex-row items-center justify-between ${
-                  position === pos.value ? "bg-gray-700" : ""
+                className={`p-4 border-b border-gray-200 dark:border-gray-700 flex-row items-center justify-between ${
+                  position === pos.value ? "bg-gray-100 dark:bg-gray-700" : ""
                 }`}
                 onPress={() => {
                   setPosition(pos.value);
@@ -329,20 +343,20 @@ export default function CreatePlayerScreen() {
                 }}
               >
                 <View>
-                  <Text className="text-white font-medium">{pos.label}</Text>
-                  <Text className="text-gray-400 text-sm">{pos.value}</Text>
+                  <Text className="text-gray-900 dark:text-white font-medium">{pos.label}</Text>
+                  <Text className="text-gray-600 dark:text-gray-400 text-sm">{pos.value}</Text>
                 </View>
                 {position === pos.value && <Icon name="stats" size={20} color="#F97316" />}
               </TouchableOpacity>
             ))}
             <TouchableOpacity
-              className="p-4 border-b border-gray-700"
+              className="p-4 border-b border-gray-200 dark:border-gray-700"
               onPress={() => {
                 setPosition(null);
                 setShowPositionModal(false);
               }}
             >
-              <Text className="text-gray-400">None / Not specified</Text>
+              <Text className="text-gray-600 dark:text-gray-400">None / Not specified</Text>
             </TouchableOpacity>
           </View>
         </View>

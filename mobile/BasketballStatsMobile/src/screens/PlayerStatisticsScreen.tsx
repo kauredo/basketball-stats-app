@@ -24,14 +24,18 @@ interface StatRowProps {
 function StatRow({ label, value, isHeader = false }: StatRowProps) {
   return (
     <View
-      className={`flex-row justify-between items-center px-4 py-3 border-b border-gray-600 ${
-        isHeader ? "bg-gray-600" : ""
+      className={`flex-row justify-between items-center px-4 py-3 border-b border-gray-200 dark:border-gray-600 ${
+        isHeader ? "bg-gray-200 dark:bg-gray-600" : ""
       }`}
     >
-      <Text className={`text-sm flex-1 ${isHeader ? "text-white font-medium" : "text-gray-300"}`}>
+      <Text
+        className={`text-sm flex-1 ${isHeader ? "text-gray-900 dark:text-white font-medium" : "text-gray-700 dark:text-gray-300"}`}
+      >
         {label}
       </Text>
-      <Text className={`text-sm font-medium ${isHeader ? "text-white font-bold" : "text-white"}`}>
+      <Text
+        className={`text-sm font-medium ${isHeader ? "text-gray-900 dark:text-white font-bold" : "text-gray-900 dark:text-white"}`}
+      >
         {value}
       </Text>
     </View>
@@ -58,9 +62,9 @@ function GameLogItem({ game }: GameLogItemProps) {
     game.result === "W" ? "text-green-400" : game.result === "L" ? "text-red-400" : "text-gray-500";
 
   return (
-    <View className="bg-gray-700 rounded-lg p-4 mb-2">
+    <View className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 mb-2">
       <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-white text-base font-medium">
+        <Text className="text-gray-900 dark:text-white text-base font-medium">
           {game.homeGame ? "vs" : "@"} {game.opponent}
         </Text>
         <View className="w-6 h-6 rounded-xl justify-center items-center">
@@ -69,26 +73,26 @@ function GameLogItem({ game }: GameLogItemProps) {
       </View>
       <View className="flex-row justify-around">
         <View className="items-center">
-          <Text className="text-white text-base font-bold">{game.points}</Text>
-          <Text className="text-gray-400 text-xs mt-0.5">PTS</Text>
+          <Text className="text-gray-900 dark:text-white text-base font-bold">{game.points}</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">PTS</Text>
         </View>
         <View className="items-center">
-          <Text className="text-white text-base font-bold">{game.rebounds}</Text>
-          <Text className="text-gray-400 text-xs mt-0.5">REB</Text>
+          <Text className="text-gray-900 dark:text-white text-base font-bold">{game.rebounds}</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">REB</Text>
         </View>
         <View className="items-center">
-          <Text className="text-white text-base font-bold">{game.assists}</Text>
-          <Text className="text-gray-400 text-xs mt-0.5">AST</Text>
+          <Text className="text-gray-900 dark:text-white text-base font-bold">{game.assists}</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">AST</Text>
         </View>
         <View className="items-center">
-          <Text className="text-white text-base font-bold">
+          <Text className="text-gray-900 dark:text-white text-base font-bold">
             {game.fieldGoalPercentage.toFixed(0)}%
           </Text>
-          <Text className="text-gray-400 text-xs mt-0.5">FG%</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">FG%</Text>
         </View>
         <View className="items-center">
-          <Text className="text-white text-base font-bold">{game.minutes}</Text>
-          <Text className="text-gray-400 text-xs mt-0.5">MIN</Text>
+          <Text className="text-gray-900 dark:text-white text-base font-bold">{game.minutes}</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">MIN</Text>
         </View>
       </View>
     </View>
@@ -119,19 +123,23 @@ export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreen
 
   if (playerStats === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-800">
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800">
         <ActivityIndicator size="large" color="#EA580C" />
-        <Text className="text-gray-400 mt-4 text-base">Loading player statistics...</Text>
+        <Text className="text-gray-600 dark:text-gray-400 mt-4 text-base">
+          Loading player statistics...
+        </Text>
       </View>
     );
   }
 
   if (!selectedLeague || !playerStats) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-800 p-8">
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-8">
         <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-white text-2xl font-bold mb-2 mt-4">No Data Available</Text>
-        <Text className="text-gray-400 text-base text-center">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-2 mt-4">
+          No Data Available
+        </Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base text-center">
           Player statistics could not be loaded.
         </Text>
       </View>
@@ -153,18 +161,18 @@ export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreen
   }> = [];
 
   return (
-    <View className="flex-1 bg-gray-800">
+    <View className="flex-1 bg-white dark:bg-gray-800">
       {/* Player Info Header */}
-      <View className="bg-gray-700 p-5 items-center">
-        <Text className="text-white text-2xl font-bold mb-1">{playerName}</Text>
+      <View className="bg-gray-100 dark:bg-gray-700 p-5 items-center">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">{playerName}</Text>
         <Text className="text-orange-500 text-base font-medium mb-0.5">
           {stats.team || "Unknown Team"}
         </Text>
-        <Text className="text-gray-400 text-sm">{stats.position || ""}</Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-sm">{stats.position || ""}</Text>
       </View>
 
       {/* Tab Navigation */}
-      <View className="flex-row bg-gray-700 border-b border-gray-600">
+      <View className="flex-row bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
         <TouchableOpacity
           className={`flex-1 py-4 items-center border-b-2 ${
             activeTab === "season" ? "border-orange-500" : "border-transparent"
@@ -173,7 +181,7 @@ export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreen
         >
           <Text
             className={`text-base font-medium ${
-              activeTab === "season" ? "text-orange-500" : "text-gray-400"
+              activeTab === "season" ? "text-orange-500" : "text-gray-600 dark:text-gray-400"
             }`}
           >
             Season Stats
@@ -187,7 +195,7 @@ export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreen
         >
           <Text
             className={`text-base font-medium ${
-              activeTab === "games" ? "text-orange-500" : "text-gray-400"
+              activeTab === "games" ? "text-orange-500" : "text-gray-600 dark:text-gray-400"
             }`}
           >
             Game Log
@@ -204,8 +212,10 @@ export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreen
           <View className="p-4">
             {/* Basic Stats */}
             <View className="mb-6">
-              <Text className="text-white text-lg font-bold mb-3">Basic Statistics</Text>
-              <View className="bg-gray-700 rounded-lg overflow-hidden">
+              <Text className="text-gray-900 dark:text-white text-lg font-bold mb-3">
+                Basic Statistics
+              </Text>
+              <View className="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
                 <StatRow label="Games Played" value={stats.gamesPlayed || 0} isHeader />
                 <StatRow label="Points per Game" value={stats.avgPoints?.toFixed(1) || "0.0"} />
                 <StatRow label="Rebounds per Game" value={stats.avgRebounds?.toFixed(1) || "0.0"} />
@@ -218,8 +228,10 @@ export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreen
 
             {/* Shooting Stats */}
             <View className="mb-6">
-              <Text className="text-white text-lg font-bold mb-3">Shooting Statistics</Text>
-              <View className="bg-gray-700 rounded-lg overflow-hidden">
+              <Text className="text-gray-900 dark:text-white text-lg font-bold mb-3">
+                Shooting Statistics
+              </Text>
+              <View className="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
                 <StatRow
                   label="Field Goal %"
                   value={`${stats.fieldGoalPercentage?.toFixed(1) || "0.0"}%`}
@@ -246,8 +258,10 @@ export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreen
 
             {/* Season Totals */}
             <View className="mb-6">
-              <Text className="text-white text-lg font-bold mb-3">Season Totals</Text>
-              <View className="bg-gray-700 rounded-lg overflow-hidden">
+              <Text className="text-gray-900 dark:text-white text-lg font-bold mb-3">
+                Season Totals
+              </Text>
+              <View className="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
                 <StatRow label="Total Points" value={stats.totalPoints || 0} isHeader />
                 <StatRow label="Total Rebounds" value={stats.totalRebounds || 0} />
                 <StatRow label="Total Assists" value={stats.totalAssists || 0} />
@@ -266,13 +280,15 @@ export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreen
         {activeTab === "games" && (
           <View className="p-4">
             <View className="mb-6">
-              <Text className="text-white text-lg font-bold mb-3">Recent Games</Text>
+              <Text className="text-gray-900 dark:text-white text-lg font-bold mb-3">
+                Recent Games
+              </Text>
               {recentGames.length > 0 ? (
                 recentGames.map((game: any, index: number) => (
                   <GameLogItem key={game.gameId || index} game={game} />
                 ))
               ) : (
-                <Text className="text-gray-400 text-base text-center italic mt-8">
+                <Text className="text-gray-600 dark:text-gray-400 text-base text-center italic mt-8">
                   No games played yet this season.
                 </Text>
               )}

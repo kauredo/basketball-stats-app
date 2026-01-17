@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import Icon from "./components/Icon";
 
 import Layout from "./components/Layout";
@@ -21,11 +22,11 @@ import ShotCharts from "./pages/ShotCharts";
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-8">
       <div className="text-center">
         <Icon name="basketball" size={64} className="mx-auto mb-4 text-orange-600" />
-        <h1 className="text-2xl font-bold text-white mb-2">Basketball Stats</h1>
-        <p className="text-gray-400">Loading...</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Basketball Stats</h1>
+        <p className="text-gray-600 dark:text-gray-400">Loading...</p>
       </div>
     </div>
   );
@@ -72,11 +73,13 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </Router>
+    </ThemeProvider>
   );
 }
 

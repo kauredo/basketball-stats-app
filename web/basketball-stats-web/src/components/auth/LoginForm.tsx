@@ -39,16 +39,16 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="mx-auto flex items-center justify-center">
             <LogoIcon variant="light" size="xl" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             Sign in to your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-400">
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             Or{" "}
             <button
               onClick={onSwitchToSignup}
@@ -68,7 +68,10 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Email address
               </label>
               <input
@@ -79,14 +82,17 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 relative block w-full px-3 py-2 border border-gray-600 bg-gray-800 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+                className="mt-1 relative block w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
                 placeholder="Enter your email"
                 disabled={isLoading}
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Password
               </label>
               <div className="mt-1 relative">
@@ -98,7 +104,7 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="relative block w-full px-3 py-2 pr-10 border border-gray-600 bg-gray-800 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                  className="relative block w-full px-3 py-2 pr-10 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                   placeholder="Enter your password"
                   disabled={isLoading}
                 />
@@ -110,7 +116,7 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
                   <Icon
                     name={showPassword ? "eye-off" : "eye"}
                     size={20}
-                    className="text-gray-400 hover:text-gray-300"
+                    className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                   />
                 </button>
               </div>

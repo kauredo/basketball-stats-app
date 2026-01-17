@@ -63,19 +63,13 @@ interface PlayerSelectModalProps {
   title: string;
 }
 
-function PlayerSelectModal({
-  visible,
-  onClose,
-  onSelect,
-  players,
-  title,
-}: PlayerSelectModalProps) {
+function PlayerSelectModal({ visible, onClose, onSelect, players, title }: PlayerSelectModalProps) {
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-gray-800 rounded-t-3xl max-h-[70%]">
-          <View className="flex-row justify-between items-center p-4 border-b border-gray-700">
-            <Text className="text-white text-lg font-bold">{title}</Text>
+        <View className="bg-white dark:bg-gray-800 rounded-t-3xl max-h-[70%]">
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+            <Text className="text-gray-900 dark:text-white text-lg font-bold">{title}</Text>
             <TouchableOpacity onPress={onClose}>
               <Icon name="close" size={24} color="#9CA3AF" />
             </TouchableOpacity>
@@ -85,7 +79,7 @@ function PlayerSelectModal({
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <TouchableOpacity
-                className="p-4 border-b border-gray-700 flex-row items-center"
+                className="p-4 border-b border-gray-200 dark:border-gray-700 flex-row items-center"
                 onPress={() => {
                   onSelect(item);
                   onClose();
@@ -95,8 +89,10 @@ function PlayerSelectModal({
                   <Text className="text-white font-bold">#{item.number}</Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white font-medium text-base">{item.name}</Text>
-                  <Text className="text-gray-400 text-sm">
+                  <Text className="text-gray-900 dark:text-white font-medium text-base">
+                    {item.name}
+                  </Text>
+                  <Text className="text-gray-600 dark:text-gray-400 text-sm">
                     {item.team} • {item.position || "N/A"}
                   </Text>
                 </View>
@@ -104,7 +100,7 @@ function PlayerSelectModal({
             )}
             ListEmptyComponent={
               <View className="p-8 items-center">
-                <Text className="text-gray-400">No players available</Text>
+                <Text className="text-gray-600 dark:text-gray-400">No players available</Text>
               </View>
             }
           />
@@ -141,7 +137,7 @@ function AnimatedShotMarker({ shot, index }: { shot: Shot; index: number }) {
       style={[
         animatedStyle,
         {
-          position: 'absolute',
+          position: "absolute",
           left: (svgX / 50) * COURT_WIDTH - 6,
           top: (svgY / 47) * COURT_HEIGHT - 6,
           width: 12,
@@ -154,15 +150,15 @@ function AnimatedShotMarker({ shot, index }: { shot: Shot; index: number }) {
           width: 12,
           height: 12,
           borderRadius: shot.made ? 6 : 0,
-          backgroundColor: shot.made ? markerColor : 'transparent',
+          backgroundColor: shot.made ? markerColor : "transparent",
           borderWidth: shot.made ? 1.5 : 0,
-          borderColor: '#fff',
-          justifyContent: 'center',
-          alignItems: 'center',
+          borderColor: "#fff",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
         {!shot.made && (
-          <Text style={{ color: markerColor, fontSize: 12, fontWeight: 'bold' }}>✕</Text>
+          <Text style={{ color: markerColor, fontSize: 12, fontWeight: "bold" }}>✕</Text>
         )}
       </View>
     </Animated.View>
@@ -194,21 +190,24 @@ function BasketballCourt({
   const savedTranslateY = useSharedValue(0);
 
   // Tap gesture for recording shots
-  const handleTap = useCallback((tapX: number, tapY: number) => {
-    if (!onCourtTap) return;
+  const handleTap = useCallback(
+    (tapX: number, tapY: number) => {
+      if (!onCourtTap) return;
 
-    // Convert tap coordinates to court coordinates
-    const courtX = (tapX / COURT_WIDTH) * 50 - 25;
-    const courtY = (tapY / COURT_HEIGHT) * 47;
+      // Convert tap coordinates to court coordinates
+      const courtX = (tapX / COURT_WIDTH) * 50 - 25;
+      const courtY = (tapY / COURT_HEIGHT) * 47;
 
-    // Get shot zone
-    const zone = getShotZone(courtX, courtY);
+      // Get shot zone
+      const zone = getShotZone(courtX, courtY);
 
-    // Haptic feedback
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      // Haptic feedback
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    onCourtTap(courtX, courtY, zone);
-  }, [onCourtTap]);
+      onCourtTap(courtX, courtY, zone);
+    },
+    [onCourtTap]
+  );
 
   const tapGesture = Gesture.Tap()
     .enabled(interactive)
@@ -237,7 +236,7 @@ function BasketballCourt({
   const panGesture = Gesture.Pan()
     .onUpdate((event) => {
       if (scale.value > 1) {
-        const maxTranslate = (scale.value - 1) * COURT_WIDTH / 2;
+        const maxTranslate = ((scale.value - 1) * COURT_WIDTH) / 2;
         translateX.value = Math.max(
           -maxTranslate,
           Math.min(maxTranslate, savedTranslateX.value + event.translationX)
@@ -269,9 +268,9 @@ function BasketballCourt({
 
   // Calculate heatmap colors for zones
   const getZoneColor = (zoneName: string): string => {
-    if (!showHeatmap || !zoneStats || !zoneStats[zoneName]) return 'transparent';
+    if (!showHeatmap || !zoneStats || !zoneStats[zoneName]) return "transparent";
     const stats = zoneStats[zoneName];
-    if (stats.attempted === 0) return 'transparent';
+    if (stats.attempted === 0) return "transparent";
     return getHeatmapColor(stats.percentage / 100, 0.4);
   };
 
@@ -286,47 +285,47 @@ function BasketballCourt({
           {showHeatmap && (
             <>
               {/* Paint zone */}
-              <Rect x="17" y="0" width="16" height="19" fill={getZoneColor('paint')} />
+              <Rect x="17" y="0" width="16" height="19" fill={getZoneColor("paint")} />
 
               {/* Left midrange */}
               <Path
                 d="M 3 0 L 3 14 L 17 14 L 17 19 L 33 19 L 33 14 L 17 14 L 17 0 Z"
-                fill={getZoneColor('midrangeLeft')}
+                fill={getZoneColor("midrangeLeft")}
               />
 
               {/* Right midrange */}
               <Path
                 d="M 47 0 L 47 14 L 33 14 L 33 19 L 17 19 L 17 14 L 33 14 L 33 0 Z"
-                fill={getZoneColor('midrangeRight')}
+                fill={getZoneColor("midrangeRight")}
               />
 
               {/* Left corner 3 */}
-              <Rect x="0" y="0" width="3" height="14" fill={getZoneColor('corner3Left')} />
+              <Rect x="0" y="0" width="3" height="14" fill={getZoneColor("corner3Left")} />
 
               {/* Right corner 3 */}
-              <Rect x="47" y="0" width="3" height="14" fill={getZoneColor('corner3Right')} />
+              <Rect x="47" y="0" width="3" height="14" fill={getZoneColor("corner3Right")} />
 
               {/* Wing and top 3 zones (simplified as a ring) */}
               <Path
                 d="M 3 14 A 23.75 23.75 0 0 0 47 14 L 47 47 L 3 47 Z"
-                fill={getZoneColor('top3')}
+                fill={getZoneColor("top3")}
               />
             </>
           )}
 
           {/* Court outline */}
+          <Rect x="0" y="0" width="50" height="47" fill="none" stroke="#4A5568" strokeWidth="0.3" />
+
+          {/* Paint/Key area */}
           <Rect
-            x="0"
+            x="17"
             y="0"
-            width="50"
-            height="47"
+            width="16"
+            height="19"
             fill="none"
             stroke="#4A5568"
             strokeWidth="0.3"
           />
-
-          {/* Paint/Key area */}
-          <Rect x="17" y="0" width="16" height="19" fill="none" stroke="#4A5568" strokeWidth="0.3" />
 
           {/* Free throw circle */}
           <Circle cx="25" cy="19" r="6" fill="none" stroke="#4A5568" strokeWidth="0.3" />
@@ -335,7 +334,14 @@ function BasketballCourt({
           <Path d="M 21 0 A 4 4 0 0 0 29 0" fill="none" stroke="#4A5568" strokeWidth="0.3" />
 
           {/* Basket */}
-          <Circle cx="25" cy="5.25" r="0.75" fill={COLORS.primary[500]} stroke={COLORS.primary[500]} strokeWidth="0.2" />
+          <Circle
+            cx="25"
+            cy="5.25"
+            r="0.75"
+            fill={COLORS.primary[500]}
+            stroke={COLORS.primary[500]}
+            strokeWidth="0.2"
+          />
 
           {/* Backboard */}
           <Line x1="22" y1="4" x2="28" y2="4" stroke="#4A5568" strokeWidth="0.3" />
@@ -361,8 +367,12 @@ function BasketballCourt({
                 const svgX = 25 + shot.x;
                 const svgY = shot.y;
                 const markerColor = shot.made
-                  ? (shot.shotType === '3pt' ? COLORS.shots.made3pt : COLORS.shots.made2pt)
-                  : (shot.shotType === '3pt' ? COLORS.shots.missed3pt : COLORS.shots.missed2pt);
+                  ? shot.shotType === "3pt"
+                    ? COLORS.shots.made3pt
+                    : COLORS.shots.made2pt
+                  : shot.shotType === "3pt"
+                    ? COLORS.shots.missed3pt
+                    : COLORS.shots.missed2pt;
 
                 return shot.made ? (
                   <Circle
@@ -428,9 +438,9 @@ interface StatBoxProps {
 
 function StatBox({ label, made, attempted, percentage, color }: StatBoxProps) {
   return (
-    <View className="flex-1 bg-gray-700 rounded-lg p-3 mx-1">
-      <Text className="text-gray-400 text-xs mb-1">{label}</Text>
-      <Text className="text-white text-lg font-bold">
+    <View className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mx-1">
+      <Text className="text-gray-600 dark:text-gray-400 text-xs mb-1">{label}</Text>
+      <Text className="text-gray-900 dark:text-white text-lg font-bold">
         {made}/{attempted}
       </Text>
       <Text style={{ color }} className="text-sm font-medium">
@@ -488,10 +498,12 @@ export default function ShotChartScreen() {
 
   if (!selectedLeague) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-800 p-8">
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-8">
         <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-white text-2xl font-bold mb-2 mt-4">No League Selected</Text>
-        <Text className="text-gray-400 text-base text-center">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-2 mt-4">
+          No League Selected
+        </Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base text-center">
           Please select a league to view shot charts.
         </Text>
       </View>
@@ -507,11 +519,13 @@ export default function ShotChartScreen() {
     }) || [];
 
   return (
-    <View className="flex-1 bg-gray-800">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-800">
       {/* Header */}
-      <View className="bg-gray-700 p-5 pt-15">
-        <Text className="text-white text-2xl font-bold mb-1">Shot Chart</Text>
-        <Text className="text-gray-400 text-base">Visualize shooting performance</Text>
+      <View className="bg-gray-100 dark:bg-gray-700 p-5 pt-15">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">Shot Chart</Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base">
+          Visualize shooting performance
+        </Text>
       </View>
 
       <ScrollView
@@ -521,7 +535,7 @@ export default function ShotChartScreen() {
         <View className="p-4">
           {/* Player Selector */}
           <TouchableOpacity
-            className="bg-gray-700 rounded-xl p-4 border border-gray-600 mb-4 flex-row items-center"
+            className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600 mb-4 flex-row items-center"
             onPress={() => setShowPlayerModal(true)}
           >
             {selectedPlayer ? (
@@ -530,8 +544,10 @@ export default function ShotChartScreen() {
                   <Text className="text-white font-bold">#{selectedPlayer.number}</Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white font-medium text-lg">{selectedPlayer.name}</Text>
-                  <Text className="text-gray-400">
+                  <Text className="text-gray-900 dark:text-white font-medium text-lg">
+                    {selectedPlayer.name}
+                  </Text>
+                  <Text className="text-gray-600 dark:text-gray-400">
                     {selectedPlayer.team} • {selectedPlayer.position || "N/A"}
                   </Text>
                 </View>
@@ -539,11 +555,11 @@ export default function ShotChartScreen() {
               </>
             ) : (
               <>
-                <View className="w-12 h-12 bg-gray-600 rounded-full justify-center items-center mr-3">
+                <View className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
                   <Icon name="user" size={24} color="#9CA3AF" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-gray-400 text-lg">Select a Player</Text>
+                  <Text className="text-gray-600 dark:text-gray-400 text-lg">Select a Player</Text>
                   <Text className="text-gray-500">Tap to choose</Text>
                 </View>
                 <Icon name="chevron-right" size={20} color="#9CA3AF" />
@@ -557,7 +573,7 @@ export default function ShotChartScreen() {
               <View className="flex-row mb-4">
                 <TouchableOpacity
                   className={`flex-1 py-3 rounded-lg mr-2 flex-row items-center justify-center ${
-                    showMade ? "bg-green-600" : "bg-gray-700"
+                    showMade ? "bg-green-600" : "bg-gray-100 dark:bg-gray-700"
                   }`}
                   onPress={() => {
                     setShowMade(!showMade);
@@ -567,13 +583,15 @@ export default function ShotChartScreen() {
                   <View
                     className={`w-3 h-3 rounded-full mr-2 ${showMade ? "bg-white" : "bg-green-600"}`}
                   />
-                  <Text className={`font-medium ${showMade ? "text-white" : "text-gray-400"}`}>
+                  <Text
+                    className={`font-medium ${showMade ? "text-white" : "text-gray-600 dark:text-gray-400"}`}
+                  >
                     Made ({shotChartData.stats.madeShots})
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   className={`flex-1 py-3 rounded-lg ml-2 flex-row items-center justify-center ${
-                    showMissed ? "bg-red-600" : "bg-gray-700"
+                    showMissed ? "bg-red-600" : "bg-gray-100 dark:bg-gray-700"
                   }`}
                   onPress={() => {
                     setShowMissed(!showMissed);
@@ -583,7 +601,9 @@ export default function ShotChartScreen() {
                   <View
                     className={`w-3 h-3 rounded-full mr-2 ${showMissed ? "bg-white" : "bg-red-600"}`}
                   />
-                  <Text className={`font-medium ${showMissed ? "text-white" : "text-gray-400"}`}>
+                  <Text
+                    className={`font-medium ${showMissed ? "text-white" : "text-gray-600 dark:text-gray-400"}`}
+                  >
                     Missed ({shotChartData.stats.totalShots - shotChartData.stats.madeShots})
                   </Text>
                 </TouchableOpacity>
@@ -592,25 +612,23 @@ export default function ShotChartScreen() {
               {/* Heatmap Toggle */}
               <TouchableOpacity
                 className={`py-3 rounded-lg mb-4 flex-row items-center justify-center ${
-                  showHeatmap ? "bg-primary-500" : "bg-gray-700"
+                  showHeatmap ? "bg-primary-500" : "bg-gray-100 dark:bg-gray-700"
                 }`}
                 onPress={() => {
                   setShowHeatmap(!showHeatmap);
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }}
               >
-                <Icon
-                  name="activity"
-                  size={18}
-                  color={showHeatmap ? "#FFFFFF" : "#9CA3AF"}
-                />
-                <Text className={`font-medium ml-2 ${showHeatmap ? "text-white" : "text-gray-400"}`}>
+                <Icon name="activity" size={18} color={showHeatmap ? "#FFFFFF" : "#9CA3AF"} />
+                <Text
+                  className={`font-medium ml-2 ${showHeatmap ? "text-white" : "text-gray-600 dark:text-gray-400"}`}
+                >
                   {showHeatmap ? "Hide Heatmap" : "Show Heatmap"}
                 </Text>
               </TouchableOpacity>
 
               {/* Shot Chart */}
-              <View className="bg-gray-700 rounded-xl p-4 mb-4 border border-gray-600 items-center">
+              <View className="bg-white dark:bg-gray-700 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-600 items-center">
                 <BasketballCourt
                   shots={filteredShots}
                   showHeatmap={showHeatmap}
@@ -622,14 +640,14 @@ export default function ShotChartScreen() {
                       className="w-3 h-3 rounded-full mr-2"
                       style={{ backgroundColor: COLORS.shots.made3pt }}
                     />
-                    <Text className="text-gray-400 text-sm">Made 3PT</Text>
+                    <Text className="text-gray-600 dark:text-gray-400 text-sm">Made 3PT</Text>
                   </View>
                   <View className="flex-row items-center mr-4 mb-2">
                     <View
                       className="w-3 h-3 rounded-full mr-2"
                       style={{ backgroundColor: COLORS.shots.made2pt }}
                     />
-                    <Text className="text-gray-400 text-sm">Made 2PT</Text>
+                    <Text className="text-gray-600 dark:text-gray-400 text-sm">Made 2PT</Text>
                   </View>
                   <View className="flex-row items-center mr-4 mb-2">
                     <Text
@@ -638,7 +656,7 @@ export default function ShotChartScreen() {
                     >
                       ✕
                     </Text>
-                    <Text className="text-gray-400 text-sm">Missed 3PT</Text>
+                    <Text className="text-gray-600 dark:text-gray-400 text-sm">Missed 3PT</Text>
                   </View>
                   <View className="flex-row items-center mb-2">
                     <Text
@@ -647,13 +665,13 @@ export default function ShotChartScreen() {
                     >
                       ✕
                     </Text>
-                    <Text className="text-gray-400 text-sm">Missed 2PT</Text>
+                    <Text className="text-gray-600 dark:text-gray-400 text-sm">Missed 2PT</Text>
                   </View>
                 </View>
 
                 {/* Heatmap legend */}
                 {showHeatmap && (
-                  <View className="flex-row items-center mt-3 pt-3 border-t border-gray-600">
+                  <View className="flex-row items-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
                     <Text className="text-gray-500 text-xs mr-2">Cold</Text>
                     <View className="flex-row flex-1 h-2 rounded overflow-hidden">
                       <View className="flex-1 bg-red-500" />
@@ -669,33 +687,37 @@ export default function ShotChartScreen() {
               </View>
 
               {/* Overall Stats */}
-              <View className="bg-gray-700 rounded-xl p-4 mb-4 border border-gray-600">
-                <Text className="text-white text-lg font-semibold mb-3">Overall Stats</Text>
+              <View className="bg-white dark:bg-gray-700 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-600">
+                <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-3">
+                  Overall Stats
+                </Text>
                 <View className="flex-row justify-between items-center">
                   <View className="items-center">
-                    <Text className="text-3xl font-bold text-white">
+                    <Text className="text-3xl font-bold text-gray-900 dark:text-white">
                       {shotChartData.stats.totalShots}
                     </Text>
-                    <Text className="text-gray-400 text-sm">Total Shots</Text>
+                    <Text className="text-gray-600 dark:text-gray-400 text-sm">Total Shots</Text>
                   </View>
                   <View className="items-center">
                     <Text className="text-3xl font-bold text-green-500">
                       {shotChartData.stats.madeShots}
                     </Text>
-                    <Text className="text-gray-400 text-sm">Made</Text>
+                    <Text className="text-gray-600 dark:text-gray-400 text-sm">Made</Text>
                   </View>
                   <View className="items-center">
                     <Text className="text-3xl font-bold text-primary-500">
                       {shotChartData.stats.overallPercentage}%
                     </Text>
-                    <Text className="text-gray-400 text-sm">FG%</Text>
+                    <Text className="text-gray-600 dark:text-gray-400 text-sm">FG%</Text>
                   </View>
                 </View>
               </View>
 
               {/* Shooting Breakdown */}
-              <View className="bg-gray-700 rounded-xl p-4 mb-4 border border-gray-600">
-                <Text className="text-white text-lg font-semibold mb-3">Shooting Breakdown</Text>
+              <View className="bg-white dark:bg-gray-700 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-600">
+                <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-3">
+                  Shooting Breakdown
+                </Text>
                 <View className="flex-row">
                   <StatBox
                     label="2-Pointers"
@@ -723,8 +745,10 @@ export default function ShotChartScreen() {
 
               {/* Zone Stats */}
               {shotChartData.zoneStats && (
-                <View className="bg-gray-700 rounded-xl p-4 border border-gray-600">
-                  <Text className="text-white text-lg font-semibold mb-3">Zone Statistics</Text>
+                <View className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+                  <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-3">
+                    Zone Statistics
+                  </Text>
                   {Object.entries(shotChartData.zoneStats).map(([zone, stats]) => {
                     if (stats.attempted === 0) return null;
                     const zoneName: Record<string, string> = {
@@ -745,10 +769,12 @@ export default function ShotChartScreen() {
                     return (
                       <View
                         key={zone}
-                        className="flex-row items-center justify-between py-3 border-b border-gray-600"
+                        className="flex-row items-center justify-between py-3 border-b border-gray-200 dark:border-gray-600"
                       >
-                        <Text className="text-white font-medium flex-1">{zoneName[zone] || zone}</Text>
-                        <Text className="text-gray-400 text-sm w-20 text-center">
+                        <Text className="text-gray-900 dark:text-white font-medium flex-1">
+                          {zoneName[zone] || zone}
+                        </Text>
+                        <Text className="text-gray-600 dark:text-gray-400 text-sm w-20 text-center">
                           {stats.made}/{stats.attempted}
                         </Text>
                         <Text className="text-primary-500 font-bold w-16 text-right">
@@ -765,13 +791,15 @@ export default function ShotChartScreen() {
               <View className="animate-spin">
                 <Icon name="basketball" size={32} color="#F97316" />
               </View>
-              <Text className="text-gray-400 mt-4">Loading shot chart...</Text>
+              <Text className="text-gray-600 dark:text-gray-400 mt-4">Loading shot chart...</Text>
             </View>
           ) : (
-            <View className="bg-gray-700 rounded-xl p-8 items-center border border-gray-600">
+            <View className="bg-white dark:bg-gray-700 rounded-xl p-8 items-center border border-gray-200 dark:border-gray-600">
               <Icon name="stats" size={48} color="#6B7280" />
-              <Text className="text-white text-lg font-medium mt-4 mb-2">Select a Player</Text>
-              <Text className="text-gray-400 text-center">
+              <Text className="text-gray-900 dark:text-white text-lg font-medium mt-4 mb-2">
+                Select a Player
+              </Text>
+              <Text className="text-gray-600 dark:text-gray-400 text-center">
                 Choose a player above to view their shot chart and shooting statistics.
               </Text>
             </View>
@@ -795,20 +823,20 @@ const styles = StyleSheet.create({
   courtContainer: {
     width: COURT_WIDTH,
     height: COURT_HEIGHT,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   interactiveHint: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 10,
     left: 0,
     right: 0,
-    alignItems: 'center',
+    alignItems: "center",
   },
   interactiveHintText: {
-    color: '#9CA3AF',
+    color: "#9CA3AF",
     fontSize: 10,
-    fontWeight: '500',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    fontWeight: "500",
+    backgroundColor: "rgba(0,0,0,0.5)",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,

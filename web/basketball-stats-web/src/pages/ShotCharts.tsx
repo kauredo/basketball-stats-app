@@ -4,12 +4,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import ShotChart from "../components/ShotChart";
-import {
-  ChartBarIcon,
-  UserIcon,
-  UsersIcon,
-  FireIcon,
-} from "@heroicons/react/24/outline";
+import { ChartBarIcon, UserIcon, UsersIcon, FireIcon } from "@heroicons/react/24/outline";
 
 interface PlayerOption {
   id: Id<"players">;
@@ -82,9 +77,9 @@ const ShotCharts: React.FC = () => {
     value,
     subValue,
   }) => (
-    <div className="bg-gray-700 rounded-lg p-4">
-      <div className="text-sm text-gray-400">{label}</div>
-      <div className="text-2xl font-bold text-white">{value}</div>
+    <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
+      <div className="text-sm text-gray-600 dark:text-gray-400">{label}</div>
+      <div className="text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
       {subValue && <div className="text-xs text-gray-500">{subValue}</div>}
     </div>
   );
@@ -93,21 +88,23 @@ const ShotCharts: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Shot Charts</h1>
-        <p className="text-gray-400">Visualize shooting patterns and hot zones</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Shot Charts</h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          Visualize shooting patterns and hot zones
+        </p>
       </div>
 
       {/* Controls */}
-      <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex flex-wrap items-center gap-4">
           {/* View Mode Toggle */}
-          <div className="flex bg-gray-700 rounded-lg p-1">
+          <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             <button
               onClick={() => setViewMode("player")}
               className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
                 viewMode === "player"
                   ? "bg-orange-600 text-white"
-                  : "text-gray-400 hover:text-white"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               <UserIcon className="w-4 h-4" />
@@ -118,7 +115,7 @@ const ShotCharts: React.FC = () => {
               className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
                 viewMode === "team"
                   ? "bg-orange-600 text-white"
-                  : "text-gray-400 hover:text-white"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               <UsersIcon className="w-4 h-4" />
@@ -130,8 +127,8 @@ const ShotCharts: React.FC = () => {
           {viewMode === "player" ? (
             <select
               value={selectedPlayerId || ""}
-              onChange={(e) => setSelectedPlayerId(e.target.value as Id<"players"> || null)}
-              className="flex-1 max-w-xs px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              onChange={(e) => setSelectedPlayerId((e.target.value as Id<"players">) || null)}
+              className="flex-1 max-w-xs px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="">Select a player</option>
               {playerOptions.map((player) => (
@@ -143,8 +140,8 @@ const ShotCharts: React.FC = () => {
           ) : (
             <select
               value={selectedTeamId || ""}
-              onChange={(e) => setSelectedTeamId(e.target.value as Id<"teams"> || null)}
-              className="flex-1 max-w-xs px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              onChange={(e) => setSelectedTeamId((e.target.value as Id<"teams">) || null)}
+              className="flex-1 max-w-xs px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="">Select a team</option>
               {teamOptions.map((team) => (
@@ -161,7 +158,7 @@ const ShotCharts: React.FC = () => {
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
               showHeatmap
                 ? "bg-red-600 text-white"
-                : "bg-gray-700 text-gray-400 hover:text-white"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             <FireIcon className="w-4 h-4" />
@@ -175,7 +172,7 @@ const ShotCharts: React.FC = () => {
         currentData ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Shot Chart */}
-            <div className="lg:col-span-2 bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
               <ShotChart
                 shots={shots}
                 showHeatmap={showHeatmap}
@@ -192,8 +189,8 @@ const ShotCharts: React.FC = () => {
             {/* Stats Panel */}
             <div className="space-y-4">
               {/* Overall Stats */}
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                   <ChartBarIcon className="w-5 h-5 mr-2 text-orange-500" />
                   Shooting Stats
                 </h3>
@@ -205,10 +202,7 @@ const ShotCharts: React.FC = () => {
                       value={playerShotData.stats.totalShots}
                       subValue={`${playerShotData.stats.madeShots} made`}
                     />
-                    <StatBox
-                      label="Overall"
-                      value={`${playerShotData.stats.overallPercentage}%`}
-                    />
+                    <StatBox label="Overall" value={`${playerShotData.stats.overallPercentage}%`} />
                     <StatBox
                       label="2PT FG"
                       value={`${playerShotData.stats.twoPoint.percentage}%`}
@@ -247,23 +241,26 @@ const ShotCharts: React.FC = () => {
 
               {/* Zone Stats */}
               {currentData?.zoneStats && (
-                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-4">Zone Breakdown</h3>
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Zone Breakdown
+                  </h3>
                   <div className="space-y-3">
                     {Object.entries(currentData.zoneStats).map(([zone, stats]) => {
                       if (stats.attempted === 0) return null;
-                      const zoneName = {
-                        paint: "Paint",
-                        midrange: "Mid-Range",
-                        corner3: "Corner 3",
-                        wing3: "Wing 3",
-                        top3: "Top of Key 3",
-                        ft: "Free Throws",
-                      }[zone] || zone;
+                      const zoneName =
+                        {
+                          paint: "Paint",
+                          midrange: "Mid-Range",
+                          corner3: "Corner 3",
+                          wing3: "Wing 3",
+                          top3: "Top of Key 3",
+                          ft: "Free Throws",
+                        }[zone] || zone;
 
                       return (
                         <div key={zone} className="flex items-center justify-between">
-                          <span className="text-gray-400">{zoneName}</span>
+                          <span className="text-gray-600 dark:text-gray-400">{zoneName}</span>
                           <div className="flex items-center space-x-3">
                             <span className="text-sm text-gray-500">
                               {stats.made}/{stats.attempted}
@@ -289,8 +286,8 @@ const ShotCharts: React.FC = () => {
 
               {/* No shots message */}
               {shots.length === 0 && (
-                <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center">
-                  <p className="text-gray-400">No shot data available</p>
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 text-center">
+                  <p className="text-gray-600 dark:text-gray-400">No shot data available</p>
                   <p className="text-sm text-gray-500 mt-2">
                     Shot data is recorded during live games
                   </p>
@@ -304,10 +301,12 @@ const ShotCharts: React.FC = () => {
           </div>
         )
       ) : (
-        <div className="bg-gray-800 rounded-lg p-12 border border-gray-700 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-12 border border-gray-200 dark:border-gray-700 text-center">
           <ChartBarIcon className="mx-auto h-12 w-12 text-gray-500 mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">Select a {viewMode}</h3>
-          <p className="text-gray-400">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Select a {viewMode}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
             Choose a {viewMode} from the dropdown above to view their shot chart and shooting
             statistics.
           </p>
@@ -315,8 +314,10 @@ const ShotCharts: React.FC = () => {
       )}
 
       {/* Info Card */}
-      <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-        <h4 className="text-sm font-medium text-gray-400 mb-2">About Shot Charts</h4>
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+          About Shot Charts
+        </h4>
         <p className="text-sm text-gray-500">
           Shot charts visualize where shots are taken on the court. Green circles indicate made
           shots, red/yellow X marks indicate misses. Enable the heat map to see shooting efficiency

@@ -25,7 +25,7 @@ const GameAnalysis: React.FC = () => {
   if (!gameData?.game) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-white">Game not found</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Game not found</h3>
       </div>
     );
   }
@@ -34,9 +34,9 @@ const GameAnalysis: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-        <h1 className="text-2xl font-bold text-white mb-4">Game Analysis</h1>
-        <p className="text-gray-400">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Game Analysis</h1>
+        <p className="text-gray-600 dark:text-gray-400">
           Post-game analysis for {game.awayTeam?.name} @ {game.homeTeam?.name}
         </p>
         <p className="text-orange-400 mt-2">

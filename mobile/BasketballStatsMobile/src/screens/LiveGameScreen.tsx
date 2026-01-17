@@ -73,18 +73,13 @@ interface PlayerSelectModalProps {
   title: string;
 }
 
-function PlayerSelectModal({
-  visible,
-  onClose,
-  onSelect,
-  players,
-}: PlayerSelectModalProps) {
+function PlayerSelectModal({ visible, onClose, onSelect, players }: PlayerSelectModalProps) {
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-gray-800 rounded-t-3xl max-h-[70%]">
-          <View className="flex-row justify-between items-center p-4 border-b border-gray-700">
-            <Text className="text-white text-lg font-bold">Select Player</Text>
+        <View className="bg-white dark:bg-gray-800 rounded-t-3xl max-h-[70%]">
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+            <Text className="text-gray-900 dark:text-white text-lg font-bold">Select Player</Text>
             <TouchableOpacity onPress={onClose}>
               <Icon name="close" size={24} color="#9CA3AF" />
             </TouchableOpacity>
@@ -93,22 +88,28 @@ function PlayerSelectModal({
             data={players.filter((p) => p.isOnCourt)}
             keyExtractor={(item) => item.id}
             ListHeaderComponent={
-              <Text className="text-gray-400 text-xs px-4 py-2 bg-gray-900">ON COURT</Text>
+              <Text className="text-gray-600 dark:text-gray-400 text-xs px-4 py-2 bg-gray-100 dark:bg-gray-900">
+                ON COURT
+              </Text>
             }
             renderItem={({ item }) => (
               <TouchableOpacity
-                className="p-4 border-b border-gray-700 flex-row items-center"
+                className="p-4 border-b border-gray-200 dark:border-gray-700 flex-row items-center"
                 onPress={() => {
                   onSelect(item);
                   onClose();
                 }}
               >
                 <View className="w-12 h-12 bg-primary-500 rounded-full justify-center items-center mr-3">
-                  <Text className="text-white font-bold text-lg">#{item.player?.number}</Text>
+                  <Text className="text-gray-900 dark:text-white font-bold text-lg">
+                    #{item.player?.number}
+                  </Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white font-medium text-base">{item.player?.name}</Text>
-                  <Text className="text-gray-400 text-sm">
+                  <Text className="text-gray-900 dark:text-white font-medium text-base">
+                    {item.player?.name}
+                  </Text>
+                  <Text className="text-gray-600 dark:text-gray-400 text-sm">
                     PTS: {item.points} • REB: {item.rebounds} • AST: {item.assists}
                   </Text>
                 </View>
@@ -134,7 +135,14 @@ interface StatButtonProps {
   size?: "normal" | "large";
 }
 
-function StatButton({ label, shortLabel, color, onPress, disabled, size = "normal" }: StatButtonProps) {
+function StatButton({
+  label,
+  shortLabel,
+  color,
+  onPress,
+  disabled,
+  size = "normal",
+}: StatButtonProps) {
   const scale = useSharedValue(1);
 
   const handlePressIn = () => {
@@ -186,21 +194,24 @@ interface MiniCourtProps {
 }
 
 function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
-  const handleTap = useCallback((tapX: number, tapY: number) => {
-    // Convert tap coordinates to court coordinates
-    const courtX = (tapX / MINI_COURT_WIDTH) * 50 - 25;
-    const courtY = (tapY / MINI_COURT_HEIGHT) * 28; // Shorter view
+  const handleTap = useCallback(
+    (tapX: number, tapY: number) => {
+      // Convert tap coordinates to court coordinates
+      const courtX = (tapX / MINI_COURT_WIDTH) * 50 - 25;
+      const courtY = (tapY / MINI_COURT_HEIGHT) * 28; // Shorter view
 
-    // Get shot zone
-    const zone = getShotZone(courtX, courtY);
+      // Get shot zone
+      const zone = getShotZone(courtX, courtY);
 
-    // Determine if it's a 3-pointer based on distance
-    const distanceFromBasket = Math.sqrt(courtX * courtX + (courtY - 5.25) ** 2);
-    const is3pt = distanceFromBasket > 23.75 || (Math.abs(courtX) > 22 && courtY < 14);
+      // Determine if it's a 3-pointer based on distance
+      const distanceFromBasket = Math.sqrt(courtX * courtX + (courtY - 5.25) ** 2);
+      const is3pt = distanceFromBasket > 23.75 || (Math.abs(courtX) > 22 && courtY < 14);
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    onCourtTap(courtX, courtY, zone, is3pt);
-  }, [onCourtTap]);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      onCourtTap(courtX, courtY, zone, is3pt);
+    },
+    [onCourtTap]
+  );
 
   const tapGesture = Gesture.Tap()
     .enabled(!disabled)
@@ -219,7 +230,15 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
           <Rect x="0" y="0" width="50" height="28" fill="none" stroke="#4A5568" strokeWidth="0.3" />
 
           {/* Paint/Key area */}
-          <Rect x="17" y="0" width="16" height="15" fill="none" stroke="#4A5568" strokeWidth="0.3" />
+          <Rect
+            x="17"
+            y="0"
+            width="16"
+            height="15"
+            fill="none"
+            stroke="#4A5568"
+            strokeWidth="0.3"
+          />
 
           {/* Free throw circle */}
           <Circle cx="25" cy="15" r="4" fill="none" stroke="#4A5568" strokeWidth="0.3" />
@@ -295,11 +314,13 @@ function ShotTypeModal({
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <View className="flex-1 bg-black/70 justify-center items-center px-8">
-        <View className="bg-gray-800 rounded-2xl p-6 w-full">
-          <Text className="text-white text-xl font-bold text-center mb-2">
+        <View className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full">
+          <Text className="text-gray-900 dark:text-white text-xl font-bold text-center mb-2">
             {shotType === "3pt" ? "3-Point Shot" : "2-Point Shot"}
           </Text>
-          <Text className="text-gray-400 text-center mb-6">Did the shot go in?</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-center mb-6">
+            Did the shot go in?
+          </Text>
 
           <View className="flex-row space-x-4">
             <TouchableOpacity
@@ -328,7 +349,7 @@ function ShotTypeModal({
           </View>
 
           <TouchableOpacity className="mt-4 py-3" onPress={onClose}>
-            <Text className="text-gray-400 text-center">Cancel</Text>
+            <Text className="text-gray-600 dark:text-gray-400 text-center">Cancel</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -356,7 +377,9 @@ export default function LiveGameScreen() {
     zone: string;
     is3pt: boolean;
   } | null>(null);
-  const [recentShots, setRecentShots] = useState<Array<{ x: number; y: number; made: boolean }>>([]);
+  const [recentShots, setRecentShots] = useState<Array<{ x: number; y: number; made: boolean }>>(
+    []
+  );
 
   // Real-time game data from Convex
   const gameData = useQuery(api.games.get, token && gameId ? { token, gameId } : "skip");
@@ -466,15 +489,18 @@ export default function LiveGameScreen() {
     if (!pendingShot || !selectedPlayer) return;
 
     const statType = pendingShot.is3pt ? "shot3" : "shot2";
-    handleRecordStat(selectedPlayer.playerId, statType, made, { x: pendingShot.x, y: pendingShot.y });
+    handleRecordStat(selectedPlayer.playerId, statType, made, {
+      x: pendingShot.x,
+      y: pendingShot.y,
+    });
     setPendingShot(null);
   };
 
   if (gameData === undefined || liveStats === undefined) {
     return (
-      <SafeAreaView className="flex-1 bg-dark-950">
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-dark-950">
         <View className="flex-1 justify-center items-center">
-          <Text className="text-white text-base">Loading game...</Text>
+          <Text className="text-gray-900 dark:text-white text-base">Loading game...</Text>
         </View>
       </SafeAreaView>
     );
@@ -482,11 +508,15 @@ export default function LiveGameScreen() {
 
   if (!game) {
     return (
-      <SafeAreaView className="flex-1 bg-dark-950">
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-dark-950">
         <View className="flex-1 justify-center items-center">
           <Icon name="basketball" size={48} color="#9CA3AF" />
-          <Text className="text-white text-lg font-semibold mt-4 mb-2">Game not found</Text>
-          <Text className="text-gray-400 text-center">The requested game could not be found.</Text>
+          <Text className="text-gray-900 dark:text-white text-lg font-semibold mt-4 mb-2">
+            Game not found
+          </Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-center">
+            The requested game could not be found.
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -501,18 +531,20 @@ export default function LiveGameScreen() {
   const canRecordStats = isGameActive;
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-950">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-dark-950">
       <StatusBar style="light" />
 
       {/* Compact Scoreboard Header */}
-      <View className="bg-gray-800 mx-4 mt-2 rounded-2xl p-4 border border-gray-700">
+      <View className="bg-white dark:bg-gray-800 mx-4 mt-2 rounded-2xl p-4 border border-gray-200 dark:border-gray-700">
         <View className="flex-row items-center justify-between">
           {/* Away Team */}
           <View className="flex-1 items-center">
-            <Text className="text-gray-400 text-xs mb-1" numberOfLines={1}>
+            <Text className="text-gray-600 dark:text-gray-400 text-xs mb-1" numberOfLines={1}>
               {game.awayTeam?.name || "Away"}
             </Text>
-            <Text className="text-white text-4xl font-bold">{game.awayScore}</Text>
+            <Text className="text-gray-900 dark:text-white text-4xl font-bold">
+              {game.awayScore}
+            </Text>
           </View>
 
           {/* Game Clock */}
@@ -528,14 +560,20 @@ export default function LiveGameScreen() {
                       : "bg-blue-600"
               }`}
             >
-              <Text className="text-white text-xs font-bold">
-                {isGameActive ? "LIVE" : isGamePaused ? "PAUSED" : game.status === "completed" ? "FINAL" : "SCHEDULED"}
+              <Text className="text-gray-900 dark:text-white text-xs font-bold">
+                {isGameActive
+                  ? "LIVE"
+                  : isGamePaused
+                    ? "PAUSED"
+                    : game.status === "completed"
+                      ? "FINAL"
+                      : "SCHEDULED"}
               </Text>
             </View>
-            <Text className="text-white text-2xl font-mono font-bold">
+            <Text className="text-gray-900 dark:text-white text-2xl font-mono font-bold">
               {formatTime(game.timeRemainingSeconds)}
             </Text>
-            <Text className="text-gray-400 text-xs">Q{game.currentQuarter}</Text>
+            <Text className="text-gray-600 dark:text-gray-400 text-xs">Q{game.currentQuarter}</Text>
 
             {/* Game Controls */}
             <View className="flex-row mt-2 space-x-2">
@@ -576,10 +614,12 @@ export default function LiveGameScreen() {
 
           {/* Home Team */}
           <View className="flex-1 items-center">
-            <Text className="text-gray-400 text-xs mb-1" numberOfLines={1}>
+            <Text className="text-gray-600 dark:text-gray-400 text-xs mb-1" numberOfLines={1}>
               {game.homeTeam?.name || "Home"}
             </Text>
-            <Text className="text-white text-4xl font-bold">{game.homeScore}</Text>
+            <Text className="text-gray-900 dark:text-white text-4xl font-bold">
+              {game.homeScore}
+            </Text>
           </View>
         </View>
       </View>
@@ -594,7 +634,7 @@ export default function LiveGameScreen() {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
             className={`flex-1 py-3 rounded-xl mx-1 ${
-              activeTab === tab.key ? "bg-primary-500" : "bg-gray-800"
+              activeTab === tab.key ? "bg-primary-500" : "bg-white dark:bg-gray-800"
             }`}
           >
             <View className="items-center">
@@ -605,7 +645,7 @@ export default function LiveGameScreen() {
               />
               <Text
                 className={`text-xs mt-1 font-medium ${
-                  activeTab === tab.key ? "text-white" : "text-gray-400"
+                  activeTab === tab.key ? "text-white" : "text-gray-600 dark:text-gray-400"
                 }`}
               >
                 {tab.label}
@@ -621,32 +661,38 @@ export default function LiveGameScreen() {
           <View className="pb-6">
             {/* Selected Player Indicator */}
             <TouchableOpacity
-              className="bg-gray-800 rounded-xl p-3 mb-4 flex-row items-center border border-gray-700"
+              className="bg-white dark:bg-gray-800 rounded-xl p-3 mb-4 flex-row items-center border border-gray-200 dark:border-gray-700"
               onPress={() => setShowPlayerModal(true)}
             >
               {selectedPlayer ? (
                 <>
                   <View className="w-10 h-10 bg-primary-500 rounded-full justify-center items-center mr-3">
-                    <Text className="text-white font-bold">#{selectedPlayer.player?.number}</Text>
+                    <Text className="text-gray-900 dark:text-white font-bold">
+                      #{selectedPlayer.player?.number}
+                    </Text>
                   </View>
                   <View className="flex-1">
-                    <Text className="text-white font-semibold">{selectedPlayer.player?.name}</Text>
-                    <Text className="text-gray-400 text-xs">
+                    <Text className="text-gray-900 dark:text-white font-semibold">
+                      {selectedPlayer.player?.name}
+                    </Text>
+                    <Text className="text-gray-600 dark:text-gray-400 text-xs">
                       {selectedPlayer.isHomeTeam ? game.homeTeam?.name : game.awayTeam?.name}
                     </Text>
                   </View>
-                  <View className="bg-gray-700 px-3 py-1 rounded">
-                    <Text className="text-gray-300 text-xs">Change</Text>
+                  <View className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded">
+                    <Text className="text-gray-700 dark:text-gray-300 text-xs">Change</Text>
                   </View>
                 </>
               ) : (
                 <>
-                  <View className="w-10 h-10 bg-gray-700 rounded-full justify-center items-center mr-3">
+                  <View className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full justify-center items-center mr-3">
                     <Icon name="user" size={20} color="#9CA3AF" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-gray-400">Select Player</Text>
-                    <Text className="text-gray-500 text-xs">Tap to choose who to record stats for</Text>
+                    <Text className="text-gray-600 dark:text-gray-400">Select Player</Text>
+                    <Text className="text-gray-500 text-xs">
+                      Tap to choose who to record stats for
+                    </Text>
                   </View>
                   <Icon name="chevron-right" size={16} color="#9CA3AF" />
                 </>
@@ -654,8 +700,10 @@ export default function LiveGameScreen() {
             </TouchableOpacity>
 
             {/* Mini Court for Shot Recording */}
-            <View className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
-              <Text className="text-white font-semibold mb-3">Shot Location</Text>
+            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
+              <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                Shot Location
+              </Text>
               <MiniCourt
                 onCourtTap={handleCourtTap}
                 disabled={!canRecordStats}
@@ -664,8 +712,8 @@ export default function LiveGameScreen() {
             </View>
 
             {/* Stat Buttons Grid */}
-            <View className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-              <Text className="text-white font-semibold mb-3">Quick Stats</Text>
+            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              <Text className="text-gray-900 dark:text-white font-semibold mb-3">Quick Stats</Text>
 
               {/* Scoring Row */}
               <View className="mb-2">
@@ -805,8 +853,10 @@ export default function LiveGameScreen() {
         {activeTab === "stats" && (
           <View className="pb-6">
             {/* Away Team Stats */}
-            <View className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
-              <Text className="text-white font-semibold mb-3">{game.awayTeam?.name || "Away"}</Text>
+            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
+              <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                {game.awayTeam?.name || "Away"}
+              </Text>
               {awayPlayerStats.map((playerStat: PlayerStat) => {
                 const player = playerStat.player;
                 if (!player) return null;
@@ -814,27 +864,33 @@ export default function LiveGameScreen() {
                 return (
                   <View
                     key={playerStat.id}
-                    className={`flex-row items-center py-3 border-b border-gray-700 ${
+                    className={`flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700 ${
                       !playerStat.isOnCourt ? "opacity-50" : ""
                     }`}
                   >
                     <View className="w-8 mr-2">
-                      <Text className="text-gray-400 text-xs">#{player.number}</Text>
+                      <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                        #{player.number}
+                      </Text>
                     </View>
                     <View className="flex-1">
-                      <Text className="text-white font-medium">{player.name}</Text>
+                      <Text className="text-gray-900 dark:text-white font-medium">
+                        {player.name}
+                      </Text>
                     </View>
                     <View className="flex-row">
                       <View className="w-12 items-center">
-                        <Text className="text-white font-bold">{playerStat.points}</Text>
+                        <Text className="text-gray-900 dark:text-white font-bold">
+                          {playerStat.points}
+                        </Text>
                         <Text className="text-gray-500 text-xs">PTS</Text>
                       </View>
                       <View className="w-10 items-center">
-                        <Text className="text-white">{playerStat.rebounds}</Text>
+                        <Text className="text-gray-900 dark:text-white">{playerStat.rebounds}</Text>
                         <Text className="text-gray-500 text-xs">REB</Text>
                       </View>
                       <View className="w-10 items-center">
-                        <Text className="text-white">{playerStat.assists}</Text>
+                        <Text className="text-gray-900 dark:text-white">{playerStat.assists}</Text>
                         <Text className="text-gray-500 text-xs">AST</Text>
                       </View>
                     </View>
@@ -844,8 +900,10 @@ export default function LiveGameScreen() {
             </View>
 
             {/* Home Team Stats */}
-            <View className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-              <Text className="text-white font-semibold mb-3">{game.homeTeam?.name || "Home"}</Text>
+            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                {game.homeTeam?.name || "Home"}
+              </Text>
               {homePlayerStats.map((playerStat: PlayerStat) => {
                 const player = playerStat.player;
                 if (!player) return null;
@@ -853,27 +911,33 @@ export default function LiveGameScreen() {
                 return (
                   <View
                     key={playerStat.id}
-                    className={`flex-row items-center py-3 border-b border-gray-700 ${
+                    className={`flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700 ${
                       !playerStat.isOnCourt ? "opacity-50" : ""
                     }`}
                   >
                     <View className="w-8 mr-2">
-                      <Text className="text-gray-400 text-xs">#{player.number}</Text>
+                      <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                        #{player.number}
+                      </Text>
                     </View>
                     <View className="flex-1">
-                      <Text className="text-white font-medium">{player.name}</Text>
+                      <Text className="text-gray-900 dark:text-white font-medium">
+                        {player.name}
+                      </Text>
                     </View>
                     <View className="flex-row">
                       <View className="w-12 items-center">
-                        <Text className="text-white font-bold">{playerStat.points}</Text>
+                        <Text className="text-gray-900 dark:text-white font-bold">
+                          {playerStat.points}
+                        </Text>
                         <Text className="text-gray-500 text-xs">PTS</Text>
                       </View>
                       <View className="w-10 items-center">
-                        <Text className="text-white">{playerStat.rebounds}</Text>
+                        <Text className="text-gray-900 dark:text-white">{playerStat.rebounds}</Text>
                         <Text className="text-gray-500 text-xs">REB</Text>
                       </View>
                       <View className="w-10 items-center">
-                        <Text className="text-white">{playerStat.assists}</Text>
+                        <Text className="text-gray-900 dark:text-white">{playerStat.assists}</Text>
                         <Text className="text-gray-500 text-xs">AST</Text>
                       </View>
                     </View>
@@ -887,8 +951,10 @@ export default function LiveGameScreen() {
         {activeTab === "subs" && (
           <View className="pb-6">
             {/* Away Team Subs */}
-            <View className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
-              <Text className="text-white font-semibold mb-3">{game.awayTeam?.name || "Away"}</Text>
+            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
+              <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                {game.awayTeam?.name || "Away"}
+              </Text>
               {awayPlayerStats.map((playerStat: PlayerStat) => {
                 const player = playerStat.player;
                 if (!player) return null;
@@ -897,16 +963,24 @@ export default function LiveGameScreen() {
                   <TouchableOpacity
                     key={playerStat.id}
                     className={`flex-row items-center py-3 px-3 mb-2 rounded-lg ${
-                      playerStat.isOnCourt ? "bg-green-900/30 border border-green-700" : "bg-gray-700"
+                      playerStat.isOnCourt
+                        ? "bg-green-900/30 border border-green-700"
+                        : "bg-gray-100 dark:bg-gray-700"
                     }`}
                     onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
                   >
-                    <View className="w-10 h-10 bg-gray-600 rounded-full justify-center items-center mr-3">
-                      <Text className="text-white font-bold">#{player.number}</Text>
+                    <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
+                      <Text className="text-gray-900 dark:text-white font-bold">
+                        #{player.number}
+                      </Text>
                     </View>
                     <View className="flex-1">
-                      <Text className="text-white font-medium">{player.name}</Text>
-                      <Text className="text-gray-400 text-xs">{player.position || "N/A"}</Text>
+                      <Text className="text-gray-900 dark:text-white font-medium">
+                        {player.name}
+                      </Text>
+                      <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                        {player.position || "N/A"}
+                      </Text>
                     </View>
                     <View
                       className={`px-4 py-2 rounded-lg ${
@@ -923,8 +997,10 @@ export default function LiveGameScreen() {
             </View>
 
             {/* Home Team Subs */}
-            <View className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-              <Text className="text-white font-semibold mb-3">{game.homeTeam?.name || "Home"}</Text>
+            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                {game.homeTeam?.name || "Home"}
+              </Text>
               {homePlayerStats.map((playerStat: PlayerStat) => {
                 const player = playerStat.player;
                 if (!player) return null;
@@ -933,16 +1009,24 @@ export default function LiveGameScreen() {
                   <TouchableOpacity
                     key={playerStat.id}
                     className={`flex-row items-center py-3 px-3 mb-2 rounded-lg ${
-                      playerStat.isOnCourt ? "bg-green-900/30 border border-green-700" : "bg-gray-700"
+                      playerStat.isOnCourt
+                        ? "bg-green-900/30 border border-green-700"
+                        : "bg-gray-100 dark:bg-gray-700"
                     }`}
                     onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
                   >
-                    <View className="w-10 h-10 bg-gray-600 rounded-full justify-center items-center mr-3">
-                      <Text className="text-white font-bold">#{player.number}</Text>
+                    <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
+                      <Text className="text-gray-900 dark:text-white font-bold">
+                        #{player.number}
+                      </Text>
                     </View>
                     <View className="flex-1">
-                      <Text className="text-white font-medium">{player.name}</Text>
-                      <Text className="text-gray-400 text-xs">{player.position || "N/A"}</Text>
+                      <Text className="text-gray-900 dark:text-white font-medium">
+                        {player.name}
+                      </Text>
+                      <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                        {player.position || "N/A"}
+                      </Text>
                     </View>
                     <View
                       className={`px-4 py-2 rounded-lg ${

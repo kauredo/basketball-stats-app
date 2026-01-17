@@ -31,16 +31,16 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div>
             <div className="mx-auto flex items-center justify-center">
               <LogoIcon variant="light" size="xl" />
             </div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
               Check your email
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-400">
+            <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
               We've sent a password reset link to {email}
             </p>
           </div>
@@ -66,16 +66,16 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="mx-auto h-12 w-12 flex items-center justify-center">
             <Icon name="basketball" size={32} className="text-orange-600" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             Reset your password
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-400">
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             Enter your email address and we'll send you a link to reset your password.
           </p>
         </div>
@@ -88,7 +88,10 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Email address
             </label>
             <input
@@ -99,7 +102,7 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 relative block w-full px-3 py-2 border border-gray-600 bg-gray-800 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+              className="mt-1 relative block w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
               placeholder="Enter your email address"
               disabled={isLoading}
             />
@@ -117,7 +120,7 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
             <button
               type="button"
               onClick={onBackToLogin}
-              className="group relative w-full flex justify-center py-2 px-4 border border-gray-600 text-sm font-medium rounded-md text-gray-300 bg-transparent hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              className="group relative w-full flex justify-center py-2 px-4 border border-gray-200 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
               Back to Sign in
             </button>

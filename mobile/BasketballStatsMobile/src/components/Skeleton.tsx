@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, ViewStyle, DimensionValue } from "react-native";
+import { View, StyleSheet, ViewStyle, DimensionValue, useColorScheme } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -22,6 +22,8 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   style,
 }) => {
   const shimmer = useSharedValue(0);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   useEffect(() => {
     shimmer.value = withRepeat(withTiming(1, { duration: 1500 }), -1, false);
@@ -38,7 +40,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
           width,
           height,
           borderRadius,
-          backgroundColor: "#374151",
+          backgroundColor: isDark ? "#374151" : "#D1D5DB",
         },
         animatedStyle,
         style,
@@ -48,191 +50,244 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 };
 
 // Skeleton Card for game cards, player cards, etc.
-export const SkeletonCard: React.FC<{ style?: ViewStyle }> = ({ style }) => (
-  <View style={[styles.card, style]}>
-    <View style={styles.cardHeader}>
-      <Skeleton width={48} height={48} borderRadius={24} />
-      <View style={styles.cardHeaderText}>
-        <Skeleton width="70%" height={18} style={styles.mb2} />
-        <Skeleton width="50%" height={14} />
+export const SkeletonCard: React.FC<{ style?: ViewStyle }> = ({ style }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const cardStyle = isDark ? styles.cardDark : styles.cardLight;
+
+  return (
+    <View style={[cardStyle, style]}>
+      <View style={styles.cardHeader}>
+        <Skeleton width={48} height={48} borderRadius={24} />
+        <View style={styles.cardHeaderText}>
+          <Skeleton width="70%" height={18} style={styles.mb2} />
+          <Skeleton width="50%" height={14} />
+        </View>
+      </View>
+      <View style={styles.cardBody}>
+        <Skeleton width="100%" height={14} style={styles.mb2} />
+        <Skeleton width="85%" height={14} style={styles.mb2} />
+        <Skeleton width="70%" height={14} />
       </View>
     </View>
-    <View style={styles.cardBody}>
-      <Skeleton width="100%" height={14} style={styles.mb2} />
-      <Skeleton width="85%" height={14} style={styles.mb2} />
-      <Skeleton width="70%" height={14} />
-    </View>
-  </View>
-);
+  );
+};
 
 // Skeleton for basketball court loading state
-export const SkeletonCourt: React.FC<{ style?: ViewStyle }> = ({ style }) => (
-  <View style={[styles.card, style]}>
-    <Skeleton width={120} height={22} style={styles.mb4} />
-    <Skeleton width="100%" height={200} borderRadius={12} style={styles.mb4} />
-    <View style={styles.row}>
-      <Skeleton width={70} height={18} style={styles.mr4} />
-      <Skeleton width={70} height={18} style={styles.mr4} />
-      <Skeleton width={70} height={18} />
+export const SkeletonCourt: React.FC<{ style?: ViewStyle }> = ({ style }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const cardStyle = isDark ? styles.cardDark : styles.cardLight;
+
+  return (
+    <View style={[cardStyle, style]}>
+      <Skeleton width={120} height={22} style={styles.mb4} />
+      <Skeleton width="100%" height={200} borderRadius={12} style={styles.mb4} />
+      <View style={styles.row}>
+        <Skeleton width={70} height={18} style={styles.mr4} />
+        <Skeleton width={70} height={18} style={styles.mr4} />
+        <Skeleton width={70} height={18} />
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 // Skeleton for statistics tables
 export const SkeletonTable: React.FC<{
   rows?: number;
   style?: ViewStyle;
-}> = ({ rows = 5, style }) => (
-  <View style={[styles.card, style]}>
-    <Skeleton width={150} height={22} style={styles.mb4} />
+}> = ({ rows = 5, style }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const cardStyle = isDark ? styles.cardDark : styles.cardLight;
+  const borderStyle = isDark ? styles.borderBottomDark : styles.borderBottomLight;
 
-    {/* Header */}
-    <View style={[styles.tableRow, styles.borderBottom]}>
-      <View style={styles.flex2}>
-        <Skeleton width={80} height={12} />
-      </View>
-      <View style={styles.flex1}>
-        <Skeleton width={30} height={12} style={styles.centered} />
-      </View>
-      <View style={styles.flex1}>
-        <Skeleton width={30} height={12} style={styles.centered} />
-      </View>
-      <View style={styles.flex1}>
-        <Skeleton width={30} height={12} style={styles.centered} />
-      </View>
-    </View>
+  return (
+    <View style={[cardStyle, style]}>
+      <Skeleton width={150} height={22} style={styles.mb4} />
 
-    {/* Rows */}
-    {Array.from({ length: rows }).map((_, index) => (
-      <View key={index} style={[styles.tableRow, styles.borderBottom]}>
+      {/* Header */}
+      <View style={[styles.tableRow, borderStyle]}>
         <View style={styles.flex2}>
-          <Skeleton width={100} height={14} />
+          <Skeleton width={80} height={12} />
         </View>
         <View style={styles.flex1}>
-          <Skeleton width={24} height={14} style={styles.centered} />
+          <Skeleton width={30} height={12} style={styles.centered} />
         </View>
         <View style={styles.flex1}>
-          <Skeleton width={24} height={14} style={styles.centered} />
+          <Skeleton width={30} height={12} style={styles.centered} />
         </View>
         <View style={styles.flex1}>
-          <Skeleton width={24} height={14} style={styles.centered} />
+          <Skeleton width={30} height={12} style={styles.centered} />
         </View>
       </View>
-    ))}
-  </View>
-);
+
+      {/* Rows */}
+      {Array.from({ length: rows }).map((_, index) => (
+        <View key={index} style={[styles.tableRow, borderStyle]}>
+          <View style={styles.flex2}>
+            <Skeleton width={100} height={14} />
+          </View>
+          <View style={styles.flex1}>
+            <Skeleton width={24} height={14} style={styles.centered} />
+          </View>
+          <View style={styles.flex1}>
+            <Skeleton width={24} height={14} style={styles.centered} />
+          </View>
+          <View style={styles.flex1}>
+            <Skeleton width={24} height={14} style={styles.centered} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+};
 
 // Skeleton for game list items
-export const SkeletonGameCard: React.FC<{ style?: ViewStyle }> = ({ style }) => (
-  <View style={[styles.gameCard, style]}>
-    <View style={styles.gameCardContent}>
-      {/* Away Team */}
-      <View style={styles.teamColumn}>
-        <Skeleton width={40} height={40} borderRadius={20} style={styles.mb2} />
-        <Skeleton width={80} height={14} style={styles.mb1} />
-        <Skeleton width={50} height={12} />
-      </View>
+export const SkeletonGameCard: React.FC<{ style?: ViewStyle }> = ({ style }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const gameCardStyle = isDark ? styles.gameCardDark : styles.gameCardLight;
 
-      {/* Score */}
-      <View style={styles.scoreSection}>
-        <Skeleton width={60} height={10} style={{ ...styles.mb2, alignSelf: 'center' }} />
-        <View style={styles.scoreRow}>
-          <Skeleton width={28} height={28} />
-          <Skeleton width={10} height={18} style={styles.mx2} />
-          <Skeleton width={28} height={28} />
+  return (
+    <View style={[gameCardStyle, style]}>
+      <View style={styles.gameCardContent}>
+        {/* Away Team */}
+        <View style={styles.teamColumn}>
+          <Skeleton width={40} height={40} borderRadius={20} style={styles.mb2} />
+          <Skeleton width={80} height={14} style={styles.mb1} />
+          <Skeleton width={50} height={12} />
         </View>
-        <Skeleton width={40} height={10} style={{ ...styles.mt2, alignSelf: 'center' }} />
-      </View>
 
-      {/* Home Team */}
-      <View style={styles.teamColumn}>
-        <Skeleton width={40} height={40} borderRadius={20} style={styles.mb2} />
-        <Skeleton width={80} height={14} style={styles.mb1} />
-        <Skeleton width={50} height={12} />
+        {/* Score */}
+        <View style={styles.scoreSection}>
+          <Skeleton width={60} height={10} style={{ ...styles.mb2, alignSelf: "center" }} />
+          <View style={styles.scoreRow}>
+            <Skeleton width={28} height={28} />
+            <Skeleton width={10} height={18} style={styles.mx2} />
+            <Skeleton width={28} height={28} />
+          </View>
+          <Skeleton width={40} height={10} style={{ ...styles.mt2, alignSelf: "center" }} />
+        </View>
+
+        {/* Home Team */}
+        <View style={styles.teamColumn}>
+          <Skeleton width={40} height={40} borderRadius={20} style={styles.mb2} />
+          <Skeleton width={80} height={14} style={styles.mb1} />
+          <Skeleton width={50} height={12} />
+        </View>
       </View>
     </View>
-  </View>
-);
+  );
+};
 
 // Skeleton for player stats row
-export const SkeletonPlayerRow: React.FC<{ style?: ViewStyle }> = ({ style }) => (
-  <View style={[styles.playerRow, style]}>
-    <Skeleton width={32} height={32} borderRadius={16} />
-    <View style={styles.playerInfo}>
-      <Skeleton width={120} height={14} style={styles.mb1} />
-      <Skeleton width={80} height={12} />
+export const SkeletonPlayerRow: React.FC<{ style?: ViewStyle }> = ({ style }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const playerRowStyle = isDark ? styles.playerRowDark : styles.playerRowLight;
+
+  return (
+    <View style={[playerRowStyle, style]}>
+      <Skeleton width={32} height={32} borderRadius={16} />
+      <View style={styles.playerInfo}>
+        <Skeleton width={120} height={14} style={styles.mb1} />
+        <Skeleton width={80} height={12} />
+      </View>
+      <View style={styles.statsRow}>
+        <Skeleton width={24} height={14} style={styles.mr3} />
+        <Skeleton width={24} height={14} style={styles.mr3} />
+        <Skeleton width={24} height={14} />
+      </View>
     </View>
-    <View style={styles.statsRow}>
-      <Skeleton width={24} height={14} style={styles.mr3} />
-      <Skeleton width={24} height={14} style={styles.mr3} />
-      <Skeleton width={24} height={14} />
-    </View>
-  </View>
-);
+  );
+};
 
 // Skeleton for stat buttons grid
-export const SkeletonStatButtons: React.FC<{ style?: ViewStyle }> = ({ style }) => (
-  <View style={[styles.card, style]}>
-    <Skeleton width={100} height={18} style={styles.mb4} />
+export const SkeletonStatButtons: React.FC<{ style?: ViewStyle }> = ({ style }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const cardStyle = isDark ? styles.cardDark : styles.cardLight;
 
-    <Skeleton width={60} height={12} style={styles.mb2} />
-    <View style={styles.buttonRow}>
-      <View style={styles.buttonItem}>
-        <Skeleton height={56} borderRadius={12} />
+  return (
+    <View style={[cardStyle, style]}>
+      <Skeleton width={100} height={18} style={styles.mb4} />
+
+      <Skeleton width={60} height={12} style={styles.mb2} />
+      <View style={styles.buttonRow}>
+        <View style={styles.buttonItem}>
+          <Skeleton height={56} borderRadius={12} />
+        </View>
+        <View style={styles.buttonItemWithMargin}>
+          <Skeleton height={56} borderRadius={12} />
+        </View>
+        <View style={styles.buttonItemWithMargin}>
+          <Skeleton height={56} borderRadius={12} />
+        </View>
+        <View style={styles.buttonItemWithMargin}>
+          <Skeleton height={56} borderRadius={12} />
+        </View>
       </View>
-      <View style={styles.buttonItemWithMargin}>
-        <Skeleton height={56} borderRadius={12} />
-      </View>
-      <View style={styles.buttonItemWithMargin}>
-        <Skeleton height={56} borderRadius={12} />
-      </View>
-      <View style={styles.buttonItemWithMargin}>
-        <Skeleton height={56} borderRadius={12} />
+
+      <Skeleton width={60} height={12} style={{ ...styles.mb2, marginTop: 16 }} />
+      <View style={styles.buttonRow}>
+        <View style={styles.buttonItem}>
+          <Skeleton height={56} borderRadius={12} />
+        </View>
+        <View style={styles.buttonItemWithMargin}>
+          <Skeleton height={56} borderRadius={12} />
+        </View>
+        <View style={styles.buttonItemWithMargin}>
+          <Skeleton height={56} borderRadius={12} />
+        </View>
+        <View style={styles.buttonItemWithMargin}>
+          <Skeleton height={56} borderRadius={12} />
+        </View>
       </View>
     </View>
-
-    <Skeleton width={60} height={12} style={{ ...styles.mb2, marginTop: 16 }} />
-    <View style={styles.buttonRow}>
-      <View style={styles.buttonItem}>
-        <Skeleton height={56} borderRadius={12} />
-      </View>
-      <View style={styles.buttonItemWithMargin}>
-        <Skeleton height={56} borderRadius={12} />
-      </View>
-      <View style={styles.buttonItemWithMargin}>
-        <Skeleton height={56} borderRadius={12} />
-      </View>
-      <View style={styles.buttonItemWithMargin}>
-        <Skeleton height={56} borderRadius={12} />
-      </View>
-    </View>
-  </View>
-);
+  );
+};
 
 // Full screen loading skeleton
-export const SkeletonScreen: React.FC = () => (
-  <View style={styles.screen}>
-    {/* Header */}
-    <View style={styles.screenHeader}>
-      <Skeleton width={180} height={28} style={styles.mb2} />
-      <Skeleton width={120} height={16} />
-    </View>
+export const SkeletonScreen: React.FC = () => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const screenStyle = isDark ? styles.screenDark : styles.screenLight;
+  const screenHeaderStyle = isDark ? styles.screenHeaderDark : styles.screenHeaderLight;
 
-    {/* Content */}
-    <View style={styles.screenContent}>
-      <SkeletonCourt style={styles.mb4} />
-      <SkeletonStatButtons />
+  return (
+    <View style={screenStyle}>
+      {/* Header */}
+      <View style={screenHeaderStyle}>
+        <Skeleton width={180} height={28} style={styles.mb2} />
+        <Skeleton width={120} height={16} />
+      </View>
+
+      {/* Content */}
+      <View style={styles.screenContent}>
+        <SkeletonCourt style={styles.mb4} />
+        <SkeletonStatButtons />
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
-  card: {
+  // Dark mode card styles
+  cardDark: {
     backgroundColor: "#1F2937",
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
     borderColor: "#374151",
+  },
+  // Light mode card styles
+  cardLight: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
   cardHeader: {
     flexDirection: "row",
@@ -253,9 +308,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
   },
-  borderBottom: {
+  borderBottomDark: {
     borderBottomWidth: 1,
     borderBottomColor: "#374151",
+  },
+  borderBottomLight: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
   },
   flex1: {
     flex: 1,
@@ -273,12 +332,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center" as const,
   },
-  gameCard: {
+  gameCardDark: {
     backgroundColor: "#1F2937",
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
     borderColor: "#374151",
+  },
+  gameCardLight: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
   gameCardContent: {
     flexDirection: "row",
@@ -293,12 +359,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  playerRow: {
+  playerRowDark: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#374151",
+  },
+  playerRowLight: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
   },
   playerInfo: {
     flex: 1,
@@ -318,12 +391,21 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 8,
   },
-  screen: {
+  screenDark: {
     flex: 1,
     backgroundColor: "#0F1419",
   },
-  screenHeader: {
+  screenLight: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+  },
+  screenHeaderDark: {
     backgroundColor: "#1F2937",
+    padding: 20,
+    paddingTop: 60,
+  },
+  screenHeaderLight: {
+    backgroundColor: "#FFFFFF",
     padding: 20,
     paddingTop: 60,
   },

@@ -17,7 +17,7 @@ interface StatCardProps {
 
 function StatCard({ title, value, subtitle, color = "#EA580C" }: StatCardProps) {
   return (
-    <View className="bg-gray-700 rounded-xl p-4 flex-row items-center w-[48%] border border-gray-600">
+    <View className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 flex-row items-center w-[48%] border border-gray-200 dark:border-gray-600">
       <View
         className="w-10 h-10 rounded-full justify-center items-center mr-3"
         style={{ backgroundColor: color }}
@@ -25,8 +25,8 @@ function StatCard({ title, value, subtitle, color = "#EA580C" }: StatCardProps) 
         <Icon name="stats" size={16} color="#FFFFFF" />
       </View>
       <View className="flex-1">
-        <Text className="text-gray-400 text-xs font-medium mb-0.5">{title}</Text>
-        <Text className="text-white text-xl font-bold mb-0.5">{value}</Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-xs font-medium mb-0.5">{title}</Text>
+        <Text className="text-gray-900 dark:text-white text-xl font-bold mb-0.5">{value}</Text>
         {subtitle && <Text className="text-gray-500 text-xs">{subtitle}</Text>}
       </View>
     </View>
@@ -42,13 +42,13 @@ interface LeaderItemProps {
 
 function LeaderItem({ rank, playerName, value, unit = "" }: LeaderItemProps) {
   return (
-    <View className="flex-row items-center bg-gray-700 p-3 rounded-lg mb-2">
+    <View className="flex-row items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg mb-2">
       <View className="w-6 h-6 rounded-full bg-primary-500 justify-center items-center mr-3">
         <Text className="text-white text-xs font-bold">{rank}</Text>
       </View>
       <View className="flex-1 flex-row justify-between items-center">
-        <Text className="text-white text-sm font-medium">{playerName}</Text>
-        <Text className="text-gray-400 text-sm">
+        <Text className="text-gray-900 dark:text-white text-sm font-medium">{playerName}</Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-sm">
           {value.toFixed(1)}
           {unit}
         </Text>
@@ -75,20 +75,24 @@ function StandingsItem({
   avgPoints,
 }: StandingsItemProps) {
   return (
-    <View className="flex-row items-center bg-gray-700 p-3 rounded-lg mb-2">
+    <View className="flex-row items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg mb-2">
       <View className="w-6 h-6 rounded-full bg-gray-500 justify-center items-center mr-3">
         <Text className="text-white text-xs font-bold">{rank}</Text>
       </View>
       <View className="flex-1">
-        <Text className="text-white text-sm font-medium">{teamName}</Text>
+        <Text className="text-gray-900 dark:text-white text-sm font-medium">{teamName}</Text>
       </View>
       <View className="items-end">
-        <Text className="text-white text-sm font-medium">
+        <Text className="text-gray-900 dark:text-white text-sm font-medium">
           {wins}-{losses}
         </Text>
-        <Text className="text-gray-400 text-xs">{winPercentage.toFixed(1)}%</Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-xs">
+          {winPercentage.toFixed(1)}%
+        </Text>
         {avgPoints !== undefined && (
-          <Text className="text-gray-400 text-xs">{avgPoints.toFixed(1)} PPG</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-xs">
+            {avgPoints.toFixed(1)} PPG
+          </Text>
         )}
       </View>
     </View>
@@ -116,18 +120,22 @@ export default function StatisticsScreen() {
 
   if (dashboardData === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-800">
-        <Text className="text-gray-400 mt-4 text-base">Loading statistics...</Text>
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800">
+        <Text className="text-gray-600 dark:text-gray-400 mt-4 text-base">
+          Loading statistics...
+        </Text>
       </View>
     );
   }
 
   if (!selectedLeague) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-800 p-8">
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-8">
         <Icon name="basketball" size={64} color="#6B7280" className="mb-4" />
-        <Text className="text-white text-2xl font-bold mb-2">No League Selected</Text>
-        <Text className="text-gray-400 text-base text-center">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-2">
+          No League Selected
+        </Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base text-center">
           Please select a league to view statistics.
         </Text>
       </View>
@@ -139,17 +147,19 @@ export default function StatisticsScreen() {
   const recentGames = dashboardData?.recentGames || [];
 
   return (
-    <View className="flex-1 bg-gray-800">
+    <View className="flex-1 bg-white dark:bg-gray-800">
       {/* Header */}
-      <View className="bg-gray-700 p-5 pt-15">
-        <Text className="text-white text-2xl font-bold mb-1">Statistics Dashboard</Text>
-        <Text className="text-gray-400 text-base">
+      <View className="bg-gray-100 dark:bg-gray-700 p-5 pt-15">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">
+          Statistics Dashboard
+        </Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base">
           {selectedLeague.name} • {selectedLeague.season}
         </Text>
       </View>
 
       {/* Tab Navigation */}
-      <View className="flex-row bg-gray-700 border-b border-gray-600">
+      <View className="flex-row bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
         <TouchableOpacity
           className={`flex-1 py-4 items-center border-b-2 ${
             activeTab === "overview" ? "border-primary-500" : "border-transparent"
@@ -158,7 +168,7 @@ export default function StatisticsScreen() {
         >
           <Text
             className={`text-base font-medium ${
-              activeTab === "overview" ? "text-primary-500" : "text-gray-400"
+              activeTab === "overview" ? "text-primary-500" : "text-gray-600 dark:text-gray-400"
             }`}
           >
             Overview
@@ -172,7 +182,7 @@ export default function StatisticsScreen() {
         >
           <Text
             className={`text-base font-medium ${
-              activeTab === "leaders" ? "text-primary-500" : "text-gray-400"
+              activeTab === "leaders" ? "text-primary-500" : "text-gray-600 dark:text-gray-400"
             }`}
           >
             Leaders
@@ -186,7 +196,7 @@ export default function StatisticsScreen() {
         >
           <Text
             className={`text-base font-medium ${
-              activeTab === "standings" ? "text-primary-500" : "text-gray-400"
+              activeTab === "standings" ? "text-primary-500" : "text-gray-600 dark:text-gray-400"
             }`}
           >
             Standings
@@ -200,7 +210,7 @@ export default function StatisticsScreen() {
         >
           <Text
             className={`text-base font-medium ${
-              activeTab === "charts" ? "text-primary-500" : "text-gray-400"
+              activeTab === "charts" ? "text-primary-500" : "text-gray-600 dark:text-gray-400"
             }`}
           >
             Charts
@@ -217,7 +227,9 @@ export default function StatisticsScreen() {
           <View className="p-4">
             {/* League Stats Overview */}
             <View className="mb-6">
-              <Text className="text-white text-xl font-bold mb-4">League Overview</Text>
+              <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
+                League Overview
+              </Text>
               <View className="flex-row flex-wrap gap-4">
                 <StatCard
                   title="Total Games"
@@ -259,26 +271,28 @@ export default function StatisticsScreen() {
             {/* Recent Games */}
             {recentGames.length > 0 && (
               <View className="mb-6">
-                <Text className="text-white text-xl font-bold mb-4">Recent Games</Text>
+                <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
+                  Recent Games
+                </Text>
                 {recentGames.slice(0, 5).map((game: any, index: number) => (
                   <View
                     key={game.id || index}
-                    className="bg-gray-700 p-4 rounded-lg mb-2 flex-row justify-between items-center"
+                    className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-2 flex-row justify-between items-center"
                   >
                     <View className="flex-row items-center flex-1">
-                      <Text className="text-white text-sm font-medium">
+                      <Text className="text-gray-900 dark:text-white text-sm font-medium">
                         {game.homeTeam?.name || "Home"}
                       </Text>
-                      <Text className="text-gray-400 text-xs mx-2">vs</Text>
-                      <Text className="text-white text-sm font-medium">
+                      <Text className="text-gray-600 dark:text-gray-400 text-xs mx-2">vs</Text>
+                      <Text className="text-gray-900 dark:text-white text-sm font-medium">
                         {game.awayTeam?.name || "Away"}
                       </Text>
                     </View>
                     <View className="items-end">
-                      <Text className="text-white text-base font-bold">
+                      <Text className="text-gray-900 dark:text-white text-base font-bold">
                         {game.homeScore} - {game.awayScore}
                       </Text>
-                      <Text className="text-gray-400 text-xs">
+                      <Text className="text-gray-600 dark:text-gray-400 text-xs">
                         ({(game.homeScore || 0) + (game.awayScore || 0)} pts)
                       </Text>
                     </View>
@@ -294,7 +308,9 @@ export default function StatisticsScreen() {
           <View className="p-4">
             {/* Scoring Leaders */}
             <View className="mb-6">
-              <Text className="text-white text-xl font-bold mb-4">Scoring Leaders</Text>
+              <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
+                Scoring Leaders
+              </Text>
               {(leaders.scoring || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
                   key={leader.playerId || index}
@@ -305,13 +321,17 @@ export default function StatisticsScreen() {
                 />
               ))}
               {(!leaders.scoring || leaders.scoring.length === 0) && (
-                <Text className="text-gray-400 text-sm">No scoring data available</Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                  No scoring data available
+                </Text>
               )}
             </View>
 
             {/* Rebounding Leaders */}
             <View className="mb-6">
-              <Text className="text-white text-xl font-bold mb-4">Rebounding Leaders</Text>
+              <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
+                Rebounding Leaders
+              </Text>
               {(leaders.rebounding || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
                   key={leader.playerId || index}
@@ -322,13 +342,17 @@ export default function StatisticsScreen() {
                 />
               ))}
               {(!leaders.rebounding || leaders.rebounding.length === 0) && (
-                <Text className="text-gray-400 text-sm">No rebounding data available</Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                  No rebounding data available
+                </Text>
               )}
             </View>
 
             {/* Assists Leaders */}
             <View className="mb-6">
-              <Text className="text-white text-xl font-bold mb-4">Assists Leaders</Text>
+              <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
+                Assists Leaders
+              </Text>
               {(leaders.assists || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
                   key={leader.playerId || index}
@@ -339,7 +363,9 @@ export default function StatisticsScreen() {
                 />
               ))}
               {(!leaders.assists || leaders.assists.length === 0) && (
-                <Text className="text-gray-400 text-sm">No assists data available</Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                  No assists data available
+                </Text>
               )}
             </View>
           </View>
@@ -349,7 +375,9 @@ export default function StatisticsScreen() {
         {activeTab === "standings" && (
           <View className="p-4">
             <View className="mb-6">
-              <Text className="text-white text-xl font-bold mb-4">League Standings</Text>
+              <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
+                League Standings
+              </Text>
               {standings.slice(0, 10).map((team: any, index: number) => (
                 <StandingsItem
                   key={team.teamId || index}
@@ -362,7 +390,9 @@ export default function StatisticsScreen() {
                 />
               ))}
               {standings.length === 0 && (
-                <Text className="text-gray-400 text-sm">No standings data available</Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                  No standings data available
+                </Text>
               )}
             </View>
           </View>
@@ -374,8 +404,10 @@ export default function StatisticsScreen() {
             {/* Team Performance Chart */}
             {standings.length > 0 && (
               <View className="mb-6">
-                <Text className="text-white text-xl font-bold mb-4">Team Performance</Text>
-                <View className="bg-gray-700 rounded-xl p-4 mb-4 items-center">
+                <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
+                  Team Performance
+                </Text>
+                <View className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-4 items-center">
                   <BarChart
                     data={{
                       labels: standings
@@ -416,7 +448,7 @@ export default function StatisticsScreen() {
                     showBarTops={false}
                     fromZero
                   />
-                  <Text className="text-gray-400 text-xs text-center mt-2 font-medium">
+                  <Text className="text-gray-600 dark:text-gray-400 text-xs text-center mt-2 font-medium">
                     Average Points Per Game
                   </Text>
                 </View>
@@ -426,8 +458,10 @@ export default function StatisticsScreen() {
             {/* Win Distribution Pie Chart */}
             {standings.length > 0 && (
               <View className="mb-6">
-                <Text className="text-white text-xl font-bold mb-4">Win Distribution</Text>
-                <View className="bg-gray-700 rounded-xl p-4 mb-4 items-center">
+                <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
+                  Win Distribution
+                </Text>
+                <View className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-4 items-center">
                   <PieChart
                     data={standings.slice(0, 5).map((team: any, index: number) => ({
                       name:
@@ -456,7 +490,7 @@ export default function StatisticsScreen() {
                       borderRadius: 16,
                     }}
                   />
-                  <Text className="text-gray-400 text-xs text-center mt-2 font-medium">
+                  <Text className="text-gray-600 dark:text-gray-400 text-xs text-center mt-2 font-medium">
                     Total Wins by Team
                   </Text>
                 </View>
@@ -466,8 +500,10 @@ export default function StatisticsScreen() {
             {/* Recent Games Trend */}
             {recentGames.length > 0 && (
               <View className="mb-6">
-                <Text className="text-white text-xl font-bold mb-4">Scoring Trends</Text>
-                <View className="bg-gray-700 rounded-xl p-4 mb-4 items-center">
+                <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
+                  Scoring Trends
+                </Text>
+                <View className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-4 items-center">
                   <LineChart
                     data={{
                       labels: recentGames.slice(-7).map((_: any, index: number) => `G${index + 1}`),
@@ -509,7 +545,7 @@ export default function StatisticsScreen() {
                       borderRadius: 16,
                     }}
                   />
-                  <Text className="text-gray-400 text-xs text-center mt-2 font-medium">
+                  <Text className="text-gray-600 dark:text-gray-400 text-xs text-center mt-2 font-medium">
                     Recent Games Total Points
                   </Text>
                 </View>

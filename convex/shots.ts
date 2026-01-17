@@ -88,9 +88,7 @@ export const getGameShots = query({
     const playerIds = Array.from(new Set(shots.map((s) => s.playerId)));
     const players = await Promise.all(playerIds.map((id) => ctx.db.get(id)));
     const playerMap = new Map(
-      players
-        .filter((p): p is NonNullable<typeof p> => p !== null)
-        .map((p) => [p._id, p])
+      players.filter((p): p is NonNullable<typeof p> => p !== null).map((p) => [p._id, p])
     );
 
     return {
@@ -183,9 +181,8 @@ export const getPlayerShotChart = query({
           attempted: twoPointers.length,
           percentage:
             twoPointers.length > 0
-              ? Math.round(
-                  (twoPointers.filter((s) => s.made).length / twoPointers.length) * 1000
-                ) / 10
+              ? Math.round((twoPointers.filter((s) => s.made).length / twoPointers.length) * 1000) /
+                10
               : 0,
         },
         threePoint: {

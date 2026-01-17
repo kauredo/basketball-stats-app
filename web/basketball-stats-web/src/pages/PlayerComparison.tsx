@@ -3,11 +3,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
-import {
-  UserIcon,
-  ArrowsRightLeftIcon,
-  ChartBarIcon,
-} from "@heroicons/react/24/outline";
+import { UserIcon, ArrowsRightLeftIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 import {
   ResponsiveContainer,
   RadarChart,
@@ -77,24 +73,32 @@ const PlayerComparison: React.FC = () => {
     higherIsBetter?: boolean;
   }> = ({ label, value1, value2, unit = "", higherIsBetter = true }) => {
     const winner =
-      value1 === value2 ? null : higherIsBetter ? (value1 > value2 ? 1 : 2) : value1 < value2 ? 1 : 2;
+      value1 === value2
+        ? null
+        : higherIsBetter
+          ? value1 > value2
+            ? 1
+            : 2
+          : value1 < value2
+            ? 1
+            : 2;
 
     return (
-      <div className="flex items-center py-3 border-b border-gray-700 last:border-0">
+      <div className="flex items-center py-3 border-b border-gray-200 dark:border-gray-700 last:border-0">
         <div className="flex-1 text-right">
           <span
-            className={`text-lg font-bold ${winner === 1 ? "text-green-400" : "text-white"}`}
+            className={`text-lg font-bold ${winner === 1 ? "text-green-400" : "text-gray-900 dark:text-white"}`}
           >
             {value1}
             {unit}
           </span>
         </div>
         <div className="w-32 text-center">
-          <span className="text-sm text-gray-400">{label}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
         </div>
         <div className="flex-1 text-left">
           <span
-            className={`text-lg font-bold ${winner === 2 ? "text-green-400" : "text-white"}`}
+            className={`text-lg font-bold ${winner === 2 ? "text-green-400" : "text-gray-900 dark:text-white"}`}
           >
             {value2}
             {unit}
@@ -160,19 +164,21 @@ const PlayerComparison: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Player Comparison</h1>
-        <p className="text-gray-400">Compare statistics between two players</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Player Comparison</h1>
+        <p className="text-gray-600 dark:text-gray-400">Compare statistics between two players</p>
       </div>
 
       {/* Player Selection */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
         {/* Player 1 Select */}
-        <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-          <label className="block text-sm font-medium text-gray-400 mb-2">Player 1</label>
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+            Player 1
+          </label>
           <select
             value={player1Id || ""}
-            onChange={(e) => setPlayer1Id(e.target.value as Id<"players"> || null)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            onChange={(e) => setPlayer1Id((e.target.value as Id<"players">) || null)}
+            className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
             <option value="">Select a player</option>
             {playerOptions.map((player) => (
@@ -191,12 +197,14 @@ const PlayerComparison: React.FC = () => {
         </div>
 
         {/* Player 2 Select */}
-        <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-          <label className="block text-sm font-medium text-gray-400 mb-2">Player 2</label>
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+            Player 2
+          </label>
           <select
             value={player2Id || ""}
-            onChange={(e) => setPlayer2Id(e.target.value as Id<"players"> || null)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            onChange={(e) => setPlayer2Id((e.target.value as Id<"players">) || null)}
+            className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
             <option value="">Select a player</option>
             {playerOptions.map((player) => (
@@ -214,7 +222,7 @@ const PlayerComparison: React.FC = () => {
           {/* Player Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Player 1 Card */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-orange-600">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-orange-600">
               <div className="flex items-center space-x-4">
                 <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center">
                   <span className="text-2xl font-bold text-white">
@@ -222,10 +230,10 @@ const PlayerComparison: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                     {comparisonData.player1.playerName}
                   </h3>
-                  <p className="text-gray-400">
+                  <p className="text-gray-600 dark:text-gray-400">
                     {comparisonData.player1.teamName} • {comparisonData.player1.position || "N/A"}
                   </p>
                   <p className="text-sm text-gray-500">
@@ -236,7 +244,7 @@ const PlayerComparison: React.FC = () => {
             </div>
 
             {/* Player 2 Card */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-blue-600">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-blue-600">
               <div className="flex items-center space-x-4">
                 <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
                   <span className="text-2xl font-bold text-white">
@@ -244,10 +252,10 @@ const PlayerComparison: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                     {comparisonData.player2.playerName}
                   </h3>
-                  <p className="text-gray-400">
+                  <p className="text-gray-600 dark:text-gray-400">
                     {comparisonData.player2.teamName} • {comparisonData.player2.position || "N/A"}
                   </p>
                   <p className="text-sm text-gray-500">
@@ -261,8 +269,8 @@ const PlayerComparison: React.FC = () => {
           {/* Stats Comparison */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Per Game Averages */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                 <ChartBarIcon className="w-5 h-5 mr-2 text-orange-500" />
                 Per Game Averages
               </h3>
@@ -318,8 +326,10 @@ const PlayerComparison: React.FC = () => {
             </div>
 
             {/* Shooting Stats */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <h3 className="text-lg font-semibold text-white mb-4">Shooting Percentages</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Shooting Percentages
+              </h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={shootingData} layout="vertical">
@@ -348,8 +358,10 @@ const PlayerComparison: React.FC = () => {
           </div>
 
           {/* Radar Chart */}
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <h3 className="text-lg font-semibold text-white mb-4">Overall Comparison</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Overall Comparison
+            </h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
@@ -382,10 +394,12 @@ const PlayerComparison: React.FC = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
         </div>
       ) : (
-        <div className="bg-gray-800 rounded-lg p-12 border border-gray-700 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-12 border border-gray-200 dark:border-gray-700 text-center">
           <UserIcon className="mx-auto h-12 w-12 text-gray-500 mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">Select Players to Compare</h3>
-          <p className="text-gray-400">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Select Players to Compare
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
             Choose two players from the dropdowns above to see a side-by-side comparison of their
             statistics.
           </p>

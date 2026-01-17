@@ -5,6 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { View, Text } from "react-native";
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
+import { ThemeProvider, useTheme } from "./src/contexts/ThemeContext";
 import HomeScreen from "./src/screens/HomeScreen";
 import GamesScreen from "./src/screens/GamesScreen";
 import TeamsScreen from "./src/screens/TeamsScreen";
@@ -64,21 +65,25 @@ function AuthStack() {
 
 function LoadingScreen() {
   return (
-    <View className="flex-1 justify-center items-center bg-dark-950">
+    <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
       <Icon name="basketball" size={64} color="#EA580C" className="mb-4" />
-      <Text className="text-2xl font-bold text-white mb-2">Basketball Stats</Text>
-      <Text className="text-base text-gray-400">Loading...</Text>
+      <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        Basketball Stats
+      </Text>
+      <Text className="text-base text-gray-600 dark:text-gray-400">Loading...</Text>
     </View>
   );
 }
 
 function AppContent() {
   const { isAuthenticated, selectedLeague, isLoading } = useAuth();
+  const { resolvedTheme } = useTheme();
+  const statusBarStyle = resolvedTheme === "dark" ? "light" : "dark";
 
   if (isLoading) {
     return (
       <NavigationContainer>
-        <StatusBar style="light" />
+        <StatusBar style={statusBarStyle} />
         <LoadingScreen />
       </NavigationContainer>
     );
@@ -86,7 +91,7 @@ function AppContent() {
 
   return (
     <NavigationContainer>
-      <StatusBar style="light" />
+      <StatusBar style={statusBarStyle} />
       {isAuthenticated ? (
         selectedLeague ? (
           <Stack.Navigator
@@ -124,9 +129,11 @@ function AppContent() {
 function App() {
   return (
     <ConvexProvider client={convex}>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ThemeProvider>
     </ConvexProvider>
   );
 }

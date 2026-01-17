@@ -104,29 +104,38 @@ export default function LeagueSelectionScreen() {
 
     return (
       <TouchableOpacity
-        className={`bg-gray-800 rounded-xl p-4 mb-3 border-2 ${
-          isSelected ? "border-primary-500 bg-primary-900" : "border-gray-700"
+        className={`bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 border-2 ${
+          isSelected ? "border-primary-500 bg-primary-900" : "border-gray-200 dark:border-gray-700"
         }`}
         onPress={() => handleSelectLeague(league)}
       >
         <View className="flex-row justify-between items-start mb-2">
-          <Text className="text-lg font-bold text-white flex-1 mr-3">{league.name}</Text>
-          <View className="bg-gray-700 px-2 py-1 rounded">
-            <Text className="text-white text-xs font-semibold capitalize">{league.leagueType}</Text>
+          <Text className="text-lg font-bold text-gray-900 dark:text-white flex-1 mr-3">
+            {league.name}
+          </Text>
+          <View className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+            <Text className="text-gray-900 dark:text-white text-xs font-semibold capitalize">
+              {league.leagueType}
+            </Text>
           </View>
         </View>
 
         {league.description && (
-          <Text className="text-gray-300 text-sm leading-5 mb-3" numberOfLines={2}>
+          <Text
+            className="text-gray-700 dark:text-gray-300 text-sm leading-5 mb-3"
+            numberOfLines={2}
+          >
             {league.description}
           </Text>
         )}
 
         <View className="mb-2">
-          <Text className="text-gray-400 text-xs">
+          <Text className="text-gray-600 dark:text-gray-400 text-xs">
             {league.teamsCount || 0} teams • {league.membersCount || 0} members
           </Text>
-          <Text className="text-gray-400 text-xs mt-0.5">Season: {league.season}</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">
+            Season: {league.season}
+          </Text>
         </View>
 
         {league.membership && (
@@ -151,25 +160,27 @@ export default function LeagueSelectionScreen() {
 
   const renderAvailableLeague = ({ item: league }: { item: League }) => (
     <TouchableOpacity
-      className="bg-gray-800 rounded-xl p-4 mb-3 border border-gray-700"
+      className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 border border-gray-200 dark:border-gray-700"
       onPress={() => handleJoinLeague(league.id)}
       disabled={isJoining}
     >
       <View className="flex-row justify-between items-start mb-2">
-        <Text className="text-lg font-bold text-white flex-1 mr-3">{league.name}</Text>
+        <Text className="text-lg font-bold text-gray-900 dark:text-white flex-1 mr-3">
+          {league.name}
+        </Text>
         <View className="bg-court-800 px-2 py-1 rounded">
           <Text className="text-white text-xs font-semibold">Public</Text>
         </View>
       </View>
 
       {league.description && (
-        <Text className="text-gray-300 text-sm leading-5 mb-3" numberOfLines={2}>
+        <Text className="text-gray-700 dark:text-gray-300 text-sm leading-5 mb-3" numberOfLines={2}>
           {league.description}
         </Text>
       )}
 
       <View className="mb-3">
-        <Text className="text-gray-400 text-xs">
+        <Text className="text-gray-600 dark:text-gray-400 text-xs">
           {league.teamsCount || 0} teams • {league.membersCount || 0} members
         </Text>
       </View>
@@ -188,19 +199,19 @@ export default function LeagueSelectionScreen() {
 
   if (leaguesData === undefined) {
     return (
-      <View className="flex-1 bg-dark-950 justify-center items-center">
-        <Text className="text-white text-base">Loading leagues...</Text>
+      <View className="flex-1 bg-gray-50 dark:bg-dark-950 justify-center items-center">
+        <Text className="text-gray-900 dark:text-white text-base">Loading leagues...</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-dark-950">
+    <View className="flex-1 bg-gray-50 dark:bg-dark-950">
       <StatusBar style="light" />
 
       <View className="px-6 pt-6 pb-4">
-        <Text className="text-3xl font-bold text-white mb-2">Select League</Text>
-        <Text className="text-base text-gray-400">
+        <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Select League</Text>
+        <Text className="text-base text-gray-600 dark:text-gray-400">
           {userLeagues.length > 0
             ? "Choose a league to continue"
             : "Join your first league to get started"}
@@ -217,7 +228,7 @@ export default function LeagueSelectionScreen() {
           <>
             {userLeagues.length > 0 && (
               <View className="flex-row justify-between items-center mb-4 mt-6">
-                <Text className="text-lg font-bold text-white">My Leagues</Text>
+                <Text className="text-lg font-bold text-gray-900 dark:text-white">My Leagues</Text>
               </View>
             )}
           </>
@@ -227,12 +238,14 @@ export default function LeagueSelectionScreen() {
             {/* Join by Code Section */}
             <View className="my-4">
               <View className="flex-row justify-between items-center mb-4 mt-6">
-                <Text className="text-lg font-bold text-white">Join by Invite Code</Text>
+                <Text className="text-lg font-bold text-gray-900 dark:text-white">
+                  Join by Invite Code
+                </Text>
                 <TouchableOpacity
                   onPress={() => setShowJoinForm(!showJoinForm)}
-                  className="px-3 py-1.5 bg-gray-700 rounded"
+                  className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded"
                 >
-                  <Text className="text-white text-sm font-semibold">
+                  <Text className="text-gray-900 dark:text-white text-sm font-semibold">
                     {showJoinForm ? "Cancel" : "Join"}
                   </Text>
                 </TouchableOpacity>
@@ -241,7 +254,7 @@ export default function LeagueSelectionScreen() {
               {showJoinForm && (
                 <View className="gap-3">
                   <TextInput
-                    className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-base text-white"
+                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-3 text-base text-gray-900 dark:text-white"
                     value={inviteCode}
                     onChangeText={setInviteCode}
                     placeholder="Enter invite code (e.g., league-name-123)"
@@ -268,7 +281,9 @@ export default function LeagueSelectionScreen() {
             {availableLeagues.length > 0 && (
               <>
                 <View className="flex-row justify-between items-center mb-4 mt-6">
-                  <Text className="text-lg font-bold text-white">Public Leagues</Text>
+                  <Text className="text-lg font-bold text-gray-900 dark:text-white">
+                    Public Leagues
+                  </Text>
                 </View>
                 {availableLeagues.map((league: League) => (
                   <View key={`available-${league.id}`}>
@@ -282,8 +297,10 @@ export default function LeagueSelectionScreen() {
             {userLeagues.length === 0 && availableLeagues.length === 0 && (
               <View className="items-center justify-center py-16">
                 <Icon name="basketball" size={48} color="#6B7280" className="mb-4" />
-                <Text className="text-white text-lg font-bold mb-2">No Leagues Available</Text>
-                <Text className="text-gray-400 text-sm text-center leading-5 px-8">
+                <Text className="text-gray-900 dark:text-white text-lg font-bold mb-2">
+                  No Leagues Available
+                </Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-sm text-center leading-5 px-8">
                   Ask a league administrator for an invite code to join a league
                 </Text>
               </View>
@@ -294,7 +311,7 @@ export default function LeagueSelectionScreen() {
       />
 
       {selectedLeague && (
-        <View className="p-6 bg-gray-800 border-t border-gray-700">
+        <View className="p-6 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
           <TouchableOpacity className="bg-primary-500 rounded-xl py-4 items-center">
             <Text className="text-white text-base font-semibold">
               Continue to {selectedLeague.name}

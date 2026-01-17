@@ -24,17 +24,18 @@ A cross-platform basketball statistics tracking application with React web, Reac
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Backend** | Convex (real-time serverless) |
-| **Web** | React 19, React Router 7, Tailwind CSS, Recharts |
-| **Mobile** | React Native 0.79, Expo 53, React Navigation |
-| **Shared** | TypeScript types, components, utilities |
-| **Monorepo** | Turborepo, npm workspaces |
+| Layer        | Technology                                       |
+| ------------ | ------------------------------------------------ |
+| **Backend**  | Convex (real-time serverless)                    |
+| **Web**      | React 19, React Router 7, Tailwind CSS, Recharts |
+| **Mobile**   | React Native 0.79, Expo 53, React Navigation     |
+| **Shared**   | TypeScript types, components, utilities          |
+| **Monorepo** | Turborepo, npm workspaces                        |
 
 ## Features
 
 ### Implemented
+
 - User authentication (signup/login/logout)
 - League management with role-based access (admin, coach, scorekeeper, member, viewer)
 - Team and player management
@@ -44,6 +45,7 @@ A cross-platform basketball statistics tracking application with React web, Reac
 - Cross-platform (web + mobile)
 
 ### Planned
+
 - Data export (PDF, CSV)
 - Push notifications
 - Offline mode with sync
@@ -126,16 +128,16 @@ cd shared && npm run build
 
 ## Database Schema
 
-| Table | Purpose |
-|-------|---------|
-| `users` | User accounts |
-| `sessions` | Auth tokens |
-| `leagues` | League configuration |
+| Table               | Purpose                   |
+| ------------------- | ------------------------- |
+| `users`             | User accounts             |
+| `sessions`          | Auth tokens               |
+| `leagues`           | League configuration      |
 | `leagueMemberships` | User-league relationships |
-| `teams` | Teams in leagues |
-| `players` | Player roster |
-| `games` | Game scheduling and state |
-| `playerStats` | Per-game statistics |
+| `teams`             | Teams in leagues          |
+| `players`           | Player roster             |
+| `games`             | Game scheduling and state |
+| `playerStats`       | Per-game statistics       |
 
 ## Deployment
 

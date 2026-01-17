@@ -1,10 +1,11 @@
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { View, Text, TouchableOpacity } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 
 // Import screens
@@ -50,6 +51,9 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 function TabNavigator() {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -70,17 +74,17 @@ function TabNavigator() {
           }
         },
         tabBarStyle: {
-          backgroundColor: "#1F2937",
-          borderTopColor: "#374151",
+          backgroundColor: isDark ? "#1F2937" : "#FFFFFF",
+          borderTopColor: isDark ? "#374151" : "#E5E7EB",
           height: 60,
           paddingBottom: 8,
         },
         tabBarActiveTintColor: "#EF4444",
-        tabBarInactiveTintColor: "#9CA3AF",
+        tabBarInactiveTintColor: isDark ? "#9CA3AF" : "#6B7280",
         headerStyle: {
-          backgroundColor: "#1F2937",
+          backgroundColor: isDark ? "#1F2937" : "#FFFFFF",
         },
-        headerTintColor: "#F9FAFB",
+        headerTintColor: isDark ? "#F9FAFB" : "#111827",
         headerTitleStyle: {
           fontWeight: "bold",
         },
@@ -132,23 +136,50 @@ function TabNavigator() {
 
 function LoadingScreen() {
   return (
-    <View className="flex-1 justify-center items-center bg-dark-950">
+    <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
       <Icon name="basketball" size={64} color="#EA580C" className="mb-4" />
-      <Text className="text-2xl font-bold text-white mb-2">Basketball Stats</Text>
-      <Text className="text-base text-gray-400">Loading...</Text>
+      <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        Basketball Stats
+      </Text>
+      <Text className="text-base text-gray-600 dark:text-gray-400">Loading...</Text>
     </View>
   );
 }
 
 function AppContent() {
   const { isAuthenticated, selectedLeague, isLoading } = useAuth();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
+  // Custom navigation themes
+  const LightNavigationTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: "#F9FAFB",
+      card: "#FFFFFF",
+      text: "#111827",
+      border: "#E5E7EB",
+    },
+  };
+
+  const DarkNavigationTheme = {
+    ...DarkTheme,
+    colors: {
+      ...DarkTheme.colors,
+      background: "#0F1419",
+      card: "#1F2937",
+      text: "#F9FAFB",
+      border: "#374151",
+    },
+  };
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={isDark ? DarkNavigationTheme : LightNavigationTheme}>
       {!isAuthenticated ? (
         <AuthNavigator />
       ) : !selectedLeague ? (
@@ -159,9 +190,9 @@ function AppContent() {
         <Stack.Navigator
           screenOptions={{
             headerStyle: {
-              backgroundColor: "#1F2937",
+              backgroundColor: isDark ? "#1F2937" : "#FFFFFF",
             },
-            headerTintColor: "#F9FAFB",
+            headerTintColor: isDark ? "#F9FAFB" : "#111827",
             headerTitleStyle: {
               fontWeight: "bold",
             },

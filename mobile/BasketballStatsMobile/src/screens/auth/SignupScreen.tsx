@@ -91,7 +91,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-dark-950"
+      className="flex-1 bg-gray-50 dark:bg-dark-950"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <StatusBar style="light" />
@@ -108,8 +108,12 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
       >
         <View className="items-center mb-8">
           <Icon name="basketball" size={64} color="#EA580C" className="mb-4" />
-          <Text className="text-3xl font-bold text-white mb-2">Create Account</Text>
-          <Text className="text-base text-gray-400 text-center">Join the basketball community</Text>
+          <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Create Account
+          </Text>
+          <Text className="text-base text-gray-600 dark:text-gray-400 text-center">
+            Join the basketball community
+          </Text>
         </View>
 
         <View className="mb-8">
@@ -121,7 +125,9 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
 
           <View className="flex-row gap-3">
             <View className="flex-1 mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">First Name</Text>
+              <Text className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                First Name
+              </Text>
               <View className="relative">
                 <Icon
                   name="user"
@@ -130,7 +136,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                   className="absolute left-4 top-3 z-10"
                 />
                 <TextInput
-                  className="bg-gray-800 border border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-white"
+                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-gray-900 dark:text-white"
                   value={formData.firstName}
                   onChangeText={(value) => handleInputChange("firstName", value)}
                   placeholder="John"
@@ -142,7 +148,9 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
             </View>
 
             <View className="flex-1 mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">Last Name</Text>
+              <Text className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                Last Name
+              </Text>
               <View className="relative">
                 <Icon
                   name="user"
@@ -151,7 +159,7 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                   className="absolute left-4 top-3 z-10"
                 />
                 <TextInput
-                  className="bg-gray-800 border border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-white"
+                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-gray-900 dark:text-white"
                   value={formData.lastName}
                   onChangeText={(value) => handleInputChange("lastName", value)}
                   placeholder="Doe"
@@ -164,11 +172,11 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
           </View>
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-white mb-2">Email</Text>
+            <Text className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Email</Text>
             <View className="relative">
               <Icon name="mail" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
               <TextInput
-                className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-4 py-3 text-base text-white"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-12 pr-4 py-3 text-base text-gray-900 dark:text-white"
                 value={formData.email}
                 onChangeText={(value) => handleInputChange("email", value)}
                 placeholder="john.doe@example.com"
@@ -182,11 +190,13 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
           </View>
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-white mb-2">Password</Text>
+            <Text className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+              Password
+            </Text>
             <View className="relative">
               <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
               <TextInput
-                className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-white"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-gray-900 dark:text-white"
                 value={formData.password}
                 onChangeText={(value) => handleInputChange("password", value)}
                 placeholder="Enter password (min. 6 chars)"
@@ -204,11 +214,13 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
           </View>
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-white mb-2">Confirm Password</Text>
+            <Text className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+              Confirm Password
+            </Text>
             <View className="relative">
               <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
               <TextInput
-                className="bg-gray-800 border border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-white"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-gray-900 dark:text-white"
                 value={formData.passwordConfirmation}
                 onChangeText={(value) => handleInputChange("passwordConfirmation", value)}
                 placeholder="Confirm your password"
@@ -243,7 +255,9 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
         </View>
 
         <View className="flex-row justify-center items-center">
-          <Text className="text-gray-400 text-sm mr-2">Already have an account?</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-sm mr-2">
+            Already have an account?
+          </Text>
           <TouchableOpacity onPress={onNavigateToLogin} disabled={isLoading}>
             <Text className="text-primary-500 text-sm font-semibold">Sign In</Text>
           </TouchableOpacity>

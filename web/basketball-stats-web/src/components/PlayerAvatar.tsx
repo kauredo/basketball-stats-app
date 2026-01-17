@@ -77,17 +77,11 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
             }}
           />
         ) : showNumber && number !== undefined ? (
-          <span
-            className="text-white font-bold"
-            style={{ fontSize: numberSize }}
-          >
+          <span className="text-white font-bold" style={{ fontSize: numberSize }}>
             #{number}
           </span>
         ) : (
-          <span
-            className="text-white font-semibold"
-            style={{ fontSize }}
-          >
+          <span className="text-white font-semibold" style={{ fontSize }}>
             {getInitials(name)}
           </span>
         )}
@@ -96,8 +90,8 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
       {/* On-court indicator */}
       {isOnCourt !== undefined && (
         <div
-          className={`absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-gray-900 ${
-            isOnCourt ? "bg-green-500" : "bg-gray-600"
+          className={`absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-white dark:border-gray-900 ${
+            isOnCourt ? "bg-green-500" : "bg-gray-400 dark:bg-gray-600"
           }`}
           style={{
             width: Math.max(8, width * 0.25),
@@ -142,13 +136,13 @@ export const PlayerAvatarWithDetails: React.FC<PlayerAvatarWithDetailsProps> = (
       />
       <div className="ml-3 flex-1">
         <div className="flex items-center">
-          <span className="text-white font-medium">{name || "Unknown"}</span>
+          <span className="text-gray-900 dark:text-white font-medium">{name || "Unknown"}</span>
           {number !== undefined && (
-            <span className="text-gray-400 text-sm ml-1">#{number}</span>
+            <span className="text-gray-600 dark:text-gray-400 text-sm ml-1">#{number}</span>
           )}
         </div>
         {(position || team) && (
-          <div className="text-gray-400 text-sm">
+          <div className="text-gray-600 dark:text-gray-400 text-sm">
             {[position, team].filter(Boolean).join(" • ")}
           </div>
         )}

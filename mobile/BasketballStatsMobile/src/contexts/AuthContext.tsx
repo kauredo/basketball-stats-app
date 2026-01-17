@@ -10,7 +10,10 @@ interface User extends Omit<SharedUser, "id"> {
   id: Id<"users">;
 }
 
-interface League extends Omit<SharedLeague, "id" | "ownerId" | "createdById" | "leagueType" | "status"> {
+interface League extends Omit<
+  SharedLeague,
+  "id" | "ownerId" | "createdById" | "leagueType" | "status"
+> {
   id: Id<"leagues">;
   leagueType: string; // String to match Convex API response
   status: string;

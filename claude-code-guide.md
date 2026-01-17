@@ -110,16 +110,16 @@ npm run format
 
 ### Tables
 
-| Table | Purpose |
-|-------|---------|
-| `users` | User accounts with email/password auth |
-| `sessions` | Token management (access + refresh tokens) |
-| `leagues` | League configuration (type, season, public/private) |
-| `leagueMemberships` | User-to-league relationships with roles |
-| `teams` | Teams within leagues |
-| `players` | Player roster with positions and attributes |
-| `games` | Game scheduling and live state tracking |
-| `playerStats` | Per-game player statistics |
+| Table               | Purpose                                             |
+| ------------------- | --------------------------------------------------- |
+| `users`             | User accounts with email/password auth              |
+| `sessions`          | Token management (access + refresh tokens)          |
+| `leagues`           | League configuration (type, season, public/private) |
+| `leagueMemberships` | User-to-league relationships with roles             |
+| `teams`             | Teams within leagues                                |
+| `players`           | Player roster with positions and attributes         |
+| `games`             | Game scheduling and live state tracking             |
+| `playerStats`       | Per-game player statistics                          |
 
 ### User Roles (leagueMemberships)
 
@@ -132,29 +132,34 @@ npm run format
 ## Implemented Features
 
 ### Authentication
+
 - Email/password signup and login
 - Token-based sessions (24h access, 7d refresh)
 - Password reset flow
 - League selection after login
 
 ### League Management
+
 - Create public/private leagues
 - Join public leagues
 - Invite-based membership for private leagues
 - Role-based permissions
 
 ### Team & Player Management
+
 - Create teams within leagues
 - Add players with positions (PG, SG, SF, PF, C)
 - Track player attributes (height, weight, jersey number)
 
 ### Live Game Tracking
+
 - Game states: scheduled → active/paused → completed
 - Real-time timer with play/pause/resume
 - Quarter/period tracking
 - Live score updates
 
 ### Statistics Recording
+
 - Shot tracking (2PT, 3PT, FT with makes/attempts)
 - Rebounds (offensive/defensive)
 - Assists, steals, blocks
@@ -163,6 +168,7 @@ npm run format
 - Plus/minus tracking
 
 ### Analytics
+
 - Dashboard with live games and stat leaders
 - Player efficiency calculations
 - Team performance charts (Recharts)
@@ -281,6 +287,7 @@ eas build --platform android
 ## Troubleshooting
 
 ### Convex types not updating
+
 ```bash
 # Regenerate Convex types
 npx convex dev
@@ -289,6 +296,7 @@ npx convex codegen
 ```
 
 ### Shared package changes not reflected
+
 ```bash
 cd shared
 npm run build
@@ -296,6 +304,7 @@ npm run build
 ```
 
 ### Mobile app not connecting to Convex
+
 Check that `convex.json` has the correct deployment URL and the mobile app's Convex provider is configured correctly.
 
 ## Resources

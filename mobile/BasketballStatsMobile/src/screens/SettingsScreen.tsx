@@ -77,19 +77,18 @@ interface SettingRowProps {
 function SettingRow({ icon, title, subtitle, onPress, rightElement }: SettingRowProps) {
   return (
     <TouchableOpacity
-      className="flex-row items-center py-4 border-b border-gray-700"
+      className="flex-row items-center py-4 border-b border-gray-200 dark:border-gray-700"
       onPress={onPress}
       disabled={!onPress && !rightElement}
     >
-      <View className="w-10 h-10 bg-gray-700 rounded-full justify-center items-center mr-4">
+      <View className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full justify-center items-center mr-4">
         <Icon name={icon as any} size={20} color="#9CA3AF" />
       </View>
       <View className="flex-1">
-        <Text className="text-white font-medium text-base">{title}</Text>
-        {subtitle && <Text className="text-gray-400 text-sm">{subtitle}</Text>}
+        <Text className="text-gray-900 dark:text-white font-medium text-base">{title}</Text>
+        {subtitle && <Text className="text-gray-600 dark:text-gray-400 text-sm">{subtitle}</Text>}
       </View>
-      {rightElement ||
-        (onPress && <Icon name="chevron-right" size={20} color="#9CA3AF" />)}
+      {rightElement || (onPress && <Icon name="chevron-right" size={20} color="#9CA3AF" />)}
     </TouchableOpacity>
   );
 }
@@ -104,9 +103,7 @@ export default function SettingsScreen() {
   // Fetch data for export
   const playersData = useQuery(
     api.statistics.getPlayersStats,
-    token && selectedLeague
-      ? { token, leagueId: selectedLeague.id, perPage: 100 }
-      : "skip"
+    token && selectedLeague ? { token, leagueId: selectedLeague.id, perPage: 100 } : "skip"
   );
 
   const standingsData = useQuery(
@@ -203,10 +200,12 @@ export default function SettingsScreen() {
 
   if (!selectedLeague) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-800 p-8">
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-8">
         <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-white text-2xl font-bold mb-2 mt-4">No League Selected</Text>
-        <Text className="text-gray-400 text-base text-center">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-2 mt-4">
+          No League Selected
+        </Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base text-center">
           Please select a league to access settings.
         </Text>
       </View>
@@ -214,20 +213,20 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-800">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-800">
       {/* Header */}
-      <View className="bg-gray-700 p-5 pt-15">
-        <Text className="text-white text-2xl font-bold mb-1">Settings</Text>
-        <Text className="text-gray-400 text-base">{selectedLeague.name}</Text>
+      <View className="bg-gray-100 dark:bg-gray-700 p-5 pt-15">
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">Settings</Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base">{selectedLeague.name}</Text>
       </View>
 
       <ScrollView className="flex-1 p-4">
         {/* Notification Preferences */}
         <View className="mb-6">
-          <Text className="text-gray-400 text-sm font-semibold mb-3 uppercase">
+          <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
             Notification Preferences
           </Text>
-          <View className="bg-gray-700 rounded-xl p-4 border border-gray-600">
+          <View className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
             <SettingRow
               icon="basketball"
               title="Game Notifications"
@@ -255,12 +254,16 @@ export default function SettingsScreen() {
               }
             />
             <View className="flex-row items-center py-4">
-              <View className="w-10 h-10 bg-gray-600 rounded-full justify-center items-center mr-4">
+              <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
                 <Icon name="basketball" size={20} color="#9CA3AF" />
               </View>
               <View className="flex-1">
-                <Text className="text-white font-medium text-base">League Announcements</Text>
-                <Text className="text-gray-400 text-sm">Important updates from league admins</Text>
+                <Text className="text-gray-900 dark:text-white font-medium text-base">
+                  League Announcements
+                </Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                  Important updates from league admins
+                </Text>
               </View>
               <Switch
                 value={leagueAnnouncements}
@@ -274,8 +277,10 @@ export default function SettingsScreen() {
 
         {/* Data Export */}
         <View className="mb-6">
-          <Text className="text-gray-400 text-sm font-semibold mb-3 uppercase">Data Export</Text>
-          <View className="bg-gray-700 rounded-xl p-4 border border-gray-600">
+          <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
+            Data Export
+          </Text>
+          <View className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
             <SettingRow
               icon="stats"
               title="Export Player Statistics"
@@ -296,30 +301,40 @@ export default function SettingsScreen() {
             />
           </View>
           {isExporting && (
-            <Text className="text-gray-400 text-sm mt-2 text-center">Preparing export...</Text>
+            <Text className="text-gray-600 dark:text-gray-400 text-sm mt-2 text-center">
+              Preparing export...
+            </Text>
           )}
         </View>
 
         {/* App Info */}
         <View className="mb-6">
-          <Text className="text-gray-400 text-sm font-semibold mb-3 uppercase">About</Text>
-          <View className="bg-gray-700 rounded-xl p-4 border border-gray-600">
-            <View className="flex-row items-center py-4 border-b border-gray-600">
-              <View className="w-10 h-10 bg-gray-600 rounded-full justify-center items-center mr-4">
+          <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
+            About
+          </Text>
+          <View className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+            <View className="flex-row items-center py-4 border-b border-gray-200 dark:border-gray-600">
+              <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
                 <Icon name="basketball" size={20} color="#F97316" />
               </View>
               <View className="flex-1">
-                <Text className="text-white font-medium text-base">Basketball Stats</Text>
-                <Text className="text-gray-400 text-sm">Version 1.0.0</Text>
+                <Text className="text-gray-900 dark:text-white font-medium text-base">
+                  Basketball Stats
+                </Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-sm">Version 1.0.0</Text>
               </View>
             </View>
             <View className="flex-row items-center py-4">
-              <View className="w-10 h-10 bg-gray-600 rounded-full justify-center items-center mr-4">
+              <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
                 <Icon name="user" size={20} color="#9CA3AF" />
               </View>
               <View className="flex-1">
-                <Text className="text-white font-medium text-base">Powered by Convex</Text>
-                <Text className="text-gray-400 text-sm">Real-time database & backend</Text>
+                <Text className="text-gray-900 dark:text-white font-medium text-base">
+                  Powered by Convex
+                </Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                  Real-time database & backend
+                </Text>
               </View>
             </View>
           </View>

@@ -148,7 +148,7 @@ const Games: React.FC = () => {
     const canEnd = game.status === "active" || game.status === "paused";
 
     return (
-      <tr key={game.id} className="border-b border-gray-700">
+      <tr key={game.id} className="border-b border-gray-200 dark:border-gray-700">
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center space-x-3">
             <div
@@ -164,7 +164,7 @@ const Games: React.FC = () => {
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="space-y-1">
             <div
-              className={`font-medium ${winner === "away" ? "text-green-400" : "text-gray-200"}`}
+              className={`font-medium ${winner === "away" ? "text-green-400" : "text-gray-800 dark:text-gray-200"}`}
             >
               {game.awayTeam?.name || "Away Team"}
             </div>
@@ -174,11 +174,15 @@ const Games: React.FC = () => {
 
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="text-lg font-bold">
-            <span className={winner === "away" ? "text-green-400" : "text-gray-200"}>
+            <span
+              className={winner === "away" ? "text-green-400" : "text-gray-800 dark:text-gray-200"}
+            >
               {game.awayScore}
             </span>
             <span className="text-gray-500 mx-2">-</span>
-            <span className={winner === "home" ? "text-green-400" : "text-gray-200"}>
+            <span
+              className={winner === "home" ? "text-green-400" : "text-gray-800 dark:text-gray-200"}
+            >
               {game.homeScore}
             </span>
           </div>
@@ -186,7 +190,7 @@ const Games: React.FC = () => {
 
         <td className="px-6 py-4 whitespace-nowrap">
           {isGameLive && (
-            <div className="text-sm text-gray-300">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
               <div>Q{game.currentQuarter}</div>
               <div className="font-mono">{formatTime(game.timeRemainingSeconds)}</div>
             </div>
@@ -281,8 +285,8 @@ const Games: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-white">Games</h1>
-          <p className="text-gray-400">Manage and monitor basketball games</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Games</h1>
+          <p className="text-gray-600 dark:text-gray-400">Manage and monitor basketball games</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
@@ -294,29 +298,29 @@ const Games: React.FC = () => {
       </div>
 
       {/* Games Table */}
-      <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-900">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Matchup
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Score
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Time
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-gray-800 divide-y divide-gray-700">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {games.map(renderGameRow)}
             </tbody>
           </table>
@@ -324,9 +328,11 @@ const Games: React.FC = () => {
 
         {games.length === 0 && (
           <div className="text-center py-12">
-            <ClockIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-white">No games</h3>
-            <p className="mt-1 text-sm text-gray-400">Get started by creating your first game.</p>
+            <ClockIcon className="mx-auto h-12 w-12 text-gray-600 dark:text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No games</h3>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              Get started by creating your first game.
+            </p>
           </div>
         )}
       </div>
@@ -334,18 +340,22 @@ const Games: React.FC = () => {
       {/* Create Game Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-700">
-            <h3 className="text-lg font-medium text-white mb-4">Create New Game</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              Create New Game
+            </h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Home Team</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Home Team
+                </label>
                 <select
                   value={selectedTeams.home || ""}
                   onChange={(e) =>
                     setSelectedTeams((prev) => ({ ...prev, home: e.target.value || null }))
                   }
-                  className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="">Select Home Team</option>
                   {teams.map((team: any) => (
@@ -357,13 +367,15 @@ const Games: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Away Team</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Away Team
+                </label>
                 <select
                   value={selectedTeams.away || ""}
                   onChange={(e) =>
                     setSelectedTeams((prev) => ({ ...prev, away: e.target.value || null }))
                   }
-                  className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="">Select Away Team</option>
                   {teams.map((team: any) => (
@@ -381,7 +393,7 @@ const Games: React.FC = () => {
                   setShowCreateModal(false);
                   setSelectedTeams({ home: null, away: null });
                 }}
-                className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
               >
                 Cancel
               </button>

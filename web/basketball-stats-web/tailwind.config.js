@@ -64,7 +64,7 @@ module.exports = {
         "fade-in": "fadeIn 0.4s ease-out",
         "slide-in": "slideIn 0.3s ease-out",
         "shot-marker": "shotMarkerEntrance 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        "ripple": "ripple 0.6s ease-out",
+        ripple: "ripple 0.6s ease-out",
         "pulse-glow": "pulseGlow 2s ease-in-out infinite",
       },
       keyframes: {

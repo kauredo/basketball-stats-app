@@ -81,9 +81,9 @@ const GameCard: React.FC<GameCardProps> = ({
   const content = (
     <div
       className={`
-        bg-gray-800 rounded-xl p-4 border border-gray-700
+        bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700
         transition-all duration-200
-        ${onClick || showLink ? "hover:border-gray-600 hover:shadow-lg hover:shadow-black/20 cursor-pointer" : ""}
+        ${onClick || showLink ? "hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg hover:shadow-black/20 cursor-pointer" : ""}
         ${className}
       `}
       onClick={onClick}
@@ -98,14 +98,9 @@ const GameCard: React.FC<GameCardProps> = ({
               className="w-12 h-12 mb-2 rounded-full object-cover"
             />
           ) : (
-            <PlayerAvatar
-              name={awayTeam.name}
-              size="lg"
-              showNumber={false}
-              className="mb-2"
-            />
+            <PlayerAvatar name={awayTeam.name} size="lg" showNumber={false} className="mb-2" />
           )}
-          <span className="text-white font-medium text-sm text-center">
+          <span className="text-gray-900 dark:text-white font-medium text-sm text-center">
             {awayTeam.name}
           </span>
         </div>
@@ -126,7 +121,9 @@ const GameCard: React.FC<GameCardProps> = ({
           <div className="flex items-center space-x-3">
             <span
               className={`text-3xl font-bold ${
-                awayScore > homeScore && isCompleted ? "text-green-400" : "text-white"
+                awayScore > homeScore && isCompleted
+                  ? "text-green-400"
+                  : "text-gray-900 dark:text-white"
               }`}
             >
               {awayScore}
@@ -134,7 +131,9 @@ const GameCard: React.FC<GameCardProps> = ({
             <span className="text-gray-500">-</span>
             <span
               className={`text-3xl font-bold ${
-                homeScore > awayScore && isCompleted ? "text-green-400" : "text-white"
+                homeScore > awayScore && isCompleted
+                  ? "text-green-400"
+                  : "text-gray-900 dark:text-white"
               }`}
             >
               {homeScore}
@@ -142,7 +141,7 @@ const GameCard: React.FC<GameCardProps> = ({
           </div>
 
           {/* Time/Quarter Info */}
-          <div className="text-gray-400 text-xs mt-2">
+          <div className="text-gray-600 dark:text-gray-400 text-xs mt-2">
             {isLive || status === "paused" ? (
               <span>
                 Q{currentQuarter} • {timeRemaining}
@@ -162,14 +161,9 @@ const GameCard: React.FC<GameCardProps> = ({
               className="w-12 h-12 mb-2 rounded-full object-cover"
             />
           ) : (
-            <PlayerAvatar
-              name={homeTeam.name}
-              size="lg"
-              showNumber={false}
-              className="mb-2"
-            />
+            <PlayerAvatar name={homeTeam.name} size="lg" showNumber={false} className="mb-2" />
           )}
-          <span className="text-white font-medium text-sm text-center">
+          <span className="text-gray-900 dark:text-white font-medium text-sm text-center">
             {homeTeam.name}
           </span>
         </div>
@@ -205,9 +199,9 @@ export const GameCardCompact: React.FC<GameCardProps> = ({
   const content = (
     <div
       className={`
-        bg-gray-800 rounded-lg p-3 border border-gray-700
+        bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700
         transition-all duration-200
-        ${onClick || showLink ? "hover:border-gray-600 cursor-pointer" : ""}
+        ${onClick || showLink ? "hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer" : ""}
         ${className}
       `}
       onClick={onClick}
@@ -226,18 +220,18 @@ export const GameCardCompact: React.FC<GameCardProps> = ({
         {/* Teams and Score */}
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <span className="text-white text-sm">{awayTeam.name}</span>
-            <span className="text-white font-bold text-sm">{awayScore}</span>
+            <span className="text-gray-900 dark:text-white text-sm">{awayTeam.name}</span>
+            <span className="text-gray-900 dark:text-white font-bold text-sm">{awayScore}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-white text-sm">{homeTeam.name}</span>
-            <span className="text-white font-bold text-sm">{homeScore}</span>
+            <span className="text-gray-900 dark:text-white text-sm">{homeTeam.name}</span>
+            <span className="text-gray-900 dark:text-white font-bold text-sm">{homeScore}</span>
           </div>
         </div>
 
         {/* Quarter/Time */}
         {isLive && (
-          <div className="ml-3 text-gray-400 text-xs text-right">
+          <div className="ml-3 text-gray-600 dark:text-gray-400 text-xs text-right">
             <div>Q{currentQuarter}</div>
             <div>{timeRemaining}</div>
           </div>

@@ -29,7 +29,7 @@ export default function Logo({
   variant = "light",
   size = "md",
   className = "",
-  showText = true
+  showText = true,
 }: LogoProps) {
   const { width, height, textSize } = sizeMap[size];
 
@@ -39,9 +39,7 @@ export default function Logo({
 
   // logo.png = dark logo (for light backgrounds)
   // logo-light.png = light logo (for dark backgrounds)
-  const logoSrc = effectiveVariant === "light"
-    ? "/assets/logo-light.png"
-    : "/assets/logo.png";
+  const logoSrc = effectiveVariant === "light" ? "/assets/logo-light.png" : "/assets/logo.png";
 
   return (
     <div className={`flex items-center ${className}`}>
@@ -53,11 +51,11 @@ export default function Logo({
         className="object-contain"
         onError={(e) => {
           // Fallback to text if image fails to load
-          e.currentTarget.style.display = 'none';
+          e.currentTarget.style.display = "none";
         }}
       />
       {showText && (
-        <span className={`ml-2 font-bold text-white ${textSize}`}>
+        <span className={`ml-2 font-bold text-gray-900 dark:text-white ${textSize}`}>
           Basketball Stats
         </span>
       )}
@@ -69,7 +67,7 @@ export default function Logo({
 export function LogoIcon({
   variant = "light",
   size = "md",
-  className = ""
+  className = "",
 }: Omit<LogoProps, "showText">) {
   return <Logo variant={variant} size={size} className={className} showText={false} />;
 }
