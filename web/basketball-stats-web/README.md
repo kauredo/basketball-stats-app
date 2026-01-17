@@ -1,46 +1,163 @@
-# Getting Started with Create React App
+# Basketball Stats Web
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React web application for the Basketball Stats platform.
+
+## Tech Stack
+
+- **React 19** - UI framework
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Utility-first styling
+- **React Router 7** - Client-side routing
+- **Convex** - Real-time backend
+- **Recharts** - Charts and data visualization
+- **Heroicons** - Icon library
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- Convex backend running (`npx convex dev` from root)
+
+### Installation
+
+```bash
+# From repository root
+npm install
+
+# Or from this directory
+npm install
+```
+
+### Development
+
+```bash
+# Start development server
+npm run dev
+
+# Open http://localhost:5173
+```
+
+### Build
+
+```bash
+# Production build
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Project Structure
+
+```
+src/
+├── components/           # Reusable UI components
+│   ├── auth/            # Authentication forms
+│   ├── GameCard.tsx     # Game display card
+│   ├── Icon.tsx         # Icon component
+│   ├── Layout.tsx       # Main app layout with sidebar
+│   ├── Logo.tsx         # App logo
+│   ├── NotificationBell.tsx  # Notification dropdown
+│   ├── PlayerAvatar.tsx # Player avatar component
+│   ├── ShotChart.tsx    # Basketball court shot chart
+│   ├── Skeleton.tsx     # Loading skeletons
+│   └── StatButton.tsx   # Stat recording button
+├── contexts/            # React contexts
+│   ├── AuthContext.tsx  # Authentication state
+│   ├── NotificationContext.tsx  # Notifications
+│   └── ThemeContext.tsx # Light/dark mode
+├── pages/               # Route pages
+│   ├── AuthPage.tsx     # Login/signup
+│   ├── Dashboard.tsx    # Main dashboard
+│   ├── Games.tsx        # Games list
+│   ├── GameAnalysis.tsx # Post-game analysis
+│   ├── LeagueSelectionPage.tsx  # League picker
+│   ├── LiveGame.tsx     # Live game scoring
+│   ├── Players.tsx      # Players list
+│   ├── PlayerComparison.tsx  # Player comparison tool
+│   ├── PlayerProfile.tsx # Player details
+│   ├── Profile.tsx      # User profile
+│   ├── ShotCharts.tsx   # Shot chart analysis
+│   ├── Standings.tsx    # League standings
+│   ├── Statistics.tsx   # Statistics dashboard
+│   ├── Teams.tsx        # Teams list
+│   └── TeamDetail.tsx   # Team details
+├── App.tsx              # Root component
+└── index.tsx            # Entry point
+```
+
+## Key Features
+
+### Authentication
+- Email/password authentication
+- Session management via Convex
+- Protected routes
+
+### Live Game Scoring
+- Real-time stat recording
+- Player substitutions
+- Game clock management
+- Shot location tracking
+
+### Statistics & Analytics
+- Player stats with averages
+- Team comparisons
+- Shot charts with heatmaps
+- League standings
+
+### Theming
+- Light and dark mode
+- System preference detection
+- Persisted preference
 
 ## Available Scripts
 
-In the project directory, you can run:
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server at localhost:5173 |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run typecheck` | Run TypeScript type checking |
+| `npm run lint` | Run ESLint |
 
-### `npm start`
+## Environment Variables
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Create a `.env` file:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```env
+VITE_CONVEX_URL=https://your-deployment.convex.cloud
+```
 
-### `npm test`
+## Styling
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This app uses Tailwind CSS with custom configuration:
 
-### `npm run build`
+- **Dark mode**: Uses `class` strategy (`dark:` variants)
+- **Colors**: Custom orange primary, gray neutrals
+- **Responsive**: Mobile-first with `sm:`, `md:`, `lg:` breakpoints
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Deployment
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Vercel (Recommended)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+# Install Vercel CLI
+npm i -g vercel
 
-### `npm run eject`
+# Deploy
+vercel
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Netlify
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+# Build
+npm run build
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+# Deploy dist/ folder
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Environment Variables
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Set `VITE_CONVEX_URL` in your hosting platform's environment settings.
