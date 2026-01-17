@@ -1,4 +1,5 @@
 import React from "react";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface LogoProps {
   variant?: "light" | "dark" | "auto";
@@ -32,10 +33,12 @@ export default function Logo({
   showText = true,
 }: LogoProps) {
   const { width, height, textSize } = sizeMap[size];
+  const { resolvedTheme } = useTheme();
 
-  // For auto variant, we'd check theme context here
-  // Currently defaulting to light (for dark backgrounds) since app is dark theme
-  const effectiveVariant = variant === "auto" ? "light" : variant;
+  // For auto variant, use resolved theme to determine which logo to show
+  // Dark theme = use light logo, Light theme = use dark logo
+  const effectiveVariant =
+    variant === "auto" ? (resolvedTheme === "dark" ? "light" : "dark") : variant;
 
   // logo.png = dark logo (for light backgrounds)
   // logo-light.png = light logo (for dark backgrounds)
