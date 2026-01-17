@@ -11,6 +11,10 @@ import PublicLayout from "./components/layouts/PublicLayout";
 // Public pages
 import LandingPage from "./pages/public/LandingPage";
 import FAQPage from "./pages/public/FAQPage";
+import AboutPage from "./pages/public/AboutPage";
+import ContactPage from "./pages/public/ContactPage";
+import PrivacyPage from "./pages/public/PrivacyPage";
+import TermsPage from "./pages/public/TermsPage";
 
 // Auth pages
 import AuthPage from "./pages/AuthPage";
@@ -116,6 +120,38 @@ function AppRoutes() {
         element={
           <PublicLayout>
             <FAQPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/about"
+        element={
+          <PublicLayout>
+            <AboutPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/contact"
+        element={
+          <PublicLayout>
+            <ContactPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/privacy"
+        element={
+          <PublicLayout>
+            <PrivacyPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/terms"
+        element={
+          <PublicLayout>
+            <TermsPage />
           </PublicLayout>
         }
       />

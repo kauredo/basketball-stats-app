@@ -10,7 +10,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3002,
+    port: 5678,
   },
   // Allow importing from parent directories (convex folder)
   optimizeDeps: {
