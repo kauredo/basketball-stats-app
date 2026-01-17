@@ -43,7 +43,7 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="mx-auto flex items-center justify-center">
-            <LogoIcon variant="light" size="xl" />
+            <LogoIcon variant="auto" size="xl" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             Sign in to your account
