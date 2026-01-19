@@ -937,3 +937,331 @@ function formatTime(seconds: number): string {
   const remainingSeconds = seconds % 60;
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 }
+
+// Record timeout
+export const recordTimeout = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    teamId: v.id("teams"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    const team = await ctx.db.get(args.teamId);
+    if (!team) throw new Error("Team not found");
+
+    const gameSettings = game.gameSettings as any || {};
+    const timeoutsPerTeam = gameSettings.timeoutsPerTeam || 4;
+
+    // Get team stats
+    let teamStats = await ctx.db
+      .query("teamStats")
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", args.teamId))
+      .first();
+
+    const currentTimeouts = teamStats?.timeoutsRemaining ?? timeoutsPerTeam;
+
+    if (currentTimeouts <= 0) {
+      throw new Error("No timeouts remaining");
+    }
+
+    const newTimeoutsRemaining = currentTimeouts - 1;
+
+    if (teamStats) {
+      await ctx.db.patch(teamStats._id, {
+        timeoutsRemaining: newTimeoutsRemaining,
+      });
+    } else {
+      await ctx.db.insert("teamStats", {
+        gameId: args.gameId,
+        teamId: args.teamId,
+        offensiveRebounds: 0,
+        defensiveRebounds: 0,
+        teamFouls: 0,
+        timeoutsRemaining: newTimeoutsRemaining,
+      });
+    }
+
+    // Pause the game
+    if (game.status === "active") {
+      await ctx.db.patch(args.gameId, { status: "paused" });
+    }
+
+    // Log the event
+    await ctx.db.insert("gameEvents", {
+      gameId: args.gameId,
+      eventType: "timeout",
+      teamId: args.teamId,
+      quarter: game.currentQuarter,
+      gameTime: game.timeRemainingSeconds,
+      timestamp: Date.now(),
+      details: {
+        timeoutsRemaining: newTimeoutsRemaining,
+      },
+      description: `Timeout - ${team.name} (${newTimeoutsRemaining} remaining)`,
+    });
+
+    return {
+      timeoutsRemaining: newTimeoutsRemaining,
+      message: `Timeout called by ${team.name}`,
+    };
+  },
+});
+
+// Start overtime
+export const startOvertime = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    // Can only start OT after Q4 or later
+    if (game.currentQuarter < 4) {
+      throw new Error("Cannot start overtime before Q4 is complete");
+    }
+
+    const gameSettings = game.gameSettings as any || {};
+    const overtimeMinutes = gameSettings.overtimeMinutes || 5;
+    const currentOvertimes = gameSettings.overtimePeriods || 0;
+    const newOvertimeNumber = currentOvertimes + 1;
+
+    // Record score at end of regulation/previous OT
+    const scoreByPeriod = gameSettings.scoreByPeriod || {};
+    const periodKey = game.currentQuarter === 4 ? "regulation" : `ot${currentOvertimes}`;
+    scoreByPeriod[periodKey] = {
+      home: game.homeScore,
+      away: game.awayScore,
+    };
+
+    const newSettings = {
+      ...gameSettings,
+      overtimePeriods: newOvertimeNumber,
+      scoreByPeriod,
+    };
+
+    // Reset team fouls for overtime
+    const homeTeamStats = await ctx.db
+      .query("teamStats")
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", game.homeTeamId))
+      .first();
+
+    const awayTeamStats = await ctx.db
+      .query("teamStats")
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", game.awayTeamId))
+      .first();
+
+    // Reset fouls for OT period
+    if (homeTeamStats) {
+      const foulsByQuarter = homeTeamStats.foulsByQuarter || { q1: 0, q2: 0, q3: 0, q4: 0, ot: 0 };
+      foulsByQuarter.ot = 0;
+      await ctx.db.patch(homeTeamStats._id, { foulsByQuarter });
+    }
+
+    if (awayTeamStats) {
+      const foulsByQuarter = awayTeamStats.foulsByQuarter || { q1: 0, q2: 0, q3: 0, q4: 0, ot: 0 };
+      foulsByQuarter.ot = 0;
+      await ctx.db.patch(awayTeamStats._id, { foulsByQuarter });
+    }
+
+    // Update game to OT period
+    await ctx.db.patch(args.gameId, {
+      currentQuarter: 4 + newOvertimeNumber, // Q5 = OT1, Q6 = OT2, etc.
+      timeRemainingSeconds: overtimeMinutes * 60,
+      status: "paused",
+      gameSettings: newSettings,
+    });
+
+    // Log the event
+    await ctx.db.insert("gameEvents", {
+      gameId: args.gameId,
+      eventType: "overtime_start",
+      quarter: 4 + newOvertimeNumber,
+      gameTime: overtimeMinutes * 60,
+      timestamp: Date.now(),
+      details: {
+        overtimeNumber: newOvertimeNumber,
+      },
+      description: `Overtime ${newOvertimeNumber} Started`,
+    });
+
+    return {
+      overtimeNumber: newOvertimeNumber,
+      message: `Overtime ${newOvertimeNumber} started`,
+    };
+  },
+});
+
+// Update score by period when scoring
+export const updateScoreByPeriod = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const gameSettings = game.gameSettings as any || {};
+    const scoreByPeriod = gameSettings.scoreByPeriod || {
+      q1: { home: 0, away: 0 },
+      q2: { home: 0, away: 0 },
+      q3: { home: 0, away: 0 },
+      q4: { home: 0, away: 0 },
+    };
+
+    // Update current period's score
+    const currentQ = game.currentQuarter;
+    const periodKey = currentQ <= 4 ? `q${currentQ}` : `ot${currentQ - 4}`;
+    scoreByPeriod[periodKey] = {
+      home: game.homeScore,
+      away: game.awayScore,
+    };
+
+    const newSettings = { ...gameSettings, scoreByPeriod };
+    await ctx.db.patch(args.gameId, { gameSettings: newSettings });
+
+    return { scoreByPeriod };
+  },
+});
+
+// Get game events (play-by-play)
+export const getGameEvents = query({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    limit: v.optional(v.number()),
+    quarter: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const hasAccess = await canAccessLeague(ctx, user._id, game.leagueId);
+    if (!hasAccess) throw new Error("Access denied");
+
+    let events;
+    if (args.quarter !== undefined) {
+      events = await ctx.db
+        .query("gameEvents")
+        .withIndex("by_game_quarter", (q) => q.eq("gameId", args.gameId).eq("quarter", args.quarter!))
+        .order("desc")
+        .collect();
+    } else {
+      events = await ctx.db
+        .query("gameEvents")
+        .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+        .order("desc")
+        .collect();
+    }
+
+    if (args.limit) {
+      events = events.slice(0, args.limit);
+    }
+
+    // Format events with player info
+    const formattedEvents = await Promise.all(
+      events.map(async (event) => {
+        let playerInfo = null;
+        if (event.playerId) {
+          const player = await ctx.db.get(event.playerId);
+          if (player) {
+            playerInfo = {
+              id: player._id,
+              name: player.name,
+              number: player.number,
+            };
+          }
+        }
+
+        let teamInfo = null;
+        if (event.teamId) {
+          const team = await ctx.db.get(event.teamId);
+          if (team) {
+            teamInfo = {
+              id: team._id,
+              name: team.name,
+            };
+          }
+        }
+
+        return {
+          id: event._id,
+          eventType: event.eventType,
+          quarter: event.quarter,
+          gameTime: event.gameTime,
+          gameTimeDisplay: formatTime(event.gameTime),
+          timestamp: event.timestamp,
+          description: event.description,
+          details: event.details,
+          player: playerInfo,
+          team: teamInfo,
+        };
+      })
+    );
+
+    return { events: formattedEvents };
+  },
+});
+
+// Add game note
+export const addGameNote = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    note: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    await ctx.db.insert("gameEvents", {
+      gameId: args.gameId,
+      eventType: "note",
+      quarter: game.currentQuarter,
+      gameTime: game.timeRemainingSeconds,
+      timestamp: Date.now(),
+      details: {
+        userId: user._id,
+        userName: `${user.firstName} ${user.lastName}`,
+      },
+      description: args.note,
+    });
+
+    return { message: "Note added" };
+  },
+});

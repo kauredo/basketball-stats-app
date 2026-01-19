@@ -165,6 +165,8 @@ export default defineSchema({
     minutesPlayed: v.number(),
     plusMinus: v.number(),
     isOnCourt: v.boolean(),
+    // For minutes tracking: timestamp when player subbed in (null if on bench)
+    subInTimestamp: v.optional(v.number()),
   })
     .index("by_game", ["gameId"])
     .index("by_player", ["playerId"])
@@ -179,9 +181,34 @@ export default defineSchema({
     offensiveRebounds: v.number(),
     defensiveRebounds: v.number(),
     teamFouls: v.number(),
+    // Track fouls by quarter for bonus calculation
+    foulsByQuarter: v.optional(v.object({
+      q1: v.number(),
+      q2: v.number(),
+      q3: v.number(),
+      q4: v.number(),
+      ot: v.number(),
+    })),
+    // Track timeouts remaining
+    timeoutsRemaining: v.optional(v.number()),
   })
     .index("by_game", ["gameId"])
     .index("by_game_team", ["gameId", "teamId"]),
+
+  // Game Events for play-by-play logging
+  gameEvents: defineTable({
+    gameId: v.id("games"),
+    eventType: v.string(), // "shot", "foul", "timeout", "substitution", "rebound", etc.
+    playerId: v.optional(v.id("players")),
+    teamId: v.optional(v.id("teams")),
+    quarter: v.number(),
+    gameTime: v.number(), // seconds remaining in quarter
+    timestamp: v.number(),
+    details: v.optional(v.any()), // Additional event-specific data
+    description: v.string(),
+  })
+    .index("by_game", ["gameId"])
+    .index("by_game_quarter", ["gameId", "quarter"]),
 
   // Shot attempts with location data for shot charts
   shots: defineTable({

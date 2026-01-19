@@ -41,6 +41,130 @@ type StatType =
   | "turnover"
   | "foul";
 
+type FoulType = "personal" | "shooting" | "offensive" | "technical" | "flagrant1" | "flagrant2";
+
+interface FreeThrowSequence {
+  playerId: Id<"players">;
+  playerName: string;
+  playerNumber: number;
+  totalAttempts: number;
+  currentAttempt: number;
+  isOneAndOne: boolean;
+  results: boolean[];
+}
+
+interface TeamStatsData {
+  offensiveRebounds: number;
+  defensiveRebounds: number;
+  teamFouls: number;
+  foulsThisQuarter: number;
+  foulsByQuarter: { q1: number; q2: number; q3: number; q4: number; ot: number };
+  timeoutsRemaining: number;
+  inBonus: boolean;
+  inDoubleBonus: boolean;
+}
+
+// Sound/Haptic Feedback Hook
+const useFeedback = () => {
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  const getAudioContext = () => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    return audioContextRef.current;
+  };
+
+  const playTone = (frequency: number, duration: number, type: OscillatorType = "sine") => {
+    try {
+      const ctx = getAudioContext();
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      oscillator.frequency.value = frequency;
+      oscillator.type = type;
+      gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + duration);
+    } catch (e) {
+      // Audio not supported
+    }
+  };
+
+  const vibrate = (pattern: number | number[]) => {
+    if (navigator.vibrate) {
+      navigator.vibrate(pattern);
+    }
+  };
+
+  const confirm = () => {
+    // Short success beep + vibration
+    playTone(800, 0.1);
+    vibrate(50);
+  };
+
+  const made = () => {
+    // Higher pitched success for made shots
+    playTone(1000, 0.15);
+    vibrate([30, 20, 30]);
+  };
+
+  const missed = () => {
+    // Lower pitched for missed
+    playTone(300, 0.1);
+    vibrate(30);
+  };
+
+  const foul = () => {
+    // Warning sound for fouls
+    playTone(400, 0.2, "square");
+    vibrate([50, 30, 50]);
+  };
+
+  const foulOut = () => {
+    // Alert sound for foul out
+    playTone(200, 0.3, "sawtooth");
+    vibrate([100, 50, 100, 50, 100]);
+  };
+
+  const timeout = () => {
+    // Double beep for timeout
+    playTone(600, 0.1);
+    setTimeout(() => playTone(600, 0.1), 150);
+    vibrate([50, 50, 50]);
+  };
+
+  const overtime = () => {
+    // Special sound for overtime
+    playTone(500, 0.2);
+    setTimeout(() => playTone(700, 0.2), 200);
+    setTimeout(() => playTone(900, 0.3), 400);
+    vibrate([100, 50, 100, 50, 100]);
+  };
+
+  const error = () => {
+    // Error sound
+    playTone(200, 0.3, "square");
+    vibrate([100, 50, 100]);
+  };
+
+  return {
+    confirm,
+    made,
+    missed,
+    foul,
+    foulOut,
+    timeout,
+    overtime,
+    error,
+  };
+};
+
 interface PlayerStat {
   id: Id<"playerStats">;
   playerId: Id<"players">;
@@ -380,6 +504,107 @@ const getShotZoneName = (x: number, y: number, is3pt: boolean): string => {
   }
 };
 
+// Assist Prompt Modal - appears after made shots
+interface AssistPromptModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAssist: (playerId: Id<"players">) => void;
+  onNoAssist: () => void;
+  scorerName: string;
+  scorerNumber: number;
+  shotType: string;
+  points: number;
+  teammates: PlayerStat[];
+}
+
+const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
+  isOpen,
+  onClose,
+  onAssist,
+  onNoAssist,
+  scorerName,
+  scorerNumber,
+  shotType,
+  points,
+  teammates,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+        {/* Header */}
+        <div className="bg-green-600 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-white">Assist?</h3>
+              <p className="text-green-200 text-sm">
+                #{scorerNumber} {scorerName} scored {points}PT
+              </p>
+            </div>
+            <div className="px-3 py-1 bg-white/20 rounded-full text-white text-sm font-bold">
+              +{points} PTS
+            </div>
+          </div>
+        </div>
+
+        {/* Teammate list for assist */}
+        <div className="max-h-60 overflow-y-auto">
+          <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+            <span className="text-xs text-gray-500 uppercase">Who assisted?</span>
+          </div>
+          {teammates.length === 0 ? (
+            <div className="p-6 text-center text-gray-500">
+              No other players on court
+            </div>
+          ) : (
+            teammates.map((player) => (
+              <button
+                key={player.id}
+                onClick={() => onAssist(player.playerId)}
+                className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-sm">#{player.player?.number}</span>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-gray-900 dark:text-white font-medium text-sm">
+                      {player.player?.name}
+                    </div>
+                    <div className="text-gray-500 text-xs">
+                      {player.assists} AST
+                    </div>
+                  </div>
+                </div>
+                <div className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-lg">
+                  +AST
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+
+        {/* No assist / Cancel */}
+        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+          <button
+            onClick={onNoAssist}
+            className="flex-1 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            No Assist
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Rebound Prompt Modal - appears after missed shots
 interface ReboundPromptModalProps {
   isOpen: boolean;
@@ -626,6 +851,722 @@ const FoulDots: React.FC<FoulDotsProps> = ({ fouls, foulLimit, fouledOut }) => {
   );
 };
 
+// Bonus Indicator Component
+interface BonusIndicatorProps {
+  inBonus: boolean;
+  inDoubleBonus: boolean;
+}
+
+const BonusIndicator: React.FC<BonusIndicatorProps> = ({ inBonus, inDoubleBonus }) => {
+  if (!inBonus) return null;
+
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+      inDoubleBonus
+        ? "bg-red-600 text-white"
+        : "bg-yellow-500 text-black"
+    }`}>
+      {inDoubleBonus ? "2X" : "BONUS"}
+    </span>
+  );
+};
+
+// Timeout Dots Component
+interface TimeoutDotsProps {
+  remaining: number;
+  total: number;
+  teamSide: "left" | "right";
+}
+
+const TimeoutDots: React.FC<TimeoutDotsProps> = ({ remaining, total, teamSide }) => {
+  return (
+    <div className={`flex gap-1 ${teamSide === "right" ? "flex-row-reverse" : ""}`}>
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={`w-2 h-2 rounded-full ${
+            i < remaining ? "bg-orange-500" : "bg-gray-400"
+          }`}
+        />
+      ))}
+    </div>
+  );
+};
+
+// Foul Recording Modal - Enhanced foul tracking
+interface FoulRecordingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onRecord: (
+    playerId: Id<"players">,
+    foulType: FoulType,
+    options?: { wasAndOne?: boolean; shotType?: "2pt" | "3pt"; fouledPlayerId?: Id<"players"> }
+  ) => void;
+  selectedPlayer: PlayerStat | null;
+  opponentPlayers: PlayerStat[]; // For shooting fouls - who was fouled
+  isOpponentTeam?: boolean; // Whether we're recording foul against opponent
+}
+
+const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
+  isOpen,
+  onClose,
+  onRecord,
+  selectedPlayer,
+  opponentPlayers,
+  isOpponentTeam,
+}) => {
+  const [foulType, setFoulType] = useState<FoulType>("personal");
+  const [showShootingDetails, setShowShootingDetails] = useState(false);
+  const [shotType, setShotType] = useState<"2pt" | "3pt">("2pt");
+  const [wasAndOne, setWasAndOne] = useState(false);
+  const [fouledPlayer, setFouledPlayer] = useState<Id<"players"> | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setFoulType("personal");
+      setShowShootingDetails(false);
+      setShotType("2pt");
+      setWasAndOne(false);
+      setFouledPlayer(null);
+    }
+  }, [isOpen]);
+
+  if (!isOpen || !selectedPlayer) return null;
+
+  const handleFoulTypeSelect = (type: FoulType) => {
+    setFoulType(type);
+    if (type === "shooting") {
+      setShowShootingDetails(true);
+    } else {
+      setShowShootingDetails(false);
+      // For non-shooting fouls, record immediately
+      onRecord(selectedPlayer.playerId, type);
+      onClose();
+    }
+  };
+
+  const handleShootingFoulConfirm = () => {
+    if (!fouledPlayer) return;
+    onRecord(selectedPlayer.playerId, "shooting", {
+      wasAndOne,
+      shotType,
+      fouledPlayerId: fouledPlayer,
+    });
+    onClose();
+  };
+
+  const opponentOnCourt = opponentPlayers.filter((p) => p.isOnCourt);
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+        {/* Header */}
+        <div className="bg-amber-600 px-6 py-4">
+          <h3 className="text-lg font-bold text-white">
+            FOUL - #{selectedPlayer.player?.number} {selectedPlayer.player?.name}
+          </h3>
+          <p className="text-amber-200 text-sm">
+            Current fouls: {selectedPlayer.fouls}
+          </p>
+        </div>
+
+        {!showShootingDetails ? (
+          /* Foul Type Selection */
+          <div className="p-4">
+            <p className="text-sm text-gray-500 mb-3">Select foul type:</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => handleFoulTypeSelect("personal")}
+                className="py-3 px-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium text-gray-900 dark:text-white transition-colors"
+              >
+                Personal
+              </button>
+              <button
+                onClick={() => handleFoulTypeSelect("shooting")}
+                className="py-3 px-4 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 rounded-lg font-medium text-blue-700 dark:text-blue-300 transition-colors"
+              >
+                Shooting
+              </button>
+              <button
+                onClick={() => handleFoulTypeSelect("offensive")}
+                className="py-3 px-4 bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 dark:hover:bg-orange-900/50 rounded-lg font-medium text-orange-700 dark:text-orange-300 transition-colors"
+              >
+                Offensive
+              </button>
+              <button
+                onClick={() => handleFoulTypeSelect("technical")}
+                className="py-3 px-4 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-lg font-medium text-red-700 dark:text-red-300 transition-colors"
+              >
+                Technical
+              </button>
+              <button
+                onClick={() => handleFoulTypeSelect("flagrant1")}
+                className="py-3 px-4 bg-red-200 dark:bg-red-800/30 hover:bg-red-300 dark:hover:bg-red-800/50 rounded-lg font-medium text-red-800 dark:text-red-200 transition-colors"
+              >
+                Flagrant 1
+              </button>
+              <button
+                onClick={() => handleFoulTypeSelect("flagrant2")}
+                className="py-3 px-4 bg-red-300 dark:bg-red-700/30 hover:bg-red-400 dark:hover:bg-red-700/50 rounded-lg font-medium text-red-900 dark:text-red-100 transition-colors"
+              >
+                Flagrant 2
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Shooting Foul Details */
+          <div className="p-4">
+            <button
+              onClick={() => setShowShootingDetails(false)}
+              className="text-sm text-blue-600 dark:text-blue-400 mb-3 flex items-center gap-1"
+            >
+              ← Back to foul types
+            </button>
+
+            <div className="space-y-4">
+              {/* Shot Type */}
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Shot type:</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShotType("2pt")}
+                    className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
+                      shotType === "2pt"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    2PT
+                  </button>
+                  <button
+                    onClick={() => setShotType("3pt")}
+                    className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
+                      shotType === "3pt"
+                        ? "bg-purple-600 text-white"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    3PT
+                  </button>
+                </div>
+              </div>
+
+              {/* And-1 */}
+              <div>
+                <p className="text-sm text-gray-500 mb-2">And-1? (shot was made)</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setWasAndOne(false)}
+                    className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
+                      !wasAndOne
+                        ? "bg-red-600 text-white"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    No
+                  </button>
+                  <button
+                    onClick={() => setWasAndOne(true)}
+                    className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
+                      wasAndOne
+                        ? "bg-green-600 text-white"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    Yes (And-1)
+                  </button>
+                </div>
+              </div>
+
+              {/* Who was fouled */}
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Who was fouled?</p>
+                <div className="max-h-40 overflow-y-auto space-y-1">
+                  {opponentOnCourt.map((player) => (
+                    <button
+                      key={player.id}
+                      onClick={() => setFouledPlayer(player.playerId)}
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                        fouledPlayer === player.playerId
+                          ? "bg-green-100 dark:bg-green-900/30 border-2 border-green-500"
+                          : "bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}
+                    >
+                      <span className="font-bold text-sm">#{player.player?.number}</span>
+                      <span className="text-sm">{player.player?.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Confirm */}
+              <button
+                onClick={handleShootingFoulConfirm}
+                disabled={!fouledPlayer}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white font-bold rounded-lg transition-colors"
+              >
+                Record Shooting Foul
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Cancel */}
+        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Free Throw Sequence Modal
+interface FreeThrowSequenceModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onRecord: (made: boolean) => void;
+  sequence: FreeThrowSequence | null;
+}
+
+const FreeThrowSequenceModal: React.FC<FreeThrowSequenceModalProps> = ({
+  isOpen,
+  onClose,
+  onRecord,
+  sequence,
+}) => {
+  if (!isOpen || !sequence) return null;
+
+  const { playerName, playerNumber, totalAttempts, currentAttempt, isOneAndOne, results } = sequence;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        {/* Header */}
+        <div className="bg-green-600 px-6 py-4">
+          <h3 className="text-lg font-bold text-white">
+            FREE THROWS - #{playerNumber} {playerName}
+          </h3>
+          <p className="text-green-200 text-sm">
+            Attempt {currentAttempt} of {totalAttempts}
+            {isOneAndOne && currentAttempt === 1 && " (1-and-1)"}
+          </p>
+        </div>
+
+        {/* Results so far */}
+        {results.length > 0 && (
+          <div className="px-6 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 uppercase">Results:</span>
+              {results.map((made, i) => (
+                <span
+                  key={i}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                    made ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                  }`}
+                >
+                  {made ? "✓" : "✗"}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Made/Missed Buttons */}
+        <div className="p-6">
+          <div className="flex gap-4">
+            <button
+              onClick={() => onRecord(true)}
+              className="flex-1 py-6 bg-green-600 hover:bg-green-700 text-white text-xl font-bold rounded-xl transition-colors"
+            >
+              MADE
+            </button>
+            <button
+              onClick={() => onRecord(false)}
+              className="flex-1 py-6 bg-red-600 hover:bg-red-700 text-white text-xl font-bold rounded-xl transition-colors"
+            >
+              MISSED
+            </button>
+          </div>
+        </div>
+
+        {/* Cancel */}
+        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+          >
+            Cancel Free Throws
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Quick Undo Chip Component
+interface QuickUndoChipProps {
+  lastAction: ActionHistoryItem | null;
+  onUndo: () => void;
+  onDismiss: () => void;
+}
+
+const QuickUndoChip: React.FC<QuickUndoChipProps> = ({ lastAction, onUndo, onDismiss }) => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (lastAction) {
+      setVisible(true);
+      const timer = setTimeout(() => setVisible(false), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [lastAction]);
+
+  if (!lastAction || !visible) return null;
+
+  const getStatLabel = (statType: StatType, made?: boolean) => {
+    switch (statType) {
+      case "shot2": return made ? "2PT Made" : "2PT Miss";
+      case "shot3": return made ? "3PT Made" : "3PT Miss";
+      case "freethrow": return made ? "FT Made" : "FT Miss";
+      case "rebound": return "REB";
+      case "assist": return "AST";
+      case "steal": return "STL";
+      case "block": return "BLK";
+      case "turnover": return "TO";
+      case "foul": return "FOUL";
+      default: return statType;
+    }
+  };
+
+  return (
+    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 animate-in slide-in-from-bottom">
+      <div className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-full shadow-lg">
+        <button
+          onClick={onUndo}
+          className="flex items-center gap-2 hover:text-orange-400 transition-colors"
+        >
+          <ArrowUturnLeftIcon className="h-4 w-4" />
+          <span className="text-sm">
+            Undo: #{lastAction.playerNumber} {getStatLabel(lastAction.statType, lastAction.made)}
+          </span>
+        </button>
+        <button
+          onClick={() => { setVisible(false); onDismiss(); }}
+          className="text-gray-400 hover:text-white"
+        >
+          <Icon name="x" size={16} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Overtime Prompt Modal
+interface OvertimePromptModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onStartOvertime: () => void;
+  onEndAsTie: () => void;
+  homeScore: number;
+  awayScore: number;
+}
+
+const OvertimePromptModal: React.FC<OvertimePromptModalProps> = ({
+  isOpen,
+  onClose,
+  onStartOvertime,
+  onEndAsTie,
+  homeScore,
+  awayScore,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="bg-orange-600 px-6 py-4">
+          <h3 className="text-lg font-bold text-white text-center">
+            Game Tied {homeScore}-{awayScore}
+          </h3>
+          <p className="text-orange-200 text-sm text-center">
+            End of Regulation
+          </p>
+        </div>
+
+        <div className="p-6 space-y-3">
+          <button
+            onClick={onStartOvertime}
+            className="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-colors"
+          >
+            Start Overtime
+          </button>
+          <button
+            onClick={onEndAsTie}
+            className="w-full py-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-colors"
+          >
+            End as Tie
+          </button>
+        </div>
+
+        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Team Stats Summary Strip Component
+interface TeamStatsSummaryProps {
+  stats: PlayerStat[];
+  teamName: string;
+  isExpanded: boolean;
+  onToggle: () => void;
+}
+
+const TeamStatsSummary: React.FC<TeamStatsSummaryProps> = ({ stats, teamName, isExpanded, onToggle }) => {
+  // Calculate team totals
+  const totals = stats.reduce(
+    (acc, s) => ({
+      fgm: acc.fgm + (s as any).fieldGoalsMade || 0,
+      fga: acc.fga + (s as any).fieldGoalsAttempted || 0,
+      tpm: acc.tpm + (s as any).threePointersMade || 0,
+      tpa: acc.tpa + (s as any).threePointersAttempted || 0,
+      ftm: acc.ftm + (s as any).freeThrowsMade || 0,
+      fta: acc.fta + (s as any).freeThrowsAttempted || 0,
+      reb: acc.reb + s.rebounds,
+      to: acc.to + s.turnovers,
+      ast: acc.ast + s.assists,
+    }),
+    { fgm: 0, fga: 0, tpm: 0, tpa: 0, ftm: 0, fta: 0, reb: 0, to: 0, ast: 0 }
+  );
+
+  const fgPct = totals.fga > 0 ? Math.round((totals.fgm / totals.fga) * 100) : 0;
+  const tpPct = totals.tpa > 0 ? Math.round((totals.tpm / totals.tpa) * 100) : 0;
+  const ftPct = totals.fta > 0 ? Math.round((totals.ftm / totals.fta) * 100) : 0;
+
+  return (
+    <button
+      onClick={onToggle}
+      className="w-full text-left px-3 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{teamName}</span>
+        <div className="flex items-center gap-3 text-xs">
+          <span className="text-gray-600 dark:text-gray-400">{fgPct}% FG</span>
+          <span className="text-gray-600 dark:text-gray-400">{tpPct}% 3P</span>
+          <span className="text-gray-600 dark:text-gray-400">{ftPct}% FT</span>
+          <span className="text-gray-600 dark:text-gray-400">{totals.reb} REB</span>
+          <span className="text-gray-600 dark:text-gray-400">{totals.to} TO</span>
+        </div>
+      </div>
+    </button>
+  );
+};
+
+// Quarter-by-Quarter Breakdown Component
+interface QuarterBreakdownProps {
+  homeTeamName: string;
+  awayTeamName: string;
+  scoreByPeriod?: {
+    q1?: { home: number; away: number };
+    q2?: { home: number; away: number };
+    q3?: { home: number; away: number };
+    q4?: { home: number; away: number };
+    [key: string]: { home: number; away: number } | undefined;
+  };
+  currentQuarter: number;
+  homeScore: number;
+  awayScore: number;
+}
+
+const QuarterBreakdown: React.FC<QuarterBreakdownProps> = ({
+  homeTeamName,
+  awayTeamName,
+  scoreByPeriod = {},
+  currentQuarter,
+  homeScore,
+  awayScore,
+}) => {
+  // Get all periods to display (Q1-Q4 + any OT periods)
+  const periods = ["Q1", "Q2", "Q3", "Q4"];
+  const overtimes = Object.keys(scoreByPeriod).filter((k) => k.startsWith("ot"));
+  overtimes.sort().forEach((ot) => periods.push(ot.toUpperCase()));
+
+  // If we're in overtime and it's not in scoreByPeriod yet, add it
+  if (currentQuarter > 4) {
+    const currentOT = `OT${currentQuarter - 4}`;
+    if (!periods.includes(currentOT)) {
+      periods.push(currentOT);
+    }
+  }
+
+  // Calculate scores per quarter (differential from previous total)
+  const getQuarterScore = (periodKey: string, team: "home" | "away"): number | string => {
+    const key = periodKey.toLowerCase();
+    if (scoreByPeriod[key]) {
+      return scoreByPeriod[key]![team];
+    }
+    // For current period, we don't have final score yet
+    const periodIndex = periods.indexOf(periodKey);
+    const currentPeriodIndex = currentQuarter <= 4 ? currentQuarter - 1 : 4 + (currentQuarter - 4) - 1;
+    if (periodIndex === currentPeriodIndex) {
+      return "-";
+    }
+    return "-";
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+      <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Score by Period</h4>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-xs">
+          <thead>
+            <tr className="border-b border-gray-300 dark:border-gray-600">
+              <th className="text-left py-2 px-2 text-gray-700 dark:text-gray-300 font-medium">Team</th>
+              {periods.map((p) => (
+                <th key={p} className="text-center py-2 px-2 text-gray-700 dark:text-gray-300 font-medium w-10">
+                  {p}
+                </th>
+              ))}
+              <th className="text-center py-2 px-2 text-gray-700 dark:text-gray-300 font-bold w-14">Final</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b border-gray-200 dark:border-gray-700">
+              <td className="py-2 px-2 text-gray-900 dark:text-white font-medium truncate max-w-[80px]">
+                {awayTeamName}
+              </td>
+              {periods.map((p) => (
+                <td key={p} className="text-center py-2 px-2 text-gray-600 dark:text-gray-400">
+                  {getQuarterScore(p, "away")}
+                </td>
+              ))}
+              <td className="text-center py-2 px-2 text-gray-900 dark:text-white font-bold">{awayScore}</td>
+            </tr>
+            <tr>
+              <td className="py-2 px-2 text-gray-900 dark:text-white font-medium truncate max-w-[80px]">
+                {homeTeamName}
+              </td>
+              {periods.map((p) => (
+                <td key={p} className="text-center py-2 px-2 text-gray-600 dark:text-gray-400">
+                  {getQuarterScore(p, "home")}
+                </td>
+              ))}
+              <td className="text-center py-2 px-2 text-gray-900 dark:text-white font-bold">{homeScore}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// Play-by-Play Panel Component
+interface PlayByPlayEvent {
+  id: string;
+  eventType: string;
+  quarter: number;
+  gameTimeDisplay: string;
+  description: string;
+  player?: { number: number; name: string } | null;
+  team?: { name: string } | null;
+}
+
+interface PlayByPlayPanelProps {
+  events: PlayByPlayEvent[];
+  isLoading: boolean;
+}
+
+const PlayByPlayPanel: React.FC<PlayByPlayPanelProps> = ({ events, isLoading }) => {
+  const getEventIcon = (eventType: string) => {
+    switch (eventType) {
+      case "shot":
+        return "🏀";
+      case "foul":
+        return "🚫";
+      case "freethrow":
+        return "🎯";
+      case "timeout":
+        return "⏸️";
+      case "substitution":
+        return "🔄";
+      case "rebound":
+        return "⬆️";
+      case "steal":
+        return "💨";
+      case "block":
+        return "✋";
+      case "turnover":
+        return "❌";
+      case "overtime_start":
+        return "⏰";
+      case "note":
+        return "📝";
+      default:
+        return "•";
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="animate-pulse space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="w-12 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (events.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 text-center">
+        <p className="text-gray-500 dark:text-gray-400">No events recorded yet</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Play-by-Play</h4>
+      </div>
+      <div className="max-h-80 overflow-y-auto">
+        {events.map((event) => (
+          <div
+            key={event.id}
+            className="flex items-start gap-3 px-3 py-2 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+          >
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="text-[10px] text-gray-500 font-mono w-10">
+                Q{event.quarter > 4 ? "OT" + (event.quarter - 4) : event.quarter}
+              </span>
+              <span className="text-[10px] text-gray-400 font-mono w-10">{event.gameTimeDisplay}</span>
+            </div>
+            <span className="text-sm flex-shrink-0">{getEventIcon(event.eventType)}</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">{event.description}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // Inline Substitution Panel Component
 interface InlineSubPanelProps {
   teamName: string;
@@ -791,8 +1732,32 @@ const LiveGame: React.FC = () => {
     isHomeTeam: boolean;
   } | null>(null);
 
+  // State for assist prompt after made shots
+  const [pendingAssist, setPendingAssist] = useState<{
+    scorerPlayerId: Id<"players">;
+    scorerName: string;
+    scorerNumber: number;
+    scorerTeamId: Id<"teams">;
+    shotType: string;
+    points: number;
+    isHomeTeam: boolean;
+  } | null>(null);
+
   // State for quick stat modal (non-shot stats)
   const [pendingQuickStat, setPendingQuickStat] = useState<StatType | null>(null);
+
+  // State for enhanced foul recording
+  const [pendingFoul, setPendingFoul] = useState<PlayerStat | null>(null);
+
+  // State for free throw sequence
+  const [freeThrowSequence, setFreeThrowSequence] = useState<FreeThrowSequence | null>(null);
+
+  // State for overtime prompt
+  const [showOvertimePrompt, setShowOvertimePrompt] = useState(false);
+
+  // State for team stats summary expansion
+  const [showHomeStatsSummary, setShowHomeStatsSummary] = useState(false);
+  const [showAwayStatsSummary, setShowAwayStatsSummary] = useState(false);
 
   // Convex queries
   const gameData = useQuery(
@@ -803,6 +1768,11 @@ const LiveGame: React.FC = () => {
   const liveStats = useQuery(
     api.stats.getLiveStats,
     token && gameId ? { token, gameId: gameId as Id<"games"> } : "skip"
+  );
+
+  const gameEvents = useQuery(
+    api.games.getGameEvents,
+    token && gameId ? { token, gameId: gameId as Id<"games">, limit: 50 } : "skip"
   );
 
   // Convex mutations
@@ -817,9 +1787,16 @@ const LiveGame: React.FC = () => {
   const recordTeamReboundMutation = useMutation(api.stats.recordTeamRebound);
   const setQuarter = useMutation(api.games.setQuarter);
   const updateGameSettings = useMutation(api.games.updateGameSettings);
+  const recordFoulWithContextMutation = useMutation(api.stats.recordFoulWithContext);
+  const recordFreeThrowMutation = useMutation(api.stats.recordFreeThrow);
+  const recordTimeoutMutation = useMutation(api.games.recordTimeout);
+  const startOvertimeMutation = useMutation(api.games.startOvertime);
 
   // State for inline substitution swap
   const [swappingPlayer, setSwappingPlayer] = useState<Id<"players"> | null>(null);
+
+  // Sound/Haptic feedback
+  const feedback = useFeedback();
 
   const game = gameData?.game;
   const stats = (liveStats?.stats || []) as PlayerStat[];
@@ -924,9 +1901,39 @@ const LiveGame: React.FC = () => {
         ...prev.slice(0, 19), // Keep last 20 actions
       ]);
 
+      // Sound/haptic feedback
+      if (statType === "shot2" || statType === "shot3" || statType === "freethrow") {
+        if (made) {
+          feedback.made();
+        } else {
+          feedback.missed();
+        }
+      } else {
+        feedback.confirm();
+      }
+
       // Track recent shots for visualization
       if (shotLocation && (statType === "shot2" || statType === "shot3")) {
         setRecentShots((prev) => [...prev.slice(-4), { ...shotLocation, made: made || false }]);
+      }
+
+      // Show assist prompt after made shots (with 300ms delay)
+      const isMadeShot =
+        (statType === "shot2" || statType === "shot3") && made === true;
+
+      if (isMadeShot) {
+        const points = statType === "shot3" ? 3 : 2;
+        setTimeout(() => {
+          setPendingAssist({
+            scorerPlayerId: playerId,
+            scorerName: playerStat.player?.name || "Unknown",
+            scorerNumber: playerStat.player?.number || 0,
+            scorerTeamId: playerStat.teamId,
+            shotType: statType,
+            points,
+            isHomeTeam: playerStat.isHomeTeam,
+          });
+        }, 300);
       }
 
       // Show rebound prompt after missed shots (with 500ms delay)
@@ -994,7 +2001,15 @@ const LiveGame: React.FC = () => {
       const currentQ = game.currentQuarter;
 
       if (currentQ >= 4) {
-        // Q4 or later - end the game
+        // Q4 or later - check if game is tied for overtime
+        if (game.homeScore === game.awayScore) {
+          // Game is tied - show overtime prompt
+          setShowEndPeriodConfirm(false);
+          setShowOvertimePrompt(true);
+          return;
+        }
+
+        // Not tied - end the game
         await endGame({
           token,
           gameId: gameId as Id<"games">,
@@ -1117,14 +2132,249 @@ const LiveGame: React.FC = () => {
     }
   };
 
+  // Handle assist from modal
+  const handleAssist = async (assisterId: Id<"players">) => {
+    if (!token || !gameId) return;
+
+    try {
+      await recordStat({
+        token,
+        gameId: gameId as Id<"games">,
+        playerId: assisterId,
+        statType: "assist",
+      });
+
+      // Track in action history
+      const assister = stats.find((s) => s.playerId === assisterId);
+      if (assister) {
+        setActionHistory((prev) => [
+          {
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            playerId: assisterId,
+            playerName: assister.player?.name || "Unknown",
+            playerNumber: assister.player?.number || 0,
+            statType: "assist",
+            timestamp: Date.now(),
+          },
+          ...prev.slice(0, 19),
+        ]);
+      }
+
+      setPendingAssist(null);
+    } catch (error) {
+      console.error("Failed to record assist:", error);
+    }
+  };
+
   // Handle quick stat from modal (non-shot stats)
   const handleQuickStatFromModal = (playerId: Id<"players">) => {
     if (!pendingQuickStat) return;
+
+    // For fouls, open the enhanced foul modal
+    if (pendingQuickStat === "foul") {
+      const playerStat = stats.find((s) => s.playerId === playerId);
+      if (playerStat) {
+        setPendingFoul(playerStat);
+      }
+      setPendingQuickStat(null);
+      return;
+    }
 
     // For free throws, default to "made"
     const made = pendingQuickStat === "freethrow" ? true : undefined;
     handleRecordStat(playerId, pendingQuickStat, made);
     setPendingQuickStat(null);
+  };
+
+  // Handle enhanced foul recording
+  const handleRecordFoulWithContext = async (
+    playerId: Id<"players">,
+    foulType: FoulType,
+    options?: { wasAndOne?: boolean; shotType?: "2pt" | "3pt"; fouledPlayerId?: Id<"players"> }
+  ) => {
+    if (!token || !gameId) return;
+
+    try {
+      const result = await recordFoulWithContextMutation({
+        token,
+        gameId: gameId as Id<"games">,
+        playerId,
+        foulType,
+        wasAndOne: options?.wasAndOne,
+        shotType: options?.shotType,
+        fouledPlayerId: options?.fouledPlayerId,
+      });
+
+      // Track in action history
+      const playerStat = stats.find((s) => s.playerId === playerId);
+      if (playerStat) {
+        setActionHistory((prev) => [
+          {
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            playerId,
+            playerName: playerStat.player?.name || "Unknown",
+            playerNumber: playerStat.player?.number || 0,
+            statType: "foul",
+            timestamp: Date.now(),
+          },
+          ...prev.slice(0, 19),
+        ]);
+      }
+
+      // Close foul modal
+      setPendingFoul(null);
+
+      // Sound/haptic feedback for foul
+      if (result.playerFouledOut) {
+        feedback.foulOut();
+      } else {
+        feedback.foul();
+      }
+
+      // If free throws are awarded, start free throw sequence
+      if (result.freeThrowsAwarded > 0) {
+        // Determine who shoots the free throws
+        let shooterId = playerId; // Default to fouling player for technicals
+        let shooterName = playerStat?.player?.name || "Unknown";
+        let shooterNumber = playerStat?.player?.number || 0;
+
+        if (foulType === "shooting" && options?.fouledPlayerId) {
+          // For shooting fouls, the fouled player shoots
+          shooterId = options.fouledPlayerId;
+          const shooter = stats.find((s) => s.playerId === options.fouledPlayerId);
+          if (shooter) {
+            shooterName = shooter.player?.name || "Unknown";
+            shooterNumber = shooter.player?.number || 0;
+          }
+        } else if (foulType === "personal" && result.inBonus) {
+          // For personal fouls in bonus, need to select who was fouled
+          // For simplicity, we'll just use the first on-court player from the other team
+          const foulerTeam = stats.find((s) => s.playerId === playerId)?.teamId;
+          const otherTeamOnCourt = stats.filter((s) => s.teamId !== foulerTeam && s.isOnCourt);
+          if (otherTeamOnCourt.length > 0) {
+            const shooter = otherTeamOnCourt[0];
+            shooterId = shooter.playerId;
+            shooterName = shooter.player?.name || "Unknown";
+            shooterNumber = shooter.player?.number || 0;
+          }
+        }
+
+        // Determine if this is a 1-and-1 situation
+        const isOneAndOne = result.bonusMode === "college" && result.inBonus && !result.inDoubleBonus;
+
+        setFreeThrowSequence({
+          playerId: shooterId,
+          playerName: shooterName,
+          playerNumber: shooterNumber,
+          totalAttempts: result.freeThrowsAwarded,
+          currentAttempt: 1,
+          isOneAndOne,
+          results: [],
+        });
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Failed to record foul:", error);
+    }
+  };
+
+  // Handle free throw result
+  const handleFreeThrowResult = async (made: boolean) => {
+    if (!token || !gameId || !freeThrowSequence) return;
+
+    try {
+      const result = await recordFreeThrowMutation({
+        token,
+        gameId: gameId as Id<"games">,
+        playerId: freeThrowSequence.playerId,
+        made,
+        attemptNumber: freeThrowSequence.currentAttempt,
+        totalAttempts: freeThrowSequence.totalAttempts,
+        isOneAndOne: freeThrowSequence.isOneAndOne,
+      });
+
+      // Update results
+      const newResults = [...freeThrowSequence.results, made];
+
+      if (result.sequenceContinues && result.nextAttemptNumber) {
+        // Continue sequence
+        setFreeThrowSequence({
+          ...freeThrowSequence,
+          currentAttempt: result.nextAttemptNumber,
+          results: newResults,
+        });
+      } else {
+        // Sequence complete
+        setFreeThrowSequence(null);
+
+        // Show rebound prompt on last missed FT
+        if (!made) {
+          const shooter = stats.find((s) => s.playerId === freeThrowSequence.playerId);
+          if (shooter) {
+            setPendingRebound({
+              shooterPlayerId: freeThrowSequence.playerId,
+              shooterTeamId: shooter.teamId,
+              shotType: "freethrow",
+              isHomeTeam: shooter.isHomeTeam,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to record free throw:", error);
+    }
+  };
+
+  // Handle timeout
+  const handleTimeout = async (teamId: Id<"teams">) => {
+    if (!token || !gameId) return;
+
+    try {
+      await recordTimeoutMutation({
+        token,
+        gameId: gameId as Id<"games">,
+        teamId,
+      });
+      feedback.timeout();
+    } catch (error) {
+      console.error("Failed to record timeout:", error);
+      feedback.error();
+      alert((error as Error).message || "Failed to record timeout");
+    }
+  };
+
+  // Handle start overtime
+  const handleStartOvertime = async () => {
+    if (!token || !gameId) return;
+
+    try {
+      await startOvertimeMutation({
+        token,
+        gameId: gameId as Id<"games">,
+      });
+      feedback.overtime();
+      setShowOvertimePrompt(false);
+    } catch (error) {
+      console.error("Failed to start overtime:", error);
+      feedback.error();
+    }
+  };
+
+  // Handle end game as tie
+  const handleEndAsTie = async () => {
+    if (!token || !gameId) return;
+
+    try {
+      await endGame({
+        token,
+        gameId: gameId as Id<"games">,
+        forceEnd: true,
+      });
+      setShowOvertimePrompt(false);
+    } catch (error) {
+      console.error("Failed to end game:", error);
+    }
   };
 
   // New court-first flow: click court -> show modal with all on-court players
@@ -1371,14 +2621,42 @@ const LiveGame: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      {/* Compact Scoreboard */}
+      {/* Compact Scoreboard with Team Fouls & Timeouts */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-3 mb-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           {/* Away Team */}
-          <div className="flex items-center gap-3">
-            <div className="text-3xl font-bold text-gray-900 dark:text-white w-12 text-center">{game.awayScore}</div>
-            <div className="text-sm font-medium text-gray-600 dark:text-gray-400 max-w-[100px] truncate">
-              {game.awayTeam?.name}
+          <div className="flex flex-col items-start gap-1">
+            <div className="flex items-center gap-3">
+              <div className="text-3xl font-bold text-gray-900 dark:text-white w-12 text-center">{game.awayScore}</div>
+              <div className="flex flex-col">
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 max-w-[100px] truncate">
+                  {game.awayTeam?.name}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-500">
+                    TF: {(liveStats?.teamStats as any)?.away?.foulsThisQuarter || 0}
+                  </span>
+                  <BonusIndicator
+                    inBonus={(liveStats?.teamStats as any)?.away?.inBonus || false}
+                    inDoubleBonus={(liveStats?.teamStats as any)?.away?.inDoubleBonus || false}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <TimeoutDots
+                remaining={(liveStats?.teamStats as any)?.away?.timeoutsRemaining ?? gameSettings.timeoutsPerTeam ?? 4}
+                total={gameSettings.timeoutsPerTeam || 4}
+                teamSide="left"
+              />
+              {canRecordStats && (
+                <button
+                  onClick={() => game.awayTeam?.id && handleTimeout(game.awayTeam.id as Id<"teams">)}
+                  className="text-[10px] text-orange-600 hover:text-orange-700 font-medium"
+                >
+                  TO
+                </button>
+              )}
             </div>
           </div>
 
@@ -1408,7 +2686,7 @@ const LiveGame: React.FC = () => {
                 disabled={isCompleted}
                 className={`text-sm font-bold px-2 py-1 rounded ${!isCompleted ? "hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" : ""}`}
               >
-                Q{game.currentQuarter}
+                {game.currentQuarter <= 4 ? `Q${game.currentQuarter}` : `OT${game.currentQuarter - 4}`}
               </button>
               {showQuarterSelector && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20 p-2">
@@ -1492,11 +2770,39 @@ const LiveGame: React.FC = () => {
           </div>
 
           {/* Home Team */}
-          <div className="flex items-center gap-3">
-            <div className="text-sm font-medium text-gray-600 dark:text-gray-400 max-w-[100px] truncate text-right">
-              {game.homeTeam?.name}
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-end">
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 max-w-[100px] truncate text-right">
+                  {game.homeTeam?.name}
+                </div>
+                <div className="flex items-center gap-2">
+                  <BonusIndicator
+                    inBonus={(liveStats?.teamStats as any)?.home?.inBonus || false}
+                    inDoubleBonus={(liveStats?.teamStats as any)?.home?.inDoubleBonus || false}
+                  />
+                  <span className="text-[10px] text-gray-500">
+                    TF: {(liveStats?.teamStats as any)?.home?.foulsThisQuarter || 0}
+                  </span>
+                </div>
+              </div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white w-12 text-center">{game.homeScore}</div>
             </div>
-            <div className="text-3xl font-bold text-gray-900 dark:text-white w-12 text-center">{game.homeScore}</div>
+            <div className="flex items-center gap-2">
+              {canRecordStats && (
+                <button
+                  onClick={() => game.homeTeam?.id && handleTimeout(game.homeTeam.id as Id<"teams">)}
+                  className="text-[10px] text-orange-600 hover:text-orange-700 font-medium"
+                >
+                  TO
+                </button>
+              )}
+              <TimeoutDots
+                remaining={(liveStats?.teamStats as any)?.home?.timeoutsRemaining ?? gameSettings.timeoutsPerTeam ?? 4}
+                total={gameSettings.timeoutsPerTeam || 4}
+                teamSide="right"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -1525,197 +2831,293 @@ const LiveGame: React.FC = () => {
       {/* Tab Content */}
       {activeTab === "court" && (
         <>
-        {/* Court and Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Court - Takes up 2 columns on large screens */}
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-gray-900 dark:text-white font-semibold">Tap Court to Record Shot</h3>
-              <div className="flex gap-2">
-                <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full">2PT</span>
-                <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full">3PT</span>
+        {/* Court, Quick Stats, and Substitutions in one row */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Court - Smaller, left side */}
+          <div className="lg:col-span-5 bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-900 dark:text-white font-semibold text-sm">Tap Court to Record</h3>
+              <div className="flex gap-1">
+                <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded">2PT</span>
+                <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded">3PT</span>
               </div>
             </div>
-            <MiniCourt
-              onCourtClick={handleCourtClick}
-              disabled={!canRecordStats}
-              recentShots={recentShots}
-            />
-          </div>
+            <div className="max-w-[280px] mx-auto">
+              <MiniCourt
+                onCourtClick={handleCourtClick}
+                disabled={!canRecordStats}
+                recentShots={recentShots}
+              />
+            </div>
 
-          {/* Quick Stat Buttons - Opens modal to select player */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-gray-900 dark:text-white font-semibold mb-4">Quick Stats</h3>
-            <p className="text-gray-500 text-xs mb-4">Tap a stat, then select the player</p>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setPendingQuickStat("assist")}
-                disabled={!canRecordStats}
-                className="py-3 px-4 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-xl font-bold transition-colors"
-              >
-                <div className="text-sm">AST</div>
-              </button>
-              <button
-                onClick={() => setPendingQuickStat("steal")}
-                disabled={!canRecordStats}
-                className="py-3 px-4 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-xl font-bold transition-colors"
-              >
-                <div className="text-sm">STL</div>
-              </button>
-              <button
-                onClick={() => setPendingQuickStat("block")}
-                disabled={!canRecordStats}
-                className="py-3 px-4 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-xl font-bold transition-colors"
-              >
-                <div className="text-sm">BLK</div>
-              </button>
-              <button
-                onClick={() => setPendingQuickStat("turnover")}
-                disabled={!canRecordStats}
-                className="py-3 px-4 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-xl font-bold transition-colors"
-              >
-                <div className="text-sm">TO</div>
-              </button>
-              <button
-                onClick={() => setPendingQuickStat("foul")}
-                disabled={!canRecordStats}
-                className="py-3 px-4 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-xl font-bold transition-colors"
-              >
-                <div className="text-sm">FOUL</div>
-              </button>
-              <button
-                onClick={() => setPendingQuickStat("freethrow")}
-                disabled={!canRecordStats}
-                className="py-3 px-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-xl font-bold transition-colors"
-              >
-                <div className="text-sm">FT</div>
-              </button>
+            {/* Quick Stats below court */}
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-gray-500 text-xs mb-2">Quick Stats</p>
+              <div className="grid grid-cols-4 gap-1.5">
+                <button
+                  onClick={() => setPendingQuickStat("rebound")}
+                  disabled={!canRecordStats}
+                  className="py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                >
+                  REB
+                </button>
+                <button
+                  onClick={() => setPendingQuickStat("assist")}
+                  disabled={!canRecordStats}
+                  className="py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                >
+                  AST
+                </button>
+                <button
+                  onClick={() => setPendingQuickStat("steal")}
+                  disabled={!canRecordStats}
+                  className="py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                >
+                  STL
+                </button>
+                <button
+                  onClick={() => setPendingQuickStat("block")}
+                  disabled={!canRecordStats}
+                  className="py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                >
+                  BLK
+                </button>
+                <button
+                  onClick={() => setPendingQuickStat("turnover")}
+                  disabled={!canRecordStats}
+                  className="py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                >
+                  TO
+                </button>
+                <button
+                  onClick={() => setPendingQuickStat("foul")}
+                  disabled={!canRecordStats}
+                  className="py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                >
+                  FOUL
+                </button>
+                <button
+                  onClick={() => setPendingQuickStat("freethrow")}
+                  disabled={!canRecordStats}
+                  className="py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs col-span-2"
+                >
+                  FREE THROW
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Inline Substitution Panels */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-          <InlineSubPanel
-            teamName={game.awayTeam?.name || "Away"}
-            teamId={game.awayTeam?.id as Id<"teams">}
-            players={awayStats}
-            foulLimit={foulLimit}
-            onSwap={handleSwapSubstitute}
-            swappingPlayer={swappingPlayer}
-            onStartSwap={setSwappingPlayer}
-            onCancelSwap={() => setSwappingPlayer(null)}
-            disabled={isCompleted}
-          />
-          <InlineSubPanel
-            teamName={game.homeTeam?.name || "Home"}
-            teamId={game.homeTeam?.id as Id<"teams">}
-            players={homeStats}
-            foulLimit={foulLimit}
-            onSwap={handleSwapSubstitute}
-            swappingPlayer={swappingPlayer}
-            onStartSwap={setSwappingPlayer}
-            onCancelSwap={() => setSwappingPlayer(null)}
-            disabled={isCompleted}
-          />
+          {/* Substitution Panels - Right side */}
+          <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InlineSubPanel
+              teamName={game.awayTeam?.name || "Away"}
+              teamId={game.awayTeam?.id as Id<"teams">}
+              players={awayStats}
+              foulLimit={foulLimit}
+              onSwap={handleSwapSubstitute}
+              swappingPlayer={swappingPlayer}
+              onStartSwap={setSwappingPlayer}
+              onCancelSwap={() => setSwappingPlayer(null)}
+              disabled={isCompleted}
+            />
+            <InlineSubPanel
+              teamName={game.homeTeam?.name || "Home"}
+              teamId={game.homeTeam?.id as Id<"teams">}
+              players={homeStats}
+              foulLimit={foulLimit}
+              onSwap={handleSwapSubstitute}
+              swappingPlayer={swappingPlayer}
+              onStartSwap={setSwappingPlayer}
+              onCancelSwap={() => setSwappingPlayer(null)}
+              disabled={isCompleted}
+            />
+          </div>
         </div>
         </>
       )}
 
       {activeTab === "stats" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Away Team Stats */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {game.awayTeam?.name} - Player Stats
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead>
-                  <tr className="border-b border-gray-300 dark:border-gray-600">
-                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                      Player
-                    </th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                      PTS
-                    </th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                      REB
-                    </th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                      AST
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {awayStats.map((stat) => (
-                    <tr key={stat.id} className={stat.isOnCourt ? "" : "opacity-50"}>
-                      <td className="py-3 px-3 text-sm text-gray-900 dark:text-white">
-                        #{stat.player?.number} {stat.player?.name}
-                        {stat.isOnCourt && <span className="ml-2 text-green-400 text-xs">ON</span>}
-                      </td>
-                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white font-bold">
-                        {stat.points}
-                      </td>
-                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
-                        {stat.rebounds}
-                      </td>
-                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
-                        {stat.assists}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <div className="space-y-6">
+          {/* Quarter Breakdown */}
+          <QuarterBreakdown
+            homeTeamName={game.homeTeam?.name || "Home"}
+            awayTeamName={game.awayTeam?.name || "Away"}
+            scoreByPeriod={gameSettings.scoreByPeriod}
+            currentQuarter={game.currentQuarter}
+            homeScore={game.homeScore}
+            awayScore={game.awayScore}
+          />
+
+          {/* Team Stats Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <TeamStatsSummary
+                stats={awayStats}
+                teamName={game.awayTeam?.name || "Away"}
+                isExpanded={showAwayStatsSummary}
+                onToggle={() => setShowAwayStatsSummary(!showAwayStatsSummary)}
+              />
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <TeamStatsSummary
+                stats={homeStats}
+                teamName={game.homeTeam?.name || "Home"}
+                isExpanded={showHomeStatsSummary}
+                onToggle={() => setShowHomeStatsSummary(!showHomeStatsSummary)}
+              />
             </div>
           </div>
 
-          {/* Home Team Stats */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {game.homeTeam?.name} - Player Stats
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead>
-                  <tr className="border-b border-gray-300 dark:border-gray-600">
-                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                      Player
-                    </th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                      PTS
-                    </th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                      REB
-                    </th>
-                    <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                      AST
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {homeStats.map((stat) => (
-                    <tr key={stat.id} className={stat.isOnCourt ? "" : "opacity-50"}>
-                      <td className="py-3 px-3 text-sm text-gray-900 dark:text-white">
-                        #{stat.player?.number} {stat.player?.name}
-                        {stat.isOnCourt && <span className="ml-2 text-green-400 text-xs">ON</span>}
-                      </td>
-                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white font-bold">
-                        {stat.points}
-                      </td>
-                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
-                        {stat.rebounds}
-                      </td>
-                      <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
-                        {stat.assists}
-                      </td>
+          {/* Box Scores */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Away Team Stats */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                {game.awayTeam?.name} - Player Stats
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b border-gray-300 dark:border-gray-600">
+                      <th className="text-left py-2 px-3 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        Player
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        PTS
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        REB
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        AST
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        STL
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        BLK
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        TO
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        PF
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {awayStats.map((stat) => (
+                      <tr key={stat.id} className={stat.isOnCourt ? "" : "opacity-50"}>
+                        <td className="py-3 px-3 text-sm text-gray-900 dark:text-white">
+                          #{stat.player?.number} {stat.player?.name}
+                          {stat.isOnCourt && <span className="ml-2 text-green-400 text-xs">ON</span>}
+                          {stat.fouledOut && <span className="ml-2 text-red-400 text-xs">OUT</span>}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white font-bold">
+                          {stat.points}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.rebounds}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.assists}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.steals}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.blocks}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.turnovers}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.fouls}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Home Team Stats */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                {game.homeTeam?.name} - Player Stats
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b border-gray-300 dark:border-gray-600">
+                      <th className="text-left py-2 px-3 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        Player
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        PTS
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        REB
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        AST
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        STL
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        BLK
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        TO
+                      </th>
+                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                        PF
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {homeStats.map((stat) => (
+                      <tr key={stat.id} className={stat.isOnCourt ? "" : "opacity-50"}>
+                        <td className="py-3 px-3 text-sm text-gray-900 dark:text-white">
+                          #{stat.player?.number} {stat.player?.name}
+                          {stat.isOnCourt && <span className="ml-2 text-green-400 text-xs">ON</span>}
+                          {stat.fouledOut && <span className="ml-2 text-red-400 text-xs">OUT</span>}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white font-bold">
+                          {stat.points}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.rebounds}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.assists}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.steals}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.blocks}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.turnovers}
+                        </td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                          {stat.fouls}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
+
+          {/* Play-by-Play */}
+          <PlayByPlayPanel
+            events={(gameEvents?.events || []) as PlayByPlayEvent[]}
+            isLoading={gameEvents === undefined}
+          />
         </div>
       )}
 
@@ -1754,6 +3156,56 @@ const LiveGame: React.FC = () => {
           shotType={pendingRebound.shotType}
         />
       )}
+
+      {/* Assist Prompt Modal */}
+      {pendingAssist && (
+        <AssistPromptModal
+          isOpen={!!pendingAssist}
+          onClose={() => setPendingAssist(null)}
+          onAssist={handleAssist}
+          onNoAssist={() => setPendingAssist(null)}
+          scorerName={pendingAssist.scorerName}
+          scorerNumber={pendingAssist.scorerNumber}
+          shotType={pendingAssist.shotType}
+          points={pendingAssist.points}
+          teammates={(pendingAssist.isHomeTeam ? homeStats : awayStats)
+            .filter((s) => s.isOnCourt && s.playerId !== pendingAssist.scorerPlayerId)}
+        />
+      )}
+
+      {/* Enhanced Foul Recording Modal */}
+      <FoulRecordingModal
+        isOpen={!!pendingFoul}
+        onClose={() => setPendingFoul(null)}
+        onRecord={handleRecordFoulWithContext}
+        selectedPlayer={pendingFoul}
+        opponentPlayers={pendingFoul?.isHomeTeam ? awayStats : homeStats}
+      />
+
+      {/* Free Throw Sequence Modal */}
+      <FreeThrowSequenceModal
+        isOpen={!!freeThrowSequence}
+        onClose={() => setFreeThrowSequence(null)}
+        onRecord={handleFreeThrowResult}
+        sequence={freeThrowSequence}
+      />
+
+      {/* Overtime Prompt Modal */}
+      <OvertimePromptModal
+        isOpen={showOvertimePrompt}
+        onClose={() => setShowOvertimePrompt(false)}
+        onStartOvertime={handleStartOvertime}
+        onEndAsTie={handleEndAsTie}
+        homeScore={game.homeScore}
+        awayScore={game.awayScore}
+      />
+
+      {/* Quick Undo Chip */}
+      <QuickUndoChip
+        lastAction={actionHistory[0] || null}
+        onUndo={() => actionHistory[0] && handleUndo(actionHistory[0])}
+        onDismiss={() => setActionHistory((prev) => prev.slice(1))}
+      />
 
       {/* Action History Panel */}
       {showActionHistory && (

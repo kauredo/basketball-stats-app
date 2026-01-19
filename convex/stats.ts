@@ -125,6 +125,47 @@ export const recordStat = mutation({
           updates.fouledOut = true;
           updates.isOnCourt = false; // Auto sub out when fouled out
         }
+
+        // Update team fouls for bonus tracking
+        const teamStatForFoul = await ctx.db
+          .query("teamStats")
+          .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", player.teamId))
+          .first();
+
+        if (teamStatForFoul) {
+          const currentQuarter = game.currentQuarter;
+          const foulsByQuarter = teamStatForFoul.foulsByQuarter || { q1: 0, q2: 0, q3: 0, q4: 0, ot: 0 };
+
+          // Increment fouls for current quarter
+          if (currentQuarter === 1) foulsByQuarter.q1++;
+          else if (currentQuarter === 2) foulsByQuarter.q2++;
+          else if (currentQuarter === 3) foulsByQuarter.q3++;
+          else if (currentQuarter === 4) foulsByQuarter.q4++;
+          else foulsByQuarter.ot++;
+
+          await ctx.db.patch(teamStatForFoul._id, {
+            teamFouls: teamStatForFoul.teamFouls + 1,
+            foulsByQuarter,
+          });
+        } else {
+          // Create team stats if they don't exist
+          const currentQuarter = game.currentQuarter;
+          const foulsByQuarter = { q1: 0, q2: 0, q3: 0, q4: 0, ot: 0 };
+          if (currentQuarter === 1) foulsByQuarter.q1 = 1;
+          else if (currentQuarter === 2) foulsByQuarter.q2 = 1;
+          else if (currentQuarter === 3) foulsByQuarter.q3 = 1;
+          else if (currentQuarter === 4) foulsByQuarter.q4 = 1;
+          else foulsByQuarter.ot = 1;
+
+          await ctx.db.insert("teamStats", {
+            gameId: args.gameId,
+            teamId: player.teamId,
+            offensiveRebounds: 0,
+            defensiveRebounds: 0,
+            teamFouls: 1,
+            foulsByQuarter,
+          });
+        }
         break;
     }
 
@@ -606,9 +647,44 @@ export const getLiveStats = query({
       .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", game.awayTeamId))
       .first();
 
-    // Get game settings for foul limit
+    // Get game settings
     const gameSettings = game.gameSettings as any || {};
     const foulLimit = gameSettings.foulLimit || 5;
+    const bonusMode = gameSettings.bonusMode || "college";
+    const timeoutsPerTeam = gameSettings.timeoutsPerTeam || 4;
+
+    // Calculate bonus status for each team based on opponent's fouls this quarter
+    const currentQuarter = game.currentQuarter;
+
+    const getTeamFoulsThisQuarter = (foulsByQuarter: any) => {
+      if (!foulsByQuarter) return 0;
+      if (currentQuarter === 1) return foulsByQuarter.q1 || 0;
+      if (currentQuarter === 2) return foulsByQuarter.q2 || 0;
+      if (currentQuarter === 3) return foulsByQuarter.q3 || 0;
+      if (currentQuarter === 4) return foulsByQuarter.q4 || 0;
+      return foulsByQuarter.ot || 0;
+    };
+
+    const homeFoulsThisQuarter = getTeamFoulsThisQuarter(homeTeamStats?.foulsByQuarter);
+    const awayFoulsThisQuarter = getTeamFoulsThisQuarter(awayTeamStats?.foulsByQuarter);
+
+    // Home team is in bonus when AWAY team has enough fouls (and vice versa)
+    const calculateBonus = (opponentFouls: number) => {
+      if (bonusMode === "nba") {
+        return {
+          inBonus: opponentFouls >= 5,
+          inDoubleBonus: opponentFouls >= 5,
+        };
+      } else {
+        return {
+          inBonus: opponentFouls >= 7,
+          inDoubleBonus: opponentFouls >= 10,
+        };
+      }
+    };
+
+    const homeBonus = calculateBonus(awayFoulsThisQuarter);
+    const awayBonus = calculateBonus(homeFoulsThisQuarter);
 
     return {
       game: {
@@ -619,23 +695,31 @@ export const getLiveStats = query({
         homeScore: game.homeScore,
         awayScore: game.awayScore,
         foulLimit,
+        bonusMode,
+        timeoutsPerTeam,
       },
       stats: formattedStats,
       teamStats: {
-        home: homeTeamStats
-          ? {
-              offensiveRebounds: homeTeamStats.offensiveRebounds,
-              defensiveRebounds: homeTeamStats.defensiveRebounds,
-              teamFouls: homeTeamStats.teamFouls,
-            }
-          : { offensiveRebounds: 0, defensiveRebounds: 0, teamFouls: 0 },
-        away: awayTeamStats
-          ? {
-              offensiveRebounds: awayTeamStats.offensiveRebounds,
-              defensiveRebounds: awayTeamStats.defensiveRebounds,
-              teamFouls: awayTeamStats.teamFouls,
-            }
-          : { offensiveRebounds: 0, defensiveRebounds: 0, teamFouls: 0 },
+        home: {
+          offensiveRebounds: homeTeamStats?.offensiveRebounds || 0,
+          defensiveRebounds: homeTeamStats?.defensiveRebounds || 0,
+          teamFouls: homeTeamStats?.teamFouls || 0,
+          foulsThisQuarter: homeFoulsThisQuarter,
+          foulsByQuarter: homeTeamStats?.foulsByQuarter || { q1: 0, q2: 0, q3: 0, q4: 0, ot: 0 },
+          timeoutsRemaining: homeTeamStats?.timeoutsRemaining ?? timeoutsPerTeam,
+          inBonus: homeBonus.inBonus,
+          inDoubleBonus: homeBonus.inDoubleBonus,
+        },
+        away: {
+          offensiveRebounds: awayTeamStats?.offensiveRebounds || 0,
+          defensiveRebounds: awayTeamStats?.defensiveRebounds || 0,
+          teamFouls: awayTeamStats?.teamFouls || 0,
+          foulsThisQuarter: awayFoulsThisQuarter,
+          foulsByQuarter: awayTeamStats?.foulsByQuarter || { q1: 0, q2: 0, q3: 0, q4: 0, ot: 0 },
+          timeoutsRemaining: awayTeamStats?.timeoutsRemaining ?? timeoutsPerTeam,
+          inBonus: awayBonus.inBonus,
+          inDoubleBonus: awayBonus.inDoubleBonus,
+        },
       },
     };
   },
@@ -673,5 +757,310 @@ export const updateMinutes = mutation({
     });
 
     return { message: "Minutes updated" };
+  },
+});
+
+// Helper function to calculate bonus status
+function calculateBonusStatus(
+  teamFoulsInQuarter: number,
+  bonusMode: "college" | "nba"
+): { inBonus: boolean; inDoubleBonus: boolean } {
+  if (bonusMode === "nba") {
+    // NBA: 5+ team fouls in quarter = bonus (2 FTs)
+    return {
+      inBonus: teamFoulsInQuarter >= 5,
+      inDoubleBonus: teamFoulsInQuarter >= 5, // NBA doesn't have separate double bonus
+    };
+  } else {
+    // College: 7+ fouls = bonus (1-and-1), 10+ = double bonus (2 FTs)
+    return {
+      inBonus: teamFoulsInQuarter >= 7,
+      inDoubleBonus: teamFoulsInQuarter >= 10,
+    };
+  }
+}
+
+// Helper function to calculate free throws awarded
+function calculateFreeThrowsAwarded(
+  foulType: string,
+  shotType: string | undefined,
+  wasAndOne: boolean,
+  inBonus: boolean,
+  inDoubleBonus: boolean,
+  bonusMode: "college" | "nba"
+): number {
+  // Technical and flagrant fouls always award free throws
+  if (foulType === "technical") return 2;
+  if (foulType === "flagrant1") return 2;
+  if (foulType === "flagrant2") return 2;
+
+  // Offensive fouls never award free throws
+  if (foulType === "offensive") return 0;
+
+  // Shooting fouls
+  if (foulType === "shooting") {
+    if (wasAndOne) return 1; // And-1: already made the shot, get 1 FT
+    if (shotType === "3pt") return 3;
+    return 2;
+  }
+
+  // Personal fouls - depends on bonus situation
+  if (foulType === "personal") {
+    if (!inBonus) return 0;
+    if (bonusMode === "nba" || inDoubleBonus) return 2;
+    return 1; // College bonus (1-and-1) - we'll handle the "and-1" logic in frontend
+  }
+
+  return 0;
+}
+
+// Record a foul with full context (for enhanced foul tracking)
+export const recordFoulWithContext = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    playerId: v.id("players"),
+    foulType: v.union(
+      v.literal("personal"),
+      v.literal("shooting"),
+      v.literal("offensive"),
+      v.literal("technical"),
+      v.literal("flagrant1"),
+      v.literal("flagrant2")
+    ),
+    wasAndOne: v.optional(v.boolean()), // Shot made while fouled
+    shotType: v.optional(v.union(v.literal("2pt"), v.literal("3pt"))), // For shooting fouls
+    fouledPlayerId: v.optional(v.id("players")), // The player who was fouled (for shooting fouls)
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    const playerStat = await ctx.db
+      .query("playerStats")
+      .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", args.playerId))
+      .first();
+
+    if (!playerStat) throw new Error("Player stat not found");
+
+    const player = await ctx.db.get(args.playerId);
+    if (!player) throw new Error("Player not found");
+
+    const gameSettings = game.gameSettings as any || {};
+    const foulLimit = gameSettings.foulLimit || 5;
+    const bonusMode = gameSettings.bonusMode || "college";
+
+    // Update player's personal foul count
+    const newFoulCount = playerStat.fouls + 1;
+    const playerFouledOut = newFoulCount >= foulLimit;
+
+    const playerUpdates: any = {
+      fouls: newFoulCount,
+    };
+
+    if (playerFouledOut) {
+      playerUpdates.fouledOut = true;
+      playerUpdates.isOnCourt = false;
+    }
+
+    await ctx.db.patch(playerStat._id, playerUpdates);
+
+    // Get or create team stats and update team fouls
+    let teamStats = await ctx.db
+      .query("teamStats")
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", player.teamId))
+      .first();
+
+    const currentQuarter = game.currentQuarter;
+    let foulsByQuarter = teamStats?.foulsByQuarter || { q1: 0, q2: 0, q3: 0, q4: 0, ot: 0 };
+
+    // Increment fouls for current quarter (only for non-offensive fouls)
+    if (args.foulType !== "offensive") {
+      if (currentQuarter === 1) foulsByQuarter.q1++;
+      else if (currentQuarter === 2) foulsByQuarter.q2++;
+      else if (currentQuarter === 3) foulsByQuarter.q3++;
+      else if (currentQuarter === 4) foulsByQuarter.q4++;
+      else foulsByQuarter.ot++;
+    }
+
+    if (teamStats) {
+      await ctx.db.patch(teamStats._id, {
+        teamFouls: teamStats.teamFouls + 1,
+        foulsByQuarter,
+      });
+    } else {
+      await ctx.db.insert("teamStats", {
+        gameId: args.gameId,
+        teamId: player.teamId,
+        offensiveRebounds: 0,
+        defensiveRebounds: 0,
+        teamFouls: 1,
+        foulsByQuarter,
+      });
+    }
+
+    // Calculate current quarter team fouls for bonus
+    let teamFoulsThisQuarter = 0;
+    if (currentQuarter === 1) teamFoulsThisQuarter = foulsByQuarter.q1;
+    else if (currentQuarter === 2) teamFoulsThisQuarter = foulsByQuarter.q2;
+    else if (currentQuarter === 3) teamFoulsThisQuarter = foulsByQuarter.q3;
+    else if (currentQuarter === 4) teamFoulsThisQuarter = foulsByQuarter.q4;
+    else teamFoulsThisQuarter = foulsByQuarter.ot;
+
+    const { inBonus, inDoubleBonus } = calculateBonusStatus(teamFoulsThisQuarter, bonusMode);
+
+    // Calculate free throws awarded
+    const freeThrowsAwarded = calculateFreeThrowsAwarded(
+      args.foulType,
+      args.shotType,
+      args.wasAndOne || false,
+      inBonus,
+      inDoubleBonus,
+      bonusMode
+    );
+
+    // Log the event
+    const foulTypeLabel = {
+      personal: "Personal Foul",
+      shooting: "Shooting Foul",
+      offensive: "Offensive Foul",
+      technical: "Technical Foul",
+      flagrant1: "Flagrant 1",
+      flagrant2: "Flagrant 2",
+    }[args.foulType];
+
+    await ctx.db.insert("gameEvents", {
+      gameId: args.gameId,
+      eventType: "foul",
+      playerId: args.playerId,
+      teamId: player.teamId,
+      quarter: currentQuarter,
+      gameTime: game.timeRemainingSeconds,
+      timestamp: Date.now(),
+      details: {
+        foulType: args.foulType,
+        wasAndOne: args.wasAndOne,
+        shotType: args.shotType,
+        fouledPlayerId: args.fouledPlayerId,
+        freeThrowsAwarded,
+        playerFoulCount: newFoulCount,
+        playerFouledOut,
+      },
+      description: `#${player.number} ${player.name} - ${foulTypeLabel}${playerFouledOut ? " (FOULED OUT)" : ""}`,
+    });
+
+    return {
+      freeThrowsAwarded,
+      inBonus,
+      inDoubleBonus,
+      playerFouledOut,
+      playerFoulCount: newFoulCount,
+      teamFoulsThisQuarter,
+      bonusMode,
+      // For shooting fouls, return the player who should shoot FTs
+      freeThrowShooterId: args.foulType === "shooting" ? args.fouledPlayerId : undefined,
+    };
+  },
+});
+
+// Record free throw result
+export const recordFreeThrow = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    playerId: v.id("players"),
+    made: v.boolean(),
+    attemptNumber: v.number(), // 1, 2, or 3
+    totalAttempts: v.number(), // Total FTs in this sequence
+    isOneAndOne: v.optional(v.boolean()), // College 1-and-1 situation
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    const playerStat = await ctx.db
+      .query("playerStats")
+      .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", args.playerId))
+      .first();
+
+    if (!playerStat) throw new Error("Player stat not found");
+
+    const player = await ctx.db.get(args.playerId);
+    if (!player) throw new Error("Player not found");
+
+    const isHomeTeam = player.teamId === game.homeTeamId;
+
+    // Update player stats
+    const updates: any = {
+      freeThrowsAttempted: playerStat.freeThrowsAttempted + 1,
+    };
+
+    if (args.made) {
+      updates.freeThrowsMade = playerStat.freeThrowsMade + 1;
+      updates.points = playerStat.points + 1;
+    }
+
+    await ctx.db.patch(playerStat._id, updates);
+
+    // Update game score if made
+    if (args.made) {
+      const scoreUpdate = isHomeTeam
+        ? { homeScore: game.homeScore + 1 }
+        : { awayScore: game.awayScore + 1 };
+      await ctx.db.patch(args.gameId, scoreUpdate);
+    }
+
+    // Log the event
+    await ctx.db.insert("gameEvents", {
+      gameId: args.gameId,
+      eventType: "freethrow",
+      playerId: args.playerId,
+      teamId: player.teamId,
+      quarter: game.currentQuarter,
+      gameTime: game.timeRemainingSeconds,
+      timestamp: Date.now(),
+      details: {
+        made: args.made,
+        attemptNumber: args.attemptNumber,
+        totalAttempts: args.totalAttempts,
+        isOneAndOne: args.isOneAndOne,
+      },
+      description: `#${player.number} ${player.name} FT ${args.made ? "Made" : "Missed"} (${args.attemptNumber}/${args.totalAttempts})`,
+    });
+
+    // Determine if sequence continues
+    // For 1-and-1: if first FT missed, sequence ends
+    const sequenceEnds = args.isOneAndOne && args.attemptNumber === 1 && !args.made
+      ? true
+      : args.attemptNumber >= args.totalAttempts;
+
+    const updatedGame = await ctx.db.get(args.gameId);
+
+    return {
+      made: args.made,
+      attemptNumber: args.attemptNumber,
+      sequenceContinues: !sequenceEnds,
+      nextAttemptNumber: sequenceEnds ? null : args.attemptNumber + 1,
+      gameScore: {
+        homeScore: updatedGame!.homeScore,
+        awayScore: updatedGame!.awayScore,
+      },
+    };
   },
 });
