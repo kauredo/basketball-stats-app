@@ -7,11 +7,11 @@ import {
   Switch,
   Alert,
   Share,
-  Platform,
 } from "react-native";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme, ThemeMode } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 
 // Column definitions for export
@@ -77,11 +77,11 @@ interface SettingRowProps {
 function SettingRow({ icon, title, subtitle, onPress, rightElement }: SettingRowProps) {
   return (
     <TouchableOpacity
-      className="flex-row items-center py-4 border-b border-gray-200 dark:border-gray-700"
+      className="flex-row items-center py-4 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
       onPress={onPress}
       disabled={!onPress && !rightElement}
     >
-      <View className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full justify-center items-center mr-4">
+      <View className="w-10 h-10 bg-gray-100 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
         <Icon name={icon as any} size={20} color="#9CA3AF" />
       </View>
       <View className="flex-1">
@@ -93,8 +93,21 @@ function SettingRow({ icon, title, subtitle, onPress, rightElement }: SettingRow
   );
 }
 
+const themeModeLabels: Record<ThemeMode, string> = {
+  system: "System",
+  light: "Light",
+  dark: "Dark",
+};
+
+const themeModeIcons: Record<ThemeMode, string> = {
+  system: "settings",
+  light: "basketball",
+  dark: "moon",
+};
+
 export default function SettingsScreen() {
   const { token, selectedLeague } = useAuth();
+  const { mode, setMode } = useTheme();
   const [gameNotifications, setGameNotifications] = useState(true);
   const [scoreUpdates, setScoreUpdates] = useState(true);
   const [leagueAnnouncements, setLeagueAnnouncements] = useState(true);
@@ -198,35 +211,61 @@ export default function SettingsScreen() {
     }
   };
 
-  if (!selectedLeague) {
-    return (
-      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-8">
-        <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-2 mt-4">
-          No League Selected
-        </Text>
-        <Text className="text-gray-600 dark:text-gray-400 text-base text-center">
-          Please select a league to access settings.
-        </Text>
-      </View>
-    );
-  }
-
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-800">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <View className="bg-gray-100 dark:bg-gray-700 p-5 pt-15">
+      <View className="bg-gray-100 dark:bg-gray-800 p-5 pt-16">
         <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">Settings</Text>
-        <Text className="text-gray-600 dark:text-gray-400 text-base">{selectedLeague.name}</Text>
+        {selectedLeague && (
+          <Text className="text-gray-600 dark:text-gray-400 text-base">{selectedLeague.name}</Text>
+        )}
       </View>
 
       <ScrollView className="flex-1 p-4">
+        {/* Appearance */}
+        <View className="mb-6">
+          <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
+            Appearance
+          </Text>
+          <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <Text className="text-gray-900 dark:text-white font-medium mb-3">Theme</Text>
+            <View className="flex-row gap-2">
+              {(["system", "light", "dark"] as ThemeMode[]).map((themeMode) => (
+                <TouchableOpacity
+                  key={themeMode}
+                  onPress={() => setMode(themeMode)}
+                  className={`flex-1 py-3 px-4 rounded-lg items-center ${
+                    mode === themeMode
+                      ? "bg-primary-500"
+                      : "bg-gray-100 dark:bg-gray-700"
+                  }`}
+                >
+                  <Icon
+                    name={themeModeIcons[themeMode] as any}
+                    size={20}
+                    color={mode === themeMode ? "#FFFFFF" : "#9CA3AF"}
+                  />
+                  <Text
+                    className={`mt-1 text-sm font-medium ${
+                      mode === themeMode
+                        ? "text-white"
+                        : "text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    {themeModeLabels[themeMode]}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+
         {/* Notification Preferences */}
         <View className="mb-6">
           <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
-            Notification Preferences
+            Notifications
           </Text>
-          <View className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+          <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
             <SettingRow
               icon="basketball"
               title="Game Notifications"
@@ -254,7 +293,7 @@ export default function SettingsScreen() {
               }
             />
             <View className="flex-row items-center py-4">
-              <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
+              <View className="w-10 h-10 bg-gray-100 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
                 <Icon name="basketball" size={20} color="#9CA3AF" />
               </View>
               <View className="flex-1">
@@ -275,46 +314,48 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Data Export */}
-        <View className="mb-6">
-          <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
-            Data Export
-          </Text>
-          <View className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
-            <SettingRow
-              icon="stats"
-              title="Export Player Statistics"
-              subtitle="Download player stats as CSV"
-              onPress={handleExportPlayerStats}
-            />
-            <SettingRow
-              icon="basketball"
-              title="Export Standings"
-              subtitle="Download league standings as CSV"
-              onPress={handleExportStandings}
-            />
-            <SettingRow
-              icon="user"
-              title="Export All Data"
-              subtitle="Download all league data"
-              onPress={handleExportAll}
-            />
-          </View>
-          {isExporting && (
-            <Text className="text-gray-600 dark:text-gray-400 text-sm mt-2 text-center">
-              Preparing export...
+        {/* Data Export - Only show if league selected */}
+        {selectedLeague && (
+          <View className="mb-6">
+            <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
+              Data Export
             </Text>
-          )}
-        </View>
+            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              <SettingRow
+                icon="stats"
+                title="Export Player Statistics"
+                subtitle="Download player stats as CSV"
+                onPress={handleExportPlayerStats}
+              />
+              <SettingRow
+                icon="basketball"
+                title="Export Standings"
+                subtitle="Download league standings as CSV"
+                onPress={handleExportStandings}
+              />
+              <SettingRow
+                icon="user"
+                title="Export All Data"
+                subtitle="Download all league data"
+                onPress={handleExportAll}
+              />
+            </View>
+            {isExporting && (
+              <Text className="text-gray-600 dark:text-gray-400 text-sm mt-2 text-center">
+                Preparing export...
+              </Text>
+            )}
+          </View>
+        )}
 
         {/* App Info */}
         <View className="mb-6">
           <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
             About
           </Text>
-          <View className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
-            <View className="flex-row items-center py-4 border-b border-gray-200 dark:border-gray-600">
-              <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
+          <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <View className="flex-row items-center py-4 border-b border-gray-200 dark:border-gray-700">
+              <View className="w-10 h-10 bg-primary-500/20 rounded-full justify-center items-center mr-4">
                 <Icon name="basketball" size={20} color="#F97316" />
               </View>
               <View className="flex-1">
@@ -325,7 +366,7 @@ export default function SettingsScreen() {
               </View>
             </View>
             <View className="flex-row items-center py-4">
-              <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
+              <View className="w-10 h-10 bg-gray-100 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
                 <Icon name="user" size={20} color="#9CA3AF" />
               </View>
               <View className="flex-1">

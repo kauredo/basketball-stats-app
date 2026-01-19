@@ -7,15 +7,13 @@ import {
   Alert,
   SafeAreaView,
   Dimensions,
-  Modal,
-  FlatList,
   StyleSheet,
   useColorScheme,
 } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
-import Svg, { Rect, Circle, Line, Path, G } from "react-native-svg";
+import Svg, { Rect, Circle, Path } from "react-native-svg";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
@@ -31,7 +29,7 @@ import Icon from "../components/Icon";
 import { RootStackParamList } from "../../App";
 import { COLORS, TOUCH_TARGETS, getShotZone } from "@basketball-stats/shared";
 
-// Import new components
+// Import components
 import EnhancedScoreboard from "../components/livegame/EnhancedScoreboard";
 import FoulTypeModal, { FoulType } from "../components/livegame/FoulTypeModal";
 import FreeThrowSequenceModal, {
@@ -40,6 +38,10 @@ import FreeThrowSequenceModal, {
 import QuickUndoFAB, { LastAction } from "../components/livegame/QuickUndoFAB";
 import OvertimePromptModal from "../components/livegame/OvertimePromptModal";
 import PlayByPlayTab from "../components/livegame/PlayByPlayTab";
+import ShotRecordingModal, { OnCourtPlayer } from "../components/livegame/ShotRecordingModal";
+import AssistPromptModal from "../components/livegame/AssistPromptModal";
+import ReboundPromptModal from "../components/livegame/ReboundPromptModal";
+import QuickStatModal, { QuickStatType } from "../components/livegame/QuickStatModal";
 import useSoundFeedback from "../hooks/useSoundFeedback";
 
 type LiveGameRouteProp = RouteProp<RootStackParamList, "LiveGame">;
@@ -76,66 +78,6 @@ interface PlayerStat {
   plusMinus: number;
   isOnCourt: boolean;
   isHomeTeam: boolean;
-}
-
-interface PlayerSelectModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSelect: (player: PlayerStat) => void;
-  players: PlayerStat[];
-  title: string;
-}
-
-function PlayerSelectModal({ visible, onClose, onSelect, players }: PlayerSelectModalProps) {
-  return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white dark:bg-gray-800 rounded-t-3xl max-h-[70%]">
-          <View className="flex-row justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-            <Text className="text-gray-900 dark:text-white text-lg font-bold">Select Player</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Icon name="close" size={24} color="#9CA3AF" />
-            </TouchableOpacity>
-          </View>
-          <FlatList
-            data={players.filter((p) => p.isOnCourt)}
-            keyExtractor={(item) => item.id}
-            ListHeaderComponent={
-              <Text className="text-gray-600 dark:text-gray-400 text-xs px-4 py-2 bg-gray-100 dark:bg-gray-900">
-                ON COURT
-              </Text>
-            }
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                className="p-4 border-b border-gray-200 dark:border-gray-700 flex-row items-center"
-                onPress={() => {
-                  onSelect(item);
-                  onClose();
-                }}
-              >
-                <View className="w-12 h-12 bg-primary-500 rounded-full justify-center items-center mr-3">
-                  <Text className="text-gray-900 dark:text-white font-bold text-lg">
-                    #{item.player?.number}
-                  </Text>
-                </View>
-                <View className="flex-1">
-                  <Text className="text-gray-900 dark:text-white font-medium text-base">
-                    {item.player?.name}
-                  </Text>
-                  <Text className="text-gray-600 dark:text-gray-400 text-sm">
-                    PTS: {item.points} • REB: {item.rebounds} • AST: {item.assists}
-                  </Text>
-                </View>
-                <View className="bg-green-600 px-2 py-1 rounded">
-                  <Text className="text-white text-xs">ON</Text>
-                </View>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-      </View>
-    </Modal>
-  );
 }
 
 // Animated Stat Button Component
@@ -315,72 +257,39 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
   );
 }
 
-// Shot Type Selection Modal
-interface ShotTypeModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSelectMade: () => void;
-  onSelectMissed: () => void;
-  shotType: "2pt" | "3pt";
-  location: { x: number; y: number } | null;
-}
-
-function ShotTypeModal({
-  visible,
-  onClose,
-  onSelectMade,
-  onSelectMissed,
-  shotType,
-}: ShotTypeModalProps) {
-  return (
-    <Modal visible={visible} animationType="fade" transparent>
-      <View className="flex-1 bg-black/70 justify-center items-center px-8">
-        <View className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full">
-          <Text className="text-gray-900 dark:text-white text-xl font-bold text-center mb-2">
-            {shotType === "3pt" ? "3-Point Shot" : "2-Point Shot"}
-          </Text>
-          <Text className="text-gray-600 dark:text-gray-400 text-center mb-6">
-            Did the shot go in?
-          </Text>
-          <View className="flex-row space-x-4">
-            <TouchableOpacity
-              className="flex-1 bg-green-600 py-4 rounded-xl"
-              onPress={() => {
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                onSelectMade();
-              }}
-            >
-              <Text className="text-white text-lg font-bold text-center">MADE</Text>
-              <Text className="text-green-200 text-sm text-center">
-                +{shotType === "3pt" ? "3" : "2"} PTS
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 bg-red-600 py-4 rounded-xl"
-              onPress={() => {
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-                onSelectMissed();
-              }}
-            >
-              <Text className="text-white text-lg font-bold text-center">MISSED</Text>
-              <Text className="text-red-200 text-sm text-center">0 PTS</Text>
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity className="mt-4 py-3" onPress={onClose}>
-            <Text className="text-gray-600 dark:text-gray-400 text-center">Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
 const TABS = [
   { key: "court", label: "Court", icon: "basketball" },
   { key: "stats", label: "Stats", icon: "stats" },
   { key: "subs", label: "Subs", icon: "users" },
   { key: "plays", label: "Plays", icon: "list" },
 ];
+
+// Pending shot state for shot recording modal
+interface PendingShot {
+  x: number;
+  y: number;
+  zone: string;
+  is3pt: boolean;
+}
+
+// Pending assist state for assist prompt modal
+interface PendingAssist {
+  scorerId: Id<"players">;
+  scorerName: string;
+  scorerNumber: number;
+  scorerTeamId: Id<"teams">;
+  shotType: "shot2" | "shot3";
+  points: number;
+}
+
+// Pending rebound state for rebound prompt modal
+interface PendingRebound {
+  shooterTeamId: Id<"teams">;
+  shooterTeamName: string;
+  opposingTeamId: Id<"teams">;
+  opposingTeamName: string;
+  shotType: "shot2" | "shot3" | "freethrow";
+}
 
 export default function LiveGameScreen() {
   const route = useRoute<LiveGameRouteProp>();
@@ -390,24 +299,28 @@ export default function LiveGameScreen() {
   // Sound feedback hook
   const soundFeedback = useSoundFeedback();
 
-  // Tab state - now includes 'plays'
+  // Tab state
   const [activeTab, setActiveTab] = useState<"court" | "stats" | "subs" | "plays">("court");
-  const [selectedPlayer, setSelectedPlayer] = useState<PlayerStat | null>(null);
-  const [showPlayerModal, setShowPlayerModal] = useState(false);
-  const [pendingShot, setPendingShot] = useState<{
-    x: number;
-    y: number;
-    zone: string;
-    is3pt: boolean;
-  } | null>(null);
+
+  // Court tap state - for ShotRecordingModal
+  const [pendingShot, setPendingShot] = useState<PendingShot | null>(null);
   const [recentShots, setRecentShots] = useState<Array<{ x: number; y: number; made: boolean }>>(
     []
   );
 
-  // New state for enhanced features
-  const [pendingFoul, setPendingFoul] = useState<PlayerStat | null>(null);
+  // Auto-prompt states for assist and rebound
+  const [pendingAssist, setPendingAssist] = useState<PendingAssist | null>(null);
+  const [pendingRebound, setPendingRebound] = useState<PendingRebound | null>(null);
+
+  // Quick stat modal state
+  const [pendingQuickStat, setPendingQuickStat] = useState<QuickStatType | null>(null);
+
+  // Foul and free throw states
+  const [pendingFoulPlayerId, setPendingFoulPlayerId] = useState<Id<"players"> | null>(null);
   const [showFoulTypeModal, setShowFoulTypeModal] = useState(false);
   const [freeThrowSequence, setFreeThrowSequence] = useState<FreeThrowSequence | null>(null);
+
+  // Undo and overtime states
   const [lastAction, setLastAction] = useState<LastAction | null>(null);
   const [showOvertimePrompt, setShowOvertimePrompt] = useState(false);
 
@@ -436,6 +349,7 @@ export default function LiveGameScreen() {
   const startOvertime = useMutation(api.games.startOvertime);
   const undoStat = useMutation(api.stats.undoStat);
   const recordShotMutation = useMutation(api.shots.recordShot);
+  const setQuarterMutation = useMutation(api.games.setQuarter);
 
   const game = gameData?.game;
   const allStats = liveStats?.stats || [];
@@ -443,6 +357,23 @@ export default function LiveGameScreen() {
   const homePlayerStats = allStats.filter((s: PlayerStat) => s.isHomeTeam);
   const awayPlayerStats = allStats.filter((s: PlayerStat) => !s.isHomeTeam);
   const onCourtPlayers = allStats.filter((s: PlayerStat) => s.isOnCourt);
+
+  // Transform stats to OnCourtPlayer format for modals
+  const onCourtPlayersForModal: OnCourtPlayer[] = onCourtPlayers.map((s: PlayerStat) => ({
+    id: s.id,
+    playerId: s.playerId,
+    teamId: s.teamId,
+    isHomeTeam: s.isHomeTeam,
+    player: s.player,
+    points: s.points,
+    isOnCourt: s.isOnCourt,
+    // Include extra stats for QuickStatModal
+    rebounds: s.rebounds,
+    assists: s.assists,
+    steals: s.steals,
+    blocks: s.blocks,
+    turnovers: s.turnovers,
+  })) as OnCourtPlayer[];
 
   // Transform persisted shots for MiniCourt visualization
   const persistedShots = (gameShotsData?.shots || []).map((shot) => ({
@@ -470,12 +401,6 @@ export default function LiveGameScreen() {
     game?.timeRemainingSeconds,
   ]);
 
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-  };
-
   const handleGameControl = async (action: "start" | "pause" | "resume" | "end") => {
     if (!game || !token) return;
 
@@ -500,6 +425,87 @@ export default function LiveGameScreen() {
       Alert.alert("Error", `Failed to ${action} game`);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
+  };
+
+  // Handle quarter change from selector
+  const handleQuarterChange = async (quarter: number) => {
+    if (!token || !game) return;
+
+    try {
+      await setQuarterMutation({ token, gameId, quarter, resetTime: true });
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (error: any) {
+      console.error("Failed to change quarter:", error);
+      Alert.alert("Error", "Failed to change quarter");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  };
+
+  // Handle end period with proper quarter/OT flow
+  const handleEndPeriod = () => {
+    if (!game) return;
+
+    const currentQ = game.currentQuarter;
+    const isTied = game.homeScore === game.awayScore;
+
+    // Q4 or later and tied - show overtime prompt
+    if (currentQ >= 4 && isTied) {
+      setShowOvertimePrompt(true);
+      return;
+    }
+
+    // Q4 or later and not tied - end the game
+    if (currentQ >= 4) {
+      Alert.alert(
+        "End Game",
+        "This will end the game. Are you sure?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "End Game",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                await endGame({ token: token!, gameId, forceEnd: true });
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+              } catch (error: any) {
+                console.error("Failed to end game:", error);
+                Alert.alert("Error", "Failed to end game");
+              }
+            },
+          },
+        ]
+      );
+      return;
+    }
+
+    // Q1-Q3 - advance to next quarter
+    Alert.alert(
+      `End ${currentQ <= 4 ? `Q${currentQ}` : `OT${currentQ - 4}`}`,
+      `Ready to start ${currentQ < 4 ? `Q${currentQ + 1}` : "the next period"}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "End Period",
+          onPress: async () => {
+            try {
+              await pauseGame({ token: token!, gameId });
+              await setQuarterMutation({
+                token: token!,
+                gameId,
+                quarter: currentQ + 1,
+                resetTime: true,
+              });
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+              soundFeedback.buzzer?.();
+            } catch (error: any) {
+              console.error("Failed to end period:", error);
+              Alert.alert("Error", "Failed to end period");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleRecordStat = async (
@@ -570,20 +576,105 @@ export default function LiveGameScreen() {
         soundFeedback.foulOut();
         Alert.alert("Fouled Out!", `${player?.player?.name} has fouled out of the game.`);
       }
+
+      return { player, made };
     } catch (error: any) {
       console.error("Failed to record stat:", error);
       Alert.alert("Error", "Failed to record stat");
       soundFeedback.error();
+      return null;
     }
   };
 
-  const handleFoulPress = () => {
-    if (!selectedPlayer) {
-      setShowPlayerModal(true);
-      return;
+  // Handle shot from ShotRecordingModal - triggers assist/rebound prompts
+  const handleShotFromModal = async (playerId: Id<"players">, made: boolean) => {
+    if (!pendingShot || !game) return;
+
+    const statType = pendingShot.is3pt ? "shot3" : "shot2";
+    const result = await handleRecordStat(playerId, statType, made, {
+      x: pendingShot.x,
+      y: pendingShot.y,
+    });
+
+    // Close shot modal first
+    setPendingShot(null);
+
+    if (!result) return;
+
+    const player = result.player as PlayerStat | undefined;
+    if (!player?.player) return;
+
+    // Trigger assist or rebound prompt
+    if (made) {
+      // Prompt for assist
+      setPendingAssist({
+        scorerId: playerId,
+        scorerName: player.player.name,
+        scorerNumber: player.player.number,
+        scorerTeamId: player.teamId,
+        shotType: statType as "shot2" | "shot3",
+        points: pendingShot.is3pt ? 3 : 2,
+      });
+    } else {
+      // Prompt for rebound
+      const isHomeTeam = player.isHomeTeam;
+      const shooterTeamId = player.teamId;
+      const shooterTeamName = isHomeTeam
+        ? game.homeTeam?.name || "Home"
+        : game.awayTeam?.name || "Away";
+      const opposingTeamId = isHomeTeam ? game.awayTeam?.id : game.homeTeam?.id;
+      const opposingTeamName = isHomeTeam
+        ? game.awayTeam?.name || "Away"
+        : game.homeTeam?.name || "Home";
+
+      if (opposingTeamId) {
+        setPendingRebound({
+          shooterTeamId,
+          shooterTeamName,
+          opposingTeamId: opposingTeamId as Id<"teams">,
+          opposingTeamName,
+          shotType: statType as "shot2" | "shot3",
+        });
+      }
     }
-    setPendingFoul(selectedPlayer);
-    setShowFoulTypeModal(true);
+  };
+
+  // Handle assist recording
+  const handleAssist = async (playerId: Id<"players">) => {
+    await handleRecordStat(playerId, "assist");
+    setPendingAssist(null);
+  };
+
+  // Handle no assist
+  const handleNoAssist = () => {
+    setPendingAssist(null);
+  };
+
+  // Handle rebound recording
+  const handlePlayerRebound = async (playerId: Id<"players">, type: "offensive" | "defensive") => {
+    await handleRecordStat(playerId, "rebound");
+    setPendingRebound(null);
+  };
+
+  // Handle team rebound (just dismiss for now - could add team rebound tracking later)
+  const handleTeamRebound = (teamId: Id<"teams">, type: "offensive" | "defensive") => {
+    // Team rebounds could be tracked separately if needed
+    setPendingRebound(null);
+  };
+
+  // Handle quick stat from modal
+  const handleQuickStatRecord = async (playerId: Id<"players">) => {
+    if (!pendingQuickStat) return;
+    await handleRecordStat(playerId, pendingQuickStat);
+    setPendingQuickStat(null);
+  };
+
+  // Handle foul button press - opens foul type modal
+  const handleFoulPress = (playerId?: Id<"players">) => {
+    if (playerId) {
+      setPendingFoulPlayerId(playerId);
+      setShowFoulTypeModal(true);
+    }
   };
 
   const handleFoulTypeSelect = async (
@@ -594,13 +685,16 @@ export default function LiveGameScreen() {
       fouledPlayerId: Id<"players">;
     }
   ) => {
-    if (!pendingFoul || !token) return;
+    if (!pendingFoulPlayerId || !token) return;
+
+    const pendingFoul = allStats.find((s) => s.playerId === pendingFoulPlayerId);
+    if (!pendingFoul) return;
 
     try {
       const result = await recordFoulWithContext({
         token,
         gameId,
-        playerId: pendingFoul.playerId,
+        playerId: pendingFoulPlayerId,
         foulType,
         wasAndOne: shootingDetails?.wasAndOne,
         shotType: shootingDetails?.shotType,
@@ -612,7 +706,7 @@ export default function LiveGameScreen() {
       // Set last action for undo
       if (pendingFoul.player) {
         setLastAction({
-          playerId: pendingFoul.playerId,
+          playerId: pendingFoulPlayerId,
           playerNumber: pendingFoul.player.number,
           playerName: pendingFoul.player.name,
           statType: "foul",
@@ -629,7 +723,7 @@ export default function LiveGameScreen() {
 
       // Start free throw sequence if needed
       if (result.freeThrowsAwarded > 0) {
-        const shooterId = shootingDetails?.fouledPlayerId || pendingFoul.playerId;
+        const shooterId = shootingDetails?.fouledPlayerId || pendingFoulPlayerId;
         const shooter = allStats.find((s) => s.playerId === shooterId);
         if (shooter?.player) {
           setFreeThrowSequence({
@@ -642,7 +736,7 @@ export default function LiveGameScreen() {
         }
       }
 
-      setPendingFoul(null);
+      setPendingFoulPlayerId(null);
       setShowFoulTypeModal(false);
     } catch (error: any) {
       console.error("Failed to record foul:", error);
@@ -762,23 +856,9 @@ export default function LiveGameScreen() {
     }
   };
 
+  // Court tap handler - opens shot recording modal
   const handleCourtTap = (x: number, y: number, zone: string, is3pt: boolean) => {
-    if (!selectedPlayer) {
-      setShowPlayerModal(true);
-      return;
-    }
     setPendingShot({ x, y, zone, is3pt });
-  };
-
-  const handleShotResult = (made: boolean) => {
-    if (!pendingShot || !selectedPlayer) return;
-
-    const statType = pendingShot.is3pt ? "shot3" : "shot2";
-    handleRecordStat(selectedPlayer.playerId, statType, made, {
-      x: pendingShot.x,
-      y: pendingShot.y,
-    });
-    setPendingShot(null);
   };
 
   if (gameData === undefined || liveStats === undefined) {
@@ -808,7 +888,9 @@ export default function LiveGameScreen() {
   }
 
   const isGameActive = game.status === "active";
-  const canRecordStats = isGameActive;
+  const isGamePaused = game.status === "paused";
+  // Allow recording stats when game is active OR paused (like web version)
+  const canRecordStats = isGameActive || isGamePaused;
 
   // Team stats for enhanced scoreboard
   const homeTeamStatsData = {
@@ -826,6 +908,30 @@ export default function LiveGameScreen() {
     inBonus: teamStats?.away.inBonus || false,
     inDoubleBonus: teamStats?.away.inDoubleBonus || false,
   };
+
+  // Get teammates for assist modal (same team as scorer, excluding scorer)
+  const getTeammatesForAssist = () => {
+    if (!pendingAssist) return [];
+    return onCourtPlayersForModal.filter(
+      (p) => p.teamId === pendingAssist.scorerTeamId && p.playerId !== pendingAssist.scorerId
+    );
+  };
+
+  // Get players by team for rebound modal
+  const getShooterTeamPlayers = () => {
+    if (!pendingRebound) return [];
+    return onCourtPlayersForModal.filter((p) => p.teamId === pendingRebound.shooterTeamId);
+  };
+
+  const getOpposingTeamPlayers = () => {
+    if (!pendingRebound) return [];
+    return onCourtPlayersForModal.filter((p) => p.teamId === pendingRebound.opposingTeamId);
+  };
+
+  // Get pending foul player stats for foul modal
+  const pendingFoulPlayer = pendingFoulPlayerId
+    ? allStats.find((s) => s.playerId === pendingFoulPlayerId)
+    : null;
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-dark-950">
@@ -848,6 +954,10 @@ export default function LiveGameScreen() {
         onGameControl={handleGameControl}
         onTimeoutHome={() => handleTimeout(true)}
         onTimeoutAway={() => handleTimeout(false)}
+        onQuarterChange={handleQuarterChange}
+        onEndPeriod={handleEndPeriod}
+        showShotClock={true}
+        shotClockSeconds={24}
       />
 
       {/* Tab Navigation */}
@@ -885,46 +995,6 @@ export default function LiveGameScreen() {
       <ScrollView className="flex-1 px-4">
         {activeTab === "court" && (
           <View className="pb-6">
-            {/* Selected Player Indicator */}
-            <TouchableOpacity
-              className="bg-white dark:bg-gray-800 rounded-xl p-3 mb-4 flex-row items-center border border-gray-200 dark:border-gray-700"
-              onPress={() => setShowPlayerModal(true)}
-            >
-              {selectedPlayer ? (
-                <>
-                  <View className="w-10 h-10 bg-primary-500 rounded-full justify-center items-center mr-3">
-                    <Text className="text-gray-900 dark:text-white font-bold">
-                      #{selectedPlayer.player?.number}
-                    </Text>
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-gray-900 dark:text-white font-semibold">
-                      {selectedPlayer.player?.name}
-                    </Text>
-                    <Text className="text-gray-600 dark:text-gray-400 text-xs">
-                      {selectedPlayer.isHomeTeam ? game.homeTeam?.name : game.awayTeam?.name}
-                    </Text>
-                  </View>
-                  <View className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded">
-                    <Text className="text-gray-700 dark:text-gray-300 text-xs">Change</Text>
-                  </View>
-                </>
-              ) : (
-                <>
-                  <View className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full justify-center items-center mr-3">
-                    <Icon name="user" size={20} color="#9CA3AF" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-gray-600 dark:text-gray-400">Select Player</Text>
-                    <Text className="text-gray-500 text-xs">
-                      Tap to choose who to record stats for
-                    </Text>
-                  </View>
-                  <Icon name="chevron-right" size={16} color="#9CA3AF" />
-                </>
-              )}
-            </TouchableOpacity>
-
             {/* Mini Court for Shot Recording */}
             <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
               <Text className="text-gray-900 dark:text-white font-semibold mb-3">
@@ -937,112 +1007,40 @@ export default function LiveGameScreen() {
               />
             </View>
 
-            {/* Stat Buttons Grid */}
+            {/* Stat Buttons Grid - Now opens modals instead of requiring pre-selected player */}
             <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
               <Text className="text-gray-900 dark:text-white font-semibold mb-3">Quick Stats</Text>
 
-              {/* Scoring Row */}
-              <View className="mb-2">
-                <Text className="text-gray-500 text-xs mb-2 uppercase">Scoring</Text>
-                <View className="flex-row">
-                  <StatButton
-                    label="2PT"
-                    shortLabel="+2"
-                    color="#22C55E"
-                    size="large"
-                    disabled={!canRecordStats || !selectedPlayer}
-                    onPress={() => {
-                      if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "shot2", true);
-                      }
-                    }}
-                  />
-                  <StatButton
-                    label="3PT"
-                    shortLabel="+3"
-                    color="#22C55E"
-                    size="large"
-                    disabled={!canRecordStats || !selectedPlayer}
-                    onPress={() => {
-                      if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "shot3", true);
-                      }
-                    }}
-                  />
-                  <StatButton
-                    label="FT"
-                    shortLabel="+1"
-                    color="#22C55E"
-                    size="large"
-                    disabled={!canRecordStats || !selectedPlayer}
-                    onPress={() => {
-                      if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "freethrow", true);
-                      }
-                    }}
-                  />
-                  <StatButton
-                    label="MISS"
-                    shortLabel="X"
-                    color="#EF4444"
-                    size="large"
-                    disabled={!canRecordStats || !selectedPlayer}
-                    onPress={() => {
-                      if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "shot2", false);
-                      }
-                    }}
-                  />
-                </View>
-              </View>
-
               {/* Other Stats Row */}
               <View>
-                <Text className="text-gray-500 text-xs mb-2 uppercase">Other</Text>
                 <View className="flex-row mb-2">
                   <StatButton
                     label="REB"
                     shortLabel="+R"
                     color="#3B82F6"
-                    disabled={!canRecordStats || !selectedPlayer}
-                    onPress={() => {
-                      if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "rebound");
-                      }
-                    }}
+                    disabled={!canRecordStats}
+                    onPress={() => setPendingQuickStat("rebound")}
                   />
                   <StatButton
                     label="AST"
                     shortLabel="+A"
                     color="#8B5CF6"
-                    disabled={!canRecordStats || !selectedPlayer}
-                    onPress={() => {
-                      if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "assist");
-                      }
-                    }}
+                    disabled={!canRecordStats}
+                    onPress={() => setPendingQuickStat("assist")}
                   />
                   <StatButton
                     label="STL"
                     shortLabel="+S"
                     color="#06B6D4"
-                    disabled={!canRecordStats || !selectedPlayer}
-                    onPress={() => {
-                      if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "steal");
-                      }
-                    }}
+                    disabled={!canRecordStats}
+                    onPress={() => setPendingQuickStat("steal")}
                   />
                   <StatButton
                     label="BLK"
                     shortLabel="+B"
                     color="#06B6D4"
-                    disabled={!canRecordStats || !selectedPlayer}
-                    onPress={() => {
-                      if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "block");
-                      }
-                    }}
+                    disabled={!canRecordStats}
+                    onPress={() => setPendingQuickStat("block")}
                   />
                 </View>
                 <View className="flex-row">
@@ -1050,20 +1048,10 @@ export default function LiveGameScreen() {
                     label="TO"
                     shortLabel="+T"
                     color="#F59E0B"
-                    disabled={!canRecordStats || !selectedPlayer}
-                    onPress={() => {
-                      if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "turnover");
-                      }
-                    }}
+                    disabled={!canRecordStats}
+                    onPress={() => setPendingQuickStat("turnover")}
                   />
-                  <StatButton
-                    label="FOUL"
-                    shortLabel="+F"
-                    color="#F59E0B"
-                    disabled={!canRecordStats || !selectedPlayer}
-                    onPress={handleFoulPress}
-                  />
+                  <View className="flex-1 mx-1" />
                   <View className="flex-1 mx-1" />
                   <View className="flex-1 mx-1" />
                 </View>
@@ -1084,11 +1072,13 @@ export default function LiveGameScreen() {
                 if (!player) return null;
 
                 return (
-                  <View
+                  <TouchableOpacity
                     key={playerStat.id}
+                    onPress={() => canRecordStats && handleFoulPress(playerStat.playerId)}
                     className={`flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700 ${
                       !playerStat.isOnCourt ? "opacity-50" : ""
                     }`}
+                    disabled={!canRecordStats}
                   >
                     <View className="w-8 mr-2">
                       <Text className="text-gray-600 dark:text-gray-400 text-xs">
@@ -1127,7 +1117,7 @@ export default function LiveGameScreen() {
                         <Text className="text-gray-500 text-xs">PF</Text>
                       </View>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 );
               })}
             </View>
@@ -1142,11 +1132,13 @@ export default function LiveGameScreen() {
                 if (!player) return null;
 
                 return (
-                  <View
+                  <TouchableOpacity
                     key={playerStat.id}
+                    onPress={() => canRecordStats && handleFoulPress(playerStat.playerId)}
                     className={`flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700 ${
                       !playerStat.isOnCourt ? "opacity-50" : ""
                     }`}
+                    disabled={!canRecordStats}
                   >
                     <View className="w-8 mr-2">
                       <Text className="text-gray-600 dark:text-gray-400 text-xs">
@@ -1185,7 +1177,7 @@ export default function LiveGameScreen() {
                         <Text className="text-gray-500 text-xs">PF</Text>
                       </View>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 );
               })}
             </View>
@@ -1311,26 +1303,52 @@ export default function LiveGameScreen() {
         )}
       </ScrollView>
 
-      {/* Player Selection Modal */}
-      <PlayerSelectModal
-        visible={showPlayerModal}
-        onClose={() => setShowPlayerModal(false)}
-        onSelect={(player) => {
-          setSelectedPlayer(player);
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }}
-        players={onCourtPlayers}
-        title="Select Player"
-      />
-
-      {/* Shot Type Modal */}
-      <ShotTypeModal
+      {/* Shot Recording Modal - Shows player selection with MADE/MISS per player */}
+      <ShotRecordingModal
         visible={!!pendingShot}
         onClose={() => setPendingShot(null)}
-        onSelectMade={() => handleShotResult(true)}
-        onSelectMissed={() => handleShotResult(false)}
+        onRecord={handleShotFromModal}
         shotType={pendingShot?.is3pt ? "3pt" : "2pt"}
-        location={pendingShot}
+        zoneName={pendingShot?.zone || "Unknown"}
+        onCourtPlayers={onCourtPlayersForModal}
+      />
+
+      {/* Assist Prompt Modal - Auto-shows after made shots */}
+      <AssistPromptModal
+        visible={!!pendingAssist}
+        onClose={() => setPendingAssist(null)}
+        onAssist={handleAssist}
+        onNoAssist={handleNoAssist}
+        scorerName={pendingAssist?.scorerName || ""}
+        scorerNumber={pendingAssist?.scorerNumber || 0}
+        shotType={pendingAssist?.shotType || "shot2"}
+        points={pendingAssist?.points || 2}
+        teammates={getTeammatesForAssist()}
+      />
+
+      {/* Rebound Prompt Modal - Auto-shows after missed shots */}
+      <ReboundPromptModal
+        visible={!!pendingRebound}
+        onClose={() => setPendingRebound(null)}
+        onPlayerRebound={handlePlayerRebound}
+        onTeamRebound={handleTeamRebound}
+        shooterTeamId={pendingRebound?.shooterTeamId || ("" as Id<"teams">)}
+        shooterTeamName={pendingRebound?.shooterTeamName || ""}
+        opposingTeamId={pendingRebound?.opposingTeamId || ("" as Id<"teams">)}
+        opposingTeamName={pendingRebound?.opposingTeamName || ""}
+        shooterTeamPlayers={getShooterTeamPlayers()}
+        opposingTeamPlayers={getOpposingTeamPlayers()}
+        shotType={pendingRebound?.shotType || "shot2"}
+        autoDismissMs={8000}
+      />
+
+      {/* Quick Stat Modal - For non-shot stats */}
+      <QuickStatModal
+        visible={!!pendingQuickStat}
+        onClose={() => setPendingQuickStat(null)}
+        onRecord={handleQuickStatRecord}
+        statType={pendingQuickStat || "rebound"}
+        onCourtPlayers={onCourtPlayersForModal}
       />
 
       {/* Foul Type Modal */}
@@ -1338,15 +1356,15 @@ export default function LiveGameScreen() {
         visible={showFoulTypeModal}
         onClose={() => {
           setShowFoulTypeModal(false);
-          setPendingFoul(null);
+          setPendingFoulPlayerId(null);
         }}
         player={
-          pendingFoul?.player
+          pendingFoulPlayer?.player
             ? {
-                id: pendingFoul.playerId,
-                name: pendingFoul.player.name,
-                number: pendingFoul.player.number,
-                fouls: pendingFoul.fouls,
+                id: pendingFoulPlayerId!,
+                name: pendingFoulPlayer.player.name,
+                number: pendingFoulPlayer.player.number,
+                fouls: pendingFoulPlayer.fouls,
               }
             : null
         }
@@ -1356,7 +1374,7 @@ export default function LiveGameScreen() {
           playerId: s.playerId,
           player: s.player,
         }))}
-        playerTeamId={pendingFoul?.teamId}
+        playerTeamId={pendingFoulPlayer?.teamId}
       />
 
       {/* Free Throw Sequence Modal */}
@@ -1419,21 +1437,5 @@ const styles = StyleSheet.create({
   },
   miniCourtDisabled: {
     opacity: 0.5,
-  },
-  courtOverlay: {
-    position: "absolute",
-    bottom: 8,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-  },
-  courtOverlayText: {
-    color: "#9CA3AF",
-    fontSize: 10,
-    fontWeight: "500",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 4,
   },
 });

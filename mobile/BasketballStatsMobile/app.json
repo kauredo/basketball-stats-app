@@ -4,9 +4,9 @@
     "slug": "BasketballStatsMobile",
     "version": "1.0.0",
     "entryPoint": "./index.ts",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",

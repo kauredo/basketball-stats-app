@@ -1,33 +1,111 @@
-import React from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  Modal,
+  Pressable,
+  TextInput,
+  ActivityIndicator,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
-import { useTheme, ThemeMode } from "../contexts/ThemeContext";
+import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 
-const themeModeLabels: Record<ThemeMode, string> = {
-  system: "System",
-  light: "Light",
-  dark: "Dark",
-};
-
-const themeModeOrder: ThemeMode[] = ["system", "light", "dark"];
-
 export default function ProfileScreen() {
-  const { user, token, selectedLeague, userLeagues, logout, selectLeague } = useAuth();
-  const { mode, resolvedTheme, setMode } = useTheme();
+  const { user, token, selectedLeague, userLeagues, logout, selectLeague, refreshUser } = useAuth();
+  const { resolvedTheme } = useTheme();
+
+  // Edit profile state
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editFirstName, setEditFirstName] = useState(user?.firstName || "");
+  const [editLastName, setEditLastName] = useState(user?.lastName || "");
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+  // Change password state
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Mutations
+  const updateProfileMutation = useMutation(api.auth.updateProfile);
+  const changePasswordMutation = useMutation(api.auth.changePassword);
 
   // Fetch user leagues from Convex
   const leaguesData = useQuery(api.leagues.list, token ? { token } : "skip");
 
   const leagues = leaguesData?.leagues?.filter((l: any) => l.membership) || userLeagues;
 
-  const cycleTheme = () => {
-    const currentIndex = themeModeOrder.indexOf(mode);
-    const nextIndex = (currentIndex + 1) % themeModeOrder.length;
-    setMode(themeModeOrder[nextIndex]);
+  const handleOpenEditProfile = () => {
+    setEditFirstName(user?.firstName || "");
+    setEditLastName(user?.lastName || "");
+    setShowEditProfile(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!token) return;
+    if (!editFirstName.trim() || !editLastName.trim()) {
+      Alert.alert("Error", "First name and last name are required");
+      return;
+    }
+
+    setIsUpdatingProfile(true);
+    try {
+      await updateProfileMutation({
+        token,
+        firstName: editFirstName.trim(),
+        lastName: editLastName.trim(),
+      });
+      await refreshUser?.();
+      setShowEditProfile(false);
+      Alert.alert("Success", "Profile updated successfully");
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to update profile");
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleOpenChangePassword = () => {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setShowChangePassword(true);
+  };
+
+  const handleChangePassword = async () => {
+    if (!token) return;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      Alert.alert("Error", "All fields are required");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Error", "New passwords do not match");
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await changePasswordMutation({
+        token,
+        currentPassword,
+        newPassword,
+        newPasswordConfirmation: confirmPassword,
+      });
+      setShowChangePassword(false);
+      Alert.alert("Success", "Password changed successfully");
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to change password");
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const handleLogout = () => {
@@ -68,11 +146,19 @@ export default function ProfileScreen() {
       <ScrollView className="flex-1 px-4">
         {/* User Info */}
         <View className="items-center py-8">
-          <View className="w-20 h-20 rounded-full bg-red-500 items-center justify-center mb-4">
-            <Text className="text-white text-2xl font-bold">
-              {user?.firstName?.[0]}
-              {user?.lastName?.[0]}
-            </Text>
+          <View className="relative">
+            <View className="w-20 h-20 rounded-full bg-orange-500 items-center justify-center mb-4">
+              <Text className="text-white text-2xl font-bold">
+                {user?.firstName?.[0]}
+                {user?.lastName?.[0]}
+              </Text>
+            </View>
+            <TouchableOpacity
+              className="absolute bottom-2 right-0 w-8 h-8 rounded-full bg-gray-800 dark:bg-gray-600 items-center justify-center border-2 border-white dark:border-gray-900"
+              onPress={handleOpenEditProfile}
+            >
+              <Icon name="settings" size={14} color="#FFFFFF" />
+            </TouchableOpacity>
           </View>
           <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
             {user?.firstName} {user?.lastName}
@@ -151,50 +237,46 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Settings */}
+        {/* Account */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">Settings</Text>
+          <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">Account</Text>
 
           <TouchableOpacity
-            className="bg-white dark:bg-gray-800 rounded-lg p-4 flex-row justify-between items-center mb-2 border border-gray-200 dark:border-gray-700"
-            onPress={cycleTheme}
+            className="bg-white dark:bg-gray-800 rounded-lg p-4 flex-row items-center mb-2 border border-gray-200 dark:border-gray-700"
+            onPress={handleOpenEditProfile}
           >
-            <Text className="text-base text-gray-900 dark:text-white">Appearance</Text>
-            <View className="flex-row items-center">
-              <Text className="text-sm text-gray-600 dark:text-gray-400 mr-2">
-                {themeModeLabels[mode]}
-              </Text>
-              <Icon
-                name="arrow-right"
-                size={16}
-                color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
-              />
+            <View className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center mr-3">
+              <Icon name="user" size={20} color="#3B82F6" />
             </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity className="bg-white dark:bg-gray-800 rounded-lg p-4 flex-row justify-between items-center mb-2 border border-gray-200 dark:border-gray-700">
-            <Text className="text-base text-gray-900 dark:text-white">Account Settings</Text>
+            <View className="flex-1">
+              <Text className="text-base text-gray-900 dark:text-white font-medium">Edit Profile</Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">
+                Change your name
+              </Text>
+            </View>
             <Icon
-              name="arrow-right"
-              size={16}
+              name="chevron-right"
+              size={20}
               color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
             />
           </TouchableOpacity>
 
-          <TouchableOpacity className="bg-white dark:bg-gray-800 rounded-lg p-4 flex-row justify-between items-center mb-2 border border-gray-200 dark:border-gray-700">
-            <Text className="text-base text-gray-900 dark:text-white">Notifications</Text>
+          <TouchableOpacity
+            className="bg-white dark:bg-gray-800 rounded-lg p-4 flex-row items-center mb-2 border border-gray-200 dark:border-gray-700"
+            onPress={handleOpenChangePassword}
+          >
+            <View className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full items-center justify-center mr-3">
+              <Icon name="settings" size={20} color="#F59E0B" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-base text-gray-900 dark:text-white font-medium">Change Password</Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">
+                Update your password
+              </Text>
+            </View>
             <Icon
-              name="arrow-right"
-              size={16}
-              color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity className="bg-white dark:bg-gray-800 rounded-lg p-4 flex-row justify-between items-center mb-2 border border-gray-200 dark:border-gray-700">
-            <Text className="text-base text-gray-900 dark:text-white">Help & Support</Text>
-            <Icon
-              name="arrow-right"
-              size={16}
+              name="chevron-right"
+              size={20}
               color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
             />
           </TouchableOpacity>
@@ -210,6 +292,144 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Edit Profile Modal */}
+      <Modal visible={showEditProfile} animationType="fade" transparent>
+        <Pressable
+          className="flex-1 bg-black/50 justify-center items-center"
+          onPress={() => setShowEditProfile(false)}
+        >
+          <Pressable
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 mx-6 w-[90%] max-w-sm"
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text className="text-gray-900 dark:text-white text-xl font-bold text-center mb-6">
+              Edit Profile
+            </Text>
+
+            <View className="mb-4">
+              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">First Name</Text>
+              <TextInput
+                className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
+                value={editFirstName}
+                onChangeText={setEditFirstName}
+                placeholder="Enter first name"
+                placeholderTextColor="#9CA3AF"
+                autoCapitalize="words"
+              />
+            </View>
+
+            <View className="mb-6">
+              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Last Name</Text>
+              <TextInput
+                className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
+                value={editLastName}
+                onChangeText={setEditLastName}
+                placeholder="Enter last name"
+                placeholderTextColor="#9CA3AF"
+                autoCapitalize="words"
+              />
+            </View>
+
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                className="flex-1 bg-gray-200 dark:bg-gray-700 py-3 rounded-lg"
+                onPress={() => setShowEditProfile(false)}
+              >
+                <Text className="text-gray-700 dark:text-gray-300 text-center font-semibold">
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-orange-500 py-3 rounded-lg flex-row justify-center items-center"
+                onPress={handleSaveProfile}
+                disabled={isUpdatingProfile}
+              >
+                {isUpdatingProfile ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text className="text-white text-center font-semibold">Save</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Change Password Modal */}
+      <Modal visible={showChangePassword} animationType="fade" transparent>
+        <Pressable
+          className="flex-1 bg-black/50 justify-center items-center"
+          onPress={() => setShowChangePassword(false)}
+        >
+          <Pressable
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 mx-6 w-[90%] max-w-sm"
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text className="text-gray-900 dark:text-white text-xl font-bold text-center mb-6">
+              Change Password
+            </Text>
+
+            <View className="mb-4">
+              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Current Password</Text>
+              <TextInput
+                className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                placeholder="Enter current password"
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry
+              />
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">New Password</Text>
+              <TextInput
+                className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
+                value={newPassword}
+                onChangeText={setNewPassword}
+                placeholder="Enter new password"
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry
+              />
+            </View>
+
+            <View className="mb-6">
+              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Confirm New Password</Text>
+              <TextInput
+                className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Confirm new password"
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry
+              />
+            </View>
+
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                className="flex-1 bg-gray-200 dark:bg-gray-700 py-3 rounded-lg"
+                onPress={() => setShowChangePassword(false)}
+              >
+                <Text className="text-gray-700 dark:text-gray-300 text-center font-semibold">
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-orange-500 py-3 rounded-lg flex-row justify-center items-center"
+                onPress={handleChangePassword}
+                disabled={isChangingPassword}
+              >
+                {isChangingPassword ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text className="text-white text-center font-semibold">Change</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }

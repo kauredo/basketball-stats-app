@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, Alert, useColorScheme } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, Alert, Modal, Pressable } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,6 +11,7 @@ import Icon from "../Icon";
 import TimeoutDots from "./TimeoutDots";
 import BonusIndicator from "./BonusIndicator";
 import TeamFoulsDisplay from "./TeamFoulsDisplay";
+import ShotClock from "./ShotClock";
 
 interface TeamStats {
   foulsThisQuarter: number;
@@ -38,6 +39,10 @@ interface EnhancedScoreboardProps {
   onGameControl: (action: "start" | "pause" | "resume" | "end") => void;
   onTimeoutHome?: () => void;
   onTimeoutAway?: () => void;
+  onQuarterChange?: (quarter: number) => void;
+  onEndPeriod?: () => void;
+  shotClockSeconds?: number;
+  showShotClock?: boolean;
 }
 
 export default function EnhancedScoreboard({
@@ -48,7 +53,13 @@ export default function EnhancedScoreboard({
   onGameControl,
   onTimeoutHome,
   onTimeoutAway,
+  onQuarterChange,
+  onEndPeriod,
+  shotClockSeconds = 24,
+  showShotClock = false,
 }: EnhancedScoreboardProps) {
+  const [showQuarterSelector, setShowQuarterSelector] = useState(false);
+
   // Score animation
   const homeScoreScale = useSharedValue(1);
   const awayScoreScale = useSharedValue(1);
@@ -118,12 +129,39 @@ export default function EnhancedScoreboard({
     );
   };
 
+  const handleQuarterSelect = (quarter: number) => {
+    setShowQuarterSelector(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onQuarterChange?.(quarter);
+  };
+
+  const handleEndPeriodPress = () => {
+    if (onEndPeriod) {
+      // Use the proper end period flow
+      onEndPeriod();
+    } else {
+      // Fallback to direct end if no handler provided
+      Alert.alert(
+        "End Game",
+        "Are you sure you want to end this game?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "End Game",
+            style: "destructive",
+            onPress: () => onGameControl("end"),
+          },
+        ]
+      );
+    }
+  };
+
   const isGameActive = game.status === "active";
   const isGamePaused = game.status === "paused";
   const canStart = game.status === "scheduled";
   const canPause = game.status === "active";
   const canResume = game.status === "paused";
-  const canEnd = game.status === "active" || game.status === "paused";
+  const canEndPeriod = game.status === "active" || game.status === "paused";
 
   // Get status badge styling
   const getStatusBadgeClass = () => {
@@ -138,6 +176,36 @@ export default function EnhancedScoreboard({
     if (isGamePaused) return "PAUSED";
     if (game.status === "completed") return "FINAL";
     return "PRE-GAME";
+  };
+
+  // Quarter progress dots
+  const renderQuarterDots = () => {
+    const dots = [];
+    for (let i = 1; i <= 4; i++) {
+      const isCompleted = i < game.currentQuarter;
+      const isCurrent = i === game.currentQuarter && game.currentQuarter <= 4;
+      dots.push(
+        <View
+          key={i}
+          className={`w-2 h-2 rounded-full mx-0.5 ${
+            isCompleted
+              ? "bg-green-500"
+              : isCurrent
+                ? "bg-orange-500"
+                : "bg-gray-400 dark:bg-gray-600"
+          }`}
+        />
+      );
+    }
+    // Add OT indicator if in overtime
+    if (game.currentQuarter > 4) {
+      dots.push(
+        <View key="ot" className="bg-purple-500 px-1.5 py-0.5 rounded ml-1">
+          <Text className="text-white text-[8px] font-bold">OT{game.currentQuarter - 4}</Text>
+        </View>
+      );
+    }
+    return dots;
   };
 
   return (
@@ -157,21 +225,45 @@ export default function EnhancedScoreboard({
           </Animated.Text>
         </View>
 
-        {/* Game Clock */}
+        {/* Game Clock & Controls */}
         <View className="items-center mx-4">
           <View className={`px-3 py-1 rounded-full mb-2 ${getStatusBadgeClass()}`}>
             <Text className="text-white text-[11px] font-bold tracking-wide">
               {getStatusText()}
             </Text>
           </View>
-          <View className="bg-gray-100 dark:bg-gray-700/50 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600">
-            <Text className="text-gray-900 dark:text-white text-2xl font-bold font-mono">
-              {formatTime(game.timeRemainingSeconds)}
-            </Text>
+
+          {/* Clock and Shot Clock Row */}
+          <View className="flex-row items-center gap-2">
+            <View className="bg-gray-100 dark:bg-gray-700/50 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600">
+              <Text className="text-gray-900 dark:text-white text-2xl font-bold font-mono">
+                {formatTime(game.timeRemainingSeconds)}
+              </Text>
+            </View>
+            {showShotClock && (isGameActive || isGamePaused) && (
+              <ShotClock
+                seconds={shotClockSeconds}
+                isRunning={isGameActive}
+                isWarning={shotClockSeconds <= 5}
+                isViolation={shotClockSeconds === 0}
+                size="sm"
+              />
+            )}
           </View>
-          <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1">
-            {formatQuarter(game.currentQuarter)}
-          </Text>
+
+          {/* Quarter Selector */}
+          <TouchableOpacity
+            className="flex-row items-center mt-1"
+            onPress={() => onQuarterChange && setShowQuarterSelector(true)}
+            disabled={!onQuarterChange}
+          >
+            <View className="flex-row items-center">
+              {renderQuarterDots()}
+            </View>
+            {onQuarterChange && (
+              <Icon name="chevron-down" size={12} color="#9CA3AF" />
+            )}
+          </TouchableOpacity>
 
           {/* Game Controls */}
           <View className="flex-row mt-2 gap-2">
@@ -199,9 +291,9 @@ export default function EnhancedScoreboard({
                 <Icon name="play" size={16} color="#FFFFFF" />
               </TouchableOpacity>
             )}
-            {canEnd && (
+            {canEndPeriod && (
               <TouchableOpacity
-                onPress={() => onGameControl("end")}
+                onPress={handleEndPeriodPress}
                 className="bg-red-500 px-4 py-2 rounded-lg"
               >
                 <Icon name="stop" size={16} color="#FFFFFF" />
@@ -269,6 +361,75 @@ export default function EnhancedScoreboard({
           />
         </View>
       </View>
+
+      {/* Quarter Selector Modal */}
+      <Modal visible={showQuarterSelector} animationType="fade" transparent>
+        <Pressable
+          className="flex-1 bg-black/50 justify-center items-center"
+          onPress={() => setShowQuarterSelector(false)}
+        >
+          <View className="bg-white dark:bg-gray-800 rounded-2xl p-4 mx-8 w-64">
+            <Text className="text-gray-900 dark:text-white text-lg font-bold text-center mb-4">
+              Select Quarter
+            </Text>
+            <View className="flex-row flex-wrap justify-center gap-2">
+              {[1, 2, 3, 4].map((q) => (
+                <TouchableOpacity
+                  key={q}
+                  onPress={() => handleQuarterSelect(q)}
+                  className={`w-14 h-14 rounded-xl items-center justify-center ${
+                    game.currentQuarter === q
+                      ? "bg-orange-500"
+                      : q < game.currentQuarter
+                        ? "bg-green-500"
+                        : "bg-gray-200 dark:bg-gray-700"
+                  }`}
+                >
+                  <Text
+                    className={`font-bold text-lg ${
+                      game.currentQuarter === q || q < game.currentQuarter
+                        ? "text-white"
+                        : "text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    Q{q}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {/* Overtime options */}
+            <View className="flex-row justify-center gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              {[5, 6, 7].map((q) => (
+                <TouchableOpacity
+                  key={q}
+                  onPress={() => handleQuarterSelect(q)}
+                  className={`px-4 py-2 rounded-lg ${
+                    game.currentQuarter === q
+                      ? "bg-purple-500"
+                      : "bg-gray-200 dark:bg-gray-700"
+                  }`}
+                >
+                  <Text
+                    className={`font-bold ${
+                      game.currentQuarter === q
+                        ? "text-white"
+                        : "text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    OT{q - 4}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity
+              onPress={() => setShowQuarterSelector(false)}
+              className="mt-4 py-2"
+            >
+              <Text className="text-gray-500 text-center">Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }

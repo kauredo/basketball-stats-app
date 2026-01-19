@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import * as SecureStore from "expo-secure-store";
@@ -41,6 +41,7 @@ interface AuthContextType {
   selectLeague: (league: League) => void;
   setUserLeagues: (leagues: League[]) => void;
   clearError: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -61,6 +62,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useMutation(api.auth.login);
   const signupMutation = useMutation(api.auth.signup);
   const logoutMutation = useMutation(api.auth.logout);
+
+  // Query for refreshing user data
+  const currentUserData = useQuery(
+    api.auth.getCurrentUser,
+    token ? { token } : "skip"
+  );
 
   useEffect(() => {
     initializeAuth();
@@ -179,6 +186,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clearError = () => setError(null);
 
+  const refreshUser = async () => {
+    if (currentUserData?.user) {
+      const updatedUser = {
+        id: currentUserData.user.id,
+        email: currentUserData.user.email,
+        firstName: currentUserData.user.firstName,
+        lastName: currentUserData.user.lastName,
+        role: currentUserData.user.role,
+      };
+      setUser(updatedUser);
+      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(updatedUser));
+    }
+  };
+
+  // Sync user data when query updates
+  useEffect(() => {
+    if (currentUserData?.user && user) {
+      // Check if user data has changed
+      if (
+        currentUserData.user.firstName !== user.firstName ||
+        currentUserData.user.lastName !== user.lastName
+      ) {
+        refreshUser();
+      }
+    }
+  }, [currentUserData]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -195,6 +229,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         selectLeague,
         setUserLeagues,
         clearError,
+        refreshUser,
       }}
     >
       {children}
