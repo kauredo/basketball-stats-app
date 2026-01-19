@@ -14,6 +14,7 @@ export type IconName =
   | "trophy"
   | "activity"
   | "target"
+  | "whistle"
   // Navigation & UI
   | "home"
   | "stats"
@@ -28,6 +29,7 @@ export type IconName =
   | "trash"
   | "check"
   | "x"
+  | "list"
   // Actions
   | "play"
   | "pause"
@@ -35,6 +37,9 @@ export type IconName =
   | "refresh"
   | "search"
   | "filter"
+  | "undo"
+  | "alarm"
+  | "timer"
   // Arrows & Directions
   | "arrow-left"
   | "arrow-right"
@@ -66,6 +71,7 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   trophy: { library: "ionicons", name: "trophy" },
   activity: { library: "ionicons", name: "pulse" },
   target: { library: "ionicons", name: "golf" },
+  whistle: { library: "ionicons", name: "megaphone" },
 
   // Navigation & UI
   home: { library: "ionicons", name: "home" },
@@ -81,6 +87,7 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   trash: { library: "ionicons", name: "trash" },
   check: { library: "ionicons", name: "checkmark" },
   x: { library: "ionicons", name: "close" },
+  list: { library: "ionicons", name: "list" },
 
   // Actions
   play: { library: "ionicons", name: "play" },
@@ -89,6 +96,9 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   refresh: { library: "ionicons", name: "refresh" },
   search: { library: "ionicons", name: "search" },
   filter: { library: "ionicons", name: "filter" },
+  undo: { library: "ionicons", name: "arrow-undo" },
+  alarm: { library: "ionicons", name: "alarm" },
+  timer: { library: "ionicons", name: "timer" },
 
   // Arrows & Directions
   "arrow-left": { library: "ionicons", name: "arrow-back" },

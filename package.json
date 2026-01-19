@@ -25,5 +25,11 @@
     "@convex-dev/auth": "^0.0.90",
     "typescript": "^5.9.3"
   },
+  "overrides": {
+    "nativewind": {
+      "tailwindcss": "3.2.7"
+    },
+    "tailwindcss": "3.2.7"
+  },
   "packageManager": "npm@10.9.2"
 }

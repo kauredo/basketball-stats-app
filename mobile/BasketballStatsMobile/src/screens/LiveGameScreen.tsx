@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -30,6 +30,15 @@ import Icon from "../components/Icon";
 import { RootStackParamList } from "../../App";
 import { COLORS, TOUCH_TARGETS, getShotZone } from "@basketball-stats/shared";
 
+// Import new components
+import EnhancedScoreboard from "../components/livegame/EnhancedScoreboard";
+import FoulTypeModal, { FoulType } from "../components/livegame/FoulTypeModal";
+import FreeThrowSequenceModal, { FreeThrowSequence } from "../components/livegame/FreeThrowSequenceModal";
+import QuickUndoFAB, { LastAction } from "../components/livegame/QuickUndoFAB";
+import OvertimePromptModal from "../components/livegame/OvertimePromptModal";
+import PlayByPlayTab from "../components/livegame/PlayByPlayTab";
+import useSoundFeedback from "../hooks/useSoundFeedback";
+
 type LiveGameRouteProp = RouteProp<RootStackParamList, "LiveGame">;
 
 const screenWidth = Dimensions.get("window").width;
@@ -53,6 +62,7 @@ interface PlayerStat {
   blocks: number;
   turnovers: number;
   fouls: number;
+  fouledOut?: boolean;
   fieldGoalsMade: number;
   fieldGoalsAttempted: number;
   threePointersMade: number;
@@ -196,17 +206,11 @@ interface MiniCourtProps {
 function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
   const handleTap = useCallback(
     (tapX: number, tapY: number) => {
-      // Convert tap coordinates to court coordinates
       const courtX = (tapX / MINI_COURT_WIDTH) * 50 - 25;
-      const courtY = (tapY / MINI_COURT_HEIGHT) * 28; // Shorter view
-
-      // Get shot zone
+      const courtY = (tapY / MINI_COURT_HEIGHT) * 28;
       const zone = getShotZone(courtX, courtY);
-
-      // Determine if it's a 3-pointer based on distance
       const distanceFromBasket = Math.sqrt(courtX * courtX + (courtY - 5.25) ** 2);
       const is3pt = distanceFromBasket > 23.75 || (Math.abs(courtX) > 22 && courtY < 14);
-
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       onCourtTap(courtX, courtY, zone, is3pt);
     },
@@ -223,51 +227,21 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
     <GestureDetector gesture={tapGesture}>
       <Animated.View style={[styles.miniCourtContainer, disabled && styles.miniCourtDisabled]}>
         <Svg width={MINI_COURT_WIDTH} height={MINI_COURT_HEIGHT} viewBox="0 0 50 28">
-          {/* Court background */}
           <Rect x="0" y="0" width="50" height="28" fill={COLORS.court.background} />
-
-          {/* Court outline */}
           <Rect x="0" y="0" width="50" height="28" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-
-          {/* Paint/Key area */}
-          <Rect
-            x="17"
-            y="0"
-            width="16"
-            height="15"
-            fill="none"
-            stroke="#4A5568"
-            strokeWidth="0.3"
-          />
-
-          {/* Free throw circle */}
+          <Rect x="17" y="0" width="16" height="15" fill="none" stroke="#4A5568" strokeWidth="0.3" />
           <Circle cx="25" cy="15" r="4" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-
-          {/* Restricted area arc */}
           <Path d="M 21 0 A 4 4 0 0 0 29 0" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-
-          {/* Basket */}
           <Circle cx="25" cy="4" r="0.6" fill={COLORS.primary[500]} />
-
-          {/* Three-point line */}
-          <Path
-            d="M 3 0 L 3 10 A 20 20 0 0 0 47 10 L 47 0"
-            fill="none"
-            stroke="#4A5568"
-            strokeWidth="0.3"
-          />
-
-          {/* 3PT and 2PT zone labels */}
+          <Path d="M 3 0 L 3 10 A 20 20 0 0 0 47 10 L 47 0" fill="none" stroke="#4A5568" strokeWidth="0.3" />
           <G>
             <Circle cx="25" cy="22" r="3" fill="rgba(239, 68, 68, 0.3)" />
             <Circle cx="10" cy="20" r="2.5" fill="rgba(34, 197, 94, 0.3)" />
             <Circle cx="40" cy="20" r="2.5" fill="rgba(34, 197, 94, 0.3)" />
           </G>
-
-          {/* Recent shots */}
           {recentShots.slice(-5).map((shot, index) => {
             const svgX = 25 + shot.x;
-            const svgY = shot.y * 0.6; // Scale Y for mini court
+            const svgY = shot.y * 0.6;
             return (
               <Circle
                 key={index}
@@ -282,8 +256,6 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
             );
           })}
         </Svg>
-
-        {/* Tap instruction overlay */}
         {!disabled && (
           <View style={styles.courtOverlay}>
             <Text style={styles.courtOverlayText}>TAP TO RECORD SHOT LOCATION</Text>
@@ -321,7 +293,6 @@ function ShotTypeModal({
           <Text className="text-gray-600 dark:text-gray-400 text-center mb-6">
             Did the shot go in?
           </Text>
-
           <View className="flex-row space-x-4">
             <TouchableOpacity
               className="flex-1 bg-green-600 py-4 rounded-xl"
@@ -335,7 +306,6 @@ function ShotTypeModal({
                 +{shotType === "3pt" ? "3" : "2"} PTS
               </Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               className="flex-1 bg-red-600 py-4 rounded-xl"
               onPress={() => {
@@ -347,7 +317,6 @@ function ShotTypeModal({
               <Text className="text-red-200 text-sm text-center">0 PTS</Text>
             </TouchableOpacity>
           </View>
-
           <TouchableOpacity className="mt-4 py-3" onPress={onClose}>
             <Text className="text-gray-600 dark:text-gray-400 text-center">Cancel</Text>
           </TouchableOpacity>
@@ -361,6 +330,7 @@ const TABS = [
   { key: "court", label: "Court", icon: "basketball" },
   { key: "stats", label: "Stats", icon: "stats" },
   { key: "subs", label: "Subs", icon: "users" },
+  { key: "plays", label: "Plays", icon: "list" },
 ];
 
 export default function LiveGameScreen() {
@@ -368,7 +338,11 @@ export default function LiveGameScreen() {
   const { token } = useAuth();
   const gameId = route.params.gameId as Id<"games">;
 
-  const [activeTab, setActiveTab] = useState<"court" | "stats" | "subs">("court");
+  // Sound feedback hook
+  const soundFeedback = useSoundFeedback();
+
+  // Tab state - now includes 'plays'
+  const [activeTab, setActiveTab] = useState<"court" | "stats" | "subs" | "plays">("court");
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerStat | null>(null);
   const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [pendingShot, setPendingShot] = useState<{
@@ -377,13 +351,19 @@ export default function LiveGameScreen() {
     zone: string;
     is3pt: boolean;
   } | null>(null);
-  const [recentShots, setRecentShots] = useState<Array<{ x: number; y: number; made: boolean }>>(
-    []
-  );
+  const [recentShots, setRecentShots] = useState<Array<{ x: number; y: number; made: boolean }>>([]);
+
+  // New state for enhanced features
+  const [pendingFoul, setPendingFoul] = useState<PlayerStat | null>(null);
+  const [showFoulTypeModal, setShowFoulTypeModal] = useState(false);
+  const [freeThrowSequence, setFreeThrowSequence] = useState<FreeThrowSequence | null>(null);
+  const [lastAction, setLastAction] = useState<LastAction | null>(null);
+  const [showOvertimePrompt, setShowOvertimePrompt] = useState(false);
 
   // Real-time game data from Convex
   const gameData = useQuery(api.games.get, token && gameId ? { token, gameId } : "skip");
   const liveStats = useQuery(api.stats.getLiveStats, token && gameId ? { token, gameId } : "skip");
+  const gameEvents = useQuery(api.games.getGameEvents, token && gameId ? { token, gameId, limit: 50 } : "skip");
 
   // Mutations
   const startGame = useMutation(api.games.start);
@@ -392,12 +372,31 @@ export default function LiveGameScreen() {
   const endGame = useMutation(api.games.end);
   const recordStat = useMutation(api.stats.recordStat);
   const substituteMutation = useMutation(api.stats.substitute);
+  const recordFoulWithContext = useMutation(api.stats.recordFoulWithContext);
+  const recordFreeThrow = useMutation(api.stats.recordFreeThrow);
+  const recordTimeout = useMutation(api.games.recordTimeout);
+  const startOvertime = useMutation(api.games.startOvertime);
+  const undoStat = useMutation(api.stats.undoStat);
 
   const game = gameData?.game;
   const allStats = liveStats?.stats || [];
+  const teamStats = liveStats?.teamStats;
   const homePlayerStats = allStats.filter((s: PlayerStat) => s.isHomeTeam);
   const awayPlayerStats = allStats.filter((s: PlayerStat) => !s.isHomeTeam);
   const onCourtPlayers = allStats.filter((s: PlayerStat) => s.isOnCourt);
+
+  // Check for overtime trigger
+  useEffect(() => {
+    if (
+      game?.status === "paused" &&
+      game.currentQuarter >= 4 &&
+      game.homeScore === game.awayScore &&
+      game.timeRemainingSeconds === 0
+    ) {
+      setShowOvertimePrompt(true);
+      soundFeedback.overtime();
+    }
+  }, [game?.status, game?.currentQuarter, game?.homeScore, game?.awayScore, game?.timeRemainingSeconds]);
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -420,10 +419,9 @@ export default function LiveGameScreen() {
           await resumeGame({ token, gameId });
           break;
         case "end":
-          await endGame({ token, gameId });
+          await endGame({ token, gameId, forceEnd: true });
           break;
       }
-
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } catch (error: any) {
       console.error(`Failed to ${action} game:`, error);
@@ -441,25 +439,223 @@ export default function LiveGameScreen() {
     if (!token) return;
 
     try {
-      await recordStat({
+      const result = await recordStat({
         token,
         gameId,
         playerId,
         statType: statType as any,
         made,
-        // Note: You may want to add x, y to the API if you want to track shot locations
       });
+
+      // Set last action for undo
+      const player = allStats.find((s) => s.playerId === playerId);
+      if (player?.player) {
+        setLastAction({
+          playerId,
+          playerNumber: player.player.number,
+          playerName: player.player.name,
+          statType,
+          wasMade: made,
+          displayText: `${statType}${made !== undefined ? (made ? " Made" : " Missed") : ""}`,
+          timestamp: Date.now(),
+        });
+      }
 
       // Add to recent shots for visualization
       if (shotLocation && (statType === "shot2" || statType === "shot3")) {
         setRecentShots((prev) => [...prev.slice(-4), { ...shotLocation, made: made || false }]);
       }
 
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      // Sound/haptic feedback
+      if (made === true) {
+        soundFeedback.made();
+      } else if (made === false) {
+        soundFeedback.missed();
+      } else {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+
+      // Check for foul out
+      if (result.didFoulOut) {
+        soundFeedback.foulOut();
+        Alert.alert("Fouled Out!", `${player?.player?.name} has fouled out of the game.`);
+      }
     } catch (error: any) {
       console.error("Failed to record stat:", error);
       Alert.alert("Error", "Failed to record stat");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      soundFeedback.error();
+    }
+  };
+
+  const handleFoulPress = () => {
+    if (!selectedPlayer) {
+      setShowPlayerModal(true);
+      return;
+    }
+    setPendingFoul(selectedPlayer);
+    setShowFoulTypeModal(true);
+  };
+
+  const handleFoulTypeSelect = async (
+    foulType: FoulType,
+    shootingDetails?: {
+      shotType: "2pt" | "3pt";
+      wasAndOne: boolean;
+      fouledPlayerId: Id<"players">;
+    }
+  ) => {
+    if (!pendingFoul || !token) return;
+
+    try {
+      const result = await recordFoulWithContext({
+        token,
+        gameId,
+        playerId: pendingFoul.playerId,
+        foulType,
+        wasAndOne: shootingDetails?.wasAndOne,
+        shotType: shootingDetails?.shotType,
+        fouledPlayerId: shootingDetails?.fouledPlayerId,
+      });
+
+      soundFeedback.foul();
+
+      // Set last action for undo
+      if (pendingFoul.player) {
+        setLastAction({
+          playerId: pendingFoul.playerId,
+          playerNumber: pendingFoul.player.number,
+          playerName: pendingFoul.player.name,
+          statType: "foul",
+          displayText: `${foulType} foul`,
+          timestamp: Date.now(),
+        });
+      }
+
+      // Check for foul out
+      if (result.playerFouledOut) {
+        soundFeedback.foulOut();
+        Alert.alert("Fouled Out!", `${pendingFoul.player?.name} has fouled out of the game.`);
+      }
+
+      // Start free throw sequence if needed
+      if (result.freeThrowsAwarded > 0) {
+        const shooterId = shootingDetails?.fouledPlayerId || pendingFoul.playerId;
+        const shooter = allStats.find((s) => s.playerId === shooterId);
+        if (shooter?.player) {
+          setFreeThrowSequence({
+            playerId: shooterId,
+            playerName: shooter.player.name,
+            playerNumber: shooter.player.number,
+            totalAttempts: result.freeThrowsAwarded,
+            isOneAndOne: result.inBonus && !result.inDoubleBonus && result.bonusMode === "college",
+          });
+        }
+      }
+
+      setPendingFoul(null);
+      setShowFoulTypeModal(false);
+    } catch (error: any) {
+      console.error("Failed to record foul:", error);
+      Alert.alert("Error", "Failed to record foul");
+      soundFeedback.error();
+    }
+  };
+
+  const handleFreeThrowResult = async (
+    playerId: Id<"players">,
+    made: boolean,
+    attemptNumber: number,
+    totalAttempts: number,
+    isOneAndOne: boolean
+  ): Promise<{ sequenceContinues: boolean }> => {
+    if (!token) return { sequenceContinues: false };
+
+    try {
+      const result = await recordFreeThrow({
+        token,
+        gameId,
+        playerId,
+        made,
+        attemptNumber,
+        totalAttempts,
+        isOneAndOne,
+      });
+
+      if (made) {
+        soundFeedback.made();
+      } else {
+        soundFeedback.missed();
+      }
+
+      return { sequenceContinues: result.sequenceContinues };
+    } catch (error: any) {
+      console.error("Failed to record free throw:", error);
+      soundFeedback.error();
+      return { sequenceContinues: false };
+    }
+  };
+
+  const handleUndo = async (action: LastAction) => {
+    if (!token) return;
+
+    try {
+      await undoStat({
+        token,
+        gameId,
+        playerId: action.playerId,
+        statType: action.statType as any,
+        wasMade: action.wasMade,
+      });
+
+      soundFeedback.success();
+      setLastAction(null);
+    } catch (error: any) {
+      console.error("Failed to undo:", error);
+      Alert.alert("Error", "Failed to undo action");
+      soundFeedback.error();
+    }
+  };
+
+  const handleTimeout = async (isHome: boolean) => {
+    if (!token || !game) return;
+
+    const teamId = isHome ? game.homeTeam?.id : game.awayTeam?.id;
+    if (!teamId) return;
+
+    try {
+      await recordTimeout({ token, gameId, teamId: teamId as Id<"teams"> });
+      soundFeedback.timeout();
+    } catch (error: any) {
+      console.error("Failed to record timeout:", error);
+      Alert.alert("Error", error.message || "Failed to record timeout");
+      soundFeedback.error();
+    }
+  };
+
+  const handleStartOvertime = async () => {
+    if (!token) return;
+
+    try {
+      await startOvertime({ token, gameId });
+      setShowOvertimePrompt(false);
+      soundFeedback.overtime();
+    } catch (error: any) {
+      console.error("Failed to start overtime:", error);
+      Alert.alert("Error", "Failed to start overtime");
+      soundFeedback.error();
+    }
+  };
+
+  const handleEndAsTie = async () => {
+    if (!token) return;
+
+    try {
+      await endGame({ token, gameId, forceEnd: true });
+      setShowOvertimePrompt(false);
+    } catch (error: any) {
+      console.error("Failed to end game:", error);
+      Alert.alert("Error", "Failed to end game");
+      soundFeedback.error();
     }
   };
 
@@ -481,7 +677,6 @@ export default function LiveGameScreen() {
       setShowPlayerModal(true);
       return;
     }
-
     setPendingShot({ x, y, zone, is3pt });
   };
 
@@ -523,106 +718,47 @@ export default function LiveGameScreen() {
   }
 
   const isGameActive = game.status === "active";
-  const isGamePaused = game.status === "paused";
-  const canStart = game.status === "scheduled";
-  const canPause = game.status === "active";
-  const canResume = game.status === "paused";
-  const canEnd = game.status === "active" || game.status === "paused";
   const canRecordStats = isGameActive;
+
+  // Team stats for enhanced scoreboard
+  const homeTeamStatsData = {
+    foulsThisQuarter: teamStats?.home.foulsThisQuarter || 0,
+    teamFouls: teamStats?.home.teamFouls || 0,
+    timeoutsRemaining: teamStats?.home.timeoutsRemaining || 4,
+    inBonus: teamStats?.home.inBonus || false,
+    inDoubleBonus: teamStats?.home.inDoubleBonus || false,
+  };
+
+  const awayTeamStatsData = {
+    foulsThisQuarter: teamStats?.away.foulsThisQuarter || 0,
+    teamFouls: teamStats?.away.teamFouls || 0,
+    timeoutsRemaining: teamStats?.away.timeoutsRemaining || 4,
+    inBonus: teamStats?.away.inBonus || false,
+    inDoubleBonus: teamStats?.away.inDoubleBonus || false,
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-dark-950">
       <StatusBar style="light" />
 
-      {/* Compact Scoreboard Header */}
-      <View className="bg-white dark:bg-gray-800 mx-4 mt-2 rounded-2xl p-4 border border-gray-200 dark:border-gray-700">
-        <View className="flex-row items-center justify-between">
-          {/* Away Team */}
-          <View className="flex-1 items-center">
-            <Text className="text-gray-600 dark:text-gray-400 text-xs mb-1" numberOfLines={1}>
-              {game.awayTeam?.name || "Away"}
-            </Text>
-            <Text className="text-gray-900 dark:text-white text-4xl font-bold">
-              {game.awayScore}
-            </Text>
-          </View>
-
-          {/* Game Clock */}
-          <View className="items-center mx-4">
-            <View
-              className={`px-3 py-1 rounded-full mb-2 ${
-                isGameActive
-                  ? "bg-red-600"
-                  : isGamePaused
-                    ? "bg-yellow-600"
-                    : game.status === "completed"
-                      ? "bg-gray-600"
-                      : "bg-blue-600"
-              }`}
-            >
-              <Text className="text-gray-900 dark:text-white text-xs font-bold">
-                {isGameActive
-                  ? "LIVE"
-                  : isGamePaused
-                    ? "PAUSED"
-                    : game.status === "completed"
-                      ? "FINAL"
-                      : "SCHEDULED"}
-              </Text>
-            </View>
-            <Text className="text-gray-900 dark:text-white text-2xl font-mono font-bold">
-              {formatTime(game.timeRemainingSeconds)}
-            </Text>
-            <Text className="text-gray-600 dark:text-gray-400 text-xs">Q{game.currentQuarter}</Text>
-
-            {/* Game Controls */}
-            <View className="flex-row mt-2 space-x-2">
-              {canStart && (
-                <TouchableOpacity
-                  onPress={() => handleGameControl("start")}
-                  className="bg-green-600 px-4 py-2 rounded-lg"
-                >
-                  <Icon name="play" size={16} color="#FFFFFF" />
-                </TouchableOpacity>
-              )}
-              {canPause && (
-                <TouchableOpacity
-                  onPress={() => handleGameControl("pause")}
-                  className="bg-yellow-600 px-4 py-2 rounded-lg"
-                >
-                  <Icon name="pause" size={16} color="#FFFFFF" />
-                </TouchableOpacity>
-              )}
-              {canResume && (
-                <TouchableOpacity
-                  onPress={() => handleGameControl("resume")}
-                  className="bg-blue-600 px-4 py-2 rounded-lg"
-                >
-                  <Icon name="play" size={16} color="#FFFFFF" />
-                </TouchableOpacity>
-              )}
-              {canEnd && (
-                <TouchableOpacity
-                  onPress={() => handleGameControl("end")}
-                  className="bg-red-600 px-4 py-2 rounded-lg"
-                >
-                  <Icon name="stop" size={16} color="#FFFFFF" />
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-
-          {/* Home Team */}
-          <View className="flex-1 items-center">
-            <Text className="text-gray-600 dark:text-gray-400 text-xs mb-1" numberOfLines={1}>
-              {game.homeTeam?.name || "Home"}
-            </Text>
-            <Text className="text-gray-900 dark:text-white text-4xl font-bold">
-              {game.homeScore}
-            </Text>
-          </View>
-        </View>
-      </View>
+      {/* Enhanced Scoreboard */}
+      <EnhancedScoreboard
+        game={{
+          status: game.status,
+          currentQuarter: game.currentQuarter,
+          timeRemainingSeconds: game.timeRemainingSeconds,
+          homeScore: game.homeScore,
+          awayScore: game.awayScore,
+          homeTeam: game.homeTeam,
+          awayTeam: game.awayTeam,
+        }}
+        homeTeamStats={homeTeamStatsData}
+        awayTeamStats={awayTeamStatsData}
+        timeoutsPerTeam={liveStats?.game?.timeoutsPerTeam || 4}
+        onGameControl={handleGameControl}
+        onTimeoutHome={() => handleTimeout(true)}
+        onTimeoutAway={() => handleTimeout(false)}
+      />
 
       {/* Tab Navigation */}
       <View className="flex-row mx-4 mt-4 mb-2">
@@ -757,7 +893,7 @@ export default function LiveGameScreen() {
                   />
                   <StatButton
                     label="MISS"
-                    shortLabel="×"
+                    shortLabel="X"
                     color="#EF4444"
                     size="large"
                     disabled={!canRecordStats || !selectedPlayer}
@@ -781,7 +917,7 @@ export default function LiveGameScreen() {
                     disabled={!canRecordStats || !selectedPlayer}
                     onPress={() => {
                       if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "rebounds");
+                        handleRecordStat(selectedPlayer.playerId, "rebound");
                       }
                     }}
                   />
@@ -792,7 +928,7 @@ export default function LiveGameScreen() {
                     disabled={!canRecordStats || !selectedPlayer}
                     onPress={() => {
                       if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "assists");
+                        handleRecordStat(selectedPlayer.playerId, "assist");
                       }
                     }}
                   />
@@ -803,7 +939,7 @@ export default function LiveGameScreen() {
                     disabled={!canRecordStats || !selectedPlayer}
                     onPress={() => {
                       if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "steals");
+                        handleRecordStat(selectedPlayer.playerId, "steal");
                       }
                     }}
                   />
@@ -814,7 +950,7 @@ export default function LiveGameScreen() {
                     disabled={!canRecordStats || !selectedPlayer}
                     onPress={() => {
                       if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "blocks");
+                        handleRecordStat(selectedPlayer.playerId, "block");
                       }
                     }}
                   />
@@ -827,7 +963,7 @@ export default function LiveGameScreen() {
                     disabled={!canRecordStats || !selectedPlayer}
                     onPress={() => {
                       if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "turnovers");
+                        handleRecordStat(selectedPlayer.playerId, "turnover");
                       }
                     }}
                   />
@@ -836,11 +972,7 @@ export default function LiveGameScreen() {
                     shortLabel="+F"
                     color="#F59E0B"
                     disabled={!canRecordStats || !selectedPlayer}
-                    onPress={() => {
-                      if (selectedPlayer) {
-                        handleRecordStat(selectedPlayer.playerId, "fouls");
-                      }
-                    }}
+                    onPress={handleFoulPress}
                   />
                   <View className="flex-1 mx-1" />
                   <View className="flex-1 mx-1" />
@@ -876,6 +1008,9 @@ export default function LiveGameScreen() {
                     <View className="flex-1">
                       <Text className="text-gray-900 dark:text-white font-medium">
                         {player.name}
+                        {playerStat.fouledOut && (
+                          <Text className="text-red-500 text-xs"> (OUT)</Text>
+                        )}
                       </Text>
                     </View>
                     <View className="flex-row">
@@ -892,6 +1027,12 @@ export default function LiveGameScreen() {
                       <View className="w-10 items-center">
                         <Text className="text-gray-900 dark:text-white">{playerStat.assists}</Text>
                         <Text className="text-gray-500 text-xs">AST</Text>
+                      </View>
+                      <View className="w-8 items-center">
+                        <Text className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}>
+                          {playerStat.fouls}
+                        </Text>
+                        <Text className="text-gray-500 text-xs">PF</Text>
                       </View>
                     </View>
                   </View>
@@ -923,6 +1064,9 @@ export default function LiveGameScreen() {
                     <View className="flex-1">
                       <Text className="text-gray-900 dark:text-white font-medium">
                         {player.name}
+                        {playerStat.fouledOut && (
+                          <Text className="text-red-500 text-xs"> (OUT)</Text>
+                        )}
                       </Text>
                     </View>
                     <View className="flex-row">
@@ -939,6 +1083,12 @@ export default function LiveGameScreen() {
                       <View className="w-10 items-center">
                         <Text className="text-gray-900 dark:text-white">{playerStat.assists}</Text>
                         <Text className="text-gray-500 text-xs">AST</Text>
+                      </View>
+                      <View className="w-8 items-center">
+                        <Text className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}>
+                          {playerStat.fouls}
+                        </Text>
+                        <Text className="text-gray-500 text-xs">PF</Text>
                       </View>
                     </View>
                   </View>
@@ -965,9 +1115,12 @@ export default function LiveGameScreen() {
                     className={`flex-row items-center py-3 px-3 mb-2 rounded-lg ${
                       playerStat.isOnCourt
                         ? "bg-green-900/30 border border-green-700"
-                        : "bg-gray-100 dark:bg-gray-700"
+                        : playerStat.fouledOut
+                          ? "bg-red-900/30 border border-red-700"
+                          : "bg-gray-100 dark:bg-gray-700"
                     }`}
                     onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
+                    disabled={playerStat.fouledOut}
                   >
                     <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
                       <Text className="text-gray-900 dark:text-white font-bold">
@@ -979,16 +1132,20 @@ export default function LiveGameScreen() {
                         {player.name}
                       </Text>
                       <Text className="text-gray-600 dark:text-gray-400 text-xs">
-                        {player.position || "N/A"}
+                        {playerStat.fouledOut ? "FOULED OUT" : player.position || "N/A"}
                       </Text>
                     </View>
                     <View
                       className={`px-4 py-2 rounded-lg ${
-                        playerStat.isOnCourt ? "bg-red-600" : "bg-green-600"
+                        playerStat.fouledOut
+                          ? "bg-gray-600"
+                          : playerStat.isOnCourt
+                            ? "bg-red-600"
+                            : "bg-green-600"
                       }`}
                     >
                       <Text className="text-white font-semibold text-sm">
-                        {playerStat.isOnCourt ? "Sub Out" : "Sub In"}
+                        {playerStat.fouledOut ? "Out" : playerStat.isOnCourt ? "Sub Out" : "Sub In"}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -1011,9 +1168,12 @@ export default function LiveGameScreen() {
                     className={`flex-row items-center py-3 px-3 mb-2 rounded-lg ${
                       playerStat.isOnCourt
                         ? "bg-green-900/30 border border-green-700"
-                        : "bg-gray-100 dark:bg-gray-700"
+                        : playerStat.fouledOut
+                          ? "bg-red-900/30 border border-red-700"
+                          : "bg-gray-100 dark:bg-gray-700"
                     }`}
                     onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
+                    disabled={playerStat.fouledOut}
                   >
                     <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
                       <Text className="text-gray-900 dark:text-white font-bold">
@@ -1025,16 +1185,20 @@ export default function LiveGameScreen() {
                         {player.name}
                       </Text>
                       <Text className="text-gray-600 dark:text-gray-400 text-xs">
-                        {player.position || "N/A"}
+                        {playerStat.fouledOut ? "FOULED OUT" : player.position || "N/A"}
                       </Text>
                     </View>
                     <View
                       className={`px-4 py-2 rounded-lg ${
-                        playerStat.isOnCourt ? "bg-red-600" : "bg-green-600"
+                        playerStat.fouledOut
+                          ? "bg-gray-600"
+                          : playerStat.isOnCourt
+                            ? "bg-red-600"
+                            : "bg-green-600"
                       }`}
                     >
                       <Text className="text-white font-semibold text-sm">
-                        {playerStat.isOnCourt ? "Sub Out" : "Sub In"}
+                        {playerStat.fouledOut ? "Out" : playerStat.isOnCourt ? "Sub Out" : "Sub In"}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -1042,6 +1206,14 @@ export default function LiveGameScreen() {
               })}
             </View>
           </View>
+        )}
+
+        {activeTab === "plays" && (
+          <PlayByPlayTab
+            events={gameEvents?.events}
+            isLoading={gameEvents === undefined}
+            currentQuarter={game.currentQuarter}
+          />
         )}
       </ScrollView>
 
@@ -1065,6 +1237,59 @@ export default function LiveGameScreen() {
         onSelectMissed={() => handleShotResult(false)}
         shotType={pendingShot?.is3pt ? "3pt" : "2pt"}
         location={pendingShot}
+      />
+
+      {/* Foul Type Modal */}
+      <FoulTypeModal
+        visible={showFoulTypeModal}
+        onClose={() => {
+          setShowFoulTypeModal(false);
+          setPendingFoul(null);
+        }}
+        player={
+          pendingFoul?.player
+            ? {
+                id: pendingFoul.playerId,
+                name: pendingFoul.player.name,
+                number: pendingFoul.player.number,
+                fouls: pendingFoul.fouls,
+              }
+            : null
+        }
+        foulLimit={liveStats?.game?.foulLimit || 5}
+        onSelectFoul={handleFoulTypeSelect}
+        onCourtPlayers={onCourtPlayers.map((s) => ({
+          playerId: s.playerId,
+          player: s.player,
+        }))}
+        playerTeamId={pendingFoul?.teamId}
+      />
+
+      {/* Free Throw Sequence Modal */}
+      <FreeThrowSequenceModal
+        visible={!!freeThrowSequence}
+        onClose={() => setFreeThrowSequence(null)}
+        sequence={freeThrowSequence}
+        onFreeThrowResult={handleFreeThrowResult}
+      />
+
+      {/* Overtime Prompt Modal */}
+      <OvertimePromptModal
+        visible={showOvertimePrompt}
+        homeScore={game.homeScore}
+        awayScore={game.awayScore}
+        currentQuarter={game.currentQuarter}
+        onStartOvertime={handleStartOvertime}
+        onEndAsTie={handleEndAsTie}
+        onDismiss={() => setShowOvertimePrompt(false)}
+      />
+
+      {/* Quick Undo FAB */}
+      <QuickUndoFAB
+        action={lastAction}
+        onUndo={handleUndo}
+        onDismiss={() => setLastAction(null)}
+        autoDismissMs={8000}
       />
     </SafeAreaView>
   );
