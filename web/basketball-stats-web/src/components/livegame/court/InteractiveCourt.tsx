@@ -1,6 +1,30 @@
-import React, { useRef, useState, useCallback } from "react";
-import { COLORS } from "@basketball-stats/shared";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import { ShotLocation } from "../../../types/livegame";
+
+// Hook to detect dark mode
+const useDarkMode = () => {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Check for dark class on html element (Tailwind's dark mode)
+    const checkDarkMode = () => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    };
+
+    checkDarkMode();
+
+    // Watch for changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+};
 
 // ============================================================================
 // Constants
@@ -19,6 +43,32 @@ const PAINT_HEIGHT = 114; // 19ft (to free throw line) * 6px/ft
 const FT_CIRCLE_RADIUS = 36; // 6ft * 6px/ft
 const RESTRICTED_RADIUS = 24; // 4ft * 6px/ft
 const CORNER_THREE_X = 18; // 3ft from sideline * 6px/ft
+
+// Court colors for light and dark modes
+const COURT_COLORS = {
+  // Light mode - classic hardwood court
+  light: {
+    background: "#d4a574", // Warm hardwood
+    backgroundDarker: "#c49464",
+    lines: "#ffffff",
+    paint: "rgba(234, 88, 12, 0.15)", // Subtle orange tint
+    rim: "#ea580c",
+    backboard: "#94a3b8",
+  },
+  // Dark mode - darker court surface
+  dark: {
+    background: "#78716c", // Stone/gray court
+    backgroundDarker: "#57534e",
+    lines: "rgba(255, 255, 255, 0.9)",
+    paint: "rgba(249, 115, 22, 0.2)",
+    rim: "#f97316",
+    backboard: "#64748b",
+  },
+  // Shared colors
+  shotMade: "#22c55e",
+  shotMissed: "#ef4444",
+  shot3pt: "#8b5cf6",
+};
 
 // ============================================================================
 // Helper Functions
@@ -87,6 +137,10 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [ripple, setRipple] = useState<{ x: number; y: number } | null>(null);
+  const isDarkMode = useDarkMode();
+
+  // Select colors based on theme
+  const colors = isDarkMode ? COURT_COLORS.dark : COURT_COLORS.light;
 
   const handleClick = useCallback(
     (event: React.MouseEvent<SVGSVGElement>) => {
@@ -126,25 +180,65 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
   const zoneStats = showHeatMap && allShots.length > 0 ? calculateZoneStats(allShots) : null;
 
   return (
-    <div className="relative">
+    <div className="relative w-full h-full flex items-center justify-center">
       <svg
         ref={svgRef}
         viewBox={`0 0 ${COURT_WIDTH} ${COURT_HEIGHT}`}
-        className={`w-full rounded-lg transition-all ${
-          disabled
-            ? "opacity-50 cursor-not-allowed"
-            : "cursor-crosshair hover:shadow-lg hover:shadow-orange-500/20"
+        className={`max-w-full max-h-full transition-all ${
+          disabled ? "opacity-50 cursor-not-allowed" : "cursor-crosshair"
         }`}
         onClick={handleClick}
         style={{ aspectRatio: `${COURT_WIDTH}/${COURT_HEIGHT}` }}
       >
+        {/* Definitions for gradients */}
+        <defs>
+          <linearGradient id="courtGradientLight" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#d4a574" />
+            <stop offset="50%" stopColor="#c9976a" />
+            <stop offset="100%" stopColor="#d4a574" />
+          </linearGradient>
+          <linearGradient id="courtGradientDark" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#78716c" />
+            <stop offset="50%" stopColor="#6b6560" />
+            <stop offset="100%" stopColor="#78716c" />
+          </linearGradient>
+          {/* Wood grain pattern for light mode */}
+          <pattern id="woodGrain" patternUnits="userSpaceOnUse" width="100" height="4">
+            <line x1="0" y1="2" x2="100" y2="2" stroke="rgba(0,0,0,0.03)" strokeWidth="1" />
+          </pattern>
+        </defs>
+
         {/* Court background */}
         <rect
           x="0"
           y="0"
           width={COURT_WIDTH}
           height={COURT_HEIGHT}
-          fill={COLORS.court.background}
+          fill={isDarkMode ? "url(#courtGradientDark)" : "url(#courtGradientLight)"}
+          rx="8"
+        />
+
+        {/* Wood grain overlay (light mode only) */}
+        {!isDarkMode && (
+          <rect
+            x="0"
+            y="0"
+            width={COURT_WIDTH}
+            height={COURT_HEIGHT}
+            fill="url(#woodGrain)"
+            rx="8"
+          />
+        )}
+
+        {/* Court border */}
+        <rect
+          x="0"
+          y="0"
+          width={COURT_WIDTH}
+          height={COURT_HEIGHT}
+          fill="none"
+          stroke={isDarkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)"}
+          strokeWidth="2"
           rx="8"
         />
 
@@ -157,8 +251,20 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
           </g>
         )}
 
+        {/* Paint area (key) */}
+        <rect
+          x={(COURT_WIDTH - PAINT_WIDTH) / 2}
+          y="0"
+          width={PAINT_WIDTH}
+          height={PAINT_HEIGHT}
+          fill={colors.paint}
+          stroke={colors.lines}
+          strokeWidth="2"
+          rx="2"
+        />
+
         {/* Baseline */}
-        <line x1="0" y1="0" x2={COURT_WIDTH} y2="0" stroke="#4B5563" strokeWidth="2" />
+        <line x1="0" y1="2" x2={COURT_WIDTH} y2="2" stroke={colors.lines} strokeWidth="4" />
 
         {/* Three-point line */}
         <path
@@ -167,19 +273,8 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
               A ${THREE_PT_RADIUS} ${THREE_PT_RADIUS} 0 0 0 ${COURT_WIDTH - CORNER_THREE_X} ${BASKET_Y + Math.sqrt(THREE_PT_RADIUS * THREE_PT_RADIUS - (BASKET_X - CORNER_THREE_X) * (BASKET_X - CORNER_THREE_X))}
               L ${COURT_WIDTH - CORNER_THREE_X} 0`}
           fill="none"
-          stroke="#4B5563"
-          strokeWidth="1.5"
-        />
-
-        {/* Paint area (key) */}
-        <rect
-          x={(COURT_WIDTH - PAINT_WIDTH) / 2}
-          y="0"
-          width={PAINT_WIDTH}
-          height={PAINT_HEIGHT}
-          fill="none"
-          stroke="#4B5563"
-          strokeWidth="1.5"
+          stroke={colors.lines}
+          strokeWidth="2"
         />
 
         {/* Free throw circle */}
@@ -188,77 +283,113 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
           cy={PAINT_HEIGHT}
           r={FT_CIRCLE_RADIUS}
           fill="none"
-          stroke="#4B5563"
-          strokeWidth="1.5"
+          stroke={colors.lines}
+          strokeWidth="2"
         />
 
         {/* Restricted area arc */}
         <path
           d={`M ${BASKET_X - RESTRICTED_RADIUS} 0 A ${RESTRICTED_RADIUS} ${RESTRICTED_RADIUS} 0 0 0 ${BASKET_X + RESTRICTED_RADIUS} 0`}
           fill="none"
-          stroke="#4B5563"
-          strokeWidth="1.5"
+          stroke={colors.lines}
+          strokeWidth="2"
         />
 
-        {/* Basket and backboard */}
-        <rect x={BASKET_X - 18} y={BASKET_Y - 4} width="36" height="2" fill="#6B7280" rx="1" />
+        {/* Rim */}
         <circle
           cx={BASKET_X}
           cy={BASKET_Y}
-          r="5"
+          r="6"
           fill="none"
-          stroke={COLORS.primary[500]}
-          strokeWidth="2"
+          stroke={colors.rim}
+          strokeWidth="2.5"
         />
-        <circle cx={BASKET_X} cy={BASKET_Y} r="2" fill={COLORS.primary[500]} />
+        <circle cx={BASKET_X} cy={BASKET_Y} r="2" fill={colors.rim} />
 
         {/* Zone labels (only if not compact) */}
         {!compact && (
           <>
             <text
               x={BASKET_X}
-              y={COURT_HEIGHT - 30}
+              y={COURT_HEIGHT - 25}
               textAnchor="middle"
-              fill="#6B7280"
-              fontSize="12"
-              fontWeight="500"
+              fill={isDarkMode ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.8)"}
+              fontSize="11"
+              fontWeight="600"
+              letterSpacing="0.1em"
             >
               3PT ZONE
             </text>
             <text
               x={BASKET_X}
-              y={85}
+              y={80}
               textAnchor="middle"
-              fill="#6B7280"
-              fontSize="11"
-              fontWeight="500"
+              fill={isDarkMode ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.8)"}
+              fontSize="10"
+              fontWeight="600"
+              letterSpacing="0.1em"
             >
               PAINT
             </text>
-            <text x={BASKET_X} y={PAINT_HEIGHT + 50} textAnchor="middle" fill="#6B7280" fontSize="10">
+            <text
+              x={BASKET_X}
+              y={PAINT_HEIGHT + 45}
+              textAnchor="middle"
+              fill={isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.7)"}
+              fontSize="9"
+              fontWeight="500"
+              letterSpacing="0.05em"
+            >
               MID-RANGE
             </text>
           </>
         )}
 
         {/* Recent shots */}
-        {recentShots.slice(-5).map((shot, index) => {
+        {recentShots.slice(-8).map((shot, index) => {
           const { x: svgX, y: svgY } = courtToSvg(shot.x, shot.y);
+          const is3pt = shot.is3pt;
+          const opacity = 0.6 + (index / 8) * 0.4; // Newer shots more visible
+          const shotColor = shot.made
+            ? is3pt
+              ? COURT_COLORS.shot3pt
+              : COURT_COLORS.shotMade
+            : COURT_COLORS.shotMissed;
           return (
             <g key={index}>
+              {/* Shot marker */}
               <circle
                 cx={svgX}
                 cy={svgY}
-                r={8}
-                fill={shot.made ? COLORS.shots.made2pt : COLORS.shots.missed2pt}
-                stroke="#fff"
+                r={7}
+                fill={shotColor}
+                stroke="rgba(255,255,255,0.9)"
                 strokeWidth="2"
-                opacity={0.9}
+                opacity={opacity}
                 className="transition-all duration-300"
               />
               {!shot.made && (
-                <text x={svgX} y={svgY + 3} textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">
-                  ×
+                <text
+                  x={svgX}
+                  y={svgY + 4}
+                  textAnchor="middle"
+                  fill="#fff"
+                  fontSize="10"
+                  fontWeight="bold"
+                >
+                  X
+                </text>
+              )}
+              {shot.made && is3pt && (
+                <text
+                  x={svgX}
+                  y={svgY + 4}
+                  textAnchor="middle"
+                  fill="#fff"
+                  fontSize="8"
+                  fontWeight="bold"
+                >
+                  3
                 </text>
               )}
             </g>
@@ -267,20 +398,31 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
 
         {/* Ripple effect */}
         {ripple && (
-          <circle
-            cx={ripple.x}
-            cy={ripple.y}
-            r="15"
-            fill={COLORS.primary[500]}
-            className="animate-ping"
-            opacity="0.5"
-          />
+          <>
+            <circle
+              cx={ripple.x}
+              cy={ripple.y}
+              r="20"
+              fill="none"
+              stroke={colors.rim}
+              strokeWidth="2"
+              className="animate-ping"
+              opacity="0.6"
+            />
+            <circle cx={ripple.x} cy={ripple.y} r="8" fill={colors.rim} opacity="0.8" />
+          </>
         )}
       </svg>
 
-      {/* Tap instruction */}
+      {/* Tap instruction - floating pill */}
       {!disabled && !compact && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/70 px-3 py-1.5 rounded-full text-xs text-white font-medium shadow-lg">
+        <div
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide
+            bg-white/90 dark:bg-gray-900/90 backdrop-blur-md
+            border border-gray-200 dark:border-gray-700
+            text-gray-600 dark:text-gray-400
+            shadow-lg shadow-gray-200/50 dark:shadow-black/30"
+        >
           Tap court to record shot
         </div>
       )}

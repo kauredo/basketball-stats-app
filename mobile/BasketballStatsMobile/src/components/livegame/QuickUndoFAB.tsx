@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -134,33 +134,36 @@ export default function QuickUndoFAB({
 
   return (
     <GestureDetector gesture={swipeGesture}>
-      <Animated.View style={[styles.container, animatedStyle]}>
-        <View style={styles.content}>
+      <Animated.View
+        className="absolute bottom-24 left-4 right-4 bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700"
+        style={animatedStyle}
+      >
+        <View className="flex-row items-center p-3 pr-2">
           {/* Undo Icon */}
-          <View style={styles.iconContainer}>
+          <View className="w-9 h-9 rounded-full bg-orange-100 dark:bg-orange-500/20 justify-center items-center mr-2.5">
             <Icon name="refresh" size={18} color="#F97316" />
           </View>
 
           {/* Action Text */}
-          <View style={styles.textContainer}>
-            <Text style={styles.undoLabel}>Undo:</Text>
-            <Text style={styles.actionText} numberOfLines={1}>
+          <View className="flex-1 flex-row items-center gap-1">
+            <Text className="text-gray-500 dark:text-gray-400 text-[13px]">Undo:</Text>
+            <Text className="text-gray-900 dark:text-white text-[14px] font-semibold flex-1" numberOfLines={1}>
               #{action.playerNumber} {statLabel}{madeText}
             </Text>
           </View>
 
           {/* Undo Button */}
           <TouchableOpacity
-            style={styles.undoButton}
+            className="bg-orange-500 px-3.5 py-2 rounded-lg mr-2"
             onPress={handleUndo}
             activeOpacity={0.7}
           >
-            <Text style={styles.undoButtonText}>UNDO</Text>
+            <Text className="text-white text-xs font-bold">UNDO</Text>
           </TouchableOpacity>
 
           {/* Dismiss Button */}
           <TouchableOpacity
-            style={styles.dismissButton}
+            className="p-1"
             onPress={dismiss}
             activeOpacity={0.7}
           >
@@ -169,82 +172,10 @@ export default function QuickUndoFAB({
         </View>
 
         {/* Progress Bar */}
-        <View style={styles.progressBar}>
-          <Animated.View style={styles.progressFill} />
+        <View className="h-1 bg-gray-100 dark:bg-gray-800">
+          <View className="h-full bg-orange-500 w-full" />
         </View>
       </Animated.View>
     </GestureDetector>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    bottom: 100,
-    left: 16,
-    right: 16,
-    backgroundColor: "#1F2937",
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-    overflow: "hidden",
-  },
-  content: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    paddingRight: 8,
-  },
-  iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(249, 115, 22, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-  },
-  textContainer: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  undoLabel: {
-    color: "#9CA3AF",
-    fontSize: 13,
-  },
-  actionText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "600",
-    flex: 1,
-  },
-  undoButton: {
-    backgroundColor: "#F97316",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginRight: 8,
-  },
-  undoButtonText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  dismissButton: {
-    padding: 4,
-  },
-  progressBar: {
-    height: 3,
-    backgroundColor: "#374151",
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#F97316",
-    width: "100%",
-  },
-});

@@ -5,12 +5,13 @@ interface ShotClockProps {
   isRunning: boolean;
   isWarning?: boolean;
   isViolation?: boolean;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
 }
 
 /**
  * Shot clock display with visual warnings at 5 seconds
  * and violation state when reaching 0.
+ * Respects light/dark mode with enhanced visual states.
  */
 export const ShotClock: React.FC<ShotClockProps> = ({
   seconds,
@@ -19,32 +20,71 @@ export const ShotClock: React.FC<ShotClockProps> = ({
   isViolation = false,
   size = "md",
 }) => {
-  const sizeClasses = {
-    sm: "text-sm w-8 h-8",
-    md: "text-lg w-10 h-10",
+  const sizeConfig = {
+    sm: { container: "w-8 h-8", text: "text-sm" },
+    md: { container: "w-11 h-11", text: "text-lg" },
+    lg: { container: "w-14 h-14", text: "text-xl" },
   };
 
-  // Determine color based on state
-  let colorClass = "bg-gray-700 text-gray-300";
-  if (isViolation) {
-    colorClass = "bg-red-600 text-white animate-pulse";
-  } else if (isWarning) {
-    colorClass = "bg-yellow-500 text-black animate-pulse";
-  } else if (isRunning) {
-    colorClass = "bg-orange-600 text-white";
-  }
+  const config = sizeConfig[size];
+
+  // Determine visual state classes
+  const getStateClasses = () => {
+    if (isViolation) {
+      return {
+        bg: "bg-red-100 dark:bg-red-600/30",
+        text: "text-red-600 dark:text-red-400",
+        border: "border-red-400 dark:border-red-500",
+        shadow: "shadow-red-200/50 dark:shadow-red-500/20",
+        animation: "animate-pulse",
+      };
+    }
+    if (isWarning) {
+      return {
+        bg: "bg-amber-100 dark:bg-amber-500/20",
+        text: "text-amber-700 dark:text-amber-400",
+        border: "border-amber-400 dark:border-amber-500",
+        shadow: "shadow-amber-200/50 dark:shadow-amber-500/20",
+        animation: isRunning ? "animate-pulse" : "",
+      };
+    }
+    if (isRunning) {
+      return {
+        bg: "bg-orange-100 dark:bg-orange-600/20",
+        text: "text-orange-700 dark:text-orange-400",
+        border: "border-orange-400 dark:border-orange-500",
+        shadow: "shadow-orange-200/50 dark:shadow-orange-500/10",
+        animation: "",
+      };
+    }
+    return {
+      bg: "bg-gray-100 dark:bg-gray-700/50",
+      text: "text-gray-600 dark:text-gray-400",
+      border: "border-gray-300 dark:border-gray-600",
+      shadow: "",
+      animation: "",
+    };
+  };
+
+  const state = getStateClasses();
 
   return (
     <div
       className={`
-        ${sizeClasses[size]}
-        ${colorClass}
-        rounded-lg font-mono font-bold
+        ${config.container}
+        ${state.bg}
+        ${state.text}
+        ${state.border}
+        ${state.animation}
+        rounded-xl font-mono font-black border-2
         flex items-center justify-center
-        transition-colors
+        transition-all duration-200
+        ${state.shadow ? `shadow-md ${state.shadow}` : ""}
       `}
     >
-      {seconds}
+      <span className={`${config.text} tabular-nums`}>
+        {seconds}
+      </span>
     </div>
   );
 };

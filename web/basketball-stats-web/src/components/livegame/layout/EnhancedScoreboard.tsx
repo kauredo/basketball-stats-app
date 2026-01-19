@@ -1,9 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  PlayIcon,
-  PauseIcon,
-  StopIcon,
-} from "@heroicons/react/24/solid";
+import { PlayIcon, PauseIcon, StopIcon } from "@heroicons/react/24/solid";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { TeamStatsData, GameStatus } from "../../../types/livegame";
 import { BonusIndicator } from "../utility/BonusIndicator";
@@ -60,10 +56,10 @@ const formatQuarter = (quarter: number): string => {
 
 interface AnimatedScoreProps {
   score: number;
-  className?: string;
+  isWinning?: boolean;
 }
 
-const AnimatedScore: React.FC<AnimatedScoreProps> = ({ score, className = "" }) => {
+const AnimatedScore: React.FC<AnimatedScoreProps> = ({ score, isWinning = false }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const prevScore = useRef(score);
 
@@ -71,19 +67,115 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({ score, className = "" }) 
     if (score !== prevScore.current) {
       setIsAnimating(true);
       prevScore.current = score;
-      const timer = setTimeout(() => setIsAnimating(false), 300);
+      const timer = setTimeout(() => setIsAnimating(false), 400);
       return () => clearTimeout(timer);
     }
   }, [score]);
 
   return (
-    <span
-      className={`tabular-nums transition-transform duration-300 ${
-        isAnimating ? "scale-125" : "scale-100"
-      } ${className}`}
-    >
-      {score}
-    </span>
+    <div className="relative">
+      <span
+        className={`
+          font-mono text-4xl sm:text-5xl font-black tabular-nums tracking-tight
+          transition-all duration-300 ease-out
+          ${isAnimating ? "scale-110 text-orange-500" : "scale-100"}
+          ${isWinning ? "text-emerald-600 dark:text-emerald-400" : "text-gray-900 dark:text-white"}
+        `}
+      >
+        {score}
+      </span>
+      {isAnimating && (
+        <span className="absolute inset-0 font-mono text-4xl sm:text-5xl font-black tabular-nums tracking-tight text-orange-500 animate-ping opacity-50">
+          {score}
+        </span>
+      )}
+    </div>
+  );
+};
+
+// ============================================================================
+// Team Panel Component
+// ============================================================================
+
+interface TeamPanelProps {
+  name: string;
+  score: number;
+  isWinning: boolean;
+  fouls: number;
+  inBonus: boolean;
+  inDoubleBonus: boolean;
+  timeoutsRemaining: number;
+  totalTimeouts: number;
+  onTimeout?: () => void;
+  disabled: boolean;
+  isHome?: boolean;
+}
+
+const TeamPanel: React.FC<TeamPanelProps> = ({
+  name,
+  score,
+  isWinning,
+  fouls,
+  inBonus,
+  inDoubleBonus,
+  timeoutsRemaining,
+  totalTimeouts,
+  onTimeout,
+  disabled,
+  isHome = false,
+}) => {
+  return (
+    <div className={`flex items-center gap-3 sm:gap-4 ${isHome ? "flex-row-reverse" : ""}`}>
+      {/* Score */}
+      <AnimatedScore score={score} isWinning={isWinning} />
+
+      {/* Team Info */}
+      <div className={`flex flex-col gap-1 ${isHome ? "items-end" : "items-start"}`}>
+        {/* Team Name */}
+        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide truncate max-w-[100px] sm:max-w-[120px]">
+          {name}
+        </span>
+
+        {/* Stats Row */}
+        <div className={`flex items-center gap-2 ${isHome ? "flex-row-reverse" : ""}`}>
+          {/* Fouls */}
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] text-gray-500 dark:text-gray-500 uppercase">Fouls</span>
+            <span
+              className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                fouls >= 4
+                  ? "bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400"
+                  : "bg-gray-200 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400"
+              }`}
+            >
+              {fouls}
+            </span>
+          </div>
+
+          {/* Bonus */}
+          <BonusIndicator inBonus={inBonus} inDoubleBonus={inDoubleBonus} />
+        </div>
+
+        {/* Timeouts */}
+        <div className={`flex items-center gap-1.5 ${isHome ? "flex-row-reverse" : ""}`}>
+          <TimeoutDots
+            remaining={timeoutsRemaining}
+            total={totalTimeouts}
+            teamSide={isHome ? "right" : "left"}
+            onTimeoutClick={onTimeout}
+            disabled={disabled}
+          />
+          {!disabled && onTimeout && (
+            <button
+              onClick={onTimeout}
+              className="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 dark:bg-amber-500/20 text-orange-600 dark:text-amber-400 hover:bg-orange-200 dark:hover:bg-amber-500/30 font-semibold uppercase tracking-wide transition-colors"
+            >
+              TO
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -118,239 +210,206 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
 
   // Score differential
   const differential = game.homeScore - game.awayScore;
-  const diffText = differential > 0 ? `+${differential}` : differential < 0 ? `${differential}` : "TIE";
+  const homeWinning = differential > 0;
+  const awayWinning = differential < 0;
 
   return (
-    <div className="bg-gray-900 rounded-xl px-4 py-3 border border-gray-700 h-20 flex items-center">
-      <div className="flex items-center justify-between w-full">
-        {/* Away Team */}
-        <div className="flex items-center gap-3 flex-1">
-          <AnimatedScore
+    <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+      {/* Main content */}
+      <div className="relative px-4 sm:px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Away Team */}
+          <TeamPanel
+            name={game.awayTeam?.name || "Away"}
             score={game.awayScore}
-            className="text-4xl font-bold text-white w-14 text-center"
+            isWinning={awayWinning}
+            fouls={awayTeamStats.foulsThisQuarter}
+            inBonus={awayTeamStats.inBonus}
+            inDoubleBonus={awayTeamStats.inDoubleBonus}
+            timeoutsRemaining={awayTeamStats.timeoutsRemaining}
+            totalTimeouts={timeoutsPerTeam}
+            onTimeout={onTimeoutAway}
+            disabled={isCompleted}
           />
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-medium text-gray-400 truncate max-w-[100px]">
-              {game.awayTeam?.name || "Away"}
-            </span>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[10px] text-gray-500">
-                TF: {awayTeamStats.foulsThisQuarter}
+
+          {/* Center: Clock & Controls */}
+          <div className="flex flex-col items-center gap-2 px-2 sm:px-6">
+            {/* Status Badge */}
+            <div
+              className={`
+                px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest
+                border transition-all duration-300
+                ${
+                  isActive
+                    ? "bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 border-red-300 dark:border-red-500/50"
+                    : isPaused
+                      ? "bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-500/50"
+                      : isCompleted
+                        ? "bg-gray-100 dark:bg-gray-600/50 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-500/50"
+                        : "bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-500/50"
+                }
+              `}
+            >
+              <span className={isActive ? "animate-pulse" : ""}>
+                {isActive ? "Live" : isPaused ? "Paused" : isCompleted ? "Final" : "Pre-Game"}
               </span>
-              <BonusIndicator
-                inBonus={awayTeamStats.inBonus}
-                inDoubleBonus={awayTeamStats.inDoubleBonus}
-              />
             </div>
-            <div className="flex items-center gap-1 mt-1">
-              <TimeoutDots
-                remaining={awayTeamStats.timeoutsRemaining}
-                total={timeoutsPerTeam}
-                teamSide="left"
-                onTimeoutClick={onTimeoutAway}
-                disabled={isCompleted}
+
+            {/* Clock Row */}
+            <div className="flex items-center gap-3">
+              <GameClock
+                displayTime={formatTime(game.timeRemainingSeconds)}
+                isRunning={isActive}
+                size="lg"
               />
-              {!isCompleted && onTimeoutAway && (
-                <button
-                  onClick={onTimeoutAway}
-                  className="text-[10px] text-orange-500 hover:text-orange-400 font-medium ml-1"
-                >
-                  TO
-                </button>
+
+              {showShotClock && (isActive || isPaused) && (
+                <ShotClock
+                  seconds={shotClockSeconds}
+                  isRunning={isActive}
+                  isWarning={shotClockSeconds <= 5}
+                  isViolation={shotClockSeconds === 0}
+                />
               )}
             </div>
-          </div>
-        </div>
 
-        {/* Center: Clock, Quarter, Status, Controls */}
-        <div className="flex flex-col items-center gap-1 px-4">
-          {/* Status Badge */}
-          <div
-            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${
-              isActive
-                ? "bg-red-600 text-white animate-pulse"
-                : isPaused
-                  ? "bg-yellow-600 text-white"
-                  : isCompleted
-                    ? "bg-gray-600 text-white"
-                    : "bg-blue-600 text-white"
-            }`}
-          >
-            {isActive ? "LIVE" : isPaused ? "PAUSED" : isCompleted ? "FINAL" : "PRE-GAME"}
-          </div>
+            {/* Quarter & Controls Row */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Quarter Progress Dots */}
+              <div className="flex gap-1">
+                {[1, 2, 3, 4].map((q) => (
+                  <div
+                    key={q}
+                    className={`
+                      w-2 h-2 rounded-full transition-all duration-200
+                      ${
+                        quartersCompleted.includes(q)
+                          ? "bg-emerald-500 dark:bg-emerald-400"
+                          : game.currentQuarter === q
+                            ? "bg-orange-500 dark:bg-amber-400"
+                            : "bg-gray-300 dark:bg-gray-600"
+                      }
+                    `}
+                  />
+                ))}
+              </div>
 
-          {/* Clock Row */}
-          <div className="flex items-center gap-2">
-            {/* Game Clock */}
-            <GameClock
-              displayTime={formatTime(game.timeRemainingSeconds)}
-              isRunning={isActive}
-              size="md"
-            />
-
-            {/* Shot Clock */}
-            {showShotClock && (isActive || isPaused) && (
-              <ShotClock
-                seconds={shotClockSeconds}
-                isRunning={isActive}
-                isWarning={shotClockSeconds <= 5}
-                isViolation={shotClockSeconds === 0}
-                size="md"
-              />
-            )}
-          </div>
-
-          {/* Quarter Selector & Controls Row */}
-          <div className="flex items-center gap-2">
-            {/* Quarter Dots */}
-            <div className="flex gap-1">
-              {[1, 2, 3, 4].map((q) => (
-                <div
-                  key={q}
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    quartersCompleted.includes(q)
-                      ? "bg-green-500"
-                      : game.currentQuarter === q
-                        ? "bg-orange-500"
-                        : "bg-gray-600"
-                  }`}
-                />
-              ))}
-            </div>
-
-            {/* Quarter Button */}
-            <div className="relative">
-              <button
-                onClick={() => !isCompleted && setShowQuarterSelector(!showQuarterSelector)}
-                disabled={isCompleted}
-                className={`text-sm font-bold px-2 py-0.5 rounded text-gray-300 ${
-                  !isCompleted ? "hover:bg-gray-700 cursor-pointer" : ""
-                }`}
-              >
-                {formatQuarter(game.currentQuarter)}
-              </button>
-              {showQuarterSelector && onQuarterChange && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-20 p-2">
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4].map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => {
-                          onQuarterChange(q);
-                          setShowQuarterSelector(false);
-                        }}
-                        className={`w-8 h-8 rounded font-bold text-sm ${
-                          game.currentQuarter === q
-                            ? "bg-orange-600 text-white"
-                            : quartersCompleted.includes(q)
-                              ? "bg-green-900/50 text-green-400"
-                              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        }`}
-                      >
-                        {q}
-                      </button>
-                    ))}
+              {/* Quarter Selector */}
+              <div className="relative">
+                <button
+                  onClick={() => !isCompleted && setShowQuarterSelector(!showQuarterSelector)}
+                  disabled={isCompleted}
+                  className={`
+                    text-sm font-bold px-3 py-1 rounded-lg border transition-all
+                    ${
+                      !isCompleted
+                        ? "bg-gray-100 dark:bg-gray-700/50 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500"
+                        : "bg-gray-50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-default"
+                    }
+                  `}
+                >
+                  {formatQuarter(game.currentQuarter)}
+                </button>
+                {showQuarterSelector && onQuarterChange && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-800 backdrop-blur rounded-xl shadow-lg border border-gray-200 dark:border-gray-600 z-20 p-2">
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4].map((q) => (
+                        <button
+                          key={q}
+                          onClick={() => {
+                            onQuarterChange(q);
+                            setShowQuarterSelector(false);
+                          }}
+                          className={`
+                            w-10 h-10 rounded-lg font-bold text-sm transition-all
+                            ${
+                              game.currentQuarter === q
+                                ? "bg-orange-500 text-white"
+                                : quartersCompleted.includes(q)
+                                  ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30"
+                                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                            }
+                          `}
+                        >
+                          Q{q}
+                        </button>
+                      ))}
+                    </div>
                   </div>
+                )}
+              </div>
+
+              {/* Control Buttons */}
+              {!isCompleted && (
+                <div className="flex gap-1.5">
+                  {canStart && (
+                    <button
+                      onClick={() => onGameControl("start")}
+                      className="p-2 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-500/30 transition-all"
+                      title="Start Game"
+                    >
+                      <PlayIcon className="h-4 w-4" />
+                    </button>
+                  )}
+                  {canPause && (
+                    <button
+                      onClick={() => onGameControl("pause")}
+                      className="p-2 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-all"
+                      title="Pause"
+                    >
+                      <PauseIcon className="h-4 w-4" />
+                    </button>
+                  )}
+                  {canResume && (
+                    <button
+                      onClick={() => onGameControl("resume")}
+                      className="p-2 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-500/30 transition-all"
+                      title="Resume"
+                    >
+                      <PlayIcon className="h-4 w-4" />
+                    </button>
+                  )}
+                  {canEnd && (
+                    <button
+                      onClick={() => onGameControl("end")}
+                      className="p-2 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-500/30 rounded-lg hover:bg-red-200 dark:hover:bg-red-500/30 transition-all"
+                      title="End Period"
+                    >
+                      <StopIcon className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               )}
             </div>
-
-            {/* Control Buttons */}
-            {!isCompleted && (
-              <div className="flex gap-1">
-                {canStart && (
-                  <button
-                    onClick={() => onGameControl("start")}
-                    className="p-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                    title="Start Game"
-                  >
-                    <PlayIcon className="h-4 w-4" />
-                  </button>
-                )}
-                {canPause && (
-                  <button
-                    onClick={() => onGameControl("pause")}
-                    className="p-1.5 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
-                    title="Pause"
-                  >
-                    <PauseIcon className="h-4 w-4" />
-                  </button>
-                )}
-                {canResume && (
-                  <button
-                    onClick={() => onGameControl("resume")}
-                    className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                    title="Resume"
-                  >
-                    <PlayIcon className="h-4 w-4" />
-                  </button>
-                )}
-                {canEnd && (
-                  <button
-                    onClick={() => onGameControl("end")}
-                    className="p-1.5 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                    title="End Period"
-                  >
-                    <StopIcon className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            )}
           </div>
-        </div>
 
-        {/* Home Team */}
-        <div className="flex items-center gap-3 flex-1 justify-end">
-          <div className="flex flex-col items-end min-w-0">
-            <span className="text-sm font-medium text-gray-400 truncate max-w-[100px]">
-              {game.homeTeam?.name || "Home"}
-            </span>
-            <div className="flex items-center gap-2 mt-0.5">
-              <BonusIndicator
-                inBonus={homeTeamStats.inBonus}
-                inDoubleBonus={homeTeamStats.inDoubleBonus}
-              />
-              <span className="text-[10px] text-gray-500">
-                TF: {homeTeamStats.foulsThisQuarter}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 mt-1">
-              {!isCompleted && onTimeoutHome && (
-                <button
-                  onClick={onTimeoutHome}
-                  className="text-[10px] text-orange-500 hover:text-orange-400 font-medium mr-1"
-                >
-                  TO
-                </button>
-              )}
-              <TimeoutDots
-                remaining={homeTeamStats.timeoutsRemaining}
-                total={timeoutsPerTeam}
-                teamSide="right"
-                onTimeoutClick={onTimeoutHome}
-                disabled={isCompleted}
-              />
-            </div>
-          </div>
-          <AnimatedScore
+          {/* Home Team */}
+          <TeamPanel
+            name={game.homeTeam?.name || "Home"}
             score={game.homeScore}
-            className="text-4xl font-bold text-white w-14 text-center"
+            isWinning={homeWinning}
+            fouls={homeTeamStats.foulsThisQuarter}
+            inBonus={homeTeamStats.inBonus}
+            inDoubleBonus={homeTeamStats.inDoubleBonus}
+            timeoutsRemaining={homeTeamStats.timeoutsRemaining}
+            totalTimeouts={timeoutsPerTeam}
+            onTimeout={onTimeoutHome}
+            disabled={isCompleted}
+            isHome
           />
         </div>
       </div>
 
-      {/* Score Differential Badge */}
+      {/* Bottom accent line */}
       <div
-        className={`absolute top-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-[10px] font-bold ${
-          differential > 0
-            ? "bg-green-900/50 text-green-400"
-            : differential < 0
-              ? "bg-red-900/50 text-red-400"
-              : "bg-gray-700 text-gray-400"
+        className={`h-1 w-full ${
+          isActive
+            ? "bg-gradient-to-r from-transparent via-red-500/50 to-transparent"
+            : isPaused
+              ? "bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"
+              : "bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"
         }`}
-      >
-        {diffText}
-      </div>
+      />
     </div>
   );
 };

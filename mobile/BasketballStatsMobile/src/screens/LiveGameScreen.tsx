@@ -10,6 +10,7 @@ import {
   Modal,
   FlatList,
   StyleSheet,
+  useColorScheme,
 } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
@@ -204,6 +205,18 @@ interface MiniCourtProps {
 }
 
 function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+
+  // Court colors based on theme
+  const courtColors = {
+    background: isDark ? "#57534e" : "#d4a574", // Dark: stone, Light: hardwood
+    lines: isDark ? "rgba(255,255,255,0.7)" : "#ffffff",
+    rim: "#ea580c",
+    shotMade: "#22c55e",
+    shotMissed: "#ef4444",
+  };
+
   const handleTap = useCallback(
     (tapX: number, tapY: number) => {
       const courtX = (tapX / MINI_COURT_WIDTH) * 50 - 25;
@@ -227,18 +240,21 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
     <GestureDetector gesture={tapGesture}>
       <Animated.View style={[styles.miniCourtContainer, disabled && styles.miniCourtDisabled]}>
         <Svg width={MINI_COURT_WIDTH} height={MINI_COURT_HEIGHT} viewBox="0 0 50 28">
-          <Rect x="0" y="0" width="50" height="28" fill={COLORS.court.background} />
-          <Rect x="0" y="0" width="50" height="28" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-          <Rect x="17" y="0" width="16" height="15" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-          <Circle cx="25" cy="15" r="4" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-          <Path d="M 21 0 A 4 4 0 0 0 29 0" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-          <Circle cx="25" cy="4" r="0.6" fill={COLORS.primary[500]} />
-          <Path d="M 3 0 L 3 10 A 20 20 0 0 0 47 10 L 47 0" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-          <G>
-            <Circle cx="25" cy="22" r="3" fill="rgba(239, 68, 68, 0.3)" />
-            <Circle cx="10" cy="20" r="2.5" fill="rgba(34, 197, 94, 0.3)" />
-            <Circle cx="40" cy="20" r="2.5" fill="rgba(34, 197, 94, 0.3)" />
-          </G>
+          {/* Court background */}
+          <Rect x="0" y="0" width="50" height="28" fill={courtColors.background} rx="2" />
+          {/* Court border */}
+          <Rect x="0" y="0" width="50" height="28" fill="none" stroke={courtColors.lines} strokeWidth="0.4" rx="2" />
+          {/* Paint */}
+          <Rect x="17" y="0" width="16" height="15" fill="none" stroke={courtColors.lines} strokeWidth="0.4" />
+          {/* Free throw circle */}
+          <Circle cx="25" cy="15" r="4" fill="none" stroke={courtColors.lines} strokeWidth="0.3" />
+          {/* Restricted area */}
+          <Path d="M 21 0 A 4 4 0 0 0 29 0" fill="none" stroke={courtColors.lines} strokeWidth="0.3" />
+          {/* Rim */}
+          <Circle cx="25" cy="4" r="0.6" fill={courtColors.rim} />
+          {/* Three-point line */}
+          <Path d="M 3 0 L 3 10 A 20 20 0 0 0 47 10 L 47 0" fill="none" stroke={courtColors.lines} strokeWidth="0.4" />
+          {/* Recent shots */}
           {recentShots.slice(-5).map((shot, index) => {
             const svgX = 25 + shot.x;
             const svgY = shot.y * 0.6;
@@ -248,17 +264,21 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
                 cx={svgX}
                 cy={svgY}
                 r={1.2}
-                fill={shot.made ? COLORS.shots.made2pt : COLORS.shots.missed2pt}
-                opacity={0.8}
+                fill={shot.made ? courtColors.shotMade : courtColors.shotMissed}
+                opacity={0.9}
                 stroke="#fff"
-                strokeWidth={0.2}
+                strokeWidth={0.3}
               />
             );
           })}
         </Svg>
         {!disabled && (
-          <View style={styles.courtOverlay}>
-            <Text style={styles.courtOverlayText}>TAP TO RECORD SHOT LOCATION</Text>
+          <View className="absolute bottom-2 left-0 right-0 items-center">
+            <View className="bg-white/90 dark:bg-gray-900/90 px-3 py-1 rounded-full">
+              <Text className="text-gray-600 dark:text-gray-400 text-[10px] font-medium">
+                TAP TO RECORD SHOT
+              </Text>
+            </View>
           </View>
         )}
       </Animated.View>

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert, useColorScheme } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -125,55 +125,60 @@ export default function EnhancedScoreboard({
   const canResume = game.status === "paused";
   const canEnd = game.status === "active" || game.status === "paused";
 
+  // Get status badge styling
+  const getStatusBadgeClass = () => {
+    if (isGameActive) return "bg-red-500";
+    if (isGamePaused) return "bg-amber-500";
+    if (game.status === "completed") return "bg-gray-500";
+    return "bg-blue-500";
+  };
+
+  const getStatusText = () => {
+    if (isGameActive) return "LIVE";
+    if (isGamePaused) return "PAUSED";
+    if (game.status === "completed") return "FINAL";
+    return "PRE-GAME";
+  };
+
   return (
-    <View style={styles.container}>
+    <View className="bg-white dark:bg-gray-800 mx-4 mt-2 rounded-2xl p-4 border border-gray-200 dark:border-gray-700">
       {/* Main Score Row */}
-      <View style={styles.mainRow}>
+      <View className="flex-row items-center justify-between">
         {/* Away Team */}
-        <View style={styles.teamSection}>
-          <Text style={styles.teamName} numberOfLines={1}>
+        <View className="flex-1 items-center">
+          <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1" numberOfLines={1}>
             {game.awayTeam?.name || "Away"}
           </Text>
-          <Animated.Text style={[styles.score, awayScoreStyle]}>
+          <Animated.Text
+            className="text-gray-900 dark:text-white text-4xl font-bold"
+            style={awayScoreStyle}
+          >
             {game.awayScore}
           </Animated.Text>
         </View>
 
         {/* Game Clock */}
-        <View style={styles.clockSection}>
-          <View
-            style={[
-              styles.statusBadge,
-              {
-                backgroundColor: isGameActive
-                  ? "#EF4444"
-                  : isGamePaused
-                    ? "#F59E0B"
-                    : game.status === "completed"
-                      ? "#6B7280"
-                      : "#3B82F6",
-              },
-            ]}
-          >
-            <Text style={styles.statusText}>
-              {isGameActive
-                ? "LIVE"
-                : isGamePaused
-                  ? "PAUSED"
-                  : game.status === "completed"
-                    ? "FINAL"
-                    : "SCHEDULED"}
+        <View className="items-center mx-4">
+          <View className={`px-3 py-1 rounded-full mb-2 ${getStatusBadgeClass()}`}>
+            <Text className="text-white text-[11px] font-bold tracking-wide">
+              {getStatusText()}
             </Text>
           </View>
-          <Text style={styles.time}>{formatTime(game.timeRemainingSeconds)}</Text>
-          <Text style={styles.quarter}>{formatQuarter(game.currentQuarter)}</Text>
+          <View className="bg-gray-100 dark:bg-gray-700/50 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600">
+            <Text className="text-gray-900 dark:text-white text-2xl font-bold font-mono">
+              {formatTime(game.timeRemainingSeconds)}
+            </Text>
+          </View>
+          <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1">
+            {formatQuarter(game.currentQuarter)}
+          </Text>
 
           {/* Game Controls */}
-          <View style={styles.controls}>
+          <View className="flex-row mt-2 gap-2">
             {canStart && (
               <TouchableOpacity
                 onPress={() => onGameControl("start")}
-                style={[styles.controlButton, { backgroundColor: "#22C55E" }]}
+                className="bg-emerald-500 px-4 py-2 rounded-lg"
               >
                 <Icon name="play" size={16} color="#FFFFFF" />
               </TouchableOpacity>
@@ -181,7 +186,7 @@ export default function EnhancedScoreboard({
             {canPause && (
               <TouchableOpacity
                 onPress={() => onGameControl("pause")}
-                style={[styles.controlButton, { backgroundColor: "#F59E0B" }]}
+                className="bg-amber-500 px-4 py-2 rounded-lg"
               >
                 <Icon name="pause" size={16} color="#FFFFFF" />
               </TouchableOpacity>
@@ -189,7 +194,7 @@ export default function EnhancedScoreboard({
             {canResume && (
               <TouchableOpacity
                 onPress={() => onGameControl("resume")}
-                style={[styles.controlButton, { backgroundColor: "#3B82F6" }]}
+                className="bg-blue-500 px-4 py-2 rounded-lg"
               >
                 <Icon name="play" size={16} color="#FFFFFF" />
               </TouchableOpacity>
@@ -197,7 +202,7 @@ export default function EnhancedScoreboard({
             {canEnd && (
               <TouchableOpacity
                 onPress={() => onGameControl("end")}
-                style={[styles.controlButton, { backgroundColor: "#EF4444" }]}
+                className="bg-red-500 px-4 py-2 rounded-lg"
               >
                 <Icon name="stop" size={16} color="#FFFFFF" />
               </TouchableOpacity>
@@ -206,21 +211,24 @@ export default function EnhancedScoreboard({
         </View>
 
         {/* Home Team */}
-        <View style={styles.teamSection}>
-          <Text style={styles.teamName} numberOfLines={1}>
+        <View className="flex-1 items-center">
+          <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1" numberOfLines={1}>
             {game.homeTeam?.name || "Home"}
           </Text>
-          <Animated.Text style={[styles.score, homeScoreStyle]}>
+          <Animated.Text
+            className="text-gray-900 dark:text-white text-4xl font-bold"
+            style={homeScoreStyle}
+          >
             {game.homeScore}
           </Animated.Text>
         </View>
       </View>
 
       {/* Stats Row - Team Fouls, Timeouts, Bonus */}
-      <View style={styles.statsRow}>
+      <View className="flex-row mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
         {/* Away Team Stats */}
-        <View style={styles.teamStatsSection}>
-          <View style={styles.foulsTimeoutsRow}>
+        <View className="flex-1 items-start gap-1">
+          <View className="flex-row items-center gap-2">
             <TeamFoulsDisplay
               foulsThisQuarter={awayTeamStats.foulsThisQuarter}
               totalFouls={awayTeamStats.teamFouls}
@@ -239,11 +247,11 @@ export default function EnhancedScoreboard({
         </View>
 
         {/* Spacer */}
-        <View style={styles.spacer} />
+        <View className="w-12" />
 
         {/* Home Team Stats */}
-        <View style={[styles.teamStatsSection, styles.homeStatsSection]}>
-          <View style={styles.foulsTimeoutsRow}>
+        <View className="flex-1 items-end gap-1">
+          <View className="flex-row items-center gap-2">
             <TimeoutDots
               total={timeoutsPerTeam}
               remaining={homeTeamStats.timeoutsRemaining}
@@ -264,94 +272,3 @@ export default function EnhancedScoreboard({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#1F2937",
-    marginHorizontal: 16,
-    marginTop: 8,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#374151",
-  },
-  mainRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  teamSection: {
-    flex: 1,
-    alignItems: "center",
-  },
-  teamName: {
-    color: "#9CA3AF",
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  score: {
-    color: "#FFFFFF",
-    fontSize: 40,
-    fontWeight: "700",
-  },
-  clockSection: {
-    alignItems: "center",
-    marginHorizontal: 16,
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  statusText: {
-    color: "#FFFFFF",
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-  },
-  time: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "700",
-    fontVariant: ["tabular-nums"],
-  },
-  quarter: {
-    color: "#9CA3AF",
-    fontSize: 12,
-    marginTop: 2,
-  },
-  controls: {
-    flexDirection: "row",
-    marginTop: 8,
-    gap: 8,
-  },
-  controlButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  statsRow: {
-    flexDirection: "row",
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#374151",
-  },
-  teamStatsSection: {
-    flex: 1,
-    alignItems: "flex-start",
-    gap: 4,
-  },
-  homeStatsSection: {
-    alignItems: "flex-end",
-  },
-  foulsTimeoutsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  spacer: {
-    width: 48,
-  },
-});
