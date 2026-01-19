@@ -43,6 +43,7 @@ interface EnhancedScoreboardProps {
   onEndPeriod?: () => void;
   shotClockSeconds?: number;
   showShotClock?: boolean;
+  isLandscape?: boolean;
 }
 
 export default function EnhancedScoreboard({
@@ -57,6 +58,7 @@ export default function EnhancedScoreboard({
   onEndPeriod,
   shotClockSeconds = 24,
   showShotClock = false,
+  isLandscape = false,
 }: EnhancedScoreboardProps) {
   const [showQuarterSelector, setShowQuarterSelector] = useState(false);
 
@@ -204,6 +206,174 @@ export default function EnhancedScoreboard({
     return dots;
   };
 
+  // Compact landscape layout
+  if (isLandscape) {
+    return (
+      <View className="bg-white dark:bg-gray-800 mx-4 mt-1 rounded-xl px-4 py-2 border border-gray-200 dark:border-gray-700">
+        <View className="flex-row items-center justify-between">
+          {/* Away Team */}
+          <View className="flex-row items-center flex-1">
+            <Text className="text-gray-500 dark:text-gray-400 text-xs mr-2" numberOfLines={1}>
+              {game.awayTeam?.name || "Away"}
+            </Text>
+            <Animated.Text
+              className="text-gray-900 dark:text-white text-2xl font-bold"
+              style={awayScoreStyle}
+            >
+              {game.awayScore}
+            </Animated.Text>
+            {awayTeamStats.inBonus && (
+              <View
+                className={`ml-2 px-1.5 py-0.5 rounded ${awayTeamStats.inDoubleBonus ? "bg-red-500" : "bg-amber-500"}`}
+              >
+                <Text className="text-white text-[8px] font-bold">
+                  {awayTeamStats.inDoubleBonus ? "2X" : "B"}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Center: Clock, Quarter, Controls */}
+          <View className="flex-row items-center gap-3">
+            <View className={`px-2 py-0.5 rounded-full ${getStatusBadgeClass()}`}>
+              <Text className="text-white text-[9px] font-bold">{getStatusText()}</Text>
+            </View>
+
+            <TouchableOpacity
+              className="flex-row items-center"
+              onPress={() => onQuarterChange && setShowQuarterSelector(true)}
+              disabled={!onQuarterChange}
+            >
+              <Text className="text-primary-500 font-bold text-sm">
+                {formatQuarter(game.currentQuarter)}
+              </Text>
+            </TouchableOpacity>
+
+            <View className="bg-gray-100 dark:bg-gray-700/50 px-3 py-1 rounded-lg">
+              <Text className="text-gray-900 dark:text-white text-lg font-bold font-mono">
+                {formatTime(game.timeRemainingSeconds)}
+              </Text>
+            </View>
+
+            {/* Compact Game Controls */}
+            <View className="flex-row gap-1">
+              {canPause && (
+                <TouchableOpacity
+                  onPress={() => onGameControl("pause")}
+                  className="bg-amber-500 p-1.5 rounded-lg"
+                >
+                  <Icon name="pause" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              )}
+              {canResume && (
+                <TouchableOpacity
+                  onPress={() => onGameControl("resume")}
+                  className="bg-blue-500 p-1.5 rounded-lg"
+                >
+                  <Icon name="play" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              )}
+              {canEndPeriod && (
+                <TouchableOpacity
+                  onPress={handleEndPeriodPress}
+                  className="bg-red-500 p-1.5 rounded-lg"
+                >
+                  <Icon name="stop" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
+          {/* Home Team */}
+          <View className="flex-row items-center justify-end flex-1">
+            {homeTeamStats.inBonus && (
+              <View
+                className={`mr-2 px-1.5 py-0.5 rounded ${homeTeamStats.inDoubleBonus ? "bg-red-500" : "bg-amber-500"}`}
+              >
+                <Text className="text-white text-[8px] font-bold">
+                  {homeTeamStats.inDoubleBonus ? "2X" : "B"}
+                </Text>
+              </View>
+            )}
+            <Animated.Text
+              className="text-gray-900 dark:text-white text-2xl font-bold"
+              style={homeScoreStyle}
+            >
+              {game.homeScore}
+            </Animated.Text>
+            <Text className="text-gray-500 dark:text-gray-400 text-xs ml-2" numberOfLines={1}>
+              {game.homeTeam?.name || "Home"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Quarter Selector Modal - same as portrait */}
+        <Modal visible={showQuarterSelector} animationType="fade" transparent>
+          <Pressable
+            className="flex-1 bg-black/50 justify-center items-center"
+            onPress={() => setShowQuarterSelector(false)}
+          >
+            <View className="bg-white dark:bg-gray-800 rounded-2xl p-4 mx-8 w-64">
+              <Text className="text-gray-900 dark:text-white text-lg font-bold text-center mb-4">
+                Select Quarter
+              </Text>
+              <View className="flex-row flex-wrap justify-center gap-2">
+                {[1, 2, 3, 4].map((q) => (
+                  <TouchableOpacity
+                    key={q}
+                    onPress={() => handleQuarterSelect(q)}
+                    className={`w-14 h-14 rounded-xl items-center justify-center ${
+                      game.currentQuarter === q
+                        ? "bg-orange-500"
+                        : q < game.currentQuarter
+                          ? "bg-green-500"
+                          : "bg-gray-200 dark:bg-gray-700"
+                    }`}
+                  >
+                    <Text
+                      className={`font-bold text-lg ${
+                        game.currentQuarter === q || q < game.currentQuarter
+                          ? "text-white"
+                          : "text-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      Q{q}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View className="flex-row justify-center gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                {[5, 6, 7].map((q) => (
+                  <TouchableOpacity
+                    key={q}
+                    onPress={() => handleQuarterSelect(q)}
+                    className={`px-4 py-2 rounded-lg ${
+                      game.currentQuarter === q ? "bg-purple-500" : "bg-gray-200 dark:bg-gray-700"
+                    }`}
+                  >
+                    <Text
+                      className={`font-bold ${
+                        game.currentQuarter === q
+                          ? "text-white"
+                          : "text-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      OT{q - 4}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TouchableOpacity onPress={() => setShowQuarterSelector(false)} className="mt-4 py-2">
+                <Text className="text-gray-500 text-center">Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Modal>
+      </View>
+    );
+  }
+
+  // Portrait layout (original)
   return (
     <View className="bg-white dark:bg-gray-800 mx-4 mt-2 rounded-2xl p-4 border border-gray-200 dark:border-gray-700">
       {/* Main Score Row */}

@@ -143,12 +143,6 @@ export default function CreatePlayerScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-gray-50 dark:bg-gray-800"
     >
-      {/* Header */}
-      <View className="bg-gray-100 dark:bg-gray-700 p-5 pt-15">
-        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">Add Player</Text>
-        <Text className="text-gray-600 dark:text-gray-400 text-base">Create a new player</Text>
-      </View>
-
       <ScrollView className="flex-1 p-4">
         {/* Team Selection */}
         <View className="mb-4">

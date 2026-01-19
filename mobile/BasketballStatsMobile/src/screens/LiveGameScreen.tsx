@@ -88,7 +88,7 @@ interface StatButtonProps {
   color: string;
   onPress: () => void;
   disabled?: boolean;
-  size?: "normal" | "large";
+  size?: "normal" | "large" | "compact";
 }
 
 function StatButton({
@@ -113,10 +113,12 @@ function StatButton({
     transform: [{ scale: scale.value }],
   }));
 
-  const buttonHeight = size === "large" ? TOUCH_TARGETS.large : TOUCH_TARGETS.comfortable;
+  const buttonHeight =
+    size === "large" ? TOUCH_TARGETS.large : size === "compact" ? 36 : TOUCH_TARGETS.comfortable;
+  const isCompact = size === "compact";
 
   return (
-    <Animated.View style={[animatedStyle, styles.statButtonContainer]}>
+    <Animated.View style={[animatedStyle, { flex: 1, marginHorizontal: isCompact ? 2 : 4 }]}>
       <TouchableOpacity
         onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -135,8 +137,8 @@ function StatButton({
         ]}
         activeOpacity={0.8}
       >
-        <Text style={styles.statButtonLabel}>{label}</Text>
-        <Text style={styles.statButtonShortLabel}>{shortLabel}</Text>
+        <Text style={[styles.statButtonLabel, isCompact && { fontSize: 11 }]}>{label}</Text>
+        {!isCompact && <Text style={styles.statButtonShortLabel}>{shortLabel}</Text>}
       </TouchableOpacity>
     </Animated.View>
   );
@@ -147,37 +149,81 @@ interface MiniCourtProps {
   onCourtTap: (x: number, y: number, zone: string, is3pt: boolean) => void;
   disabled?: boolean;
   recentShots?: Array<{ x: number; y: number; made: boolean }>;
+  isLandscape?: boolean;
 }
 
-function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
+function MiniCourt({
+  onCourtTap,
+  disabled,
+  recentShots = [],
+  isLandscape = false,
+}: MiniCourtProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
-  // Calculate court dimensions based on current screen width
-  const MINI_COURT_WIDTH = screenWidth - 64;
-  const MINI_COURT_HEIGHT = MINI_COURT_WIDTH * 0.6;
+  // SVG viewBox dimensions - represents half court with proper proportions
+  // Court is 50 feet wide, we show ~35 feet deep (enough for 3pt line + buffer)
+  const VIEW_WIDTH = 50;
+  const VIEW_HEIGHT = 35;
+  const ASPECT_RATIO = VIEW_WIDTH / VIEW_HEIGHT; // ~1.43
+
+  // Calculate court dimensions based on available space
+  // In portrait: use most of the width, let height follow aspect ratio
+  // In landscape: constrain to available height, let width follow aspect ratio
+  let courtWidth: number;
+  let courtHeight: number;
+
+  if (isLandscape) {
+    // In landscape, height is the constraint - leave room for other UI
+    const availableHeight = screenHeight - 180; // scoreboard + tabs + padding
+    courtHeight = Math.min(availableHeight * 0.85, 280);
+    courtWidth = courtHeight * ASPECT_RATIO;
+    // Make sure we don't exceed available width
+    const maxWidth = screenWidth * 0.55; // Leave room for stat buttons
+    if (courtWidth > maxWidth) {
+      courtWidth = maxWidth;
+      courtHeight = courtWidth / ASPECT_RATIO;
+    }
+  } else {
+    // In portrait, width is the constraint
+    const availableWidth = screenWidth - 48; // margins and padding
+    courtWidth = Math.min(availableWidth, 400);
+    courtHeight = courtWidth / ASPECT_RATIO;
+    // Make sure height is reasonable in portrait
+    const minHeight = 200;
+    const maxHeight = screenHeight * 0.4;
+    courtHeight = Math.max(minHeight, Math.min(courtHeight, maxHeight));
+    courtWidth = courtHeight * ASPECT_RATIO;
+  }
 
   // Court colors based on theme
   const courtColors = {
-    background: isDark ? "#57534e" : "#d4a574", // Dark: stone, Light: hardwood
-    lines: isDark ? "rgba(255,255,255,0.7)" : "#ffffff",
+    background: isDark ? "#57534e" : "#d4a574",
+    lines: isDark ? "rgba(255,255,255,0.8)" : "#ffffff",
     rim: "#ea580c",
     shotMade: "#22c55e",
     shotMissed: "#ef4444",
+    paint: isDark ? "rgba(234,88,12,0.15)" : "rgba(234,88,12,0.1)",
   };
+
+  // Basket position in SVG coordinates
+  const BASKET_X = 25;
+  const BASKET_Y = 5.25;
 
   const handleTap = useCallback(
     (tapX: number, tapY: number) => {
-      const courtX = (tapX / MINI_COURT_WIDTH) * 50 - 25;
-      const courtY = (tapY / MINI_COURT_HEIGHT) * 28;
+      // Convert tap position to SVG/court coordinates
+      const courtX = (tapX / courtWidth) * VIEW_WIDTH - 25; // -25 to 25
+      const courtY = (tapY / courtHeight) * VIEW_HEIGHT; // 0 to 35
       const zone = getShotZone(courtX, courtY);
-      const distanceFromBasket = Math.sqrt(courtX * courtX + (courtY - 5.25) ** 2);
+      const distanceFromBasket = Math.sqrt(courtX * courtX + (courtY - BASKET_Y) ** 2);
+      // 3pt line is 23.75 feet, corners are 22 feet
       const is3pt = distanceFromBasket > 23.75 || (Math.abs(courtX) > 22 && courtY < 14);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       onCourtTap(courtX, courtY, zone, is3pt);
     },
-    [onCourtTap]
+    [onCourtTap, courtWidth, courtHeight]
   );
 
   const tapGesture = Gesture.Tap()
@@ -191,8 +237,8 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
       <Animated.View
         style={[
           {
-            width: MINI_COURT_WIDTH,
-            height: MINI_COURT_HEIGHT,
+            width: courtWidth,
+            height: courtHeight,
             borderRadius: 12,
             overflow: "hidden",
             alignSelf: "center",
@@ -200,59 +246,108 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
           disabled && styles.miniCourtDisabled,
         ]}
       >
-        <Svg width={MINI_COURT_WIDTH} height={MINI_COURT_HEIGHT} viewBox="0 0 50 28">
+        <Svg
+          width="100%"
+          height="100%"
+          viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+          preserveAspectRatio="xMidYMid meet"
+        >
           {/* Court background */}
-          <Rect x="0" y="0" width="50" height="28" fill={courtColors.background} rx="2" />
-          {/* Court border */}
+          <Rect x="0" y="0" width={VIEW_WIDTH} height={VIEW_HEIGHT} fill={courtColors.background} />
+
+          {/* Court border/outline */}
           <Rect
-            x="0"
-            y="0"
-            width="50"
-            height="28"
+            x="0.5"
+            y="0.5"
+            width={VIEW_WIDTH - 1}
+            height={VIEW_HEIGHT - 1}
             fill="none"
             stroke={courtColors.lines}
-            strokeWidth="0.4"
-            rx="2"
+            strokeWidth="0.5"
           />
-          {/* Paint */}
+
+          {/* Paint/Key area with fill */}
           <Rect
             x="17"
             y="0"
             width="16"
-            height="15"
+            height="19"
+            fill={courtColors.paint}
+            stroke={courtColors.lines}
+            strokeWidth="0.4"
+          />
+
+          {/* Free throw circle (top half) */}
+          <Path
+            d="M 17 19 A 8 8 0 0 0 33 19"
             fill="none"
             stroke={courtColors.lines}
             strokeWidth="0.4"
           />
-          {/* Free throw circle */}
-          <Circle cx="25" cy="15" r="4" fill="none" stroke={courtColors.lines} strokeWidth="0.3" />
-          {/* Restricted area */}
+          {/* Free throw circle (bottom half - dashed) */}
+          <Path
+            d="M 17 19 A 8 8 0 0 1 33 19"
+            fill="none"
+            stroke={courtColors.lines}
+            strokeWidth="0.3"
+            strokeDasharray="1,1"
+          />
+
+          {/* Restricted area arc */}
           <Path
             d="M 21 0 A 4 4 0 0 0 29 0"
             fill="none"
             stroke={courtColors.lines}
-            strokeWidth="0.3"
+            strokeWidth="0.4"
           />
+
+          {/* Backboard */}
+          <Rect x="22" y="3" width="6" height="0.4" fill={courtColors.lines} />
+
           {/* Rim */}
-          <Circle cx="25" cy="4" r="0.6" fill={courtColors.rim} />
-          {/* Three-point line */}
+          <Circle
+            cx={BASKET_X}
+            cy={BASKET_Y}
+            r="0.75"
+            fill="none"
+            stroke={courtColors.rim}
+            strokeWidth="0.4"
+          />
+          {/* Rim center dot */}
+          <Circle cx={BASKET_X} cy={BASKET_Y} r="0.2" fill={courtColors.rim} />
+
+          {/* Three-point line - proper arc that stays within bounds */}
+          {/* Corner sections (straight lines) */}
+          <Path d="M 3 0 L 3 14" fill="none" stroke={courtColors.lines} strokeWidth="0.4" />
+          <Path d="M 47 0 L 47 14" fill="none" stroke={courtColors.lines} strokeWidth="0.4" />
+          {/* Arc section - connects the corner lines */}
           <Path
-            d="M 3 0 L 3 10 A 20 20 0 0 0 47 10 L 47 0"
+            d="M 3 14 A 23.75 23.75 0 0 0 47 14"
             fill="none"
             stroke={courtColors.lines}
             strokeWidth="0.4"
           />
+
+          {/* Half court line (if visible) */}
+          <Path
+            d="M 0 35 L 50 35"
+            fill="none"
+            stroke={courtColors.lines}
+            strokeWidth="0.3"
+            strokeDasharray="2,1"
+          />
+
           {/* Recent shots */}
           {recentShots.slice(-5).map((shot, index) => {
-            // Convert court coordinates (x: -25 to 25, y: 0 to 28) to SVG coordinates (0-50, 0-28)
+            // Convert court coordinates (x: -25 to 25, y: 0 to 35) to SVG coordinates
             const svgX = 25 + shot.x;
-            const svgY = shot.y; // Y is already in 0-28 range matching viewBox
+            const svgY = Math.min(shot.y, VIEW_HEIGHT - 1); // Clamp to viewBox
             return (
               <Circle
                 key={index}
                 cx={svgX}
                 cy={svgY}
-                r={1.2}
+                r={1.5}
                 fill={shot.made ? courtColors.shotMade : courtColors.shotMissed}
                 opacity={0.9}
                 stroke="#fff"
@@ -1223,10 +1318,11 @@ export default function LiveGameScreen() {
         onQuarterChange={handleQuarterChange}
         onEndPeriod={handleEndPeriod}
         showShotClock={false}
+        isLandscape={isLandscape}
       />
 
       {/* Tab Navigation */}
-      <View className="flex-row mx-4 mt-4 mb-2">
+      <View className={`flex-row mx-4 ${isLandscape ? "mt-1 mb-1" : "mt-4 mb-2"}`}>
         {TABS.map((tab) => (
           <TouchableOpacity
             key={tab.key}
@@ -1234,23 +1330,34 @@ export default function LiveGameScreen() {
               setActiveTab(tab.key as any);
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
-            className={`flex-1 py-3 rounded-xl mx-1 ${
+            className={`flex-1 ${isLandscape ? "py-1.5" : "py-3"} rounded-xl mx-1 ${
               activeTab === tab.key ? "bg-primary-500" : "bg-white dark:bg-gray-800"
             }`}
           >
-            <View className="items-center">
+            <View className="items-center flex-row justify-center">
               <Icon
                 name={tab.icon as any}
-                size={20}
+                size={isLandscape ? 16 : 20}
                 color={activeTab === tab.key ? "#FFFFFF" : "#9CA3AF"}
               />
-              <Text
-                className={`text-xs mt-1 font-medium ${
-                  activeTab === tab.key ? "text-white" : "text-gray-600 dark:text-gray-400"
-                }`}
-              >
-                {tab.label}
-              </Text>
+              {!isLandscape && (
+                <Text
+                  className={`text-xs mt-1 font-medium ${
+                    activeTab === tab.key ? "text-white" : "text-gray-600 dark:text-gray-400"
+                  }`}
+                >
+                  {tab.label}
+                </Text>
+              )}
+              {isLandscape && (
+                <Text
+                  className={`text-[10px] ml-1 font-medium ${
+                    activeTab === tab.key ? "text-white" : "text-gray-600 dark:text-gray-400"
+                  }`}
+                >
+                  {tab.label}
+                </Text>
+              )}
             </View>
           </TouchableOpacity>
         ))}
@@ -1263,34 +1370,41 @@ export default function LiveGameScreen() {
       >
         {/* Court Tab */}
         {activeTab === "court" && (
-          <View className={`flex-1 ${isLandscape ? "flex-row gap-4" : ""}`}>
+          <View className={`flex-1 ${isLandscape ? "flex-row gap-2" : ""}`}>
             {/* Large Court for Shot Recording */}
             <View
-              className={`bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 ${
-                isLandscape ? "flex-1" : "mb-4 flex-1"
+              className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 ${
+                isLandscape ? "flex-1 p-2" : "mb-4 flex-1 p-4"
               }`}
             >
-              <Text className="text-gray-900 dark:text-white font-semibold mb-3">
-                Shot Location
-              </Text>
+              {!isLandscape && (
+                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                  Shot Location
+                </Text>
+              )}
               <View className="flex-1 items-center justify-center">
                 <MiniCourt
                   onCourtTap={handleCourtTap}
                   disabled={!canRecordStats}
                   recentShots={persistedShots.length > 0 ? persistedShots.slice(-5) : recentShots}
+                  isLandscape={isLandscape}
                 />
               </View>
             </View>
 
             {/* Stat Buttons Grid */}
             <View
-              className={`bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 ${
-                isLandscape ? "w-48" : ""
+              className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 ${
+                isLandscape ? "w-40 p-2" : "p-4"
               }`}
             >
-              <Text className="text-gray-900 dark:text-white font-semibold mb-3">Quick Stats</Text>
-              <View>
-                <View className={`${isLandscape ? "flex-col gap-2" : "flex-row mb-2"}`}>
+              {!isLandscape && (
+                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                  Quick Stats
+                </Text>
+              )}
+              <View className={isLandscape ? "flex-1 justify-center" : ""}>
+                <View className={`${isLandscape ? "flex-col gap-1" : "flex-row mb-2"}`}>
                   <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
                     <StatButton
                       label="REB"
@@ -1298,6 +1412,7 @@ export default function LiveGameScreen() {
                       color="#3B82F6"
                       disabled={!canRecordStats}
                       onPress={() => setPendingQuickStat("rebound")}
+                      size={isLandscape ? "compact" : "normal"}
                     />
                     <StatButton
                       label="AST"
@@ -1305,6 +1420,7 @@ export default function LiveGameScreen() {
                       color="#8B5CF6"
                       disabled={!canRecordStats}
                       onPress={() => setPendingQuickStat("assist")}
+                      size={isLandscape ? "compact" : "normal"}
                     />
                   </View>
                   <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
@@ -1314,6 +1430,7 @@ export default function LiveGameScreen() {
                       color="#06B6D4"
                       disabled={!canRecordStats}
                       onPress={() => setPendingQuickStat("steal")}
+                      size={isLandscape ? "compact" : "normal"}
                     />
                     <StatButton
                       label="BLK"
@@ -1321,16 +1438,18 @@ export default function LiveGameScreen() {
                       color="#06B6D4"
                       disabled={!canRecordStats}
                       onPress={() => setPendingQuickStat("block")}
+                      size={isLandscape ? "compact" : "normal"}
                     />
                   </View>
                 </View>
-                <View className={`${isLandscape ? "flex-row mt-2" : "flex-row"}`}>
+                <View className={`${isLandscape ? "flex-row mt-1" : "flex-row"}`}>
                   <StatButton
                     label="TO"
                     shortLabel="+T"
                     color="#F59E0B"
                     disabled={!canRecordStats}
                     onPress={() => setPendingQuickStat("turnover")}
+                    size={isLandscape ? "compact" : "normal"}
                   />
                   {!isLandscape && (
                     <>

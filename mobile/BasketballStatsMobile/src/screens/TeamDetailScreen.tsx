@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, FlatList, TouchableOpacity, RefreshControl, SafeAreaView } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -112,6 +112,20 @@ export default function TeamDetailScreen() {
 
   const statusBarStyle = resolvedTheme === "dark" ? "light" : "dark";
 
+  // Set header right button
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          className="bg-primary-500 px-3 py-1.5 rounded-lg mr-2"
+          onPress={() => navigation.navigate("CreatePlayer", { teamId })}
+        >
+          <Text className="text-white font-semibold text-sm">Add Player</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, teamId]);
+
   if (playersData === undefined) {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
@@ -121,30 +135,8 @@ export default function TeamDetailScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-dark-950">
+    <View className="flex-1 bg-gray-50 dark:bg-dark-950">
       <StatusBar style={statusBarStyle} />
-
-      {/* Header */}
-      <View className="flex-row items-center px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-        <TouchableOpacity
-          className="w-10 h-10 items-center justify-center -ml-2"
-          onPress={() => navigation.goBack()}
-        >
-          <Icon name="back" size={24} color={resolvedTheme === "dark" ? "#F9FAFB" : "#111827"} />
-        </TouchableOpacity>
-        <View className="flex-1 ml-2">
-          <Text className="text-xl font-bold text-gray-900 dark:text-white">{teamName}</Text>
-          <Text className="text-sm text-gray-600 dark:text-gray-400">
-            {players.length} {players.length === 1 ? "Player" : "Players"}
-          </Text>
-        </View>
-        <TouchableOpacity
-          className="bg-primary-500 px-4 py-2 rounded-lg"
-          onPress={() => navigation.navigate("CreatePlayer", { teamId })}
-        >
-          <Text className="text-white font-semibold text-sm">Add Player</Text>
-        </TouchableOpacity>
-      </View>
 
       {/* Players List */}
       <FlatList
@@ -165,6 +157,6 @@ export default function TeamDetailScreen() {
           </View>
         }
       />
-    </SafeAreaView>
+    </View>
   );
 }

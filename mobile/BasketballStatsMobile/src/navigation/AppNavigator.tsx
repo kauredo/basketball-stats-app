@@ -208,6 +208,7 @@ function AppContent() {
             options={{
               title: "Live Game",
               presentation: "fullScreenModal",
+              headerShown: false,
             }}
           />
           <Stack.Screen
@@ -228,27 +229,29 @@ function AppContent() {
           <Stack.Screen
             name="CreateGame"
             component={CreateGameScreen}
-            options={{ title: "Create Game", headerShown: false }}
+            options={{ title: "Create Game" }}
           />
           <Stack.Screen
             name="CreateTeam"
             component={CreateTeamScreen}
-            options={{ title: "Create Team", headerShown: false }}
+            options={{ title: "Create Team" }}
           />
           <Stack.Screen
             name="CreatePlayer"
             component={CreatePlayerScreen}
-            options={{ title: "Add Player", headerShown: false }}
+            options={{ title: "Add Player" }}
           />
           <Stack.Screen
             name="Settings"
             component={SettingsScreen}
-            options={{ title: "Settings", headerShown: false }}
+            options={{ title: "Settings" }}
           />
           <Stack.Screen
             name="TeamDetail"
             component={TeamDetailScreen}
-            options={{ title: "Team Details", headerShown: false }}
+            options={({ route }) => ({
+              title: route.params.teamName,
+            })}
           />
         </Stack.Navigator>
       )}

@@ -205,14 +205,6 @@ export default function SettingsScreen() {
 
   return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <View className="bg-gray-100 dark:bg-gray-800 p-5 pt-16">
-        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">Settings</Text>
-        {selectedLeague && (
-          <Text className="text-gray-600 dark:text-gray-400 text-base">{selectedLeague.name}</Text>
-        )}
-      </View>
-
       <ScrollView className="flex-1 p-4">
         {/* Appearance */}
         <View className="mb-6">
