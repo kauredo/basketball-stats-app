@@ -1,0 +1,109 @@
+import React from "react";
+import { Id } from "../../../../../../convex/_generated/dataModel";
+import { PlayerStat } from "../../../types/livegame";
+
+interface AssistPromptModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAssist: (playerId: Id<"players">) => void;
+  onNoAssist: () => void;
+  scorerName: string;
+  scorerNumber: number;
+  shotType: string;
+  points: number;
+  teammates: PlayerStat[];
+}
+
+/**
+ * Modal that appears after a made shot to record an assist.
+ * Shows scorer info and list of teammates to select the assister.
+ */
+export const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
+  isOpen,
+  onClose,
+  onAssist,
+  onNoAssist,
+  scorerName,
+  scorerNumber,
+  shotType,
+  points,
+  teammates,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+        {/* Header */}
+        <div className="bg-green-600 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-white">Assist?</h3>
+              <p className="text-green-200 text-sm">
+                #{scorerNumber} {scorerName} scored {points}PT
+              </p>
+            </div>
+            <div className="px-3 py-1 bg-white/20 rounded-full text-white text-sm font-bold">
+              +{points} PTS
+            </div>
+          </div>
+        </div>
+
+        {/* Teammate list for assist */}
+        <div className="max-h-60 overflow-y-auto">
+          <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+            <span className="text-xs text-gray-500 uppercase">Who assisted?</span>
+          </div>
+          {teammates.length === 0 ? (
+            <div className="p-6 text-center text-gray-500">
+              No other players on court
+            </div>
+          ) : (
+            teammates.map((player) => (
+              <button
+                key={player.id}
+                onClick={() => onAssist(player.playerId)}
+                className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-sm">
+                      #{player.player?.number}
+                    </span>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-gray-900 dark:text-white font-medium text-sm">
+                      {player.player?.name}
+                    </div>
+                    <div className="text-gray-500 text-xs">{player.assists} AST</div>
+                  </div>
+                </div>
+                <div className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-lg">
+                  +AST
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+
+        {/* No assist / Cancel */}
+        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+          <button
+            onClick={onNoAssist}
+            className="flex-1 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            No Assist
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AssistPromptModal;

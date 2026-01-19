@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -25,7 +25,7 @@ import Games from "./pages/Games";
 import Teams from "./pages/Teams";
 import Players from "./pages/Players";
 import Statistics from "./pages/Statistics";
-import LiveGame from "./pages/LiveGame";
+import LiveGame from "./pages/LiveGameNew";
 import GameAnalysis from "./pages/GameAnalysis";
 import LeagueSelectionPage from "./pages/LeagueSelectionPage";
 import Profile from "./pages/Profile";
@@ -47,9 +47,23 @@ function LoadingScreen() {
 
 function AuthenticatedApp() {
   const { selectedLeague } = useAuth();
+  const location = useLocation();
 
   if (!selectedLeague) {
     return <LeagueSelectionPage />;
+  }
+
+  // LiveGame renders full-screen without the Layout for immersive stat recording
+  const isLiveGameRoute = location.pathname.includes("/live");
+
+  if (isLiveGameRoute) {
+    return (
+      <NotificationProvider>
+        <Routes>
+          <Route path="/games/:gameId/live" element={<LiveGame />} />
+        </Routes>
+      </NotificationProvider>
+    );
   }
 
   return (
@@ -64,7 +78,6 @@ function AuthenticatedApp() {
           <Route path="/standings" element={<Standings />} />
           <Route path="/compare" element={<PlayerComparison />} />
           <Route path="/shot-charts" element={<ShotCharts />} />
-          <Route path="/games/:gameId/live" element={<LiveGame />} />
           <Route path="/games/:gameId/analysis" element={<GameAnalysis />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/leagues" element={<LeagueSelectionPage />} />
