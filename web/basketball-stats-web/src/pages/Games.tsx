@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -13,16 +13,24 @@ import {
   ChartBarIcon,
   CalendarIcon,
   ClockIcon,
+  BoltIcon,
 } from "@heroicons/react/24/outline";
 
 const Games: React.FC = () => {
   const { token, selectedLeague } = useAuth();
+  const navigate = useNavigate();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showQuickGameModal, setShowQuickGameModal] = useState(false);
   const [selectedTeams, setSelectedTeams] = useState<{ home: string | null; away: string | null }>({
     home: null,
     away: null,
   });
   const [isCreating, setIsCreating] = useState(false);
+  const [quickGameSettings, setQuickGameSettings] = useState({
+    homeTeamName: "",
+    awayTeamName: "",
+    quarterMinutes: 12,
+  });
 
   const gamesData = useQuery(
     api.games.list,
@@ -35,6 +43,7 @@ const Games: React.FC = () => {
   );
 
   const createGame = useMutation(api.games.create);
+  const createQuickGame = useMutation(api.games.createQuickGame);
   const startGame = useMutation(api.games.start);
   const pauseGame = useMutation(api.games.pause);
   const resumeGame = useMutation(api.games.resume);
@@ -101,6 +110,36 @@ const Games: React.FC = () => {
       setSelectedTeams({ home: null, away: null });
     } catch (error) {
       console.error("Failed to create game:", error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleCreateQuickGame = async () => {
+    if (
+      !quickGameSettings.homeTeamName.trim() ||
+      !quickGameSettings.awayTeamName.trim() ||
+      !token ||
+      !selectedLeague
+    ) {
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const result = await createQuickGame({
+        token,
+        leagueId: selectedLeague.id,
+        homeTeamName: quickGameSettings.homeTeamName.trim(),
+        awayTeamName: quickGameSettings.awayTeamName.trim(),
+        quarterMinutes: quickGameSettings.quarterMinutes,
+      });
+      setShowQuickGameModal(false);
+      setQuickGameSettings({ homeTeamName: "", awayTeamName: "", quarterMinutes: 12 });
+      // Navigate directly to the live game page
+      navigate(`/app/games/${result.gameId}/live`);
+    } catch (error) {
+      console.error("Failed to create quick game:", error);
     } finally {
       setIsCreating(false);
     }
@@ -211,13 +250,13 @@ const Games: React.FC = () => {
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center space-x-2">
             {canStart && (
-              <button
-                onClick={() => handleGameAction(game.id, "start")}
-                className="p-2 bg-green-600 hover:bg-green-700 rounded-lg text-white transition-colors"
-                title="Start Game"
+              <Link
+                to={`/app/games/${game.id}/live`}
+                className="p-2 bg-green-600 hover:bg-green-700 rounded-lg text-white transition-colors inline-flex"
+                title="Set Lineups & Start"
               >
                 <PlayIcon className="w-4 h-4" />
-              </button>
+              </Link>
             )}
 
             {canPause && (
@@ -252,7 +291,7 @@ const Games: React.FC = () => {
 
             {(isGameLive || game.status === "paused") && (
               <Link
-                to={`/games/${game.id}/live`}
+                to={`/app/games/${game.id}/live`}
                 className="p-2 bg-orange-600 hover:bg-orange-700 rounded-lg text-white transition-colors"
                 title="Coach View"
               >
@@ -261,7 +300,7 @@ const Games: React.FC = () => {
             )}
 
             <Link
-              to={`/games/${game.id}/analysis`}
+              to={`/app/games/${game.id}/analysis`}
               className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors"
               title="Analysis"
             >
@@ -288,13 +327,22 @@ const Games: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Games</h1>
           <p className="text-gray-600 dark:text-gray-400">Manage and monitor basketball games</p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-        >
-          <PlusIcon className="w-4 h-4 mr-2" />
-          Create Game
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowQuickGameModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+          >
+            <BoltIcon className="w-4 h-4 mr-2" />
+            Quick Game
+          </button>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+          >
+            <PlusIcon className="w-4 h-4 mr-2" />
+            Create Game
+          </button>
+        </div>
       </div>
 
       {/* Games Table */}
@@ -408,6 +456,107 @@ const Games: React.FC = () => {
                 className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isCreating ? "Creating..." : "Create Game"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Game Modal */}
+      {showQuickGameModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                <BoltIcon className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Quick Game</h3>
+                <p className="text-sm text-gray-500">Play without adding teams to your league</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Home Team Name
+                </label>
+                <input
+                  type="text"
+                  value={quickGameSettings.homeTeamName}
+                  onChange={(e) =>
+                    setQuickGameSettings((prev) => ({ ...prev, homeTeamName: e.target.value }))
+                  }
+                  placeholder="e.g., Lakers"
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Away Team Name
+                </label>
+                <input
+                  type="text"
+                  value={quickGameSettings.awayTeamName}
+                  onChange={(e) =>
+                    setQuickGameSettings((prev) => ({ ...prev, awayTeamName: e.target.value }))
+                  }
+                  placeholder="e.g., Celtics"
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Quarter Length
+                </label>
+                <div className="flex gap-2">
+                  {[5, 8, 10, 12].map((mins) => (
+                    <button
+                      key={mins}
+                      onClick={() =>
+                        setQuickGameSettings((prev) => ({ ...prev, quarterMinutes: mins }))
+                      }
+                      className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
+                        quickGameSettings.quarterMinutes === mins
+                          ? "bg-purple-600 text-white"
+                          : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      {mins} min
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  This will create two temporary teams with 15 numbered players each (Player 1, Player 2, etc.). You can select starting lineups and track full stats.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowQuickGameModal(false);
+                  setQuickGameSettings({ homeTeamName: "", awayTeamName: "", quarterMinutes: 12 });
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateQuickGame}
+                disabled={
+                  !quickGameSettings.homeTeamName.trim() ||
+                  !quickGameSettings.awayTeamName.trim() ||
+                  isCreating
+                }
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCreating ? "Creating..." : "Start Quick Game"}
               </button>
             </div>
           </div>

@@ -13,6 +13,8 @@ export const recordStat = mutation({
       v.literal("shot3"),
       v.literal("freethrow"),
       v.literal("rebound"),
+      v.literal("offensiveRebound"),
+      v.literal("defensiveRebound"),
       v.literal("assist"),
       v.literal("steal"),
       v.literal("block"),
@@ -85,6 +87,16 @@ export const recordStat = mutation({
         updates.rebounds = playerStat.rebounds + increment;
         break;
 
+      case "offensiveRebound":
+        updates.rebounds = playerStat.rebounds + increment;
+        updates.offensiveRebounds = (playerStat.offensiveRebounds || 0) + increment;
+        break;
+
+      case "defensiveRebound":
+        updates.rebounds = playerStat.rebounds + increment;
+        updates.defensiveRebounds = (playerStat.defensiveRebounds || 0) + increment;
+        break;
+
       case "assist":
         updates.assists = playerStat.assists + increment;
         break;
@@ -102,12 +114,26 @@ export const recordStat = mutation({
         break;
 
       case "foul":
-        updates.fouls = playerStat.fouls + increment;
+        const newFoulCount = playerStat.fouls + increment;
+        updates.fouls = newFoulCount;
+
+        // Check foul limit and foul out player if exceeded
+        const settings = game.gameSettings as any || {};
+        const foulLimit = settings.foulLimit || 5; // Default 5 fouls
+
+        if (newFoulCount >= foulLimit) {
+          updates.fouledOut = true;
+          updates.isOnCourt = false; // Auto sub out when fouled out
+        }
         break;
     }
 
     // Update player stat
     await ctx.db.patch(playerStat._id, updates);
+
+    // Check if player fouled out and return that info
+    const updatedPlayerStat = await ctx.db.get(playerStat._id);
+    const didFoulOut = updates.fouledOut === true;
 
     // Update game score if points were scored
     if (pointsScored > 0) {
@@ -121,16 +147,28 @@ export const recordStat = mutation({
     const updatedGame = await ctx.db.get(args.gameId);
     const updatedStat = await ctx.db.get(playerStat._id);
 
+    // Determine if this was a missed shot that should prompt for rebound
+    const isMissedShot =
+      (args.statType === "shot2" || args.statType === "shot3" || args.statType === "freethrow") &&
+      args.made === false;
+
+    // Get game settings for foul limit
+    const gameSettings = game.gameSettings as any || {};
+    const foulLimit = gameSettings.foulLimit || 5;
+
     return {
       stat: {
         id: updatedStat!._id,
         points: updatedStat!.points,
         rebounds: updatedStat!.rebounds,
+        offensiveRebounds: updatedStat!.offensiveRebounds || 0,
+        defensiveRebounds: updatedStat!.defensiveRebounds || 0,
         assists: updatedStat!.assists,
         steals: updatedStat!.steals,
         blocks: updatedStat!.blocks,
         turnovers: updatedStat!.turnovers,
         fouls: updatedStat!.fouls,
+        fouledOut: updatedStat!.fouledOut || false,
         fieldGoalsMade: updatedStat!.fieldGoalsMade,
         fieldGoalsAttempted: updatedStat!.fieldGoalsAttempted,
         threePointersMade: updatedStat!.threePointersMade,
@@ -143,6 +181,21 @@ export const recordStat = mutation({
         awayScore: updatedGame!.awayScore,
       },
       message: `${args.statType} recorded for ${player.name}`,
+      // Include foul-out warning info
+      foulWarning:
+        args.statType === "foul" && updatedStat!.fouls === foulLimit - 1
+          ? { playerId: args.playerId, fouls: updatedStat!.fouls, foulLimit }
+          : null,
+      didFoulOut,
+      // Signal for rebound prompt on missed shots
+      pendingRebound: isMissedShot
+        ? {
+            shotType: args.statType,
+            shooterPlayerId: args.playerId,
+            shooterTeamId: player.teamId,
+            isHomeTeam,
+          }
+        : null,
     };
   },
 });
@@ -158,6 +211,8 @@ export const undoStat = mutation({
       v.literal("shot3"),
       v.literal("freethrow"),
       v.literal("rebound"),
+      v.literal("offensiveRebound"),
+      v.literal("defensiveRebound"),
       v.literal("assist"),
       v.literal("steal"),
       v.literal("block"),
@@ -226,6 +281,16 @@ export const undoStat = mutation({
         updates.rebounds = Math.max(0, playerStat.rebounds - 1);
         break;
 
+      case "offensiveRebound":
+        updates.rebounds = Math.max(0, playerStat.rebounds - 1);
+        updates.offensiveRebounds = Math.max(0, (playerStat.offensiveRebounds || 0) - 1);
+        break;
+
+      case "defensiveRebound":
+        updates.rebounds = Math.max(0, playerStat.rebounds - 1);
+        updates.defensiveRebounds = Math.max(0, (playerStat.defensiveRebounds || 0) - 1);
+        break;
+
       case "assist":
         updates.assists = Math.max(0, playerStat.assists - 1);
         break;
@@ -243,7 +308,16 @@ export const undoStat = mutation({
         break;
 
       case "foul":
-        updates.fouls = Math.max(0, playerStat.fouls - 1);
+        const newFoulCount = Math.max(0, playerStat.fouls - 1);
+        updates.fouls = newFoulCount;
+        // If player was fouled out, check if they should be un-fouled-out
+        if (playerStat.fouledOut) {
+          const settings = (game.gameSettings as any) || {};
+          const foulLimit = settings.foulLimit || 5;
+          if (newFoulCount < foulLimit) {
+            updates.fouledOut = false;
+          }
+        }
         break;
     }
 
@@ -299,6 +373,25 @@ export const substitute = mutation({
     const player = await ctx.db.get(args.playerId);
     if (!player) throw new Error("Player not found");
 
+    // Check if player is fouled out - can't sub back in
+    if (args.isOnCourt && playerStat.fouledOut) {
+      throw new Error("Cannot substitute fouled out player back into the game");
+    }
+
+    // Max 5 players on court validation
+    if (args.isOnCourt) {
+      const teamStats = await ctx.db
+        .query("playerStats")
+        .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", player.teamId))
+        .collect();
+
+      const playersOnCourt = teamStats.filter((s) => s.isOnCourt && s._id !== playerStat._id).length;
+
+      if (playersOnCourt >= 5) {
+        throw new Error("Cannot have more than 5 players on court. Sub out a player first.");
+      }
+    }
+
     await ctx.db.patch(playerStat._id, {
       isOnCourt: args.isOnCourt,
     });
@@ -306,6 +399,138 @@ export const substitute = mutation({
     return {
       message: args.isOnCourt ? `${player.name} entered the game` : `${player.name} left the game`,
       isOnCourt: args.isOnCourt,
+    };
+  },
+});
+
+// Swap two players (atomic substitution)
+export const swapSubstitute = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    playerOutId: v.id("players"),
+    playerInId: v.id("players"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    // Get player out stat
+    const playerOutStat = await ctx.db
+      .query("playerStats")
+      .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", args.playerOutId))
+      .first();
+
+    if (!playerOutStat) throw new Error("Player to sub out not found");
+
+    // Get player in stat
+    const playerInStat = await ctx.db
+      .query("playerStats")
+      .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", args.playerInId))
+      .first();
+
+    if (!playerInStat) throw new Error("Player to sub in not found");
+
+    const playerOut = await ctx.db.get(args.playerOutId);
+    const playerIn = await ctx.db.get(args.playerInId);
+
+    if (!playerOut || !playerIn) throw new Error("Player not found");
+
+    // Validate same team
+    if (playerOut.teamId !== playerIn.teamId) {
+      throw new Error("Players must be on the same team");
+    }
+
+    // Check if player coming in is fouled out
+    if (playerInStat.fouledOut) {
+      throw new Error("Cannot substitute fouled out player back into the game");
+    }
+
+    // Validate player out is on court and player in is off court
+    if (!playerOutStat.isOnCourt) {
+      throw new Error("Player to sub out is not on court");
+    }
+
+    if (playerInStat.isOnCourt) {
+      throw new Error("Player to sub in is already on court");
+    }
+
+    // Perform atomic swap
+    await ctx.db.patch(playerOutStat._id, { isOnCourt: false });
+    await ctx.db.patch(playerInStat._id, { isOnCourt: true });
+
+    return {
+      message: `${playerIn.name} substituted for ${playerOut.name}`,
+      playerOut: { id: playerOut._id, name: playerOut.name },
+      playerIn: { id: playerIn._id, name: playerIn.name },
+    };
+  },
+});
+
+// Record team rebound
+export const recordTeamRebound = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    teamId: v.id("teams"),
+    reboundType: v.union(v.literal("offensive"), v.literal("defensive")),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    // Get or create team stats
+    let teamStats = await ctx.db
+      .query("teamStats")
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", args.teamId))
+      .first();
+
+    if (!teamStats) {
+      // Create team stats if they don't exist
+      const teamStatsId = await ctx.db.insert("teamStats", {
+        gameId: args.gameId,
+        teamId: args.teamId,
+        offensiveRebounds: 0,
+        defensiveRebounds: 0,
+        teamFouls: 0,
+      });
+      teamStats = await ctx.db.get(teamStatsId);
+    }
+
+    if (!teamStats) throw new Error("Failed to create team stats");
+
+    // Update the appropriate rebound count
+    const updates =
+      args.reboundType === "offensive"
+        ? { offensiveRebounds: teamStats.offensiveRebounds + 1 }
+        : { defensiveRebounds: teamStats.defensiveRebounds + 1 };
+
+    await ctx.db.patch(teamStats._id, updates);
+
+    const team = await ctx.db.get(args.teamId);
+
+    return {
+      message: `Team ${args.reboundType} rebound recorded for ${team?.name || "team"}`,
+      teamStats: {
+        offensiveRebounds: args.reboundType === "offensive" ? teamStats.offensiveRebounds + 1 : teamStats.offensiveRebounds,
+        defensiveRebounds: args.reboundType === "defensive" ? teamStats.defensiveRebounds + 1 : teamStats.defensiveRebounds,
+      },
     };
   },
 });
@@ -340,11 +565,14 @@ export const getLiveStats = query({
           teamId: stat.teamId,
           points: stat.points,
           rebounds: stat.rebounds,
+          offensiveRebounds: stat.offensiveRebounds || 0,
+          defensiveRebounds: stat.defensiveRebounds || 0,
           assists: stat.assists,
           steals: stat.steals,
           blocks: stat.blocks,
           turnovers: stat.turnovers,
           fouls: stat.fouls,
+          fouledOut: stat.fouledOut || false,
           fieldGoalsMade: stat.fieldGoalsMade,
           fieldGoalsAttempted: stat.fieldGoalsAttempted,
           threePointersMade: stat.threePointersMade,
@@ -367,6 +595,21 @@ export const getLiveStats = query({
       })
     );
 
+    // Get team stats
+    const homeTeamStats = await ctx.db
+      .query("teamStats")
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", game.homeTeamId))
+      .first();
+
+    const awayTeamStats = await ctx.db
+      .query("teamStats")
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", game.awayTeamId))
+      .first();
+
+    // Get game settings for foul limit
+    const gameSettings = game.gameSettings as any || {};
+    const foulLimit = gameSettings.foulLimit || 5;
+
     return {
       game: {
         id: game._id,
@@ -375,8 +618,25 @@ export const getLiveStats = query({
         timeRemainingSeconds: game.timeRemainingSeconds,
         homeScore: game.homeScore,
         awayScore: game.awayScore,
+        foulLimit,
       },
       stats: formattedStats,
+      teamStats: {
+        home: homeTeamStats
+          ? {
+              offensiveRebounds: homeTeamStats.offensiveRebounds,
+              defensiveRebounds: homeTeamStats.defensiveRebounds,
+              teamFouls: homeTeamStats.teamFouls,
+            }
+          : { offensiveRebounds: 0, defensiveRebounds: 0, teamFouls: 0 },
+        away: awayTeamStats
+          ? {
+              offensiveRebounds: awayTeamStats.offensiveRebounds,
+              defensiveRebounds: awayTeamStats.defensiveRebounds,
+              teamFouls: awayTeamStats.teamFouls,
+            }
+          : { offensiveRebounds: 0, defensiveRebounds: 0, teamFouls: 0 },
+      },
     };
   },
 });

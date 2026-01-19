@@ -154,11 +154,14 @@ export default defineSchema({
     freeThrowsMade: v.number(),
     freeThrowsAttempted: v.number(),
     rebounds: v.number(),
+    offensiveRebounds: v.optional(v.number()), // New: offensive rebounds
+    defensiveRebounds: v.optional(v.number()), // New: defensive rebounds
     assists: v.number(),
     steals: v.number(),
     blocks: v.number(),
     turnovers: v.number(),
     fouls: v.number(),
+    fouledOut: v.optional(v.boolean()), // New: player fouled out
     minutesPlayed: v.number(),
     plusMinus: v.number(),
     isOnCourt: v.boolean(),
@@ -167,6 +170,17 @@ export default defineSchema({
     .index("by_player", ["playerId"])
     .index("by_game_player", ["gameId", "playerId"])
     .index("by_team", ["teamId"])
+    .index("by_game_team", ["gameId", "teamId"]),
+
+  // Team Stats (for team rebounds and fouls)
+  teamStats: defineTable({
+    gameId: v.id("games"),
+    teamId: v.id("teams"),
+    offensiveRebounds: v.number(),
+    defensiveRebounds: v.number(),
+    teamFouls: v.number(),
+  })
+    .index("by_game", ["gameId"])
     .index("by_game_team", ["gameId", "teamId"]),
 
   // Shot attempts with location data for shot charts

@@ -138,13 +138,13 @@ const Dashboard: React.FC = () => {
         {showActions && (game.status === "active" || game.status === "paused") && (
           <div className="mt-4 flex space-x-2">
             <Link
-              to={`/games/${game.id}/live`}
+              to={`/app/games/${game.id}/live`}
               className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded text-sm font-medium text-center transition-colors"
             >
               Coach View
             </Link>
             <Link
-              to={`/games/${game.id}/analysis`}
+              to={`/app/games/${game.id}/analysis`}
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium text-center transition-colors"
             >
               Analysis

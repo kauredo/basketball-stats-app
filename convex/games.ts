@@ -361,6 +361,58 @@ export const start = mutation({
       throw new Error("Game cannot be started from current state");
     }
 
+    // If starting from scheduled, set starters on court (configured or default to first 5)
+    if (game.status === "scheduled") {
+      const settings = game.gameSettings as any;
+      let startingFive = settings?.startingFive;
+
+      // If no starting five configured, default to first 5 players from each team
+      if (!startingFive || (!startingFive.homeTeam?.length && !startingFive.awayTeam?.length)) {
+        // Get first 5 home team players
+        const homePlayerStats = await ctx.db
+          .query("playerStats")
+          .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", game.homeTeamId))
+          .take(5);
+
+        // Get first 5 away team players
+        const awayPlayerStats = await ctx.db
+          .query("playerStats")
+          .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", game.awayTeamId))
+          .take(5);
+
+        startingFive = {
+          homeTeam: homePlayerStats.map((ps) => ps.playerId),
+          awayTeam: awayPlayerStats.map((ps) => ps.playerId),
+        };
+
+        // Save the default starters to gameSettings
+        const newSettings = { ...settings, startingFive };
+        await ctx.db.patch(args.gameId, { gameSettings: newSettings });
+      }
+
+      // Set home team starters on court
+      for (const playerId of startingFive.homeTeam || []) {
+        const playerStat = await ctx.db
+          .query("playerStats")
+          .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", playerId))
+          .first();
+        if (playerStat) {
+          await ctx.db.patch(playerStat._id, { isOnCourt: true });
+        }
+      }
+
+      // Set away team starters on court
+      for (const playerId of startingFive.awayTeam || []) {
+        const playerStat = await ctx.db
+          .query("playerStats")
+          .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", playerId))
+          .first();
+        if (playerStat) {
+          await ctx.db.patch(playerStat._id, { isOnCourt: true });
+        }
+      }
+    }
+
     await ctx.db.patch(args.gameId, {
       status: "active",
       startedAt: game.startedAt || Date.now(),
@@ -447,6 +499,7 @@ export const end = mutation({
   args: {
     token: v.string(),
     gameId: v.id("games"),
+    forceEnd: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
@@ -460,12 +513,157 @@ export const end = mutation({
       throw new Error("Access denied");
     }
 
+    // Check if all quarters have been completed
+    const settings = game.gameSettings as any;
+    const quartersCompleted = settings?.quartersCompleted || [];
+
+    if (!args.forceEnd && quartersCompleted.length < 4) {
+      throw new Error("Cannot end game before all 4 quarters are completed. Use forceEnd to override.");
+    }
+
     await ctx.db.patch(args.gameId, {
       status: "completed",
       endedAt: Date.now(),
     });
 
     return { message: "Game ended", status: "completed" };
+  },
+});
+
+// Set quarter manually
+export const setQuarter = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    quarter: v.number(),
+    resetTime: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    if (game.status === "completed") {
+      throw new Error("Cannot change quarter on a completed game");
+    }
+
+    if (args.quarter < 1 || args.quarter > 4) {
+      throw new Error("Quarter must be between 1 and 4");
+    }
+
+    const settings = game.gameSettings as any;
+    const quarterMinutes = settings?.quarterMinutes || 12;
+
+    const updates: any = {
+      currentQuarter: args.quarter,
+    };
+
+    // Reset time to full quarter if requested
+    if (args.resetTime) {
+      updates.timeRemainingSeconds = quarterMinutes * 60;
+    }
+
+    // Pause game when changing quarters
+    if (game.status === "active") {
+      updates.status = "paused";
+    }
+
+    await ctx.db.patch(args.gameId, updates);
+
+    return {
+      message: `Changed to quarter ${args.quarter}`,
+      quarter: args.quarter,
+      status: updates.status || game.status,
+    };
+  },
+});
+
+// Update game settings (only allowed before game starts)
+export const updateGameSettings = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    quarterMinutes: v.optional(v.number()),
+    foulLimit: v.optional(v.number()), // 5 or 6 fouls before foul out
+    startingFive: v.optional(v.object({
+      homeTeam: v.array(v.id("players")),
+      awayTeam: v.array(v.id("players")),
+    })),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    if (game.status !== "scheduled") {
+      throw new Error("Can only update settings before game starts");
+    }
+
+    const currentSettings = (game.gameSettings as any) || {};
+    const newSettings = { ...currentSettings };
+
+    if (args.quarterMinutes !== undefined) {
+      if (args.quarterMinutes < 1 || args.quarterMinutes > 20) {
+        throw new Error("Quarter minutes must be between 1 and 20");
+      }
+      newSettings.quarterMinutes = args.quarterMinutes;
+    }
+
+    if (args.foulLimit !== undefined) {
+      if (args.foulLimit !== 5 && args.foulLimit !== 6) {
+        throw new Error("Foul limit must be 5 or 6");
+      }
+      newSettings.foulLimit = args.foulLimit;
+    }
+
+    if (args.startingFive) {
+      // Validate players belong to the correct teams
+      for (const playerId of args.startingFive.homeTeam) {
+        const player = await ctx.db.get(playerId);
+        if (!player || player.teamId !== game.homeTeamId) {
+          throw new Error("Invalid home team player");
+        }
+      }
+      for (const playerId of args.startingFive.awayTeam) {
+        const player = await ctx.db.get(playerId);
+        if (!player || player.teamId !== game.awayTeamId) {
+          throw new Error("Invalid away team player");
+        }
+      }
+
+      if (args.startingFive.homeTeam.length > 5 || args.startingFive.awayTeam.length > 5) {
+        throw new Error("Starting lineup cannot have more than 5 players");
+      }
+
+      newSettings.startingFive = args.startingFive;
+    }
+
+    // Update time remaining if quarter minutes changed
+    const updates: any = { gameSettings: newSettings };
+    if (args.quarterMinutes !== undefined) {
+      updates.timeRemainingSeconds = args.quarterMinutes * 60;
+    }
+
+    await ctx.db.patch(args.gameId, updates);
+
+    return {
+      message: "Game settings updated",
+      gameSettings: newSettings,
+    };
   },
 });
 
@@ -481,25 +679,35 @@ export const timerTick = internalMutation({
     // Stop if game is not active
     if (game.status !== "active") return;
 
+    const settings = (game.gameSettings as any) || {};
     const newTime = Math.max(0, game.timeRemainingSeconds - 1);
-    const quarterMinutes = (game.gameSettings as any)?.quarterMinutes || 12;
+    const quarterMinutes = settings.quarterMinutes || 12;
 
     if (newTime === 0) {
+      // Track completed quarters
+      const quartersCompleted = settings.quartersCompleted || [];
+      if (!quartersCompleted.includes(game.currentQuarter)) {
+        quartersCompleted.push(game.currentQuarter);
+      }
+      const newSettings = { ...settings, quartersCompleted };
+
       if (game.currentQuarter < 4) {
         // Quarter ended - move to next quarter
         await ctx.db.patch(args.gameId, {
           timeRemainingSeconds: quarterMinutes * 60,
           currentQuarter: game.currentQuarter + 1,
           status: "paused", // Pause for quarter break
+          gameSettings: newSettings,
         });
         // Don't schedule next tick - game is paused
         return;
       } else {
-        // Game ended
+        // Game ended - all 4 quarters completed
         await ctx.db.patch(args.gameId, {
           status: "completed",
           endedAt: Date.now(),
           timeRemainingSeconds: 0,
+          gameSettings: newSettings,
         });
         return;
       }
@@ -598,6 +806,127 @@ export const getBoxScore = query({
           players: await formatStats(awayStats),
         },
       },
+    };
+  },
+});
+
+// Create quick game without existing teams
+export const createQuickGame = mutation({
+  args: {
+    token: v.string(),
+    leagueId: v.id("leagues"),
+    homeTeamName: v.string(),
+    awayTeamName: v.string(),
+    quarterMinutes: v.optional(v.number()),
+    playersPerTeam: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    // Check user has permission to create games
+    const role = await getUserLeagueRole(ctx, user._id, args.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied - insufficient permissions");
+    }
+
+    const quarterMinutes = args.quarterMinutes || 12;
+    const playersPerTeam = args.playersPerTeam || 15;
+
+    // Create temporary home team
+    const homeTeamId = await ctx.db.insert("teams", {
+      name: args.homeTeamName,
+      leagueId: args.leagueId,
+      userId: user._id,
+    });
+
+    // Create temporary away team
+    const awayTeamId = await ctx.db.insert("teams", {
+      name: args.awayTeamName,
+      leagueId: args.leagueId,
+      userId: user._id,
+    });
+
+    // Create numbered players for home team
+    for (let i = 1; i <= playersPerTeam; i++) {
+      await ctx.db.insert("players", {
+        teamId: homeTeamId,
+        name: `Player ${i}`,
+        number: i,
+        active: true,
+      });
+    }
+
+    // Create numbered players for away team
+    for (let i = 1; i <= playersPerTeam; i++) {
+      await ctx.db.insert("players", {
+        teamId: awayTeamId,
+        name: `Player ${i}`,
+        number: i,
+        active: true,
+      });
+    }
+
+    // Create the game
+    const gameId = await ctx.db.insert("games", {
+      homeTeamId,
+      awayTeamId,
+      leagueId: args.leagueId,
+      status: "scheduled",
+      currentQuarter: 1,
+      timeRemainingSeconds: quarterMinutes * 60,
+      homeScore: 0,
+      awayScore: 0,
+      gameSettings: {
+        quarterMinutes,
+        isQuickGame: true,
+        customHomeTeamName: args.homeTeamName,
+        customAwayTeamName: args.awayTeamName,
+      },
+      userId: user._id,
+    });
+
+    // Initialize player stats
+    const homePlayers = await ctx.db
+      .query("players")
+      .withIndex("by_team", (q) => q.eq("teamId", homeTeamId))
+      .collect();
+
+    const awayPlayers = await ctx.db
+      .query("players")
+      .withIndex("by_team", (q) => q.eq("teamId", awayTeamId))
+      .collect();
+
+    const allPlayers = [...homePlayers, ...awayPlayers];
+    for (const player of allPlayers) {
+      await ctx.db.insert("playerStats", {
+        playerId: player._id,
+        gameId,
+        teamId: player.teamId,
+        points: 0,
+        fieldGoalsMade: 0,
+        fieldGoalsAttempted: 0,
+        threePointersMade: 0,
+        threePointersAttempted: 0,
+        freeThrowsMade: 0,
+        freeThrowsAttempted: 0,
+        rebounds: 0,
+        assists: 0,
+        steals: 0,
+        blocks: 0,
+        turnovers: 0,
+        fouls: 0,
+        minutesPlayed: 0,
+        plusMinus: 0,
+        isOnCourt: false,
+      });
+    }
+
+    return {
+      gameId,
+      homeTeamId,
+      awayTeamId,
+      message: "Quick game created successfully",
     };
   },
 });

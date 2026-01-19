@@ -6,6 +6,14 @@ import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { PlusIcon, UsersIcon, TrophyIcon, CalendarIcon } from "@heroicons/react/24/outline";
 
+const leagueTypes = [
+  { value: "recreational", label: "Recreational" },
+  { value: "youth", label: "Youth" },
+  { value: "high_school", label: "High School" },
+  { value: "college", label: "College" },
+  { value: "professional", label: "Professional" },
+];
+
 export default function LeagueSelectionPage() {
   const { token, selectedLeague, selectLeague, user, logout } = useAuth();
   const [inviteCode, setInviteCode] = useState("");
@@ -13,9 +21,21 @@ export default function LeagueSelectionPage() {
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Create league modal state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    name: "",
+    description: "",
+    leagueType: "recreational" as const,
+    isPublic: false,
+  });
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+
   const leaguesData = useQuery(api.leagues.list, token ? { token } : "skip");
   const joinLeagueMutation = useMutation(api.leagues.join);
   const joinByCodeMutation = useMutation(api.leagues.joinByCode);
+  const createLeague = useMutation(api.leagues.create);
 
   const userLeagues = leaguesData?.leagues || [];
 
@@ -72,6 +92,53 @@ export default function LeagueSelectionPage() {
     logout();
   };
 
+  const handleCreateLeague = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createFormData.name.trim() || !token) return;
+
+    setIsCreating(true);
+    setCreateError(null);
+    try {
+      const result = await createLeague({
+        token,
+        name: createFormData.name.trim(),
+        description: createFormData.description.trim() || undefined,
+        leagueType: createFormData.leagueType,
+        isPublic: createFormData.isPublic,
+      });
+
+      // Auto-select the newly created league
+      selectLeague({
+        id: result.league.id,
+        name: result.league.name,
+        description: result.league.description,
+        leagueType: result.league.leagueType,
+        season: result.league.season,
+        isPublic: result.league.isPublic,
+        role: "admin",
+        teamsCount: 0,
+        membersCount: 1,
+        gamesCount: 0,
+        status: result.league.status,
+        createdAt: result.league.createdAt,
+      });
+
+      // Reset form and close modal
+      setCreateFormData({
+        name: "",
+        description: "",
+        leagueType: "recreational",
+        isPublic: false,
+      });
+      setShowCreateModal(false);
+    } catch (err: any) {
+      console.error("Failed to create league:", err);
+      setCreateError(err.message || "Failed to create league");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -88,6 +155,13 @@ export default function LeagueSelectionPage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              >
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Create League
+              </button>
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {user?.firstName} {user?.lastName}
@@ -226,11 +300,20 @@ export default function LeagueSelectionPage() {
             <div className="text-center py-12">
               <TrophyIcon className="mx-auto h-12 w-12 text-gray-600 dark:text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-                No leagues available
+                No leagues yet
               </h3>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                Ask a league administrator for an invite code to join a league.
+                Create your own league or join an existing one with an invite code.
               </p>
+              <div className="mt-6">
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                >
+                  <PlusIcon className="h-4 w-4 mr-2" />
+                  Create League
+                </button>
+              </div>
             </div>
           )}
 
@@ -249,6 +332,122 @@ export default function LeagueSelectionPage() {
           )}
         </div>
       </div>
+
+      {/* Create League Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              Create New League
+            </h3>
+
+            {createError && (
+              <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 text-red-800 dark:text-red-300 px-4 py-3 rounded-md text-sm">
+                {createError}
+              </div>
+            )}
+
+            <form onSubmit={handleCreateLeague} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  League Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={createFormData.name}
+                  onChange={(e) =>
+                    setCreateFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  placeholder="Enter league name"
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={createFormData.description}
+                  onChange={(e) =>
+                    setCreateFormData((prev) => ({ ...prev, description: e.target.value }))
+                  }
+                  placeholder="Enter league description (optional)"
+                  rows={3}
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  League Type <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={createFormData.leagueType}
+                  onChange={(e) =>
+                    setCreateFormData((prev) => ({
+                      ...prev,
+                      leagueType: e.target.value as typeof createFormData.leagueType,
+                    }))
+                  }
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  {leagueTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isPublic"
+                  checked={createFormData.isPublic}
+                  onChange={(e) =>
+                    setCreateFormData((prev) => ({ ...prev, isPublic: e.target.checked }))
+                  }
+                  className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 dark:border-gray-600 rounded"
+                />
+                <label
+                  htmlFor="isPublic"
+                  className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                >
+                  Public League (anyone can discover and request to join)
+                </label>
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setCreateFormData({
+                      name: "",
+                      description: "",
+                      leagueType: "recreational",
+                      isPublic: false,
+                    });
+                    setCreateError(null);
+                  }}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!createFormData.name.trim() || isCreating}
+                  className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isCreating ? "Creating..." : "Create League"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
