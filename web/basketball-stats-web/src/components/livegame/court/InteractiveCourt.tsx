@@ -311,7 +311,7 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
           <>
             <text
               x={BASKET_X}
-              y={COURT_HEIGHT - 25}
+              y={COURT_HEIGHT - 60}
               textAnchor="middle"
               fill={isDarkMode ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.8)"}
               fontSize="11"
@@ -322,7 +322,7 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
             </text>
             <text
               x={BASKET_X}
-              y={80}
+              y={60}
               textAnchor="middle"
               fill={isDarkMode ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.8)"}
               fontSize="10"
@@ -333,7 +333,7 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
             </text>
             <text
               x={BASKET_X}
-              y={PAINT_HEIGHT + 45}
+              y={PAINT_HEIGHT + 50}
               textAnchor="middle"
               fill={isDarkMode ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.7)"}
               fontSize="9"

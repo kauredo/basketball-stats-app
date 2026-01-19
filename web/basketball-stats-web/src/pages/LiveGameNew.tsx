@@ -83,6 +83,11 @@ const LiveGameNew: React.FC = () => {
     token && gameId ? { token, gameId: gameId as Id<"games">, limit: 100 } : "skip"
   );
 
+  const gameShotsData = useQuery(
+    api.shots.getGameShots,
+    token && gameId ? { token, gameId: gameId as Id<"games"> } : "skip"
+  );
+
   // Convex mutations
   const startGame = useMutation(api.games.start);
   const pauseGame = useMutation(api.games.pause);
@@ -91,12 +96,14 @@ const LiveGameNew: React.FC = () => {
   const recordStat = useMutation(api.stats.recordStat);
   const undoStat = useMutation(api.stats.undoStat);
   const swapSubstituteMutation = useMutation(api.stats.swapSubstitute);
+  const substituteMutation = useMutation(api.stats.substitute);
   const recordTeamReboundMutation = useMutation(api.stats.recordTeamRebound);
   const setQuarter = useMutation(api.games.setQuarter);
   const recordFoulWithContextMutation = useMutation(api.stats.recordFoulWithContext);
   const recordFreeThrowMutation = useMutation(api.stats.recordFreeThrow);
   const recordTimeoutMutation = useMutation(api.games.recordTimeout);
   const startOvertimeMutation = useMutation(api.games.startOvertime);
+  const recordShotMutation = useMutation(api.shots.recordShot);
 
   // Hooks
   const feedback = useFeedback();
@@ -141,6 +148,15 @@ const LiveGameNew: React.FC = () => {
   const isPaused = game?.status === "paused";
   const isCompleted = game?.status === "completed";
   const canRecordStats = isActive || isPaused;
+
+  // Transform persisted shots to ShotLocation format for heat maps
+  const persistedShots: ShotLocation[] = (gameShotsData?.shots || []).map((shot) => ({
+    x: shot.x,
+    y: shot.y,
+    made: shot.made,
+    playerId: shot.playerId as Id<"players">,
+    is3pt: shot.shotType === "3pt",
+  }));
 
   // Game clock (for optional local countdown)
   const gameClock = useGameClock({
@@ -248,9 +264,27 @@ const LiveGameNew: React.FC = () => {
         feedback.confirm();
       }
 
-      // Track recent shots for visualization
+      // Track recent shots for visualization AND persist to database
       if (shotLocation && (statType === "shot2" || statType === "shot3")) {
-        setRecentShots((prev) => [...prev.slice(-4), { ...shotLocation, made: made || false, playerId }]);
+        const is3pt = statType === "shot3";
+        setRecentShots((prev) => [...prev.slice(-4), { ...shotLocation, made: made || false, playerId, is3pt }]);
+
+        // Persist shot location to database for heat maps
+        try {
+          await recordShotMutation({
+            token,
+            gameId: gameId as Id<"games">,
+            playerId,
+            x: shotLocation.x,
+            y: shotLocation.y,
+            shotType: is3pt ? "3pt" : "2pt",
+            made: made || false,
+            quarter: game?.currentQuarter || 1,
+            timeRemaining: game?.timeRemainingSeconds || 0,
+          });
+        } catch (error) {
+          console.error("Failed to persist shot location:", error);
+        }
       }
 
       // Show assist prompt after made shots
@@ -511,6 +545,23 @@ const LiveGameNew: React.FC = () => {
     }
   };
 
+  // Add a player to the court (for filling empty slots after foul-outs)
+  const handleSubstituteIn = async (playerId: Id<"players">) => {
+    if (!token || !gameId) return;
+
+    try {
+      await substituteMutation({
+        token,
+        gameId: gameId as Id<"games">,
+        playerId,
+        isOnCourt: true,
+      });
+      setSwappingPlayer(null);
+    } catch (error) {
+      console.error("Failed to substitute player in:", error);
+    }
+  };
+
   const handleTimeoutHome = async () => {
     if (!token || !gameId || !game) return;
     try {
@@ -612,12 +663,13 @@ const LiveGameNew: React.FC = () => {
           awayStats={awayStats}
           foulLimit={foulLimit}
           onCourtClick={handleCourtClick}
-          recentShots={recentShots}
+          recentShots={persistedShots.length > 0 ? persistedShots.slice(-8) : recentShots}
           showHeatMap={showHeatMap}
-          allShots={recentShots}
+          allShots={persistedShots}
           onStatSelect={handleStatSelect}
           swappingPlayer={swappingPlayer}
           onSwap={handleSwapSubstitute}
+          onSubIn={handleSubstituteIn}
           onStartSwap={setSwappingPlayer}
           onCancelSwap={() => setSwappingPlayer(null)}
           disabled={!canRecordStats}
@@ -658,6 +710,7 @@ const LiveGameNew: React.FC = () => {
           awayStats={awayStats}
           foulLimit={foulLimit}
           onSwap={handleSwapSubstitute}
+          onSubIn={handleSubstituteIn}
           swappingPlayer={swappingPlayer}
           onStartSwap={setSwappingPlayer}
           onCancelSwap={() => setSwappingPlayer(null)}

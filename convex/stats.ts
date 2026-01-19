@@ -184,6 +184,51 @@ export const recordStat = mutation({
       await ctx.db.patch(args.gameId, scoreUpdate);
     }
 
+    // Log game event for play-by-play
+    const eventDescriptions: Record<string, string> = {
+      shot2: args.made ? `#${player.number} ${player.name} 2PT Made` : `#${player.number} ${player.name} 2PT Missed`,
+      shot3: args.made ? `#${player.number} ${player.name} 3PT Made` : `#${player.number} ${player.name} 3PT Missed`,
+      freethrow: args.made ? `#${player.number} ${player.name} FT Made` : `#${player.number} ${player.name} FT Missed`,
+      rebound: `#${player.number} ${player.name} Rebound`,
+      offensiveRebound: `#${player.number} ${player.name} Offensive Rebound`,
+      defensiveRebound: `#${player.number} ${player.name} Defensive Rebound`,
+      assist: `#${player.number} ${player.name} Assist`,
+      steal: `#${player.number} ${player.name} Steal`,
+      block: `#${player.number} ${player.name} Block`,
+      turnover: `#${player.number} ${player.name} Turnover`,
+      foul: `#${player.number} ${player.name} Foul`,
+    };
+
+    const eventTypes: Record<string, string> = {
+      shot2: "shot",
+      shot3: "shot",
+      freethrow: "freethrow",
+      rebound: "rebound",
+      offensiveRebound: "rebound",
+      defensiveRebound: "rebound",
+      assist: "assist",
+      steal: "steal",
+      block: "block",
+      turnover: "turnover",
+      foul: "foul",
+    };
+
+    await ctx.db.insert("gameEvents", {
+      gameId: args.gameId,
+      eventType: eventTypes[args.statType] || args.statType,
+      playerId: args.playerId,
+      teamId: player.teamId,
+      quarter: game.currentQuarter,
+      gameTime: game.timeRemainingSeconds,
+      timestamp: Date.now(),
+      details: {
+        statType: args.statType,
+        made: args.made,
+        points: pointsScored,
+      },
+      description: eventDescriptions[args.statType] || `#${player.number} ${player.name} ${args.statType}`,
+    });
+
     // Get updated game for response
     const updatedGame = await ctx.db.get(args.gameId);
     const updatedStat = await ctx.db.get(playerStat._id);

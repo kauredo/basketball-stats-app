@@ -12,6 +12,7 @@ interface LineupsModeContentProps {
   awayStats: PlayerStat[];
   foulLimit: number;
   onSwap: (playerOut: Id<"players">, playerIn: Id<"players">) => void;
+  onSubIn?: (playerId: Id<"players">) => void;
   swappingPlayer: Id<"players"> | null;
   onStartSwap: (playerId: Id<"players">) => void;
   onCancelSwap: () => void;
@@ -33,6 +34,7 @@ export const LineupsModeContent: React.FC<LineupsModeContentProps> = ({
   awayStats,
   foulLimit,
   onSwap,
+  onSubIn,
   swappingPlayer,
   onStartSwap,
   onCancelSwap,
@@ -51,6 +53,7 @@ export const LineupsModeContent: React.FC<LineupsModeContentProps> = ({
           players={awayStats}
           foulLimit={foulLimit}
           onSwap={onSwap}
+          onSubIn={onSubIn}
           swappingPlayer={swappingPlayer}
           onStartSwap={onStartSwap}
           onCancelSwap={onCancelSwap}
@@ -64,6 +67,7 @@ export const LineupsModeContent: React.FC<LineupsModeContentProps> = ({
           players={homeStats}
           foulLimit={foulLimit}
           onSwap={onSwap}
+          onSubIn={onSubIn}
           swappingPlayer={swappingPlayer}
           onStartSwap={onStartSwap}
           onCancelSwap={onCancelSwap}

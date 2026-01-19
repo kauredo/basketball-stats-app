@@ -384,6 +384,7 @@ export default function LiveGameScreen() {
   const gameData = useQuery(api.games.get, token && gameId ? { token, gameId } : "skip");
   const liveStats = useQuery(api.stats.getLiveStats, token && gameId ? { token, gameId } : "skip");
   const gameEvents = useQuery(api.games.getGameEvents, token && gameId ? { token, gameId, limit: 50 } : "skip");
+  const gameShotsData = useQuery(api.shots.getGameShots, token && gameId ? { token, gameId } : "skip");
 
   // Mutations
   const startGame = useMutation(api.games.start);
@@ -397,6 +398,7 @@ export default function LiveGameScreen() {
   const recordTimeout = useMutation(api.games.recordTimeout);
   const startOvertime = useMutation(api.games.startOvertime);
   const undoStat = useMutation(api.stats.undoStat);
+  const recordShotMutation = useMutation(api.shots.recordShot);
 
   const game = gameData?.game;
   const allStats = liveStats?.stats || [];
@@ -404,6 +406,13 @@ export default function LiveGameScreen() {
   const homePlayerStats = allStats.filter((s: PlayerStat) => s.isHomeTeam);
   const awayPlayerStats = allStats.filter((s: PlayerStat) => !s.isHomeTeam);
   const onCourtPlayers = allStats.filter((s: PlayerStat) => s.isOnCourt);
+
+  // Transform persisted shots for MiniCourt visualization
+  const persistedShots = (gameShotsData?.shots || []).map((shot) => ({
+    x: shot.x,
+    y: shot.y,
+    made: shot.made,
+  }));
 
   // Check for overtime trigger
   useEffect(() => {
@@ -481,9 +490,27 @@ export default function LiveGameScreen() {
         });
       }
 
-      // Add to recent shots for visualization
+      // Add to recent shots for visualization AND persist to database
       if (shotLocation && (statType === "shot2" || statType === "shot3")) {
+        const is3pt = statType === "shot3";
         setRecentShots((prev) => [...prev.slice(-4), { ...shotLocation, made: made || false }]);
+
+        // Persist shot location to database for heat maps
+        try {
+          await recordShotMutation({
+            token,
+            gameId,
+            playerId,
+            x: shotLocation.x,
+            y: shotLocation.y,
+            shotType: is3pt ? "3pt" : "2pt",
+            made: made || false,
+            quarter: game?.currentQuarter || 1,
+            timeRemaining: game?.timeRemainingSeconds || 0,
+          });
+        } catch (error) {
+          console.error("Failed to persist shot location:", error);
+        }
       }
 
       // Sound/haptic feedback
@@ -863,7 +890,7 @@ export default function LiveGameScreen() {
               <MiniCourt
                 onCourtTap={handleCourtTap}
                 disabled={!canRecordStats}
-                recentShots={recentShots}
+                recentShots={persistedShots.length > 0 ? persistedShots.slice(-5) : recentShots}
               />
             </View>
 

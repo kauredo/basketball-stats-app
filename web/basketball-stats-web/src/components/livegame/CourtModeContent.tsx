@@ -27,6 +27,7 @@ interface CourtModeContentProps {
   // Substitution
   swappingPlayer: Id<"players"> | null;
   onSwap: (playerOut: Id<"players">, playerIn: Id<"players">) => void;
+  onSubIn?: (playerId: Id<"players">) => void;
   onStartSwap: (playerId: Id<"players">) => void;
   onCancelSwap: () => void;
 
@@ -56,6 +57,7 @@ export const CourtModeContent: React.FC<CourtModeContentProps> = ({
   onStatSelect,
   swappingPlayer,
   onSwap,
+  onSubIn,
   onStartSwap,
   onCancelSwap,
   disabled = false,
@@ -115,6 +117,7 @@ export const CourtModeContent: React.FC<CourtModeContentProps> = ({
           players={awayStats}
           foulLimit={foulLimit}
           onSwap={onSwap}
+          onSubIn={onSubIn}
           swappingPlayer={swappingPlayer}
           onStartSwap={onStartSwap}
           onCancelSwap={onCancelSwap}
@@ -129,6 +132,7 @@ export const CourtModeContent: React.FC<CourtModeContentProps> = ({
           players={homeStats}
           foulLimit={foulLimit}
           onSwap={onSwap}
+          onSubIn={onSubIn}
           swappingPlayer={swappingPlayer}
           onStartSwap={onStartSwap}
           onCancelSwap={onCancelSwap}
