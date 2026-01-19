@@ -64,10 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logoutMutation = useMutation(api.auth.logout);
 
   // Query for refreshing user data
-  const currentUserData = useQuery(
-    api.auth.getCurrentUser,
-    token ? { token } : "skip"
-  );
+  const currentUserData = useQuery(api.auth.getCurrentUser, token ? { token } : "skip");
 
   useEffect(() => {
     initializeAuth();

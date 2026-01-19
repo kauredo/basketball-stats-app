@@ -24,12 +24,14 @@ import CreateGameScreen from "../screens/CreateGameScreen";
 import CreateTeamScreen from "../screens/CreateTeamScreen";
 import CreatePlayerScreen from "../screens/CreatePlayerScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import TeamDetailScreen from "../screens/TeamDetailScreen";
 
 // Navigation parameter types
 export type RootStackParamList = {
   Main: undefined;
   LiveGame: { gameId: string };
   PlayerStats: { playerId: string };
+  PlayerStatistics: { playerId: string; playerName?: string };
   LeagueSelection: undefined;
   PlayerComparison: undefined;
   ShotChart: undefined;
@@ -37,6 +39,7 @@ export type RootStackParamList = {
   CreateTeam: undefined;
   CreatePlayer: { teamId?: string } | undefined;
   Settings: undefined;
+  TeamDetail: { teamId: string; teamName: string };
 };
 
 export type TabParamList = {
@@ -241,6 +244,11 @@ function AppContent() {
             name="Settings"
             component={SettingsScreen}
             options={{ title: "Settings", headerShown: false }}
+          />
+          <Stack.Screen
+            name="TeamDetail"
+            component={TeamDetailScreen}
+            options={{ title: "Team Details", headerShown: false }}
           />
         </Stack.Navigator>
       )}

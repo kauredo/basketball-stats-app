@@ -459,13 +459,14 @@ const HeatMapZone: React.FC<HeatMapZoneProps> = ({ zone, stats }) => {
   // Zone coordinates (simplified)
   const zoneCoords: Record<string, { x: number; y: number; w: number; h: number }> = {
     paint: { x: 102, y: 0, w: 96, h: 114 },
-    leftElbow: { x: 18, y: 50, w: 84, h: 100 },
-    rightElbow: { x: 198, y: 50, w: 84, h: 100 },
-    topKey: { x: 102, y: 114, w: 96, h: 80 },
+    leftElbow: { x: 18, y: 50, w: 84, h: 64 },
+    rightElbow: { x: 198, y: 50, w: 84, h: 64 },
+    midRange: { x: 102, y: 114, w: 96, h: 60 },
     leftCorner3: { x: 0, y: 0, w: 18, h: 100 },
     rightCorner3: { x: 282, y: 0, w: 18, h: 100 },
     leftWing3: { x: 0, y: 100, w: 100, h: 120 },
     rightWing3: { x: 200, y: 100, w: 100, h: 120 },
+    topKey3: { x: 80, y: 174, w: 140, h: 108 },
   };
 
   const coords = zoneCoords[zone];
@@ -492,11 +493,12 @@ function calculateZoneStats(shots: ShotLocation[]): Record<string, ZoneStats> {
     paint: { made: 0, total: 0, percentage: 0 },
     leftElbow: { made: 0, total: 0, percentage: 0 },
     rightElbow: { made: 0, total: 0, percentage: 0 },
-    topKey: { made: 0, total: 0, percentage: 0 },
+    midRange: { made: 0, total: 0, percentage: 0 },
     leftCorner3: { made: 0, total: 0, percentage: 0 },
     rightCorner3: { made: 0, total: 0, percentage: 0 },
     leftWing3: { made: 0, total: 0, percentage: 0 },
     rightWing3: { made: 0, total: 0, percentage: 0 },
+    topKey3: { made: 0, total: 0, percentage: 0 },
   };
 
   shots.forEach((shot) => {
@@ -522,13 +524,13 @@ function getZoneKey(x: number, y: number, is3pt: boolean): string {
     } else if (Math.abs(x) > 12) {
       return x > 0 ? "rightWing3" : "leftWing3";
     }
-    return "topKey";
+    return "topKey3";
   } else {
     const dist = Math.sqrt(x * x + y * y);
     if (dist < 10) return "paint";
     if (x > 8) return "rightElbow";
     if (x < -8) return "leftElbow";
-    return "topKey";
+    return "midRange";
   }
 }
 

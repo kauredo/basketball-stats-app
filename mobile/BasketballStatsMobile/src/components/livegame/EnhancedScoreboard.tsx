@@ -141,18 +141,14 @@ export default function EnhancedScoreboard({
       onEndPeriod();
     } else {
       // Fallback to direct end if no handler provided
-      Alert.alert(
-        "End Game",
-        "Are you sure you want to end this game?",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "End Game",
-            style: "destructive",
-            onPress: () => onGameControl("end"),
-          },
-        ]
-      );
+      Alert.alert("End Game", "Are you sure you want to end this game?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "End Game",
+          style: "destructive",
+          onPress: () => onGameControl("end"),
+        },
+      ]);
     }
   };
 
@@ -257,12 +253,8 @@ export default function EnhancedScoreboard({
             onPress={() => onQuarterChange && setShowQuarterSelector(true)}
             disabled={!onQuarterChange}
           >
-            <View className="flex-row items-center">
-              {renderQuarterDots()}
-            </View>
-            {onQuarterChange && (
-              <Icon name="chevron-down" size={12} color="#9CA3AF" />
-            )}
+            <View className="flex-row items-center">{renderQuarterDots()}</View>
+            {onQuarterChange && <Icon name="chevron-down" size={12} color="#9CA3AF" />}
           </TouchableOpacity>
 
           {/* Game Controls */}
@@ -404,16 +396,12 @@ export default function EnhancedScoreboard({
                   key={q}
                   onPress={() => handleQuarterSelect(q)}
                   className={`px-4 py-2 rounded-lg ${
-                    game.currentQuarter === q
-                      ? "bg-purple-500"
-                      : "bg-gray-200 dark:bg-gray-700"
+                    game.currentQuarter === q ? "bg-purple-500" : "bg-gray-200 dark:bg-gray-700"
                   }`}
                 >
                   <Text
                     className={`font-bold ${
-                      game.currentQuarter === q
-                        ? "text-white"
-                        : "text-gray-700 dark:text-gray-300"
+                      game.currentQuarter === q ? "text-white" : "text-gray-700 dark:text-gray-300"
                     }`}
                   >
                     OT{q - 4}
@@ -421,10 +409,7 @@ export default function EnhancedScoreboard({
                 </TouchableOpacity>
               ))}
             </View>
-            <TouchableOpacity
-              onPress={() => setShowQuarterSelector(false)}
-              className="mt-4 py-2"
-            >
+            <TouchableOpacity onPress={() => setShowQuarterSelector(false)} className="mt-4 py-2">
               <Text className="text-gray-500 text-center">Cancel</Text>
             </TouchableOpacity>
           </View>

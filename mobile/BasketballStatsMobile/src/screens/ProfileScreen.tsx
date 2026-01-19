@@ -11,13 +11,17 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
+import { RootStackParamList } from "../navigation/AppNavigator";
 
 export default function ProfileScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, token, selectedLeague, userLeagues, logout, selectLeague, refreshUser } = useAuth();
   const { resolvedTheme } = useTheme();
 
@@ -249,10 +253,10 @@ export default function ProfileScreen() {
               <Icon name="user" size={20} color="#3B82F6" />
             </View>
             <View className="flex-1">
-              <Text className="text-base text-gray-900 dark:text-white font-medium">Edit Profile</Text>
-              <Text className="text-sm text-gray-500 dark:text-gray-400">
-                Change your name
+              <Text className="text-base text-gray-900 dark:text-white font-medium">
+                Edit Profile
               </Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">Change your name</Text>
             </View>
             <Icon
               name="chevron-right"
@@ -269,9 +273,40 @@ export default function ProfileScreen() {
               <Icon name="settings" size={20} color="#F59E0B" />
             </View>
             <View className="flex-1">
-              <Text className="text-base text-gray-900 dark:text-white font-medium">Change Password</Text>
+              <Text className="text-base text-gray-900 dark:text-white font-medium">
+                Change Password
+              </Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">Update your password</Text>
+            </View>
+            <Icon
+              name="chevron-right"
+              size={20}
+              color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Settings */}
+        <View className="mb-8">
+          <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">Settings</Text>
+
+          <TouchableOpacity
+            className="bg-white dark:bg-gray-800 rounded-lg p-4 flex-row items-center mb-2 border border-gray-200 dark:border-gray-700"
+            onPress={() => navigation.navigate("Settings")}
+          >
+            <View className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full items-center justify-center mr-3">
+              <Icon
+                name="settings"
+                size={20}
+                color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
+              />
+            </View>
+            <View className="flex-1">
+              <Text className="text-base text-gray-900 dark:text-white font-medium">
+                App Settings
+              </Text>
               <Text className="text-sm text-gray-500 dark:text-gray-400">
-                Update your password
+                Theme, sounds, and preferences
               </Text>
             </View>
             <Icon
@@ -371,7 +406,9 @@ export default function ProfileScreen() {
             </Text>
 
             <View className="mb-4">
-              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Current Password</Text>
+              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                Current Password
+              </Text>
               <TextInput
                 className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
                 value={currentPassword}
@@ -395,7 +432,9 @@ export default function ProfileScreen() {
             </View>
 
             <View className="mb-6">
-              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Confirm New Password</Text>
+              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                Confirm New Password
+              </Text>
               <TextInput
                 className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
                 value={confirmPassword}

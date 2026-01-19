@@ -23,7 +23,7 @@ const soundCache: Map<SoundType, AudioPlayer | null> = new Map();
 export async function initializeAudio(): Promise<void> {
   try {
     await setAudioModeAsync({
-      playsInSilentModeIOS: true,
+      playsInSilentMode: true,
       shouldRouteThroughEarpiece: false,
     });
   } catch (error) {

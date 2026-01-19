@@ -13,7 +13,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-import { RootStackParamList } from "../../App";
+import { RootStackParamList } from "../navigation/AppNavigator";
 
 interface StatRowProps {
   label: string;
@@ -102,7 +102,7 @@ function GameLogItem({ game }: GameLogItemProps) {
 type PlayerStatisticsScreenProps = NativeStackScreenProps<RootStackParamList, "PlayerStatistics">;
 
 export default function PlayerStatisticsScreen({ route }: PlayerStatisticsScreenProps) {
-  const { playerId, playerName } = route.params;
+  const { playerId, playerName = "" } = route.params || {};
   const { token, selectedLeague } = useAuth();
   const [activeTab, setActiveTab] = useState<"season" | "games">("season");
   const [refreshing, setRefreshing] = useState(false);

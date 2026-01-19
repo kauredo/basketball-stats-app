@@ -116,26 +116,66 @@ export default function PlayByPlayTab({
     groupedEvents.push(currentGroup);
   }
 
-  const renderEvent = (event: GameEvent, isFirstInGroup: boolean) => (
-    <View key={event.id} style={styles.eventContainer}>
-      {/* Time Column */}
-      <View style={styles.timeColumn}>
-        <Text style={styles.quarterText}>{formatQuarter(event.quarter)}</Text>
-        <Text style={styles.timeText}>{event.gameTimeDisplay}</Text>
-      </View>
+  const getEventDetails = (event: GameEvent): string | null => {
+    if (!event.details) return null;
+    const { made, points, shotType, foulType, assisted } = event.details;
+    const parts: string[] = [];
 
-      {/* Icon Column */}
-      <View style={[styles.iconColumn, { backgroundColor: getEventColor(event.eventType) + "20" }]}>
-        <Text style={styles.eventIcon}>{getEventIcon(event.eventType)}</Text>
-      </View>
+    if (event.eventType === "shot" || event.eventType === "freethrow") {
+      if (made !== undefined) {
+        parts.push(made ? "Made" : "Missed");
+      }
+      if (shotType) {
+        parts.push(shotType === "3pt" ? "3PT" : shotType === "2pt" ? "2PT" : "FT");
+      }
+      if (points !== undefined && made) {
+        parts.push(`+${points} pts`);
+      }
+      if (assisted) {
+        parts.push("Assisted");
+      }
+    } else if (event.eventType === "foul" && foulType) {
+      parts.push(foulType.charAt(0).toUpperCase() + foulType.slice(1));
+    }
 
-      {/* Description Column */}
-      <View style={styles.descriptionColumn}>
-        <Text style={styles.descriptionText}>{event.description}</Text>
-        {event.team && <Text style={styles.teamText}>{event.team.name}</Text>}
+    return parts.length > 0 ? parts.join(" • ") : null;
+  };
+
+  const renderEvent = (event: GameEvent, isFirstInGroup: boolean) => {
+    const details = getEventDetails(event);
+
+    return (
+      <View key={event.id} style={styles.eventContainer}>
+        {/* Time Column */}
+        <View style={styles.timeColumn}>
+          <Text style={styles.quarterText}>{formatQuarter(event.quarter)}</Text>
+          <Text style={styles.timeText}>{event.gameTimeDisplay}</Text>
+        </View>
+
+        {/* Icon Column */}
+        <View
+          style={[styles.iconColumn, { backgroundColor: getEventColor(event.eventType) + "20" }]}
+        >
+          <Text style={styles.eventIcon}>{getEventIcon(event.eventType)}</Text>
+        </View>
+
+        {/* Description Column */}
+        <View style={styles.descriptionColumn}>
+          <Text style={styles.descriptionText}>{event.description}</Text>
+          {/* Player Info */}
+          {event.player && (
+            <Text style={styles.playerText}>
+              #{event.player.number} {event.player.name}
+            </Text>
+          )}
+          {/* Event Details (made/missed, points, etc.) */}
+          {details && <Text style={styles.detailsText}>{details}</Text>}
+          {/* Team Name */}
+          {event.team && <Text style={styles.teamText}>{event.team.name}</Text>}
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   const renderQuarterHeader = (quarter: number) => (
     <View style={styles.quarterHeader}>
@@ -294,6 +334,18 @@ const styles = StyleSheet.create({
   descriptionText: {
     color: "#FFFFFF",
     fontSize: 14,
+  },
+  playerText: {
+    color: "#9CA3AF",
+    fontSize: 12,
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  detailsText: {
+    color: "#F97316",
+    fontSize: 11,
+    fontWeight: "600",
+    marginTop: 2,
   },
   teamText: {
     color: "#6B7280",

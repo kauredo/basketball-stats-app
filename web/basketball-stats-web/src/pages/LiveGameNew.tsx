@@ -23,6 +23,7 @@ import {
   PlaysModeContent,
   LineupsModeContent,
 } from "../components/livegame";
+import { ClockModeContent } from "../components/livegame/ClockModeContent";
 
 // Import types
 import {
@@ -66,6 +67,7 @@ const LiveGameNew: React.FC = () => {
   const [recentShots, setRecentShots] = useState<ShotLocation[]>([]);
   const [showHeatMap, setShowHeatMap] = useState(false);
   const [lastAction, setLastAction] = useState<LastAction | null>(null);
+  const [shotClockSeconds, setShotClockSeconds] = useState(24);
 
   // Convex queries
   const gameData = useQuery(
@@ -613,6 +615,30 @@ const LiveGameNew: React.FC = () => {
     }
   };
 
+  const handleResetShotClock = (seconds: number = 24) => {
+    setShotClockSeconds(seconds);
+  };
+
+  const handleEndPeriod = async () => {
+    if (!token || !gameId || !game) return;
+    try {
+      // First pause the game
+      await pauseGame({ token, gameId: gameId as Id<"games"> });
+      // Then advance to next quarter (or overtime)
+      const nextQuarter = game.currentQuarter + 1;
+      await setQuarter({
+        token,
+        gameId: gameId as Id<"games">,
+        quarter: nextQuarter,
+        resetTime: true,
+      });
+      // Reset shot clock
+      setShotClockSeconds(24);
+    } catch (error) {
+      console.error("Failed to end period:", error);
+    }
+  };
+
   // Loading state
   if (!game) {
     return (
@@ -674,6 +700,7 @@ const LiveGameNew: React.FC = () => {
           onCourtClick={handleCourtClick}
           recentShots={persistedShots.length > 0 ? persistedShots.slice(-8) : recentShots}
           showHeatMap={showHeatMap}
+          onToggleHeatMap={() => setShowHeatMap(!showHeatMap)}
           allShots={persistedShots}
           onStatSelect={handleStatSelect}
           swappingPlayer={swappingPlayer}
@@ -724,6 +751,28 @@ const LiveGameNew: React.FC = () => {
           onStartSwap={setSwappingPlayer}
           onCancelSwap={() => setSwappingPlayer(null)}
           disabled={!canRecordStats}
+        />
+      )}
+
+      {/* Clock Mode */}
+      {activeMode === "clock" && (
+        <ClockModeContent
+          timeRemainingSeconds={game.timeRemainingSeconds}
+          shotClockSeconds={shotClockSeconds}
+          currentQuarter={game.currentQuarter}
+          status={game.status as "scheduled" | "active" | "paused" | "completed"}
+          isOvertime={game.currentQuarter > 4}
+          homeScore={game.homeScore}
+          awayScore={game.awayScore}
+          homeTeamName={game.homeTeam?.name || "Home"}
+          awayTeamName={game.awayTeam?.name || "Away"}
+          homeTimeoutsRemaining={homeTeamStats.timeoutsRemaining}
+          awayTimeoutsRemaining={awayTeamStats.timeoutsRemaining}
+          onGameControl={handleGameControl}
+          onTimeoutHome={handleTimeoutHome}
+          onTimeoutAway={handleTimeoutAway}
+          onResetShotClock={handleResetShotClock}
+          onEndPeriod={handleEndPeriod}
         />
       )}
 

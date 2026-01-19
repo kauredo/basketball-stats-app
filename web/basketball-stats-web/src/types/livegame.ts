@@ -33,7 +33,7 @@ export type TurnoverType =
   | "shot_clock_violation"
   | "other";
 
-export type GameMode = "court" | "stats" | "plays" | "lineups";
+export type GameMode = "court" | "stats" | "plays" | "lineups" | "clock";
 
 export type GameStatus = "scheduled" | "active" | "paused" | "completed";
 

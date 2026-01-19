@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   Alert,
   SafeAreaView,
-  Dimensions,
   StyleSheet,
   useColorScheme,
+  useWindowDimensions,
 } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
@@ -26,7 +26,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-import { RootStackParamList } from "../../App";
+import { RootStackParamList } from "../navigation/AppNavigator";
 import { COLORS, TOUCH_TARGETS, getShotZone } from "@basketball-stats/shared";
 
 // Import components
@@ -46,8 +46,9 @@ import useSoundFeedback from "../hooks/useSoundFeedback";
 
 type LiveGameRouteProp = RouteProp<RootStackParamList, "LiveGame">;
 
-const screenWidth = Dimensions.get("window").width;
-const MINI_COURT_WIDTH = screenWidth - 64;
+// Default court dimensions for StyleSheet (actual dimensions computed responsively in component)
+const DEFAULT_SCREEN_WIDTH = 400;
+const MINI_COURT_WIDTH = DEFAULT_SCREEN_WIDTH - 64;
 const MINI_COURT_HEIGHT = MINI_COURT_WIDTH * 0.6;
 
 interface PlayerStat {
@@ -151,6 +152,11 @@ interface MiniCourtProps {
 function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const { width: screenWidth } = useWindowDimensions();
+
+  // Calculate court dimensions based on current screen width
+  const MINI_COURT_WIDTH = screenWidth - 64;
+  const MINI_COURT_HEIGHT = MINI_COURT_WIDTH * 0.6;
 
   // Court colors based on theme
   const courtColors = {
@@ -182,7 +188,18 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
 
   return (
     <GestureDetector gesture={tapGesture}>
-      <Animated.View style={[styles.miniCourtContainer, disabled && styles.miniCourtDisabled]}>
+      <Animated.View
+        style={[
+          {
+            width: MINI_COURT_WIDTH,
+            height: MINI_COURT_HEIGHT,
+            borderRadius: 12,
+            overflow: "hidden",
+            alignSelf: "center",
+          },
+          disabled && styles.miniCourtDisabled,
+        ]}
+      >
         <Svg width={MINI_COURT_WIDTH} height={MINI_COURT_HEIGHT} viewBox="0 0 50 28">
           {/* Court background */}
           <Rect x="0" y="0" width="50" height="28" fill={courtColors.background} rx="2" />
@@ -227,8 +244,9 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
           />
           {/* Recent shots */}
           {recentShots.slice(-5).map((shot, index) => {
+            // Convert court coordinates (x: -25 to 25, y: 0 to 28) to SVG coordinates (0-50, 0-28)
             const svgX = 25 + shot.x;
-            const svgY = shot.y * 0.6;
+            const svgY = shot.y; // Y is already in 0-28 range matching viewBox
             return (
               <Circle
                 key={index}
@@ -259,6 +277,7 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
 
 const TABS = [
   { key: "court", label: "Court", icon: "basketball" },
+  { key: "clock", label: "Clock", icon: "timer" },
   { key: "stats", label: "Stats", icon: "stats" },
   { key: "subs", label: "Subs", icon: "users" },
   { key: "plays", label: "Plays", icon: "list" },
@@ -299,8 +318,17 @@ export default function LiveGameScreen() {
   // Sound feedback hook
   const soundFeedback = useSoundFeedback();
 
+  // Orientation detection
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const isLandscape = screenWidth > screenHeight;
+
   // Tab state
-  const [activeTab, setActiveTab] = useState<"court" | "stats" | "subs" | "plays">("court");
+  const [activeTab, setActiveTab] = useState<"court" | "clock" | "stats" | "subs" | "plays">(
+    "court"
+  );
+
+  // Shot clock state
+  const [shotClockSeconds, setShotClockSeconds] = useState(24);
 
   // Court tap state - for ShotRecordingModal
   const [pendingShot, setPendingShot] = useState<PendingShot | null>(null);
@@ -324,6 +352,11 @@ export default function LiveGameScreen() {
   const [lastAction, setLastAction] = useState<LastAction | null>(null);
   const [showOvertimePrompt, setShowOvertimePrompt] = useState(false);
 
+  // Pre-game lineup selection state
+  const [homeStarters, setHomeStarters] = useState<Id<"players">[]>([]);
+  const [awayStarters, setAwayStarters] = useState<Id<"players">[]>([]);
+  const [quarterMinutes, setQuarterMinutes] = useState(12);
+
   // Real-time game data from Convex
   const gameData = useQuery(api.games.get, token && gameId ? { token, gameId } : "skip");
   const liveStats = useQuery(api.stats.getLiveStats, token && gameId ? { token, gameId } : "skip");
@@ -341,6 +374,7 @@ export default function LiveGameScreen() {
   const pauseGame = useMutation(api.games.pause);
   const resumeGame = useMutation(api.games.resume);
   const endGame = useMutation(api.games.end);
+  const updateGameSettings = useMutation(api.games.updateGameSettings);
   const recordStat = useMutation(api.stats.recordStat);
   const substituteMutation = useMutation(api.stats.substitute);
   const recordFoulWithContext = useMutation(api.stats.recordFoulWithContext);
@@ -381,6 +415,89 @@ export default function LiveGameScreen() {
     y: shot.y,
     made: shot.made,
   }));
+
+  // Initialize starters when data loads for scheduled games
+  useEffect(() => {
+    if (game?.status === "scheduled" && homePlayerStats.length > 0 && awayPlayerStats.length > 0) {
+      // Check if starters are already configured
+      const settings = game.gameSettings as any;
+      const existingStarters = settings?.startingFive;
+
+      if (existingStarters?.homeTeam?.length > 0) {
+        setHomeStarters(existingStarters.homeTeam);
+      } else if (homeStarters.length === 0) {
+        setHomeStarters(homePlayerStats.slice(0, 5).map((s) => s.playerId));
+      }
+
+      if (existingStarters?.awayTeam?.length > 0) {
+        setAwayStarters(existingStarters.awayTeam);
+      } else if (awayStarters.length === 0) {
+        setAwayStarters(awayPlayerStats.slice(0, 5).map((s) => s.playerId));
+      }
+
+      if (settings?.quarterMinutes && quarterMinutes === 12) {
+        setQuarterMinutes(settings.quarterMinutes);
+      }
+    }
+  }, [game?.status, game?.gameSettings, homePlayerStats.length, awayPlayerStats.length]);
+
+  // Toggle starter selection
+  const toggleStarter = (playerId: Id<"players">, isHome: boolean) => {
+    if (isHome) {
+      if (homeStarters.includes(playerId)) {
+        setHomeStarters(homeStarters.filter((id) => id !== playerId));
+      } else if (homeStarters.length < 5) {
+        setHomeStarters([...homeStarters, playerId]);
+      }
+    } else {
+      if (awayStarters.includes(playerId)) {
+        setAwayStarters(awayStarters.filter((id) => id !== playerId));
+      } else if (awayStarters.length < 5) {
+        setAwayStarters([...awayStarters, playerId]);
+      }
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  // Handle starting the game with selected lineup
+  const handleStartGame = async () => {
+    if (!token) return;
+
+    if (homeStarters.length !== 5 || awayStarters.length !== 5) {
+      Alert.alert("Invalid Lineup", "Please select exactly 5 starters for each team.");
+      return;
+    }
+
+    try {
+      // Save settings first
+      await updateGameSettings({
+        token,
+        gameId,
+        quarterMinutes,
+        startingFive: {
+          homeTeam: homeStarters,
+          awayTeam: awayStarters,
+        },
+      });
+
+      // Set starters on court
+      for (const playerId of homeStarters) {
+        await substituteMutation({ token, gameId, playerId, isOnCourt: true });
+      }
+      for (const playerId of awayStarters) {
+        await substituteMutation({ token, gameId, playerId, isOnCourt: true });
+      }
+
+      // Start the game
+      await startGame({ token, gameId });
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      soundFeedback.buzzer?.();
+    } catch (error: any) {
+      console.error("Failed to start game:", error);
+      Alert.alert("Error", error.message || "Failed to start game");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  };
 
   // Check for overtime trigger
   useEffect(() => {
@@ -443,7 +560,15 @@ export default function LiveGameScreen() {
 
   // Handle end period with proper quarter/OT flow
   const handleEndPeriod = () => {
-    if (!game) return;
+    if (!game) {
+      Alert.alert("Error", "Game data not available. Please try again.");
+      return;
+    }
+
+    if (!token) {
+      Alert.alert("Error", "Authentication required. Please log in again.");
+      return;
+    }
 
     const currentQ = game.currentQuarter;
     const isTied = game.homeScore === game.awayScore;
@@ -456,26 +581,22 @@ export default function LiveGameScreen() {
 
     // Q4 or later and not tied - end the game
     if (currentQ >= 4) {
-      Alert.alert(
-        "End Game",
-        "This will end the game. Are you sure?",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "End Game",
-            style: "destructive",
-            onPress: async () => {
-              try {
-                await endGame({ token: token!, gameId, forceEnd: true });
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-              } catch (error: any) {
-                console.error("Failed to end game:", error);
-                Alert.alert("Error", "Failed to end game");
-              }
-            },
+      Alert.alert("End Game", "This will end the game. Are you sure?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "End Game",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await endGame({ token: token!, gameId, forceEnd: true });
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            } catch (error: any) {
+              console.error("Failed to end game:", error);
+              Alert.alert("Error", "Failed to end game");
+            }
           },
-        ]
-      );
+        },
+      ]);
       return;
     }
 
@@ -887,6 +1008,151 @@ export default function LiveGameScreen() {
     );
   }
 
+  // Show pre-game setup if game is scheduled
+  if (game.status === "scheduled") {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-dark-950">
+        <StatusBar style="light" />
+        <ScrollView className="flex-1">
+          {/* Header */}
+          <View className="bg-white dark:bg-gray-800 mx-4 mt-4 rounded-2xl p-4 border border-gray-200 dark:border-gray-700">
+            <View className="flex-row items-center mb-4">
+              <Icon name="settings" size={24} color="#F97316" />
+              <View className="ml-3 flex-1">
+                <Text className="text-gray-900 dark:text-white text-xl font-bold">
+                  Pre-Game Setup
+                </Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                  Select starting lineups before starting
+                </Text>
+              </View>
+            </View>
+            <View className="flex-row items-center justify-center py-3 border-t border-gray-200 dark:border-gray-700">
+              <Text className="text-gray-600 dark:text-gray-400 text-lg font-semibold">
+                {game.awayTeam?.name}
+              </Text>
+              <Text className="text-gray-400 mx-4 text-lg">VS</Text>
+              <Text className="text-gray-600 dark:text-gray-400 text-lg font-semibold">
+                {game.homeTeam?.name}
+              </Text>
+            </View>
+          </View>
+
+          {/* Quarter Duration */}
+          <View className="bg-white dark:bg-gray-800 mx-4 mt-4 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <Text className="text-gray-900 dark:text-white text-base font-semibold mb-3">
+              Quarter Duration
+            </Text>
+            <View className="flex-row flex-wrap gap-2">
+              {[5, 8, 10, 12].map((mins) => (
+                <TouchableOpacity
+                  key={mins}
+                  onPress={() => {
+                    setQuarterMinutes(mins);
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
+                  className={`px-4 py-2 rounded-lg ${
+                    quarterMinutes === mins ? "bg-primary-500" : "bg-gray-100 dark:bg-gray-700"
+                  }`}
+                >
+                  <Text
+                    className={`font-medium ${
+                      quarterMinutes === mins ? "text-white" : "text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    {mins} min
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Away Team Starters */}
+          <View className="bg-white dark:bg-gray-800 mx-4 mt-4 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-gray-900 dark:text-white text-base font-semibold">
+                {game.awayTeam?.name} Starters
+              </Text>
+              <Text
+                className={`text-sm font-medium ${
+                  awayStarters.length === 5 ? "text-green-500" : "text-primary-500"
+                }`}
+              >
+                {awayStarters.length}/5 selected
+              </Text>
+            </View>
+            {awayPlayerStats.map((stat) => (
+              <TouchableOpacity
+                key={stat.id}
+                onPress={() => toggleStarter(stat.playerId, false)}
+                className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
+                  awayStarters.includes(stat.playerId)
+                    ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
+                    : "bg-gray-100 dark:bg-gray-700"
+                }`}
+              >
+                <Text className="text-gray-900 dark:text-white font-medium">
+                  #{stat.player?.number} {stat.player?.name}
+                </Text>
+                {awayStarters.includes(stat.playerId) && (
+                  <Icon name="check" size={20} color="#F97316" />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Home Team Starters */}
+          <View className="bg-white dark:bg-gray-800 mx-4 mt-4 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-gray-900 dark:text-white text-base font-semibold">
+                {game.homeTeam?.name} Starters
+              </Text>
+              <Text
+                className={`text-sm font-medium ${
+                  homeStarters.length === 5 ? "text-green-500" : "text-primary-500"
+                }`}
+              >
+                {homeStarters.length}/5 selected
+              </Text>
+            </View>
+            {homePlayerStats.map((stat) => (
+              <TouchableOpacity
+                key={stat.id}
+                onPress={() => toggleStarter(stat.playerId, true)}
+                className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
+                  homeStarters.includes(stat.playerId)
+                    ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
+                    : "bg-gray-100 dark:bg-gray-700"
+                }`}
+              >
+                <Text className="text-gray-900 dark:text-white font-medium">
+                  #{stat.player?.number} {stat.player?.name}
+                </Text>
+                {homeStarters.includes(stat.playerId) && (
+                  <Icon name="check" size={20} color="#F97316" />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Start Game Button */}
+          <TouchableOpacity
+            onPress={handleStartGame}
+            className={`mx-4 mt-6 mb-8 py-4 rounded-xl flex-row items-center justify-center ${
+              homeStarters.length === 5 && awayStarters.length === 5
+                ? "bg-green-600"
+                : "bg-gray-400"
+            }`}
+            disabled={homeStarters.length !== 5 || awayStarters.length !== 5}
+          >
+            <Icon name="play" size={24} color="#FFFFFF" />
+            <Text className="text-white text-lg font-bold ml-2">Start Game</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
   const isGameActive = game.status === "active";
   const isGamePaused = game.status === "paused";
   // Allow recording stats when game is active OR paused (like web version)
@@ -956,8 +1222,7 @@ export default function LiveGameScreen() {
         onTimeoutAway={() => handleTimeout(false)}
         onQuarterChange={handleQuarterChange}
         onEndPeriod={handleEndPeriod}
-        showShotClock={true}
-        shotClockSeconds={24}
+        showShotClock={false}
       />
 
       {/* Tab Navigation */}
@@ -992,58 +1257,74 @@ export default function LiveGameScreen() {
       </View>
 
       {/* Tab Content */}
-      <ScrollView className="flex-1 px-4">
+      <ScrollView
+        className="flex-1 px-4"
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
+      >
+        {/* Court Tab */}
         {activeTab === "court" && (
-          <View className="pb-6">
-            {/* Mini Court for Shot Recording */}
-            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
+          <View className={`flex-1 ${isLandscape ? "flex-row gap-4" : ""}`}>
+            {/* Large Court for Shot Recording */}
+            <View
+              className={`bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 ${
+                isLandscape ? "flex-1" : "mb-4 flex-1"
+              }`}
+            >
               <Text className="text-gray-900 dark:text-white font-semibold mb-3">
                 Shot Location
               </Text>
-              <MiniCourt
-                onCourtTap={handleCourtTap}
-                disabled={!canRecordStats}
-                recentShots={persistedShots.length > 0 ? persistedShots.slice(-5) : recentShots}
-              />
+              <View className="flex-1 items-center justify-center">
+                <MiniCourt
+                  onCourtTap={handleCourtTap}
+                  disabled={!canRecordStats}
+                  recentShots={persistedShots.length > 0 ? persistedShots.slice(-5) : recentShots}
+                />
+              </View>
             </View>
 
-            {/* Stat Buttons Grid - Now opens modals instead of requiring pre-selected player */}
-            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            {/* Stat Buttons Grid */}
+            <View
+              className={`bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 ${
+                isLandscape ? "w-48" : ""
+              }`}
+            >
               <Text className="text-gray-900 dark:text-white font-semibold mb-3">Quick Stats</Text>
-
-              {/* Other Stats Row */}
               <View>
-                <View className="flex-row mb-2">
-                  <StatButton
-                    label="REB"
-                    shortLabel="+R"
-                    color="#3B82F6"
-                    disabled={!canRecordStats}
-                    onPress={() => setPendingQuickStat("rebound")}
-                  />
-                  <StatButton
-                    label="AST"
-                    shortLabel="+A"
-                    color="#8B5CF6"
-                    disabled={!canRecordStats}
-                    onPress={() => setPendingQuickStat("assist")}
-                  />
-                  <StatButton
-                    label="STL"
-                    shortLabel="+S"
-                    color="#06B6D4"
-                    disabled={!canRecordStats}
-                    onPress={() => setPendingQuickStat("steal")}
-                  />
-                  <StatButton
-                    label="BLK"
-                    shortLabel="+B"
-                    color="#06B6D4"
-                    disabled={!canRecordStats}
-                    onPress={() => setPendingQuickStat("block")}
-                  />
+                <View className={`${isLandscape ? "flex-col gap-2" : "flex-row mb-2"}`}>
+                  <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
+                    <StatButton
+                      label="REB"
+                      shortLabel="+R"
+                      color="#3B82F6"
+                      disabled={!canRecordStats}
+                      onPress={() => setPendingQuickStat("rebound")}
+                    />
+                    <StatButton
+                      label="AST"
+                      shortLabel="+A"
+                      color="#8B5CF6"
+                      disabled={!canRecordStats}
+                      onPress={() => setPendingQuickStat("assist")}
+                    />
+                  </View>
+                  <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
+                    <StatButton
+                      label="STL"
+                      shortLabel="+S"
+                      color="#06B6D4"
+                      disabled={!canRecordStats}
+                      onPress={() => setPendingQuickStat("steal")}
+                    />
+                    <StatButton
+                      label="BLK"
+                      shortLabel="+B"
+                      color="#06B6D4"
+                      disabled={!canRecordStats}
+                      onPress={() => setPendingQuickStat("block")}
+                    />
+                  </View>
                 </View>
-                <View className="flex-row">
+                <View className={`${isLandscape ? "flex-row mt-2" : "flex-row"}`}>
                   <StatButton
                     label="TO"
                     shortLabel="+T"
@@ -1051,15 +1332,185 @@ export default function LiveGameScreen() {
                     disabled={!canRecordStats}
                     onPress={() => setPendingQuickStat("turnover")}
                   />
-                  <View className="flex-1 mx-1" />
-                  <View className="flex-1 mx-1" />
-                  <View className="flex-1 mx-1" />
+                  {!isLandscape && (
+                    <>
+                      <View className="flex-1 mx-1" />
+                      <View className="flex-1 mx-1" />
+                      <View className="flex-1 mx-1" />
+                    </>
+                  )}
                 </View>
               </View>
             </View>
           </View>
         )}
 
+        {/* Clock Tab */}
+        {activeTab === "clock" && (
+          <View className={`flex-1 ${isLandscape ? "flex-row gap-4" : ""}`}>
+            {/* Main Clock Display */}
+            <View
+              className={`bg-gray-900 rounded-2xl p-6 items-center justify-center ${
+                isLandscape ? "flex-1" : "mb-4"
+              }`}
+            >
+              {/* Quarter Badge */}
+              <View className="bg-primary-500 px-4 py-2 rounded-full mb-4">
+                <Text className="text-white text-lg font-bold">
+                  {game.currentQuarter <= 4
+                    ? `Q${game.currentQuarter}`
+                    : `OT${game.currentQuarter - 4}`}
+                </Text>
+              </View>
+
+              {/* Game Clock */}
+              <Text
+                className={`font-mono font-bold text-white ${
+                  game.timeRemainingSeconds <= 60 && isGameActive ? "text-red-500" : ""
+                }`}
+                style={{ fontSize: isLandscape ? 72 : 80 }}
+              >
+                {Math.floor(game.timeRemainingSeconds / 60)}:
+                {(game.timeRemainingSeconds % 60).toString().padStart(2, "0")}
+              </Text>
+              <Text className="text-gray-400 text-sm mt-2 uppercase tracking-widest">
+                Game Clock
+              </Text>
+
+              {/* Shot Clock */}
+              <View className="flex-row items-center gap-4 mt-6">
+                <View
+                  className={`px-8 py-4 rounded-xl border-2 ${
+                    shotClockSeconds <= 5 && isGameActive
+                      ? "bg-red-500/20 border-red-500"
+                      : "bg-gray-800 border-gray-700"
+                  }`}
+                >
+                  <Text
+                    className={`font-mono font-bold text-5xl ${
+                      shotClockSeconds <= 5 && isGameActive ? "text-red-500" : "text-amber-400"
+                    }`}
+                  >
+                    {shotClockSeconds}
+                  </Text>
+                  <Text className="text-gray-400 text-xs mt-1 uppercase tracking-wider text-center">
+                    Shot Clock
+                  </Text>
+                </View>
+
+                {/* Shot Clock Reset Buttons */}
+                <View className="gap-2">
+                  <TouchableOpacity
+                    onPress={() => {
+                      setShotClockSeconds(24);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }}
+                    className="bg-amber-600 px-4 py-3 rounded-lg"
+                  >
+                    <Text className="text-white font-bold text-lg">24</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setShotClockSeconds(14);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }}
+                    className="bg-amber-700 px-4 py-3 rounded-lg"
+                  >
+                    <Text className="text-white font-bold text-lg">14</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Game Controls */}
+              <View className="flex-row gap-3 mt-6">
+                {isGameActive && (
+                  <TouchableOpacity
+                    onPress={() => handleGameControl("pause")}
+                    className="bg-amber-600 px-6 py-3 rounded-xl flex-row items-center"
+                  >
+                    <Icon name="pause" size={24} color="#FFFFFF" />
+                    <Text className="text-white text-lg font-bold ml-2">Pause</Text>
+                  </TouchableOpacity>
+                )}
+                {isGamePaused && (
+                  <>
+                    <TouchableOpacity
+                      onPress={() => handleGameControl("resume")}
+                      className="bg-green-600 px-6 py-3 rounded-xl flex-row items-center"
+                    >
+                      <Icon name="play" size={24} color="#FFFFFF" />
+                      <Text className="text-white text-lg font-bold ml-2">Resume</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleEndPeriod}
+                      className="bg-red-600 px-6 py-3 rounded-xl flex-row items-center"
+                    >
+                      <Icon name="stop" size={24} color="#FFFFFF" />
+                      <Text className="text-white text-lg font-bold ml-2">End Period</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            </View>
+
+            {/* Score Display (shown in landscape or below clock in portrait) */}
+            <View
+              className={`bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 ${isLandscape ? "w-56" : ""}`}
+            >
+              <Text className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider text-center mb-4">
+                Score
+              </Text>
+              {/* Away Team */}
+              <View className="items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1">
+                  {game.awayTeam?.name || "Away"}
+                </Text>
+                <Text className="text-gray-900 dark:text-white text-4xl font-bold">
+                  {game.awayScore}
+                </Text>
+              </View>
+              {/* Home Team */}
+              <View className="items-center">
+                <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1">
+                  {game.homeTeam?.name || "Home"}
+                </Text>
+                <Text className="text-gray-900 dark:text-white text-4xl font-bold">
+                  {game.homeScore}
+                </Text>
+              </View>
+
+              {/* Timeout Buttons */}
+              <View className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <TouchableOpacity
+                  onPress={() => handleTimeout(false)}
+                  disabled={awayTeamStatsData.timeoutsRemaining === 0}
+                  className={`py-2 px-4 rounded-lg mb-2 ${
+                    awayTeamStatsData.timeoutsRemaining === 0
+                      ? "bg-gray-200 dark:bg-gray-700 opacity-50"
+                      : "bg-gray-200 dark:bg-gray-700"
+                  }`}
+                >
+                  <Text className="text-gray-900 dark:text-white text-center text-sm">
+                    {game.awayTeam?.name} TO ({awayTeamStatsData.timeoutsRemaining})
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleTimeout(true)}
+                  disabled={homeTeamStatsData.timeoutsRemaining === 0}
+                  className={`py-2 px-4 rounded-lg ${
+                    homeTeamStatsData.timeoutsRemaining === 0
+                      ? "bg-gray-200 dark:bg-gray-700 opacity-50"
+                      : "bg-gray-200 dark:bg-gray-700"
+                  }`}
+                >
+                  <Text className="text-gray-900 dark:text-white text-center text-sm">
+                    {game.homeTeam?.name} TO ({homeTeamStatsData.timeoutsRemaining})
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
         {activeTab === "stats" && (
           <View className="pb-6">
             {/* Away Team Stats */}
@@ -1293,15 +1744,18 @@ export default function LiveGameScreen() {
             </View>
           </View>
         )}
+      </ScrollView>
 
-        {activeTab === "plays" && (
+      {/* Plays tab - rendered outside ScrollView to avoid VirtualizedList nesting warning */}
+      {activeTab === "plays" && (
+        <View className="flex-1 px-4 pb-4">
           <PlayByPlayTab
             events={gameEvents?.events}
             isLoading={gameEvents === undefined}
             currentQuarter={game.currentQuarter}
           />
-        )}
-      </ScrollView>
+        </View>
+      )}
 
       {/* Shot Recording Modal - Shows player selection with MADE/MISS per player */}
       <ShotRecordingModal

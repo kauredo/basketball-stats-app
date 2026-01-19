@@ -17,7 +17,7 @@ interface StatCardProps {
 
 function StatCard({ title, value, subtitle, color = "#EA580C" }: StatCardProps) {
   return (
-    <View className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 flex-row items-center w-[48%] border border-gray-200 dark:border-gray-600">
+    <View className="bg-white dark:bg-gray-800 rounded-xl p-4 flex-row items-center w-[48%] border border-gray-200 dark:border-gray-700">
       <View
         className="w-10 h-10 rounded-full justify-center items-center mr-3"
         style={{ backgroundColor: color }}
@@ -42,7 +42,7 @@ interface LeaderItemProps {
 
 function LeaderItem({ rank, playerName, value, unit = "" }: LeaderItemProps) {
   return (
-    <View className="flex-row items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg mb-2">
+    <View className="flex-row items-center bg-white dark:bg-gray-800 p-3 rounded-lg mb-2 border border-gray-200 dark:border-gray-700">
       <View className="w-6 h-6 rounded-full bg-primary-500 justify-center items-center mr-3">
         <Text className="text-white text-xs font-bold">{rank}</Text>
       </View>
@@ -75,7 +75,7 @@ function StandingsItem({
   avgPoints,
 }: StandingsItemProps) {
   return (
-    <View className="flex-row items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg mb-2">
+    <View className="flex-row items-center bg-white dark:bg-gray-800 p-3 rounded-lg mb-2 border border-gray-200 dark:border-gray-700">
       <View className="w-6 h-6 rounded-full bg-gray-500 justify-center items-center mr-3">
         <Text className="text-white text-xs font-bold">{rank}</Text>
       </View>
@@ -120,7 +120,7 @@ export default function StatisticsScreen() {
 
   if (dashboardData === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800">
+      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
         <Text className="text-gray-600 dark:text-gray-400 mt-4 text-base">
           Loading statistics...
         </Text>
@@ -130,7 +130,7 @@ export default function StatisticsScreen() {
 
   if (!selectedLeague) {
     return (
-      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-8">
+      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950 p-8">
         <Icon name="basketball" size={64} color="#6B7280" className="mb-4" />
         <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-2">
           No League Selected
@@ -147,9 +147,9 @@ export default function StatisticsScreen() {
   const recentGames = dashboardData?.recentGames || [];
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-800">
+    <View className="flex-1 bg-gray-50 dark:bg-dark-950">
       {/* Header */}
-      <View className="bg-gray-100 dark:bg-gray-700 p-5 pt-15">
+      <View className="bg-white dark:bg-gray-800 p-5 pt-15 border-b border-gray-200 dark:border-gray-700">
         <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">
           Statistics Dashboard
         </Text>
@@ -159,7 +159,7 @@ export default function StatisticsScreen() {
       </View>
 
       {/* Tab Navigation */}
-      <View className="flex-row bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+      <View className="flex-row bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <TouchableOpacity
           className={`flex-1 py-4 items-center border-b-2 ${
             activeTab === "overview" ? "border-primary-500" : "border-transparent"

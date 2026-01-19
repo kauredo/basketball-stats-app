@@ -123,8 +123,8 @@ export const LiveGameLayout: React.FC<LiveGameLayoutProps> = ({
         <ModeTabNavigation activeMode={activeMode} onModeChange={onModeChange} />
       </div>
 
-      {/* Main Content - Fills remaining space */}
-      <div className="relative flex-1 min-h-0 overflow-hidden px-4 pb-4">{children}</div>
+      {/* Main Content - Fills remaining space, allows scroll when needed */}
+      <div className="relative flex-1 min-h-0 overflow-y-auto px-4 pb-4">{children}</div>
 
       {/* Quick Undo FAB */}
       <QuickUndoFAB action={lastAction} onUndo={onUndo} onDismiss={onDismissUndo} />

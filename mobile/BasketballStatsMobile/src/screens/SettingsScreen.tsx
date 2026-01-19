@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Switch,
-  Alert,
-  Share,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Switch, Alert, Share } from "react-native";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
@@ -235,9 +227,7 @@ export default function SettingsScreen() {
                   key={themeMode}
                   onPress={() => setMode(themeMode)}
                   className={`flex-1 py-3 px-4 rounded-lg items-center ${
-                    mode === themeMode
-                      ? "bg-primary-500"
-                      : "bg-gray-100 dark:bg-gray-700"
+                    mode === themeMode ? "bg-primary-500" : "bg-gray-100 dark:bg-gray-700"
                   }`}
                 >
                   <Icon
@@ -247,9 +237,7 @@ export default function SettingsScreen() {
                   />
                   <Text
                     className={`mt-1 text-sm font-medium ${
-                      mode === themeMode
-                        ? "text-white"
-                        : "text-gray-700 dark:text-gray-300"
+                      mode === themeMode ? "text-white" : "text-gray-700 dark:text-gray-300"
                     }`}
                   >
                     {themeModeLabels[themeMode]}

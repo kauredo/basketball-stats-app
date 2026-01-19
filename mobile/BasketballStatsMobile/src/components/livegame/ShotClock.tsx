@@ -29,10 +29,7 @@ export default function ShotClock({
   React.useEffect(() => {
     if (isWarning || isViolation) {
       opacity.value = withRepeat(
-        withSequence(
-          withTiming(0.5, { duration: 300 }),
-          withTiming(1, { duration: 300 })
-        ),
+        withSequence(withTiming(0.5, { duration: 300 }), withTiming(1, { duration: 300 })),
         -1, // infinite
         true
       );
@@ -67,9 +64,7 @@ export default function ShotClock({
       style={animatedStyle}
       className={`${config.container} ${getBackgroundColor()} rounded-full items-center justify-center`}
     >
-      <Text className={`text-white font-bold font-mono ${config.text}`}>
-        {seconds}
-      </Text>
+      <Text className={`text-white font-bold font-mono ${config.text}`}>{seconds}</Text>
     </Animated.View>
   );
 }

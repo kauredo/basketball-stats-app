@@ -4,12 +4,14 @@ import {
   UserGroupIcon,
   ClipboardDocumentListIcon,
   UsersIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChartBarIcon as ChartBarIconSolid,
   UserGroupIcon as UserGroupIconSolid,
   ClipboardDocumentListIcon as ClipboardDocumentListIconSolid,
   UsersIcon as UsersIconSolid,
+  ClockIcon as ClockIconSolid,
 } from "@heroicons/react/24/solid";
 import { GameMode } from "../../../types/livegame";
 
@@ -30,6 +32,7 @@ const TABS: Tab[] = [
     iconSolid: ClipboardDocumentListIconSolid,
   },
   { key: "lineups", label: "Lineups", icon: UsersIcon, iconSolid: UsersIconSolid },
+  { key: "clock", label: "Clock", icon: ClockIcon, iconSolid: ClockIconSolid },
 ];
 
 interface ModeTabNavigationProps {

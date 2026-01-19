@@ -216,14 +216,6 @@ export default function HomeScreen() {
               <Icon name="user" size={24} color="#FFFFFF" />
               <Text className="text-white text-sm font-bold mt-2">Add Player</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              className="bg-purple-600 rounded-xl p-4 mr-3 items-center justify-center min-w-[100px]"
-              onPress={() => navigation.navigate("Settings")}
-            >
-              <Icon name="user" size={24} color="#FFFFFF" />
-              <Text className="text-white text-sm font-bold mt-2">Settings</Text>
-            </TouchableOpacity>
           </ScrollView>
         </View>
 
@@ -250,16 +242,6 @@ export default function HomeScreen() {
               <Icon name="stats" size={20} color="#3B82F6" />
               <Text className="text-gray-900 dark:text-white text-sm font-medium ml-3">
                 Shot Charts
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="w-[48%] bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 flex-row items-center border border-gray-200 dark:border-gray-700"
-              onPress={() => navigation.navigate("Settings")}
-            >
-              <Icon name="settings" size={20} color="#10B981" />
-              <Text className="text-gray-900 dark:text-white text-sm font-medium ml-3">
-                Settings
               </Text>
             </TouchableOpacity>
 

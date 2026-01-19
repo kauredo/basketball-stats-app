@@ -1,11 +1,16 @@
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import { RootStackParamList } from "../navigation/AppNavigator";
+
+type TeamsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface Team {
   id: Id<"teams">;
@@ -16,6 +21,7 @@ interface Team {
 }
 
 export default function TeamsScreen() {
+  const navigation = useNavigation<TeamsScreenNavigationProp>();
   const { token, selectedLeague } = useAuth();
   const [refreshing, setRefreshing] = React.useState(false);
 
@@ -33,7 +39,10 @@ export default function TeamsScreen() {
   };
 
   const renderTeam = ({ item: team }: { item: Team }) => (
-    <TouchableOpacity className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 border border-gray-200 dark:border-gray-700">
+    <TouchableOpacity
+      className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 border border-gray-200 dark:border-gray-700"
+      onPress={() => navigation.navigate("TeamDetail", { teamId: team.id, teamName: team.name })}
+    >
       <View className="mb-2">
         <Text className="text-gray-900 dark:text-white text-lg font-bold">{team.name}</Text>
         {team.city && (
