@@ -1,4 +1,4 @@
-import { Audio } from "expo-av";
+import { AudioPlayer, createAudioPlayer, setAudioModeAsync } from "expo-audio";
 
 export type SoundType =
   | "made"
@@ -11,44 +11,28 @@ export type SoundType =
   | "whistle";
 
 // Sound configuration
-// Using Audio.Sound.createAsync with generated tones since we don't have actual sound files
 // In production, you would load actual .mp3 files from assets/sounds/
 
 let soundEnabled = true;
 let volume = 1.0;
 
 // Cache for loaded sounds
-const soundCache: Map<SoundType, Audio.Sound | null> = new Map();
+const soundCache: Map<SoundType, AudioPlayer | null> = new Map();
 
 // Initialize audio mode for mobile
 export async function initializeAudio(): Promise<void> {
   try {
-    await Audio.setAudioModeAsync({
+    await setAudioModeAsync({
       playsInSilentModeIOS: true,
-      staysActiveInBackground: false,
-      shouldDuckAndroid: true,
+      shouldRouteThroughEarpiece: false,
     });
   } catch (error) {
     console.warn("Failed to initialize audio:", error);
   }
 }
 
-// Generate a simple beep sound programmatically
-// In production, replace with actual sound file loading
-async function createBeepSound(frequency: number, duration: number): Promise<Audio.Sound | null> {
-  try {
-    // Note: In a production app, you would load actual sound files:
-    // const { sound } = await Audio.Sound.createAsync(require('../../assets/sounds/made.mp3'));
-    // For now, we'll just return null and rely on haptics for feedback
-    return null;
-  } catch (error) {
-    console.warn("Failed to create sound:", error);
-    return null;
-  }
-}
-
 // Load sound (placeholder - would load from assets in production)
-async function loadSound(type: SoundType): Promise<Audio.Sound | null> {
+async function loadSound(type: SoundType): Promise<AudioPlayer | null> {
   if (soundCache.has(type)) {
     return soundCache.get(type) || null;
   }
@@ -64,7 +48,7 @@ async function loadSound(type: SoundType): Promise<Audio.Sound | null> {
   //   buzzer: require('../../assets/sounds/buzzer.mp3'),
   //   whistle: require('../../assets/sounds/whistle.mp3'),
   // };
-  // const { sound } = await Audio.Sound.createAsync(soundFiles[type]);
+  // const player = createAudioPlayer(soundFiles[type]);
 
   // For now, return null - haptics will provide feedback
   soundCache.set(type, null);
@@ -75,11 +59,11 @@ export async function playSound(type: SoundType): Promise<void> {
   if (!soundEnabled) return;
 
   try {
-    const sound = await loadSound(type);
-    if (sound) {
-      await sound.setVolumeAsync(volume);
-      await sound.setPositionAsync(0);
-      await sound.playAsync();
+    const player = await loadSound(type);
+    if (player) {
+      player.volume = volume;
+      player.seekTo(0);
+      player.play();
     }
   } catch (error) {
     console.warn(`Failed to play sound ${type}:`, error);
@@ -102,12 +86,12 @@ export function getVolume(): number {
   return volume;
 }
 
-// Cleanup function to unload all sounds
+// Cleanup function to release all sounds
 export async function unloadAllSounds(): Promise<void> {
-  for (const [_, sound] of soundCache) {
-    if (sound) {
+  for (const [_, player] of soundCache) {
+    if (player) {
       try {
-        await sound.unloadAsync();
+        player.release();
       } catch (error) {
         console.warn("Failed to unload sound:", error);
       }
