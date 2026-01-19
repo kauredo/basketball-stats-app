@@ -120,10 +120,7 @@ export default function QuickUndoFAB({
     });
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: translateY.value },
-      { translateX: translateX.value },
-    ],
+    transform: [{ translateY: translateY.value }, { translateX: translateX.value }],
     opacity: opacity.value,
   }));
 
@@ -147,8 +144,12 @@ export default function QuickUndoFAB({
           {/* Action Text */}
           <View className="flex-1 flex-row items-center gap-1">
             <Text className="text-gray-500 dark:text-gray-400 text-[13px]">Undo:</Text>
-            <Text className="text-gray-900 dark:text-white text-[14px] font-semibold flex-1" numberOfLines={1}>
-              #{action.playerNumber} {statLabel}{madeText}
+            <Text
+              className="text-gray-900 dark:text-white text-[14px] font-semibold flex-1"
+              numberOfLines={1}
+            >
+              #{action.playerNumber} {statLabel}
+              {madeText}
             </Text>
           </View>
 
@@ -162,11 +163,7 @@ export default function QuickUndoFAB({
           </TouchableOpacity>
 
           {/* Dismiss Button */}
-          <TouchableOpacity
-            className="p-1"
-            onPress={dismiss}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity className="p-1" onPress={dismiss} activeOpacity={0.7}>
             <Icon name="close" size={18} color="#9CA3AF" />
           </TouchableOpacity>
         </View>

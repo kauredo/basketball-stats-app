@@ -31,12 +31,7 @@ export function useFeedback(): FeedbackMethods {
   }, []);
 
   const playTone = useCallback(
-    (
-      frequency: number,
-      duration: number,
-      type: OscillatorType = "sine",
-      volume: number = 0.1
-    ) => {
+    (frequency: number, duration: number, type: OscillatorType = "sine", volume: number = 0.1) => {
       try {
         const ctx = getAudioContext();
         const oscillator = ctx.createOscillator();

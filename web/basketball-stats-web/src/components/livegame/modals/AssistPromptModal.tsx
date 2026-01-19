@@ -55,9 +55,7 @@ export const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
             <span className="text-xs text-gray-500 uppercase">Who assisted?</span>
           </div>
           {teammates.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
-              No other players on court
-            </div>
+            <div className="p-6 text-center text-gray-500">No other players on court</div>
           ) : (
             teammates.map((player) => (
               <button
@@ -67,9 +65,7 @@ export const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm">
-                      #{player.player?.number}
-                    </span>
+                    <span className="text-white font-bold text-sm">#{player.player?.number}</span>
                   </div>
                   <div className="text-left">
                     <div className="text-gray-900 dark:text-white font-medium text-sm">

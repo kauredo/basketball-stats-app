@@ -96,13 +96,7 @@ export default function BottomSheet({
         </Animated.View>
 
         <GestureDetector gesture={gesture}>
-          <Animated.View
-            style={[
-              styles.sheet,
-              { maxHeight },
-              animatedSheetStyle,
-            ]}
-          >
+          <Animated.View style={[styles.sheet, { maxHeight }, animatedSheetStyle]}>
             {showHandle && <View style={styles.handle} />}
 
             {title && (

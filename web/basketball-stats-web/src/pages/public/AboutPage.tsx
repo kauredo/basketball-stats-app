@@ -31,9 +31,9 @@ export default function AboutPage() {
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
                   Basketball Stats was created with a simple mission: to make professional-grade
-                  statistics tracking accessible to everyone. Whether you're coaching a youth league,
-                  playing in a recreational league, or managing a competitive team, we believe you
-                  deserve the same powerful tools that professional teams use.
+                  statistics tracking accessible to everyone. Whether you're coaching a youth
+                  league, playing in a recreational league, or managing a competitive team, we
+                  believe you deserve the same powerful tools that professional teams use.
                 </p>
               </div>
 
@@ -43,23 +43,43 @@ export default function AboutPage() {
                 </h2>
                 <ul className="space-y-2 text-gray-600 dark:text-gray-400">
                   <li className="flex items-start">
-                    <Icon name="check" size={20} className="text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <Icon
+                      name="check"
+                      size={20}
+                      className="text-green-500 mr-2 mt-0.5 flex-shrink-0"
+                    />
                     <span>Real-time game tracking with an intuitive interface</span>
                   </li>
                   <li className="flex items-start">
-                    <Icon name="check" size={20} className="text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <Icon
+                      name="check"
+                      size={20}
+                      className="text-green-500 mr-2 mt-0.5 flex-shrink-0"
+                    />
                     <span>Comprehensive player and team statistics</span>
                   </li>
                   <li className="flex items-start">
-                    <Icon name="check" size={20} className="text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <Icon
+                      name="check"
+                      size={20}
+                      className="text-green-500 mr-2 mt-0.5 flex-shrink-0"
+                    />
                     <span>Visual shot charts to analyze shooting patterns</span>
                   </li>
                   <li className="flex items-start">
-                    <Icon name="check" size={20} className="text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <Icon
+                      name="check"
+                      size={20}
+                      className="text-green-500 mr-2 mt-0.5 flex-shrink-0"
+                    />
                     <span>League management with automatic standings</span>
                   </li>
                   <li className="flex items-start">
-                    <Icon name="check" size={20} className="text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <Icon
+                      name="check"
+                      size={20}
+                      className="text-green-500 mr-2 mt-0.5 flex-shrink-0"
+                    />
                     <span>Player comparison tools for performance analysis</span>
                   </li>
                 </ul>
@@ -82,9 +102,7 @@ export default function AboutPage() {
 
           {/* CTA */}
           <div className="mt-12 text-center">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Ready to elevate your game?
-            </p>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">Ready to elevate your game?</p>
             <Link
               to="/signup"
               className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors"

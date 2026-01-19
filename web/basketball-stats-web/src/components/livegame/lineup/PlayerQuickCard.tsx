@@ -44,8 +44,8 @@ export const PlayerQuickCard: React.FC<PlayerQuickCardProps> = ({
           isSelected
             ? "bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-500 ring-2 ring-orange-500/30"
             : isSwapTarget
-            ? "bg-green-50 dark:bg-green-900/20 border-2 border-green-500 ring-2 ring-green-500/30"
-            : "bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+              ? "bg-green-50 dark:bg-green-900/20 border-2 border-green-500 ring-2 ring-green-500/30"
+              : "bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
         }
         ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-95"}
         ${player.fouledOut ? "opacity-60" : ""}

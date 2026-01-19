@@ -67,9 +67,10 @@ export const GameClock: React.FC<GameClockProps> = ({
         className={`
           font-mono font-black
           ${config.text}
-          ${isRunning
-            ? "text-red-400 dark:text-red-500 animate-pulse"
-            : "text-gray-500 dark:text-gray-500"
+          ${
+            isRunning
+              ? "text-red-400 dark:text-red-500 animate-pulse"
+              : "text-gray-500 dark:text-gray-500"
           }
           transition-colors duration-200
         `}

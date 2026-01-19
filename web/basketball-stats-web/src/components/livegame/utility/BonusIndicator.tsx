@@ -10,18 +10,13 @@ interface BonusIndicatorProps {
  * Single bonus: 4+ team fouls in quarter
  * Double bonus: 9+ team fouls in quarter
  */
-export const BonusIndicator: React.FC<BonusIndicatorProps> = ({
-  inBonus,
-  inDoubleBonus,
-}) => {
+export const BonusIndicator: React.FC<BonusIndicatorProps> = ({ inBonus, inDoubleBonus }) => {
   if (!inBonus) return null;
 
   return (
     <span
       className={`px-1.5 py-0.5 rounded text-[10px] font-bold animate-pulse ${
-        inDoubleBonus
-          ? "bg-red-600 text-white"
-          : "bg-yellow-500 text-black"
+        inDoubleBonus ? "bg-red-600 text-white" : "bg-yellow-500 text-black"
       }`}
     >
       {inDoubleBonus ? "2X" : "BONUS"}

@@ -9,10 +9,7 @@ interface GameEventCardProps {
 /**
  * Individual play-by-play event card.
  */
-export const GameEventCard: React.FC<GameEventCardProps> = ({
-  event,
-  isHomeTeam = false,
-}) => {
+export const GameEventCard: React.FC<GameEventCardProps> = ({ event, isHomeTeam = false }) => {
   // Format time remaining as MM:SS
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -131,9 +128,7 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({
 
       {/* Description */}
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-900 dark:text-white">
-          {event.description}
-        </p>
+        <p className="text-xs text-gray-900 dark:text-white">{event.description}</p>
         {event.points && event.points > 0 && (
           <span className="text-[10px] text-green-600 dark:text-green-400 font-semibold">
             +{event.points}

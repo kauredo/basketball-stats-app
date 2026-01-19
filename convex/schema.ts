@@ -182,13 +182,15 @@ export default defineSchema({
     defensiveRebounds: v.number(),
     teamFouls: v.number(),
     // Track fouls by quarter for bonus calculation
-    foulsByQuarter: v.optional(v.object({
-      q1: v.number(),
-      q2: v.number(),
-      q3: v.number(),
-      q4: v.number(),
-      ot: v.number(),
-    })),
+    foulsByQuarter: v.optional(
+      v.object({
+        q1: v.number(),
+        q2: v.number(),
+        q3: v.number(),
+        q4: v.number(),
+        ot: v.number(),
+      })
+    ),
     // Track timeouts remaining
     timeoutsRemaining: v.optional(v.number()),
   })

@@ -371,13 +371,17 @@ export const start = mutation({
         // Get first 5 home team players
         const homePlayerStats = await ctx.db
           .query("playerStats")
-          .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", game.homeTeamId))
+          .withIndex("by_game_team", (q) =>
+            q.eq("gameId", args.gameId).eq("teamId", game.homeTeamId)
+          )
           .take(5);
 
         // Get first 5 away team players
         const awayPlayerStats = await ctx.db
           .query("playerStats")
-          .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", game.awayTeamId))
+          .withIndex("by_game_team", (q) =>
+            q.eq("gameId", args.gameId).eq("teamId", game.awayTeamId)
+          )
           .take(5);
 
         startingFive = {
@@ -518,7 +522,9 @@ export const end = mutation({
     const quartersCompleted = settings?.quartersCompleted || [];
 
     if (!args.forceEnd && quartersCompleted.length < 4) {
-      throw new Error("Cannot end game before all 4 quarters are completed. Use forceEnd to override.");
+      throw new Error(
+        "Cannot end game before all 4 quarters are completed. Use forceEnd to override."
+      );
     }
 
     await ctx.db.patch(args.gameId, {
@@ -592,10 +598,12 @@ export const updateGameSettings = mutation({
     gameId: v.id("games"),
     quarterMinutes: v.optional(v.number()),
     foulLimit: v.optional(v.number()), // 5 or 6 fouls before foul out
-    startingFive: v.optional(v.object({
-      homeTeam: v.array(v.id("players")),
-      awayTeam: v.array(v.id("players")),
-    })),
+    startingFive: v.optional(
+      v.object({
+        homeTeam: v.array(v.id("players")),
+        awayTeam: v.array(v.id("players")),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
@@ -960,7 +968,7 @@ export const recordTimeout = mutation({
     const team = await ctx.db.get(args.teamId);
     if (!team) throw new Error("Team not found");
 
-    const gameSettings = game.gameSettings as any || {};
+    const gameSettings = (game.gameSettings as any) || {};
     const timeoutsPerTeam = gameSettings.timeoutsPerTeam || 4;
 
     // Get team stats
@@ -1041,7 +1049,7 @@ export const startOvertime = mutation({
       throw new Error("Cannot start overtime before Q4 is complete");
     }
 
-    const gameSettings = game.gameSettings as any || {};
+    const gameSettings = (game.gameSettings as any) || {};
     const overtimeMinutes = gameSettings.overtimeMinutes || 5;
     const currentOvertimes = gameSettings.overtimePeriods || 0;
     const newOvertimeNumber = currentOvertimes + 1;
@@ -1125,7 +1133,7 @@ export const updateScoreByPeriod = mutation({
     const game = await ctx.db.get(args.gameId);
     if (!game) throw new Error("Game not found");
 
-    const gameSettings = game.gameSettings as any || {};
+    const gameSettings = (game.gameSettings as any) || {};
     const scoreByPeriod = gameSettings.scoreByPeriod || {
       q1: { home: 0, away: 0 },
       q2: { home: 0, away: 0 },
@@ -1170,7 +1178,9 @@ export const getGameEvents = query({
     if (args.quarter !== undefined) {
       events = await ctx.db
         .query("gameEvents")
-        .withIndex("by_game_quarter", (q) => q.eq("gameId", args.gameId).eq("quarter", args.quarter!))
+        .withIndex("by_game_quarter", (q) =>
+          q.eq("gameId", args.gameId).eq("quarter", args.quarter!)
+        )
         .order("desc")
         .collect();
     } else {

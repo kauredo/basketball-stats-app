@@ -37,10 +37,7 @@ export const FoulDots: React.FC<FoulDotsProps> = ({
         }
 
         return (
-          <div
-            key={i}
-            className={`${dotSize} rounded-full ${colorClass} transition-colors`}
-          />
+          <div key={i} className={`${dotSize} rounded-full ${colorClass} transition-colors`} />
         );
       })}
     </div>

@@ -465,7 +465,13 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
   const [draggingFromPosition, setDraggingFromPosition] = useState<number | null>(null);
   const [showAlert, setShowAlert] = useState(true);
   // Local state to track custom position assignments (player IDs by position index)
-  const [customPositions, setCustomPositions] = useState<(Id<"players"> | null)[]>([null, null, null, null, null]);
+  const [customPositions, setCustomPositions] = useState<(Id<"players"> | null)[]>([
+    null,
+    null,
+    null,
+    null,
+    null,
+  ]);
 
   // Separate players by status
   const onCourt = players.filter((p) => p.isOnCourt && !p.fouledOut);
@@ -493,9 +499,7 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
 
       // Try to find a player with matching position who hasn't been assigned yet
       const matchingPlayer = onCourt.find(
-        (p) =>
-          p.player?.position?.toUpperCase() === pos &&
-          !assignedPlayerIds.has(p.playerId)
+        (p) => p.player?.position?.toUpperCase() === pos && !assignedPlayerIds.has(p.playerId)
       );
 
       if (matchingPlayer) {
@@ -517,9 +521,7 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
   // Reset custom positions when players change (substitutions)
   useEffect(() => {
     const currentPlayerIds = new Set(onCourt.map((p) => p.playerId));
-    const customHasInvalidPlayer = customPositions.some(
-      (id) => id && !currentPlayerIds.has(id)
-    );
+    const customHasInvalidPlayer = customPositions.some((id) => id && !currentPlayerIds.has(id));
     if (customHasInvalidPlayer) {
       setCustomPositions([null, null, null, null, null]);
     }
@@ -536,7 +538,11 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
   // Track which position is selected for position swapping (separate from substitution)
   const [selectedPositionIndex, setSelectedPositionIndex] = useState<number | null>(null);
 
-  const handlePositionClick = (player: PlayerStat | null, _position: Position, positionIndex: number) => {
+  const handlePositionClick = (
+    player: PlayerStat | null,
+    _position: Position,
+    positionIndex: number
+  ) => {
     if (disabled) return;
 
     if (player) {
@@ -561,7 +567,9 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
           return;
         }
         // Clicking a different court player while swapping - swap positions instead
-        const swappingPlayerIndex = positionAssignments.findIndex(p => p?.playerId === swappingPlayer);
+        const swappingPlayerIndex = positionAssignments.findIndex(
+          (p) => p?.playerId === swappingPlayer
+        );
         if (swappingPlayerIndex !== -1) {
           handleSwapPositions(swappingPlayerIndex, positionIndex);
           onCancelSwap();

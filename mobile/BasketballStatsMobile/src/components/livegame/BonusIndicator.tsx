@@ -33,10 +33,7 @@ export default function BonusIndicator({
       );
       // Then subtle continuous pulse
       opacity.value = withRepeat(
-        withSequence(
-          withTiming(0.7, { duration: 1000 }),
-          withTiming(1, { duration: 1000 })
-        ),
+        withSequence(withTiming(0.7, { duration: 1000 }), withTiming(1, { duration: 1000 })),
         -1,
         true
       );

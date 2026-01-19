@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  ScrollView,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
 import { Id } from "../../../../../convex/_generated/dataModel";
@@ -42,10 +35,7 @@ interface FoulTypeModalProps {
   onClose: () => void;
   player: PlayerInfo | null;
   foulLimit: number;
-  onSelectFoul: (
-    foulType: FoulType,
-    shootingDetails?: ShootingFoulDetails
-  ) => void;
+  onSelectFoul: (foulType: FoulType, shootingDetails?: ShootingFoulDetails) => void;
   onCourtPlayers: OnCourtPlayer[];
   playerTeamId?: Id<"teams">;
 }
@@ -201,12 +191,7 @@ export default function FoulTypeModal({
             </View>
             <View style={styles.playerDetails}>
               <Text style={styles.playerName}>{player.name}</Text>
-              <Text
-                style={[
-                  styles.playerFouls,
-                  isFoulLimitReached && styles.foulWarning,
-                ]}
-              >
+              <Text style={[styles.playerFouls, isFoulLimitReached && styles.foulWarning]}>
                 Current fouls: {player.fouls}
                 {isFoulLimitReached && " (FOUL TROUBLE!)"}
               </Text>
@@ -227,9 +212,7 @@ export default function FoulTypeModal({
                     <Text style={[styles.foulButtonLabel, { color: foul.color }]}>
                       {foul.label}
                     </Text>
-                    <Text style={styles.foulButtonDescription}>
-                      {foul.description}
-                    </Text>
+                    <Text style={styles.foulButtonDescription}>{foul.description}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -294,9 +277,7 @@ export default function FoulTypeModal({
                       onPress={() => handleFouledPlayerSelect(p.playerId)}
                     >
                       <View style={styles.playerListNumber}>
-                        <Text style={styles.playerListNumberText}>
-                          #{p.player?.number}
-                        </Text>
+                        <Text style={styles.playerListNumberText}>#{p.player?.number}</Text>
                       </View>
                       <Text style={styles.playerListName}>{p.player?.name}</Text>
                       <Icon name="chevron-right" size={20} color="#6B7280" />

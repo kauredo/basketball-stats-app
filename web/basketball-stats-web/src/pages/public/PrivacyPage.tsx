@@ -15,9 +15,7 @@ export default function PrivacyPage() {
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Privacy Policy
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Last updated: January 2025
-            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Last updated: January 2025</p>
           </div>
 
           {/* Content */}
@@ -83,9 +81,7 @@ export default function PrivacyPage() {
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
                   5. Your Rights
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-3">
-                  You have the right to:
-                </p>
+                <p className="text-gray-600 dark:text-gray-400 mb-3">You have the right to:</p>
                 <ul className="list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
                   <li>Access and receive a copy of your personal data</li>
                   <li>Rectify or update your personal information</li>

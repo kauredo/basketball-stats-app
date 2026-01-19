@@ -74,8 +74,7 @@ export const QuickUndoFAB: React.FC<QuickUndoFABProps> = ({
   if (!action) return null;
 
   const statLabel = STAT_TYPE_LABELS[action.statType] || action.statType.toUpperCase();
-  const madeText =
-    action.wasMade !== undefined ? (action.wasMade ? " Made" : " Missed") : "";
+  const madeText = action.wasMade !== undefined ? (action.wasMade ? " Made" : " Missed") : "";
 
   return (
     <div

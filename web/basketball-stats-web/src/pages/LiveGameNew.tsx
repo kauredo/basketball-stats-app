@@ -189,20 +189,26 @@ const LiveGameNew: React.FC = () => {
     }
   };
 
-  const handleCourtClick = useCallback((x: number, y: number, is3pt: boolean, zoneName: string) => {
-    if (!canRecordStats) return;
-    setPendingShot({ x, y, is3pt, zoneName });
-  }, [canRecordStats]);
+  const handleCourtClick = useCallback(
+    (x: number, y: number, is3pt: boolean, zoneName: string) => {
+      if (!canRecordStats) return;
+      setPendingShot({ x, y, is3pt, zoneName });
+    },
+    [canRecordStats]
+  );
 
-  const handleStatSelect = useCallback((statType: StatType) => {
-    if (!canRecordStats) return;
-    if (statType === "foul") {
-      // Foul requires special handling - show player selection first via quick stat
-      setPendingQuickStat(statType);
-    } else {
-      setPendingQuickStat(statType);
-    }
-  }, [canRecordStats]);
+  const handleStatSelect = useCallback(
+    (statType: StatType) => {
+      if (!canRecordStats) return;
+      if (statType === "foul") {
+        // Foul requires special handling - show player selection first via quick stat
+        setPendingQuickStat(statType);
+      } else {
+        setPendingQuickStat(statType);
+      }
+    },
+    [canRecordStats]
+  );
 
   const handleRecordStat = async (
     playerId: Id<"players">,
@@ -267,7 +273,10 @@ const LiveGameNew: React.FC = () => {
       // Track recent shots for visualization AND persist to database
       if (shotLocation && (statType === "shot2" || statType === "shot3")) {
         const is3pt = statType === "shot3";
-        setRecentShots((prev) => [...prev.slice(-4), { ...shotLocation, made: made || false, playerId, is3pt }]);
+        setRecentShots((prev) => [
+          ...prev.slice(-4),
+          { ...shotLocation, made: made || false, playerId, is3pt },
+        ]);
 
         // Persist shot location to database for heat maps
         try {
@@ -743,9 +752,21 @@ const LiveGameNew: React.FC = () => {
           onPlayerRebound={handlePlayerRebound}
           onTeamRebound={handleTeamRebound}
           shooterTeamId={pendingRebound.shooterTeamId}
-          shooterTeamName={pendingRebound.isHomeTeam ? (game.homeTeam?.name || "Home") : (game.awayTeam?.name || "Away")}
-          opposingTeamId={pendingRebound.isHomeTeam ? (game.awayTeam?.id as Id<"teams">) : (game.homeTeam?.id as Id<"teams">)}
-          opposingTeamName={pendingRebound.isHomeTeam ? (game.awayTeam?.name || "Away") : (game.homeTeam?.name || "Home")}
+          shooterTeamName={
+            pendingRebound.isHomeTeam
+              ? game.homeTeam?.name || "Home"
+              : game.awayTeam?.name || "Away"
+          }
+          opposingTeamId={
+            pendingRebound.isHomeTeam
+              ? (game.awayTeam?.id as Id<"teams">)
+              : (game.homeTeam?.id as Id<"teams">)
+          }
+          opposingTeamName={
+            pendingRebound.isHomeTeam
+              ? game.awayTeam?.name || "Away"
+              : game.homeTeam?.name || "Home"
+          }
           shooterTeamPlayers={pendingRebound.isHomeTeam ? homeStats : awayStats}
           opposingTeamPlayers={pendingRebound.isHomeTeam ? awayStats : homeStats}
           shotType={pendingRebound.shotType}
@@ -762,8 +783,9 @@ const LiveGameNew: React.FC = () => {
           scorerNumber={pendingAssist.scorerNumber}
           shotType={pendingAssist.shotType}
           points={pendingAssist.points}
-          teammates={(pendingAssist.isHomeTeam ? homeStats : awayStats)
-            .filter((s) => s.isOnCourt && s.playerId !== pendingAssist.scorerPlayerId)}
+          teammates={(pendingAssist.isHomeTeam ? homeStats : awayStats).filter(
+            (s) => s.isOnCourt && s.playerId !== pendingAssist.scorerPlayerId
+          )}
         />
       )}
 

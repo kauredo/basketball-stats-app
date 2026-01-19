@@ -532,7 +532,8 @@ const Games: React.FC = () => {
 
               <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  This will create two temporary teams with 15 numbered players each (Player 1, Player 2, etc.). You can select starting lineups and track full stats.
+                  This will create two temporary teams with 15 numbered players each (Player 1,
+                  Player 2, etc.). You can select starting lineups and track full stats.
                 </p>
               </div>
             </div>

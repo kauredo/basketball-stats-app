@@ -129,12 +129,9 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                 First Name
               </Text>
               <View className="relative">
-                <Icon
-                  name="user"
-                  size={18}
-                  color="#6B7280"
-                  className="absolute left-4 top-3 z-10"
-                />
+                <View className="absolute left-4 top-3 z-10">
+                  <Icon name="user" size={18} color="#6B7280" />
+                </View>
                 <TextInput
                   className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-gray-900 dark:text-white"
                   value={formData.firstName}
@@ -152,12 +149,9 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
                 Last Name
               </Text>
               <View className="relative">
-                <Icon
-                  name="user"
-                  size={18}
-                  color="#6B7280"
-                  className="absolute left-4 top-3 z-10"
-                />
+                <View className="absolute left-4 top-3 z-10">
+                  <Icon name="user" size={18} color="#6B7280" />
+                </View>
                 <TextInput
                   className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-11 pr-4 py-3 text-base text-gray-900 dark:text-white"
                   value={formData.lastName}
@@ -174,7 +168,9 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
           <View className="mb-5">
             <Text className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Email</Text>
             <View className="relative">
-              <Icon name="mail" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
+              <View className="absolute left-4 top-3 z-10">
+                <Icon name="mail" size={20} color="#6B7280" />
+              </View>
               <TextInput
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-12 pr-4 py-3 text-base text-gray-900 dark:text-white"
                 value={formData.email}
@@ -194,7 +190,9 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
               Password
             </Text>
             <View className="relative">
-              <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
+              <View className="absolute left-4 top-3 z-10">
+                <Icon name="lock" size={20} color="#6B7280" />
+              </View>
               <TextInput
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-gray-900 dark:text-white"
                 value={formData.password}
@@ -218,7 +216,9 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
               Confirm Password
             </Text>
             <View className="relative">
-              <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
+              <View className="absolute left-4 top-3 z-10">
+                <Icon name="lock" size={20} color="#6B7280" />
+              </View>
               <TextInput
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-gray-900 dark:text-white"
                 value={formData.passwordConfirmation}

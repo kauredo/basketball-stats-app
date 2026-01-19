@@ -85,21 +85,25 @@ src/
 ## Key Features
 
 ### Authentication
+
 - Email/password authentication
 - Secure token storage with Expo Secure Store
 - Auto-login on app restart
 
 ### Navigation
+
 - Bottom tab navigation (Home, Stats, Teams, Games, Profile)
 - Stack navigation for detail screens
 - Theme-aware navigation colors
 
 ### Live Game Scoring
+
 - Real-time stat recording
 - Haptic feedback on actions
 - Shot location tracking
 
 ### Theming
+
 - Light and dark mode
 - System preference detection
 - Manual toggle in Profile settings
@@ -107,14 +111,14 @@ src/
 
 ## Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm start` | Start Expo development server |
-| `npm run ios` | Start on iOS Simulator |
-| `npm run android` | Start on Android Emulator |
-| `npm run web` | Start web version |
-| `npm run typecheck` | Run TypeScript type checking |
-| `npm run lint` | Run ESLint |
+| Command             | Description                   |
+| ------------------- | ----------------------------- |
+| `npm start`         | Start Expo development server |
+| `npm run ios`       | Start on iOS Simulator        |
+| `npm run android`   | Start on Android Emulator     |
+| `npm run web`       | Start web version             |
+| `npm run typecheck` | Run TypeScript type checking  |
+| `npm run lint`      | Run ESLint                    |
 
 ## Environment Variables
 
@@ -131,18 +135,18 @@ This app uses NativeWind (Tailwind CSS for React Native):
 ```tsx
 // Example usage
 <View className="flex-1 bg-gray-50 dark:bg-gray-900">
-  <Text className="text-gray-900 dark:text-white text-lg font-bold">
-    Hello World
-  </Text>
+  <Text className="text-gray-900 dark:text-white text-lg font-bold">Hello World</Text>
 </View>
 ```
 
 ### Dark Mode
+
 - Uses NativeWind's `dark:` variants
 - Automatically responds to system preference
 - Manual override available in Profile settings
 
 ### Custom Colors
+
 - `primary-500` - Orange accent (#F97316)
 - `dark-950` - Dark background (#0f1419)
 - `court-background` - Court green (#1a472a)
@@ -191,18 +195,21 @@ eas submit --platform android
 ## Troubleshooting
 
 ### Metro Bundler Issues
+
 ```bash
 # Clear cache and restart
 npx expo start --clear
 ```
 
 ### NativeWind Not Working
+
 ```bash
 # Rebuild native cache
 npx expo prebuild --clean
 ```
 
 ### TypeScript Errors
+
 ```bash
 # Check types
 npm run typecheck

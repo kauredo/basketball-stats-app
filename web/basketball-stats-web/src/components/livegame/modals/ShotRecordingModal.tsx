@@ -39,9 +39,7 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Shot from{" "}
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  {zoneName}
-                </span>
+                <span className="font-medium text-gray-700 dark:text-gray-300">{zoneName}</span>
               </p>
             </div>
             <div
@@ -68,9 +66,7 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm">
-                      #{player.player?.number}
-                    </span>
+                    <span className="text-white font-bold text-sm">#{player.player?.number}</span>
                   </div>
                   <div>
                     <div className="text-gray-900 dark:text-white font-medium text-sm">

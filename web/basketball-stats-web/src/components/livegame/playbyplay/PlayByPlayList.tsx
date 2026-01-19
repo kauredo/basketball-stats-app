@@ -55,11 +55,7 @@ export const PlayByPlayList: React.FC<PlayByPlayListProps> = ({
   return (
     <div ref={listRef} className="h-full overflow-auto space-y-1 pr-1">
       {sortedEvents.map((event) => (
-        <GameEventCard
-          key={event._id}
-          event={event}
-          isHomeTeam={event.teamId === homeTeamId}
-        />
+        <GameEventCard key={event._id} event={event} isHomeTeam={event.teamId === homeTeamId} />
       ))}
     </div>
   );

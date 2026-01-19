@@ -118,7 +118,7 @@ export const recordStat = mutation({
         updates.fouls = newFoulCount;
 
         // Check foul limit and foul out player if exceeded
-        const settings = game.gameSettings as any || {};
+        const settings = (game.gameSettings as any) || {};
         const foulLimit = settings.foulLimit || 5; // Default 5 fouls
 
         if (newFoulCount >= foulLimit) {
@@ -134,7 +134,13 @@ export const recordStat = mutation({
 
         if (teamStatForFoul) {
           const currentQuarter = game.currentQuarter;
-          const foulsByQuarter = teamStatForFoul.foulsByQuarter || { q1: 0, q2: 0, q3: 0, q4: 0, ot: 0 };
+          const foulsByQuarter = teamStatForFoul.foulsByQuarter || {
+            q1: 0,
+            q2: 0,
+            q3: 0,
+            q4: 0,
+            ot: 0,
+          };
 
           // Increment fouls for current quarter
           if (currentQuarter === 1) foulsByQuarter.q1++;
@@ -186,9 +192,15 @@ export const recordStat = mutation({
 
     // Log game event for play-by-play
     const eventDescriptions: Record<string, string> = {
-      shot2: args.made ? `#${player.number} ${player.name} 2PT Made` : `#${player.number} ${player.name} 2PT Missed`,
-      shot3: args.made ? `#${player.number} ${player.name} 3PT Made` : `#${player.number} ${player.name} 3PT Missed`,
-      freethrow: args.made ? `#${player.number} ${player.name} FT Made` : `#${player.number} ${player.name} FT Missed`,
+      shot2: args.made
+        ? `#${player.number} ${player.name} 2PT Made`
+        : `#${player.number} ${player.name} 2PT Missed`,
+      shot3: args.made
+        ? `#${player.number} ${player.name} 3PT Made`
+        : `#${player.number} ${player.name} 3PT Missed`,
+      freethrow: args.made
+        ? `#${player.number} ${player.name} FT Made`
+        : `#${player.number} ${player.name} FT Missed`,
       rebound: `#${player.number} ${player.name} Rebound`,
       offensiveRebound: `#${player.number} ${player.name} Offensive Rebound`,
       defensiveRebound: `#${player.number} ${player.name} Defensive Rebound`,
@@ -226,7 +238,8 @@ export const recordStat = mutation({
         made: args.made,
         points: pointsScored,
       },
-      description: eventDescriptions[args.statType] || `#${player.number} ${player.name} ${args.statType}`,
+      description:
+        eventDescriptions[args.statType] || `#${player.number} ${player.name} ${args.statType}`,
     });
 
     // Get updated game for response
@@ -239,7 +252,7 @@ export const recordStat = mutation({
       args.made === false;
 
     // Get game settings for foul limit
-    const gameSettings = game.gameSettings as any || {};
+    const gameSettings = (game.gameSettings as any) || {};
     const foulLimit = gameSettings.foulLimit || 5;
 
     return {
@@ -471,7 +484,9 @@ export const substitute = mutation({
         .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", player.teamId))
         .collect();
 
-      const playersOnCourt = teamStats.filter((s) => s.isOnCourt && s._id !== playerStat._id).length;
+      const playersOnCourt = teamStats.filter(
+        (s) => s.isOnCourt && s._id !== playerStat._id
+      ).length;
 
       if (playersOnCourt >= 5) {
         throw new Error("Cannot have more than 5 players on court. Sub out a player first.");
@@ -512,7 +527,9 @@ export const swapSubstitute = mutation({
     // Get player out stat
     const playerOutStat = await ctx.db
       .query("playerStats")
-      .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", args.playerOutId))
+      .withIndex("by_game_player", (q) =>
+        q.eq("gameId", args.gameId).eq("playerId", args.playerOutId)
+      )
       .first();
 
     if (!playerOutStat) throw new Error("Player to sub out not found");
@@ -520,7 +537,9 @@ export const swapSubstitute = mutation({
     // Get player in stat
     const playerInStat = await ctx.db
       .query("playerStats")
-      .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", args.playerInId))
+      .withIndex("by_game_player", (q) =>
+        q.eq("gameId", args.gameId).eq("playerId", args.playerInId)
+      )
       .first();
 
     if (!playerInStat) throw new Error("Player to sub in not found");
@@ -614,8 +633,14 @@ export const recordTeamRebound = mutation({
     return {
       message: `Team ${args.reboundType} rebound recorded for ${team?.name || "team"}`,
       teamStats: {
-        offensiveRebounds: args.reboundType === "offensive" ? teamStats.offensiveRebounds + 1 : teamStats.offensiveRebounds,
-        defensiveRebounds: args.reboundType === "defensive" ? teamStats.defensiveRebounds + 1 : teamStats.defensiveRebounds,
+        offensiveRebounds:
+          args.reboundType === "offensive"
+            ? teamStats.offensiveRebounds + 1
+            : teamStats.offensiveRebounds,
+        defensiveRebounds:
+          args.reboundType === "defensive"
+            ? teamStats.defensiveRebounds + 1
+            : teamStats.defensiveRebounds,
       },
     };
   },
@@ -693,7 +718,7 @@ export const getLiveStats = query({
       .first();
 
     // Get game settings
-    const gameSettings = game.gameSettings as any || {};
+    const gameSettings = (game.gameSettings as any) || {};
     const foulLimit = gameSettings.foulLimit || 5;
     const bonusMode = gameSettings.bonusMode || "college";
     const timeoutsPerTeam = gameSettings.timeoutsPerTeam || 4;
@@ -899,7 +924,7 @@ export const recordFoulWithContext = mutation({
     const player = await ctx.db.get(args.playerId);
     if (!player) throw new Error("Player not found");
 
-    const gameSettings = game.gameSettings as any || {};
+    const gameSettings = (game.gameSettings as any) || {};
     const foulLimit = gameSettings.foulLimit || 5;
     const bonusMode = gameSettings.bonusMode || "college";
 
@@ -1091,9 +1116,10 @@ export const recordFreeThrow = mutation({
 
     // Determine if sequence continues
     // For 1-and-1: if first FT missed, sequence ends
-    const sequenceEnds = args.isOneAndOne && args.attemptNumber === 1 && !args.made
-      ? true
-      : args.attemptNumber >= args.totalAttempts;
+    const sequenceEnds =
+      args.isOneAndOne && args.attemptNumber === 1 && !args.made
+        ? true
+        : args.attemptNumber >= args.totalAttempts;
 
     const updatedGame = await ctx.db.get(args.gameId);
 

@@ -412,16 +412,12 @@ export const STAT_BUTTON_CONFIG = {
     { key: "shot3", label: "3PT", shortLabel: "3", color: "purple" },
     { key: "freethrow", label: "FT", shortLabel: "FT", color: "green" },
   ],
-  playmaking: [
-    { key: "assist", label: "Assist", shortLabel: "AST", color: "purple" },
-  ],
+  playmaking: [{ key: "assist", label: "Assist", shortLabel: "AST", color: "purple" }],
   defense: [
     { key: "steal", label: "Steal", shortLabel: "STL", color: "cyan" },
     { key: "block", label: "Block", shortLabel: "BLK", color: "cyan" },
   ],
-  rebounding: [
-    { key: "rebound", label: "Rebound", shortLabel: "REB", color: "blue" },
-  ],
+  rebounding: [{ key: "rebound", label: "Rebound", shortLabel: "REB", color: "blue" }],
   negative: [
     { key: "turnover", label: "Turnover", shortLabel: "TO", color: "amber" },
     { key: "foul", label: "Foul", shortLabel: "FOUL", color: "red" },

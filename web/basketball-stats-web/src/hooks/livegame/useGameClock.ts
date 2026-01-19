@@ -76,14 +76,17 @@ export function useGameClock({
   }, []);
 
   // Reset to a specific time
-  const reset = useCallback((seconds?: number) => {
-    const newSeconds = seconds ?? quarterDuration;
-    setState((prev) => ({
-      ...prev,
-      seconds: newSeconds,
-      displayTime: formatTime(newSeconds),
-    }));
-  }, [quarterDuration]);
+  const reset = useCallback(
+    (seconds?: number) => {
+      const newSeconds = seconds ?? quarterDuration;
+      setState((prev) => ({
+        ...prev,
+        seconds: newSeconds,
+        displayTime: formatTime(newSeconds),
+      }));
+    },
+    [quarterDuration]
+  );
 
   // Set time manually (for syncing with server)
   const setTime = useCallback((seconds: number) => {

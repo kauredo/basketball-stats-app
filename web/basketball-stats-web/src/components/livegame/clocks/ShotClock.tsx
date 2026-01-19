@@ -82,9 +82,7 @@ export const ShotClock: React.FC<ShotClockProps> = ({
         ${state.shadow ? `shadow-md ${state.shadow}` : ""}
       `}
     >
-      <span className={`${config.text} tabular-nums`}>
-        {seconds}
-      </span>
+      <span className={`${config.text} tabular-nums`}>{seconds}</span>
     </div>
   );
 };

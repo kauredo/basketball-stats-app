@@ -10,7 +10,15 @@ interface FAQAccordionProps {
   items: FAQItem[];
 }
 
-function FAQAccordionItem({ item, isOpen, onToggle }: { item: FAQItem; isOpen: boolean; onToggle: () => void }) {
+function FAQAccordionItem({
+  item,
+  isOpen,
+  onToggle,
+}: {
+  item: FAQItem;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div className="border-b border-gray-200 dark:border-gray-700 last:border-b-0">
       <button

@@ -96,7 +96,9 @@ export const LiveGameLayout: React.FC<LiveGameLayoutProps> = ({
         className="absolute top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 shadow-sm"
       >
         <XMarkIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
-        <span className="text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Exit</span>
+        <span className="text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+          Exit
+        </span>
       </Link>
 
       {/* Scoreboard */}
@@ -118,23 +120,14 @@ export const LiveGameLayout: React.FC<LiveGameLayoutProps> = ({
 
       {/* Mode Tabs */}
       <div className="relative flex-shrink-0 px-4 pb-3">
-        <ModeTabNavigation
-          activeMode={activeMode}
-          onModeChange={onModeChange}
-        />
+        <ModeTabNavigation activeMode={activeMode} onModeChange={onModeChange} />
       </div>
 
       {/* Main Content - Fills remaining space */}
-      <div className="relative flex-1 min-h-0 overflow-hidden px-4 pb-4">
-        {children}
-      </div>
+      <div className="relative flex-1 min-h-0 overflow-hidden px-4 pb-4">{children}</div>
 
       {/* Quick Undo FAB */}
-      <QuickUndoFAB
-        action={lastAction}
-        onUndo={onUndo}
-        onDismiss={onDismissUndo}
-      />
+      <QuickUndoFAB action={lastAction} onUndo={onUndo} onDismiss={onDismissUndo} />
     </div>
   );
 };

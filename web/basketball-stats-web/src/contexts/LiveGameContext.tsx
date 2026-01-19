@@ -225,15 +225,9 @@ export function LiveGameProvider({
   }, []);
 
   // Computed Values
-  const homeOnCourt = useMemo(
-    () => homeStats.filter((p) => p.isOnCourt),
-    [homeStats]
-  );
+  const homeOnCourt = useMemo(() => homeStats.filter((p) => p.isOnCourt), [homeStats]);
 
-  const awayOnCourt = useMemo(
-    () => awayStats.filter((p) => p.isOnCourt),
-    [awayStats]
-  );
+  const awayOnCourt = useMemo(() => awayStats.filter((p) => p.isOnCourt), [awayStats]);
 
   const allOnCourtPlayers = useMemo(
     () => [...homeOnCourt, ...awayOnCourt],
@@ -331,11 +325,7 @@ export function LiveGameProvider({
     ]
   );
 
-  return (
-    <LiveGameContext.Provider value={value}>
-      {children}
-    </LiveGameContext.Provider>
-  );
+  return <LiveGameContext.Provider value={value}>{children}</LiveGameContext.Provider>;
 }
 
 // ============================================================================

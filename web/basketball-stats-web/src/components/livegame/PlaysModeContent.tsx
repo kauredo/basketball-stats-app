@@ -24,9 +24,7 @@ export const PlaysModeContent: React.FC<PlaysModeContentProps> = ({
     <div className="h-full flex flex-col bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
       {/* Header with filter */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-          Play-by-Play
-        </h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Play-by-Play</h3>
         <QuarterFilterTabs
           currentQuarter={currentQuarter}
           selectedQuarter={selectedQuarter}
@@ -36,11 +34,7 @@ export const PlaysModeContent: React.FC<PlaysModeContentProps> = ({
 
       {/* Events list */}
       <div className="flex-1 min-h-0 p-2">
-        <PlayByPlayList
-          events={events}
-          homeTeamId={homeTeamId}
-          filterQuarter={selectedQuarter}
-        />
+        <PlayByPlayList events={events} homeTeamId={homeTeamId} filterQuarter={selectedQuarter} />
       </div>
     </div>
   );

@@ -90,36 +90,40 @@ src/
 ## Key Features
 
 ### Authentication
+
 - Email/password authentication
 - Session management via Convex
 - Protected routes
 
 ### Live Game Scoring
+
 - Real-time stat recording
 - Player substitutions
 - Game clock management
 - Shot location tracking
 
 ### Statistics & Analytics
+
 - Player stats with averages
 - Team comparisons
 - Shot charts with heatmaps
 - League standings
 
 ### Theming
+
 - Light and dark mode
 - System preference detection
 - Persisted preference
 
 ## Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start dev server at localhost:5173 |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build |
-| `npm run typecheck` | Run TypeScript type checking |
-| `npm run lint` | Run ESLint |
+| Command             | Description                        |
+| ------------------- | ---------------------------------- |
+| `npm run dev`       | Start dev server at localhost:5173 |
+| `npm run build`     | Build for production               |
+| `npm run preview`   | Preview production build           |
+| `npm run typecheck` | Run TypeScript type checking       |
+| `npm run lint`      | Run ESLint                         |
 
 ## Environment Variables
 

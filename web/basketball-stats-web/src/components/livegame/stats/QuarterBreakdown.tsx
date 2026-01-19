@@ -29,9 +29,7 @@ export const QuarterBreakdown: React.FC<QuarterBreakdownProps> = ({
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
       <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50">
-        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-          Score by Quarter
-        </h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Score by Quarter</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">

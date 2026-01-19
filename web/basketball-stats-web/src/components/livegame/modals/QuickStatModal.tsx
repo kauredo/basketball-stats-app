@@ -68,9 +68,7 @@ export const QuickStatModal: React.FC<QuickStatModalProps> = ({
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm">
-                      #{player.player?.number}
-                    </span>
+                    <span className="text-white font-bold text-sm">#{player.player?.number}</span>
                   </div>
                   <div className="text-left">
                     <div className="text-gray-900 dark:text-white font-medium text-sm">

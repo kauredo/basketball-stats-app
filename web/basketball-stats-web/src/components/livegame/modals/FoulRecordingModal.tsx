@@ -78,17 +78,13 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
           <h3 className="text-lg font-bold text-white">
             FOUL - #{selectedPlayer.player?.number} {selectedPlayer.player?.name}
           </h3>
-          <p className="text-amber-200 text-sm">
-            Current fouls: {selectedPlayer.fouls}
-          </p>
+          <p className="text-amber-200 text-sm">Current fouls: {selectedPlayer.fouls}</p>
         </div>
 
         {!showShootingDetails ? (
           /* Foul Type Selection */
           <div className="p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-              Select foul type:
-            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Select foul type:</p>
             <div className="grid grid-cols-2 gap-2">
               {(Object.keys(FOUL_TYPE_LABELS) as FoulType[]).map((type) => {
                 const colorClasses: Record<FoulType, string> = {
@@ -131,9 +127,7 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
             <div className="space-y-4">
               {/* Shot Type */}
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                  Shot type:
-                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Shot type:</p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShotType("2pt")}
@@ -189,9 +183,7 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
 
               {/* Who was fouled */}
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                  Who was fouled?
-                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Who was fouled?</p>
                 <div className="max-h-40 overflow-y-auto space-y-1">
                   {opponentOnCourt.map((player) => (
                     <button

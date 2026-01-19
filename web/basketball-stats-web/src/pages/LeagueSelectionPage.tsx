@@ -355,9 +355,7 @@ export default function LeagueSelectionPage() {
                 <input
                   type="text"
                   value={createFormData.name}
-                  onChange={(e) =>
-                    setCreateFormData((prev) => ({ ...prev, name: e.target.value }))
-                  }
+                  onChange={(e) => setCreateFormData((prev) => ({ ...prev, name: e.target.value }))}
                   placeholder="Enter league name"
                   className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
                   required

@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  RefreshControl,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl } from "react-native";
 import { Id } from "../../../../../convex/_generated/dataModel";
 
 interface GameEvent {
@@ -139,9 +132,7 @@ export default function PlayByPlayTab({
       {/* Description Column */}
       <View style={styles.descriptionColumn}>
         <Text style={styles.descriptionText}>{event.description}</Text>
-        {event.team && (
-          <Text style={styles.teamText}>{event.team.name}</Text>
-        )}
+        {event.team && <Text style={styles.teamText}>{event.team.name}</Text>}
       </View>
     </View>
   );
@@ -158,9 +149,7 @@ export default function PlayByPlayTab({
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateIcon}>📋</Text>
       <Text style={styles.emptyStateText}>No events recorded yet</Text>
-      <Text style={styles.emptyStateSubtext}>
-        Events will appear here as the game progresses
-      </Text>
+      <Text style={styles.emptyStateSubtext}>Events will appear here as the game progresses</Text>
     </View>
   );
 
@@ -201,18 +190,12 @@ export default function PlayByPlayTab({
         keyExtractor={(item) => item.quarter.toString()}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={onRefresh}
-            tintColor="#F97316"
-          />
+          <RefreshControl refreshing={isLoading} onRefresh={onRefresh} tintColor="#F97316" />
         }
         renderItem={({ item: group }) => (
           <View>
             {renderQuarterHeader(group.quarter)}
-            {group.events.map((event, index) =>
-              renderEvent(event, index === 0)
-            )}
+            {group.events.map((event, index) => renderEvent(event, index === 0))}
           </View>
         )}
         contentContainerStyle={styles.listContent}

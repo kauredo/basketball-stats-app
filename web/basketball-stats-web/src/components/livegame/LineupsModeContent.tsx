@@ -116,9 +116,7 @@ const LineupCombinations: React.FC<LineupCombinationsProps> = ({
   if (lineups.length === 0) return null;
 
   // Sort by minutes played
-  const sortedLineups = [...lineups].sort(
-    (a, b) => b.minutesPlayed - a.minutesPlayed
-  );
+  const sortedLineups = [...lineups].sort((a, b) => b.minutesPlayed - a.minutesPlayed);
 
   const getPlayerNumber = (playerId: Id<"players">) => {
     const player = allPlayers.find((p) => p.playerId === playerId);
@@ -129,14 +127,10 @@ const LineupCombinations: React.FC<LineupCombinationsProps> = ({
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
       <div
         className={`px-3 py-2 ${
-          isHomeTeam
-            ? "bg-orange-50 dark:bg-orange-900/20"
-            : "bg-gray-50 dark:bg-gray-700/50"
+          isHomeTeam ? "bg-orange-50 dark:bg-orange-900/20" : "bg-gray-50 dark:bg-gray-700/50"
         }`}
       >
-        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-          {teamName} Lineups
-        </h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{teamName} Lineups</h3>
       </div>
       <div className="p-2 space-y-1">
         {sortedLineups.slice(0, 5).map((lineup, idx) => (
@@ -161,8 +155,8 @@ const LineupCombinations: React.FC<LineupCombinationsProps> = ({
                   lineup.plusMinus > 0
                     ? "text-green-600"
                     : lineup.plusMinus < 0
-                    ? "text-red-600"
-                    : "text-gray-500"
+                      ? "text-red-600"
+                      : "text-gray-500"
                 }`}
               >
                 {lineup.plusMinus > 0 ? "+" : ""}

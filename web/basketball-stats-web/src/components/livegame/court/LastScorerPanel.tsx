@@ -23,9 +23,14 @@ export const LastScorerPanel: React.FC<LastScorerPanelProps> = ({
 
   const isScoring = ["shot2", "shot3", "freethrow"].includes(lastAction.statType);
   const madeText = lastAction.wasMade ? "Made" : "Missed";
-  const pointsText = lastAction.statType === "shot3" ? "3PT" :
-                     lastAction.statType === "shot2" ? "2PT" :
-                     lastAction.statType === "freethrow" ? "FT" : "";
+  const pointsText =
+    lastAction.statType === "shot3"
+      ? "3PT"
+      : lastAction.statType === "shot2"
+        ? "2PT"
+        : lastAction.statType === "freethrow"
+          ? "FT"
+          : "";
 
   return (
     <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-2">

@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  PlayIcon,
-  PauseIcon,
-  StopIcon,
-  ArrowPathIcon,
-} from "@heroicons/react/24/solid";
+import { PlayIcon, PauseIcon, StopIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 
 interface ClockControlsProps {
   isRunning: boolean;
@@ -40,11 +35,7 @@ export const ClockControls: React.FC<ClockControlsProps> = ({
   const smallButtonSize = size === "sm" ? "w-6 h-6 text-[10px]" : "w-8 h-8 text-xs";
 
   if (isCompleted) {
-    return (
-      <div className="text-xs text-gray-500 dark:text-gray-400 font-medium px-3">
-        FINAL
-      </div>
-    );
+    return <div className="text-xs text-gray-500 dark:text-gray-400 font-medium px-3">FINAL</div>;
   }
 
   return (

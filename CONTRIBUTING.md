@@ -14,23 +14,27 @@ Thank you for your interest in contributing to Basketball Stats App!
 ### Getting Started
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd basketball-stats-app
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up Convex**
+
    ```bash
    npx convex login
    npx convex dev
    ```
 
 4. **Start development**
+
    ```bash
    # Terminal 1: Convex
    npm run convex:dev
@@ -108,6 +112,7 @@ type(scope): description
 ```
 
 Types:
+
 - `feat` - New feature
 - `fix` - Bug fix
 - `docs` - Documentation
@@ -117,6 +122,7 @@ Types:
 - `chore` - Maintenance
 
 Examples:
+
 ```
 feat(games): add live game timer
 fix(auth): handle expired tokens correctly

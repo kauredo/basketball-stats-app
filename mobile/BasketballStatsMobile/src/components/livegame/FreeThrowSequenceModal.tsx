@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -201,12 +195,8 @@ export default function FreeThrowSequenceModal({
                       index === currentAttempt - 1 && styles.progressDotCurrent,
                     ]}
                   >
-                    {result === true && (
-                      <Icon name="check" size={12} color="#FFFFFF" />
-                    )}
-                    {result === false && (
-                      <Text style={styles.missedX}>X</Text>
-                    )}
+                    {result === true && <Icon name="check" size={12} color="#FFFFFF" />}
+                    {result === false && <Text style={styles.missedX}>X</Text>}
                   </View>
                 ))}
               </View>

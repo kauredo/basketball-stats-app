@@ -8,11 +8,11 @@ The backend uses [Convex](https://convex.dev) serverless functions. All function
 
 ### Function Types
 
-| Type | Description | Usage |
-|------|-------------|-------|
-| **Query** | Read-only, real-time subscriptions | `useQuery(api.module.function, args)` |
-| **Mutation** | Write operations, transactional | `useMutation(api.module.function)` |
-| **Action** | External API calls, side effects | `useAction(api.module.function)` |
+| Type         | Description                        | Usage                                 |
+| ------------ | ---------------------------------- | ------------------------------------- |
+| **Query**    | Read-only, real-time subscriptions | `useQuery(api.module.function, args)` |
+| **Mutation** | Write operations, transactional    | `useMutation(api.module.function)`    |
+| **Action**   | External API calls, side effects   | `useAction(api.module.function)`      |
 
 ### Authentication
 
@@ -29,6 +29,7 @@ const games = useQuery(api.games.list, { token, leagueId });
 ### Mutations
 
 #### `signup`
+
 Create a new user account.
 
 ```typescript
@@ -43,6 +44,7 @@ const result = await signup({
 ```
 
 #### `login`
+
 Authenticate an existing user.
 
 ```typescript
@@ -54,6 +56,7 @@ const result = await login({
 ```
 
 #### `logout`
+
 Invalidate current session.
 
 ```typescript
@@ -61,6 +64,7 @@ await logout({ token: string });
 ```
 
 #### `refreshToken`
+
 Get new tokens using refresh token.
 
 ```typescript
@@ -69,6 +73,7 @@ const tokens = await refreshToken({ refreshToken: string });
 ```
 
 #### `requestPasswordReset`
+
 Send password reset email.
 
 ```typescript
@@ -76,6 +81,7 @@ await requestPasswordReset({ email: string });
 ```
 
 #### `resetPassword`
+
 Reset password with token.
 
 ```typescript
@@ -87,6 +93,7 @@ await resetPassword({
 ```
 
 #### `updateProfile`
+
 Update user profile.
 
 ```typescript
@@ -98,6 +105,7 @@ await updateProfile({
 ```
 
 #### `changePassword`
+
 Change user password.
 
 ```typescript
@@ -111,6 +119,7 @@ await changePassword({
 ### Queries
 
 #### `validateToken`
+
 Check if token is valid.
 
 ```typescript
@@ -119,6 +128,7 @@ const result = useQuery(api.auth.validateToken, { token: string });
 ```
 
 #### `getCurrentUser`
+
 Get current user from token.
 
 ```typescript
@@ -132,6 +142,7 @@ const user = useQuery(api.auth.getCurrentUser, { token: string });
 ### Queries
 
 #### `list`
+
 List all leagues accessible to user.
 
 ```typescript
@@ -140,6 +151,7 @@ const leagues = useQuery(api.leagues.list, { token: string });
 ```
 
 #### `get`
+
 Get single league by ID.
 
 ```typescript
@@ -147,6 +159,7 @@ const league = useQuery(api.leagues.get, { token: string, leagueId: Id });
 ```
 
 #### `getMembers`
+
 Get league members.
 
 ```typescript
@@ -155,6 +168,7 @@ const members = useQuery(api.leagues.getMembers, { token: string, leagueId: Id }
 ```
 
 #### `getStandings`
+
 Get league standings.
 
 ```typescript
@@ -163,6 +177,7 @@ const standings = useQuery(api.leagues.getStandings, { token: string, leagueId: 
 ```
 
 #### `getInviteCode`
+
 Get league invite code (admin only).
 
 ```typescript
@@ -172,6 +187,7 @@ const code = useQuery(api.leagues.getInviteCode, { token: string, leagueId: Id }
 ### Mutations
 
 #### `create`
+
 Create a new league.
 
 ```typescript
@@ -186,6 +202,7 @@ const leagueId = await create({
 ```
 
 #### `update`
+
 Update league settings.
 
 ```typescript
@@ -199,6 +216,7 @@ await update({
 ```
 
 #### `join`
+
 Join a public league.
 
 ```typescript
@@ -206,6 +224,7 @@ await join({ token: string, leagueId: Id });
 ```
 
 #### `joinByCode`
+
 Join league with invite code.
 
 ```typescript
@@ -213,6 +232,7 @@ await joinByCode({ token: string, inviteCode: string });
 ```
 
 #### `leave`
+
 Leave a league.
 
 ```typescript
@@ -226,6 +246,7 @@ await leave({ token: string, leagueId: Id });
 ### Queries
 
 #### `list`
+
 List teams in a league.
 
 ```typescript
@@ -233,6 +254,7 @@ const teams = useQuery(api.teams.list, { token: string, leagueId: Id });
 ```
 
 #### `get`
+
 Get team with players.
 
 ```typescript
@@ -243,6 +265,7 @@ const team = useQuery(api.teams.get, { token: string, teamId: Id });
 ### Mutations
 
 #### `create`
+
 Create a new team.
 
 ```typescript
@@ -256,6 +279,7 @@ const teamId = await create({
 ```
 
 #### `update`
+
 Update team.
 
 ```typescript
@@ -269,6 +293,7 @@ await update({
 ```
 
 #### `remove`
+
 Delete team.
 
 ```typescript
@@ -282,6 +307,7 @@ await remove({ token: string, teamId: Id });
 ### Queries
 
 #### `list`
+
 List players (optionally filtered by team).
 
 ```typescript
@@ -293,6 +319,7 @@ const players = useQuery(api.players.list, {
 ```
 
 #### `get`
+
 Get player with stats.
 
 ```typescript
@@ -303,6 +330,7 @@ const player = useQuery(api.players.get, { token: string, playerId: Id });
 ### Mutations
 
 #### `create`
+
 Create a new player.
 
 ```typescript
@@ -319,6 +347,7 @@ const playerId = await create({
 ```
 
 #### `update`
+
 Update player.
 
 ```typescript
@@ -333,6 +362,7 @@ await update({
 ```
 
 #### `remove`
+
 Delete player.
 
 ```typescript
@@ -346,6 +376,7 @@ await remove({ token: string, playerId: Id });
 ### Queries
 
 #### `list`
+
 List games in a league.
 
 ```typescript
@@ -358,6 +389,7 @@ const games = useQuery(api.games.list, {
 ```
 
 #### `get`
+
 Get game with full details.
 
 ```typescript
@@ -366,6 +398,7 @@ const game = useQuery(api.games.get, { token: string, gameId: Id });
 ```
 
 #### `getBoxScore`
+
 Get complete box score.
 
 ```typescript
@@ -376,6 +409,7 @@ const boxScore = useQuery(api.games.getBoxScore, { token: string, gameId: Id });
 ### Mutations
 
 #### `create`
+
 Create a new game.
 
 ```typescript
@@ -389,6 +423,7 @@ const gameId = await create({
 ```
 
 #### `start`
+
 Start a game.
 
 ```typescript
@@ -396,6 +431,7 @@ await start({ token: string, gameId: Id });
 ```
 
 #### `pause`
+
 Pause a game.
 
 ```typescript
@@ -403,6 +439,7 @@ await pause({ token: string, gameId: Id });
 ```
 
 #### `resume`
+
 Resume a paused game.
 
 ```typescript
@@ -410,6 +447,7 @@ await resume({ token: string, gameId: Id });
 ```
 
 #### `end`
+
 End a game.
 
 ```typescript
@@ -423,6 +461,7 @@ await end({ token: string, gameId: Id });
 ### Queries
 
 #### `getLiveStats`
+
 Get live stats for a game.
 
 ```typescript
@@ -433,6 +472,7 @@ const stats = useQuery(api.stats.getLiveStats, { token: string, gameId: Id });
 ### Mutations
 
 #### `recordStat`
+
 Record a stat event.
 
 ```typescript
@@ -448,6 +488,7 @@ await recordStat({
 ```
 
 #### `undoStat`
+
 Undo the last stat.
 
 ```typescript
@@ -455,6 +496,7 @@ await undoStat({ token: string, gameId: Id, playerId: Id, stat: string });
 ```
 
 #### `substitute`
+
 Substitute players.
 
 ```typescript
@@ -473,6 +515,7 @@ await substitute({
 ### Queries
 
 #### `getGameShots`
+
 Get all shots from a game.
 
 ```typescript
@@ -485,6 +528,7 @@ const shots = useQuery(api.shots.getGameShots, {
 ```
 
 #### `getPlayerShotChart`
+
 Get player's shot data for shot charts.
 
 ```typescript
@@ -497,6 +541,7 @@ const data = useQuery(api.shots.getPlayerShotChart, {
 ```
 
 #### `getTeamShotChart`
+
 Get team's shot data.
 
 ```typescript
@@ -510,6 +555,7 @@ const data = useQuery(api.shots.getTeamShotChart, {
 ### Mutations
 
 #### `recordShot`
+
 Record a shot with location.
 
 ```typescript
@@ -517,8 +563,8 @@ await recordShot({
   token: string,
   gameId: Id,
   playerId: Id,
-  x: number,  // -50 to 50
-  y: number,  // 0 to 94
+  x: number, // -50 to 50
+  y: number, // 0 to 94
   shotType: "2pt" | "3pt" | "ft",
   made: boolean,
   quarter: number,
@@ -533,6 +579,7 @@ await recordShot({
 ### Queries
 
 #### `getDashboard`
+
 Get dashboard data.
 
 ```typescript
@@ -544,6 +591,7 @@ const dashboard = useQuery(api.statistics.getDashboard, {
 ```
 
 #### `getPlayerSeasonStats`
+
 Get player's season statistics.
 
 ```typescript
@@ -555,6 +603,7 @@ const stats = useQuery(api.statistics.getPlayerSeasonStats, {
 ```
 
 #### `getPlayersStats`
+
 Get stats for multiple players.
 
 ```typescript
@@ -566,6 +615,7 @@ const stats = useQuery(api.statistics.getPlayersStats, {
 ```
 
 #### `getTeamsStats`
+
 Get team statistics.
 
 ```typescript
@@ -576,6 +626,7 @@ const stats = useQuery(api.statistics.getTeamsStats, {
 ```
 
 #### `getLeagueLeaders`
+
 Get statistical leaders.
 
 ```typescript
@@ -588,6 +639,7 @@ const leaders = useQuery(api.statistics.getLeagueLeaders, {
 ```
 
 #### `comparePlayersStats`
+
 Compare two players.
 
 ```typescript
@@ -600,6 +652,7 @@ const comparison = useQuery(api.statistics.comparePlayersStats, {
 ```
 
 #### `getStandings`
+
 Get league standings.
 
 ```typescript
@@ -616,6 +669,7 @@ const standings = useQuery(api.statistics.getStandings, {
 ### Queries
 
 #### `getNotifications`
+
 Get user notifications.
 
 ```typescript
@@ -628,6 +682,7 @@ const notifications = useQuery(api.notifications.getNotifications, {
 ```
 
 #### `getPreferences`
+
 Get notification preferences.
 
 ```typescript
@@ -640,6 +695,7 @@ const prefs = useQuery(api.notifications.getPreferences, {
 ### Mutations
 
 #### `markAsRead`
+
 Mark notification as read.
 
 ```typescript
@@ -647,6 +703,7 @@ await markAsRead({ token: string, notificationId: Id });
 ```
 
 #### `markAllAsRead`
+
 Mark all notifications as read.
 
 ```typescript
@@ -654,6 +711,7 @@ await markAllAsRead({ token: string, leagueId?: Id });
 ```
 
 #### `updatePreferences`
+
 Update notification preferences.
 
 ```typescript
@@ -686,6 +744,7 @@ try {
 ```
 
 Common errors:
+
 - `"Not authenticated"` - Invalid or missing token
 - `"Not authorized"` - Insufficient permissions
 - `"Not found"` - Resource doesn't exist

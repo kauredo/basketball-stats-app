@@ -20,13 +20,9 @@ export default function TeamFoulsDisplay({
   return (
     <View style={styles.container}>
       <Text style={[styles.label, { fontSize }]}>TF:</Text>
-      <Text style={[styles.number, { fontSize: numberFontSize }]}>
-        {foulsThisQuarter}
-      </Text>
+      <Text style={[styles.number, { fontSize: numberFontSize }]}>{foulsThisQuarter}</Text>
       {showTotal && totalFouls > 0 && (
-        <Text style={[styles.total, { fontSize: fontSize - 2 }]}>
-          ({totalFouls})
-        </Text>
+        <Text style={[styles.total, { fontSize: fontSize - 2 }]}>({totalFouls})</Text>
       )}
     </View>
   );

@@ -89,7 +89,9 @@ export default function LoginScreen({
           <View className="mb-5">
             <Text className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Email</Text>
             <View className="relative">
-              <Icon name="mail" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
+              <View className="absolute left-4 top-3 z-10">
+                <Icon name="mail" size={20} color="#6B7280" />
+              </View>
               <TextInput
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-12 pr-4 py-3 text-base text-gray-900 dark:text-white"
                 value={email}
@@ -109,7 +111,9 @@ export default function LoginScreen({
               Password
             </Text>
             <View className="relative">
-              <Icon name="lock" size={20} color="#6B7280" className="absolute left-4 top-3 z-10" />
+              <View className="absolute left-4 top-3 z-10">
+                <Icon name="lock" size={20} color="#6B7280" />
+              </View>
               <TextInput
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-gray-900 dark:text-white"
                 value={password}

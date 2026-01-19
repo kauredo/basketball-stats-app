@@ -23,7 +23,12 @@ interface Tab {
 const TABS: Tab[] = [
   { key: "court", label: "Court", icon: ChartBarIcon, iconSolid: ChartBarIconSolid },
   { key: "stats", label: "Stats", icon: UserGroupIcon, iconSolid: UserGroupIconSolid },
-  { key: "plays", label: "Plays", icon: ClipboardDocumentListIcon, iconSolid: ClipboardDocumentListIconSolid },
+  {
+    key: "plays",
+    label: "Plays",
+    icon: ClipboardDocumentListIcon,
+    iconSolid: ClipboardDocumentListIconSolid,
+  },
   { key: "lineups", label: "Lineups", icon: UsersIcon, iconSolid: UsersIconSolid },
 ];
 
@@ -57,9 +62,10 @@ export const ModeTabNavigation: React.FC<ModeTabNavigationProps> = ({
             className={`
               flex-1 flex items-center justify-center gap-2 rounded-lg font-semibold text-sm
               transition-all duration-200 ease-out
-              ${isActive
-                ? "bg-orange-600 text-white shadow-sm"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+              ${
+                isActive
+                  ? "bg-orange-600 text-white shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
               }
             `}
           >

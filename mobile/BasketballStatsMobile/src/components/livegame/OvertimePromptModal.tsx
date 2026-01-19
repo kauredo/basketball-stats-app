@@ -39,10 +39,7 @@ export default function OvertimePromptModal({
 
       // Pulsing animation for the score
       pulseScale.value = withRepeat(
-        withSequence(
-          withTiming(1.05, { duration: 600 }),
-          withTiming(1, { duration: 600 })
-        ),
+        withSequence(withTiming(1.05, { duration: 600 }), withTiming(1, { duration: 600 })),
         -1,
         true
       );
@@ -111,9 +108,7 @@ export default function OvertimePromptModal({
 
           {/* Subtitle */}
           <Text style={styles.subtitle}>
-            {currentQuarter === 4
-              ? "End of Regulation"
-              : `End of ${getOvertimeLabel()}`}
+            {currentQuarter === 4 ? "End of Regulation" : `End of ${getOvertimeLabel()}`}
           </Text>
 
           {/* Start Overtime Button */}
@@ -132,18 +127,12 @@ export default function OvertimePromptModal({
           </TouchableOpacity>
 
           {/* End as Tie Button */}
-          <TouchableOpacity
-            style={styles.tieButton}
-            onPress={handleEndAsTie}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity style={styles.tieButton} onPress={handleEndAsTie} activeOpacity={0.8}>
             <Text style={styles.tieButtonText}>End as Tie</Text>
           </TouchableOpacity>
 
           {/* Info Text */}
-          <Text style={styles.infoText}>
-            Team fouls will reset for overtime
-          </Text>
+          <Text style={styles.infoText}>Team fouls will reset for overtime</Text>
         </View>
       </View>
     </Modal>

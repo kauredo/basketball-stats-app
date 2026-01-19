@@ -234,8 +234,8 @@ const MiniCourt: React.FC<MiniCourtProps> = ({ onCourtClick, disabled, recentSho
       const svgY = (event.clientY - rect.top) * scaleY;
 
       // Convert to court coordinates (feet, origin at basket)
-      const courtX = ((svgX - BASKET_X) / 6); // Convert px to feet
-      const courtY = ((svgY - BASKET_Y) / 6); // Convert px to feet
+      const courtX = (svgX - BASKET_X) / 6; // Convert px to feet
+      const courtY = (svgY - BASKET_Y) / 6; // Convert px to feet
 
       // Determine if it's a 3-pointer
       const distanceFromBasket = Math.sqrt(courtX * courtX + courtY * courtY);
@@ -268,7 +268,14 @@ const MiniCourt: React.FC<MiniCourtProps> = ({ onCourtClick, disabled, recentSho
         style={{ aspectRatio: `${COURT_WIDTH}/${COURT_HEIGHT}` }}
       >
         {/* Court background */}
-        <rect x="0" y="0" width={COURT_WIDTH} height={COURT_HEIGHT} fill={COLORS.court.background} rx="8" />
+        <rect
+          x="0"
+          y="0"
+          width={COURT_WIDTH}
+          height={COURT_HEIGHT}
+          fill={COLORS.court.background}
+          rx="8"
+        />
 
         {/* Baseline */}
         <line x1="0" y1="0" x2={COURT_WIDTH} y2="0" stroke="#4B5563" strokeWidth="2" />
@@ -315,11 +322,25 @@ const MiniCourt: React.FC<MiniCourtProps> = ({ onCourtClick, disabled, recentSho
 
         {/* Basket and backboard */}
         <rect x={BASKET_X - 18} y={BASKET_Y - 4} width="36" height="2" fill="#6B7280" rx="1" />
-        <circle cx={BASKET_X} cy={BASKET_Y} r="5" fill="none" stroke={COLORS.primary[500]} strokeWidth="2" />
+        <circle
+          cx={BASKET_X}
+          cy={BASKET_Y}
+          r="5"
+          fill="none"
+          stroke={COLORS.primary[500]}
+          strokeWidth="2"
+        />
         <circle cx={BASKET_X} cy={BASKET_Y} r="2" fill={COLORS.primary[500]} />
 
         {/* Zone labels */}
-        <text x={BASKET_X} y={COURT_HEIGHT - 30} textAnchor="middle" fill="#6B7280" fontSize="12" fontWeight="500">
+        <text
+          x={BASKET_X}
+          y={COURT_HEIGHT - 30}
+          textAnchor="middle"
+          fill="#6B7280"
+          fontSize="12"
+          fontWeight="500"
+        >
           3PT ZONE
         </text>
         <text x={BASKET_X} y={85} textAnchor="middle" fill="#6B7280" fontSize="11" fontWeight="500">
@@ -345,7 +366,14 @@ const MiniCourt: React.FC<MiniCourtProps> = ({ onCourtClick, disabled, recentSho
                 className="transition-all duration-300"
               />
               {!shot.made && (
-                <text x={svgX} y={svgY + 3} textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">
+                <text
+                  x={svgX}
+                  y={svgY + 3}
+                  textAnchor="middle"
+                  fill="#fff"
+                  fontSize="10"
+                  fontWeight="bold"
+                >
                   ×
                 </text>
               )}
@@ -408,12 +436,17 @@ const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
                 {shotType === "3pt" ? "3-Point Shot" : "2-Point Shot"}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Shot from <span className="font-medium text-gray-700 dark:text-gray-300">{zoneName}</span>
+                Shot from{" "}
+                <span className="font-medium text-gray-700 dark:text-gray-300">{zoneName}</span>
               </p>
             </div>
-            <div className={`px-3 py-1 rounded-full text-sm font-bold ${
-              shotType === "3pt" ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300" : "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
-            }`}>
+            <div
+              className={`px-3 py-1 rounded-full text-sm font-bold ${
+                shotType === "3pt"
+                  ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
+                  : "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+              }`}
+            >
               +{points} PTS
             </div>
           </div>
@@ -422,9 +455,7 @@ const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
         {/* Player list with made/missed buttons */}
         <div className="max-h-80 overflow-y-auto">
           {onCourtPlayers.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              No players on court
-            </div>
+            <div className="p-8 text-center text-gray-500">No players on court</div>
           ) : (
             onCourtPlayers.map((player) => (
               <div
@@ -439,9 +470,7 @@ const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
                     <div className="text-gray-900 dark:text-white font-medium text-sm">
                       {player.player?.name}
                     </div>
-                    <div className="text-gray-500 text-xs">
-                      {player.points} PTS
-                    </div>
+                    <div className="text-gray-500 text-xs">{player.points} PTS</div>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -554,9 +583,7 @@ const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
             <span className="text-xs text-gray-500 uppercase">Who assisted?</span>
           </div>
           {teammates.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
-              No other players on court
-            </div>
+            <div className="p-6 text-center text-gray-500">No other players on court</div>
           ) : (
             teammates.map((player) => (
               <button
@@ -572,9 +599,7 @@ const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
                     <div className="text-gray-900 dark:text-white font-medium text-sm">
                       {player.player?.name}
                     </div>
-                    <div className="text-gray-500 text-xs">
-                      {player.assists} AST
-                    </div>
+                    <div className="text-gray-500 text-xs">{player.assists} AST</div>
                   </div>
                 </div>
                 <div className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-lg">
@@ -753,14 +778,22 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
 
   const getStatInfo = (type: StatType) => {
     switch (type) {
-      case "assist": return { label: "Assist", color: "purple" };
-      case "steal": return { label: "Steal", color: "cyan" };
-      case "block": return { label: "Block", color: "cyan" };
-      case "turnover": return { label: "Turnover", color: "amber" };
-      case "foul": return { label: "Foul", color: "amber" };
-      case "freethrow": return { label: "Free Throw", color: "green" };
-      case "rebound": return { label: "Rebound", color: "blue" };
-      default: return { label: type, color: "gray" };
+      case "assist":
+        return { label: "Assist", color: "purple" };
+      case "steal":
+        return { label: "Steal", color: "cyan" };
+      case "block":
+        return { label: "Block", color: "cyan" };
+      case "turnover":
+        return { label: "Turnover", color: "amber" };
+      case "foul":
+        return { label: "Foul", color: "amber" };
+      case "freethrow":
+        return { label: "Free Throw", color: "green" };
+      case "rebound":
+        return { label: "Rebound", color: "blue" };
+      default:
+        return { label: type, color: "gray" };
     }
   };
 
@@ -778,9 +811,7 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
         {/* Player list */}
         <div className="max-h-80 overflow-y-auto">
           {onCourtPlayers.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              No players on court
-            </div>
+            <div className="p-8 text-center text-gray-500">No players on court</div>
           ) : (
             onCourtPlayers.map((player) => (
               <button
@@ -801,7 +832,9 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
                     </div>
                   </div>
                 </div>
-                <div className={`px-3 py-1 bg-${color}-100 dark:bg-${color}-900/30 text-${color}-700 dark:text-${color}-300 text-sm font-medium rounded-lg`}>
+                <div
+                  className={`px-3 py-1 bg-${color}-100 dark:bg-${color}-900/30 text-${color}-700 dark:text-${color}-300 text-sm font-medium rounded-lg`}
+                >
                   +{label.toUpperCase().slice(0, 3)}
                 </div>
               </button>
@@ -861,11 +894,11 @@ const BonusIndicator: React.FC<BonusIndicatorProps> = ({ inBonus, inDoubleBonus 
   if (!inBonus) return null;
 
   return (
-    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-      inDoubleBonus
-        ? "bg-red-600 text-white"
-        : "bg-yellow-500 text-black"
-    }`}>
+    <span
+      className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+        inDoubleBonus ? "bg-red-600 text-white" : "bg-yellow-500 text-black"
+      }`}
+    >
       {inDoubleBonus ? "2X" : "BONUS"}
     </span>
   );
@@ -884,9 +917,7 @@ const TimeoutDots: React.FC<TimeoutDotsProps> = ({ remaining, total, teamSide })
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
-          className={`w-2 h-2 rounded-full ${
-            i < remaining ? "bg-orange-500" : "bg-gray-400"
-          }`}
+          className={`w-2 h-2 rounded-full ${i < remaining ? "bg-orange-500" : "bg-gray-400"}`}
         />
       ))}
     </div>
@@ -965,9 +996,7 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
           <h3 className="text-lg font-bold text-white">
             FOUL - #{selectedPlayer.player?.number} {selectedPlayer.player?.name}
           </h3>
-          <p className="text-amber-200 text-sm">
-            Current fouls: {selectedPlayer.fouls}
-          </p>
+          <p className="text-amber-200 text-sm">Current fouls: {selectedPlayer.fouls}</p>
         </div>
 
         {!showShootingDetails ? (
@@ -1141,7 +1170,8 @@ const FreeThrowSequenceModal: React.FC<FreeThrowSequenceModalProps> = ({
 }) => {
   if (!isOpen || !sequence) return null;
 
-  const { playerName, playerNumber, totalAttempts, currentAttempt, isOneAndOne, results } = sequence;
+  const { playerName, playerNumber, totalAttempts, currentAttempt, isOneAndOne, results } =
+    sequence;
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -1230,16 +1260,26 @@ const QuickUndoChip: React.FC<QuickUndoChipProps> = ({ lastAction, onUndo, onDis
 
   const getStatLabel = (statType: StatType, made?: boolean) => {
     switch (statType) {
-      case "shot2": return made ? "2PT Made" : "2PT Miss";
-      case "shot3": return made ? "3PT Made" : "3PT Miss";
-      case "freethrow": return made ? "FT Made" : "FT Miss";
-      case "rebound": return "REB";
-      case "assist": return "AST";
-      case "steal": return "STL";
-      case "block": return "BLK";
-      case "turnover": return "TO";
-      case "foul": return "FOUL";
-      default: return statType;
+      case "shot2":
+        return made ? "2PT Made" : "2PT Miss";
+      case "shot3":
+        return made ? "3PT Made" : "3PT Miss";
+      case "freethrow":
+        return made ? "FT Made" : "FT Miss";
+      case "rebound":
+        return "REB";
+      case "assist":
+        return "AST";
+      case "steal":
+        return "STL";
+      case "block":
+        return "BLK";
+      case "turnover":
+        return "TO";
+      case "foul":
+        return "FOUL";
+      default:
+        return statType;
     }
   };
 
@@ -1256,7 +1296,10 @@ const QuickUndoChip: React.FC<QuickUndoChipProps> = ({ lastAction, onUndo, onDis
           </span>
         </button>
         <button
-          onClick={() => { setVisible(false); onDismiss(); }}
+          onClick={() => {
+            setVisible(false);
+            onDismiss();
+          }}
           className="text-gray-400 hover:text-white"
         >
           <Icon name="x" size={16} />
@@ -1293,9 +1336,7 @@ const OvertimePromptModal: React.FC<OvertimePromptModalProps> = ({
           <h3 className="text-lg font-bold text-white text-center">
             Game Tied {homeScore}-{awayScore}
           </h3>
-          <p className="text-orange-200 text-sm text-center">
-            End of Regulation
-          </p>
+          <p className="text-orange-200 text-sm text-center">End of Regulation</p>
         </div>
 
         <div className="p-6 space-y-3">
@@ -1334,7 +1375,12 @@ interface TeamStatsSummaryProps {
   onToggle: () => void;
 }
 
-const TeamStatsSummary: React.FC<TeamStatsSummaryProps> = ({ stats, teamName, isExpanded, onToggle }) => {
+const TeamStatsSummary: React.FC<TeamStatsSummaryProps> = ({
+  stats,
+  teamName,
+  isExpanded,
+  onToggle,
+}) => {
   // Calculate team totals
   const totals = stats.reduce(
     (acc, s) => ({
@@ -1419,7 +1465,8 @@ const QuarterBreakdown: React.FC<QuarterBreakdownProps> = ({
     }
     // For current period, we don't have final score yet
     const periodIndex = periods.indexOf(periodKey);
-    const currentPeriodIndex = currentQuarter <= 4 ? currentQuarter - 1 : 4 + (currentQuarter - 4) - 1;
+    const currentPeriodIndex =
+      currentQuarter <= 4 ? currentQuarter - 1 : 4 + (currentQuarter - 4) - 1;
     if (periodIndex === currentPeriodIndex) {
       return "-";
     }
@@ -1433,13 +1480,20 @@ const QuarterBreakdown: React.FC<QuarterBreakdownProps> = ({
         <table className="min-w-full text-xs">
           <thead>
             <tr className="border-b border-gray-300 dark:border-gray-600">
-              <th className="text-left py-2 px-2 text-gray-700 dark:text-gray-300 font-medium">Team</th>
+              <th className="text-left py-2 px-2 text-gray-700 dark:text-gray-300 font-medium">
+                Team
+              </th>
               {periods.map((p) => (
-                <th key={p} className="text-center py-2 px-2 text-gray-700 dark:text-gray-300 font-medium w-10">
+                <th
+                  key={p}
+                  className="text-center py-2 px-2 text-gray-700 dark:text-gray-300 font-medium w-10"
+                >
                   {p}
                 </th>
               ))}
-              <th className="text-center py-2 px-2 text-gray-700 dark:text-gray-300 font-bold w-14">Final</th>
+              <th className="text-center py-2 px-2 text-gray-700 dark:text-gray-300 font-bold w-14">
+                Final
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -1452,7 +1506,9 @@ const QuarterBreakdown: React.FC<QuarterBreakdownProps> = ({
                   {getQuarterScore(p, "away")}
                 </td>
               ))}
-              <td className="text-center py-2 px-2 text-gray-900 dark:text-white font-bold">{awayScore}</td>
+              <td className="text-center py-2 px-2 text-gray-900 dark:text-white font-bold">
+                {awayScore}
+              </td>
             </tr>
             <tr>
               <td className="py-2 px-2 text-gray-900 dark:text-white font-medium truncate max-w-[80px]">
@@ -1463,7 +1519,9 @@ const QuarterBreakdown: React.FC<QuarterBreakdownProps> = ({
                   {getQuarterScore(p, "home")}
                 </td>
               ))}
-              <td className="text-center py-2 px-2 text-gray-900 dark:text-white font-bold">{homeScore}</td>
+              <td className="text-center py-2 px-2 text-gray-900 dark:text-white font-bold">
+                {homeScore}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -1556,10 +1614,14 @@ const PlayByPlayPanel: React.FC<PlayByPlayPanelProps> = ({ events, isLoading }) 
               <span className="text-[10px] text-gray-500 font-mono w-10">
                 Q{event.quarter > 4 ? "OT" + (event.quarter - 4) : event.quarter}
               </span>
-              <span className="text-[10px] text-gray-400 font-mono w-10">{event.gameTimeDisplay}</span>
+              <span className="text-[10px] text-gray-400 font-mono w-10">
+                {event.gameTimeDisplay}
+              </span>
             </div>
             <span className="text-sm flex-shrink-0">{getEventIcon(event.eventType)}</span>
-            <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">{event.description}</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+              {event.description}
+            </span>
           </div>
         ))}
       </div>
@@ -1601,9 +1663,7 @@ const InlineSubPanel: React.FC<InlineSubPanelProps> = ({
       <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{teamName}</h4>
-          <span className="text-xs text-gray-500">
-            {onCourtPlayers.length}/5 on court
-          </span>
+          <span className="text-xs text-gray-500">{onCourtPlayers.length}/5 on court</span>
         </div>
       </div>
 
@@ -1631,8 +1691,8 @@ const InlineSubPanel: React.FC<InlineSubPanelProps> = ({
                   <FoulDots fouls={player.fouls} foulLimit={foulLimit} />
                 </div>
               </div>
-              {!disabled && (
-                swappingPlayer === player.playerId ? (
+              {!disabled &&
+                (swappingPlayer === player.playerId ? (
                   <button
                     onClick={onCancelSwap}
                     className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded transition-colors"
@@ -1647,8 +1707,7 @@ const InlineSubPanel: React.FC<InlineSubPanelProps> = ({
                   >
                     SWAP
                   </button>
-                )
-              )}
+                ))}
             </div>
           ))}
         </div>
@@ -1918,8 +1977,7 @@ const LiveGame: React.FC = () => {
       }
 
       // Show assist prompt after made shots (with 300ms delay)
-      const isMadeShot =
-        (statType === "shot2" || statType === "shot3") && made === true;
+      const isMadeShot = (statType === "shot2" || statType === "shot3") && made === true;
 
       if (isMadeShot) {
         const points = statType === "shot3" ? 3 : 2;
@@ -2260,7 +2318,8 @@ const LiveGame: React.FC = () => {
         }
 
         // Determine if this is a 1-and-1 situation
-        const isOneAndOne = result.bonusMode === "college" && result.inBonus && !result.inDoubleBonus;
+        const isOneAndOne =
+          result.bonusMode === "college" && result.inBonus && !result.inDoubleBonus;
 
         setFreeThrowSequence({
           playerId: shooterId,
@@ -2432,7 +2491,7 @@ const LiveGame: React.FC = () => {
   const canRecordStats = isActive || isPaused;
 
   // Extract game settings
-  const gameSettings = game.gameSettings as any || {};
+  const gameSettings = (game.gameSettings as any) || {};
   const quartersCompleted = gameSettings.quartersCompleted || [];
   const isQuickGame = gameSettings.isQuickGame || false;
   const configuredQuarterMinutes = gameSettings.quarterMinutes || 12;
@@ -2441,16 +2500,26 @@ const LiveGame: React.FC = () => {
   // Get stat type label for action history
   const getStatLabel = (statType: StatType, made?: boolean) => {
     switch (statType) {
-      case "shot2": return made ? "2PT Made" : "2PT Miss";
-      case "shot3": return made ? "3PT Made" : "3PT Miss";
-      case "freethrow": return made ? "FT Made" : "FT Miss";
-      case "rebound": return "Rebound";
-      case "assist": return "Assist";
-      case "steal": return "Steal";
-      case "block": return "Block";
-      case "turnover": return "Turnover";
-      case "foul": return "Foul";
-      default: return statType;
+      case "shot2":
+        return made ? "2PT Made" : "2PT Miss";
+      case "shot3":
+        return made ? "3PT Made" : "3PT Miss";
+      case "freethrow":
+        return made ? "FT Made" : "FT Miss";
+      case "rebound":
+        return "Rebound";
+      case "assist":
+        return "Assist";
+      case "steal":
+        return "Steal";
+      case "block":
+        return "Block";
+      case "turnover":
+        return "Turnover";
+      case "foul":
+        return "Foul";
+      default:
+        return statType;
     }
   };
 
@@ -2465,22 +2534,32 @@ const LiveGame: React.FC = () => {
               <div className="flex items-center gap-3">
                 <Cog6ToothIcon className="h-8 w-8 text-orange-500" />
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Pre-Game Setup</h1>
-                  <p className="text-gray-600 dark:text-gray-400">Configure game settings before starting</p>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Pre-Game Setup
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Configure game settings before starting
+                  </p>
                 </div>
               </div>
               {isQuickGame && (
-                <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full">Quick Game</span>
+                <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full">
+                  Quick Game
+                </span>
               )}
             </div>
 
             <div className="grid grid-cols-3 gap-8 items-center py-4 border-t border-gray-200 dark:border-gray-700">
               <div className="text-center">
-                <h2 className="text-lg font-bold text-gray-700 dark:text-gray-300">{game.awayTeam?.name}</h2>
+                <h2 className="text-lg font-bold text-gray-700 dark:text-gray-300">
+                  {game.awayTeam?.name}
+                </h2>
               </div>
               <div className="text-center text-2xl font-bold text-gray-500">VS</div>
               <div className="text-center">
-                <h2 className="text-lg font-bold text-gray-700 dark:text-gray-300">{game.homeTeam?.name}</h2>
+                <h2 className="text-lg font-bold text-gray-700 dark:text-gray-300">
+                  {game.homeTeam?.name}
+                </h2>
               </div>
             </div>
           </div>
@@ -2489,7 +2568,9 @@ const LiveGame: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Quarter Duration */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quarter Duration</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Quarter Duration
+              </h3>
               <div className="flex flex-wrap gap-3">
                 {[5, 8, 10, 12].map((mins) => (
                   <button
@@ -2510,7 +2591,9 @@ const LiveGame: React.FC = () => {
                     min="1"
                     max="20"
                     value={quarterMinutes}
-                    onChange={(e) => setQuarterMinutes(Math.min(20, Math.max(1, parseInt(e.target.value) || 12)))}
+                    onChange={(e) =>
+                      setQuarterMinutes(Math.min(20, Math.max(1, parseInt(e.target.value) || 12)))
+                    }
                     className="w-16 px-2 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center"
                   />
                   <span className="text-gray-600 dark:text-gray-400 text-sm">min</span>
@@ -2520,7 +2603,9 @@ const LiveGame: React.FC = () => {
 
             {/* Foul Limit */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Foul Limit</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Foul Limit
+              </h3>
               <p className="text-sm text-gray-500 mb-4">Players foul out after this many fouls</p>
               <div className="flex gap-3">
                 {[5, 6].map((limit) => (
@@ -2545,15 +2630,25 @@ const LiveGame: React.FC = () => {
 
           {/* Starting Five Selection */}
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Starting Lineups</h3>
-            <p className="text-sm text-gray-500">First 5 players are selected by default. Tap to change.</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+              Starting Lineups
+            </h3>
+            <p className="text-sm text-gray-500">
+              First 5 players are selected by default. Tap to change.
+            </p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Away Team Starters */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{game.awayTeam?.name}</h3>
-                <span className={`text-sm font-medium ${awayStarters.length === 5 ? "text-green-500" : "text-orange-500"}`}>{awayStarters.length}/5 selected</span>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {game.awayTeam?.name}
+                </h3>
+                <span
+                  className={`text-sm font-medium ${awayStarters.length === 5 ? "text-green-500" : "text-orange-500"}`}
+                >
+                  {awayStarters.length}/5 selected
+                </span>
               </div>
               <div className="space-y-2 max-h-80 overflow-y-auto">
                 {awayStats.map((stat) => (
@@ -2580,8 +2675,14 @@ const LiveGame: React.FC = () => {
             {/* Home Team Starters */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{game.homeTeam?.name}</h3>
-                <span className={`text-sm font-medium ${homeStarters.length === 5 ? "text-green-500" : "text-orange-500"}`}>{homeStarters.length}/5 selected</span>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {game.homeTeam?.name}
+                </h3>
+                <span
+                  className={`text-sm font-medium ${homeStarters.length === 5 ? "text-green-500" : "text-orange-500"}`}
+                >
+                  {homeStarters.length}/5 selected
+                </span>
               </div>
               <div className="space-y-2 max-h-80 overflow-y-auto">
                 {homeStats.map((stat) => (
@@ -2627,7 +2728,9 @@ const LiveGame: React.FC = () => {
           {/* Away Team */}
           <div className="flex flex-col items-start gap-1">
             <div className="flex items-center gap-3">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white w-12 text-center">{game.awayScore}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white w-12 text-center">
+                {game.awayScore}
+              </div>
               <div className="flex flex-col">
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 max-w-[100px] truncate">
                   {game.awayTeam?.name}
@@ -2645,13 +2748,19 @@ const LiveGame: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <TimeoutDots
-                remaining={(liveStats?.teamStats as any)?.away?.timeoutsRemaining ?? gameSettings.timeoutsPerTeam ?? 4}
+                remaining={
+                  (liveStats?.teamStats as any)?.away?.timeoutsRemaining ??
+                  gameSettings.timeoutsPerTeam ??
+                  4
+                }
                 total={gameSettings.timeoutsPerTeam || 4}
                 teamSide="left"
               />
               {canRecordStats && (
                 <button
-                  onClick={() => game.awayTeam?.id && handleTimeout(game.awayTeam.id as Id<"teams">)}
+                  onClick={() =>
+                    game.awayTeam?.id && handleTimeout(game.awayTeam.id as Id<"teams">)
+                  }
                   className="text-[10px] text-orange-600 hover:text-orange-700 font-medium"
                 >
                   TO
@@ -2686,7 +2795,9 @@ const LiveGame: React.FC = () => {
                 disabled={isCompleted}
                 className={`text-sm font-bold px-2 py-1 rounded ${!isCompleted ? "hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" : ""}`}
               >
-                {game.currentQuarter <= 4 ? `Q${game.currentQuarter}` : `OT${game.currentQuarter - 4}`}
+                {game.currentQuarter <= 4
+                  ? `Q${game.currentQuarter}`
+                  : `OT${game.currentQuarter - 4}`}
               </button>
               {showQuarterSelector && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20 p-2">
@@ -2786,19 +2897,27 @@ const LiveGame: React.FC = () => {
                   </span>
                 </div>
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white w-12 text-center">{game.homeScore}</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white w-12 text-center">
+                {game.homeScore}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               {canRecordStats && (
                 <button
-                  onClick={() => game.homeTeam?.id && handleTimeout(game.homeTeam.id as Id<"teams">)}
+                  onClick={() =>
+                    game.homeTeam?.id && handleTimeout(game.homeTeam.id as Id<"teams">)
+                  }
                   className="text-[10px] text-orange-600 hover:text-orange-700 font-medium"
                 >
                   TO
                 </button>
               )}
               <TimeoutDots
-                remaining={(liveStats?.teamStats as any)?.home?.timeoutsRemaining ?? gameSettings.timeoutsPerTeam ?? 4}
+                remaining={
+                  (liveStats?.teamStats as any)?.home?.timeoutsRemaining ??
+                  gameSettings.timeoutsPerTeam ??
+                  4
+                }
                 total={gameSettings.timeoutsPerTeam || 4}
                 teamSide="right"
               />
@@ -2831,108 +2950,114 @@ const LiveGame: React.FC = () => {
       {/* Tab Content */}
       {activeTab === "court" && (
         <>
-        {/* Court, Quick Stats, and Substitutions in one row */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Court - Smaller, left side */}
-          <div className="lg:col-span-5 bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-gray-900 dark:text-white font-semibold text-sm">Tap Court to Record</h3>
-              <div className="flex gap-1">
-                <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded">2PT</span>
-                <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded">3PT</span>
+          {/* Court, Quick Stats, and Substitutions in one row */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {/* Court - Smaller, left side */}
+            <div className="lg:col-span-5 bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-gray-900 dark:text-white font-semibold text-sm">
+                  Tap Court to Record
+                </h3>
+                <div className="flex gap-1">
+                  <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded">
+                    2PT
+                  </span>
+                  <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded">
+                    3PT
+                  </span>
+                </div>
+              </div>
+              <div className="max-w-[280px] mx-auto">
+                <MiniCourt
+                  onCourtClick={handleCourtClick}
+                  disabled={!canRecordStats}
+                  recentShots={recentShots}
+                />
+              </div>
+
+              {/* Quick Stats below court */}
+              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-gray-500 text-xs mb-2">Quick Stats</p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  <button
+                    onClick={() => setPendingQuickStat("rebound")}
+                    disabled={!canRecordStats}
+                    className="py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                  >
+                    REB
+                  </button>
+                  <button
+                    onClick={() => setPendingQuickStat("assist")}
+                    disabled={!canRecordStats}
+                    className="py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                  >
+                    AST
+                  </button>
+                  <button
+                    onClick={() => setPendingQuickStat("steal")}
+                    disabled={!canRecordStats}
+                    className="py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                  >
+                    STL
+                  </button>
+                  <button
+                    onClick={() => setPendingQuickStat("block")}
+                    disabled={!canRecordStats}
+                    className="py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                  >
+                    BLK
+                  </button>
+                  <button
+                    onClick={() => setPendingQuickStat("turnover")}
+                    disabled={!canRecordStats}
+                    className="py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                  >
+                    TO
+                  </button>
+                  <button
+                    onClick={() => setPendingQuickStat("foul")}
+                    disabled={!canRecordStats}
+                    className="py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                  >
+                    FOUL
+                  </button>
+                  <button
+                    onClick={() => setPendingQuickStat("freethrow")}
+                    disabled={!canRecordStats}
+                    className="py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs col-span-2"
+                  >
+                    FREE THROW
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="max-w-[280px] mx-auto">
-              <MiniCourt
-                onCourtClick={handleCourtClick}
-                disabled={!canRecordStats}
-                recentShots={recentShots}
+
+            {/* Substitution Panels - Right side */}
+            <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InlineSubPanel
+                teamName={game.awayTeam?.name || "Away"}
+                teamId={game.awayTeam?.id as Id<"teams">}
+                players={awayStats}
+                foulLimit={foulLimit}
+                onSwap={handleSwapSubstitute}
+                swappingPlayer={swappingPlayer}
+                onStartSwap={setSwappingPlayer}
+                onCancelSwap={() => setSwappingPlayer(null)}
+                disabled={isCompleted}
+              />
+              <InlineSubPanel
+                teamName={game.homeTeam?.name || "Home"}
+                teamId={game.homeTeam?.id as Id<"teams">}
+                players={homeStats}
+                foulLimit={foulLimit}
+                onSwap={handleSwapSubstitute}
+                swappingPlayer={swappingPlayer}
+                onStartSwap={setSwappingPlayer}
+                onCancelSwap={() => setSwappingPlayer(null)}
+                disabled={isCompleted}
               />
             </div>
-
-            {/* Quick Stats below court */}
-            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-gray-500 text-xs mb-2">Quick Stats</p>
-              <div className="grid grid-cols-4 gap-1.5">
-                <button
-                  onClick={() => setPendingQuickStat("rebound")}
-                  disabled={!canRecordStats}
-                  className="py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
-                >
-                  REB
-                </button>
-                <button
-                  onClick={() => setPendingQuickStat("assist")}
-                  disabled={!canRecordStats}
-                  className="py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
-                >
-                  AST
-                </button>
-                <button
-                  onClick={() => setPendingQuickStat("steal")}
-                  disabled={!canRecordStats}
-                  className="py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
-                >
-                  STL
-                </button>
-                <button
-                  onClick={() => setPendingQuickStat("block")}
-                  disabled={!canRecordStats}
-                  className="py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
-                >
-                  BLK
-                </button>
-                <button
-                  onClick={() => setPendingQuickStat("turnover")}
-                  disabled={!canRecordStats}
-                  className="py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
-                >
-                  TO
-                </button>
-                <button
-                  onClick={() => setPendingQuickStat("foul")}
-                  disabled={!canRecordStats}
-                  className="py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
-                >
-                  FOUL
-                </button>
-                <button
-                  onClick={() => setPendingQuickStat("freethrow")}
-                  disabled={!canRecordStats}
-                  className="py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs col-span-2"
-                >
-                  FREE THROW
-                </button>
-              </div>
-            </div>
           </div>
-
-          {/* Substitution Panels - Right side */}
-          <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InlineSubPanel
-              teamName={game.awayTeam?.name || "Away"}
-              teamId={game.awayTeam?.id as Id<"teams">}
-              players={awayStats}
-              foulLimit={foulLimit}
-              onSwap={handleSwapSubstitute}
-              swappingPlayer={swappingPlayer}
-              onStartSwap={setSwappingPlayer}
-              onCancelSwap={() => setSwappingPlayer(null)}
-              disabled={isCompleted}
-            />
-            <InlineSubPanel
-              teamName={game.homeTeam?.name || "Home"}
-              teamId={game.homeTeam?.id as Id<"teams">}
-              players={homeStats}
-              foulLimit={foulLimit}
-              onSwap={handleSwapSubstitute}
-              swappingPlayer={swappingPlayer}
-              onStartSwap={setSwappingPlayer}
-              onCancelSwap={() => setSwappingPlayer(null)}
-              disabled={isCompleted}
-            />
-          </div>
-        </div>
         </>
       )}
 
@@ -3010,7 +3135,9 @@ const LiveGame: React.FC = () => {
                       <tr key={stat.id} className={stat.isOnCourt ? "" : "opacity-50"}>
                         <td className="py-3 px-3 text-sm text-gray-900 dark:text-white">
                           #{stat.player?.number} {stat.player?.name}
-                          {stat.isOnCourt && <span className="ml-2 text-green-400 text-xs">ON</span>}
+                          {stat.isOnCourt && (
+                            <span className="ml-2 text-green-400 text-xs">ON</span>
+                          )}
                           {stat.fouledOut && <span className="ml-2 text-red-400 text-xs">OUT</span>}
                         </td>
                         <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white font-bold">
@@ -3081,7 +3208,9 @@ const LiveGame: React.FC = () => {
                       <tr key={stat.id} className={stat.isOnCourt ? "" : "opacity-50"}>
                         <td className="py-3 px-3 text-sm text-gray-900 dark:text-white">
                           #{stat.player?.number} {stat.player?.name}
-                          {stat.isOnCourt && <span className="ml-2 text-green-400 text-xs">ON</span>}
+                          {stat.isOnCourt && (
+                            <span className="ml-2 text-green-400 text-xs">ON</span>
+                          )}
                           {stat.fouledOut && <span className="ml-2 text-red-400 text-xs">OUT</span>}
                         </td>
                         <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white font-bold">
@@ -3148,9 +3277,21 @@ const LiveGame: React.FC = () => {
           onPlayerRebound={handlePlayerRebound}
           onTeamRebound={handleTeamRebound}
           shooterTeamId={pendingRebound.shooterTeamId}
-          shooterTeamName={pendingRebound.isHomeTeam ? (game.homeTeam?.name || "Home") : (game.awayTeam?.name || "Away")}
-          opposingTeamId={pendingRebound.isHomeTeam ? (game.awayTeam?.id as Id<"teams">) : (game.homeTeam?.id as Id<"teams">)}
-          opposingTeamName={pendingRebound.isHomeTeam ? (game.awayTeam?.name || "Away") : (game.homeTeam?.name || "Home")}
+          shooterTeamName={
+            pendingRebound.isHomeTeam
+              ? game.homeTeam?.name || "Home"
+              : game.awayTeam?.name || "Away"
+          }
+          opposingTeamId={
+            pendingRebound.isHomeTeam
+              ? (game.awayTeam?.id as Id<"teams">)
+              : (game.homeTeam?.id as Id<"teams">)
+          }
+          opposingTeamName={
+            pendingRebound.isHomeTeam
+              ? game.awayTeam?.name || "Away"
+              : game.homeTeam?.name || "Home"
+          }
           shooterTeamPlayers={pendingRebound.isHomeTeam ? homeStats : awayStats}
           opposingTeamPlayers={pendingRebound.isHomeTeam ? awayStats : homeStats}
           shotType={pendingRebound.shotType}
@@ -3168,8 +3309,9 @@ const LiveGame: React.FC = () => {
           scorerNumber={pendingAssist.scorerNumber}
           shotType={pendingAssist.shotType}
           points={pendingAssist.points}
-          teammates={(pendingAssist.isHomeTeam ? homeStats : awayStats)
-            .filter((s) => s.isOnCourt && s.playerId !== pendingAssist.scorerPlayerId)}
+          teammates={(pendingAssist.isHomeTeam ? homeStats : awayStats).filter(
+            (s) => s.isOnCourt && s.playerId !== pendingAssist.scorerPlayerId
+          )}
         />
       )}
 
@@ -3225,9 +3367,7 @@ const LiveGame: React.FC = () => {
             </div>
             <div className="overflow-y-auto max-h-[calc(70vh-120px)]">
               {actionHistory.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  No actions recorded yet
-                </div>
+                <div className="p-8 text-center text-gray-500">No actions recorded yet</div>
               ) : (
                 actionHistory.map((action) => (
                   <div
@@ -3269,14 +3409,18 @@ const LiveGame: React.FC = () => {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-96 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3 mb-4">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                game.currentQuarter >= 4
-                  ? "bg-red-100 dark:bg-red-900/30"
-                  : "bg-orange-100 dark:bg-orange-900/30"
-              }`}>
-                <StopIcon className={`h-6 w-6 ${
-                  game.currentQuarter >= 4 ? "text-red-600" : "text-orange-600"
-                }`} />
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  game.currentQuarter >= 4
+                    ? "bg-red-100 dark:bg-red-900/30"
+                    : "bg-orange-100 dark:bg-orange-900/30"
+                }`}
+              >
+                <StopIcon
+                  className={`h-6 w-6 ${
+                    game.currentQuarter >= 4 ? "text-red-600" : "text-orange-600"
+                  }`}
+                />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -3285,8 +3429,7 @@ const LiveGame: React.FC = () => {
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {game.currentQuarter >= 4
                     ? "This will mark the game as complete"
-                    : `Move to Q${game.currentQuarter + 1}`
-                  }
+                    : `Move to Q${game.currentQuarter + 1}`}
                 </p>
               </div>
             </div>
@@ -3311,8 +3454,7 @@ const LiveGame: React.FC = () => {
               <p className="text-gray-600 dark:text-gray-400 text-center text-sm">
                 {game.currentQuarter >= 4
                   ? "The game will be marked as final."
-                  : `Quarter ${game.currentQuarter} will be marked complete and the game will pause for Q${game.currentQuarter + 1}.`
-                }
+                  : `Quarter ${game.currentQuarter} will be marked complete and the game will pause for Q${game.currentQuarter + 1}.`}
               </p>
             </div>
 

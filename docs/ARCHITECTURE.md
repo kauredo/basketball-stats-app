@@ -5,6 +5,7 @@ This document describes the system architecture of the Basketball Stats App.
 ## Overview
 
 Basketball Stats is a monorepo containing three main packages:
+
 - **convex/** - Serverless backend (database + functions)
 - **web/** - React web application
 - **mobile/** - React Native mobile application
@@ -98,18 +99,18 @@ Basketball Stats is a monorepo containing three main packages:
 
 ### Key Tables
 
-| Table | Purpose | Key Fields |
-|-------|---------|------------|
-| `users` | User accounts | email, passwordHash, firstName, lastName, role |
-| `sessions` | Auth tokens | userId, token, expiresAt, refreshToken |
-| `leagues` | League configuration | name, leagueType, season, status, ownerId |
-| `leagueMemberships` | User-league access | userId, leagueId, role, status |
-| `teams` | Teams in leagues | name, leagueId, city, logoUrl |
-| `players` | Player rosters | teamId, name, number, position |
-| `games` | Game state | homeTeamId, awayTeamId, status, scores, quarter |
-| `playerStats` | Per-game stats | playerId, gameId, points, rebounds, assists... |
-| `shots` | Shot locations | playerId, gameId, x, y, shotType, made |
-| `notifications` | In-app notifications | userId, type, title, body, read |
+| Table               | Purpose              | Key Fields                                      |
+| ------------------- | -------------------- | ----------------------------------------------- |
+| `users`             | User accounts        | email, passwordHash, firstName, lastName, role  |
+| `sessions`          | Auth tokens          | userId, token, expiresAt, refreshToken          |
+| `leagues`           | League configuration | name, leagueType, season, status, ownerId       |
+| `leagueMemberships` | User-league access   | userId, leagueId, role, status                  |
+| `teams`             | Teams in leagues     | name, leagueId, city, logoUrl                   |
+| `players`           | Player rosters       | teamId, name, number, position                  |
+| `games`             | Game state           | homeTeamId, awayTeamId, status, scores, quarter |
+| `playerStats`       | Per-game stats       | playerId, gameId, points, rebounds, assists...  |
+| `shots`             | Shot locations       | playerId, gameId, x, y, shotType, made          |
+| `notifications`     | In-app notifications | userId, type, title, body, read                 |
 
 ### Function Organization
 
@@ -152,6 +153,7 @@ convex/
 ```
 
 **Key Contexts:**
+
 - `ThemeContext` - Light/dark mode management
 - `AuthContext` - User authentication state
 - `NotificationContext` - In-app notification management
@@ -181,6 +183,7 @@ convex/
 ```
 
 **Navigation Structure:**
+
 - Bottom Tabs: Home, Statistics, Teams, Games, Profile
 - Stack screens for details and modals
 
@@ -257,6 +260,7 @@ Both web and mobile support light/dark mode:
 ```
 
 **Theme Modes:**
+
 - `light` - Light theme
 - `dark` - Dark theme
 - `system` - Follow OS preference
@@ -264,15 +268,18 @@ Both web and mobile support light/dark mode:
 ## Security Considerations
 
 ### Authentication
+
 - Passwords hashed with bcrypt (via Convex)
 - JWT-like tokens with expiration
 - Refresh token rotation
 
 ### Authorization
+
 - League membership checked on all operations
 - Role-based permissions (admin > coach > scorekeeper > member > viewer)
 - Token validation on every request
 
 ### Data Isolation
+
 - All queries filter by user's league memberships
 - No cross-league data access

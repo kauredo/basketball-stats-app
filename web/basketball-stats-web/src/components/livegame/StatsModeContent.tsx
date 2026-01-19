@@ -42,11 +42,7 @@ export const StatsModeContent: React.FC<StatsModeContentProps> = ({
       {/* Team Box Scores */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Away Team */}
-        <TeamBoxScore
-          teamName={awayTeamName}
-          players={awayStats}
-          foulLimit={foulLimit}
-        />
+        <TeamBoxScore teamName={awayTeamName} players={awayStats} foulLimit={foulLimit} />
 
         {/* Home Team */}
         <TeamBoxScore

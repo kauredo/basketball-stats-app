@@ -34,7 +34,9 @@ import { COLORS, TOUCH_TARGETS, getShotZone } from "@basketball-stats/shared";
 // Import new components
 import EnhancedScoreboard from "../components/livegame/EnhancedScoreboard";
 import FoulTypeModal, { FoulType } from "../components/livegame/FoulTypeModal";
-import FreeThrowSequenceModal, { FreeThrowSequence } from "../components/livegame/FreeThrowSequenceModal";
+import FreeThrowSequenceModal, {
+  FreeThrowSequence,
+} from "../components/livegame/FreeThrowSequenceModal";
 import QuickUndoFAB, { LastAction } from "../components/livegame/QuickUndoFAB";
 import OvertimePromptModal from "../components/livegame/OvertimePromptModal";
 import PlayByPlayTab from "../components/livegame/PlayByPlayTab";
@@ -243,17 +245,44 @@ function MiniCourt({ onCourtTap, disabled, recentShots = [] }: MiniCourtProps) {
           {/* Court background */}
           <Rect x="0" y="0" width="50" height="28" fill={courtColors.background} rx="2" />
           {/* Court border */}
-          <Rect x="0" y="0" width="50" height="28" fill="none" stroke={courtColors.lines} strokeWidth="0.4" rx="2" />
+          <Rect
+            x="0"
+            y="0"
+            width="50"
+            height="28"
+            fill="none"
+            stroke={courtColors.lines}
+            strokeWidth="0.4"
+            rx="2"
+          />
           {/* Paint */}
-          <Rect x="17" y="0" width="16" height="15" fill="none" stroke={courtColors.lines} strokeWidth="0.4" />
+          <Rect
+            x="17"
+            y="0"
+            width="16"
+            height="15"
+            fill="none"
+            stroke={courtColors.lines}
+            strokeWidth="0.4"
+          />
           {/* Free throw circle */}
           <Circle cx="25" cy="15" r="4" fill="none" stroke={courtColors.lines} strokeWidth="0.3" />
           {/* Restricted area */}
-          <Path d="M 21 0 A 4 4 0 0 0 29 0" fill="none" stroke={courtColors.lines} strokeWidth="0.3" />
+          <Path
+            d="M 21 0 A 4 4 0 0 0 29 0"
+            fill="none"
+            stroke={courtColors.lines}
+            strokeWidth="0.3"
+          />
           {/* Rim */}
           <Circle cx="25" cy="4" r="0.6" fill={courtColors.rim} />
           {/* Three-point line */}
-          <Path d="M 3 0 L 3 10 A 20 20 0 0 0 47 10 L 47 0" fill="none" stroke={courtColors.lines} strokeWidth="0.4" />
+          <Path
+            d="M 3 0 L 3 10 A 20 20 0 0 0 47 10 L 47 0"
+            fill="none"
+            stroke={courtColors.lines}
+            strokeWidth="0.4"
+          />
           {/* Recent shots */}
           {recentShots.slice(-5).map((shot, index) => {
             const svgX = 25 + shot.x;
@@ -371,7 +400,9 @@ export default function LiveGameScreen() {
     zone: string;
     is3pt: boolean;
   } | null>(null);
-  const [recentShots, setRecentShots] = useState<Array<{ x: number; y: number; made: boolean }>>([]);
+  const [recentShots, setRecentShots] = useState<Array<{ x: number; y: number; made: boolean }>>(
+    []
+  );
 
   // New state for enhanced features
   const [pendingFoul, setPendingFoul] = useState<PlayerStat | null>(null);
@@ -383,8 +414,14 @@ export default function LiveGameScreen() {
   // Real-time game data from Convex
   const gameData = useQuery(api.games.get, token && gameId ? { token, gameId } : "skip");
   const liveStats = useQuery(api.stats.getLiveStats, token && gameId ? { token, gameId } : "skip");
-  const gameEvents = useQuery(api.games.getGameEvents, token && gameId ? { token, gameId, limit: 50 } : "skip");
-  const gameShotsData = useQuery(api.shots.getGameShots, token && gameId ? { token, gameId } : "skip");
+  const gameEvents = useQuery(
+    api.games.getGameEvents,
+    token && gameId ? { token, gameId, limit: 50 } : "skip"
+  );
+  const gameShotsData = useQuery(
+    api.shots.getGameShots,
+    token && gameId ? { token, gameId } : "skip"
+  );
 
   // Mutations
   const startGame = useMutation(api.games.start);
@@ -425,7 +462,13 @@ export default function LiveGameScreen() {
       setShowOvertimePrompt(true);
       soundFeedback.overtime();
     }
-  }, [game?.status, game?.currentQuarter, game?.homeScore, game?.awayScore, game?.timeRemainingSeconds]);
+  }, [
+    game?.status,
+    game?.currentQuarter,
+    game?.homeScore,
+    game?.awayScore,
+    game?.timeRemainingSeconds,
+  ]);
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -1076,7 +1119,9 @@ export default function LiveGameScreen() {
                         <Text className="text-gray-500 text-xs">AST</Text>
                       </View>
                       <View className="w-8 items-center">
-                        <Text className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}>
+                        <Text
+                          className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}
+                        >
                           {playerStat.fouls}
                         </Text>
                         <Text className="text-gray-500 text-xs">PF</Text>
@@ -1132,7 +1177,9 @@ export default function LiveGameScreen() {
                         <Text className="text-gray-500 text-xs">AST</Text>
                       </View>
                       <View className="w-8 items-center">
-                        <Text className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}>
+                        <Text
+                          className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}
+                        >
                           {playerStat.fouls}
                         </Text>
                         <Text className="text-gray-500 text-xs">PF</Text>

@@ -104,14 +104,17 @@ export function useShotClock({
   }, [offensiveReboundReset, pause]);
 
   // Set custom time
-  const setTime = useCallback((seconds: number) => {
-    setState((prev) => ({
-      ...prev,
-      seconds,
-      isWarning: seconds <= warningThreshold,
-      isViolation: seconds === 0,
-    }));
-  }, [warningThreshold]);
+  const setTime = useCallback(
+    (seconds: number) => {
+      setState((prev) => ({
+        ...prev,
+        seconds,
+        isWarning: seconds <= warningThreshold,
+        isViolation: seconds === 0,
+      }));
+    },
+    [warningThreshold]
+  );
 
   // Toggle running state
   const toggle = useCallback(() => {

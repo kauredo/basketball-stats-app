@@ -55,7 +55,10 @@ export function useSoundFeedback(options: SoundFeedbackOptions = {}): SoundFeedb
   }, [enableSound]);
 
   const playFeedback = useCallback(
-    async (soundType: SoundType, hapticType?: Haptics.ImpactFeedbackStyle | Haptics.NotificationFeedbackType) => {
+    async (
+      soundType: SoundType,
+      hapticType?: Haptics.ImpactFeedbackStyle | Haptics.NotificationFeedbackType
+    ) => {
       const promises: Promise<void>[] = [];
 
       if (enableSound) {

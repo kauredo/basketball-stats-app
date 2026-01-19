@@ -36,13 +36,13 @@ A full-stack basketball statistics tracking application with real-time game scor
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Backend** | [Convex](https://convex.dev) - Serverless database & real-time functions |
-| **Web** | React 19, Vite, Tailwind CSS, React Router 7, Recharts |
-| **Mobile** | React Native 0.79, Expo 53, NativeWind, React Navigation |
-| **Shared** | TypeScript types package |
-| **Monorepo** | Turborepo, npm workspaces |
+| Layer        | Technology                                                               |
+| ------------ | ------------------------------------------------------------------------ |
+| **Backend**  | [Convex](https://convex.dev) - Serverless database & real-time functions |
+| **Web**      | React 19, Vite, Tailwind CSS, React Router 7, Recharts                   |
+| **Mobile**   | React Native 0.79, Expo 53, NativeWind, React Navigation                 |
+| **Shared**   | TypeScript types package                                                 |
+| **Monorepo** | Turborepo, npm workspaces                                                |
 
 ## Project Structure
 
@@ -118,6 +118,7 @@ npm start
 ```
 
 **Access the apps:**
+
 - Web: http://localhost:5173
 - Mobile: Scan QR code with Expo Go
 
@@ -125,64 +126,67 @@ npm start
 
 **Root (Monorepo)**
 
-| Command | Description |
-|---------|-------------|
-| `npm run build` | Build all packages |
-| `npm run typecheck` | Type check all packages |
-| `npm run lint` | Lint all packages |
-| `npm run format` | Format code with Prettier |
-| `npm run convex:dev` | Start Convex dev server |
+| Command                 | Description                 |
+| ----------------------- | --------------------------- |
+| `npm run build`         | Build all packages          |
+| `npm run typecheck`     | Type check all packages     |
+| `npm run lint`          | Lint all packages           |
+| `npm run format`        | Format code with Prettier   |
+| `npm run convex:dev`    | Start Convex dev server     |
 | `npm run convex:deploy` | Deploy Convex to production |
 
 **Web** (`web/basketball-stats-web`)
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run typecheck` | Type check |
+| Command             | Description              |
+| ------------------- | ------------------------ |
+| `npm run dev`       | Start development server |
+| `npm run build`     | Build for production     |
+| `npm run typecheck` | Type check               |
 
 **Mobile** (`mobile/BasketballStatsMobile`)
 
-| Command | Description |
-|---------|-------------|
-| `npm start` | Start Expo server |
-| `npm run ios` | Start iOS simulator |
-| `npm run android` | Start Android emulator |
-| `npm run typecheck` | Type check |
+| Command             | Description            |
+| ------------------- | ---------------------- |
+| `npm start`         | Start Expo server      |
+| `npm run ios`       | Start iOS simulator    |
+| `npm run android`   | Start Android emulator |
+| `npm run typecheck` | Type check             |
 
 ## Environment Variables
 
 **.env.local** (root)
+
 ```env
 CONVEX_DEPLOYMENT=dev:your-deployment-name
 ```
 
 **web/.env**
+
 ```env
 VITE_CONVEX_URL=https://your-deployment.convex.cloud
 ```
 
 **mobile/.env**
+
 ```env
 EXPO_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
 ```
 
 ## Database Schema
 
-| Table | Purpose |
-|-------|---------|
-| `users` | User accounts and authentication |
-| `sessions` | Auth tokens and sessions |
-| `leagues` | League configuration |
-| `leagueMemberships` | User-league relationships with roles |
-| `teams` | Teams within leagues |
-| `players` | Player rosters |
-| `games` | Game state and scheduling |
-| `playerStats` | Per-game player statistics |
-| `shots` | Shot locations for shot charts |
-| `notifications` | In-app notifications |
-| `notificationPreferences` | User notification settings |
+| Table                     | Purpose                              |
+| ------------------------- | ------------------------------------ |
+| `users`                   | User accounts and authentication     |
+| `sessions`                | Auth tokens and sessions             |
+| `leagues`                 | League configuration                 |
+| `leagueMemberships`       | User-league relationships with roles |
+| `teams`                   | Teams within leagues                 |
+| `players`                 | Player rosters                       |
+| `games`                   | Game state and scheduling            |
+| `playerStats`             | Per-game player statistics           |
+| `shots`                   | Shot locations for shot charts       |
+| `notifications`           | In-app notifications                 |
+| `notificationPreferences` | User notification settings           |
 
 ## Documentation
 
