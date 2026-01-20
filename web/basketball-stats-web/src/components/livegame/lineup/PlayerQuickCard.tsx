@@ -28,18 +28,22 @@ export const PlayerQuickCard: React.FC<PlayerQuickCardProps> = ({
   size = "sm",
   showStats = false,
 }) => {
-  const padding = size === "sm" ? "p-1.5" : "p-2";
-  const numberSize = size === "sm" ? "text-xs" : "text-sm";
-  const nameSize = size === "sm" ? "text-[8px]" : "text-[10px]";
-  const statSize = size === "sm" ? "text-[7px]" : "text-[9px]";
+  // Use rem-based sizes that scale with user font preferences
+  // Minimum touch target of 44px
+  const padding = size === "sm" ? "p-2" : "p-2.5";
+  const numberSize = size === "sm" ? "text-sm" : "text-base";
+  const nameSize = size === "sm" ? "text-xs" : "text-sm";
+  const statSize = size === "sm" ? "text-xs" : "text-sm";
 
   return (
     <button
       onClick={onClick}
       disabled={disabled}
+      aria-label={`${player.player?.name}, #${player.player?.number}, ${player.fouls} fouls${player.fouledOut ? ", fouled out" : ""}`}
       className={`
         ${padding}
-        rounded-lg text-center transition-all w-full
+        rounded-lg text-center transition-all w-full min-h-[44px]
+        focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
         ${
           isSelected
             ? "bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-500 ring-2 ring-orange-500/30"
@@ -57,7 +61,10 @@ export const PlayerQuickCard: React.FC<PlayerQuickCardProps> = ({
       </div>
 
       {/* Name (last name) */}
-      <div className={`text-gray-500 truncate ${nameSize}`}>
+      <div
+        className={`text-gray-500 dark:text-gray-400 truncate ${nameSize}`}
+        title={player.player?.name}
+      >
         {player.player?.name?.split(" ").pop()}
       </div>
 
@@ -73,7 +80,7 @@ export const PlayerQuickCard: React.FC<PlayerQuickCardProps> = ({
 
       {/* Mini Stats Row (optional) */}
       {showStats && (
-        <div className={`flex justify-center gap-1 mt-1 text-gray-500 ${statSize}`}>
+        <div className={`flex justify-center gap-1 mt-1 text-gray-500 dark:text-gray-400 ${statSize}`}>
           <span>{player.points}p</span>
           <span>{player.rebounds}r</span>
           <span>{player.assists}a</span>

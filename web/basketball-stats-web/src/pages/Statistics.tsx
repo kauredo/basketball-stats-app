@@ -112,32 +112,32 @@ function StandingsTable({ standings }: StandingsTableProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">League Standings</h3>
+        <h3 id="standings-table-heading" className="text-lg font-semibold text-gray-900 dark:text-white">League Standings</h3>
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-100 dark:bg-gray-750">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700" aria-labelledby="standings-table-heading">
+          <thead className="bg-gray-100 dark:bg-gray-700">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                 Team
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                W
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <abbr title="Wins">W</abbr>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                L
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <abbr title="Losses">L</abbr>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                Win%
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <abbr title="Win Percentage">Win%</abbr>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                PPG
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <abbr title="Points Per Game">PPG</abbr>
               </th>
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {standings.slice(0, 10).map((team, index) => (
-              <tr key={team.teamId} className="hover:bg-gray-100 dark:hover:bg-gray-750">
+              <tr key={team.teamId} className="hover:bg-gray-100 dark:hover:bg-gray-700">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <span className="w-6 h-6 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center justify-center mr-3">
@@ -303,27 +303,51 @@ export default function Statistics() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex space-x-4 border-b border-gray-200 dark:border-gray-700">
+      <div
+        className="flex space-x-4 border-b border-gray-200 dark:border-gray-700"
+        role="tablist"
+        aria-label="Statistics views"
+      >
         <button
-          className={`px-4 py-2 font-medium ${activeTab === "overview" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
+          role="tab"
+          aria-selected={activeTab === "overview"}
+          aria-controls="panel-overview"
+          id="tab-overview"
+          tabIndex={activeTab === "overview" ? 0 : -1}
+          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-t ${activeTab === "overview" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
           onClick={() => setActiveTab("overview")}
         >
           Overview
         </button>
         <button
-          className={`px-4 py-2 font-medium ${activeTab === "players" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
+          role="tab"
+          aria-selected={activeTab === "players"}
+          aria-controls="panel-players"
+          id="tab-players"
+          tabIndex={activeTab === "players" ? 0 : -1}
+          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-t ${activeTab === "players" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
           onClick={() => setActiveTab("players")}
         >
           Players
         </button>
         <button
-          className={`px-4 py-2 font-medium ${activeTab === "teams" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
+          role="tab"
+          aria-selected={activeTab === "teams"}
+          aria-controls="panel-teams"
+          id="tab-teams"
+          tabIndex={activeTab === "teams" ? 0 : -1}
+          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-t ${activeTab === "teams" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
           onClick={() => setActiveTab("teams")}
         >
           Teams
         </button>
         <button
-          className={`px-4 py-2 font-medium ${activeTab === "charts" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
+          role="tab"
+          aria-selected={activeTab === "charts"}
+          aria-controls="panel-charts"
+          id="tab-charts"
+          tabIndex={activeTab === "charts" ? 0 : -1}
+          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-t ${activeTab === "charts" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
           onClick={() => setActiveTab("charts")}
         >
           Charts
@@ -332,7 +356,12 @@ export default function Statistics() {
 
       {/* Overview Tab */}
       {activeTab === "overview" && (
-        <div className="space-y-6">
+        <div
+          role="tabpanel"
+          id="panel-overview"
+          aria-labelledby="tab-overview"
+          className="space-y-6"
+        >
           {/* League Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard
@@ -388,7 +417,12 @@ export default function Statistics() {
 
       {/* Players Tab */}
       {activeTab === "players" && playersData && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div
+          role="tabpanel"
+          id="panel-players"
+          aria-labelledby="tab-players"
+          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+        >
           <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Player Statistics
@@ -410,41 +444,41 @@ export default function Statistics() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-100 dark:bg-gray-750">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700" aria-label="Player statistics">
+              <thead className="bg-gray-100 dark:bg-gray-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
                     Player
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
                     Team
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    GP
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Games Played">GP</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    PPG
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Points Per Game">PPG</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    RPG
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Rebounds Per Game">RPG</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    APG
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Assists Per Game">APG</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    FG%
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Field Goal Percentage">FG%</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    3P%
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="3-Point Percentage">3P%</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    FT%
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Free Throw Percentage">FT%</abbr>
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {playersData.players?.map((player: any) => (
-                  <tr key={player.playerId} className="hover:bg-gray-100 dark:hover:bg-gray-750">
+                  <tr key={player.playerId} className="hover:bg-gray-100 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
                         <span className="text-gray-900 dark:text-white font-medium">
@@ -510,35 +544,35 @@ export default function Statistics() {
                   <option value={100}>100 per page</option>
                 </select>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2" role="navigation" aria-label="Pagination">
                 <button
                   onClick={() => setCurrentPage(1)}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="px-3 py-2 min-h-[44px] rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 >
                   First
                 </button>
                 <button
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="px-3 py-2 min-h-[44px] rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 >
                   Previous
                 </button>
-                <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
+                <span className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
                   Page {playersData.pagination.currentPage} of {playersData.pagination.totalPages}
                 </span>
                 <button
                   onClick={() => setCurrentPage(Math.min(playersData.pagination.totalPages, currentPage + 1))}
                   disabled={currentPage >= playersData.pagination.totalPages}
-                  className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="px-3 py-2 min-h-[44px] rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 >
                   Next
                 </button>
                 <button
                   onClick={() => setCurrentPage(playersData.pagination.totalPages)}
                   disabled={currentPage >= playersData.pagination.totalPages}
-                  className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="px-3 py-2 min-h-[44px] rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 >
                   Last
                 </button>
@@ -550,43 +584,48 @@ export default function Statistics() {
 
       {/* Teams Tab */}
       {activeTab === "teams" && teamsData && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div
+          role="tabpanel"
+          id="panel-teams"
+          aria-labelledby="tab-teams"
+          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+        >
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Team Statistics</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-100 dark:bg-gray-750">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700" aria-label="Team statistics">
+              <thead className="bg-gray-100 dark:bg-gray-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
                     Team
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    W
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Wins">W</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    L
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Losses">L</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    Win%
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Win Percentage">Win%</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    PPG
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Points Per Game">PPG</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    RPG
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Rebounds Per Game">RPG</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    APG
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Assists Per Game">APG</abbr>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
-                    FG%
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <abbr title="Field Goal Percentage">FG%</abbr>
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {teamsData.teams?.map((team: any, index: number) => (
-                  <tr key={team.teamId} className="hover:bg-gray-100 dark:hover:bg-gray-750">
+                  <tr key={team.teamId} className="hover:bg-gray-100 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <span className="w-6 h-6 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center justify-center mr-3">
@@ -628,12 +667,22 @@ export default function Statistics() {
 
       {/* Charts Tab */}
       {activeTab === "charts" && teamsData && playersData && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div
+          role="tabpanel"
+          id="panel-charts"
+          aria-labelledby="tab-charts"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        >
           {/* Team Performance Comparison */}
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <h3 id="team-performance-heading" className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Team Performance Comparison
             </h3>
+            <div role="img" aria-labelledby="team-performance-heading" aria-describedby="team-performance-desc">
+              <p id="team-performance-desc" className="sr-only">
+                Bar chart comparing points, rebounds, and assists across teams
+              </p>
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={teamsData.teams?.slice(0, 8) || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -664,9 +713,14 @@ export default function Statistics() {
 
           {/* Win Percentage Distribution */}
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <h3 id="win-distribution-heading" className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Win Percentage Distribution
             </h3>
+            <div role="img" aria-labelledby="win-distribution-heading" aria-describedby="win-distribution-desc">
+              <p id="win-distribution-desc" className="sr-only">
+                Pie chart showing win percentage distribution across teams
+              </p>
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -698,8 +752,13 @@ export default function Statistics() {
 
           {/* Top Players Performance Radar */}
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+            <div role="img" aria-labelledby="player-radar-heading" aria-describedby="player-radar-desc">
+              <p id="player-radar-desc" className="sr-only">
+                Radar chart comparing player performance across points, rebounds, assists, field goal percentage, and free throw percentage
+              </p>
+            </div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 id="player-radar-heading" className="text-lg font-semibold text-gray-900 dark:text-white">
                 Player Performance Comparison
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -818,9 +877,14 @@ export default function Statistics() {
 
           {/* Shooting Efficiency Analysis */}
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <h3 id="shooting-efficiency-heading" className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Team Shooting Efficiency
             </h3>
+            <div role="img" aria-labelledby="shooting-efficiency-heading" aria-describedby="shooting-efficiency-desc">
+              <p id="shooting-efficiency-desc" className="sr-only">
+                Line chart comparing field goal, 3-point, and free throw percentages across teams
+              </p>
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={teamsData.teams?.slice(0, 8) || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />

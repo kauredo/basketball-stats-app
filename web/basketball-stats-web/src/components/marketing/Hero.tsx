@@ -47,20 +47,20 @@ export default function Hero() {
             </Link>
           </div>
 
-          {/* Stats preview */}
-          <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
+          {/* Feature highlights instead of vanity metrics */}
+          <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
             {[
-              { value: "10K+", label: "Games Tracked" },
-              { value: "50K+", label: "Players" },
-              { value: "1M+", label: "Stats Recorded" },
-              { value: "99.9%", label: "Uptime" },
-            ].map((stat) => (
+              { icon: "play", label: "Real-time tracking", desc: "Record stats as the game happens" },
+              { icon: "stats", label: "Detailed analytics", desc: "Shot charts & player comparisons" },
+              { icon: "users", label: "Team management", desc: "Multiple leagues & seasons" },
+            ].map((feature) => (
               <div
-                key={stat.label}
-                className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
+                key={feature.label}
+                className="p-5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-left"
               >
-                <div className="text-2xl sm:text-3xl font-bold text-orange-600">{stat.value}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</div>
+                <Icon name={feature.icon as any} size={24} className="text-orange-600 mb-2" />
+                <div className="font-semibold text-gray-900 dark:text-white">{feature.label}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">{feature.desc}</div>
               </div>
             ))}
           </div>

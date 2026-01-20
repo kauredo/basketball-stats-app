@@ -59,22 +59,34 @@ export default function Features() {
           </p>
         </div>
 
-        {/* Feature grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-700 transition-colors group"
-            >
-              <div className="w-12 h-12 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-4 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/50 transition-colors">
-                <Icon name={feature.icon} size={24} className="text-orange-600" />
+        {/* Feature grid with varied layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature, index) => {
+            // First feature spans 2 columns on large screens for visual variety
+            const isHighlighted = index === 0;
+            return (
+              <div
+                key={feature.title}
+                className={`p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-700 transition-colors group focus-within:ring-2 focus-within:ring-orange-500 ${
+                  isHighlighted ? "lg:col-span-2 lg:flex lg:items-start lg:gap-6" : ""
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-4 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/50 transition-colors flex-shrink-0 ${
+                  isHighlighted ? "lg:mb-0 lg:w-14 lg:h-14" : ""
+                }`}>
+                  <Icon name={feature.icon} size={isHighlighted ? 28 : 24} className="text-orange-600" />
+                </div>
+                <div>
+                  <h3 className={`font-semibold text-gray-900 dark:text-white mb-2 ${
+                    isHighlighted ? "text-xl" : "text-lg"
+                  }`}>
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">{feature.description}</p>
+                </div>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">{feature.description}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

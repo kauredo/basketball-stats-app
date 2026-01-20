@@ -10,6 +10,7 @@ interface FoulDotsProps {
 /**
  * Visual indicator showing player's current foul count.
  * Dots change color based on foul trouble status.
+ * Includes screen reader text for accessibility.
  */
 export const FoulDots: React.FC<FoulDotsProps> = ({
   fouls,
@@ -19,8 +20,18 @@ export const FoulDots: React.FC<FoulDotsProps> = ({
 }) => {
   const dotSize = size === "sm" ? "w-2 h-2" : "w-2.5 h-2.5";
 
+  // Determine foul trouble status for screen readers
+  const getFoulStatus = () => {
+    if (fouledOut || fouls >= foulLimit) return "fouled out";
+    if (fouls >= foulLimit - 1) return "foul trouble";
+    return "";
+  };
+
+  const foulStatus = getFoulStatus();
+  const srText = `${fouls} of ${foulLimit} fouls${foulStatus ? `, ${foulStatus}` : ""}`;
+
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-0.5" role="img" aria-label={srText}>
       {Array.from({ length: foulLimit }).map((_, i) => {
         const isFilled = i < fouls;
         const isLastFoul = i === foulLimit - 1 && fouls >= foulLimit;
@@ -37,7 +48,11 @@ export const FoulDots: React.FC<FoulDotsProps> = ({
         }
 
         return (
-          <div key={i} className={`${dotSize} rounded-full ${colorClass} transition-colors`} />
+          <div
+            key={i}
+            className={`${dotSize} rounded-full ${colorClass} transition-colors`}
+            aria-hidden="true"
+          />
         );
       })}
     </div>

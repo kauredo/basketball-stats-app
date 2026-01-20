@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { PlayerStat, StatType } from "../../../types/livegame";
 
@@ -37,6 +37,7 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
   autoDismissMs = 8000,
 }) => {
   const [autoDismissTimer, setAutoDismissTimer] = useState<number | null>(null);
+  const dismissButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -52,6 +53,27 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
     };
   }, [isOpen, autoDismissMs]);
 
+  // Handle escape key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, onClose]);
+
+  // Focus management - focus dismiss button when modal opens
+  useEffect(() => {
+    if (isOpen && dismissButtonRef.current) {
+      dismissButtonRef.current.focus();
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const shooterOnCourt = shooterTeamPlayers.filter((p) => p.isOnCourt);
@@ -64,11 +86,17 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rebound-modal-title"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         {/* Header */}
         <div className="bg-blue-600 px-6 py-4">
-          <h3 className="text-lg font-bold text-white">Rebound</h3>
+          <h3 id="rebound-modal-title" className="text-lg font-bold text-white">Rebound</h3>
           <p className="text-blue-200 text-sm">Missed {getShotTypeLabel(shotType)}</p>
         </div>
 
@@ -129,8 +157,9 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
         {/* Footer */}
         <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
           <button
+            ref={dismissButtonRef}
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
           >
             Dismiss / No Rebound
           </button>

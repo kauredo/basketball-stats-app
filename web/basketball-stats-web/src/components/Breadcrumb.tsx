@@ -13,9 +13,16 @@ interface BreadcrumbProps {
 }
 
 export default function Breadcrumb({ items, showHome = true }: BreadcrumbProps) {
+  // Add "/app/" prefix to all hrefs if not already present
+  const normalizedItems = items.map((item) => {
+    if (item.href && !item.href.startsWith("/app/")) {
+      return { ...item, href: `/app${item.href}` };
+    }
+    return item;
+  });
   const allItems: BreadcrumbItem[] = showHome
-    ? [{ label: "Home", href: "/" }, ...items]
-    : items;
+    ? [{ label: "Home", href: "/app" }, ...normalizedItems]
+    : normalizedItems;
 
   return (
     <nav className="flex items-center space-x-1 text-sm mb-4" aria-label="Breadcrumb">

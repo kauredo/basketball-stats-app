@@ -198,14 +198,17 @@ export default function LeagueSelectionPage() {
                 {userLeagues.map((league: any) => {
                   const isSelected = selectedLeague?.id === league.id;
                   return (
-                    <div
+                    <button
                       key={league.id}
-                      className={`relative rounded-lg border p-6 cursor-pointer transition-all ${
+                      type="button"
+                      className={`relative rounded-lg border p-6 cursor-pointer transition-all text-left w-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
                         isSelected
                           ? "border-orange-500 bg-orange-100 dark:bg-orange-900/20 ring-2 ring-orange-500"
                           : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600"
                       }`}
                       onClick={() => handleSelectLeague(league)}
+                      aria-pressed={isSelected}
+                      aria-label={`Select ${league.name} league`}
                     >
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white">
@@ -249,11 +252,11 @@ export default function LeagueSelectionPage() {
                       )}
 
                       {isSelected && (
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-2 right-2" aria-hidden="true">
                           <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
                         </div>
                       )}
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -276,12 +279,14 @@ export default function LeagueSelectionPage() {
 
               {showJoinForm && (
                 <form onSubmit={handleJoinByCode} className="flex gap-4">
+                  <label htmlFor="invite-code" className="sr-only">Invite code</label>
                   <input
+                    id="invite-code"
                     type="text"
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value)}
                     placeholder="Enter invite code (e.g., league-name-123)"
-                    className="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                    className="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                   <button
                     type="submit"
@@ -335,9 +340,16 @@ export default function LeagueSelectionPage() {
 
       {/* Create League Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-league-modal-title"
+          onClick={(e) => e.target === e.currentTarget && setShowCreateModal(false)}
+          onKeyDown={(e) => e.key === "Escape" && setShowCreateModal(false)}
+        >
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            <h3 id="create-league-modal-title" className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               Create New League
             </h3>
 

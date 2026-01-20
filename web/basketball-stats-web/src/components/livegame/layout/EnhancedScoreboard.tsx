@@ -132,7 +132,10 @@ const TeamPanel: React.FC<TeamPanelProps> = ({
       {/* Team Info */}
       <div className={`flex flex-col gap-1 ${isHome ? "items-end" : "items-start"}`}>
         {/* Team Name */}
-        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide truncate max-w-[100px] sm:max-w-[120px]">
+        <span
+          className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide truncate max-w-[100px] sm:max-w-[120px]"
+          title={name}
+        >
           {name}
         </span>
 
@@ -168,7 +171,8 @@ const TeamPanel: React.FC<TeamPanelProps> = ({
           {!disabled && onTimeout && (
             <button
               onClick={onTimeout}
-              className="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 dark:bg-amber-500/20 text-orange-600 dark:text-amber-400 hover:bg-orange-200 dark:hover:bg-amber-500/30 font-semibold uppercase tracking-wide transition-colors"
+              aria-label="Call timeout"
+              className="text-[10px] px-2.5 py-1.5 min-h-[32px] min-w-[32px] rounded bg-orange-100 dark:bg-amber-500/20 text-orange-600 dark:text-amber-400 hover:bg-orange-200 dark:hover:bg-amber-500/30 font-semibold uppercase tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
             >
               TO
             </button>
@@ -197,6 +201,74 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
   quartersCompleted = [],
 }) => {
   const [showQuarterSelector, setShowQuarterSelector] = useState(false);
+  const quarterSelectorRef = useRef<HTMLDivElement>(null);
+  const quarterButtonRef = useRef<HTMLButtonElement>(null);
+  const [focusedQuarter, setFocusedQuarter] = useState<number | null>(null);
+
+  // Handle escape key and click outside for quarter selector
+  useEffect(() => {
+    if (!showQuarterSelector) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowQuarterSelector(false);
+        quarterButtonRef.current?.focus();
+      }
+    };
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        quarterSelectorRef.current &&
+        !quarterSelectorRef.current.contains(e.target as Node) &&
+        quarterButtonRef.current &&
+        !quarterButtonRef.current.contains(e.target as Node)
+      ) {
+        setShowQuarterSelector(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Focus first option when opened
+    setFocusedQuarter(game.currentQuarter);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showQuarterSelector, game.currentQuarter]);
+
+  // Handle arrow key navigation within dropdown
+  const handleQuarterKeyDown = (e: React.KeyboardEvent, quarter: number) => {
+    const quarters = [1, 2, 3, 4];
+    const currentIndex = quarters.indexOf(quarter);
+
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % quarters.length;
+      setFocusedQuarter(quarters[nextIndex]);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + quarters.length) % quarters.length;
+      setFocusedQuarter(quarters[prevIndex]);
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onQuarterChange?.(quarter);
+      setShowQuarterSelector(false);
+      quarterButtonRef.current?.focus();
+    }
+  };
+
+  // Focus the appropriate quarter button when focusedQuarter changes
+  useEffect(() => {
+    if (showQuarterSelector && focusedQuarter !== null) {
+      const button = quarterSelectorRef.current?.querySelector(
+        `[data-quarter="${focusedQuarter}"]`
+      ) as HTMLButtonElement;
+      button?.focus();
+    }
+  }, [focusedQuarter, showQuarterSelector]);
 
   const isActive = game.status === "active";
   const isPaused = game.status === "paused";
@@ -297,10 +369,15 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
               {/* Quarter Selector */}
               <div className="relative">
                 <button
+                  ref={quarterButtonRef}
                   onClick={() => !isCompleted && setShowQuarterSelector(!showQuarterSelector)}
                   disabled={isCompleted}
+                  aria-expanded={showQuarterSelector}
+                  aria-haspopup="listbox"
+                  aria-controls="quarter-selector-listbox"
+                  aria-label={`Current quarter: ${formatQuarter(game.currentQuarter)}. Click to change quarter.`}
                   className={`
-                    text-sm font-bold px-3 py-1 rounded-lg border transition-all
+                    text-sm font-bold px-3 py-1 rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
                     ${
                       !isCompleted
                         ? "bg-gray-100 dark:bg-gray-700/50 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500"
@@ -311,17 +388,28 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
                   {formatQuarter(game.currentQuarter)}
                 </button>
                 {showQuarterSelector && onQuarterChange && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-800 backdrop-blur rounded-xl shadow-lg border border-gray-200 dark:border-gray-600 z-20 p-2">
+                  <div
+                    ref={quarterSelectorRef}
+                    id="quarter-selector-listbox"
+                    role="listbox"
+                    aria-label="Select quarter"
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-800 backdrop-blur rounded-xl shadow-lg border border-gray-200 dark:border-gray-600 z-20 p-2"
+                  >
                     <div className="flex gap-1">
                       {[1, 2, 3, 4].map((q) => (
                         <button
                           key={q}
+                          data-quarter={q}
+                          role="option"
+                          aria-selected={game.currentQuarter === q}
                           onClick={() => {
                             onQuarterChange(q);
                             setShowQuarterSelector(false);
+                            quarterButtonRef.current?.focus();
                           }}
+                          onKeyDown={(e) => handleQuarterKeyDown(e, q)}
                           className={`
-                            w-10 h-10 rounded-lg font-bold text-sm transition-all
+                            w-10 h-10 rounded-lg font-bold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-inset
                             ${
                               game.currentQuarter === q
                                 ? "bg-orange-500 text-white"
@@ -341,41 +429,41 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
 
               {/* Control Buttons */}
               {!isCompleted && (
-                <div className="flex gap-1.5">
+                <div className="flex gap-1.5" role="group" aria-label="Game controls">
                   {canStart && (
                     <button
                       onClick={() => onGameControl("start")}
-                      className="p-2 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-500/30 transition-all"
-                      title="Start Game"
+                      className="p-2 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-500/30 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                      aria-label="Start game"
                     >
-                      <PlayIcon className="h-4 w-4" />
+                      <PlayIcon className="h-4 w-4" aria-hidden="true" />
                     </button>
                   )}
                   {canPause && (
                     <button
                       onClick={() => onGameControl("pause")}
-                      className="p-2 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-all"
-                      title="Pause"
+                      className="p-2 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+                      aria-label="Pause game"
                     >
-                      <PauseIcon className="h-4 w-4" />
+                      <PauseIcon className="h-4 w-4" aria-hidden="true" />
                     </button>
                   )}
                   {canResume && (
                     <button
                       onClick={() => onGameControl("resume")}
-                      className="p-2 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-500/30 transition-all"
-                      title="Resume"
+                      className="p-2 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-500/30 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      aria-label="Resume game"
                     >
-                      <PlayIcon className="h-4 w-4" />
+                      <PlayIcon className="h-4 w-4" aria-hidden="true" />
                     </button>
                   )}
                   {canEnd && (
                     <button
                       onClick={() => onGameControl("end")}
-                      className="p-2 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-500/30 rounded-lg hover:bg-red-200 dark:hover:bg-red-500/30 transition-all"
-                      title="End Period"
+                      className="p-2 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-500/30 rounded-lg hover:bg-red-200 dark:hover:bg-red-500/30 transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                      aria-label="End period"
                     >
-                      <StopIcon className="h-4 w-4" />
+                      <StopIcon className="h-4 w-4" aria-hidden="true" />
                     </button>
                   )}
                 </div>
