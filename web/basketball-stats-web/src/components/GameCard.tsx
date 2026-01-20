@@ -78,15 +78,21 @@ const GameCard: React.FC<GameCardProps> = ({
     });
   };
 
+  const isInteractive = onClick || showLink;
+
   const content = (
     <div
       className={`
         bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700
         transition-all duration-200
-        ${onClick || showLink ? "hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg hover:shadow-black/20 cursor-pointer" : ""}
+        ${isInteractive ? "hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg hover:shadow-black/20 cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2" : ""}
         ${className}
       `}
       onClick={onClick}
+      onKeyDown={isInteractive ? (e) => e.key === "Enter" && onClick?.() : undefined}
+      role={isInteractive ? "button" : undefined}
+      tabIndex={isInteractive && onClick ? 0 : undefined}
+      aria-label={isInteractive ? `View game: ${awayTeam.name} vs ${homeTeam.name}` : undefined}
     >
       <div className="flex items-center justify-between">
         {/* Away Team */}
@@ -195,16 +201,21 @@ export const GameCardCompact: React.FC<GameCardProps> = ({
 }) => {
   const statusInfo = statusConfig[status];
   const isLive = status === "active";
+  const isInteractive = onClick || showLink;
 
   const content = (
     <div
       className={`
         bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700
         transition-all duration-200
-        ${onClick || showLink ? "hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer" : ""}
+        ${isInteractive ? "hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2" : ""}
         ${className}
       `}
       onClick={onClick}
+      onKeyDown={isInteractive ? (e) => e.key === "Enter" && onClick?.() : undefined}
+      role={isInteractive ? "button" : undefined}
+      tabIndex={isInteractive && onClick ? 0 : undefined}
+      aria-label={isInteractive ? `View game: ${awayTeam.name} vs ${homeTeam.name}` : undefined}
     >
       <div className="flex items-center">
         {/* Status */}

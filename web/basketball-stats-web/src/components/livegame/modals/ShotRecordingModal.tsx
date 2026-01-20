@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { PlayerStat } from "../../../types/livegame";
 
@@ -23,18 +23,51 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
   zoneName,
   onCourtPlayers,
 }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, onClose]);
+
+  // Focus management - focus cancel button when modal opens
+  useEffect(() => {
+    if (isOpen && cancelButtonRef.current) {
+      cancelButtonRef.current.focus();
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const points = shotType === "3pt" ? 3 : 2;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="shot-modal-title"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        ref={modalRef}
+        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden"
+      >
         {/* Header with zone info */}
         <div className="bg-gray-50 dark:bg-gray-900 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h3 id="shot-modal-title" className="text-lg font-bold text-gray-900 dark:text-white">
                 {shotType === "3pt" ? "3-Point Shot" : "2-Point Shot"}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -97,8 +130,9 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
         {/* Cancel button */}
         <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
           <button
+            ref={cancelButtonRef}
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
           >
             Cancel
           </button>

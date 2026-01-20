@@ -51,9 +51,10 @@ export default function Header() {
                     ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
-                title="Light mode"
+                aria-label="Light mode"
+                aria-pressed={mode === "light"}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -69,9 +70,10 @@ export default function Header() {
                     ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
-                title="System preference"
+                aria-label="System preference"
+                aria-pressed={mode === "system"}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -87,9 +89,10 @@ export default function Header() {
                     ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
-                title="Dark mode"
+                aria-label="Dark mode"
+                aria-pressed={mode === "dark"}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -118,6 +121,8 @@ export default function Header() {
           <button
             className="md:hidden p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
           >
             <Icon name={mobileMenuOpen ? "x" : "menu"} size={24} />
           </button>
@@ -146,16 +151,18 @@ export default function Header() {
               {/* Mobile Theme Toggle */}
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-500 dark:text-gray-400">Theme:</span>
-                <div className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                <div className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1" role="group" aria-label="Theme selection">
                   <button
                     onClick={() => setMode("light")}
                     className={`p-1.5 rounded-md transition-colors ${
                       mode === "light"
                         ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                        : "text-gray-500"
+                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                     }`}
+                    aria-label="Light mode"
+                    aria-pressed={mode === "light"}
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -169,10 +176,12 @@ export default function Header() {
                     className={`p-1.5 rounded-md transition-colors ${
                       mode === "system"
                         ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                        : "text-gray-500"
+                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                     }`}
+                    aria-label="System preference"
+                    aria-pressed={mode === "system"}
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -186,10 +195,12 @@ export default function Header() {
                     className={`p-1.5 rounded-md transition-colors ${
                       mode === "dark"
                         ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                        : "text-gray-500"
+                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                     }`}
+                    aria-label="Dark mode"
+                    aria-pressed={mode === "dark"}
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"

@@ -52,7 +52,7 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
             Or{" "}
             <button
               onClick={onSwitchToSignup}
-              className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none"
+              className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
             >
               create a new account
             </button>
@@ -112,6 +112,7 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   <Icon
                     name={showPassword ? "eye-off" : "eye"}
@@ -127,7 +128,7 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
             <button
               type="button"
               onClick={onSwitchToForgotPassword}
-              className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none text-sm"
+              className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded text-sm"
             >
               Forgot your password?
             </button>

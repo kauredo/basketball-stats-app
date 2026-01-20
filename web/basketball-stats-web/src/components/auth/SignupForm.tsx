@@ -98,7 +98,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
             Or{" "}
             <button
               onClick={onSwitchToLogin}
-              className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none"
+              className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
             >
               sign in to your existing account
             </button>
@@ -202,14 +202,13 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  <span className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                    <Icon
-                      name={showPassword ? "eye-off" : "eye"}
-                      size={20}
-                      className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                    />
-                  </span>
+                  <Icon
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={20}
+                    className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  />
                 </button>
               </div>
             </div>
@@ -238,14 +237,13 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 >
-                  <span className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                    <Icon
-                      name={showConfirmPassword ? "eye-off" : "eye"}
-                      size={20}
-                      className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                    />
-                  </span>
+                  <Icon
+                    name={showConfirmPassword ? "eye-off" : "eye"}
+                    size={20}
+                    className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  />
                 </button>
               </div>
             </div>

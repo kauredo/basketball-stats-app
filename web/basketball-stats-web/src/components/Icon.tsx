@@ -84,6 +84,10 @@ interface IconProps {
   size?: number;
   className?: string;
   color?: string;
+  /** Set to true for decorative icons that should be hidden from screen readers. Defaults to true. */
+  "aria-hidden"?: boolean;
+  /** Accessible label for icons that convey meaning. When provided, aria-hidden is automatically set to false. */
+  "aria-label"?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,7 +138,14 @@ const iconMap: Record<IconName, React.ComponentType<any>> = {
   "chevron-up": ChevronUpIcon,
 };
 
-export default function Icon({ name, size = 24, className = "", color }: IconProps) {
+export default function Icon({
+  name,
+  size = 24,
+  className = "",
+  color,
+  "aria-hidden": ariaHidden,
+  "aria-label": ariaLabel,
+}: IconProps) {
   const IconComponent = iconMap[name];
 
   if (!IconComponent) {
@@ -142,12 +153,18 @@ export default function Icon({ name, size = 24, className = "", color }: IconPro
     return null;
   }
 
+  // If aria-label is provided, the icon is meaningful and shouldn't be hidden
+  // Otherwise, default to hiding decorative icons
+  const shouldHide = ariaLabel ? false : (ariaHidden ?? true);
+
   return (
     <IconComponent
       width={size}
       height={size}
       className={className}
       style={color ? { color } : undefined}
+      aria-hidden={shouldHide}
+      aria-label={ariaLabel}
     />
   );
 }

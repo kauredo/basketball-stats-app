@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { PlayerStat, FoulType, FOUL_TYPE_LABELS } from "../../../types/livegame";
 
@@ -34,6 +34,7 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
   const [shotType, setShotType] = useState<"2pt" | "3pt">("2pt");
   const [wasAndOne, setWasAndOne] = useState(false);
   const [fouledPlayer, setFouledPlayer] = useState<Id<"players"> | null>(null);
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!isOpen) {
@@ -42,6 +43,27 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
       setShotType("2pt");
       setWasAndOne(false);
       setFouledPlayer(null);
+    }
+  }, [isOpen]);
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, onClose]);
+
+  // Focus management - focus cancel button when modal opens
+  useEffect(() => {
+    if (isOpen && cancelButtonRef.current) {
+      cancelButtonRef.current.focus();
     }
   }, [isOpen]);
 
@@ -71,11 +93,17 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
   const opponentOnCourt = opponentPlayers.filter((p) => p.isOnCourt);
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="foul-modal-title"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
         {/* Header */}
         <div className="bg-amber-600 px-6 py-4">
-          <h3 className="text-lg font-bold text-white">
+          <h3 id="foul-modal-title" className="text-lg font-bold text-white">
             FOUL - #{selectedPlayer.player?.number} {selectedPlayer.player?.name}
           </h3>
           <p className="text-amber-200 text-sm">Current fouls: {selectedPlayer.fouls}</p>
@@ -221,8 +249,9 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
         {/* Cancel button */}
         <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
           <button
+            ref={cancelButtonRef}
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
           >
             Cancel
           </button>

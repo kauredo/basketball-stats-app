@@ -97,7 +97,11 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
             width: Math.max(8, width * 0.25),
             height: Math.max(8, width * 0.25),
           }}
+          aria-hidden="true"
         />
+      )}
+      {isOnCourt !== undefined && (
+        <span className="sr-only">{isOnCourt ? "On court" : "On bench"}</span>
       )}
     </div>
   );

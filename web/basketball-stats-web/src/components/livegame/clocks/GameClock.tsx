@@ -49,6 +49,9 @@ export const GameClock: React.FC<GameClockProps> = ({
         border border-gray-200 dark:border-gray-700
         transition-all duration-200
       `}
+      role="timer"
+      aria-live={lowTimeWarning ? "assertive" : "off"}
+      aria-label={`Game clock: ${displayTime}${isRunning ? ", running" : ", stopped"}`}
     >
       {/* Minutes */}
       <span
@@ -58,6 +61,7 @@ export const GameClock: React.FC<GameClockProps> = ({
           ${getColorClasses()}
           transition-colors duration-200
         `}
+        aria-hidden="true"
       >
         {minutes}
       </span>
@@ -74,6 +78,7 @@ export const GameClock: React.FC<GameClockProps> = ({
           }
           transition-colors duration-200
         `}
+        aria-hidden="true"
       >
         :
       </span>
@@ -86,6 +91,7 @@ export const GameClock: React.FC<GameClockProps> = ({
           ${getColorClasses()}
           transition-colors duration-200
         `}
+        aria-hidden="true"
       >
         {seconds}
       </span>

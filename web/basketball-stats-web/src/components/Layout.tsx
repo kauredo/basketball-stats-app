@@ -80,7 +80,7 @@ export default function Layout({ children }: LayoutProps) {
 
         {/* Theme toggle */}
         <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between rounded-lg bg-gray-100 dark:bg-gray-700 p-1">
+          <div className="flex items-center justify-between rounded-lg bg-gray-100 dark:bg-gray-700 p-1" role="group" aria-label="Theme selection">
             {themeOptions.map((option) => (
               <button
                 key={option.mode}
@@ -90,9 +90,10 @@ export default function Layout({ children }: LayoutProps) {
                     ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
-                title={option.label}
+                aria-label={option.label}
+                aria-pressed={mode === option.mode}
               >
-                <option.icon className="h-4 w-4" />
+                <option.icon className="h-4 w-4" aria-hidden="true" />
               </button>
             ))}
           </div>
@@ -151,7 +152,7 @@ export default function Layout({ children }: LayoutProps) {
                   </div>
                 </div>
               </div>
-              <ChevronDownIcon className="h-5 w-5 text-gray-400" />
+              <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
             </button>
 
             {showUserMenu && (
@@ -211,7 +212,13 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Click outside to close user menu */}
       {showUserMenu && (
-        <div className="fixed inset-0 z-30" onClick={() => setShowUserMenu(false)} />
+        <div
+          className="fixed inset-0 z-30"
+          onClick={() => setShowUserMenu(false)}
+          onKeyDown={(e) => e.key === "Escape" && setShowUserMenu(false)}
+          role="presentation"
+          aria-hidden="true"
+        />
       )}
     </div>
   );
