@@ -59,7 +59,7 @@
 
 - [x] **No form validation feedback** - ~~Team/player forms accept invalid data without real-time validation.~~ Fixed: Added validation to Teams.tsx (team name, player name, jersey number) and Players.tsx (player name, jersey number) with error states and messages.
 - [x] **Sort state not persisted** - ~~Standings and Statistics sorting resets on page refresh.~~ Fixed: Added URL search params persistence for sort state and active tab in Statistics and Standings pages.
-- [ ] **No breadcrumb navigation** - Easy to get lost in deep pages.
+- [x] **No breadcrumb navigation** - ~~Easy to get lost in deep pages.~~ Fixed: Added Breadcrumb component and applied to PlayerDetail and GameAnalysis pages.
 - [x] **Error messages generic** - ~~"Failed to create team" doesn't explain why.~~ Fixed: Added error utility to extract meaningful messages from Convex errors. Updated Teams, Players, and Games pages.
 - [ ] **Charts hardcoded** - Radar chart only shows top 3 players, no customization.
 - [ ] **No pagination** - Standings and statistics tables load all data at once.
@@ -72,8 +72,8 @@
 - [x] **No team edit capability** - ~~Cannot edit team details from mobile.~~ Fixed: Added edit/delete options menu and edit modal to TeamDetailScreen.
 - [x] **No player edit capability** - ~~Cannot edit player details from mobile.~~ Fixed: Added edit/delete options menu and edit modal to PlayerStatsScreen.
 - [x] **Settings should be in Profile** - ~~Settings currently in Dashboard, should move to Profile tab.~~ Fixed: Integrated theme and notification settings directly into ProfileScreen, removed separate Settings navigation.
-- [ ] **No calendar date picker** - Game creation uses +/- buttons instead of proper date picker.
-- [ ] **No loading skeletons** - Most screens show "Loading..." text instead of proper skeletons.
+- [x] **No calendar date picker** - ~~Game creation uses +/- buttons instead of proper date picker.~~ Fixed: Added @react-native-community/datetimepicker with native date/time pickers.
+- [x] **No loading skeletons** - ~~Most screens show "Loading..." text instead of proper skeletons.~~ Fixed: Added skeleton loading states to GamesScreen, TeamsScreen, HomeScreen, and StandingsScreen.
 
 ### Both Apps
 
@@ -139,7 +139,7 @@
 | Standings          | ✅  | ✅     | -                   |
 | Shot Charts        | ✅  | ✅     | -                   |
 | Player Comparison  | ✅  | ✅     | -                   |
-| Game Analysis      | ✅  | ❌     | Implement mobile    |
+| Game Analysis      | ✅  | ✅     | -                   |
 | Notifications Bell | ✅  | ✅     | -                   |
 | Notification Prefs | ✅  | ✅     | -                   |
 | Profile/Settings   | ✅  | ✅     | -                   |
@@ -208,3 +208,7 @@
 - [x] **Team logos display (Mobile)** - Added team logo images with fallback icons in TeamsScreen
 - [x] **Sort state persistence (Web)** - Statistics and Standings pages now persist sort state via URL search params
 - [x] **Improved error messages (Web)** - Added getErrorMessage utility to extract meaningful messages from Convex errors
+- [x] **Breadcrumb navigation (Web)** - Added Breadcrumb component to PlayerDetail and GameAnalysis pages for easier navigation
+- [x] **Calendar date picker (Mobile)** - Replaced +/- buttons with native date/time pickers using @react-native-community/datetimepicker
+- [x] **Game Analysis (Mobile)** - Added GameAnalysisScreen with box scores, team stats comparison, and play-by-play log
+- [x] **Loading skeletons (Mobile)** - Added skeleton loading states to GamesScreen, TeamsScreen, HomeScreen, and StandingsScreen

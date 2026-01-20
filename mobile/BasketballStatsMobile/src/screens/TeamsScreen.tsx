@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, FlatList, TouchableOpacity, RefreshControl, Image } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, Image, ScrollView } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -10,6 +10,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import { SkeletonCard } from "../components/Skeleton";
 
 type TeamsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -95,8 +96,13 @@ export default function TeamsScreen() {
 
   if (teamsData === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
-        <Text className="text-gray-900 dark:text-white text-base">Loading teams...</Text>
+      <View className="flex-1 bg-gray-50 dark:bg-dark-950">
+        <ScrollView className="p-4">
+          <SkeletonCard style={{ marginBottom: 12 }} />
+          <SkeletonCard style={{ marginBottom: 12 }} />
+          <SkeletonCard style={{ marginBottom: 12 }} />
+          <SkeletonCard style={{ marginBottom: 12 }} />
+        </ScrollView>
       </View>
     );
   }

@@ -12,6 +12,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import { SkeletonTable } from "../components/Skeleton";
 
 interface StandingTeam {
   teamId: string;
@@ -294,8 +295,10 @@ export default function StandingsScreen() {
 
   if (standingsData === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
-        <Text className="text-gray-600 dark:text-gray-400 text-base">Loading standings...</Text>
+      <View className="flex-1 bg-gray-50 dark:bg-dark-950">
+        <ScrollView className="p-4">
+          <SkeletonTable rows={8} style={{ marginBottom: 16 }} />
+        </ScrollView>
       </View>
     );
   }

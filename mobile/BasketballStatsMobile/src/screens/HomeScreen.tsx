@@ -9,6 +9,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import { SkeletonCard, SkeletonGameCard } from "../components/Skeleton";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -174,8 +175,13 @@ export default function HomeScreen() {
 
   if (gamesData === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
-        <Text className="text-gray-900 dark:text-white text-base">Loading games...</Text>
+      <View className="flex-1 bg-gray-50 dark:bg-dark-950">
+        <ScrollView className="p-4">
+          <SkeletonCard style={{ marginBottom: 16 }} />
+          <SkeletonGameCard style={{ marginBottom: 12 }} />
+          <SkeletonGameCard style={{ marginBottom: 12 }} />
+          <SkeletonGameCard style={{ marginBottom: 12 }} />
+        </ScrollView>
       </View>
     );
   }

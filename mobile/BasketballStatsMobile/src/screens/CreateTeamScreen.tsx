@@ -20,6 +20,7 @@ export default function CreateTeamScreen() {
   const { token, selectedLeague } = useAuth();
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,6 +45,7 @@ export default function CreateTeamScreen() {
         leagueId: selectedLeague.id,
         name: name.trim(),
         city: city.trim() || undefined,
+        logoUrl: logoUrl.trim() || undefined,
         description: description.trim() || undefined,
       });
 
@@ -100,6 +102,21 @@ export default function CreateTeamScreen() {
             value={city}
             onChangeText={setCity}
             autoCapitalize="words"
+          />
+        </View>
+
+        {/* Logo URL */}
+        <View className="mb-4">
+          <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Logo URL (optional)</Text>
+          <TextInput
+            className="bg-white dark:bg-gray-700 rounded-xl p-4 text-gray-900 dark:text-white text-base border border-gray-200 dark:border-gray-600"
+            placeholder="https://example.com/logo.png"
+            placeholderTextColor="#6B7280"
+            value={logoUrl}
+            onChangeText={setLogoUrl}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
           />
         </View>
 

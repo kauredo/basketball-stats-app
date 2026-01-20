@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
@@ -9,6 +9,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import { SkeletonGameCard } from "../components/Skeleton";
 
 type GamesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -82,6 +83,8 @@ export default function GamesScreen() {
   const handleGamePress = (game: Game) => {
     if (game.status === "active" || game.status === "paused") {
       navigation.navigate("LiveGame", { gameId: game.id });
+    } else if (game.status === "completed") {
+      navigation.navigate("GameAnalysis", { gameId: game.id });
     }
   };
 
@@ -98,8 +101,9 @@ export default function GamesScreen() {
 
   const renderGame = ({ item: game }: { item: Game }) => {
     const isGameLive = game.status === "active" || game.status === "paused";
+    const isGameCompleted = game.status === "completed";
     const winner = getWinner(game);
-    const canPress = isGameLive;
+    const canPress = isGameLive || isGameCompleted;
 
     return (
       <TouchableOpacity
@@ -199,8 +203,13 @@ export default function GamesScreen() {
 
   if (gamesData === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
-        <Text className="text-gray-900 dark:text-white text-base">Loading games...</Text>
+      <View className="flex-1 bg-gray-50 dark:bg-dark-950">
+        <ScrollView className="p-4">
+          <SkeletonGameCard style={{ marginBottom: 12 }} />
+          <SkeletonGameCard style={{ marginBottom: 12 }} />
+          <SkeletonGameCard style={{ marginBottom: 12 }} />
+          <SkeletonGameCard style={{ marginBottom: 12 }} />
+        </ScrollView>
       </View>
     );
   }

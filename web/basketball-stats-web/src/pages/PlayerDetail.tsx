@@ -4,7 +4,8 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
-import { ArrowLeftIcon, ChartBarIcon, UserIcon, TrophyIcon } from "@heroicons/react/24/outline";
+import { ChartBarIcon, UserIcon, TrophyIcon } from "@heroicons/react/24/outline";
+import Breadcrumb from "../components/Breadcrumb";
 
 interface StatCardProps {
   label: string;
@@ -103,16 +104,16 @@ const PlayerDetail: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { label: "Players", href: "/players" },
+          { label: player.name },
+        ]}
+      />
+
       {/* Header */}
       <div className="mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
-        >
-          <ArrowLeftIcon className="w-5 h-5 mr-2" />
-          Back
-        </button>
-
         <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl p-6 text-white">
           <div className="flex items-center gap-6">
             <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center">

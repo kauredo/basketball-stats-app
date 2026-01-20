@@ -7,7 +7,7 @@ import {
   Modal,
   FlatList,
   Alert,
-  TextInput,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useMutation, useQuery } from "convex/react";
@@ -15,6 +15,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 interface Team {
   id: Id<"teams">;
@@ -97,6 +98,8 @@ export default function CreateGameScreen() {
   const [scheduledDate, setScheduledDate] = useState(new Date());
   const [quarterMinutes, setQuarterMinutes] = useState(12);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const createGameMutation = useMutation(api.games.create);
 
@@ -145,16 +148,29 @@ export default function CreateGameScreen() {
     }
   };
 
-  const adjustDate = (days: number) => {
-    const newDate = new Date(scheduledDate);
-    newDate.setDate(newDate.getDate() + days);
-    setScheduledDate(newDate);
+  const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS === "android") {
+      setShowDatePicker(false);
+    }
+    if (selectedDate) {
+      const newDate = new Date(scheduledDate);
+      newDate.setFullYear(selectedDate.getFullYear());
+      newDate.setMonth(selectedDate.getMonth());
+      newDate.setDate(selectedDate.getDate());
+      setScheduledDate(newDate);
+    }
   };
 
-  const adjustTime = (hours: number) => {
-    const newDate = new Date(scheduledDate);
-    newDate.setHours(newDate.getHours() + hours);
-    setScheduledDate(newDate);
+  const onTimeChange = (event: DateTimePickerEvent, selectedTime?: Date) => {
+    if (Platform.OS === "android") {
+      setShowTimePicker(false);
+    }
+    if (selectedTime) {
+      const newDate = new Date(scheduledDate);
+      newDate.setHours(selectedTime.getHours());
+      newDate.setMinutes(selectedTime.getMinutes());
+      setScheduledDate(newDate);
+    }
   };
 
   if (!selectedLeague) {
@@ -257,52 +273,87 @@ export default function CreateGameScreen() {
           {/* Date */}
           <View className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600 mb-3">
             <Text className="text-gray-600 dark:text-gray-400 text-xs mb-2">DATE</Text>
-            <View className="flex-row items-center justify-between">
-              <TouchableOpacity
-                className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center"
-                onPress={() => adjustDate(-1)}
-              >
-                <Text className="text-gray-900 dark:text-white text-xl font-bold">-</Text>
-              </TouchableOpacity>
-              <Text className="text-gray-900 dark:text-white font-medium text-lg">
-                {scheduledDate.toLocaleDateString("en-US", {
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                })}
-              </Text>
-              <TouchableOpacity
-                className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center"
-                onPress={() => adjustDate(1)}
-              >
-                <Text className="text-gray-900 dark:text-white text-xl font-bold">+</Text>
-              </TouchableOpacity>
-            </View>
+            {Platform.OS === "ios" ? (
+              <DateTimePicker
+                value={scheduledDate}
+                mode="date"
+                display="default"
+                onChange={onDateChange}
+                minimumDate={new Date()}
+                style={{ marginLeft: -10 }}
+              />
+            ) : (
+              <>
+                <TouchableOpacity
+                  className="flex-row items-center justify-between py-2"
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <View className="flex-row items-center">
+                    <Icon name="timer" size={20} color="#9CA3AF" />
+                    <Text className="text-gray-900 dark:text-white font-medium text-lg ml-3">
+                      {scheduledDate.toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </Text>
+                  </View>
+                  <Icon name="chevron-right" size={20} color="#9CA3AF" />
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={scheduledDate}
+                    mode="date"
+                    display="default"
+                    onChange={onDateChange}
+                    minimumDate={new Date()}
+                  />
+                )}
+              </>
+            )}
           </View>
 
           {/* Time */}
           <View className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
             <Text className="text-gray-600 dark:text-gray-400 text-xs mb-2">TIME</Text>
-            <View className="flex-row items-center justify-between">
-              <TouchableOpacity
-                className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center"
-                onPress={() => adjustTime(-1)}
-              >
-                <Text className="text-gray-900 dark:text-white text-xl font-bold">-</Text>
-              </TouchableOpacity>
-              <Text className="text-gray-900 dark:text-white font-medium text-lg">
-                {scheduledDate.toLocaleTimeString("en-US", {
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
-              </Text>
-              <TouchableOpacity
-                className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center"
-                onPress={() => adjustTime(1)}
-              >
-                <Text className="text-gray-900 dark:text-white text-xl font-bold">+</Text>
-              </TouchableOpacity>
-            </View>
+            {Platform.OS === "ios" ? (
+              <DateTimePicker
+                value={scheduledDate}
+                mode="time"
+                display="default"
+                onChange={onTimeChange}
+                minuteInterval={5}
+                style={{ marginLeft: -10 }}
+              />
+            ) : (
+              <>
+                <TouchableOpacity
+                  className="flex-row items-center justify-between py-2"
+                  onPress={() => setShowTimePicker(true)}
+                >
+                  <View className="flex-row items-center">
+                    <Icon name="alarm" size={20} color="#9CA3AF" />
+                    <Text className="text-gray-900 dark:text-white font-medium text-lg ml-3">
+                      {scheduledDate.toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+                  </View>
+                  <Icon name="chevron-right" size={20} color="#9CA3AF" />
+                </TouchableOpacity>
+                {showTimePicker && (
+                  <DateTimePicker
+                    value={scheduledDate}
+                    mode="time"
+                    display="default"
+                    onChange={onTimeChange}
+                    minuteInterval={5}
+                  />
+                )}
+              </>
+            )}
           </View>
         </View>
 

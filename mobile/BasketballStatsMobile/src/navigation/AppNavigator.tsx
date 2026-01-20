@@ -27,6 +27,7 @@ import CreatePlayerScreen from "../screens/CreatePlayerScreen";
 import TeamDetailScreen from "../screens/TeamDetailScreen";
 import StandingsScreen from "../screens/StandingsScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
+import GameAnalysisScreen from "../screens/GameAnalysisScreen";
 
 // Navigation parameter types
 export type RootStackParamList = {
@@ -42,6 +43,7 @@ export type RootStackParamList = {
   TeamDetail: { teamId: string; teamName: string };
   Standings: undefined;
   Notifications: undefined;
+  GameAnalysis: { gameId: string };
 };
 
 export type TabParamList = {
@@ -268,6 +270,11 @@ function AppContent() {
             name="Notifications"
             component={NotificationsScreen}
             options={{ title: "Notifications" }}
+          />
+          <Stack.Screen
+            name="GameAnalysis"
+            component={GameAnalysisScreen}
+            options={{ title: "Game Analysis" }}
           />
         </Stack.Navigator>
       )}

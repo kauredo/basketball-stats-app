@@ -5,12 +5,12 @@ import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import { Id } from "../../../../convex/_generated/dataModel";
 import {
-  ArrowLeftIcon,
   TrophyIcon,
   ChartBarIcon,
   TableCellsIcon,
   PlayIcon,
 } from "@heroicons/react/24/outline";
+import Breadcrumb from "../components/Breadcrumb";
 import {
   BarChart,
   Bar,
@@ -290,20 +290,20 @@ const GameAnalysis: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { label: "Games", href: "/games" },
+          { label: `${homeTeam?.team?.name || "Home"} vs ${awayTeam?.team?.name || "Away"}` },
+        ]}
+      />
+
       {/* Header */}
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={() => navigate("/app/games")}
-          className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-        >
-          <ArrowLeftIcon className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Game Analysis</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            {game.status === "completed" ? "Final" : game.status}
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Game Analysis</h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          {game.status === "completed" ? "Final" : game.status}
+        </p>
       </div>
 
       {/* Score Card */}
