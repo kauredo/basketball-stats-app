@@ -12,15 +12,17 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import ImagePicker from "../components/ImagePicker";
 
 export default function CreateTeamScreen() {
   const navigation = useNavigation();
   const { token, selectedLeague } = useAuth();
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
-  const [logoUrl, setLogoUrl] = useState("");
+  const [logoStorageId, setLogoStorageId] = useState<Id<"_storage"> | null>(null);
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,7 +47,7 @@ export default function CreateTeamScreen() {
         leagueId: selectedLeague.id,
         name: name.trim(),
         city: city.trim() || undefined,
-        logoUrl: logoUrl.trim() || undefined,
+        logoStorageId: logoStorageId || undefined,
         description: description.trim() || undefined,
       });
 
@@ -105,20 +107,13 @@ export default function CreateTeamScreen() {
           />
         </View>
 
-        {/* Logo URL */}
-        <View className="mb-4">
-          <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Logo URL (optional)</Text>
-          <TextInput
-            className="bg-white dark:bg-gray-700 rounded-xl p-4 text-gray-900 dark:text-white text-base border border-gray-200 dark:border-gray-600"
-            placeholder="https://example.com/logo.png"
-            placeholderTextColor="#6B7280"
-            value={logoUrl}
-            onChangeText={setLogoUrl}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
-          />
-        </View>
+        {/* Logo Image Picker */}
+        <ImagePicker
+          onImageUploaded={(storageId) => setLogoStorageId(storageId)}
+          onImageCleared={() => setLogoStorageId(null)}
+          label="Team Logo"
+          placeholder="Tap to add team logo"
+        />
 
         {/* Description */}
         <View className="mb-6">

@@ -13,6 +13,7 @@ import {
   TrashIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+import ImageUpload from "../components/ImageUpload";
 
 const Teams: React.FC = () => {
   const { token, selectedLeague } = useAuth();
@@ -22,7 +23,14 @@ const Teams: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCreatePlayerModal, setShowCreatePlayerModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<any>(null);
-  const [teamForm, setTeamForm] = useState({ name: "", city: "", description: "", logoUrl: "" });
+  const [teamForm, setTeamForm] = useState({
+    name: "",
+    city: "",
+    description: "",
+    logoUrl: "",
+    logoStorageId: null as Id<"_storage"> | null,
+    clearLogo: false,
+  });
   const [teamFormErrors, setTeamFormErrors] = useState<{ name?: string }>({});
   const [playerForm, setPlayerForm] = useState({
     name: "",
@@ -81,10 +89,10 @@ const Teams: React.FC = () => {
         name: teamForm.name.trim(),
         city: teamForm.city.trim() || undefined,
         description: teamForm.description.trim() || undefined,
-        logoUrl: teamForm.logoUrl.trim() || undefined,
+        logoStorageId: teamForm.logoStorageId || undefined,
       });
       setShowCreateModal(false);
-      setTeamForm({ name: "", city: "", description: "", logoUrl: "" });
+      setTeamForm({ name: "", city: "", description: "", logoUrl: "", logoStorageId: null, clearLogo: false });
       setTeamFormErrors({});
       toast.success(`Team "${teamForm.name.trim()}" created successfully`);
     } catch (error) {
@@ -131,6 +139,8 @@ const Teams: React.FC = () => {
       city: team.city || "",
       description: team.description || "",
       logoUrl: team.logoUrl || "",
+      logoStorageId: null,
+      clearLogo: false,
     });
     setTeamFormErrors({});
     setShowEditModal(true);
@@ -147,11 +157,12 @@ const Teams: React.FC = () => {
         name: teamForm.name.trim(),
         city: teamForm.city.trim() || undefined,
         description: teamForm.description.trim() || undefined,
-        logoUrl: teamForm.logoUrl.trim() || undefined,
+        logoStorageId: teamForm.logoStorageId || undefined,
+        clearLogo: teamForm.clearLogo || undefined,
       });
       toast.success(`Team "${teamForm.name.trim()}" updated successfully`);
       setShowEditModal(false);
-      setTeamForm({ name: "", city: "", description: "", logoUrl: "" });
+      setTeamForm({ name: "", city: "", description: "", logoUrl: "", logoStorageId: null, clearLogo: false });
       setTeamFormErrors({});
       setSelectedTeam(null);
     } catch (error) {
@@ -363,18 +374,16 @@ const Teams: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Logo URL
-                </label>
-                <input
-                  type="url"
-                  value={teamForm.logoUrl}
-                  onChange={(e) => setTeamForm((prev) => ({ ...prev, logoUrl: e.target.value }))}
-                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="https://example.com/logo.png"
-                />
-              </div>
+              <ImageUpload
+                label="Team Logo"
+                placeholder="Click to upload logo or drag and drop"
+                onImageUploaded={(storageId) =>
+                  setTeamForm((prev) => ({ ...prev, logoStorageId: storageId }))
+                }
+                onImageCleared={() =>
+                  setTeamForm((prev) => ({ ...prev, logoStorageId: null }))
+                }
+              />
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -396,7 +405,7 @@ const Teams: React.FC = () => {
               <button
                 onClick={() => {
                   setShowCreateModal(false);
-                  setTeamForm({ name: "", city: "", description: "", logoUrl: "" });
+                  setTeamForm({ name: "", city: "", description: "", logoUrl: "", logoStorageId: null, clearLogo: false });
                   setTeamFormErrors({});
                 }}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -617,18 +626,17 @@ const Teams: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Logo URL
-                </label>
-                <input
-                  type="url"
-                  value={teamForm.logoUrl}
-                  onChange={(e) => setTeamForm((prev) => ({ ...prev, logoUrl: e.target.value }))}
-                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="https://example.com/logo.png"
-                />
-              </div>
+              <ImageUpload
+                label="Team Logo"
+                placeholder="Click to upload logo or drag and drop"
+                currentImageUrl={teamForm.clearLogo ? undefined : teamForm.logoUrl}
+                onImageUploaded={(storageId) =>
+                  setTeamForm((prev) => ({ ...prev, logoStorageId: storageId, clearLogo: false }))
+                }
+                onImageCleared={() =>
+                  setTeamForm((prev) => ({ ...prev, logoStorageId: null, clearLogo: true }))
+                }
+              />
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -650,7 +658,7 @@ const Teams: React.FC = () => {
               <button
                 onClick={() => {
                   setShowEditModal(false);
-                  setTeamForm({ name: "", city: "", description: "", logoUrl: "" });
+                  setTeamForm({ name: "", city: "", description: "", logoUrl: "", logoStorageId: null, clearLogo: false });
                   setTeamFormErrors({});
                   setSelectedTeam(null);
                 }}

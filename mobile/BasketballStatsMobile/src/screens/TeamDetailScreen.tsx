@@ -21,6 +21,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
+import ImagePicker from "../components/ImagePicker";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { FontAwesome5 } from "@expo/vector-icons";
 
@@ -49,6 +50,8 @@ export default function TeamDetailScreen() {
     city: "",
     description: "",
     logoUrl: "",
+    logoStorageId: null as Id<"_storage"> | null,
+    clearLogo: false,
   });
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -81,6 +84,8 @@ export default function TeamDetailScreen() {
         city: team.city || "",
         description: team.description || "",
         logoUrl: team.logoUrl || "",
+        logoStorageId: null,
+        clearLogo: false,
       });
     }
   }, [team, teamName]);
@@ -101,7 +106,8 @@ export default function TeamDetailScreen() {
         name: editForm.name.trim(),
         city: editForm.city.trim() || undefined,
         description: editForm.description.trim() || undefined,
-        logoUrl: editForm.logoUrl.trim() || undefined,
+        logoStorageId: editForm.logoStorageId || undefined,
+        clearLogo: editForm.clearLogo || undefined,
       });
       setShowEditModal(false);
       // Update the header title
@@ -375,22 +381,26 @@ export default function TeamDetailScreen() {
                 />
               </View>
 
-              {/* Logo URL */}
-              <View className="mb-4">
-                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
-                  Logo URL
-                </Text>
-                <TextInput
-                  className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
-                  value={editForm.logoUrl}
-                  onChangeText={(text) => setEditForm((prev) => ({ ...prev, logoUrl: text }))}
-                  placeholder="https://example.com/logo.png"
-                  placeholderTextColor="#9CA3AF"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  keyboardType="url"
-                />
-              </View>
+              {/* Logo Image Picker */}
+              <ImagePicker
+                currentImageUrl={editForm.clearLogo ? undefined : editForm.logoUrl}
+                onImageUploaded={(storageId) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    logoStorageId: storageId,
+                    clearLogo: false,
+                  }))
+                }
+                onImageCleared={() =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    logoStorageId: null,
+                    clearLogo: true,
+                  }))
+                }
+                label="Team Logo"
+                placeholder="Tap to add team logo"
+              />
 
               {/* Description */}
               <View>

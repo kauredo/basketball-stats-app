@@ -87,7 +87,8 @@ export default defineSchema({
   teams: defineTable({
     name: v.string(),
     city: v.optional(v.string()),
-    logoUrl: v.optional(v.string()),
+    logoUrl: v.optional(v.string()), // External URL (legacy support)
+    logoStorageId: v.optional(v.id("_storage")), // Convex file storage ID
     description: v.optional(v.string()),
     userId: v.optional(v.id("users")),
     leagueId: v.id("leagues"),

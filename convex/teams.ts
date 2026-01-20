@@ -2,6 +2,19 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getUserFromToken, canAccessLeague, canManageLeague } from "./lib/auth";
 
+// Helper to resolve logo URL from either logoUrl or logoStorageId
+async function resolveLogoUrl(
+  ctx: any,
+  logoUrl: string | undefined,
+  logoStorageId: any | undefined
+): Promise<string | undefined> {
+  if (logoStorageId) {
+    const url = await ctx.storage.getUrl(logoStorageId);
+    return url || undefined;
+  }
+  return logoUrl;
+}
+
 // List teams in a league
 export const list = query({
   args: {
@@ -60,11 +73,14 @@ export const list = query({
         // Get owner info if exists
         const owner = team.userId ? await ctx.db.get(team.userId) : null;
 
+        // Resolve logo URL
+        const logoUrl = await resolveLogoUrl(ctx, team.logoUrl, team.logoStorageId);
+
         return {
           id: team._id,
           name: team.name,
           city: team.city,
-          logoUrl: team.logoUrl,
+          logoUrl,
           description: team.description,
           activePlayersCount: players.length,
           wins,
@@ -148,12 +164,15 @@ export const get = query({
     const owner = team.userId ? await ctx.db.get(team.userId) : null;
     const league = await ctx.db.get(team.leagueId);
 
+    // Resolve logo URL
+    const logoUrl = await resolveLogoUrl(ctx, team.logoUrl, team.logoStorageId);
+
     return {
       team: {
         id: team._id,
         name: team.name,
         city: team.city,
-        logoUrl: team.logoUrl,
+        logoUrl,
         description: team.description,
         activePlayersCount: players.filter((p) => p.active).length,
         wins,
@@ -196,6 +215,7 @@ export const create = mutation({
     name: v.string(),
     city: v.optional(v.string()),
     logoUrl: v.optional(v.string()),
+    logoStorageId: v.optional(v.id("_storage")),
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -219,19 +239,21 @@ export const create = mutation({
       name: args.name,
       city: args.city,
       logoUrl: args.logoUrl,
+      logoStorageId: args.logoStorageId,
       description: args.description,
       leagueId: args.leagueId,
       userId: user._id,
     });
 
     const team = await ctx.db.get(teamId);
+    const logoUrl = await resolveLogoUrl(ctx, team!.logoUrl, team!.logoStorageId);
 
     return {
       team: {
         id: team!._id,
         name: team!.name,
         city: team!.city,
-        logoUrl: team!.logoUrl,
+        logoUrl,
         description: team!.description,
         createdAt: team!._creationTime,
       },
@@ -248,6 +270,8 @@ export const update = mutation({
     name: v.optional(v.string()),
     city: v.optional(v.string()),
     logoUrl: v.optional(v.string()),
+    logoStorageId: v.optional(v.id("_storage")),
+    clearLogo: v.optional(v.boolean()),
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -278,19 +302,43 @@ export const update = mutation({
     const updates: any = {};
     if (args.name !== undefined) updates.name = args.name;
     if (args.city !== undefined) updates.city = args.city;
-    if (args.logoUrl !== undefined) updates.logoUrl = args.logoUrl;
     if (args.description !== undefined) updates.description = args.description;
+
+    // Handle logo updates
+    if (args.clearLogo) {
+      // Delete old storage file if exists
+      if (team.logoStorageId) {
+        await ctx.storage.delete(team.logoStorageId);
+      }
+      updates.logoUrl = undefined;
+      updates.logoStorageId = undefined;
+    } else if (args.logoStorageId !== undefined) {
+      // New storage-based logo - delete old storage file if exists
+      if (team.logoStorageId && team.logoStorageId !== args.logoStorageId) {
+        await ctx.storage.delete(team.logoStorageId);
+      }
+      updates.logoStorageId = args.logoStorageId;
+      updates.logoUrl = undefined; // Clear URL-based logo
+    } else if (args.logoUrl !== undefined) {
+      // URL-based logo - delete old storage file if exists
+      if (team.logoStorageId) {
+        await ctx.storage.delete(team.logoStorageId);
+      }
+      updates.logoUrl = args.logoUrl;
+      updates.logoStorageId = undefined;
+    }
 
     await ctx.db.patch(args.teamId, updates);
 
     const updatedTeam = await ctx.db.get(args.teamId);
+    const logoUrl = await resolveLogoUrl(ctx, updatedTeam!.logoUrl, updatedTeam!.logoStorageId);
 
     return {
       team: {
         id: updatedTeam!._id,
         name: updatedTeam!.name,
         city: updatedTeam!.city,
-        logoUrl: updatedTeam!.logoUrl,
+        logoUrl,
         description: updatedTeam!.description,
         createdAt: updatedTeam!._creationTime,
       },
@@ -340,6 +388,11 @@ export const remove = mutation({
 
     for (const player of players) {
       await ctx.db.delete(player._id);
+    }
+
+    // Delete logo file from storage if exists
+    if (team.logoStorageId) {
+      await ctx.storage.delete(team.logoStorageId);
     }
 
     // Delete team
