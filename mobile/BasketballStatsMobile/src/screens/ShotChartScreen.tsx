@@ -1,35 +1,21 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  Dimensions,
   Modal,
   FlatList,
-  StyleSheet,
 } from "react-native";
-import Svg, { Rect, Circle, Line, Path, G, Defs, RadialGradient, Stop } from "react-native-svg";
-import { GestureDetector, Gesture } from "react-native-gesture-handler";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-  runOnJS,
-} from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-import { COLORS, COURT_DIMENSIONS, getShotZone, getHeatmapColor } from "@basketball-stats/shared";
-
-const screenWidth = Dimensions.get("window").width;
-const COURT_WIDTH = screenWidth - 32;
-const COURT_HEIGHT = COURT_WIDTH * 0.94; // NBA half-court ratio
+import { MiniCourt, ShotMarker } from "../components/court/MiniCourt";
+import { COLORS } from "@basketball-stats/shared";
 
 interface PlayerOption {
   id: Id<"players">;
@@ -37,22 +23,6 @@ interface PlayerOption {
   team: string;
   number: number;
   position?: string;
-}
-
-interface Shot {
-  id: string;
-  x: number;
-  y: number;
-  shotType: "2pt" | "3pt" | "ft";
-  made: boolean;
-  quarter: number;
-  shotZone?: string;
-}
-
-interface ZoneStats {
-  made: number;
-  attempted: number;
-  percentage: number;
 }
 
 interface PlayerSelectModalProps {
@@ -107,324 +77,6 @@ function PlayerSelectModal({ visible, onClose, onSelect, players, title }: Playe
         </View>
       </View>
     </Modal>
-  );
-}
-
-// Animated Shot Marker Component
-function AnimatedShotMarker({ shot, index }: { shot: Shot; index: number }) {
-  const scale = useSharedValue(0);
-  const opacity = useSharedValue(0);
-
-  React.useEffect(() => {
-    const delay = index * 50;
-    setTimeout(() => {
-      scale.value = withSpring(1, { damping: 12, stiffness: 150 });
-      opacity.value = withTiming(1, { duration: 300 });
-    }, delay);
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
-
-  const svgX = 25 + shot.x;
-  const svgY = shot.y;
-  const markerColor = shot.made ? COLORS.shots.made3pt : COLORS.shots.missed3pt;
-
-  return (
-    <Animated.View
-      style={[
-        animatedStyle,
-        {
-          position: "absolute",
-          left: (svgX / 50) * COURT_WIDTH - 6,
-          top: (svgY / 47) * COURT_HEIGHT - 6,
-          width: 12,
-          height: 12,
-        },
-      ]}
-    >
-      <View
-        style={{
-          width: 12,
-          height: 12,
-          borderRadius: shot.made ? 6 : 0,
-          backgroundColor: shot.made ? markerColor : "transparent",
-          borderWidth: shot.made ? 1.5 : 0,
-          borderColor: "#fff",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        {!shot.made && (
-          <Text style={{ color: markerColor, fontSize: 12, fontWeight: "bold" }}>✕</Text>
-        )}
-      </View>
-    </Animated.View>
-  );
-}
-
-// Interactive Basketball court SVG component with gestures and heatmap
-interface BasketballCourtProps {
-  shots: Shot[];
-  showHeatmap?: boolean;
-  interactive?: boolean;
-  onCourtTap?: (x: number, y: number, zone: string) => void;
-  zoneStats?: Record<string, ZoneStats>;
-}
-
-function BasketballCourt({
-  shots,
-  showHeatmap = false,
-  interactive = false,
-  onCourtTap,
-  zoneStats,
-}: BasketballCourtProps) {
-  // Gesture animation values
-  const scale = useSharedValue(1);
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-  const savedScale = useSharedValue(1);
-  const savedTranslateX = useSharedValue(0);
-  const savedTranslateY = useSharedValue(0);
-
-  // Tap gesture for recording shots
-  const handleTap = useCallback(
-    (tapX: number, tapY: number) => {
-      if (!onCourtTap) return;
-
-      // Convert tap coordinates to court coordinates
-      const courtX = (tapX / COURT_WIDTH) * 50 - 25;
-      const courtY = (tapY / COURT_HEIGHT) * 47;
-
-      // Get shot zone
-      const zone = getShotZone(courtX, courtY);
-
-      // Haptic feedback
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-      onCourtTap(courtX, courtY, zone);
-    },
-    [onCourtTap]
-  );
-
-  const tapGesture = Gesture.Tap()
-    .enabled(interactive)
-    .onEnd((event) => {
-      runOnJS(handleTap)(event.x, event.y);
-    });
-
-  // Pinch gesture for zooming
-  const pinchGesture = Gesture.Pinch()
-    .onUpdate((event) => {
-      scale.value = Math.max(1, Math.min(3, savedScale.value * event.scale));
-    })
-    .onEnd(() => {
-      savedScale.value = scale.value;
-      if (scale.value < 1.1) {
-        scale.value = withSpring(1);
-        savedScale.value = 1;
-        translateX.value = withSpring(0);
-        translateY.value = withSpring(0);
-        savedTranslateX.value = 0;
-        savedTranslateY.value = 0;
-      }
-    });
-
-  // Pan gesture for navigation when zoomed
-  const panGesture = Gesture.Pan()
-    .onUpdate((event) => {
-      if (scale.value > 1) {
-        const maxTranslate = ((scale.value - 1) * COURT_WIDTH) / 2;
-        translateX.value = Math.max(
-          -maxTranslate,
-          Math.min(maxTranslate, savedTranslateX.value + event.translationX)
-        );
-        translateY.value = Math.max(
-          -maxTranslate,
-          Math.min(maxTranslate, savedTranslateY.value + event.translationY)
-        );
-      }
-    })
-    .onEnd(() => {
-      savedTranslateX.value = translateX.value;
-      savedTranslateY.value = translateY.value;
-    });
-
-  // Combine gestures
-  const composedGesture = Gesture.Simultaneous(
-    tapGesture,
-    Gesture.Simultaneous(pinchGesture, panGesture)
-  );
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { scale: scale.value },
-    ],
-  }));
-
-  // Calculate heatmap colors for zones
-  const getZoneColor = (zoneName: string): string => {
-    if (!showHeatmap || !zoneStats || !zoneStats[zoneName]) return "transparent";
-    const stats = zoneStats[zoneName];
-    if (stats.attempted === 0) return "transparent";
-    return getHeatmapColor(stats.percentage / 100, 0.4);
-  };
-
-  return (
-    <GestureDetector gesture={composedGesture}>
-      <Animated.View style={[styles.courtContainer, animatedStyle]}>
-        <Svg width={COURT_WIDTH} height={COURT_HEIGHT} viewBox="0 0 50 47">
-          {/* Court background with unified color */}
-          <Rect x="0" y="0" width="50" height="47" fill={COLORS.court.background} />
-
-          {/* Heatmap zones */}
-          {showHeatmap && (
-            <>
-              {/* Paint zone */}
-              <Rect x="17" y="0" width="16" height="19" fill={getZoneColor("paint")} />
-
-              {/* Left midrange */}
-              <Path
-                d="M 3 0 L 3 14 L 17 14 L 17 19 L 33 19 L 33 14 L 17 14 L 17 0 Z"
-                fill={getZoneColor("midrangeLeft")}
-              />
-
-              {/* Right midrange */}
-              <Path
-                d="M 47 0 L 47 14 L 33 14 L 33 19 L 17 19 L 17 14 L 33 14 L 33 0 Z"
-                fill={getZoneColor("midrangeRight")}
-              />
-
-              {/* Left corner 3 */}
-              <Rect x="0" y="0" width="3" height="14" fill={getZoneColor("corner3Left")} />
-
-              {/* Right corner 3 */}
-              <Rect x="47" y="0" width="3" height="14" fill={getZoneColor("corner3Right")} />
-
-              {/* Wing and top 3 zones (simplified as a ring) */}
-              <Path
-                d="M 3 14 A 23.75 23.75 0 0 0 47 14 L 47 47 L 3 47 Z"
-                fill={getZoneColor("top3")}
-              />
-            </>
-          )}
-
-          {/* Court outline */}
-          <Rect x="0" y="0" width="50" height="47" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-
-          {/* Paint/Key area */}
-          <Rect
-            x="17"
-            y="0"
-            width="16"
-            height="19"
-            fill="none"
-            stroke="#4A5568"
-            strokeWidth="0.3"
-          />
-
-          {/* Free throw circle */}
-          <Circle cx="25" cy="19" r="6" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-
-          {/* Restricted area arc */}
-          <Path d="M 21 0 A 4 4 0 0 0 29 0" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-
-          {/* Basket */}
-          <Circle
-            cx="25"
-            cy="5.25"
-            r="0.75"
-            fill={COLORS.primary[500]}
-            stroke={COLORS.primary[500]}
-            strokeWidth="0.2"
-          />
-
-          {/* Backboard */}
-          <Line x1="22" y1="4" x2="28" y2="4" stroke="#4A5568" strokeWidth="0.3" />
-
-          {/* Three-point line */}
-          <Path
-            d="M 3 0 L 3 14 A 23.75 23.75 0 0 0 47 14 L 47 0"
-            fill="none"
-            stroke="#4A5568"
-            strokeWidth="0.3"
-          />
-
-          {/* Half court line (top of chart) */}
-          <Line x1="0" y1="47" x2="50" y2="47" stroke="#4A5568" strokeWidth="0.3" />
-
-          {/* Center circle at half court */}
-          <Path d="M 19 47 A 6 6 0 0 1 31 47" fill="none" stroke="#4A5568" strokeWidth="0.3" />
-
-          {/* Plot shots when not using animated markers */}
-          {!showHeatmap && (
-            <G>
-              {shots.map((shot, index) => {
-                const svgX = 25 + shot.x;
-                const svgY = shot.y;
-                const markerColor = shot.made
-                  ? shot.shotType === "3pt"
-                    ? COLORS.shots.made3pt
-                    : COLORS.shots.made2pt
-                  : shot.shotType === "3pt"
-                    ? COLORS.shots.missed3pt
-                    : COLORS.shots.missed2pt;
-
-                return shot.made ? (
-                  <Circle
-                    key={shot.id || index}
-                    cx={svgX}
-                    cy={svgY}
-                    r={1}
-                    fill={markerColor}
-                    opacity={0.9}
-                    stroke="#fff"
-                    strokeWidth={0.15}
-                  />
-                ) : (
-                  <G key={shot.id || index}>
-                    <Line
-                      x1={svgX - 0.8}
-                      y1={svgY - 0.8}
-                      x2={svgX + 0.8}
-                      y2={svgY + 0.8}
-                      stroke={markerColor}
-                      strokeWidth={0.3}
-                    />
-                    <Line
-                      x1={svgX + 0.8}
-                      y1={svgY - 0.8}
-                      x2={svgX - 0.8}
-                      y2={svgY + 0.8}
-                      stroke={markerColor}
-                      strokeWidth={0.3}
-                    />
-                  </G>
-                );
-              })}
-            </G>
-          )}
-
-          {/* Interactive mode indicator */}
-          {interactive && (
-            <G>
-              <Circle cx="25" cy="28" r="0.5" fill={COLORS.primary[500]} opacity={0.8} />
-            </G>
-          )}
-        </Svg>
-
-        {/* Interactive hint */}
-        {interactive && (
-          <View style={styles.interactiveHint}>
-            <Text style={styles.interactiveHintText}>TAP TO RECORD SHOT</Text>
-          </View>
-        )}
-      </Animated.View>
-    </GestureDetector>
   );
 }
 
@@ -510,13 +162,22 @@ export default function ShotChartScreen() {
     );
   }
 
-  // Filter shots based on toggle
-  const filteredShots: Shot[] =
-    shotChartData?.shots.filter((shot) => {
-      if (shot.made && !showMade) return false;
-      if (!shot.made && !showMissed) return false;
-      return true;
-    }) || [];
+  // Transform and filter shots for MiniCourt display
+  const transformedShots: ShotMarker[] = useMemo(() => {
+    if (!shotChartData?.shots) return [];
+    return shotChartData.shots
+      .filter((shot) => {
+        if (shot.made && !showMade) return false;
+        if (!shot.made && !showMissed) return false;
+        return true;
+      })
+      .map((shot) => ({
+        x: shot.x,
+        y: shot.y,
+        made: shot.made,
+        is3pt: shot.shotType === "3pt",
+      }));
+  }, [shotChartData?.shots, showMade, showMissed]);
 
   return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-800">
@@ -629,43 +290,25 @@ export default function ShotChartScreen() {
 
               {/* Shot Chart */}
               <View className="bg-white dark:bg-gray-700 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-600 items-center">
-                <BasketballCourt
-                  shots={filteredShots}
+                <MiniCourt
+                  shots={transformedShots}
+                  displayMode="all"
                   showHeatmap={showHeatmap}
                   zoneStats={shotChartData.zoneStats}
+                  disabled
                 />
                 <View className="flex-row items-center mt-4 flex-wrap justify-center">
                   <View className="flex-row items-center mr-4 mb-2">
-                    <View
-                      className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: COLORS.shots.made3pt }}
-                    />
+                    <View className="w-3 h-3 rounded-full mr-2 bg-violet-500" />
                     <Text className="text-gray-600 dark:text-gray-400 text-sm">Made 3PT</Text>
                   </View>
                   <View className="flex-row items-center mr-4 mb-2">
-                    <View
-                      className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: COLORS.shots.made2pt }}
-                    />
+                    <View className="w-3 h-3 rounded-full mr-2 bg-green-500" />
                     <Text className="text-gray-600 dark:text-gray-400 text-sm">Made 2PT</Text>
                   </View>
-                  <View className="flex-row items-center mr-4 mb-2">
-                    <Text
-                      className="mr-2 font-bold"
-                      style={{ color: COLORS.shots.missed3pt, fontSize: 14 }}
-                    >
-                      ✕
-                    </Text>
-                    <Text className="text-gray-600 dark:text-gray-400 text-sm">Missed 3PT</Text>
-                  </View>
                   <View className="flex-row items-center mb-2">
-                    <Text
-                      className="mr-2 font-bold"
-                      style={{ color: COLORS.shots.missed2pt, fontSize: 14 }}
-                    >
-                      ✕
-                    </Text>
-                    <Text className="text-gray-600 dark:text-gray-400 text-sm">Missed 2PT</Text>
+                    <View className="w-3 h-3 rounded-full mr-2 bg-red-500" />
+                    <Text className="text-gray-600 dark:text-gray-400 text-sm">Missed</Text>
                   </View>
                 </View>
 
@@ -818,27 +461,3 @@ export default function ShotChartScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  courtContainer: {
-    width: COURT_WIDTH,
-    height: COURT_HEIGHT,
-    overflow: "hidden",
-  },
-  interactiveHint: {
-    position: "absolute",
-    bottom: 10,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-  },
-  interactiveHintText: {
-    color: "#9CA3AF",
-    fontSize: 10,
-    fontWeight: "500",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-});

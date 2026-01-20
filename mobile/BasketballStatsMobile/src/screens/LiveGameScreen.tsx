@@ -7,27 +7,24 @@ import {
   Alert,
   SafeAreaView,
   StyleSheet,
-  useColorScheme,
   useWindowDimensions,
 } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
-import Svg, { Rect, Circle, Path } from "react-native-svg";
-import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  runOnJS,
 } from "react-native-reanimated";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import { MiniCourt } from "../components/court/MiniCourt";
 import { RootStackParamList } from "../navigation/AppNavigator";
-import { COLORS, TOUCH_TARGETS, getShotZone } from "@basketball-stats/shared";
+import { TOUCH_TARGETS } from "@basketball-stats/shared";
 
 // Import components
 import EnhancedScoreboard from "../components/livegame/EnhancedScoreboard";
@@ -45,11 +42,6 @@ import QuickStatModal, { QuickStatType } from "../components/livegame/QuickStatM
 import useSoundFeedback from "../hooks/useSoundFeedback";
 
 type LiveGameRouteProp = RouteProp<RootStackParamList, "LiveGame">;
-
-// Default court dimensions for StyleSheet (actual dimensions computed responsively in component)
-const DEFAULT_SCREEN_WIDTH = 400;
-const MINI_COURT_WIDTH = DEFAULT_SCREEN_WIDTH - 64;
-const MINI_COURT_HEIGHT = MINI_COURT_WIDTH * 0.6;
 
 interface PlayerStat {
   id: Id<"playerStats">;
@@ -141,200 +133,6 @@ function StatButton({
         {!isCompact && <Text style={styles.statButtonShortLabel}>{shortLabel}</Text>}
       </TouchableOpacity>
     </Animated.View>
-  );
-}
-
-// Mini Basketball Court for Shot Recording
-interface MiniCourtProps {
-  onCourtTap: (x: number, y: number, zone: string, is3pt: boolean) => void;
-  disabled?: boolean;
-  recentShots?: Array<{ x: number; y: number; made: boolean }>;
-  isLandscape?: boolean;
-}
-
-function MiniCourt({
-  onCourtTap,
-  disabled,
-  recentShots = [],
-  isLandscape = false,
-}: MiniCourtProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-
-  // SVG viewBox dimensions - represents half court with proper proportions
-  // Court is 50 feet wide, we show ~35 feet deep (enough for 3pt line + buffer)
-  const VIEW_WIDTH = 50;
-  const VIEW_HEIGHT = 35;
-  const ASPECT_RATIO = VIEW_WIDTH / VIEW_HEIGHT; // ~1.43
-
-  // Calculate court dimensions based on available space
-  // In portrait: use most of the width, let height follow aspect ratio
-  // In landscape: constrain to available height, let width follow aspect ratio
-  let courtWidth: number;
-  let courtHeight: number;
-
-  if (isLandscape) {
-    // In landscape, height is the constraint - leave room for other UI
-    const availableHeight = screenHeight - 80; // scoreboard + tabs + padding
-    courtHeight = Math.min(availableHeight * 0.85, 280);
-    courtWidth = courtHeight * ASPECT_RATIO;
-    // Make sure we don't exceed available width
-    const maxWidth = screenWidth * 0.55; // Leave room for stat buttons
-    if (courtWidth > maxWidth) {
-      courtWidth = maxWidth;
-      courtHeight = courtWidth / ASPECT_RATIO;
-    }
-  } else {
-    // In portrait, width is the constraint
-    const availableWidth = screenWidth - 48; // margins and padding
-    courtWidth = Math.min(availableWidth, 400);
-    courtHeight = courtWidth / ASPECT_RATIO;
-    // Make sure height is reasonable in portrait
-    const minHeight = 200;
-    const maxHeight = screenHeight * 0.4;
-    courtHeight = Math.max(minHeight, Math.min(courtHeight, maxHeight));
-    courtWidth = courtHeight * ASPECT_RATIO;
-  }
-
-  // Court colors based on theme
-  const courtColors = {
-    background: isDark ? "#57534e" : "#d4a574",
-    lines: isDark ? "rgba(255,255,255,0.8)" : "#ffffff",
-    rim: "#ea580c",
-    shotMade: "#22c55e",
-    shotMissed: "#ef4444",
-    paint: isDark ? "rgba(234,88,12,0.15)" : "rgba(234,88,12,0.1)",
-  };
-
-  // Basket position in SVG coordinates
-  const BASKET_X = 25;
-  const BASKET_Y = 5.25;
-
-  const handleTap = useCallback(
-    (tapX: number, tapY: number) => {
-      // Convert tap position to SVG/court coordinates
-      const courtX = (tapX / courtWidth) * VIEW_WIDTH - 25; // -25 to 25
-      const courtY = (tapY / courtHeight) * VIEW_HEIGHT; // 0 to 35
-      const zone = getShotZone(courtX, courtY);
-      const distanceFromBasket = Math.sqrt(courtX * courtX + (courtY - BASKET_Y) ** 2);
-      // 3pt line is 23.75 feet, corners are 22 feet
-      const is3pt = distanceFromBasket > 23.75 || (Math.abs(courtX) > 22 && courtY < 14);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      onCourtTap(courtX, courtY, zone, is3pt);
-    },
-    [onCourtTap, courtWidth, courtHeight]
-  );
-
-  const tapGesture = Gesture.Tap()
-    .enabled(!disabled)
-    .onEnd((event) => {
-      runOnJS(handleTap)(event.x, event.y);
-    });
-
-  return (
-    <GestureDetector gesture={tapGesture}>
-      <Animated.View
-        style={[
-          {
-            width: courtWidth,
-            height: courtHeight,
-            borderRadius: 12,
-            overflow: "hidden",
-            alignSelf: "center",
-          },
-          disabled && styles.miniCourtDisabled,
-        ]}
-      >
-        <Svg
-          width="100%"
-          height="100%"
-          viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
-          preserveAspectRatio="xMidYMid meet"
-        >
-          {/* Court background */}
-          <Rect x="0" y="0" width={VIEW_WIDTH} height={VIEW_HEIGHT} fill={courtColors.background} />
-
-          {/* Paint/Key area with fill */}
-          <Rect
-            x="17"
-            y="0"
-            width="16"
-            height="19"
-            fill={courtColors.paint}
-            stroke={courtColors.lines}
-            strokeWidth="0.4"
-          />
-
-          {/* Free throw circle (top half) */}
-          <Path
-            d="M 17 19 A 8 8 0 0 0 33 19"
-            fill="none"
-            stroke={courtColors.lines}
-            strokeWidth="0.4"
-          />
-          {/* Free throw circle (bottom half - dashed) */}
-          <Path
-            d="M 17 19 A 8 8 0 0 1 33 19"
-            fill="none"
-            stroke={courtColors.lines}
-            strokeWidth="0.3"
-            strokeDasharray="1,1"
-          />
-
-          {/* Restricted area arc */}
-          <Path
-            d="M 21 0 A 4 4 0 0 0 29 0"
-            fill="none"
-            stroke={courtColors.lines}
-            strokeWidth="0.4"
-          />
-
-          {/* Rim */}
-          <Circle
-            cx={BASKET_X}
-            cy={BASKET_Y}
-            r="0.75"
-            fill="none"
-            stroke={courtColors.rim}
-            strokeWidth="0.4"
-          />
-          {/* Rim center dot */}
-          <Circle cx={BASKET_X} cy={BASKET_Y} r="0.2" fill={courtColors.rim} />
-
-          {/* Three-point line - proper arc that stays within bounds */}
-          {/* Corner sections (straight lines) */}
-          <Path d="M 3 0 L 3 14" fill="none" stroke={courtColors.lines} strokeWidth="0.4" />
-          <Path d="M 47 0 L 47 14" fill="none" stroke={courtColors.lines} strokeWidth="0.4" />
-          {/* Arc section - connects the corner lines */}
-          <Path
-            d="M 3 14 A 23.75 23.75 0 0 0 47 14"
-            fill="none"
-            stroke={courtColors.lines}
-            strokeWidth="0.4"
-          />
-
-          {/* Recent shots */}
-          {recentShots.slice(-5).map((shot, index) => {
-            // Convert court coordinates (x: -25 to 25, y: 0 to 35) to SVG coordinates
-            const svgX = 25 + shot.x;
-            const svgY = Math.min(shot.y, VIEW_HEIGHT - 1); // Clamp to viewBox
-            return (
-              <Circle
-                key={index}
-                cx={svgX}
-                cy={svgY}
-                r={1.5}
-                fill={shot.made ? courtColors.shotMade : courtColors.shotMissed}
-                opacity={0.9}
-                stroke="#fff"
-                strokeWidth={0.3}
-              />
-            );
-          })}
-        </Svg>
-      </Animated.View>
-    </GestureDetector>
   );
 }
 
@@ -1380,7 +1178,8 @@ export default function LiveGameScreen() {
                   <MiniCourt
                     onCourtTap={handleCourtTap}
                     disabled={!canRecordStats}
-                    recentShots={persistedShots.length > 0 ? persistedShots.slice(-5) : recentShots}
+                    shots={persistedShots.length > 0 ? persistedShots : recentShots}
+                    displayMode="recent"
                     isLandscape={isLandscape}
                   />
                 </View>
@@ -2024,15 +1823,5 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.7)",
     fontSize: 10,
     marginTop: 2,
-  },
-  miniCourtContainer: {
-    width: MINI_COURT_WIDTH,
-    height: MINI_COURT_HEIGHT,
-    borderRadius: 12,
-    overflow: "hidden",
-    alignSelf: "center",
-  },
-  miniCourtDisabled: {
-    opacity: 0.5,
   },
 });
