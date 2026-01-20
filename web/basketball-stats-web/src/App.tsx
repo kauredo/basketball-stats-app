@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "r
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Icon from "./components/Icon";
 
 import Layout from "./components/Layout";
 import PublicLayout from "./components/layouts/PublicLayout";
@@ -37,8 +36,16 @@ function LoadingScreen() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-8">
       <div className="text-center">
-        <Icon name="basketball" size={64} className="mx-auto mb-4 text-orange-600" />
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Basketball Stats</h1>
+        <img
+          src="/assets/logo.png"
+          alt="Basketball Stats App"
+          className="w-32 h-32 mx-auto mb-4 dark:hidden"
+        />
+        <img
+          src="/assets/logo-light.png"
+          alt="Basketball Stats App"
+          className="w-32 h-32 mx-auto mb-4 hidden dark:block"
+        />
         <p className="text-gray-600 dark:text-gray-400">Loading...</p>
       </div>
     </div>

@@ -2,7 +2,7 @@ import React from "react";
 import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Image, useColorScheme } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -138,13 +138,17 @@ function TabNavigator() {
 }
 
 function LoadingScreen() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+
   return (
     <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
-      <Icon name="basketball" size={64} color="#EA580C" className="mb-4" />
-      <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-        Basketball Stats
-      </Text>
-      <Text className="text-base text-gray-600 dark:text-gray-400">Loading...</Text>
+      <Image
+        source={isDark ? require("../../assets/logo-light.png") : require("../../assets/logo.png")}
+        style={{ width: 128, height: 128 }}
+        resizeMode="contain"
+      />
+      <Text className="text-base text-gray-600 dark:text-gray-400 mt-4">Loading...</Text>
     </View>
   );
 }
