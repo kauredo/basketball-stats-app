@@ -214,7 +214,7 @@ const Players: React.FC = () => {
           </div>
           <div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">{player.name}</h3>
-            <p className="text-orange-400 font-semibold">#{player.number}</p>
+            <p className="text-orange-500 dark:text-orange-400 font-medium">#{player.number}</p>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
               {player.team?.name || "Unknown Team"}
             </p>
@@ -224,14 +224,14 @@ const Players: React.FC = () => {
         <div className="flex items-center space-x-1">
           <button
             onClick={() => handleViewPlayer(player)}
-            className="p-2 bg-primary-500 hover:bg-primary-600 rounded-lg text-white transition-colors"
+            className="p-2 bg-orange-600 hover:bg-orange-700 rounded-lg text-white transition-colors"
             title="View Profile"
           >
             <EyeIcon className="w-5 h-5" />
           </button>
           <button
             onClick={() => handleViewStats(player)}
-            className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors"
+            className="p-2 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 rounded-lg text-gray-600 dark:text-gray-400 transition-colors"
             title="Shot Chart"
           >
             <ChartBarIcon className="w-5 h-5" />
@@ -248,7 +248,7 @@ const Players: React.FC = () => {
               setSelectedPlayer(player);
               setShowDeleteModal(true);
             }}
-            className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
+            className="p-2 text-gray-500 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             title="Delete player"
           >
             <TrashIcon className="w-5 h-5" />
@@ -285,8 +285,8 @@ const Players: React.FC = () => {
         <div className="flex justify-between items-center">
           <span className="text-gray-600 dark:text-gray-400">Status</span>
           <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${
-              player.active ? "bg-green-900 text-green-200" : "bg-red-900 text-red-200"
+            className={`text-sm font-medium ${
+              player.active ? "text-gray-800 dark:text-gray-200" : "text-gray-500 dark:text-gray-500"
             }`}
           >
             {player.active ? "Active" : "Inactive"}
@@ -383,33 +383,33 @@ const Players: React.FC = () => {
         {(searchTerm || selectedTeam || selectedPosition) && (
           <div className="mt-4 flex flex-wrap gap-2">
             {searchTerm && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-orange-100 text-orange-800">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                 Search: "{searchTerm}"
                 <button
                   onClick={() => setSearchTerm("")}
-                  className="ml-2 inline-flex items-center p-0.5 rounded-full text-orange-600 hover:bg-orange-200"
+                  className="ml-2 inline-flex items-center p-0.5 rounded-full text-gray-500 hover:text-gray-700 dark:hover:text-gray-200"
                 >
                   x
                 </button>
               </span>
             )}
             {selectedTeam && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                 Team: {teams.find((t: any) => t.id === selectedTeam)?.name}
                 <button
                   onClick={() => setSelectedTeam("")}
-                  className="ml-2 inline-flex items-center p-0.5 rounded-full text-blue-600 hover:bg-blue-200"
+                  className="ml-2 inline-flex items-center p-0.5 rounded-full text-gray-500 hover:text-gray-700 dark:hover:text-gray-200"
                 >
                   x
                 </button>
               </span>
             )}
             {selectedPosition && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                 Position: {positionLabels[selectedPosition]}
                 <button
                   onClick={() => setSelectedPosition("")}
-                  className="ml-2 inline-flex items-center p-0.5 rounded-full text-green-600 hover:bg-green-200"
+                  className="ml-2 inline-flex items-center p-0.5 rounded-full text-gray-500 hover:text-gray-700 dark:hover:text-gray-200"
                 >
                   x
                 </button>

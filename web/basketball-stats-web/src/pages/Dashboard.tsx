@@ -18,19 +18,19 @@ const Dashboard: React.FC = () => {
   const recentGames = games.filter((game) => game.status === "completed").slice(0, 5);
   const upcomingGames = games.filter((game) => game.status === "scheduled").slice(0, 5);
 
-  // Return Tailwind background classes for game status
-  const getStatusBgClass = (status: string) => {
+  // Return Tailwind classes for game status - simplified to use subtle styling
+  const getStatusClasses = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-red-500"; // Live games
+        return "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300";
       case "paused":
-        return "bg-amber-500"; // Paused games
+        return "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300";
       case "completed":
-        return "bg-green-500"; // Finished games
+        return "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400";
       case "scheduled":
-        return "bg-blue-500"; // Upcoming games
+        return "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400";
       default:
-        return "bg-gray-500";
+        return "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400";
     }
   };
 
@@ -74,7 +74,7 @@ const Dashboard: React.FC = () => {
         <div className="flex justify-between items-start mb-3">
           <div className="flex items-center space-x-2">
             <div
-              className={`px-2 py-1 rounded-full text-xs font-medium text-white ${getStatusBgClass(game.status)}`}
+              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusClasses(game.status)}`}
             >
               {getStatusLabel(game.status)}
             </div>
@@ -92,25 +92,25 @@ const Dashboard: React.FC = () => {
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span
-              className={`font-medium ${winner === "away" ? "text-green-400" : "text-gray-800 dark:text-gray-200"}`}
+              className={`${winner === "away" ? "font-semibold text-gray-900 dark:text-white" : "font-normal text-gray-600 dark:text-gray-400"}`}
             >
               {game.awayTeam?.name || "Away Team"}
             </span>
             <span
-              className={`font-bold text-lg ${winner === "away" ? "text-green-400" : "text-gray-800 dark:text-gray-200"}`}
+              className={`text-lg ${winner === "away" ? "font-bold text-gray-900 dark:text-white" : "font-medium text-gray-600 dark:text-gray-400"}`}
             >
               {game.awayScore}
             </span>
           </div>
-          <div className="text-center text-gray-500 text-sm">@</div>
+          <div className="text-center text-gray-400 dark:text-gray-500 text-xs">vs</div>
           <div className="flex justify-between items-center">
             <span
-              className={`font-medium ${winner === "home" ? "text-green-400" : "text-gray-800 dark:text-gray-200"}`}
+              className={`${winner === "home" ? "font-semibold text-gray-900 dark:text-white" : "font-normal text-gray-600 dark:text-gray-400"}`}
             >
               {game.homeTeam?.name || "Home Team"}
             </span>
             <span
-              className={`font-bold text-lg ${winner === "home" ? "text-green-400" : "text-gray-800 dark:text-gray-200"}`}
+              className={`text-lg ${winner === "home" ? "font-bold text-gray-900 dark:text-white" : "font-medium text-gray-600 dark:text-gray-400"}`}
             >
               {game.homeScore}
             </span>
@@ -145,7 +145,7 @@ const Dashboard: React.FC = () => {
             </Link>
             <Link
               to={`/app/games/${game.id}/analysis`}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium text-center transition-colors"
+              className="flex-1 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300 px-3 py-2 rounded text-sm font-medium text-center transition-colors"
             >
               Analysis
             </Link>
@@ -165,18 +165,18 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Stats cards skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700"
+              className="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700"
             >
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
-                <div className="ml-4 space-y-2">
-                  <div className="h-7 w-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                  <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <div className="h-8 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                 </div>
+                <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
               </div>
             </div>
           ))}
@@ -224,59 +224,51 @@ const Dashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="p-2 bg-red-600 rounded-lg">
-              <PlayIcon className="w-6 h-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+      {/* Quick Stats - simplified with monochrome icons */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white">
                 {liveGames.length}
               </div>
-              <div className="text-gray-600 dark:text-gray-400">Live Games</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Live</div>
             </div>
+            <PlayIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-600 rounded-lg">
-              <TrophyIcon className="w-6 h-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white">
                 {recentGames.length}
               </div>
-              <div className="text-gray-600 dark:text-gray-400">Completed</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Completed</div>
             </div>
+            <TrophyIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <ClockIcon className="w-6 h-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white">
                 {upcomingGames.length}
               </div>
-              <div className="text-gray-600 dark:text-gray-400">Upcoming</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Upcoming</div>
             </div>
+            <ClockIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-600 rounded-lg">
-              <ChartBarIcon className="w-6 h-6 text-white" />
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white">{games.length}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Total</div>
             </div>
-            <div className="ml-4">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{games.length}</div>
-              <div className="text-gray-600 dark:text-gray-400">Total Games</div>
-            </div>
+            <ChartBarIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
           </div>
         </div>
       </div>

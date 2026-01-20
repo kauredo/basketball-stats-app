@@ -48,25 +48,47 @@ const Games: React.FC = () => {
   const games = gamesData?.games || [];
   const teams = teamsData?.teams || [];
 
+  // Sort games: live first, then scheduled by date, then completed (most recent first)
+  const sortedGames = [...games].sort((a, b) => {
+    const statusOrder: Record<string, number> = {
+      active: 0,
+      paused: 1,
+      scheduled: 2,
+      completed: 3,
+    };
+    const aOrder = statusOrder[a.status] ?? 4;
+    const bOrder = statusOrder[b.status] ?? 4;
+
+    if (aOrder !== bOrder) return aOrder - bOrder;
+
+    // Within same status, sort by date
+    if (a.status === "scheduled" && b.status === "scheduled") {
+      // Upcoming: earliest first
+      return (a.scheduledAt || 0) - (b.scheduledAt || 0);
+    }
+    // Completed/other: most recent first
+    return (b._creationTime || 0) - (a._creationTime || 0);
+  });
+
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  // Return Tailwind background classes for game status
-  const getStatusBgClass = (status: string) => {
+  // Return Tailwind classes for game status - simplified subtle styling
+  const getStatusClasses = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-red-500"; // Live games
+        return "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300";
       case "paused":
-        return "bg-amber-500"; // Paused games
+        return "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300";
       case "completed":
-        return "bg-green-500"; // Finished games
+        return "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400";
       case "scheduled":
-        return "bg-blue-500"; // Upcoming games
+        return "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400";
       default:
-        return "bg-gray-500";
+        return "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400";
     }
   };
 
@@ -165,7 +187,7 @@ const Games: React.FC = () => {
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center space-x-3">
             <div
-              className={`px-2 py-1 rounded-full text-xs font-medium text-white ${getStatusBgClass(game.status)}`}
+              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusClasses(game.status)}`}
             >
               {getStatusLabel(game.status)}
             </div>
@@ -176,24 +198,24 @@ const Games: React.FC = () => {
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="space-y-1">
             <div
-              className={`font-medium ${winner === "away" ? "text-green-400" : "text-gray-800 dark:text-gray-200"}`}
+              className={`${winner === "away" ? "font-semibold text-gray-900 dark:text-white" : "font-normal text-gray-700 dark:text-gray-300"}`}
             >
               {game.awayTeam?.name || "Away Team"}
             </div>
-            <div className="text-sm text-gray-500">@ {game.homeTeam?.name || "Home Team"}</div>
+            <div className="text-sm text-gray-500">vs {game.homeTeam?.name || "Home Team"}</div>
           </div>
         </td>
 
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="text-lg font-bold">
+          <div className="text-lg">
             <span
-              className={winner === "away" ? "text-green-400" : "text-gray-800 dark:text-gray-200"}
+              className={winner === "away" ? "font-bold text-gray-900 dark:text-white" : "font-medium text-gray-600 dark:text-gray-400"}
             >
               {game.awayScore}
             </span>
-            <span className="text-gray-500 mx-2">-</span>
+            <span className="text-gray-400 mx-2">-</span>
             <span
-              className={winner === "home" ? "text-green-400" : "text-gray-800 dark:text-gray-200"}
+              className={winner === "home" ? "font-bold text-gray-900 dark:text-white" : "font-medium text-gray-600 dark:text-gray-400"}
             >
               {game.homeScore}
             </span>
@@ -234,7 +256,7 @@ const Games: React.FC = () => {
 
             <Link
               to={`/app/games/${game.id}/analysis`}
-              className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors inline-flex"
+              className="p-2 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 rounded-lg text-gray-600 dark:text-gray-400 transition-colors inline-flex"
               title="Analysis"
             >
               <ChartBarIcon className="w-4 h-4" />
@@ -263,7 +285,7 @@ const Games: React.FC = () => {
         <div className="flex gap-3">
           <button
             onClick={() => setShowQuickGameModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             <BoltIcon className="w-4 h-4 mr-2" />
             Quick Game
@@ -302,7 +324,7 @@ const Games: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {games.map(renderGameRow)}
+              {sortedGames.map(renderGameRow)}
             </tbody>
           </table>
         </div>
@@ -400,8 +422,8 @@ const Games: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-                <BoltIcon className="w-5 h-5 text-purple-600" />
+              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                <BoltIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </div>
               <div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">Quick Game</h3>
@@ -421,7 +443,7 @@ const Games: React.FC = () => {
                     setQuickGameSettings((prev) => ({ ...prev, homeTeamName: e.target.value }))
                   }
                   placeholder="e.g., Lakers"
-                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
@@ -436,7 +458,7 @@ const Games: React.FC = () => {
                     setQuickGameSettings((prev) => ({ ...prev, awayTeamName: e.target.value }))
                   }
                   placeholder="e.g., Celtics"
-                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
@@ -453,7 +475,7 @@ const Games: React.FC = () => {
                       }
                       className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
                         quickGameSettings.quarterMinutes === mins
-                          ? "bg-purple-600 text-white"
+                          ? "bg-orange-600 text-white"
                           : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                       }`}
                     >
@@ -488,7 +510,7 @@ const Games: React.FC = () => {
                   !quickGameSettings.awayTeamName.trim() ||
                   isCreating
                 }
-                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isCreating ? "Creating..." : "Start Quick Game"}
               </button>
