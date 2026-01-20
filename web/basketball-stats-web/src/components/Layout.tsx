@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme, ThemeMode } from "../contexts/ThemeContext";
@@ -49,14 +49,73 @@ export default function Layout({ children }: LayoutProps) {
   const { user, selectedLeague, logout } = useAuth();
   const { mode, resolvedTheme, setMode } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+
+  const menuItems = [
+    { id: "profile", label: "Profile" },
+    { id: "leagues", label: "Switch League" },
+    { id: "logout", label: "Sign out" },
+  ];
 
   const handleLogout = () => {
     logout();
     setShowUserMenu(false);
   };
 
+  // Handle keyboard navigation in menu
+  const handleMenuKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!showUserMenu) return;
+
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          setFocusedIndex((prev) => (prev + 1) % menuItems.length);
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          setFocusedIndex((prev) => (prev - 1 + menuItems.length) % menuItems.length);
+          break;
+        case "Escape":
+          e.preventDefault();
+          setShowUserMenu(false);
+          menuButtonRef.current?.focus();
+          break;
+        case "Tab":
+          setShowUserMenu(false);
+          break;
+      }
+    },
+    [showUserMenu, menuItems.length]
+  );
+
+  // Focus the menu item when focusedIndex changes
+  useEffect(() => {
+    if (showUserMenu && focusedIndex >= 0 && menuRef.current) {
+      const items = menuRef.current.querySelectorAll<HTMLElement>('[role="menuitem"]');
+      items[focusedIndex]?.focus();
+    }
+  }, [focusedIndex, showUserMenu]);
+
+  // Reset focused index when menu closes
+  useEffect(() => {
+    if (!showUserMenu) {
+      setFocusedIndex(-1);
+    }
+  }, [showUserMenu]);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Skip to main content link for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-orange-600 focus:text-white focus:rounded-lg focus:font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+      >
+        Skip to main content
+      </a>
+
       {/* Sidebar */}
       <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
         <div className="flex h-16 shrink-0 items-center px-6">
@@ -133,8 +192,19 @@ export default function Layout({ children }: LayoutProps) {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="relative">
             <button
+              ref={menuButtonRef}
               onClick={() => setShowUserMenu(!showUserMenu)}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowDown" && !showUserMenu) {
+                  e.preventDefault();
+                  setShowUserMenu(true);
+                  setFocusedIndex(0);
+                }
+              }}
               className="flex w-full items-center justify-between rounded-lg p-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              aria-expanded={showUserMenu}
+              aria-haspopup="menu"
+              aria-controls="user-menu"
             >
               <div className="flex items-center">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600">
@@ -152,32 +222,48 @@ export default function Layout({ children }: LayoutProps) {
                   </div>
                 </div>
               </div>
-              <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              <ChevronDownIcon
+                className={`h-5 w-5 text-gray-400 transition-transform ${showUserMenu ? "rotate-180" : ""}`}
+                aria-hidden="true"
+              />
             </button>
 
             {showUserMenu && (
-              <div className="absolute bottom-full left-0 right-0 mb-2 rounded-md bg-white dark:bg-gray-700 py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+              <div
+                ref={menuRef}
+                id="user-menu"
+                role="menu"
+                aria-label="User menu"
+                onKeyDown={handleMenuKeyDown}
+                className="absolute bottom-full left-0 right-0 mb-2 rounded-md bg-white dark:bg-gray-700 py-1 shadow-lg ring-1 ring-black ring-opacity-5"
+              >
                 <Link
                   to="/app/profile"
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white"
+                  role="menuitem"
+                  tabIndex={focusedIndex === 0 ? 0 : -1}
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
                   onClick={() => setShowUserMenu(false)}
                 >
-                  <UserIcon className="mr-3 h-5 w-5" />
+                  <UserIcon className="mr-3 h-5 w-5" aria-hidden="true" />
                   Profile
                 </Link>
                 <Link
                   to="/app/leagues"
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white"
+                  role="menuitem"
+                  tabIndex={focusedIndex === 1 ? 0 : -1}
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
                   onClick={() => setShowUserMenu(false)}
                 >
-                  <TrophyIcon className="mr-3 h-5 w-5" />
+                  <TrophyIcon className="mr-3 h-5 w-5" aria-hidden="true" />
                   Switch League
                 </Link>
                 <button
+                  role="menuitem"
+                  tabIndex={focusedIndex === 2 ? 0 : -1}
                   onClick={handleLogout}
-                  className="flex w-full items-center px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white"
+                  className="flex w-full items-center px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
                 >
-                  <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" />
+                  <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" aria-hidden="true" />
                   Sign out
                 </button>
               </div>
@@ -205,7 +291,7 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </div>
 
-        <main className="py-6">
+        <main id="main-content" className="py-6" tabIndex={-1}>
           <div className="px-4 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>

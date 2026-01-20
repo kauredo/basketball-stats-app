@@ -69,23 +69,24 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" role="region" aria-label={`${teamName} box score`} tabIndex={0}>
         <table className="w-full text-xs">
+          <caption className="sr-only">{teamName} player statistics including points, rebounds, assists, steals, blocks, turnovers, fouls, and shooting percentages</caption>
           <thead className="bg-gray-50 dark:bg-gray-700/50">
             <tr className="text-gray-500 dark:text-gray-400 uppercase">
-              <th className="text-left px-2 py-1.5 font-medium sticky left-0 bg-gray-50 dark:bg-gray-700/50">
+              <th scope="col" className="text-left px-2 py-1.5 font-medium sticky left-0 bg-gray-50 dark:bg-gray-700/50">
                 Player
               </th>
-              <th className="text-center px-1 py-1.5 font-medium">PTS</th>
-              <th className="text-center px-1 py-1.5 font-medium">REB</th>
-              <th className="text-center px-1 py-1.5 font-medium">AST</th>
-              <th className="text-center px-1 py-1.5 font-medium">STL</th>
-              <th className="text-center px-1 py-1.5 font-medium">BLK</th>
-              <th className="text-center px-1 py-1.5 font-medium">TO</th>
-              <th className="text-center px-1 py-1.5 font-medium">PF</th>
-              <th className="text-center px-1.5 py-1.5 font-medium">FG</th>
-              <th className="text-center px-1.5 py-1.5 font-medium">3P</th>
-              <th className="text-center px-1.5 py-1.5 font-medium">FT</th>
+              <th scope="col" className="text-center px-1 py-1.5 font-medium" aria-label="Points">PTS</th>
+              <th scope="col" className="text-center px-1 py-1.5 font-medium" aria-label="Rebounds">REB</th>
+              <th scope="col" className="text-center px-1 py-1.5 font-medium" aria-label="Assists">AST</th>
+              <th scope="col" className="text-center px-1 py-1.5 font-medium" aria-label="Steals">STL</th>
+              <th scope="col" className="text-center px-1 py-1.5 font-medium" aria-label="Blocks">BLK</th>
+              <th scope="col" className="text-center px-1 py-1.5 font-medium" aria-label="Turnovers">TO</th>
+              <th scope="col" className="text-center px-1 py-1.5 font-medium" aria-label="Personal Fouls">PF</th>
+              <th scope="col" className="text-center px-1.5 py-1.5 font-medium" aria-label="Field Goals Made/Attempted">FG</th>
+              <th scope="col" className="text-center px-1.5 py-1.5 font-medium" aria-label="3-Pointers Made/Attempted">3P</th>
+              <th scope="col" className="text-center px-1.5 py-1.5 font-medium" aria-label="Free Throws Made/Attempted">FT</th>
             </tr>
           </thead>
           <tbody>
@@ -98,10 +99,10 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
                   ${player.isOnCourt && !player.fouledOut ? "bg-green-50/50 dark:bg-green-900/10" : ""}
                 `}
               >
-                <td className="px-2 py-1.5 sticky left-0 bg-inherit">
+                <th scope="row" className="px-2 py-1.5 sticky left-0 bg-inherit font-normal text-left">
                   <div className="flex items-center gap-1">
                     {player.isOnCourt && !player.fouledOut && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500" aria-label="On court" />
                     )}
                     <span
                       className={`font-medium ${player.fouledOut ? "line-through" : "text-gray-900 dark:text-white"}`}
@@ -111,8 +112,9 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
                     <span className="text-gray-500 dark:text-gray-400 truncate max-w-[60px]">
                       {player.player?.name?.split(" ").pop()}
                     </span>
+                    {player.fouledOut && <span className="sr-only">(fouled out)</span>}
                   </div>
-                </td>
+                </th>
                 <td className="text-center px-1 py-1.5 font-semibold text-gray-900 dark:text-white">
                   {player.points}
                 </td>
@@ -149,9 +151,9 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
             ))}
             {/* Totals Row */}
             <tr className="border-t-2 border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 font-semibold">
-              <td className="px-2 py-1.5 sticky left-0 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
+              <th scope="row" className="px-2 py-1.5 sticky left-0 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white text-left">
                 TOTAL
-              </td>
+              </th>
               <td className="text-center px-1 py-1.5 text-gray-900 dark:text-white">
                 {totals.points}
               </td>

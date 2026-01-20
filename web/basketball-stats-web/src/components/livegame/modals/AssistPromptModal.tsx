@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { PlayerStat } from "../../../types/livegame";
+import { useFocusTrap } from "../../../hooks/useFocusTrap";
 
 interface AssistPromptModalProps {
   isOpen: boolean;
@@ -29,16 +30,44 @@ export const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
   points,
   teammates,
 }) => {
+  const noAssistButtonRef = useRef<HTMLButtonElement>(null);
+  const focusTrapRef = useFocusTrap(isOpen, {
+    initialFocusRef: noAssistButtonRef,
+  });
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="assist-modal-title"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        ref={focusTrapRef}
+        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden"
+      >
         {/* Header */}
         <div className="bg-green-600 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-white">Assist?</h3>
+              <h3 id="assist-modal-title" className="text-lg font-bold text-white">Assist?</h3>
               <p className="text-green-200 text-sm">
                 #{scorerNumber} {scorerName} scored {points}PT
               </p>
@@ -85,14 +114,15 @@ export const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
         {/* No assist / Cancel */}
         <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex gap-2">
           <button
+            ref={noAssistButtonRef}
             onClick={onNoAssist}
-            className="flex-1 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            className="flex-1 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
             No Assist
           </button>
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="flex-1 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
             Cancel
           </button>

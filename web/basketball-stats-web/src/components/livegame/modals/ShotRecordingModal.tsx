@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { PlayerStat } from "../../../types/livegame";
+import { useFocusTrap } from "../../../hooks/useFocusTrap";
 
 interface ShotRecordingModalProps {
   isOpen: boolean;
@@ -23,8 +24,10 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
   zoneName,
   onCourtPlayers,
 }) => {
-  const modalRef = useRef<HTMLDivElement>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const focusTrapRef = useFocusTrap(isOpen, {
+    initialFocusRef: cancelButtonRef,
+  });
 
   // Handle escape key to close modal
   useEffect(() => {
@@ -40,13 +43,6 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
-  // Focus management - focus cancel button when modal opens
-  useEffect(() => {
-    if (isOpen && cancelButtonRef.current) {
-      cancelButtonRef.current.focus();
-    }
-  }, [isOpen]);
-
   if (!isOpen) return null;
 
   const points = shotType === "3pt" ? 3 : 2;
@@ -60,7 +56,7 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        ref={modalRef}
+        ref={focusTrapRef}
         className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden"
       >
         {/* Header with zone info */}

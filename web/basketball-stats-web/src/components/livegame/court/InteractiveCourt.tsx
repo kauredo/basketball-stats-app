@@ -191,7 +191,15 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
         }`}
         onClick={handleClick}
         style={{ aspectRatio: `${COURT_WIDTH}/${COURT_HEIGHT}` }}
+        role={onCourtClick ? "application" : "img"}
+        aria-label={onCourtClick ? "Interactive basketball court. Tap to record a shot location." : "Basketball court shot chart"}
+        aria-describedby={showHeatMap ? "court-heatmap-desc" : undefined}
       >
+        {showHeatMap && (
+          <desc id="court-heatmap-desc">
+            Heat map showing shooting percentages by zone. Green indicates high percentage zones, yellow indicates medium, and red indicates low percentage zones.
+          </desc>
+        )}
         {/* Definitions for gradients */}
         <defs>
           <linearGradient id="courtGradientLight" x1="0%" y1="0%" x2="100%" y2="100%">

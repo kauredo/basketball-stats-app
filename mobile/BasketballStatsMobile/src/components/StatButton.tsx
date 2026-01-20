@@ -39,8 +39,12 @@ const StatButton: React.FC<StatButtonProps> = ({
     scale.value = withSpring(1, { damping: 15 });
   };
 
-  const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  const handlePress = async () => {
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch {
+      // Haptics not available on this device - silently continue
+    }
     onPress();
   };
 

@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { PlayerStat, StatType } from "../../../types/livegame";
+import { useFocusTrap } from "../../../hooks/useFocusTrap";
 
 interface QuickStatModalProps {
   isOpen: boolean;
@@ -10,25 +11,56 @@ interface QuickStatModalProps {
   onCourtPlayers: PlayerStat[];
 }
 
+const STAT_INFO: Record<StatType, { label: string; bgClass: string; badgeClass: string }> = {
+  assist: {
+    label: "Assist",
+    bgClass: "bg-purple-600",
+    badgeClass: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300",
+  },
+  steal: {
+    label: "Steal",
+    bgClass: "bg-cyan-600",
+    badgeClass: "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300",
+  },
+  block: {
+    label: "Block",
+    bgClass: "bg-cyan-600",
+    badgeClass: "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300",
+  },
+  turnover: {
+    label: "Turnover",
+    bgClass: "bg-amber-600",
+    badgeClass: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300",
+  },
+  foul: {
+    label: "Foul",
+    bgClass: "bg-red-600",
+    badgeClass: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300",
+  },
+  freethrow: {
+    label: "Free Throw",
+    bgClass: "bg-green-600",
+    badgeClass: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300",
+  },
+  rebound: {
+    label: "Rebound",
+    bgClass: "bg-blue-600",
+    badgeClass: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300",
+  },
+  shot2: {
+    label: "2-Point Shot",
+    bgClass: "bg-blue-600",
+    badgeClass: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300",
+  },
+  shot3: {
+    label: "3-Point Shot",
+    bgClass: "bg-purple-600",
+    badgeClass: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300",
+  },
+};
+
 const getStatInfo = (type: StatType) => {
-  switch (type) {
-    case "assist":
-      return { label: "Assist", color: "purple", bgClass: "bg-purple-600" };
-    case "steal":
-      return { label: "Steal", color: "cyan", bgClass: "bg-cyan-600" };
-    case "block":
-      return { label: "Block", color: "cyan", bgClass: "bg-cyan-600" };
-    case "turnover":
-      return { label: "Turnover", color: "amber", bgClass: "bg-amber-600" };
-    case "foul":
-      return { label: "Foul", color: "red", bgClass: "bg-red-600" };
-    case "freethrow":
-      return { label: "Free Throw", color: "green", bgClass: "bg-green-600" };
-    case "rebound":
-      return { label: "Rebound", color: "blue", bgClass: "bg-blue-600" };
-    default:
-      return { label: type, color: "gray", bgClass: "bg-gray-600" };
-  }
+  return STAT_INFO[type] || { label: type, bgClass: "bg-gray-600", badgeClass: "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300" };
 };
 
 /**
@@ -42,16 +74,44 @@ export const QuickStatModal: React.FC<QuickStatModalProps> = ({
   statType,
   onCourtPlayers,
 }) => {
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const focusTrapRef = useFocusTrap(isOpen && !!statType, {
+    initialFocusRef: cancelButtonRef,
+  });
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    if (!isOpen || !statType) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, statType, onClose]);
+
   if (!isOpen || !statType) return null;
 
-  const { label, color, bgClass } = getStatInfo(statType);
+  const { label, bgClass, badgeClass } = getStatInfo(statType);
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="quickstat-modal-title"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        ref={focusTrapRef}
+        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden"
+      >
         {/* Header */}
         <div className={`px-6 py-4 ${bgClass}`}>
-          <h3 className="text-lg font-bold text-white">Record {label}</h3>
+          <h3 id="quickstat-modal-title" className="text-lg font-bold text-white">Record {label}</h3>
           <p className="text-white/80 text-sm">Select a player</p>
         </div>
 
@@ -80,7 +140,7 @@ export const QuickStatModal: React.FC<QuickStatModalProps> = ({
                   </div>
                 </div>
                 <div
-                  className={`px-3 py-1 bg-${color}-100 dark:bg-${color}-900/30 text-${color}-700 dark:text-${color}-300 text-sm font-medium rounded-lg`}
+                  className={`px-3 py-1 text-sm font-medium rounded-lg ${badgeClass}`}
                 >
                   +{label.toUpperCase().slice(0, 3)}
                 </div>
@@ -92,8 +152,9 @@ export const QuickStatModal: React.FC<QuickStatModalProps> = ({
         {/* Cancel button */}
         <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
           <button
+            ref={cancelButtonRef}
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
           >
             Cancel
           </button>

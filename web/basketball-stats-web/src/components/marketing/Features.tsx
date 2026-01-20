@@ -65,9 +65,9 @@ export default function Features() {
             // First feature spans 2 columns on large screens for visual variety
             const isHighlighted = index === 0;
             return (
-              <div
+              <article
                 key={feature.title}
-                className={`p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-700 transition-colors group focus-within:ring-2 focus-within:ring-orange-500 ${
+                className={`p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-700 transition-colors group ${
                   isHighlighted ? "lg:col-span-2 lg:flex lg:items-start lg:gap-6" : ""
                 }`}
               >
@@ -84,7 +84,7 @@ export default function Features() {
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">{feature.description}</p>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>

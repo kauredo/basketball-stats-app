@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { PlayerStat, StatType } from "../../../types/livegame";
+import { useFocusTrap } from "../../../hooks/useFocusTrap";
 
 interface ReboundPromptModalProps {
   isOpen: boolean;
@@ -38,6 +39,9 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
 }) => {
   const [autoDismissTimer, setAutoDismissTimer] = useState<number | null>(null);
   const dismissButtonRef = useRef<HTMLButtonElement>(null);
+  const focusTrapRef = useFocusTrap(isOpen, {
+    initialFocusRef: dismissButtonRef,
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -93,7 +97,10 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
       aria-labelledby="rebound-modal-title"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div
+        ref={focusTrapRef}
+        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+      >
         {/* Header */}
         <div className="bg-blue-600 px-6 py-4">
           <h3 id="rebound-modal-title" className="text-lg font-bold text-white">Rebound</h3>

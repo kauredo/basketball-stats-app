@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { PlayerStat, FoulType, FOUL_TYPE_LABELS } from "../../../types/livegame";
+import { useFocusTrap } from "../../../hooks/useFocusTrap";
 
 interface FoulRecordingModalProps {
   isOpen: boolean;
@@ -35,6 +36,9 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
   const [wasAndOne, setWasAndOne] = useState(false);
   const [fouledPlayer, setFouledPlayer] = useState<Id<"players"> | null>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const focusTrapRef = useFocusTrap(isOpen && !!selectedPlayer, {
+    initialFocusRef: cancelButtonRef,
+  });
 
   useEffect(() => {
     if (!isOpen) {
@@ -100,7 +104,10 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
       aria-labelledby="foul-modal-title"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div
+        ref={focusTrapRef}
+        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden"
+      >
         {/* Header */}
         <div className="bg-amber-600 px-6 py-4">
           <h3 id="foul-modal-title" className="text-lg font-bold text-white">

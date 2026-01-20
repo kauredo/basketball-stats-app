@@ -60,11 +60,13 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded-md">
-              {error}
-            </div>
-          )}
+          <div role="alert" aria-live="polite" aria-atomic="true">
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800 text-red-800 dark:text-red-300 px-4 py-3 rounded-md">
+                {error}
+              </div>
+            )}
+          </div>
 
           <div className="space-y-4">
             <div>
