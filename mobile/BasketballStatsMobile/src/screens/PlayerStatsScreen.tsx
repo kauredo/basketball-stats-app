@@ -1,14 +1,27 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert } from "react-native";
+import React, { useState, useLayoutEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+  Alert,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 type PlayerStatsRouteProp = RouteProp<RootStackParamList, "PlayerStats">;
 type PlayerStatsNavigationProp = NativeStackNavigationProp<RootStackParamList, "PlayerStats">;
@@ -27,9 +40,22 @@ export default function PlayerStatsScreen() {
   const navigation = useNavigation<PlayerStatsNavigationProp>();
   const { playerId } = route.params;
   const { token, selectedLeague } = useAuth();
+  const { resolvedTheme } = useTheme();
 
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<"season" | "recent">("season");
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    number: "",
+    position: "PG" as "PG" | "SG" | "SF" | "PF" | "C",
+    heightCm: "",
+    weightKg: "",
+    active: true,
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch player data from Convex
   const playerData = useQuery(
@@ -45,10 +71,99 @@ export default function PlayerStatsScreen() {
       : "skip"
   );
 
+  // Mutations
+  const updatePlayer = useMutation(api.players.update);
+  const removePlayer = useMutation(api.players.remove);
+
+  // Initialize edit form when player data loads
+  React.useEffect(() => {
+    if (playerData?.player) {
+      const p = playerData.player;
+      setEditForm({
+        name: p.name || "",
+        number: p.number?.toString() || "",
+        position: p.position || "PG",
+        heightCm: p.heightCm?.toString() || "",
+        weightKg: p.weightKg?.toString() || "",
+        active: p.active !== false,
+      });
+    }
+  }, [playerData?.player]);
+
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 500);
   };
+
+  const handleEditPlayer = async () => {
+    if (!editForm.name.trim() || !editForm.number || !token) return;
+
+    setIsUpdating(true);
+    try {
+      await updatePlayer({
+        token,
+        playerId: playerId as Id<"players">,
+        name: editForm.name.trim(),
+        number: parseInt(editForm.number),
+        position: editForm.position,
+        heightCm: editForm.heightCm ? parseInt(editForm.heightCm) : undefined,
+        weightKg: editForm.weightKg ? parseInt(editForm.weightKg) : undefined,
+        active: editForm.active,
+      });
+      setShowEditModal(false);
+      Alert.alert("Success", "Player updated successfully");
+    } catch (error) {
+      console.error("Failed to update player:", error);
+      Alert.alert("Error", "Failed to update player. Please try again.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeletePlayer = () => {
+    const playerName = playerData?.player?.name || "this player";
+    Alert.alert(
+      "Delete Player",
+      `Are you sure you want to delete "${playerName}"? This action cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            if (!token) return;
+            setIsDeleting(true);
+            try {
+              await removePlayer({
+                token,
+                playerId: playerId as Id<"players">,
+              });
+              navigation.goBack();
+            } catch (error) {
+              console.error("Failed to delete player:", error);
+              Alert.alert("Error", "Failed to delete player. Please try again.");
+              setIsDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Set header right button
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity className="p-2 mr-1" onPress={() => setShowOptionsMenu(true)}>
+          <FontAwesome5
+            name="ellipsis-v"
+            size={18}
+            color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
+          />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, resolvedTheme]);
 
   const getStatCategories = (): StatCategory[] => {
     if (!playerStats?.stats) return [];
@@ -136,8 +251,7 @@ export default function PlayerStatsScreen() {
   );
 
   const renderRecentGames = () => {
-    // Note: recentGames would need a separate endpoint if needed
-    const recentGames: any[] = [];
+    const recentGames = playerStats?.recentGames || [];
 
     if (!recentGames.length) {
       return (
@@ -275,6 +389,200 @@ export default function PlayerStatsScreen() {
         {/* Recent Games */}
         {renderRecentGames()}
       </ScrollView>
+
+      {/* Options Menu Modal */}
+      <Modal
+        visible={showOptionsMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowOptionsMenu(false)}
+      >
+        <TouchableOpacity
+          className="flex-1 bg-black/50 justify-end"
+          activeOpacity={1}
+          onPress={() => setShowOptionsMenu(false)}
+        >
+          <View className="bg-white dark:bg-gray-800 rounded-t-3xl p-4 pb-8">
+            <View className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full self-center mb-4" />
+            <Text className="text-gray-900 dark:text-white text-lg font-bold mb-4 text-center">
+              Player Options
+            </Text>
+
+            <TouchableOpacity
+              className="flex-row items-center p-4 bg-gray-100 dark:bg-gray-700 rounded-xl mb-3"
+              onPress={() => {
+                setShowOptionsMenu(false);
+                setShowEditModal(true);
+              }}
+            >
+              <FontAwesome5 name="edit" size={18} color="#3B82F6" />
+              <Text className="text-gray-900 dark:text-white font-medium ml-3">Edit Player</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-row items-center p-4 bg-red-100 dark:bg-red-900/30 rounded-xl"
+              onPress={() => {
+                setShowOptionsMenu(false);
+                handleDeletePlayer();
+              }}
+              disabled={isDeleting}
+            >
+              <FontAwesome5 name="trash" size={18} color="#EF4444" />
+              <Text className="text-red-600 dark:text-red-400 font-medium ml-3">
+                {isDeleting ? "Deleting..." : "Delete Player"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Edit Player Modal */}
+      <Modal
+        visible={showEditModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1 bg-gray-50 dark:bg-dark-950"
+        >
+          {/* Modal Header */}
+          <View className="flex-row items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <TouchableOpacity onPress={() => setShowEditModal(false)}>
+              <Text className="text-gray-600 dark:text-gray-400 text-base">Cancel</Text>
+            </TouchableOpacity>
+            <Text className="text-gray-900 dark:text-white text-lg font-bold">Edit Player</Text>
+            <TouchableOpacity
+              onPress={handleEditPlayer}
+              disabled={isUpdating || !editForm.name.trim() || !editForm.number}
+            >
+              <Text
+                className={`text-base font-semibold ${
+                  isUpdating || !editForm.name.trim() || !editForm.number
+                    ? "text-gray-400"
+                    : "text-primary-500"
+                }`}
+              >
+                {isUpdating ? "Saving..." : "Save"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Form */}
+          <ScrollView className="flex-1 p-4">
+            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              {/* Player Name */}
+              <View className="mb-4">
+                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                  Player Name *
+                </Text>
+                <TextInput
+                  className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
+                  value={editForm.name}
+                  onChangeText={(text) => setEditForm((prev) => ({ ...prev, name: text }))}
+                  placeholder="Enter player name"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+
+              {/* Jersey Number */}
+              <View className="mb-4">
+                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                  Jersey Number *
+                </Text>
+                <TextInput
+                  className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
+                  value={editForm.number}
+                  onChangeText={(text) => setEditForm((prev) => ({ ...prev, number: text }))}
+                  placeholder="Enter jersey number"
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="number-pad"
+                />
+              </View>
+
+              {/* Position */}
+              <View className="mb-4">
+                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                  Position
+                </Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {(["PG", "SG", "SF", "PF", "C"] as const).map((pos) => (
+                    <TouchableOpacity
+                      key={pos}
+                      className={`px-4 py-2 rounded-lg ${
+                        editForm.position === pos
+                          ? "bg-primary-500"
+                          : "bg-gray-100 dark:bg-gray-700"
+                      }`}
+                      onPress={() => setEditForm((prev) => ({ ...prev, position: pos }))}
+                    >
+                      <Text
+                        className={`font-medium ${
+                          editForm.position === pos
+                            ? "text-white"
+                            : "text-gray-700 dark:text-gray-300"
+                        }`}
+                      >
+                        {pos}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Height & Weight */}
+              <View className="flex-row gap-3 mb-4">
+                <View className="flex-1">
+                  <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                    Height (cm)
+                  </Text>
+                  <TextInput
+                    className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
+                    value={editForm.heightCm}
+                    onChangeText={(text) => setEditForm((prev) => ({ ...prev, heightCm: text }))}
+                    placeholder="Height"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="number-pad"
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                    Weight (kg)
+                  </Text>
+                  <TextInput
+                    className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
+                    value={editForm.weightKg}
+                    onChangeText={(text) => setEditForm((prev) => ({ ...prev, weightKg: text }))}
+                    placeholder="Weight"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="number-pad"
+                  />
+                </View>
+              </View>
+
+              {/* Active Status */}
+              <View className="flex-row items-center justify-between">
+                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                  Active Player
+                </Text>
+                <TouchableOpacity
+                  className={`w-12 h-7 rounded-full justify-center ${
+                    editForm.active ? "bg-primary-500" : "bg-gray-300 dark:bg-gray-600"
+                  }`}
+                  onPress={() => setEditForm((prev) => ({ ...prev, active: !prev.active }))}
+                >
+                  <View
+                    className={`w-5 h-5 bg-white rounded-full ${
+                      editForm.active ? "self-end mr-1" : "self-start ml-1"
+                    }`}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }

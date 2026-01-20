@@ -7,6 +7,7 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
+import NotificationBell from "../components/NotificationBell";
 
 // Import screens
 import HomeScreen from "../screens/HomeScreen";
@@ -23,23 +24,24 @@ import ShotChartScreen from "../screens/ShotChartScreen";
 import CreateGameScreen from "../screens/CreateGameScreen";
 import CreateTeamScreen from "../screens/CreateTeamScreen";
 import CreatePlayerScreen from "../screens/CreatePlayerScreen";
-import SettingsScreen from "../screens/SettingsScreen";
 import TeamDetailScreen from "../screens/TeamDetailScreen";
+import StandingsScreen from "../screens/StandingsScreen";
+import NotificationsScreen from "../screens/NotificationsScreen";
 
 // Navigation parameter types
 export type RootStackParamList = {
   Main: undefined;
   LiveGame: { gameId: string };
   PlayerStats: { playerId: string };
-  PlayerStatistics: { playerId: string; playerName?: string };
   LeagueSelection: undefined;
   PlayerComparison: undefined;
   ShotChart: undefined;
   CreateGame: undefined;
   CreateTeam: undefined;
   CreatePlayer: { teamId?: string } | undefined;
-  Settings: undefined;
   TeamDetail: { teamId: string; teamName: string };
+  Standings: undefined;
+  Notifications: undefined;
 };
 
 export type TabParamList = {
@@ -99,6 +101,11 @@ function TabNavigator() {
         options={{
           title: "Basketball Stats",
           tabBarLabel: "Home",
+          headerRight: () => (
+            <View style={{ marginRight: 8 }}>
+              <NotificationBell color={isDark ? "#9CA3AF" : "#6B7280"} />
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -223,12 +230,12 @@ function AppContent() {
           <Stack.Screen
             name="PlayerComparison"
             component={PlayerComparisonScreen}
-            options={{ title: "Player Comparison", headerShown: false }}
+            options={{ title: "Player Comparison" }}
           />
           <Stack.Screen
             name="ShotChart"
             component={ShotChartScreen}
-            options={{ title: "Shot Chart", headerShown: false }}
+            options={{ title: "Shot Chart" }}
           />
           <Stack.Screen
             name="CreateGame"
@@ -246,16 +253,21 @@ function AppContent() {
             options={{ title: "Add Player" }}
           />
           <Stack.Screen
-            name="Settings"
-            component={SettingsScreen}
-            options={{ title: "Settings" }}
-          />
-          <Stack.Screen
             name="TeamDetail"
             component={TeamDetailScreen}
             options={({ route }) => ({
               title: route.params.teamName,
             })}
+          />
+          <Stack.Screen
+            name="Standings"
+            component={StandingsScreen}
+            options={{ title: "League Standings" }}
+          />
+          <Stack.Screen
+            name="Notifications"
+            component={NotificationsScreen}
+            options={{ title: "Notifications" }}
           />
         </Stack.Navigator>
       )}

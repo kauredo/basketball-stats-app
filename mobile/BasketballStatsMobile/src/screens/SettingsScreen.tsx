@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Switch, Alert, Share } from "react-native";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme, ThemeMode } from "../contexts/ThemeContext";
@@ -100,10 +100,62 @@ const themeModeIcons: Record<ThemeMode, string> = {
 export default function SettingsScreen() {
   const { token, selectedLeague } = useAuth();
   const { mode, setMode } = useTheme();
-  const [gameNotifications, setGameNotifications] = useState(true);
-  const [scoreUpdates, setScoreUpdates] = useState(true);
-  const [leagueAnnouncements, setLeagueAnnouncements] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
+
+  // Fetch notification preferences from backend
+  const notificationPrefs = useQuery(
+    api.notifications.getPreferences,
+    token ? { token, leagueId: selectedLeague?.id } : "skip"
+  );
+
+  const updatePreferencesMutation = useMutation(api.notifications.updatePreferences);
+
+  // Local state initialized from backend (with defaults)
+  const [gameNotifications, setGameNotifications] = useState(true);
+  const [scoreUpdates, setScoreUpdates] = useState(false);
+  const [leagueAnnouncements, setLeagueAnnouncements] = useState(true);
+
+  // Sync local state with backend preferences when loaded
+  useEffect(() => {
+    if (notificationPrefs) {
+      setGameNotifications(notificationPrefs.gameStart ?? true);
+      setScoreUpdates(notificationPrefs.scoreUpdates ?? false);
+      setLeagueAnnouncements(notificationPrefs.leagueAnnouncements ?? true);
+    }
+  }, [notificationPrefs]);
+
+  // Save preference to backend when toggled
+  const handleTogglePreference = async (
+    key: "gameStart" | "scoreUpdates" | "leagueAnnouncements",
+    value: boolean
+  ) => {
+    // Update local state immediately for responsiveness
+    if (key === "gameStart") setGameNotifications(value);
+    else if (key === "scoreUpdates") setScoreUpdates(value);
+    else if (key === "leagueAnnouncements") setLeagueAnnouncements(value);
+
+    // Save to backend
+    if (token) {
+      try {
+        await updatePreferencesMutation({
+          token,
+          leagueId: selectedLeague?.id,
+          gameReminders: notificationPrefs?.gameReminders ?? true,
+          gameStart: key === "gameStart" ? value : gameNotifications,
+          gameEnd: notificationPrefs?.gameEnd ?? true,
+          scoreUpdates: key === "scoreUpdates" ? value : scoreUpdates,
+          teamUpdates: notificationPrefs?.teamUpdates ?? true,
+          leagueAnnouncements: key === "leagueAnnouncements" ? value : leagueAnnouncements,
+        });
+      } catch (error) {
+        // Revert on error
+        if (key === "gameStart") setGameNotifications(!value);
+        else if (key === "scoreUpdates") setScoreUpdates(!value);
+        else if (key === "leagueAnnouncements") setLeagueAnnouncements(!value);
+        Alert.alert("Error", "Failed to save notification preferences");
+      }
+    }
+  };
 
   // Fetch data for export
   const playersData = useQuery(
@@ -253,7 +305,7 @@ export default function SettingsScreen() {
               rightElement={
                 <Switch
                   value={gameNotifications}
-                  onValueChange={setGameNotifications}
+                  onValueChange={(value) => handleTogglePreference("gameStart", value)}
                   trackColor={{ false: "#374151", true: "#F97316" }}
                   thumbColor={gameNotifications ? "#FFFFFF" : "#9CA3AF"}
                 />
@@ -266,7 +318,7 @@ export default function SettingsScreen() {
               rightElement={
                 <Switch
                   value={scoreUpdates}
-                  onValueChange={setScoreUpdates}
+                  onValueChange={(value) => handleTogglePreference("scoreUpdates", value)}
                   trackColor={{ false: "#374151", true: "#F97316" }}
                   thumbColor={scoreUpdates ? "#FFFFFF" : "#9CA3AF"}
                 />
@@ -286,7 +338,7 @@ export default function SettingsScreen() {
               </View>
               <Switch
                 value={leagueAnnouncements}
-                onValueChange={setLeagueAnnouncements}
+                onValueChange={(value) => handleTogglePreference("leagueAnnouncements", value)}
                 trackColor={{ false: "#374151", true: "#F97316" }}
                 thumbColor={leagueAnnouncements ? "#FFFFFF" : "#9CA3AF"}
               />

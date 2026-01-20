@@ -346,11 +346,11 @@ export function svgToCourtCoords(
 }
 
 /**
- * Determine shot zone from coordinates
+ * Determine shot zone from coordinates (basket-origin: x=0, y=0 at basket)
  */
 export function getShotZone(x: number, y: number): keyof typeof SHOT_ZONES | "unknown" {
-  // Calculate distance from basket (at 0, 5.25 on mobile coords)
-  const distanceFromBasket = Math.sqrt(x * x + (y - 5.25) ** 2);
+  // Calculate distance from basket (origin is at basket, so y=0 at basket)
+  const distanceFromBasket = Math.sqrt(x * x + y * y);
 
   // Check if it's a 3-pointer (beyond 3pt line)
   const isThreePointer =

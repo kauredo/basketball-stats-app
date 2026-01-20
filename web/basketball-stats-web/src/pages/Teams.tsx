@@ -3,20 +3,27 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
+import { getErrorMessage } from "../utils/error";
 import {
   PlusIcon,
   UsersIcon,
   UserPlusIcon,
   PencilIcon,
   TrashIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 
 const Teams: React.FC = () => {
   const { token, selectedLeague } = useAuth();
+  const toast = useToast();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCreatePlayerModal, setShowCreatePlayerModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<any>(null);
-  const [teamForm, setTeamForm] = useState({ name: "", city: "", description: "" });
+  const [teamForm, setTeamForm] = useState({ name: "", city: "", description: "", logoUrl: "" });
+  const [teamFormErrors, setTeamFormErrors] = useState<{ name?: string }>({});
   const [playerForm, setPlayerForm] = useState({
     name: "",
     number: "",
@@ -24,7 +31,32 @@ const Teams: React.FC = () => {
     heightCm: "",
     weightKg: "",
   });
+  const [playerFormErrors, setPlayerFormErrors] = useState<{ name?: string; number?: string }>({});
   const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Validation functions
+  const validateTeamName = (name: string) => {
+    if (!name.trim()) return "Team name is required";
+    if (name.trim().length < 2) return "Team name must be at least 2 characters";
+    if (name.trim().length > 50) return "Team name must be less than 50 characters";
+    return undefined;
+  };
+
+  const validatePlayerName = (name: string) => {
+    if (!name.trim()) return "Player name is required";
+    if (name.trim().length < 2) return "Player name must be at least 2 characters";
+    return undefined;
+  };
+
+  const validateJerseyNumber = (number: string) => {
+    if (!number) return "Jersey number is required";
+    const num = parseInt(number);
+    if (isNaN(num)) return "Jersey number must be a valid number";
+    if (num < 0 || num > 99) return "Jersey number must be between 0 and 99";
+    return undefined;
+  };
 
   const teamsData = useQuery(
     api.teams.list,
@@ -32,6 +64,8 @@ const Teams: React.FC = () => {
   );
 
   const createTeam = useMutation(api.teams.create);
+  const updateTeam = useMutation(api.teams.update);
+  const removeTeam = useMutation(api.teams.remove);
   const createPlayer = useMutation(api.players.create);
 
   const teams = teamsData?.teams || [];
@@ -47,11 +81,16 @@ const Teams: React.FC = () => {
         name: teamForm.name.trim(),
         city: teamForm.city.trim() || undefined,
         description: teamForm.description.trim() || undefined,
+        logoUrl: teamForm.logoUrl.trim() || undefined,
       });
       setShowCreateModal(false);
-      setTeamForm({ name: "", city: "", description: "" });
+      setTeamForm({ name: "", city: "", description: "", logoUrl: "" });
+      setTeamFormErrors({});
+      toast.success(`Team "${teamForm.name.trim()}" created successfully`);
     } catch (error) {
       console.error("Failed to create team:", error);
+      const message = getErrorMessage(error, "Failed to create team. Please try again.");
+      toast.error(message);
     } finally {
       setIsCreating(false);
     }
@@ -71,13 +110,78 @@ const Teams: React.FC = () => {
         heightCm: playerForm.heightCm ? parseInt(playerForm.heightCm) : undefined,
         weightKg: playerForm.weightKg ? parseInt(playerForm.weightKg) : undefined,
       });
+      toast.success(`Player "${playerForm.name.trim()}" added to ${selectedTeam.name}`);
       setShowCreatePlayerModal(false);
       setPlayerForm({ name: "", number: "", position: "PG", heightCm: "", weightKg: "" });
+      setPlayerFormErrors({});
       setSelectedTeam(null);
     } catch (error) {
       console.error("Failed to create player:", error);
+      const message = getErrorMessage(error, "Failed to add player. Please try again.");
+      toast.error(message);
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleEditTeam = (team: any) => {
+    setSelectedTeam(team);
+    setTeamForm({
+      name: team.name,
+      city: team.city || "",
+      description: team.description || "",
+      logoUrl: team.logoUrl || "",
+    });
+    setTeamFormErrors({});
+    setShowEditModal(true);
+  };
+
+  const handleUpdateTeam = async () => {
+    if (!selectedTeam || !teamForm.name.trim() || !token) return;
+
+    setIsUpdating(true);
+    try {
+      await updateTeam({
+        token,
+        teamId: selectedTeam.id as Id<"teams">,
+        name: teamForm.name.trim(),
+        city: teamForm.city.trim() || undefined,
+        description: teamForm.description.trim() || undefined,
+        logoUrl: teamForm.logoUrl.trim() || undefined,
+      });
+      toast.success(`Team "${teamForm.name.trim()}" updated successfully`);
+      setShowEditModal(false);
+      setTeamForm({ name: "", city: "", description: "", logoUrl: "" });
+      setTeamFormErrors({});
+      setSelectedTeam(null);
+    } catch (error) {
+      console.error("Failed to update team:", error);
+      const message = getErrorMessage(error, "Failed to update team. Please try again.");
+      toast.error(message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteTeam = async () => {
+    if (!selectedTeam || !token) return;
+
+    const teamName = selectedTeam.name;
+    setIsDeleting(true);
+    try {
+      await removeTeam({
+        token,
+        teamId: selectedTeam.id as Id<"teams">,
+      });
+      toast.success(`Team "${teamName}" deleted successfully`);
+      setShowDeleteModal(false);
+      setSelectedTeam(null);
+    } catch (error) {
+      console.error("Failed to delete team:", error);
+      const message = getErrorMessage(error, "Failed to delete team. Please try again.");
+      toast.error(message);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -94,10 +198,21 @@ const Teams: React.FC = () => {
           )}
         </div>
         <div className="flex items-center space-x-2">
-          <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          <button
+            onClick={() => handleEditTeam(team)}
+            className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            title="Edit team"
+          >
             <PencilIcon className="w-4 h-4" />
           </button>
-          <button className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors">
+          <button
+            onClick={() => {
+              setSelectedTeam(team);
+              setShowDeleteModal(true);
+            }}
+            className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
+            title="Delete team"
+          >
             <TrashIcon className="w-4 h-4" />
           </button>
         </div>
@@ -213,10 +328,26 @@ const Teams: React.FC = () => {
                 <input
                   type="text"
                   value={teamForm.name}
-                  onChange={(e) => setTeamForm((prev) => ({ ...prev, name: e.target.value }))}
-                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  onChange={(e) => {
+                    setTeamForm((prev) => ({ ...prev, name: e.target.value }));
+                    if (teamFormErrors.name) {
+                      setTeamFormErrors((prev) => ({ ...prev, name: validateTeamName(e.target.value) }));
+                    }
+                  }}
+                  onBlur={(e) => setTeamFormErrors((prev) => ({ ...prev, name: validateTeamName(e.target.value) }))}
+                  className={`w-full bg-gray-100 dark:bg-gray-700 border rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                    teamFormErrors.name
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  }`}
                   placeholder="Enter team name"
                 />
+                {teamFormErrors.name && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                    {teamFormErrors.name}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -229,6 +360,19 @@ const Teams: React.FC = () => {
                   onChange={(e) => setTeamForm((prev) => ({ ...prev, city: e.target.value }))}
                   className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter city"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Logo URL
+                </label>
+                <input
+                  type="url"
+                  value={teamForm.logoUrl}
+                  onChange={(e) => setTeamForm((prev) => ({ ...prev, logoUrl: e.target.value }))}
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="https://example.com/logo.png"
                 />
               </div>
 
@@ -252,7 +396,8 @@ const Teams: React.FC = () => {
               <button
                 onClick={() => {
                   setShowCreateModal(false);
-                  setTeamForm({ name: "", city: "", description: "" });
+                  setTeamForm({ name: "", city: "", description: "", logoUrl: "" });
+                  setTeamFormErrors({});
                 }}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
@@ -260,7 +405,7 @@ const Teams: React.FC = () => {
               </button>
               <button
                 onClick={handleCreateTeam}
-                disabled={!teamForm.name.trim() || isCreating}
+                disabled={!teamForm.name.trim() || !!teamFormErrors.name || isCreating}
                 className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isCreating ? "Creating..." : "Create Team"}
@@ -286,10 +431,26 @@ const Teams: React.FC = () => {
                 <input
                   type="text"
                   value={playerForm.name}
-                  onChange={(e) => setPlayerForm((prev) => ({ ...prev, name: e.target.value }))}
-                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  onChange={(e) => {
+                    setPlayerForm((prev) => ({ ...prev, name: e.target.value }));
+                    if (playerFormErrors.name) {
+                      setPlayerFormErrors((prev) => ({ ...prev, name: validatePlayerName(e.target.value) }));
+                    }
+                  }}
+                  onBlur={(e) => setPlayerFormErrors((prev) => ({ ...prev, name: validatePlayerName(e.target.value) }))}
+                  className={`w-full bg-gray-100 dark:bg-gray-700 border rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                    playerFormErrors.name
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  }`}
                   placeholder="Enter player name"
                 />
+                {playerFormErrors.name && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                    {playerFormErrors.name}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -300,12 +461,28 @@ const Teams: React.FC = () => {
                   <input
                     type="number"
                     value={playerForm.number}
-                    onChange={(e) => setPlayerForm((prev) => ({ ...prev, number: e.target.value }))}
-                    className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    onChange={(e) => {
+                      setPlayerForm((prev) => ({ ...prev, number: e.target.value }));
+                      if (playerFormErrors.number) {
+                        setPlayerFormErrors((prev) => ({ ...prev, number: validateJerseyNumber(e.target.value) }));
+                      }
+                    }}
+                    onBlur={(e) => setPlayerFormErrors((prev) => ({ ...prev, number: validateJerseyNumber(e.target.value) }))}
+                    className={`w-full bg-gray-100 dark:bg-gray-700 border rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      playerFormErrors.number
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 dark:border-gray-600"
+                    }`}
                     placeholder="00"
                     min="0"
                     max="99"
                   />
+                  {playerFormErrors.number && (
+                    <p className="mt-1 text-sm text-red-500 flex items-center">
+                      <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                      {playerFormErrors.number}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -372,6 +549,7 @@ const Teams: React.FC = () => {
                     heightCm: "",
                     weightKg: "",
                   });
+                  setPlayerFormErrors({});
                   setSelectedTeam(null);
                 }}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -380,10 +558,156 @@ const Teams: React.FC = () => {
               </button>
               <button
                 onClick={handleCreatePlayer}
-                disabled={!playerForm.name.trim() || !playerForm.number || isCreating}
+                disabled={!playerForm.name.trim() || !playerForm.number || !!playerFormErrors.name || !!playerFormErrors.number || isCreating}
                 className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isCreating ? "Adding..." : "Add Player"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Team Modal */}
+      {showEditModal && selectedTeam && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Edit Team</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Team Name *
+                </label>
+                <input
+                  type="text"
+                  value={teamForm.name}
+                  onChange={(e) => {
+                    setTeamForm((prev) => ({ ...prev, name: e.target.value }));
+                    if (teamFormErrors.name) {
+                      setTeamFormErrors((prev) => ({ ...prev, name: validateTeamName(e.target.value) }));
+                    }
+                  }}
+                  onBlur={(e) => setTeamFormErrors((prev) => ({ ...prev, name: validateTeamName(e.target.value) }))}
+                  className={`w-full bg-gray-100 dark:bg-gray-700 border rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                    teamFormErrors.name
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  }`}
+                  placeholder="Enter team name"
+                />
+                {teamFormErrors.name && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                    {teamFormErrors.name}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  City
+                </label>
+                <input
+                  type="text"
+                  value={teamForm.city}
+                  onChange={(e) => setTeamForm((prev) => ({ ...prev, city: e.target.value }))}
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Enter city"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Logo URL
+                </label>
+                <input
+                  type="url"
+                  value={teamForm.logoUrl}
+                  onChange={(e) => setTeamForm((prev) => ({ ...prev, logoUrl: e.target.value }))}
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="https://example.com/logo.png"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={teamForm.description}
+                  onChange={(e) =>
+                    setTeamForm((prev) => ({ ...prev, description: e.target.value }))
+                  }
+                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Enter team description"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setTeamForm({ name: "", city: "", description: "", logoUrl: "" });
+                  setTeamFormErrors({});
+                  setSelectedTeam(null);
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateTeam}
+                disabled={!teamForm.name.trim() || !!teamFormErrors.name || isUpdating}
+                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUpdating ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Team Confirmation Modal */}
+      {showDeleteModal && selectedTeam && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <ExclamationTriangleIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Delete Team</h3>
+            </div>
+
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {selectedTeam.name}
+              </span>
+              ?
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
+              This action cannot be undone. All players on this team will also be affected.
+            </p>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedTeam(null);
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteTeam}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? "Deleting..." : "Delete Team"}
               </button>
             </div>
           </div>

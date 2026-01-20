@@ -182,11 +182,11 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
   const zoneStats = showHeatMap && allShots.length > 0 ? calculateZoneStats(allShots) : null;
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
       <svg
         ref={svgRef}
         viewBox={`0 0 ${COURT_WIDTH} ${COURT_HEIGHT}`}
-        className={`max-w-full max-h-full transition-all ${
+        className={`max-w-full max-h-full w-auto h-auto transition-all ${
           disabled ? "opacity-50 cursor-not-allowed" : onCourtClick ? "cursor-crosshair" : ""
         }`}
         onClick={handleClick}

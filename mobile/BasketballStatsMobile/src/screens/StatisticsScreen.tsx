@@ -1,10 +1,16 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Dimensions } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Dimensions, Image } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
+import { RootStackParamList } from "../navigation/AppNavigator";
+
+type StatisticsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -17,7 +23,7 @@ interface StatCardProps {
 
 function StatCard({ title, value, subtitle, color = "#EA580C" }: StatCardProps) {
   return (
-    <View className="bg-white dark:bg-gray-800 rounded-xl p-4 flex-row items-center w-[48%] border border-gray-200 dark:border-gray-700">
+    <View className="bg-white dark:bg-gray-800 rounded-xl p-4 flex-row items-center border border-gray-200 dark:border-gray-700">
       <View
         className="w-10 h-10 rounded-full justify-center items-center mr-3"
         style={{ backgroundColor: color }}
@@ -36,23 +42,27 @@ function StatCard({ title, value, subtitle, color = "#EA580C" }: StatCardProps) 
 interface LeaderItemProps {
   rank: number;
   playerName: string;
+  teamName?: string;
   value: number;
   unit?: string;
 }
 
-function LeaderItem({ rank, playerName, value, unit = "" }: LeaderItemProps) {
+function LeaderItem({ rank, playerName, teamName, value, unit = "" }: LeaderItemProps) {
   return (
     <View className="flex-row items-center bg-white dark:bg-gray-800 p-3 rounded-lg mb-2 border border-gray-200 dark:border-gray-700">
-      <View className="w-6 h-6 rounded-full bg-primary-500 justify-center items-center mr-3">
+      <View className="w-7 h-7 rounded-full bg-primary-500 justify-center items-center mr-3">
         <Text className="text-white text-xs font-bold">{rank}</Text>
       </View>
-      <View className="flex-1 flex-row justify-between items-center">
+      <View className="flex-1">
         <Text className="text-gray-900 dark:text-white text-sm font-medium">{playerName}</Text>
-        <Text className="text-gray-600 dark:text-gray-400 text-sm">
-          {value.toFixed(1)}
-          {unit}
-        </Text>
+        {teamName && (
+          <Text className="text-gray-500 dark:text-gray-400 text-xs">{teamName}</Text>
+        )}
       </View>
+      <Text className="text-gray-900 dark:text-white text-base font-semibold">
+        {value.toFixed(1)}
+        {unit}
+      </Text>
     </View>
   );
 }
@@ -60,6 +70,7 @@ function LeaderItem({ rank, playerName, value, unit = "" }: LeaderItemProps) {
 interface StandingsItemProps {
   rank: number;
   teamName: string;
+  logoUrl?: string;
   wins: number;
   losses: number;
   winPercentage: number;
@@ -69,6 +80,7 @@ interface StandingsItemProps {
 function StandingsItem({
   rank,
   teamName,
+  logoUrl,
   wins,
   losses,
   winPercentage,
@@ -76,30 +88,38 @@ function StandingsItem({
 }: StandingsItemProps) {
   return (
     <View className="flex-row items-center bg-white dark:bg-gray-800 p-3 rounded-lg mb-2 border border-gray-200 dark:border-gray-700">
-      <View className="w-6 h-6 rounded-full bg-gray-500 justify-center items-center mr-3">
-        <Text className="text-white text-xs font-bold">{rank}</Text>
+      <View className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 justify-center items-center mr-3">
+        <Text className="text-gray-600 dark:text-gray-400 text-xs font-bold">{rank}</Text>
+      </View>
+      <View className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 justify-center items-center mr-3">
+        {logoUrl ? (
+          <Image source={{ uri: logoUrl }} className="w-8 h-8 rounded" resizeMode="contain" />
+        ) : (
+          <Icon name="basketball" size={20} color="#9CA3AF" />
+        )}
       </View>
       <View className="flex-1">
         <Text className="text-gray-900 dark:text-white text-sm font-medium">{teamName}</Text>
-      </View>
-      <View className="items-end">
-        <Text className="text-gray-900 dark:text-white text-sm font-medium">
-          {wins}-{losses}
-        </Text>
-        <Text className="text-gray-600 dark:text-gray-400 text-xs">
-          {winPercentage.toFixed(1)}%
-        </Text>
-        {avgPoints !== undefined && (
-          <Text className="text-gray-600 dark:text-gray-400 text-xs">
+        {avgPoints !== undefined && avgPoints > 0 && (
+          <Text className="text-gray-500 dark:text-gray-400 text-xs">
             {avgPoints.toFixed(1)} PPG
           </Text>
         )}
+      </View>
+      <View className="items-end">
+        <Text className="text-gray-900 dark:text-white text-base font-semibold">
+          {wins}-{losses}
+        </Text>
+        <Text className="text-gray-500 dark:text-gray-400 text-xs">
+          .{winPercentage.toFixed(0).padStart(3, "0")}
+        </Text>
       </View>
     </View>
   );
 }
 
 export default function StatisticsScreen() {
+  const navigation = useNavigation<StatisticsScreenNavigationProp>();
   const { token, selectedLeague } = useAuth();
   const [activeTab, setActiveTab] = useState<"overview" | "leaders" | "standings" | "charts">(
     "overview"
@@ -145,15 +165,17 @@ export default function StatisticsScreen() {
   const leaders = dashboardData?.leaders || {};
   const standings = dashboardData?.standings || [];
   const recentGames = dashboardData?.recentGames || [];
+  const leagueInfo = dashboardData?.leagueInfo || {
+    totalGames: 0,
+    totalTeams: 0,
+    totalPlayers: 0,
+  };
 
   return (
     <View className="flex-1 bg-gray-50 dark:bg-dark-950">
-      {/* Header */}
-      <View className="bg-white dark:bg-gray-800 p-5 pt-15 border-b border-gray-200 dark:border-gray-700">
-        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">
-          Statistics Dashboard
-        </Text>
-        <Text className="text-gray-600 dark:text-gray-400 text-base">
+      {/* League Info Banner */}
+      <View className="bg-primary-500/10 dark:bg-primary-500/20 px-4 py-2 border-b border-primary-500/20">
+        <Text className="text-primary-600 dark:text-primary-400 text-sm font-medium text-center">
           {selectedLeague.name} • {selectedLeague.season}
         </Text>
       </View>
@@ -230,41 +252,48 @@ export default function StatisticsScreen() {
               <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
                 League Overview
               </Text>
-              <View className="flex-row flex-wrap gap-4">
-                <StatCard
-                  title="Total Games"
-                  value={recentGames.length || 0}
-                  subtitle="Completed games"
-                  color="#10B981"
-                />
-                <StatCard
-                  title="Total Teams"
-                  value={standings.length || 0}
-                  subtitle="Active teams"
-                  color="#3B82F6"
-                />
-                <StatCard
-                  title="Total Players"
-                  value={leaders.scoring?.length || leaders.rebounding?.length || 0}
-                  subtitle="Registered players"
-                  color="#8B5CF6"
-                />
-                <StatCard
-                  title="Average PPG"
-                  value={
-                    recentGames.length > 0
-                      ? (
-                          recentGames.reduce(
-                            (sum: number, game: any) =>
-                              sum + (game.homeScore || 0) + (game.awayScore || 0),
-                            0
-                          ) / recentGames.length
-                        ).toFixed(1)
-                      : "0.0"
-                  }
-                  subtitle="Points per game"
-                  color="#EF4444"
-                />
+              <View className="flex-row flex-wrap justify-between">
+                <View className="w-[48%] mb-3">
+                  <StatCard
+                    title="Total Games"
+                    value={leagueInfo.totalGames}
+                    subtitle="Completed games"
+                    color="#10B981"
+                  />
+                </View>
+                <View className="w-[48%] mb-3">
+                  <StatCard
+                    title="Total Teams"
+                    value={leagueInfo.totalTeams}
+                    subtitle="Active teams"
+                    color="#3B82F6"
+                  />
+                </View>
+                <View className="w-[48%] mb-3">
+                  <StatCard
+                    title="Total Players"
+                    value={leagueInfo.totalPlayers}
+                    subtitle="Registered players"
+                    color="#8B5CF6"
+                  />
+                </View>
+                <View className="w-[48%] mb-3">
+                  <StatCard
+                    title="Average PPG"
+                    value={
+                      recentGames.length > 0
+                        ? (
+                            recentGames.reduce(
+                              (sum: number, game: any) => sum + (game.totalPoints || 0),
+                              0
+                            ) / recentGames.length
+                          ).toFixed(1)
+                        : "0.0"
+                    }
+                    subtitle="Points per game"
+                    color="#EF4444"
+                  />
+                </View>
               </View>
             </View>
 
@@ -277,23 +306,23 @@ export default function StatisticsScreen() {
                 {recentGames.slice(0, 5).map((game: any, index: number) => (
                   <View
                     key={game.id || index}
-                    className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-2 flex-row justify-between items-center"
+                    className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-2 flex-row justify-between items-center border border-gray-200 dark:border-gray-700"
                   >
-                    <View className="flex-row items-center flex-1">
+                    <View className="flex-1">
                       <Text className="text-gray-900 dark:text-white text-sm font-medium">
-                        {game.homeTeam?.name || "Home"}
+                        {game.homeTeam || "Home"}
                       </Text>
-                      <Text className="text-gray-600 dark:text-gray-400 text-xs mx-2">vs</Text>
+                      <Text className="text-gray-500 dark:text-gray-400 text-xs">vs</Text>
                       <Text className="text-gray-900 dark:text-white text-sm font-medium">
-                        {game.awayTeam?.name || "Away"}
+                        {game.awayTeam || "Away"}
                       </Text>
                     </View>
                     <View className="items-end">
-                      <Text className="text-gray-900 dark:text-white text-base font-bold">
+                      <Text className="text-gray-900 dark:text-white text-lg font-bold">
                         {game.homeScore} - {game.awayScore}
                       </Text>
-                      <Text className="text-gray-600 dark:text-gray-400 text-xs">
-                        ({(game.homeScore || 0) + (game.awayScore || 0)} pts)
+                      <Text className="text-gray-500 dark:text-gray-400 text-xs">
+                        {game.totalPoints} total pts
                       </Text>
                     </View>
                   </View>
@@ -313,10 +342,11 @@ export default function StatisticsScreen() {
               </Text>
               {(leaders.scoring || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
-                  key={leader.playerId || index}
+                  key={index}
                   rank={index + 1}
-                  playerName={leader.playerName || "Unknown"}
-                  value={leader.avgPoints || 0}
+                  playerName={leader.name || "Unknown"}
+                  teamName={leader.team}
+                  value={leader.value || 0}
                   unit=" PPG"
                 />
               ))}
@@ -334,10 +364,11 @@ export default function StatisticsScreen() {
               </Text>
               {(leaders.rebounding || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
-                  key={leader.playerId || index}
+                  key={index}
                   rank={index + 1}
-                  playerName={leader.playerName || "Unknown"}
-                  value={leader.avgRebounds || 0}
+                  playerName={leader.name || "Unknown"}
+                  teamName={leader.team}
+                  value={leader.value || 0}
                   unit=" RPG"
                 />
               ))}
@@ -355,16 +386,39 @@ export default function StatisticsScreen() {
               </Text>
               {(leaders.assists || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
-                  key={leader.playerId || index}
+                  key={index}
                   rank={index + 1}
-                  playerName={leader.playerName || "Unknown"}
-                  value={leader.avgAssists || 0}
+                  playerName={leader.name || "Unknown"}
+                  teamName={leader.team}
+                  value={leader.value || 0}
                   unit=" APG"
                 />
               ))}
               {(!leaders.assists || leaders.assists.length === 0) && (
                 <Text className="text-gray-600 dark:text-gray-400 text-sm">
                   No assists data available
+                </Text>
+              )}
+            </View>
+
+            {/* Shooting Leaders */}
+            <View className="mb-6">
+              <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
+                Shooting Leaders
+              </Text>
+              {(leaders.shooting || []).slice(0, 5).map((leader: any, index: number) => (
+                <LeaderItem
+                  key={index}
+                  rank={index + 1}
+                  playerName={leader.name || "Unknown"}
+                  teamName={leader.team}
+                  value={leader.value || 0}
+                  unit="%"
+                />
+              ))}
+              {(!leaders.shooting || leaders.shooting.length === 0) && (
+                <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                  No shooting data available
                 </Text>
               )}
             </View>
@@ -375,20 +429,40 @@ export default function StatisticsScreen() {
         {activeTab === "standings" && (
           <View className="p-4">
             <View className="mb-6">
-              <Text className="text-gray-900 dark:text-white text-xl font-bold mb-4">
-                League Standings
-              </Text>
-              {standings.slice(0, 10).map((team: any, index: number) => (
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="text-gray-900 dark:text-white text-xl font-bold">
+                  League Standings
+                </Text>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Standings")}
+                  className="bg-primary-500 px-4 py-2 rounded-lg flex-row items-center"
+                >
+                  <Text className="text-white font-medium text-sm mr-1">View Full</Text>
+                  <Icon name="chevron-right" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+              {standings.slice(0, 5).map((team: any, index: number) => (
                 <StandingsItem
                   key={team.teamId || index}
                   rank={index + 1}
                   teamName={team.teamName || "Unknown"}
+                  logoUrl={team.logoUrl}
                   wins={team.wins || 0}
                   losses={team.losses || 0}
                   winPercentage={team.winPercentage || 0}
                   avgPoints={team.avgPoints}
                 />
               ))}
+              {standings.length > 5 && (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Standings")}
+                  className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg mt-2 items-center"
+                >
+                  <Text className="text-primary-500 font-medium">
+                    View all {standings.length} teams
+                  </Text>
+                </TouchableOpacity>
+              )}
               {standings.length === 0 && (
                 <Text className="text-gray-600 dark:text-gray-400 text-sm">
                   No standings data available

@@ -48,7 +48,10 @@ export type IconName =
   | "chevron-down"
   | "chevron-up"
   | "chevron-right"
-  | "close";
+  | "close"
+  // Theme
+  | "moon"
+  | "sunny";
 
 interface IconProps {
   name: IconName;
@@ -109,6 +112,10 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   "chevron-up": { library: "ionicons", name: "chevron-up" },
   "chevron-right": { library: "ionicons", name: "chevron-forward" },
   close: { library: "ionicons", name: "close" },
+
+  // Theme
+  moon: { library: "ionicons", name: "moon" },
+  sunny: { library: "ionicons", name: "sunny" },
 };
 
 export default function Icon({ name, size = 24, color = "#6B7280", className }: IconProps) {

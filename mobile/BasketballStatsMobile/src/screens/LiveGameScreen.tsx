@@ -12,11 +12,7 @@ import {
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -275,6 +271,7 @@ export default function LiveGameScreen() {
     x: shot.x,
     y: shot.y,
     made: shot.made,
+    is3pt: shot.shotType === "3pt",
   }));
 
   // Initialize starters when data loads for scheduled games
@@ -1158,7 +1155,12 @@ export default function LiveGameScreen() {
       {activeTab !== "plays" && (
         <ScrollView
           className="flex-1 px-4"
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
+          contentContainerStyle={{
+            flexGrow: isLandscape ? 0 : 1,
+            paddingBottom: isLandscape ? 8 : 16,
+            minHeight: isLandscape ? undefined : "100%",
+          }}
+          showsVerticalScrollIndicator={isLandscape}
         >
           {/* Court Tab */}
           {activeTab === "court" && (

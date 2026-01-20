@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
@@ -165,11 +166,30 @@ function StandingsTable({ standings }: StandingsTableProps) {
 
 export default function Statistics() {
   const { token, selectedLeague } = useAuth();
-  const [activeTab, setActiveTab] = useState<"overview" | "players" | "teams" | "charts">(
-    "overview"
-  );
-  const [sortBy, setSortBy] = useState("avgPoints");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initialize state from URL params or defaults
+  const [activeTab, setActiveTab] = useState<"overview" | "players" | "teams" | "charts">(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "overview" || tab === "players" || tab === "teams" || tab === "charts") {
+      return tab;
+    }
+    return "overview";
+  });
+  const [sortBy, setSortBy] = useState(() => searchParams.get("sortBy") || "avgPoints");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(() => {
+    const order = searchParams.get("order");
+    return order === "asc" ? "asc" : "desc";
+  });
+
+  // Sync state changes to URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (activeTab !== "overview") params.set("tab", activeTab);
+    if (sortBy !== "avgPoints") params.set("sortBy", sortBy);
+    if (sortOrder !== "desc") params.set("order", sortOrder);
+    setSearchParams(params, { replace: true });
+  }, [activeTab, sortBy, sortOrder, setSearchParams]);
 
   // Fetch dashboard data from Convex
   const dashboardData = useQuery(

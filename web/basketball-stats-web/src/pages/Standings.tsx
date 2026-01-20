@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -21,10 +22,37 @@ type SortField =
   | "avgPointsAgainst";
 type SortDirection = "asc" | "desc";
 
+const validSortFields: SortField[] = [
+  "rank",
+  "wins",
+  "losses",
+  "winPercentage",
+  "pointDiff",
+  "avgPointsFor",
+  "avgPointsAgainst",
+];
+
 const Standings: React.FC = () => {
   const { token, selectedLeague } = useAuth();
-  const [sortField, setSortField] = useState<SortField>("rank");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initialize state from URL params or defaults
+  const [sortField, setSortField] = useState<SortField>(() => {
+    const field = searchParams.get("sort") as SortField;
+    return validSortFields.includes(field) ? field : "rank";
+  });
+  const [sortDirection, setSortDirection] = useState<SortDirection>(() => {
+    const dir = searchParams.get("dir");
+    return dir === "desc" ? "desc" : "asc";
+  });
+
+  // Sync state changes to URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (sortField !== "rank") params.set("sort", sortField);
+    if (sortDirection !== "asc") params.set("dir", sortDirection);
+    setSearchParams(params, { replace: true });
+  }, [sortField, sortDirection, setSearchParams]);
 
   const standingsData = useQuery(
     api.statistics.getStandings,

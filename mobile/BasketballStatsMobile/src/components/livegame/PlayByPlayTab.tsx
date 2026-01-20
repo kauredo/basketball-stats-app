@@ -226,17 +226,13 @@ export default function PlayByPlayTab({
           <TouchableOpacity
             key={item.key}
             className={`px-3 py-1.5 rounded-full mr-2 ${
-              selectedQuarter === item.key
-                ? "bg-primary-500"
-                : "bg-gray-200 dark:bg-gray-700"
+              selectedQuarter === item.key ? "bg-primary-500" : "bg-gray-200 dark:bg-gray-700"
             }`}
             onPress={() => setSelectedQuarter(item.key)}
           >
             <Text
               className={`text-xs font-semibold ${
-                selectedQuarter === item.key
-                  ? "text-white"
-                  : "text-gray-600 dark:text-gray-400"
+                selectedQuarter === item.key ? "text-white" : "text-gray-600 dark:text-gray-400"
               }`}
             >
               {item.label}

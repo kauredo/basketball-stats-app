@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { BellIcon, CheckIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { BellAlertIcon } from "@heroicons/react/24/solid";
 import { useNotifications } from "../contexts/NotificationContext";
@@ -7,6 +8,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 const NotificationBell: React.FC = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } =
     useNotifications();
+  const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -78,11 +80,46 @@ const NotificationBell: React.FC = () => {
   const handleNotificationClick = async (notification: {
     _id: Id<"notifications">;
     read: boolean;
+    type: string;
+    data?: { gameId?: string; teamId?: string; playerId?: string };
   }) => {
     if (!notification.read) {
       await markAsRead(notification._id);
     }
-    // TODO: Navigate to relevant page based on notification.data
+
+    // Navigate to relevant page based on notification type and data
+    const { type, data } = notification;
+    setIsOpen(false);
+
+    switch (type) {
+      case "game_reminder":
+      case "game_start":
+        if (data?.gameId) {
+          navigate(`/app/games/${data.gameId}/live`);
+        } else {
+          navigate("/app/games");
+        }
+        break;
+      case "game_end":
+        if (data?.gameId) {
+          navigate(`/app/games/${data.gameId}/analysis`);
+        } else {
+          navigate("/app/games");
+        }
+        break;
+      case "score_update":
+        navigate("/app/statistics");
+        break;
+      case "team_update":
+        navigate("/app/teams");
+        break;
+      case "league_announcement":
+        navigate("/app");
+        break;
+      default:
+        // For unknown types, stay on current page
+        break;
+    }
   };
 
   return (

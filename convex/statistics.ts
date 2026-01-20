@@ -41,7 +41,7 @@ export const getPlayerSeasonStats = query({
     const stats = allStats.filter((s) => gameIds.has(s.gameId));
 
     if (stats.length === 0) {
-      return { stats: emptyPlayerStats(player, team ?? undefined) };
+      return { stats: emptyPlayerStats(player, team ?? undefined), recentGames: [] };
     }
 
     const aggregated = aggregateStats(stats);
@@ -49,6 +49,55 @@ export const getPlayerSeasonStats = query({
     const averages = calculateAverages(aggregated, gamesPlayed);
     const percentages = calculatePercentages(aggregated);
     const advanced = calculateAdvancedStats(aggregated, averages, gamesPlayed);
+
+    // Get recent games with individual game stats
+    const gameMap = new Map(games.map((g) => [g._id, g]));
+    const recentGameStats = stats
+      .map((stat) => {
+        const game = gameMap.get(stat.gameId);
+        if (!game) return null;
+
+        // Determine opponent
+        const isHomeTeam = game.homeTeamId === player.teamId;
+        const opponentId = isHomeTeam ? game.awayTeamId : game.homeTeamId;
+
+        return {
+          gameId: game._id,
+          gameDate: game.endedAt || game.startedAt || game.scheduledAt,
+          opponentId,
+          points: stat.points,
+          rebounds: stat.rebounds,
+          assists: stat.assists,
+          steals: stat.steals,
+          blocks: stat.blocks,
+          turnovers: stat.turnovers,
+          fouls: stat.fouls,
+          fieldGoalsMade: stat.fieldGoalsMade,
+          fieldGoalsAttempted: stat.fieldGoalsAttempted,
+          fieldGoalPercentage:
+            stat.fieldGoalsAttempted > 0
+              ? (stat.fieldGoalsMade / stat.fieldGoalsAttempted) * 100
+              : 0,
+          threePointersMade: stat.threePointersMade,
+          threePointersAttempted: stat.threePointersAttempted,
+          freeThrowsMade: stat.freeThrowsMade,
+          freeThrowsAttempted: stat.freeThrowsAttempted,
+          minutesPlayed: stat.minutesPlayed || 0,
+        };
+      })
+      .filter((g): g is NonNullable<typeof g> => g !== null)
+      .sort((a, b) => (b.gameDate || 0) - (a.gameDate || 0))
+      .slice(0, 10);
+
+    // Fetch opponent names
+    const opponentIds = [...new Set(recentGameStats.map((g) => g.opponentId))];
+    const opponents = await Promise.all(opponentIds.map((id) => ctx.db.get(id)));
+    const opponentMap = new Map(opponents.filter(Boolean).map((t) => [t!._id, t!.name]));
+
+    const recentGames = recentGameStats.map((g) => ({
+      ...g,
+      opponent: opponentMap.get(g.opponentId) || "Unknown",
+    }));
 
     return {
       stats: {
@@ -62,6 +111,7 @@ export const getPlayerSeasonStats = query({
         ...percentages,
         ...advanced,
       },
+      recentGames,
     };
   },
 });
@@ -479,27 +529,27 @@ export const getDashboard = query({
 
     const validPlayerStats = playerStatsForLeaders.filter((s) => s !== null);
 
-    // Top 5 in each category
+    // Top 5 in each category - include team info
     const scoringLeaders = [...validPlayerStats]
       .sort((a, b) => b!.avgPoints - a!.avgPoints)
       .slice(0, 5)
-      .map((p) => ({ name: p!.playerName, value: p!.avgPoints }));
+      .map((p) => ({ name: p!.playerName, value: p!.avgPoints, team: p!.team }));
 
     const reboundingLeaders = [...validPlayerStats]
       .sort((a, b) => b!.avgRebounds - a!.avgRebounds)
       .slice(0, 5)
-      .map((p) => ({ name: p!.playerName, value: p!.avgRebounds }));
+      .map((p) => ({ name: p!.playerName, value: p!.avgRebounds, team: p!.team }));
 
     const assistsLeaders = [...validPlayerStats]
       .sort((a, b) => b!.avgAssists - a!.avgAssists)
       .slice(0, 5)
-      .map((p) => ({ name: p!.playerName, value: p!.avgAssists }));
+      .map((p) => ({ name: p!.playerName, value: p!.avgAssists, team: p!.team }));
 
     const shootingLeaders = [...validPlayerStats]
       .filter((p) => p!.gamesPlayed >= 3)
       .sort((a, b) => b!.fieldGoalPercentage - a!.fieldGoalPercentage)
       .slice(0, 5)
-      .map((p) => ({ name: p!.playerName, value: p!.fieldGoalPercentage }));
+      .map((p) => ({ name: p!.playerName, value: p!.fieldGoalPercentage, team: p!.team }));
 
     // Calculate standings
     const standings = await Promise.all(
@@ -509,27 +559,33 @@ export const getDashboard = query({
 
         let wins = 0;
         let losses = 0;
+        let totalPoints = 0;
 
         for (const game of homeGames) {
+          totalPoints += game.homeScore;
           if (game.homeScore > game.awayScore) wins++;
           else losses++;
         }
 
         for (const game of awayGames) {
+          totalPoints += game.awayScore;
           if (game.awayScore > game.homeScore) wins++;
           else losses++;
         }
 
         const gamesPlayed = wins + losses;
         const winPercentage = gamesPlayed > 0 ? Math.round((wins / gamesPlayed) * 1000) / 10 : 0;
+        const avgPoints = gamesPlayed > 0 ? Math.round((totalPoints / gamesPlayed) * 10) / 10 : 0;
 
         return {
           teamId: team._id,
           teamName: team.name,
+          logoUrl: team.logoUrl,
           gamesPlayed,
           wins,
           losses,
           winPercentage,
+          avgPoints,
         };
       })
     );

@@ -99,8 +99,8 @@ export const CourtModeContent: React.FC<CourtModeContentProps> = ({
           </div>
 
           {/* Interactive Court - fills available space */}
-          <div className="flex-1 flex items-center justify-center min-h-0 py-1 sm:py-2">
-            <div className="w-full h-full flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center min-h-0 py-1 sm:py-2 overflow-hidden">
+            <div className="w-full h-full max-h-full flex items-center justify-center">
               <InteractiveCourt
                 onCourtClick={onCourtClick}
                 disabled={disabled}

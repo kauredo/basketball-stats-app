@@ -5,7 +5,14 @@ import Icon from "../Icon";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { OnCourtPlayer } from "./ShotRecordingModal";
 
-export type QuickStatType = "rebound" | "assist" | "steal" | "block" | "turnover" | "foul" | "freethrow";
+export type QuickStatType =
+  | "rebound"
+  | "assist"
+  | "steal"
+  | "block"
+  | "turnover"
+  | "foul"
+  | "freethrow";
 
 interface QuickStatModalProps {
   visible: boolean;

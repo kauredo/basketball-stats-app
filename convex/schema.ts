@@ -131,7 +131,38 @@ export default defineSchema({
     timeRemainingSeconds: v.number(),
     homeScore: v.number(),
     awayScore: v.number(),
-    gameSettings: v.optional(v.any()),
+    gameSettings: v.optional(
+      v.object({
+        quarterMinutes: v.optional(v.number()),
+        foulLimit: v.optional(v.number()),
+        timeoutsPerTeam: v.optional(v.number()),
+        overtimeMinutes: v.optional(v.number()),
+        overtimePeriods: v.optional(v.number()),
+        bonusMode: v.optional(v.union(v.literal("college"), v.literal("nba"))),
+        startingFive: v.optional(
+          v.object({
+            home: v.optional(v.array(v.id("players"))),
+            away: v.optional(v.array(v.id("players"))),
+            homeTeam: v.optional(v.array(v.id("players"))),
+            awayTeam: v.optional(v.array(v.id("players"))),
+          })
+        ),
+        scoreByPeriod: v.optional(
+          v.record(
+            v.string(),
+            v.object({
+              home: v.number(),
+              away: v.number(),
+            })
+          )
+        ),
+        homeTimeouts: v.optional(v.number()),
+        awayTimeouts: v.optional(v.number()),
+        isQuickGame: v.optional(v.boolean()),
+        customHomeTeamName: v.optional(v.string()),
+        customAwayTeamName: v.optional(v.string()),
+      })
+    ),
     userId: v.optional(v.id("users")),
   })
     .index("by_league", ["leagueId"])
@@ -245,7 +276,10 @@ export default defineSchema({
     .index("by_game", ["gameId"])
     .index("by_player", ["playerId"])
     .index("by_game_player", ["gameId", "playerId"])
-    .index("by_team", ["teamId"]),
+    .index("by_team", ["teamId"])
+    .index("by_player_made", ["playerId", "made"])
+    .index("by_player_zone", ["playerId", "shotZone"])
+    .index("by_team_zone", ["teamId", "shotZone"]),
 
   // Push subscriptions for web push notifications
   pushSubscriptions: defineTable({

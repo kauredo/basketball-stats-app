@@ -560,20 +560,22 @@ export const setQuarter = mutation({
       throw new Error("Cannot change quarter on a completed game");
     }
 
-    if (args.quarter < 1 || args.quarter > 4) {
-      throw new Error("Quarter must be between 1 and 4");
+    if (args.quarter < 1) {
+      throw new Error("Quarter must be at least 1");
     }
 
     const settings = game.gameSettings as any;
     const quarterMinutes = settings?.quarterMinutes || 12;
+    const overtimeMinutes = settings?.overtimeMinutes || 5;
 
     const updates: any = {
       currentQuarter: args.quarter,
     };
 
-    // Reset time to full quarter if requested
+    // Reset time to full quarter/overtime if requested
     if (args.resetTime) {
-      updates.timeRemainingSeconds = quarterMinutes * 60;
+      const periodMinutes = args.quarter > 4 ? overtimeMinutes : quarterMinutes;
+      updates.timeRemainingSeconds = periodMinutes * 60;
     }
 
     // Pause game when changing quarters

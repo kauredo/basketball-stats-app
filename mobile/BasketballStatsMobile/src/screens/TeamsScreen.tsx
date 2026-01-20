@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, Image } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -7,6 +7,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import { RootStackParamList } from "../navigation/AppNavigator";
 
@@ -17,12 +18,14 @@ interface Team {
   name: string;
   city?: string;
   description?: string;
+  logoUrl?: string;
   activePlayersCount?: number;
 }
 
 export default function TeamsScreen() {
   const navigation = useNavigation<TeamsScreenNavigationProp>();
   const { token, selectedLeague } = useAuth();
+  const { resolvedTheme } = useTheme();
   const [refreshing, setRefreshing] = React.useState(false);
 
   const teamsData = useQuery(
@@ -40,27 +43,53 @@ export default function TeamsScreen() {
 
   const renderTeam = ({ item: team }: { item: Team }) => (
     <TouchableOpacity
-      className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 border border-gray-200 dark:border-gray-700"
+      className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 border border-gray-200 dark:border-gray-700 flex-row"
       onPress={() => navigation.navigate("TeamDetail", { teamId: team.id, teamName: team.name })}
     >
-      <View className="mb-2">
+      {/* Team Logo */}
+      <View className="w-14 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 items-center justify-center mr-4">
+        {team.logoUrl ? (
+          <Image
+            source={{ uri: team.logoUrl }}
+            className="w-12 h-12 rounded-lg"
+            resizeMode="contain"
+          />
+        ) : (
+          <Icon
+            name="basketball"
+            size={28}
+            color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
+          />
+        )}
+      </View>
+
+      {/* Team Info */}
+      <View className="flex-1">
         <Text className="text-gray-900 dark:text-white text-lg font-bold">{team.name}</Text>
         {team.city && (
           <Text className="text-gray-600 dark:text-gray-400 text-sm mt-0.5">{team.city}</Text>
         )}
-      </View>
-
-      <View className="mb-2">
-        <Text className="text-green-400 text-sm font-semibold">
+        <Text className="text-green-500 text-sm font-medium mt-1">
           {team.activePlayersCount || 0} Active Players
         </Text>
+        {team.description && (
+          <Text
+            className="text-gray-500 dark:text-gray-400 text-xs mt-1 leading-4"
+            numberOfLines={1}
+          >
+            {team.description}
+          </Text>
+        )}
       </View>
 
-      {team.description && (
-        <Text className="text-gray-700 dark:text-gray-300 text-sm leading-[18px]" numberOfLines={2}>
-          {team.description}
-        </Text>
-      )}
+      {/* Chevron */}
+      <View className="justify-center">
+        <Icon
+          name="chevron-right"
+          size={20}
+          color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
+        />
+      </View>
     </TouchableOpacity>
   );
 
@@ -72,9 +101,11 @@ export default function TeamsScreen() {
     );
   }
 
+  const statusBarStyle = resolvedTheme === "dark" ? "light" : "dark";
+
   return (
     <View className="flex-1 bg-gray-50 dark:bg-dark-950">
-      <StatusBar style="light" />
+      <StatusBar style={statusBarStyle} />
       <FlatList
         data={teams}
         renderItem={renderTeam}

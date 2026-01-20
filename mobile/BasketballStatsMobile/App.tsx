@@ -3,6 +3,7 @@ import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider } from "./src/contexts/AuthContext";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
+import { NotificationProvider } from "./src/contexts/NotificationContext";
 import AppNavigator from "./src/navigation/AppNavigator";
 
 // Initialize Convex client
@@ -15,7 +16,9 @@ function App() {
       <ConvexProvider client={convex}>
         <ThemeProvider>
           <AuthProvider>
-            <AppNavigator />
+            <NotificationProvider>
+              <AppNavigator />
+            </NotificationProvider>
           </AuthProvider>
         </ThemeProvider>
       </ConvexProvider>

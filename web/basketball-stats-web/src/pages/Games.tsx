@@ -4,6 +4,8 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
+import { getErrorMessage } from "../utils/error";
 import {
   PlusIcon,
   PlayIcon,
@@ -15,6 +17,7 @@ import {
 
 const Games: React.FC = () => {
   const { token, selectedLeague } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showQuickGameModal, setShowQuickGameModal] = useState(false);
@@ -99,10 +102,13 @@ const Games: React.FC = () => {
         homeTeamId: selectedTeams.home as Id<"teams">,
         awayTeamId: selectedTeams.away as Id<"teams">,
       });
+      toast.success("Game created successfully");
       setShowCreateModal(false);
       setSelectedTeams({ home: null, away: null });
     } catch (error) {
       console.error("Failed to create game:", error);
+      const message = getErrorMessage(error, "Failed to create game. Please try again.");
+      toast.error(message);
     } finally {
       setIsCreating(false);
     }
@@ -127,12 +133,15 @@ const Games: React.FC = () => {
         awayTeamName: quickGameSettings.awayTeamName.trim(),
         quarterMinutes: quickGameSettings.quarterMinutes,
       });
+      toast.success("Quick game started!");
       setShowQuickGameModal(false);
       setQuickGameSettings({ homeTeamName: "", awayTeamName: "", quarterMinutes: 12 });
       // Navigate directly to the live game page
       navigate(`/app/games/${result.gameId}/live`);
     } catch (error) {
       console.error("Failed to create quick game:", error);
+      const message = getErrorMessage(error, "Failed to create quick game. Please try again.");
+      toast.error(message);
     } finally {
       setIsCreating(false);
     }

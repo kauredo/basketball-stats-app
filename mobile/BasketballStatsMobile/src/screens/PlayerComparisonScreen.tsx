@@ -142,29 +142,20 @@ export default function PlayerComparisonScreen() {
   const [showPlayer2Modal, setShowPlayer2Modal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch all players for selection
-  const teamsData = useQuery(
-    api.teams.list,
-    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  // Fetch all players for selection using the efficient players.list query
+  const playersData = useQuery(
+    api.players.list,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id, activeOnly: true } : "skip"
   );
 
-  // Build player options from teams data
-  const playerOptions: PlayerOption[] = [];
-  if (teamsData?.teams) {
-    for (const team of teamsData.teams) {
-      if (team.players) {
-        for (const player of team.players) {
-          playerOptions.push({
-            id: player.id as Id<"players">,
-            name: player.name,
-            team: team.name,
-            number: player.number,
-            position: player.position,
-          });
-        }
-      }
-    }
-  }
+  // Build player options from players data
+  const playerOptions: PlayerOption[] = (playersData?.players || []).map((player) => ({
+    id: player.id as Id<"players">,
+    name: player.name,
+    team: player.team?.name || "Unknown",
+    number: player.number,
+    position: player.position,
+  }));
 
   // Fetch comparison data when both players are selected
   const comparisonData = useQuery(
@@ -226,16 +217,6 @@ export default function PlayerComparisonScreen() {
 
   return (
     <View className="flex-1 bg-white dark:bg-gray-800">
-      {/* Header */}
-      <View className="bg-gray-100 dark:bg-gray-700 p-5 pt-15">
-        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-1">
-          Player Comparison
-        </Text>
-        <Text className="text-gray-600 dark:text-gray-400 text-base">
-          Compare statistics between two players
-        </Text>
-      </View>
-
       <ScrollView
         className="flex-1"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "r
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { ToastProvider } from "./contexts/ToastContext";
 
 import Layout from "./components/Layout";
 import PublicLayout from "./components/layouts/PublicLayout";
@@ -31,6 +32,7 @@ import Profile from "./pages/Profile";
 import Standings from "./pages/Standings";
 import PlayerComparison from "./pages/PlayerComparison";
 import ShotCharts from "./pages/ShotCharts";
+import PlayerDetail from "./pages/PlayerDetail";
 
 function LoadingScreen() {
   return (
@@ -81,6 +83,7 @@ function AuthenticatedApp() {
           <Route path="/games" element={<Games />} />
           <Route path="/teams" element={<Teams />} />
           <Route path="/players" element={<Players />} />
+          <Route path="/players/:playerId" element={<PlayerDetail />} />
           <Route path="/statistics" element={<Statistics />} />
           <Route path="/standings" element={<Standings />} />
           <Route path="/compare" element={<PlayerComparison />} />
@@ -213,11 +216,13 @@ function AppRoutes() {
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </Router>
+      <ToastProvider>
+        <Router>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </Router>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

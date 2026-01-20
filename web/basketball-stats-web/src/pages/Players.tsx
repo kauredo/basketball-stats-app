@@ -1,19 +1,58 @@
 import React, { useState } from "react";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
+import { getErrorMessage } from "../utils/error";
 import {
   UserIcon,
   ChartBarIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
+  PencilIcon,
+  TrashIcon,
+  ExclamationTriangleIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 
 const Players: React.FC = () => {
   const { token, selectedLeague } = useAuth();
+  const toast = useToast();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTeam, setSelectedTeam] = useState<string>("");
   const [selectedPosition, setSelectedPosition] = useState<string>("");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
+  const [playerForm, setPlayerForm] = useState({
+    name: "",
+    number: "",
+    position: "PG" as "PG" | "SG" | "SF" | "PF" | "C",
+    heightCm: "",
+    weightKg: "",
+    active: true,
+  });
+  const [playerFormErrors, setPlayerFormErrors] = useState<{ name?: string; number?: string }>({});
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Validation functions
+  const validatePlayerName = (name: string) => {
+    if (!name.trim()) return "Player name is required";
+    if (name.trim().length < 2) return "Player name must be at least 2 characters";
+    return undefined;
+  };
+
+  const validateJerseyNumber = (number: string) => {
+    if (!number) return "Jersey number is required";
+    const num = parseInt(number);
+    if (isNaN(num)) return "Jersey number must be a valid number";
+    if (num < 0 || num > 99) return "Jersey number must be between 0 and 99";
+    return undefined;
+  };
 
   const playersData = useQuery(
     api.players.list,
@@ -25,8 +64,91 @@ const Players: React.FC = () => {
     token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
   );
 
+  const updatePlayer = useMutation(api.players.update);
+  const removePlayer = useMutation(api.players.remove);
+
   const players = playersData?.players || [];
   const teams = teamsData?.teams || [];
+
+  const handleViewStats = (player: any) => {
+    navigate(`/app/shot-charts?player=${player.id}`);
+  };
+
+  const handleViewPlayer = (player: any) => {
+    navigate(`/app/players/${player.id}`);
+  };
+
+  const handleEditPlayer = (player: any) => {
+    setSelectedPlayer(player);
+    setPlayerForm({
+      name: player.name,
+      number: player.number.toString(),
+      position: player.position,
+      heightCm: player.heightCm?.toString() || "",
+      weightKg: player.weightKg?.toString() || "",
+      active: player.active !== false,
+    });
+    setPlayerFormErrors({});
+    setShowEditModal(true);
+  };
+
+  const handleUpdatePlayer = async () => {
+    if (!selectedPlayer || !playerForm.name.trim() || !playerForm.number || !token) return;
+
+    setIsUpdating(true);
+    try {
+      await updatePlayer({
+        token,
+        playerId: selectedPlayer.id as Id<"players">,
+        name: playerForm.name.trim(),
+        number: parseInt(playerForm.number),
+        position: playerForm.position,
+        heightCm: playerForm.heightCm ? parseInt(playerForm.heightCm) : undefined,
+        weightKg: playerForm.weightKg ? parseInt(playerForm.weightKg) : undefined,
+        active: playerForm.active,
+      });
+      toast.success(`Player "${playerForm.name.trim()}" updated successfully`);
+      setShowEditModal(false);
+      setSelectedPlayer(null);
+      setPlayerForm({
+        name: "",
+        number: "",
+        position: "PG",
+        heightCm: "",
+        weightKg: "",
+        active: true,
+      });
+      setPlayerFormErrors({});
+    } catch (error) {
+      console.error("Failed to update player:", error);
+      const message = getErrorMessage(error, "Failed to update player. Please try again.");
+      toast.error(message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeletePlayer = async () => {
+    if (!selectedPlayer || !token) return;
+
+    const playerName = selectedPlayer.name;
+    setIsDeleting(true);
+    try {
+      await removePlayer({
+        token,
+        playerId: selectedPlayer.id as Id<"players">,
+      });
+      toast.success(`Player "${playerName}" deleted successfully`);
+      setShowDeleteModal(false);
+      setSelectedPlayer(null);
+    } catch (error) {
+      console.error("Failed to delete player:", error);
+      const message = getErrorMessage(error, "Failed to delete player. Please try again.");
+      toast.error(message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const positions = ["PG", "SG", "SF", "PF", "C"];
   const positionLabels: Record<string, string> = {
@@ -66,12 +188,39 @@ const Players: React.FC = () => {
           </div>
         </div>
 
-        <button
-          className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors"
-          title="View Stats"
-        >
-          <ChartBarIcon className="w-5 h-5" />
-        </button>
+        <div className="flex items-center space-x-1">
+          <button
+            onClick={() => handleViewPlayer(player)}
+            className="p-2 bg-primary-500 hover:bg-primary-600 rounded-lg text-white transition-colors"
+            title="View Profile"
+          >
+            <EyeIcon className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => handleViewStats(player)}
+            className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors"
+            title="Shot Chart"
+          >
+            <ChartBarIcon className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => handleEditPlayer(player)}
+            className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            title="Edit player"
+          >
+            <PencilIcon className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => {
+              setSelectedPlayer(player);
+              setShowDeleteModal(true);
+            }}
+            className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
+            title="Delete player"
+          >
+            <TrashIcon className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -273,6 +422,219 @@ const Players: React.FC = () => {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Edit Player Modal */}
+      {showEditModal && selectedPlayer && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Edit Player</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Player Name *
+                </label>
+                <input
+                  type="text"
+                  value={playerForm.name}
+                  onChange={(e) => {
+                    setPlayerForm((prev) => ({ ...prev, name: e.target.value }));
+                    if (playerFormErrors.name) {
+                      setPlayerFormErrors((prev) => ({ ...prev, name: validatePlayerName(e.target.value) }));
+                    }
+                  }}
+                  onBlur={(e) => setPlayerFormErrors((prev) => ({ ...prev, name: validatePlayerName(e.target.value) }))}
+                  className={`w-full bg-gray-100 dark:bg-gray-700 border rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                    playerFormErrors.name
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  }`}
+                  placeholder="Enter player name"
+                />
+                {playerFormErrors.name && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                    {playerFormErrors.name}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Jersey # *
+                  </label>
+                  <input
+                    type="number"
+                    value={playerForm.number}
+                    onChange={(e) => {
+                      setPlayerForm((prev) => ({ ...prev, number: e.target.value }));
+                      if (playerFormErrors.number) {
+                        setPlayerFormErrors((prev) => ({ ...prev, number: validateJerseyNumber(e.target.value) }));
+                      }
+                    }}
+                    onBlur={(e) => setPlayerFormErrors((prev) => ({ ...prev, number: validateJerseyNumber(e.target.value) }))}
+                    className={`w-full bg-gray-100 dark:bg-gray-700 border rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      playerFormErrors.number
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 dark:border-gray-600"
+                    }`}
+                    placeholder="00"
+                    min="0"
+                    max="99"
+                  />
+                  {playerFormErrors.number && (
+                    <p className="mt-1 text-sm text-red-500 flex items-center">
+                      <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
+                      {playerFormErrors.number}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Position *
+                  </label>
+                  <select
+                    value={playerForm.position}
+                    onChange={(e) =>
+                      setPlayerForm((prev) => ({ ...prev, position: e.target.value as any }))
+                    }
+                    className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="PG">Point Guard</option>
+                    <option value="SG">Shooting Guard</option>
+                    <option value="SF">Small Forward</option>
+                    <option value="PF">Power Forward</option>
+                    <option value="C">Center</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Height (cm)
+                  </label>
+                  <input
+                    type="number"
+                    value={playerForm.heightCm}
+                    onChange={(e) =>
+                      setPlayerForm((prev) => ({ ...prev, heightCm: e.target.value }))
+                    }
+                    className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="183"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Weight (kg)
+                  </label>
+                  <input
+                    type="number"
+                    value={playerForm.weightKg}
+                    onChange={(e) =>
+                      setPlayerForm((prev) => ({ ...prev, weightKg: e.target.value }))
+                    }
+                    className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="82"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="activeStatus"
+                  checked={playerForm.active}
+                  onChange={(e) => setPlayerForm((prev) => ({ ...prev, active: e.target.checked }))}
+                  className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                />
+                <label
+                  htmlFor="activeStatus"
+                  className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                >
+                  Active player
+                </label>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setSelectedPlayer(null);
+                  setPlayerForm({
+                    name: "",
+                    number: "",
+                    position: "PG",
+                    heightCm: "",
+                    weightKg: "",
+                    active: true,
+                  });
+                  setPlayerFormErrors({});
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdatePlayer}
+                disabled={!playerForm.name.trim() || !playerForm.number || !!playerFormErrors.name || !!playerFormErrors.number || isUpdating}
+                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUpdating ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Player Confirmation Modal */}
+      {showDeleteModal && selectedPlayer && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <ExclamationTriangleIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Delete Player</h3>
+            </div>
+
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {selectedPlayer.name}
+              </span>
+              ?
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
+              This action cannot be undone. If the player has game statistics, they will be set to
+              inactive instead.
+            </p>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedPlayer(null);
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeletePlayer}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? "Deleting..." : "Delete Player"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

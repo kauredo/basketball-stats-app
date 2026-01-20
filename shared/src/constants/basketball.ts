@@ -155,41 +155,6 @@ export const GAME_STATUSES = {
   },
 } as const;
 
-// API configuration
-export const API_CONFIG = {
-  // BASE_URL: "http://localhost:3000/api/v1",
-  BASE_URL: "http://192.168.1.55:3000/api/v1",
-  // WEBSOCKET_URL: "ws://localhost:3000",
-  WEBSOCKET_URL: "ws://192.168.1.55:3000",
-  TIMEOUT: 10000,
-  RETRY_ATTEMPTS: 3,
-  RETRY_DELAY: 1000,
-} as const;
-
-// WebSocket event types
-export const WEBSOCKET_EVENTS = {
-  // Connection events
-  CONNECT: "connect",
-  DISCONNECT: "disconnect",
-  CONNECT_ERROR: "connect_error",
-
-  // Game events
-  GAME_UPDATE: "game_update",
-  GAME_CONNECTED: "game_connected",
-  TIMER_UPDATE: "timer_update",
-  QUARTER_END: "quarter_end",
-
-  // Stats events
-  STAT_UPDATE: "stat_update",
-  STATS_CONNECTED: "stats_connected",
-  STATS_STATE: "stats_state",
-
-  // General events
-  PING: "ping",
-  PONG: "pong",
-  ERROR: "error",
-} as const;
-
 // UI Constants
 export const UI_CONSTANTS = {
   // Pagination
@@ -259,8 +224,6 @@ export default {
   POSITIONS,
   STAT_TYPES,
   GAME_STATUSES,
-  API_CONFIG,
-  WEBSOCKET_EVENTS,
   UI_CONSTANTS,
   VALIDATION,
 };
