@@ -125,7 +125,7 @@ export default function TeamsScreen() {
               No teams found
             </Text>
             <Text className="text-gray-600 dark:text-gray-400 text-sm text-center leading-5">
-              Teams will appear here once they're added
+              Teams will appear here once they&apos;re added
             </Text>
           </View>
         }

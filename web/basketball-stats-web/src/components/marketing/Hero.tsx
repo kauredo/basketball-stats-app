@@ -27,7 +27,7 @@ export default function Hero() {
           {/* Subheadline */}
           <p className="mt-6 text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Record live game stats, analyze player performance, and gain insights to improve your
-            team's game. Built for coaches, players, and basketball enthusiasts.
+            team&apos;s game. Built for coaches, players, and basketball enthusiasts.
           </p>
 
           {/* CTAs */}

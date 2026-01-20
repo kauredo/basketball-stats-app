@@ -67,7 +67,7 @@ const Games: React.FC = () => {
       return (a.scheduledAt || 0) - (b.scheduledAt || 0);
     }
     // Completed/other: most recent first
-    return (b._creationTime || 0) - (a._creationTime || 0);
+    return (b.createdAt || 0) - (a.createdAt || 0);
   });
 
   const formatTime = (seconds: number): string => {

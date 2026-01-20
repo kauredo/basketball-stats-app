@@ -174,7 +174,7 @@ export default function NotificationsScreen() {
       </View>
       <Text className="text-gray-900 dark:text-white text-xl font-bold mb-2">No Notifications</Text>
       <Text className="text-gray-600 dark:text-gray-400 text-center">
-        You'll see game updates and announcements here when they arrive.
+        You&apos;ll see game updates and announcements here when they arrive.
       </Text>
     </View>
   );

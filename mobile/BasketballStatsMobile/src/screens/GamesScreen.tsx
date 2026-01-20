@@ -230,7 +230,7 @@ export default function GamesScreen() {
               No games found
             </Text>
             <Text className="text-gray-600 dark:text-gray-400 text-sm text-center leading-5">
-              Games will appear here once they're scheduled
+              Games will appear here once they&apos;re scheduled
             </Text>
           </View>
         }

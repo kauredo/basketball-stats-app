@@ -15,7 +15,6 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { MiniCourt, ShotMarker } from "../components/court/MiniCourt";
-import { COLORS } from "@basketball-stats/shared";
 
 interface PlayerOption {
   id: Id<"players">;
@@ -139,21 +138,8 @@ export default function ShotChartScreen() {
     setTimeout(() => setRefreshing(false), 500);
   };
 
-  if (!selectedLeague) {
-    return (
-      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-8">
-        <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-2 mt-4">
-          No League Selected
-        </Text>
-        <Text className="text-gray-600 dark:text-gray-400 text-base text-center">
-          Please select a league to view shot charts.
-        </Text>
-      </View>
-    );
-  }
-
   // Transform and filter shots for MiniCourt display
+  // Note: Must be called before any early returns to follow React Hooks rules
   const transformedShots: ShotMarker[] = useMemo(() => {
     if (!shotChartData?.shots) return [];
     return shotChartData.shots
@@ -169,6 +155,20 @@ export default function ShotChartScreen() {
         is3pt: shot.shotType === "3pt",
       }));
   }, [shotChartData?.shots, showMade, showMissed]);
+
+  if (!selectedLeague) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-8">
+        <Icon name="basketball" size={64} color="#6B7280" />
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-2 mt-4">
+          No League Selected
+        </Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base text-center">
+          Please select a league to view shot charts.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-800">

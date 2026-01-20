@@ -11,7 +11,7 @@ import { useEffect, useRef, useCallback } from "react";
 export function useFocusTrap(
   isActive: boolean,
   options: {
-    initialFocusRef?: React.RefObject<HTMLElement>;
+    initialFocusRef?: React.RefObject<HTMLElement | null>;
     returnFocusOnDeactivate?: boolean;
   } = {}
 ) {

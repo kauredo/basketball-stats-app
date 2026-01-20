@@ -117,7 +117,7 @@ export default function TermsPage() {
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
                   We reserve the right to modify or replace these terms at any time. If a revision
-                  is material, we will try to provide at least 30 days' notice prior to any new
+                  is material, we will try to provide at least 30 days&apos; notice prior to any new
                   terms taking effect. Continued use of the service after changes constitutes
                   acceptance of the new terms.
                 </p>

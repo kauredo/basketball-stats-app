@@ -197,7 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Sync user data when query updates
+  // Sync user data when query updates and handle invalid tokens
   useEffect(() => {
     if (currentUserData?.user && user) {
       // Check if user data has changed
@@ -207,8 +207,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ) {
         refreshUser();
       }
+    } else if (token && currentUserData === null && !isLoading) {
+      // Token exists but validation returned null - token is invalid
+      // Clear stored credentials and log out
+      console.warn("Stored token is invalid, logging out");
+      SecureStore.deleteItemAsync(TOKEN_KEY);
+      SecureStore.deleteItemAsync(USER_KEY);
+      SecureStore.deleteItemAsync(LEAGUE_KEY);
+      setToken(null);
+      setUser(null);
+      setSelectedLeague(null);
+      setIsAuthenticated(false);
     }
-  }, [currentUserData]);
+  }, [currentUserData, token, isLoading]);
 
   return (
     <AuthContext.Provider

@@ -21,7 +21,7 @@ export default function FAQPage() {
               Frequently Asked Questions
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              Everything you need to know about Basketball Stats. Can't find the answer you're
+              Everything you need to know about Basketball Stats. Can&apos;t find the answer you&apos;re
               looking for? Feel free to contact our support team.
             </p>
           </div>
@@ -34,7 +34,7 @@ export default function FAQPage() {
           {/* CTA */}
           <div className="mt-12 text-center">
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Still have questions? We're here to help.
+              Still have questions? We&apos;re here to help.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link

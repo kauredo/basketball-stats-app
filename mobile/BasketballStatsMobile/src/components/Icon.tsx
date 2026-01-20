@@ -51,13 +51,18 @@ export type IconName =
   | "close"
   // Theme
   | "moon"
-  | "sunny";
+  | "sunny"
+  // Status
+  | "alert"
+  | "wifi"
+  | "wifi-off";
 
 interface IconProps {
   name: IconName;
   size?: number;
   color?: string;
   className?: string;
+  style?: object;
 }
 
 const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; name: string }> = {
@@ -116,9 +121,14 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   // Theme
   moon: { library: "ionicons", name: "moon" },
   sunny: { library: "ionicons", name: "sunny" },
+
+  // Status
+  alert: { library: "ionicons", name: "alert-circle" },
+  wifi: { library: "ionicons", name: "wifi" },
+  "wifi-off": { library: "ionicons", name: "wifi-outline" },
 };
 
-export default function Icon({ name, size = 24, color = "#6B7280", className }: IconProps) {
+export default function Icon({ name, size = 24, color = "#6B7280", className, style }: IconProps) {
   const iconConfig = iconMap[name];
 
   if (!iconConfig) {
@@ -133,6 +143,6 @@ export default function Icon({ name, size = 24, color = "#6B7280", className }: 
   }[iconConfig.library];
 
   return (
-    <IconComponent name={iconConfig.name as any} size={size} color={color} className={className} />
+    <IconComponent name={iconConfig.name as any} size={size} color={color} className={className} style={style} />
   );
 }

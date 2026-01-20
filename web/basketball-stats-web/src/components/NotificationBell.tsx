@@ -165,7 +165,7 @@ const NotificationBell: React.FC = () => {
                 <BellIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-3" />
                 <p className="text-gray-600 dark:text-gray-400">No notifications yet</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  You'll see game updates and announcements here
+                  You&apos;ll see game updates and announcements here
                 </p>
               </div>
             ) : (

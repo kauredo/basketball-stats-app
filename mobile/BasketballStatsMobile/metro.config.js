@@ -6,7 +6,11 @@ const workspaceRoot = path.resolve(projectRoot, "../../");
 
 const config = getDefaultConfig(projectRoot);
 
-config.watchFolders = [path.resolve(projectRoot, "../../shared"), workspaceRoot];
+config.watchFolders = [
+  path.resolve(projectRoot, "../../shared"),
+  path.resolve(workspaceRoot, "convex"),
+  workspaceRoot,
+];
 
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),

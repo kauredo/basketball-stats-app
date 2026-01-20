@@ -41,7 +41,7 @@ export default function ContactPage() {
               Contact Us
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              Have a question or feedback? We'd love to hear from you.
+              Have a question or feedback? We&apos;d love to hear from you.
             </p>
           </div>
 
@@ -54,7 +54,7 @@ export default function ContactPage() {
                 Message Sent!
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Thank you for reaching out. We'll get back to you as soon as possible.
+                Thank you for reaching out. We&apos;ll get back to you as soon as possible.
               </p>
               <button
                 onClick={() => {

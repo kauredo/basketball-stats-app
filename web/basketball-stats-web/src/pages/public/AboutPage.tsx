@@ -31,7 +31,7 @@ export default function AboutPage() {
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
                   Basketball Stats was created with a simple mission: to make professional-grade
-                  statistics tracking accessible to everyone. Whether you're coaching a youth
+                  statistics tracking accessible to everyone. Whether you&apos;re coaching a youth
                   league, playing in a recreational league, or managing a competitive team, we
                   believe you deserve the same powerful tools that professional teams use.
                 </p>

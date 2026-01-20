@@ -40,5 +40,5 @@
     "no-duplicate-imports": "error",
     "no-console": ["warn", { "allow": ["warn", "error"] }]
   },
-  "ignorePatterns": ["node_modules", ".expo", "dist"]
+  "ignorePatterns": ["node_modules", "dist", "build"]
 }
