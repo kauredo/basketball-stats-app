@@ -176,7 +176,7 @@ function MiniCourt({
 
   if (isLandscape) {
     // In landscape, height is the constraint - leave room for other UI
-    const availableHeight = screenHeight - 180; // scoreboard + tabs + padding
+    const availableHeight = screenHeight - 80; // scoreboard + tabs + padding
     courtHeight = Math.min(availableHeight * 0.85, 280);
     courtWidth = courtHeight * ASPECT_RATIO;
     // Make sure we don't exceed available width
@@ -255,17 +255,6 @@ function MiniCourt({
           {/* Court background */}
           <Rect x="0" y="0" width={VIEW_WIDTH} height={VIEW_HEIGHT} fill={courtColors.background} />
 
-          {/* Court border/outline */}
-          <Rect
-            x="0.5"
-            y="0.5"
-            width={VIEW_WIDTH - 1}
-            height={VIEW_HEIGHT - 1}
-            fill="none"
-            stroke={courtColors.lines}
-            strokeWidth="0.5"
-          />
-
           {/* Paint/Key area with fill */}
           <Rect
             x="17"
@@ -301,9 +290,6 @@ function MiniCourt({
             strokeWidth="0.4"
           />
 
-          {/* Backboard */}
-          <Rect x="22" y="3" width="6" height="0.4" fill={courtColors.lines} />
-
           {/* Rim */}
           <Circle
             cx={BASKET_X}
@@ -328,15 +314,6 @@ function MiniCourt({
             strokeWidth="0.4"
           />
 
-          {/* Half court line (if visible) */}
-          <Path
-            d="M 0 35 L 50 35"
-            fill="none"
-            stroke={courtColors.lines}
-            strokeWidth="0.3"
-            strokeDasharray="2,1"
-          />
-
           {/* Recent shots */}
           {recentShots.slice(-5).map((shot, index) => {
             // Convert court coordinates (x: -25 to 25, y: 0 to 35) to SVG coordinates
@@ -356,15 +333,6 @@ function MiniCourt({
             );
           })}
         </Svg>
-        {!disabled && (
-          <View className="absolute bottom-2 left-0 right-0 items-center">
-            <View className="bg-white/90 dark:bg-gray-900/90 px-3 py-1 rounded-full">
-              <Text className="text-gray-600 dark:text-gray-400 text-[10px] font-medium">
-                TAP TO RECORD SHOT
-              </Text>
-            </View>
-          </View>
-        )}
       </Animated.View>
     </GestureDetector>
   );
@@ -1390,519 +1358,535 @@ export default function LiveGameScreen() {
 
       {/* Tab Content */}
       {activeTab !== "plays" && (
-      <ScrollView
-        className="flex-1 px-4"
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
-      >
-        {/* Court Tab */}
-        {activeTab === "court" && (
-          <View className={`flex-1 ${isLandscape ? "flex-row gap-2" : ""}`}>
-            {/* Large Court for Shot Recording */}
-            <View
-              className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 ${
-                isLandscape ? "flex-1 p-2" : "mb-4 flex-1 p-4"
-              }`}
-            >
-              {!isLandscape && (
-                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
-                  Shot Location
-                </Text>
-              )}
-              <View className="flex-1 items-center justify-center">
-                <MiniCourt
-                  onCourtTap={handleCourtTap}
-                  disabled={!canRecordStats}
-                  recentShots={persistedShots.length > 0 ? persistedShots.slice(-5) : recentShots}
-                  isLandscape={isLandscape}
-                />
-              </View>
-            </View>
-
-            {/* Stat Buttons Grid */}
-            <View
-              className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 ${
-                isLandscape ? "w-40 p-2" : "p-4"
-              }`}
-            >
-              {!isLandscape && (
-                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
-                  Quick Stats
-                </Text>
-              )}
-              <View className={isLandscape ? "flex-1 justify-center" : ""}>
-                <View className={`${isLandscape ? "flex-col gap-1" : "flex-row mb-2"}`}>
-                  <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
-                    <StatButton
-                      label="REB"
-                      shortLabel="+R"
-                      color="#2563EB"
-                      disabled={!canRecordStats}
-                      onPress={() => setPendingQuickStat("rebound")}
-                      size={isLandscape ? "compact" : "normal"}
-                    />
-                    <StatButton
-                      label="AST"
-                      shortLabel="+A"
-                      color="#7C3AED"
-                      disabled={!canRecordStats}
-                      onPress={() => setPendingQuickStat("assist")}
-                      size={isLandscape ? "compact" : "normal"}
-                    />
-                  </View>
-                  <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
-                    <StatButton
-                      label="STL"
-                      shortLabel="+S"
-                      color="#0891B2"
-                      disabled={!canRecordStats}
-                      onPress={() => setPendingQuickStat("steal")}
-                      size={isLandscape ? "compact" : "normal"}
-                    />
-                    <StatButton
-                      label="BLK"
-                      shortLabel="+B"
-                      color="#0D9488"
-                      disabled={!canRecordStats}
-                      onPress={() => setPendingQuickStat("block")}
-                      size={isLandscape ? "compact" : "normal"}
-                    />
-                  </View>
-                </View>
-                <View className={`${isLandscape ? "flex-col gap-1" : "flex-row mb-2"}`}>
-                  <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
-                    <StatButton
-                      label="TO"
-                      shortLabel="+T"
-                      color="#F59E0B"
-                      disabled={!canRecordStats}
-                      onPress={() => setPendingQuickStat("turnover")}
-                      size={isLandscape ? "compact" : "normal"}
-                    />
-                    <StatButton
-                      label="FOUL"
-                      shortLabel="+F"
-                      color="#DC2626"
-                      disabled={!canRecordStats}
-                      onPress={() => setPendingQuickStat("foul")}
-                      size={isLandscape ? "compact" : "normal"}
-                    />
-                  </View>
-                </View>
-                <View className={`${isLandscape ? "flex-row" : "flex-row"}`}>
-                  <StatButton
-                    label="FREE THROW"
-                    shortLabel="FT"
-                    color="#059669"
+        <ScrollView
+          className="flex-1 px-4"
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
+        >
+          {/* Court Tab */}
+          {activeTab === "court" && (
+            <View className={`flex-1 ${isLandscape ? "flex-row gap-2" : ""}`}>
+              {/* Large Court for Shot Recording */}
+              <View
+                className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 ${
+                  isLandscape ? "flex-1 p-2" : "mb-4 flex-1 p-4"
+                }`}
+              >
+                {!isLandscape && (
+                  <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                    Shot Location (Tap to Record Shot)
+                  </Text>
+                )}
+                <View className="flex-1 items-center justify-center">
+                  <MiniCourt
+                    onCourtTap={handleCourtTap}
                     disabled={!canRecordStats}
-                    onPress={() => setPendingQuickStat("freethrow")}
-                    size={isLandscape ? "compact" : "normal"}
+                    recentShots={persistedShots.length > 0 ? persistedShots.slice(-5) : recentShots}
+                    isLandscape={isLandscape}
                   />
                 </View>
               </View>
-            </View>
-          </View>
-        )}
 
-        {/* Clock Tab */}
-        {activeTab === "clock" && (
-          <View className={`flex-1 ${isLandscape ? "flex-row gap-4" : ""}`}>
-            {/* Main Clock Display */}
-            <View
-              className={`bg-gray-900 rounded-2xl p-6 items-center justify-center ${
-                isLandscape ? "flex-1" : "mb-4"
-              }`}
-            >
-              {/* Quarter Badge */}
-              <View className="bg-primary-500 px-4 py-2 rounded-full mb-4">
-                <Text className="text-white text-lg font-bold">
-                  {game.currentQuarter <= 4
-                    ? `Q${game.currentQuarter}`
-                    : `OT${game.currentQuarter - 4}`}
-                </Text>
-              </View>
-
-              {/* Game Clock */}
-              <Text
-                className={`font-mono font-bold text-white ${
-                  game.timeRemainingSeconds <= 60 && isGameActive ? "text-red-500" : ""
+              {/* Stat Buttons Grid */}
+              <View
+                className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 ${
+                  isLandscape ? "w-40 p-2" : "p-4"
                 }`}
-                style={{ fontSize: isLandscape ? 72 : 80 }}
               >
-                {Math.floor(game.timeRemainingSeconds / 60)}:
-                {(game.timeRemainingSeconds % 60).toString().padStart(2, "0")}
-              </Text>
-              <Text className="text-gray-400 text-sm mt-2 uppercase tracking-widest">
-                Game Clock
-              </Text>
+                {!isLandscape && (
+                  <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                    Quick Stats
+                  </Text>
+                )}
+                <View className={isLandscape ? "flex-1 justify-center" : ""}>
+                  <View className={`${isLandscape ? "flex-col gap-1" : "flex-row mb-2"}`}>
+                    <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
+                      <StatButton
+                        label="REB"
+                        shortLabel="+R"
+                        color="#2563EB"
+                        disabled={!canRecordStats}
+                        onPress={() => setPendingQuickStat("rebound")}
+                        size={isLandscape ? "compact" : "normal"}
+                      />
+                      <StatButton
+                        label="AST"
+                        shortLabel="+A"
+                        color="#7C3AED"
+                        disabled={!canRecordStats}
+                        onPress={() => setPendingQuickStat("assist")}
+                        size={isLandscape ? "compact" : "normal"}
+                      />
+                    </View>
+                    <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
+                      <StatButton
+                        label="STL"
+                        shortLabel="+S"
+                        color="#0891B2"
+                        disabled={!canRecordStats}
+                        onPress={() => setPendingQuickStat("steal")}
+                        size={isLandscape ? "compact" : "normal"}
+                      />
+                      <StatButton
+                        label="BLK"
+                        shortLabel="+B"
+                        color="#0D9488"
+                        disabled={!canRecordStats}
+                        onPress={() => setPendingQuickStat("block")}
+                        size={isLandscape ? "compact" : "normal"}
+                      />
+                    </View>
+                  </View>
+                  <View className={`${isLandscape ? "flex-col gap-1" : "flex-row mb-2"}`}>
+                    <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
+                      <StatButton
+                        label="TO"
+                        shortLabel="+T"
+                        color="#F59E0B"
+                        disabled={!canRecordStats}
+                        onPress={() => setPendingQuickStat("turnover")}
+                        size={isLandscape ? "compact" : "normal"}
+                      />
+                      <StatButton
+                        label="FOUL"
+                        shortLabel="+F"
+                        color="#DC2626"
+                        disabled={!canRecordStats}
+                        onPress={() => setPendingQuickStat("foul")}
+                        size={isLandscape ? "compact" : "normal"}
+                      />
+                    </View>
+                  </View>
+                  <View className={`${isLandscape ? "flex-row" : "flex-row"}`}>
+                    <StatButton
+                      label="FREE THROW"
+                      shortLabel="FT"
+                      color="#059669"
+                      disabled={!canRecordStats}
+                      onPress={() => setPendingQuickStat("freethrow")}
+                      size={isLandscape ? "compact" : "normal"}
+                    />
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
 
-              {/* Shot Clock */}
-              <View className="flex-row items-center gap-4 mt-6">
-                <View
-                  className={`px-8 py-4 rounded-xl border-2 ${
-                    shotClockSeconds <= 5 && isGameActive
-                      ? "bg-red-500/20 border-red-500"
-                      : "bg-gray-800 border-gray-700"
+          {/* Clock Tab */}
+          {activeTab === "clock" && (
+            <View className={`flex-1 ${isLandscape ? "flex-row gap-4" : ""}`}>
+              {/* Main Clock Display */}
+              <View
+                className={`bg-gray-900 rounded-2xl p-6 items-center justify-center ${
+                  isLandscape ? "flex-1" : "mb-4"
+                }`}
+              >
+                {/* Quarter Badge */}
+                <View className="bg-primary-500 px-4 py-2 rounded-full mb-4">
+                  <Text className="text-white text-lg font-bold">
+                    {game.currentQuarter <= 4
+                      ? `Q${game.currentQuarter}`
+                      : `OT${game.currentQuarter - 4}`}
+                  </Text>
+                </View>
+
+                {/* Game Clock */}
+                <Text
+                  className={`font-mono font-bold text-white ${
+                    game.timeRemainingSeconds <= 60 && isGameActive ? "text-red-500" : ""
                   }`}
+                  style={{ fontSize: isLandscape ? 72 : 80 }}
                 >
-                  <Text
-                    className={`font-mono font-bold text-5xl ${
-                      shotClockSeconds <= 5 && isGameActive ? "text-red-500" : "text-amber-400"
+                  {Math.floor(game.timeRemainingSeconds / 60)}:
+                  {(game.timeRemainingSeconds % 60).toString().padStart(2, "0")}
+                </Text>
+                <Text className="text-gray-400 text-sm mt-2 uppercase tracking-widest">
+                  Game Clock
+                </Text>
+
+                {/* Shot Clock */}
+                <View className="flex-row items-center gap-4 mt-6">
+                  <View
+                    className={`px-8 py-4 rounded-xl border-2 ${
+                      shotClockSeconds <= 5 && isGameActive
+                        ? "bg-red-500/20 border-red-500"
+                        : "bg-gray-800 border-gray-700"
                     }`}
                   >
-                    {shotClockSeconds}
-                  </Text>
-                  <Text className="text-gray-400 text-xs mt-1 uppercase tracking-wider text-center">
-                    Shot Clock
-                  </Text>
+                    <Text
+                      className={`font-mono font-bold text-5xl ${
+                        shotClockSeconds <= 5 && isGameActive ? "text-red-500" : "text-amber-400"
+                      }`}
+                    >
+                      {shotClockSeconds}
+                    </Text>
+                    <Text className="text-gray-400 text-xs mt-1 uppercase tracking-wider text-center">
+                      Shot Clock
+                    </Text>
+                  </View>
+
+                  {/* Shot Clock Reset Buttons */}
+                  <View className="gap-2">
+                    <TouchableOpacity
+                      onPress={() => {
+                        setShotClockSeconds(24);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      }}
+                      className="bg-amber-600 px-4 py-3 rounded-lg"
+                    >
+                      <Text className="text-white font-bold text-lg">24</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setShotClockSeconds(14);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      }}
+                      className="bg-amber-700 px-4 py-3 rounded-lg"
+                    >
+                      <Text className="text-white font-bold text-lg">14</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
-                {/* Shot Clock Reset Buttons */}
-                <View className="gap-2">
-                  <TouchableOpacity
-                    onPress={() => {
-                      setShotClockSeconds(24);
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    }}
-                    className="bg-amber-600 px-4 py-3 rounded-lg"
-                  >
-                    <Text className="text-white font-bold text-lg">24</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setShotClockSeconds(14);
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    }}
-                    className="bg-amber-700 px-4 py-3 rounded-lg"
-                  >
-                    <Text className="text-white font-bold text-lg">14</Text>
-                  </TouchableOpacity>
+                {/* Game Controls */}
+                <View className="flex-row gap-3 mt-6">
+                  {isGameActive && (
+                    <TouchableOpacity
+                      onPress={() => handleGameControl("pause")}
+                      className="bg-amber-600 px-6 py-3 rounded-xl flex-row items-center"
+                    >
+                      <Icon name="pause" size={24} color="#FFFFFF" />
+                      <Text className="text-white text-lg font-bold ml-2">Pause</Text>
+                    </TouchableOpacity>
+                  )}
+                  {isGamePaused && (
+                    <>
+                      <TouchableOpacity
+                        onPress={() => handleGameControl("resume")}
+                        className="bg-green-600 px-6 py-3 rounded-xl flex-row items-center"
+                      >
+                        <Icon name="play" size={24} color="#FFFFFF" />
+                        <Text className="text-white text-lg font-bold ml-2">Resume</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={handleEndPeriod}
+                        className="bg-red-600 px-6 py-3 rounded-xl flex-row items-center"
+                      >
+                        <Icon name="stop" size={24} color="#FFFFFF" />
+                        <Text className="text-white text-lg font-bold ml-2">End Period</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
                 </View>
               </View>
 
-              {/* Game Controls */}
-              <View className="flex-row gap-3 mt-6">
-                {isGameActive && (
+              {/* Score Display (shown in landscape or below clock in portrait) */}
+              <View
+                className={`bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 ${isLandscape ? "w-56" : ""}`}
+              >
+                <Text className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider text-center mb-4">
+                  Score
+                </Text>
+                {/* Away Team */}
+                <View className="items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                  <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1">
+                    {game.awayTeam?.name || "Away"}
+                  </Text>
+                  <Text className="text-gray-900 dark:text-white text-4xl font-bold">
+                    {game.awayScore}
+                  </Text>
+                </View>
+                {/* Home Team */}
+                <View className="items-center">
+                  <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1">
+                    {game.homeTeam?.name || "Home"}
+                  </Text>
+                  <Text className="text-gray-900 dark:text-white text-4xl font-bold">
+                    {game.homeScore}
+                  </Text>
+                </View>
+
+                {/* Timeout Buttons */}
+                <View className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <TouchableOpacity
-                    onPress={() => handleGameControl("pause")}
-                    className="bg-amber-600 px-6 py-3 rounded-xl flex-row items-center"
+                    onPress={() => handleTimeout(false)}
+                    disabled={awayTeamStatsData.timeoutsRemaining === 0}
+                    className={`py-2 px-4 rounded-lg mb-2 ${
+                      awayTeamStatsData.timeoutsRemaining === 0
+                        ? "bg-gray-200 dark:bg-gray-700 opacity-50"
+                        : "bg-gray-200 dark:bg-gray-700"
+                    }`}
                   >
-                    <Icon name="pause" size={24} color="#FFFFFF" />
-                    <Text className="text-white text-lg font-bold ml-2">Pause</Text>
+                    <Text className="text-gray-900 dark:text-white text-center text-sm">
+                      {game.awayTeam?.name} TO ({awayTeamStatsData.timeoutsRemaining})
+                    </Text>
                   </TouchableOpacity>
-                )}
-                {isGamePaused && (
-                  <>
-                    <TouchableOpacity
-                      onPress={() => handleGameControl("resume")}
-                      className="bg-green-600 px-6 py-3 rounded-xl flex-row items-center"
-                    >
-                      <Icon name="play" size={24} color="#FFFFFF" />
-                      <Text className="text-white text-lg font-bold ml-2">Resume</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={handleEndPeriod}
-                      className="bg-red-600 px-6 py-3 rounded-xl flex-row items-center"
-                    >
-                      <Icon name="stop" size={24} color="#FFFFFF" />
-                      <Text className="text-white text-lg font-bold ml-2">End Period</Text>
-                    </TouchableOpacity>
-                  </>
-                )}
+                  <TouchableOpacity
+                    onPress={() => handleTimeout(true)}
+                    disabled={homeTeamStatsData.timeoutsRemaining === 0}
+                    className={`py-2 px-4 rounded-lg ${
+                      homeTeamStatsData.timeoutsRemaining === 0
+                        ? "bg-gray-200 dark:bg-gray-700 opacity-50"
+                        : "bg-gray-200 dark:bg-gray-700"
+                    }`}
+                  >
+                    <Text className="text-gray-900 dark:text-white text-center text-sm">
+                      {game.homeTeam?.name} TO ({homeTeamStatsData.timeoutsRemaining})
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-
-            {/* Score Display (shown in landscape or below clock in portrait) */}
-            <View
-              className={`bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 ${isLandscape ? "w-56" : ""}`}
-            >
-              <Text className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider text-center mb-4">
-                Score
-              </Text>
-              {/* Away Team */}
-              <View className="items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-                <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1">
+          )}
+          {activeTab === "stats" && (
+            <View className="pb-6">
+              {/* Away Team Stats */}
+              <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
+                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
                   {game.awayTeam?.name || "Away"}
                 </Text>
-                <Text className="text-gray-900 dark:text-white text-4xl font-bold">
-                  {game.awayScore}
-                </Text>
+                {awayPlayerStats.map((playerStat: PlayerStat) => {
+                  const player = playerStat.player;
+                  if (!player) return null;
+
+                  return (
+                    <TouchableOpacity
+                      key={playerStat.id}
+                      onPress={() => canRecordStats && handleFoulPress(playerStat.playerId)}
+                      className={`flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700 ${
+                        !playerStat.isOnCourt ? "opacity-50" : ""
+                      }`}
+                      disabled={!canRecordStats}
+                    >
+                      <View className="w-8 mr-2">
+                        <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                          #{player.number}
+                        </Text>
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-gray-900 dark:text-white font-medium">
+                          {player.name}
+                          {playerStat.fouledOut && (
+                            <Text className="text-red-500 text-xs"> (OUT)</Text>
+                          )}
+                        </Text>
+                      </View>
+                      <View className="flex-row">
+                        <View className="w-12 items-center">
+                          <Text className="text-gray-900 dark:text-white font-bold">
+                            {playerStat.points}
+                          </Text>
+                          <Text className="text-gray-500 text-xs">PTS</Text>
+                        </View>
+                        <View className="w-10 items-center">
+                          <Text className="text-gray-900 dark:text-white">
+                            {playerStat.rebounds}
+                          </Text>
+                          <Text className="text-gray-500 text-xs">REB</Text>
+                        </View>
+                        <View className="w-10 items-center">
+                          <Text className="text-gray-900 dark:text-white">
+                            {playerStat.assists}
+                          </Text>
+                          <Text className="text-gray-500 text-xs">AST</Text>
+                        </View>
+                        <View className="w-8 items-center">
+                          <Text
+                            className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}
+                          >
+                            {playerStat.fouls}
+                          </Text>
+                          <Text className="text-gray-500 text-xs">PF</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
-              {/* Home Team */}
-              <View className="items-center">
-                <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1">
+
+              {/* Home Team Stats */}
+              <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
                   {game.homeTeam?.name || "Home"}
                 </Text>
-                <Text className="text-gray-900 dark:text-white text-4xl font-bold">
-                  {game.homeScore}
+                {homePlayerStats.map((playerStat: PlayerStat) => {
+                  const player = playerStat.player;
+                  if (!player) return null;
+
+                  return (
+                    <TouchableOpacity
+                      key={playerStat.id}
+                      onPress={() => canRecordStats && handleFoulPress(playerStat.playerId)}
+                      className={`flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700 ${
+                        !playerStat.isOnCourt ? "opacity-50" : ""
+                      }`}
+                      disabled={!canRecordStats}
+                    >
+                      <View className="w-8 mr-2">
+                        <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                          #{player.number}
+                        </Text>
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-gray-900 dark:text-white font-medium">
+                          {player.name}
+                          {playerStat.fouledOut && (
+                            <Text className="text-red-500 text-xs"> (OUT)</Text>
+                          )}
+                        </Text>
+                      </View>
+                      <View className="flex-row">
+                        <View className="w-12 items-center">
+                          <Text className="text-gray-900 dark:text-white font-bold">
+                            {playerStat.points}
+                          </Text>
+                          <Text className="text-gray-500 text-xs">PTS</Text>
+                        </View>
+                        <View className="w-10 items-center">
+                          <Text className="text-gray-900 dark:text-white">
+                            {playerStat.rebounds}
+                          </Text>
+                          <Text className="text-gray-500 text-xs">REB</Text>
+                        </View>
+                        <View className="w-10 items-center">
+                          <Text className="text-gray-900 dark:text-white">
+                            {playerStat.assists}
+                          </Text>
+                          <Text className="text-gray-500 text-xs">AST</Text>
+                        </View>
+                        <View className="w-8 items-center">
+                          <Text
+                            className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}
+                          >
+                            {playerStat.fouls}
+                          </Text>
+                          <Text className="text-gray-500 text-xs">PF</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          )}
+
+          {activeTab === "subs" && (
+            <View className="pb-6">
+              {/* Away Team Subs */}
+              <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
+                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                  {game.awayTeam?.name || "Away"}
                 </Text>
+                {awayPlayerStats.map((playerStat: PlayerStat) => {
+                  const player = playerStat.player;
+                  if (!player) return null;
+
+                  return (
+                    <TouchableOpacity
+                      key={playerStat.id}
+                      className={`flex-row items-center py-3 px-3 mb-2 rounded-lg ${
+                        playerStat.isOnCourt
+                          ? "bg-green-900/30 border border-green-700"
+                          : playerStat.fouledOut
+                            ? "bg-red-900/30 border border-red-700"
+                            : "bg-gray-100 dark:bg-gray-700"
+                      }`}
+                      onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
+                      disabled={playerStat.fouledOut}
+                    >
+                      <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
+                        <Text className="text-gray-900 dark:text-white font-bold">
+                          #{player.number}
+                        </Text>
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-gray-900 dark:text-white font-medium">
+                          {player.name}
+                        </Text>
+                        <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                          {playerStat.fouledOut ? "FOULED OUT" : player.position || "N/A"}
+                        </Text>
+                      </View>
+                      <View
+                        className={`px-4 py-2 rounded-lg ${
+                          playerStat.fouledOut
+                            ? "bg-gray-600"
+                            : playerStat.isOnCourt
+                              ? "bg-red-600"
+                              : "bg-green-600"
+                        }`}
+                      >
+                        <Text className="text-white font-semibold text-sm">
+                          {playerStat.fouledOut
+                            ? "Out"
+                            : playerStat.isOnCourt
+                              ? "Sub Out"
+                              : "Sub In"}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
 
-              {/* Timeout Buttons */}
-              <View className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <TouchableOpacity
-                  onPress={() => handleTimeout(false)}
-                  disabled={awayTeamStatsData.timeoutsRemaining === 0}
-                  className={`py-2 px-4 rounded-lg mb-2 ${
-                    awayTeamStatsData.timeoutsRemaining === 0
-                      ? "bg-gray-200 dark:bg-gray-700 opacity-50"
-                      : "bg-gray-200 dark:bg-gray-700"
-                  }`}
-                >
-                  <Text className="text-gray-900 dark:text-white text-center text-sm">
-                    {game.awayTeam?.name} TO ({awayTeamStatsData.timeoutsRemaining})
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleTimeout(true)}
-                  disabled={homeTeamStatsData.timeoutsRemaining === 0}
-                  className={`py-2 px-4 rounded-lg ${
-                    homeTeamStatsData.timeoutsRemaining === 0
-                      ? "bg-gray-200 dark:bg-gray-700 opacity-50"
-                      : "bg-gray-200 dark:bg-gray-700"
-                  }`}
-                >
-                  <Text className="text-gray-900 dark:text-white text-center text-sm">
-                    {game.homeTeam?.name} TO ({homeTeamStatsData.timeoutsRemaining})
-                  </Text>
-                </TouchableOpacity>
+              {/* Home Team Subs */}
+              <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                  {game.homeTeam?.name || "Home"}
+                </Text>
+                {homePlayerStats.map((playerStat: PlayerStat) => {
+                  const player = playerStat.player;
+                  if (!player) return null;
+
+                  return (
+                    <TouchableOpacity
+                      key={playerStat.id}
+                      className={`flex-row items-center py-3 px-3 mb-2 rounded-lg ${
+                        playerStat.isOnCourt
+                          ? "bg-green-900/30 border border-green-700"
+                          : playerStat.fouledOut
+                            ? "bg-red-900/30 border border-red-700"
+                            : "bg-gray-100 dark:bg-gray-700"
+                      }`}
+                      onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
+                      disabled={playerStat.fouledOut}
+                    >
+                      <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
+                        <Text className="text-gray-900 dark:text-white font-bold">
+                          #{player.number}
+                        </Text>
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-gray-900 dark:text-white font-medium">
+                          {player.name}
+                        </Text>
+                        <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                          {playerStat.fouledOut ? "FOULED OUT" : player.position || "N/A"}
+                        </Text>
+                      </View>
+                      <View
+                        className={`px-4 py-2 rounded-lg ${
+                          playerStat.fouledOut
+                            ? "bg-gray-600"
+                            : playerStat.isOnCourt
+                              ? "bg-red-600"
+                              : "bg-green-600"
+                        }`}
+                      >
+                        <Text className="text-white font-semibold text-sm">
+                          {playerStat.fouledOut
+                            ? "Out"
+                            : playerStat.isOnCourt
+                              ? "Sub Out"
+                              : "Sub In"}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
-          </View>
-        )}
-        {activeTab === "stats" && (
-          <View className="pb-6">
-            {/* Away Team Stats */}
-            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
-              <Text className="text-gray-900 dark:text-white font-semibold mb-3">
-                {game.awayTeam?.name || "Away"}
-              </Text>
-              {awayPlayerStats.map((playerStat: PlayerStat) => {
-                const player = playerStat.player;
-                if (!player) return null;
-
-                return (
-                  <TouchableOpacity
-                    key={playerStat.id}
-                    onPress={() => canRecordStats && handleFoulPress(playerStat.playerId)}
-                    className={`flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700 ${
-                      !playerStat.isOnCourt ? "opacity-50" : ""
-                    }`}
-                    disabled={!canRecordStats}
-                  >
-                    <View className="w-8 mr-2">
-                      <Text className="text-gray-600 dark:text-gray-400 text-xs">
-                        #{player.number}
-                      </Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-gray-900 dark:text-white font-medium">
-                        {player.name}
-                        {playerStat.fouledOut && (
-                          <Text className="text-red-500 text-xs"> (OUT)</Text>
-                        )}
-                      </Text>
-                    </View>
-                    <View className="flex-row">
-                      <View className="w-12 items-center">
-                        <Text className="text-gray-900 dark:text-white font-bold">
-                          {playerStat.points}
-                        </Text>
-                        <Text className="text-gray-500 text-xs">PTS</Text>
-                      </View>
-                      <View className="w-10 items-center">
-                        <Text className="text-gray-900 dark:text-white">{playerStat.rebounds}</Text>
-                        <Text className="text-gray-500 text-xs">REB</Text>
-                      </View>
-                      <View className="w-10 items-center">
-                        <Text className="text-gray-900 dark:text-white">{playerStat.assists}</Text>
-                        <Text className="text-gray-500 text-xs">AST</Text>
-                      </View>
-                      <View className="w-8 items-center">
-                        <Text
-                          className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}
-                        >
-                          {playerStat.fouls}
-                        </Text>
-                        <Text className="text-gray-500 text-xs">PF</Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            {/* Home Team Stats */}
-            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <Text className="text-gray-900 dark:text-white font-semibold mb-3">
-                {game.homeTeam?.name || "Home"}
-              </Text>
-              {homePlayerStats.map((playerStat: PlayerStat) => {
-                const player = playerStat.player;
-                if (!player) return null;
-
-                return (
-                  <TouchableOpacity
-                    key={playerStat.id}
-                    onPress={() => canRecordStats && handleFoulPress(playerStat.playerId)}
-                    className={`flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700 ${
-                      !playerStat.isOnCourt ? "opacity-50" : ""
-                    }`}
-                    disabled={!canRecordStats}
-                  >
-                    <View className="w-8 mr-2">
-                      <Text className="text-gray-600 dark:text-gray-400 text-xs">
-                        #{player.number}
-                      </Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-gray-900 dark:text-white font-medium">
-                        {player.name}
-                        {playerStat.fouledOut && (
-                          <Text className="text-red-500 text-xs"> (OUT)</Text>
-                        )}
-                      </Text>
-                    </View>
-                    <View className="flex-row">
-                      <View className="w-12 items-center">
-                        <Text className="text-gray-900 dark:text-white font-bold">
-                          {playerStat.points}
-                        </Text>
-                        <Text className="text-gray-500 text-xs">PTS</Text>
-                      </View>
-                      <View className="w-10 items-center">
-                        <Text className="text-gray-900 dark:text-white">{playerStat.rebounds}</Text>
-                        <Text className="text-gray-500 text-xs">REB</Text>
-                      </View>
-                      <View className="w-10 items-center">
-                        <Text className="text-gray-900 dark:text-white">{playerStat.assists}</Text>
-                        <Text className="text-gray-500 text-xs">AST</Text>
-                      </View>
-                      <View className="w-8 items-center">
-                        <Text
-                          className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}
-                        >
-                          {playerStat.fouls}
-                        </Text>
-                        <Text className="text-gray-500 text-xs">PF</Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        )}
-
-        {activeTab === "subs" && (
-          <View className="pb-6">
-            {/* Away Team Subs */}
-            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
-              <Text className="text-gray-900 dark:text-white font-semibold mb-3">
-                {game.awayTeam?.name || "Away"}
-              </Text>
-              {awayPlayerStats.map((playerStat: PlayerStat) => {
-                const player = playerStat.player;
-                if (!player) return null;
-
-                return (
-                  <TouchableOpacity
-                    key={playerStat.id}
-                    className={`flex-row items-center py-3 px-3 mb-2 rounded-lg ${
-                      playerStat.isOnCourt
-                        ? "bg-green-900/30 border border-green-700"
-                        : playerStat.fouledOut
-                          ? "bg-red-900/30 border border-red-700"
-                          : "bg-gray-100 dark:bg-gray-700"
-                    }`}
-                    onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
-                    disabled={playerStat.fouledOut}
-                  >
-                    <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
-                      <Text className="text-gray-900 dark:text-white font-bold">
-                        #{player.number}
-                      </Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-gray-900 dark:text-white font-medium">
-                        {player.name}
-                      </Text>
-                      <Text className="text-gray-600 dark:text-gray-400 text-xs">
-                        {playerStat.fouledOut ? "FOULED OUT" : player.position || "N/A"}
-                      </Text>
-                    </View>
-                    <View
-                      className={`px-4 py-2 rounded-lg ${
-                        playerStat.fouledOut
-                          ? "bg-gray-600"
-                          : playerStat.isOnCourt
-                            ? "bg-red-600"
-                            : "bg-green-600"
-                      }`}
-                    >
-                      <Text className="text-white font-semibold text-sm">
-                        {playerStat.fouledOut ? "Out" : playerStat.isOnCourt ? "Sub Out" : "Sub In"}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            {/* Home Team Subs */}
-            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <Text className="text-gray-900 dark:text-white font-semibold mb-3">
-                {game.homeTeam?.name || "Home"}
-              </Text>
-              {homePlayerStats.map((playerStat: PlayerStat) => {
-                const player = playerStat.player;
-                if (!player) return null;
-
-                return (
-                  <TouchableOpacity
-                    key={playerStat.id}
-                    className={`flex-row items-center py-3 px-3 mb-2 rounded-lg ${
-                      playerStat.isOnCourt
-                        ? "bg-green-900/30 border border-green-700"
-                        : playerStat.fouledOut
-                          ? "bg-red-900/30 border border-red-700"
-                          : "bg-gray-100 dark:bg-gray-700"
-                    }`}
-                    onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
-                    disabled={playerStat.fouledOut}
-                  >
-                    <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
-                      <Text className="text-gray-900 dark:text-white font-bold">
-                        #{player.number}
-                      </Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-gray-900 dark:text-white font-medium">
-                        {player.name}
-                      </Text>
-                      <Text className="text-gray-600 dark:text-gray-400 text-xs">
-                        {playerStat.fouledOut ? "FOULED OUT" : player.position || "N/A"}
-                      </Text>
-                    </View>
-                    <View
-                      className={`px-4 py-2 rounded-lg ${
-                        playerStat.fouledOut
-                          ? "bg-gray-600"
-                          : playerStat.isOnCourt
-                            ? "bg-red-600"
-                            : "bg-green-600"
-                      }`}
-                    >
-                      <Text className="text-white font-semibold text-sm">
-                        {playerStat.fouledOut ? "Out" : playerStat.isOnCourt ? "Sub Out" : "Sub In"}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        )}
-      </ScrollView>
+          )}
+        </ScrollView>
       )}
 
       {/* Plays tab - rendered outside ScrollView to avoid VirtualizedList nesting warning */}
