@@ -881,6 +881,31 @@ export default function LiveGameScreen() {
   // Handle quick stat from modal
   const handleQuickStatRecord = async (playerId: Id<"players">) => {
     if (!pendingQuickStat) return;
+
+    // Handle foul specially - chain to foul type modal
+    if (pendingQuickStat === "foul") {
+      setPendingQuickStat(null);
+      setPendingFoulPlayerId(playerId);
+      setShowFoulTypeModal(true);
+      return;
+    }
+
+    // Handle free throw specially - set up free throw sequence
+    if (pendingQuickStat === "freethrow") {
+      setPendingQuickStat(null);
+      const player = allStats.find((s) => s.playerId === playerId);
+      if (player?.player) {
+        setFreeThrowSequence({
+          playerId,
+          playerName: player.player.name,
+          playerNumber: player.player.number,
+          totalAttempts: 2, // Default to 2 FTs, can be changed
+          isOneAndOne: false,
+        });
+      }
+      return;
+    }
+
     await handleRecordStat(playerId, pendingQuickStat);
     setPendingQuickStat(null);
   };
@@ -1364,6 +1389,7 @@ export default function LiveGameScreen() {
       </View>
 
       {/* Tab Content */}
+      {activeTab !== "plays" && (
       <ScrollView
         className="flex-1 px-4"
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
@@ -1409,7 +1435,7 @@ export default function LiveGameScreen() {
                     <StatButton
                       label="REB"
                       shortLabel="+R"
-                      color="#3B82F6"
+                      color="#2563EB"
                       disabled={!canRecordStats}
                       onPress={() => setPendingQuickStat("rebound")}
                       size={isLandscape ? "compact" : "normal"}
@@ -1417,7 +1443,7 @@ export default function LiveGameScreen() {
                     <StatButton
                       label="AST"
                       shortLabel="+A"
-                      color="#8B5CF6"
+                      color="#7C3AED"
                       disabled={!canRecordStats}
                       onPress={() => setPendingQuickStat("assist")}
                       size={isLandscape ? "compact" : "normal"}
@@ -1427,7 +1453,7 @@ export default function LiveGameScreen() {
                     <StatButton
                       label="STL"
                       shortLabel="+S"
-                      color="#06B6D4"
+                      color="#0891B2"
                       disabled={!canRecordStats}
                       onPress={() => setPendingQuickStat("steal")}
                       size={isLandscape ? "compact" : "normal"}
@@ -1435,29 +1461,42 @@ export default function LiveGameScreen() {
                     <StatButton
                       label="BLK"
                       shortLabel="+B"
-                      color="#06B6D4"
+                      color="#0D9488"
                       disabled={!canRecordStats}
                       onPress={() => setPendingQuickStat("block")}
                       size={isLandscape ? "compact" : "normal"}
                     />
                   </View>
                 </View>
-                <View className={`${isLandscape ? "flex-row mt-1" : "flex-row"}`}>
+                <View className={`${isLandscape ? "flex-col gap-1" : "flex-row mb-2"}`}>
+                  <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
+                    <StatButton
+                      label="TO"
+                      shortLabel="+T"
+                      color="#F59E0B"
+                      disabled={!canRecordStats}
+                      onPress={() => setPendingQuickStat("turnover")}
+                      size={isLandscape ? "compact" : "normal"}
+                    />
+                    <StatButton
+                      label="FOUL"
+                      shortLabel="+F"
+                      color="#DC2626"
+                      disabled={!canRecordStats}
+                      onPress={() => setPendingQuickStat("foul")}
+                      size={isLandscape ? "compact" : "normal"}
+                    />
+                  </View>
+                </View>
+                <View className={`${isLandscape ? "flex-row" : "flex-row"}`}>
                   <StatButton
-                    label="TO"
-                    shortLabel="+T"
-                    color="#F59E0B"
+                    label="FREE THROW"
+                    shortLabel="FT"
+                    color="#059669"
                     disabled={!canRecordStats}
-                    onPress={() => setPendingQuickStat("turnover")}
+                    onPress={() => setPendingQuickStat("freethrow")}
                     size={isLandscape ? "compact" : "normal"}
                   />
-                  {!isLandscape && (
-                    <>
-                      <View className="flex-1 mx-1" />
-                      <View className="flex-1 mx-1" />
-                      <View className="flex-1 mx-1" />
-                    </>
-                  )}
                 </View>
               </View>
             </View>
@@ -1864,10 +1903,11 @@ export default function LiveGameScreen() {
           </View>
         )}
       </ScrollView>
+      )}
 
       {/* Plays tab - rendered outside ScrollView to avoid VirtualizedList nesting warning */}
       {activeTab === "plays" && (
-        <View className="flex-1 px-4 pb-4">
+        <View className="flex-1 mx-4 mb-2">
           <PlayByPlayTab
             events={gameEvents?.events}
             isLoading={gameEvents === undefined}

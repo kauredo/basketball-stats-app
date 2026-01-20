@@ -5,7 +5,7 @@ import Icon from "../Icon";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { OnCourtPlayer } from "./ShotRecordingModal";
 
-export type QuickStatType = "rebound" | "assist" | "steal" | "block" | "turnover";
+export type QuickStatType = "rebound" | "assist" | "steal" | "block" | "turnover" | "foul" | "freethrow";
 
 interface QuickStatModalProps {
   visible: boolean;
@@ -22,37 +22,51 @@ const STAT_CONFIG: Record<
   rebound: {
     label: "Rebound",
     shortLabel: "+REB",
-    color: "#3B82F6",
+    color: "#2563EB",
     bgClass: "bg-blue-600",
     textClass: "text-blue-700 dark:text-blue-300",
   },
   assist: {
     label: "Assist",
     shortLabel: "+AST",
-    color: "#8B5CF6",
-    bgClass: "bg-purple-600",
-    textClass: "text-purple-700 dark:text-purple-300",
+    color: "#7C3AED",
+    bgClass: "bg-violet-600",
+    textClass: "text-violet-700 dark:text-violet-300",
   },
   steal: {
     label: "Steal",
     shortLabel: "+STL",
-    color: "#06B6D4",
+    color: "#0891B2",
     bgClass: "bg-cyan-600",
     textClass: "text-cyan-700 dark:text-cyan-300",
   },
   block: {
     label: "Block",
     shortLabel: "+BLK",
-    color: "#06B6D4",
-    bgClass: "bg-cyan-600",
-    textClass: "text-cyan-700 dark:text-cyan-300",
+    color: "#0D9488",
+    bgClass: "bg-teal-600",
+    textClass: "text-teal-700 dark:text-teal-300",
   },
   turnover: {
     label: "Turnover",
     shortLabel: "+TO",
     color: "#F59E0B",
-    bgClass: "bg-amber-600",
+    bgClass: "bg-amber-500",
     textClass: "text-amber-700 dark:text-amber-300",
+  },
+  foul: {
+    label: "Foul",
+    shortLabel: "+PF",
+    color: "#DC2626",
+    bgClass: "bg-red-600",
+    textClass: "text-red-700 dark:text-red-300",
+  },
+  freethrow: {
+    label: "Free Throw",
+    shortLabel: "FT",
+    color: "#059669",
+    bgClass: "bg-emerald-600",
+    textClass: "text-emerald-700 dark:text-emerald-300",
   },
 };
 
@@ -88,6 +102,10 @@ export function QuickStatModal({
         return p.blocks || 0;
       case "turnover":
         return p.turnovers || 0;
+      case "foul":
+        return p.fouls || 0;
+      case "freethrow":
+        return p.freeThrowsMade || 0;
       default:
         return 0;
     }

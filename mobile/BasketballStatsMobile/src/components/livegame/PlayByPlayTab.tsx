@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { Id } from "../../../../../convex/_generated/dataModel";
+import Icon from "../Icon";
 
 interface GameEvent {
   id: Id<"gameEvents">;
@@ -29,19 +30,20 @@ interface PlayByPlayTabProps {
   onRefresh?: () => void;
 }
 
+// Map event types to icon names
 const EVENT_ICONS: Record<string, string> = {
-  shot: "🏀",
-  freethrow: "🎯",
-  foul: "🚫",
-  timeout: "⏸️",
-  rebound: "⬆️",
-  steal: "💨",
-  block: "✋",
-  turnover: "❌",
-  overtime_start: "⏰",
-  substitution: "🔄",
-  note: "📝",
-  quarter_end: "⏰",
+  shot: "basketball",
+  freethrow: "basketball",
+  foul: "close",
+  timeout: "timer",
+  rebound: "stats",
+  steal: "play",
+  block: "stop",
+  turnover: "close",
+  overtime_start: "timer",
+  substitution: "users",
+  note: "list",
+  quarter_end: "timer",
 };
 
 const QUARTER_FILTERS = [
@@ -73,7 +75,7 @@ export default function PlayByPlayTab({
   };
 
   const getEventIcon = (eventType: string): string => {
-    return EVENT_ICONS[eventType] || "📋";
+    return EVENT_ICONS[eventType] || "list";
   };
 
   const getEventColor = (eventType: string): string => {
@@ -141,87 +143,106 @@ export default function PlayByPlayTab({
     return parts.length > 0 ? parts.join(" • ") : null;
   };
 
-  const renderEvent = (event: GameEvent, isFirstInGroup: boolean) => {
+  const renderEvent = (event: GameEvent) => {
     const details = getEventDetails(event);
+    const iconColor = getEventColor(event.eventType);
 
     return (
-      <View key={event.id} style={styles.eventContainer}>
+      <View
+        key={event.id}
+        className="flex-row px-3 py-2 border-b border-gray-200 dark:border-gray-700"
+      >
         {/* Time Column */}
-        <View style={styles.timeColumn}>
-          <Text style={styles.quarterText}>{formatQuarter(event.quarter)}</Text>
-          <Text style={styles.timeText}>{event.gameTimeDisplay}</Text>
+        <View className="w-12 items-center">
+          <Text className="text-gray-500 dark:text-gray-500 text-[10px] font-medium">
+            {formatQuarter(event.quarter)}
+          </Text>
+          <Text className="text-gray-700 dark:text-gray-300 text-xs font-semibold">
+            {event.gameTimeDisplay}
+          </Text>
         </View>
 
         {/* Icon Column */}
         <View
-          style={[styles.iconColumn, { backgroundColor: getEventColor(event.eventType) + "20" }]}
+          className="w-7 h-7 rounded-full justify-center items-center mx-2"
+          style={{ backgroundColor: iconColor + "20" }}
         >
-          <Text style={styles.eventIcon}>{getEventIcon(event.eventType)}</Text>
+          <Icon name={getEventIcon(event.eventType) as any} size={14} color={iconColor} />
         </View>
 
         {/* Description Column */}
-        <View style={styles.descriptionColumn}>
-          <Text style={styles.descriptionText}>{event.description}</Text>
+        <View className="flex-1 justify-center">
+          <Text className="text-gray-900 dark:text-white text-sm">{event.description}</Text>
           {/* Player Info */}
           {event.player && (
-            <Text style={styles.playerText}>
+            <Text className="text-gray-600 dark:text-gray-400 text-xs font-medium mt-0.5">
               #{event.player.number} {event.player.name}
             </Text>
           )}
           {/* Event Details (made/missed, points, etc.) */}
-          {details && <Text style={styles.detailsText}>{details}</Text>}
+          {details && (
+            <Text className="text-primary-500 text-[11px] font-semibold mt-0.5">{details}</Text>
+          )}
           {/* Team Name */}
-          {event.team && <Text style={styles.teamText}>{event.team.name}</Text>}
+          {event.team && (
+            <Text className="text-gray-500 dark:text-gray-500 text-[11px] mt-0.5">
+              {event.team.name}
+            </Text>
+          )}
         </View>
       </View>
     );
   };
 
   const renderQuarterHeader = (quarter: number) => (
-    <View style={styles.quarterHeader}>
-      <View style={styles.quarterHeaderLine} />
-      <Text style={styles.quarterHeaderText}>{formatQuarter(quarter)}</Text>
-      <View style={styles.quarterHeaderLine} />
+    <View className="flex-row items-center py-2 px-3">
+      <View className="flex-1 h-px bg-gray-300 dark:bg-gray-600" />
+      <Text className="text-gray-500 dark:text-gray-400 text-[11px] font-semibold mx-2">
+        {formatQuarter(quarter)}
+      </Text>
+      <View className="flex-1 h-px bg-gray-300 dark:bg-gray-600" />
     </View>
   );
 
   const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <Text style={styles.emptyStateIcon}>📋</Text>
-      <Text style={styles.emptyStateText}>No events recorded yet</Text>
-      <Text style={styles.emptyStateSubtext}>Events will appear here as the game progresses</Text>
+    <View className="items-center py-8 px-6">
+      <View className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 justify-center items-center mb-3">
+        <Icon name="list" size={24} color="#6B7280" />
+      </View>
+      <Text className="text-gray-900 dark:text-white text-sm font-semibold mb-1">
+        No events recorded yet
+      </Text>
+      <Text className="text-gray-500 dark:text-gray-400 text-xs text-center">
+        Events will appear here as the game progresses
+      </Text>
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
       {/* Quarter Filter */}
-      <View style={styles.filterContainer}>
-        <FlatList
-          horizontal
-          data={QUARTER_FILTERS}
-          keyExtractor={(item) => item.key}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterList}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.filterButton,
-                selectedQuarter === item.key && styles.filterButtonActive,
-              ]}
-              onPress={() => setSelectedQuarter(item.key)}
+      <View className="flex-row items-center border-b border-gray-200 dark:border-gray-700 px-3 py-1.5">
+        {QUARTER_FILTERS.map((item) => (
+          <TouchableOpacity
+            key={item.key}
+            className={`px-3 py-1.5 rounded-full mr-2 ${
+              selectedQuarter === item.key
+                ? "bg-primary-500"
+                : "bg-gray-200 dark:bg-gray-700"
+            }`}
+            onPress={() => setSelectedQuarter(item.key)}
+          >
+            <Text
+              className={`text-xs font-semibold ${
+                selectedQuarter === item.key
+                  ? "text-white"
+                  : "text-gray-600 dark:text-gray-400"
+              }`}
             >
-              <Text
-                style={[
-                  styles.filterButtonText,
-                  selectedQuarter === item.key && styles.filterButtonTextActive,
-                ]}
-              >
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
+              {item.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       {/* Events List */}
@@ -235,141 +256,11 @@ export default function PlayByPlayTab({
         renderItem={({ item: group }) => (
           <View>
             {renderQuarterHeader(group.quarter)}
-            {group.events.map((event, index) => renderEvent(event, index === 0))}
+            {group.events.map((event) => renderEvent(event))}
           </View>
         )}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={{ paddingBottom: 16, flexGrow: 1 }}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  filterContainer: {
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#374151",
-  },
-  filterList: {
-    paddingHorizontal: 8,
-    gap: 8,
-  },
-  filterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#374151",
-  },
-  filterButtonActive: {
-    backgroundColor: "#F97316",
-  },
-  filterButtonText: {
-    color: "#9CA3AF",
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  filterButtonTextActive: {
-    color: "#FFFFFF",
-  },
-  listContent: {
-    paddingBottom: 16,
-  },
-  quarterHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  quarterHeaderLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#374151",
-  },
-  quarterHeaderText: {
-    color: "#9CA3AF",
-    fontSize: 12,
-    fontWeight: "600",
-    marginHorizontal: 12,
-  },
-  eventContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#1F2937",
-  },
-  timeColumn: {
-    width: 50,
-    alignItems: "center",
-  },
-  quarterText: {
-    color: "#6B7280",
-    fontSize: 10,
-    fontWeight: "500",
-  },
-  timeText: {
-    color: "#9CA3AF",
-    fontSize: 12,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-  },
-  iconColumn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 10,
-  },
-  eventIcon: {
-    fontSize: 16,
-  },
-  descriptionColumn: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  descriptionText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-  },
-  playerText: {
-    color: "#9CA3AF",
-    fontSize: 12,
-    fontWeight: "500",
-    marginTop: 2,
-  },
-  detailsText: {
-    color: "#F97316",
-    fontSize: 11,
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  teamText: {
-    color: "#6B7280",
-    fontSize: 11,
-    marginTop: 2,
-  },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: 48,
-    paddingHorizontal: 32,
-  },
-  emptyStateIcon: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  emptyStateText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  emptyStateSubtext: {
-    color: "#6B7280",
-    fontSize: 14,
-    textAlign: "center",
-  },
-});
