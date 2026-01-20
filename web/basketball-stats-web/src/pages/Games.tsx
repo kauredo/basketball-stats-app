@@ -7,9 +7,6 @@ import { useAuth } from "../contexts/AuthContext";
 import {
   PlusIcon,
   PlayIcon,
-  PauseIcon,
-  StopIcon,
-  EyeIcon,
   ChartBarIcon,
   CalendarIcon,
   ClockIcon,
@@ -44,10 +41,6 @@ const Games: React.FC = () => {
 
   const createGame = useMutation(api.games.create);
   const createQuickGame = useMutation(api.games.createQuickGame);
-  const startGame = useMutation(api.games.start);
-  const pauseGame = useMutation(api.games.pause);
-  const resumeGame = useMutation(api.games.resume);
-  const endGame = useMutation(api.games.end);
 
   const games = gamesData?.games || [];
   const teams = teamsData?.teams || [];
@@ -145,32 +138,6 @@ const Games: React.FC = () => {
     }
   };
 
-  const handleGameAction = async (
-    gameId: Id<"games">,
-    action: "start" | "pause" | "resume" | "end"
-  ) => {
-    if (!token) return;
-
-    try {
-      switch (action) {
-        case "start":
-          await startGame({ token, gameId });
-          break;
-        case "pause":
-          await pauseGame({ token, gameId });
-          break;
-        case "resume":
-          await resumeGame({ token, gameId });
-          break;
-        case "end":
-          await endGame({ token, gameId });
-          break;
-      }
-    } catch (error) {
-      console.error(`Failed to ${action} game:`, error);
-    }
-  };
-
   const renderGameRow = (game: any) => {
     const isGameLive = game.status === "active";
     const winner =
@@ -181,10 +148,7 @@ const Games: React.FC = () => {
             ? "away"
             : "tie"
         : null;
-    const canStart = game.status === "scheduled";
-    const canPause = game.status === "active";
-    const canResume = game.status === "paused";
-    const canEnd = game.status === "active" || game.status === "paused";
+    const canGoToLive = game.status !== "completed";
 
     return (
       <tr key={game.id} className="border-b border-gray-200 dark:border-gray-700">
@@ -249,59 +213,19 @@ const Games: React.FC = () => {
 
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center space-x-2">
-            {canStart && (
+            {canGoToLive && (
               <Link
                 to={`/app/games/${game.id}/live`}
-                className="p-2 bg-green-600 hover:bg-green-700 rounded-lg text-white transition-colors inline-flex"
-                title="Set Lineups & Start"
+                className="p-2 bg-orange-600 hover:bg-orange-700 rounded-lg text-white transition-colors inline-flex"
+                title="Live Game"
               >
                 <PlayIcon className="w-4 h-4" />
-              </Link>
-            )}
-
-            {canPause && (
-              <button
-                onClick={() => handleGameAction(game.id, "pause")}
-                className="p-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg text-white transition-colors"
-                title="Pause Game"
-              >
-                <PauseIcon className="w-4 h-4" />
-              </button>
-            )}
-
-            {canResume && (
-              <button
-                onClick={() => handleGameAction(game.id, "resume")}
-                className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors"
-                title="Resume Game"
-              >
-                <PlayIcon className="w-4 h-4" />
-              </button>
-            )}
-
-            {canEnd && (
-              <button
-                onClick={() => handleGameAction(game.id, "end")}
-                className="p-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition-colors"
-                title="End Game"
-              >
-                <StopIcon className="w-4 h-4" />
-              </button>
-            )}
-
-            {(isGameLive || game.status === "paused") && (
-              <Link
-                to={`/app/games/${game.id}/live`}
-                className="p-2 bg-orange-600 hover:bg-orange-700 rounded-lg text-white transition-colors"
-                title="Coach View"
-              >
-                <EyeIcon className="w-4 h-4" />
               </Link>
             )}
 
             <Link
               to={`/app/games/${game.id}/analysis`}
-              className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors"
+              className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors inline-flex"
               title="Analysis"
             >
               <ChartBarIcon className="w-4 h-4" />

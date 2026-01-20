@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
-import ShotChart from "../components/ShotChart";
+import { InteractiveCourt } from "../components/livegame/court/InteractiveCourt";
+import { ShotLocation } from "../types/livegame";
 import { ChartBarIcon, UserIcon, UsersIcon, FireIcon } from "@heroicons/react/24/outline";
 
 interface PlayerOption {
@@ -71,6 +72,16 @@ const ShotCharts: React.FC = () => {
 
   const currentData = viewMode === "player" ? playerShotData : teamShotData;
   const shots = currentData?.shots || [];
+
+  // Transform shots to ShotLocation format for InteractiveCourt
+  const transformedShots: ShotLocation[] = useMemo(() => {
+    return shots.map((shot) => ({
+      x: shot.x,
+      y: shot.y,
+      made: shot.made,
+      is3pt: shot.shotType === "3pt",
+    }));
+  }, [shots]);
 
   const StatBox: React.FC<{ label: string; value: string | number; subValue?: string }> = ({
     label,
@@ -173,17 +184,35 @@ const ShotCharts: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Shot Chart */}
             <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-              <ShotChart
-                shots={shots}
-                showHeatmap={showHeatmap}
-                title={
-                  viewMode === "player"
-                    ? `${playerShotData?.player?.name} - Shot Chart`
-                    : `${teamShotData?.team?.name} - Team Shot Chart`
-                }
-                width={600}
-                height={564}
-              />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                {viewMode === "player"
+                  ? `${playerShotData?.player?.name} - Shot Chart`
+                  : `${teamShotData?.team?.name} - Team Shot Chart`}
+              </h3>
+              <div className="aspect-[300/282] max-w-[600px] mx-auto">
+                <InteractiveCourt
+                  allShots={transformedShots}
+                  showHeatMap={showHeatmap}
+                  displayMode="all"
+                  disabled
+                  compact
+                />
+              </div>
+              {/* Legend */}
+              <div className="flex justify-center flex-wrap gap-4 mt-4 text-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-gray-600 dark:text-gray-400">Made 2PT</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-violet-500"></div>
+                  <span className="text-gray-600 dark:text-gray-400">Made 3PT</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <span className="text-gray-600 dark:text-gray-400">Missed</span>
+                </div>
+              </div>
             </div>
 
             {/* Stats Panel */}

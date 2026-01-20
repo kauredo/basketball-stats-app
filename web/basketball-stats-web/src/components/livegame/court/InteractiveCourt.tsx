@@ -115,12 +115,13 @@ const courtToSvg = (courtX: number, courtY: number) => ({
 // ============================================================================
 
 interface InteractiveCourtProps {
-  onCourtClick: (x: number, y: number, is3pt: boolean, zoneName: string) => void;
+  onCourtClick?: (x: number, y: number, is3pt: boolean, zoneName: string) => void;
   disabled?: boolean;
-  recentShots: ShotLocation[];
+  recentShots?: ShotLocation[];
   showHeatMap?: boolean;
   allShots?: ShotLocation[];
   compact?: boolean;
+  displayMode?: "recent" | "all"; // "recent" shows last 8, "all" shows all shots
 }
 
 // ============================================================================
@@ -130,10 +131,11 @@ interface InteractiveCourtProps {
 export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
   onCourtClick,
   disabled = false,
-  recentShots,
+  recentShots = [],
   showHeatMap = false,
   allShots = [],
   compact = false,
+  displayMode = "recent",
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [ripple, setRipple] = useState<{ x: number; y: number } | null>(null);
@@ -144,7 +146,7 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
 
   const handleClick = useCallback(
     (event: React.MouseEvent<SVGSVGElement>) => {
-      if (disabled || !svgRef.current) return;
+      if (disabled || !svgRef.current || !onCourtClick) return;
 
       const svg = svgRef.current;
       const rect = svg.getBoundingClientRect();
@@ -185,7 +187,7 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
         ref={svgRef}
         viewBox={`0 0 ${COURT_WIDTH} ${COURT_HEIGHT}`}
         className={`max-w-full max-h-full transition-all ${
-          disabled ? "opacity-50 cursor-not-allowed" : "cursor-crosshair"
+          disabled ? "opacity-50 cursor-not-allowed" : onCourtClick ? "cursor-crosshair" : ""
         }`}
         onClick={handleClick}
         style={{ aspectRatio: `${COURT_WIDTH}/${COURT_HEIGHT}` }}
@@ -345,11 +347,12 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
           </>
         )}
 
-        {/* Recent shots */}
-        {recentShots.slice(-8).map((shot, index) => {
+        {/* Shot markers */}
+        {(displayMode === "all" ? allShots : recentShots.slice(-8)).map((shot, index, arr) => {
           const { x: svgX, y: svgY } = courtToSvg(shot.x, shot.y);
           const is3pt = shot.is3pt;
-          const opacity = 0.6 + (index / 8) * 0.4; // Newer shots more visible
+          // For "recent" mode, fade older shots; for "all" mode, use consistent opacity
+          const opacity = displayMode === "all" ? 0.85 : 0.6 + (index / 8) * 0.4;
           const shotColor = shot.made
             ? is3pt
               ? COURT_COLORS.shot3pt
@@ -361,10 +364,10 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
               <circle
                 cx={svgX}
                 cy={svgY}
-                r={7}
+                r={displayMode === "all" ? 6 : 7}
                 fill={shotColor}
                 stroke="rgba(255,255,255,0.9)"
-                strokeWidth="2"
+                strokeWidth={displayMode === "all" ? 1.5 : 2}
                 opacity={opacity}
                 className="transition-all duration-300"
               />
@@ -374,7 +377,7 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
                   y={svgY + 4}
                   textAnchor="middle"
                   fill="#fff"
-                  fontSize="10"
+                  fontSize={displayMode === "all" ? 8 : 10}
                   fontWeight="bold"
                 >
                   X
@@ -386,7 +389,7 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
                   y={svgY + 4}
                   textAnchor="middle"
                   fill="#fff"
-                  fontSize="8"
+                  fontSize={displayMode === "all" ? 6 : 8}
                   fontWeight="bold"
                 >
                   3
@@ -414,8 +417,8 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
         )}
       </svg>
 
-      {/* Tap instruction - floating pill */}
-      {!disabled && !compact && (
+      {/* Tap instruction - floating pill (only show when interactive) */}
+      {!disabled && !compact && onCourtClick && (
         <div
           className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide
             bg-white/90 dark:bg-gray-900/90 backdrop-blur-md
