@@ -90,9 +90,13 @@ export const getPlayerSeasonStats = query({
       .slice(0, 10);
 
     // Fetch opponent names
-    const opponentIds = [...new Set(recentGameStats.map((g) => g.opponentId))];
+    const opponentIds = Array.from(new Set(recentGameStats.map((g) => g.opponentId)));
     const opponents = await Promise.all(opponentIds.map((id) => ctx.db.get(id)));
-    const opponentMap = new Map(opponents.filter(Boolean).map((t) => [t!._id, t!.name]));
+    const opponentMap = new Map(
+      opponents
+        .filter((t): t is NonNullable<typeof t> => t !== null && "name" in t)
+        .map((t) => [t._id, (t as { _id: typeof t._id; name: string }).name])
+    );
 
     const recentGames = recentGameStats.map((g) => ({
       ...g,
@@ -293,6 +297,29 @@ export const getTeamsStats = query({
         const gamesPlayed = wins + losses;
         const aggregated = aggregateStats(allPlayerStats);
 
+        // Get team rebounds from teamStats (unattributed rebounds)
+        const teamStatRecords = await ctx.db
+          .query("teamStats")
+          .filter((q) => q.eq(q.field("teamId"), team._id))
+          .collect();
+        const filteredTeamStats = teamStatRecords.filter((ts) => gameIds.has(ts.gameId));
+
+        // Sum team rebounds (these are in addition to player rebounds)
+        const teamOffensiveRebounds = filteredTeamStats.reduce(
+          (sum, ts) => sum + (ts.offensiveRebounds || 0),
+          0
+        );
+        const teamDefensiveRebounds = filteredTeamStats.reduce(
+          (sum, ts) => sum + (ts.defensiveRebounds || 0),
+          0
+        );
+
+        // Total rebounds = player rebounds + team rebounds
+        const totalReboundsWithTeam =
+          aggregated.totalRebounds + teamOffensiveRebounds + teamDefensiveRebounds;
+        const totalOffensiveRebounds = aggregated.totalOffensiveRebounds + teamOffensiveRebounds;
+        const totalDefensiveRebounds = aggregated.totalDefensiveRebounds + teamDefensiveRebounds;
+
         return {
           teamId: team._id,
           teamName: team.name,
@@ -303,7 +330,11 @@ export const getTeamsStats = query({
           avgPoints:
             gamesPlayed > 0 ? Math.round((aggregated.totalPoints / gamesPlayed) * 10) / 10 : 0,
           avgRebounds:
-            gamesPlayed > 0 ? Math.round((aggregated.totalRebounds / gamesPlayed) * 10) / 10 : 0,
+            gamesPlayed > 0 ? Math.round((totalReboundsWithTeam / gamesPlayed) * 10) / 10 : 0,
+          avgOffensiveRebounds:
+            gamesPlayed > 0 ? Math.round((totalOffensiveRebounds / gamesPlayed) * 10) / 10 : 0,
+          avgDefensiveRebounds:
+            gamesPlayed > 0 ? Math.round((totalDefensiveRebounds / gamesPlayed) * 10) / 10 : 0,
           avgAssists:
             gamesPlayed > 0 ? Math.round((aggregated.totalAssists / gamesPlayed) * 10) / 10 : 0,
           fieldGoalPercentage:
@@ -686,6 +717,8 @@ function aggregateStats(stats: Doc<"playerStats">[]) {
       totalFreeThrowsMade: acc.totalFreeThrowsMade + s.freeThrowsMade,
       totalFreeThrowsAttempted: acc.totalFreeThrowsAttempted + s.freeThrowsAttempted,
       totalRebounds: acc.totalRebounds + s.rebounds,
+      totalOffensiveRebounds: acc.totalOffensiveRebounds + (s.offensiveRebounds || 0),
+      totalDefensiveRebounds: acc.totalDefensiveRebounds + (s.defensiveRebounds || 0),
       totalAssists: acc.totalAssists + s.assists,
       totalSteals: acc.totalSteals + s.steals,
       totalBlocks: acc.totalBlocks + s.blocks,
@@ -702,6 +735,8 @@ function aggregateStats(stats: Doc<"playerStats">[]) {
       totalFreeThrowsMade: 0,
       totalFreeThrowsAttempted: 0,
       totalRebounds: 0,
+      totalOffensiveRebounds: 0,
+      totalDefensiveRebounds: 0,
       totalAssists: 0,
       totalSteals: 0,
       totalBlocks: 0,
@@ -717,6 +752,8 @@ function calculateAverages(totals: ReturnType<typeof aggregateStats>, gamesPlaye
     return {
       avgPoints: 0,
       avgRebounds: 0,
+      avgOffensiveRebounds: 0,
+      avgDefensiveRebounds: 0,
       avgAssists: 0,
       avgSteals: 0,
       avgBlocks: 0,
@@ -729,6 +766,8 @@ function calculateAverages(totals: ReturnType<typeof aggregateStats>, gamesPlaye
   return {
     avgPoints: Math.round((totals.totalPoints / gamesPlayed) * 10) / 10,
     avgRebounds: Math.round((totals.totalRebounds / gamesPlayed) * 10) / 10,
+    avgOffensiveRebounds: Math.round((totals.totalOffensiveRebounds / gamesPlayed) * 10) / 10,
+    avgDefensiveRebounds: Math.round((totals.totalDefensiveRebounds / gamesPlayed) * 10) / 10,
     avgAssists: Math.round((totals.totalAssists / gamesPlayed) * 10) / 10,
     avgSteals: Math.round((totals.totalSteals / gamesPlayed) * 10) / 10,
     avgBlocks: Math.round((totals.totalBlocks / gamesPlayed) * 10) / 10,

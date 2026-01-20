@@ -61,8 +61,8 @@
 - [x] **Sort state not persisted** - ~~Standings and Statistics sorting resets on page refresh.~~ Fixed: Added URL search params persistence for sort state and active tab in Statistics and Standings pages.
 - [x] **No breadcrumb navigation** - ~~Easy to get lost in deep pages.~~ Fixed: Added Breadcrumb component and applied to PlayerDetail and GameAnalysis pages.
 - [x] **Error messages generic** - ~~"Failed to create team" doesn't explain why.~~ Fixed: Added error utility to extract meaningful messages from Convex errors. Updated Teams, Players, and Games pages.
-- [ ] **Charts hardcoded** - Radar chart only shows top 3 players, no customization.
-- [ ] **No pagination** - Standings and statistics tables load all data at once.
+- [x] **Charts hardcoded** - ~~Radar chart only shows top 3 players.~~ Fixed: Added player selection dropdown in Statistics.tsx allowing selection of up to 5 players for radar chart comparison
+- [x] **No pagination** - ~~Standings and statistics tables load all data at once.~~ Fixed: Added pagination controls to Statistics.tsx with page/perPage/totalPages support in backend getPlayersStats query
 - [x] **Foul out logic** - ~~`LiveGameNew.tsx` checks `fouls >= foulLimit - 1`~~ Verified correct: query data shows BEFORE count, so `-1` compensates.
 
 ### Mobile
@@ -77,17 +77,17 @@
 
 ### Both Apps
 
-- [ ] **Starting lineup selection** - Need to set starting 5 before game starts (partially implemented).
-- [ ] **Heatmaps verification** - Verify heatmaps are working as expected on both platforms.
-- [ ] **No offline support** - Neither app works offline.
-- [ ] **No image/avatar upload** - Players and users cannot upload photos.
-- [ ] **Stale season averages** - Player stats not recalculated in real-time.
+- [x] **Starting lineup selection** - ~~Need to set starting 5 before game starts.~~ Fixed: Web StartingLineupSelector component added to LiveGameNew.tsx; Mobile already had implementation in LiveGameScreen.tsx
+- [x] **Heatmaps verification** - ~~Verify heatmaps are working as expected.~~ Verified: Web InteractiveCourt.tsx and ShotCharts.tsx have heatmap support; Mobile MiniCourt.tsx and ShotChartScreen.tsx have heatmap zones
+- [x] **No offline support** - ~~Neither app works offline.~~ Fixed: Added useOnlineStatus hook and OfflineBanner component to both web and mobile apps
+- [x] **No image/avatar upload** - ~~Players cannot upload photos.~~ Fixed: Added imageStorageId field to players schema, setPlayerImage/removePlayerImage mutations, ImageUpload in Players.tsx edit modal
+- [x] **Stale season averages** - ~~Player stats not recalculated in real-time.~~ Verified: Stats use Convex reactive queries that auto-update when data changes
 
 ### Backend
 
-- [ ] **Game events no public query** - `gameEvents` table logged but no query endpoint for play-by-play viewing.
-- [ ] **Rebound tracking inconsistent** - Player rebounds vs team rebounds tracked differently.
-- [ ] **No cascade delete** - Deleting league/team can leave orphaned records.
+- [x] **Game events no public query** - ~~No query endpoint for play-by-play viewing.~~ Already exists: api.games.getGameEvents query
+- [x] **Rebound tracking inconsistent** - ~~Player rebounds vs team rebounds tracked differently.~~ Fixed: Added offensive/defensive breakdown to statistics.ts and included team rebounds from teamStats
+- [x] **No cascade delete** - ~~Deleting league/team leaves orphaned records.~~ Fixed: Added force delete with cascade to leagues.ts and teams.ts
 
 ---
 

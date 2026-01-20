@@ -181,6 +181,9 @@ export default function Statistics() {
     const order = searchParams.get("order");
     return order === "asc" ? "asc" : "desc";
   });
+  const [selectedRadarPlayers, setSelectedRadarPlayers] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
 
   // Sync state changes to URL
   useEffect(() => {
@@ -201,7 +204,7 @@ export default function Statistics() {
   const playersData = useQuery(
     api.statistics.getPlayersStats,
     token && selectedLeague
-      ? { token, leagueId: selectedLeague.id, sortBy, order: sortOrder, perPage: 20 }
+      ? { token, leagueId: selectedLeague.id, sortBy, order: sortOrder, page: currentPage, perPage }
       : "skip"
   );
 
@@ -215,6 +218,7 @@ export default function Statistics() {
     const newOrder = newSortBy === sortBy && sortOrder === "desc" ? "asc" : "desc";
     setSortBy(newSortBy);
     setSortOrder(newOrder);
+    setCurrentPage(1); // Reset to first page when sorting changes
   };
 
   if (dashboardData === undefined) {
@@ -477,6 +481,65 @@ export default function Statistics() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {playersData.pagination && (
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <span>
+                  Showing {((playersData.pagination.currentPage - 1) * playersData.pagination.perPage) + 1} to{" "}
+                  {Math.min(playersData.pagination.currentPage * playersData.pagination.perPage, playersData.pagination.totalCount)} of{" "}
+                  {playersData.pagination.totalCount} players
+                </span>
+                <select
+                  value={perPage}
+                  onChange={(e) => {
+                    setPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="ml-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm"
+                >
+                  <option value={10}>10 per page</option>
+                  <option value={20}>20 per page</option>
+                  <option value={50}>50 per page</option>
+                  <option value={100}>100 per page</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  First
+                </button>
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Previous
+                </button>
+                <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
+                  Page {playersData.pagination.currentPage} of {playersData.pagination.totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(Math.min(playersData.pagination.totalPages, currentPage + 1))}
+                  disabled={currentPage >= playersData.pagination.totalPages}
+                  className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Next
+                </button>
+                <button
+                  onClick={() => setCurrentPage(playersData.pagination.totalPages)}
+                  disabled={currentPage >= playersData.pagination.totalPages}
+                  className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Last
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -630,43 +693,79 @@ export default function Statistics() {
 
           {/* Top Players Performance Radar */}
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Top Players Performance Comparison
-            </h3>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Player Performance Comparison
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                <select
+                  className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm text-gray-900 dark:text-white"
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value && selectedRadarPlayers.length < 5 && !selectedRadarPlayers.includes(e.target.value)) {
+                      setSelectedRadarPlayers([...selectedRadarPlayers, e.target.value]);
+                    }
+                  }}
+                >
+                  <option value="">Add player...</option>
+                  {playersData?.players
+                    ?.filter((p: any) => !selectedRadarPlayers.includes(p.playerId))
+                    .map((player: any) => (
+                      <option key={player.playerId} value={player.playerId}>
+                        {player.playerName} ({player.teamName})
+                      </option>
+                    ))}
+                </select>
+                {selectedRadarPlayers.length > 0 && (
+                  <button
+                    onClick={() => setSelectedRadarPlayers([])}
+                    className="px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+            </div>
+            {/* Selected players chips */}
+            {selectedRadarPlayers.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {selectedRadarPlayers.map((playerId, index) => {
+                  const player = playersData?.players?.find((p: any) => p.playerId === playerId);
+                  const colors = ["#EA580C", "#3B82F6", "#10B981", "#8B5CF6", "#F59E0B"];
+                  return (
+                    <span
+                      key={playerId}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white"
+                      style={{ backgroundColor: colors[index % colors.length] }}
+                    >
+                      {player?.playerName || "Unknown"}
+                      <button
+                        onClick={() => setSelectedRadarPlayers(selectedRadarPlayers.filter(id => id !== playerId))}
+                        className="ml-2 hover:text-gray-200"
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
             <ResponsiveContainer width="100%" height={400}>
               <RadarChart
-                data={[
-                  {
-                    metric: "Points",
-                    player1: playersData.players?.[0]?.avgPoints || 0,
-                    player2: playersData.players?.[1]?.avgPoints || 0,
-                    player3: playersData.players?.[2]?.avgPoints || 0,
-                  },
-                  {
-                    metric: "Rebounds",
-                    player1: playersData.players?.[0]?.avgRebounds || 0,
-                    player2: playersData.players?.[1]?.avgRebounds || 0,
-                    player3: playersData.players?.[2]?.avgRebounds || 0,
-                  },
-                  {
-                    metric: "Assists",
-                    player1: playersData.players?.[0]?.avgAssists || 0,
-                    player2: playersData.players?.[1]?.avgAssists || 0,
-                    player3: playersData.players?.[2]?.avgAssists || 0,
-                  },
-                  {
-                    metric: "FG%",
-                    player1: playersData.players?.[0]?.fieldGoalPercentage || 0,
-                    player2: playersData.players?.[1]?.fieldGoalPercentage || 0,
-                    player3: playersData.players?.[2]?.fieldGoalPercentage || 0,
-                  },
-                  {
-                    metric: "FT%",
-                    player1: playersData.players?.[0]?.freeThrowPercentage || 0,
-                    player2: playersData.players?.[1]?.freeThrowPercentage || 0,
-                    player3: playersData.players?.[2]?.freeThrowPercentage || 0,
-                  },
-                ]}
+                data={(() => {
+                  // Use selected players or default to top 3
+                  const playersToShow = selectedRadarPlayers.length > 0
+                    ? selectedRadarPlayers.map(id => playersData?.players?.find((p: any) => p.playerId === id)).filter(Boolean)
+                    : playersData?.players?.slice(0, 3) || [];
+
+                  return [
+                    { metric: "Points", ...Object.fromEntries(playersToShow.map((p: any, i: number) => [`player${i}`, p?.avgPoints || 0])) },
+                    { metric: "Rebounds", ...Object.fromEntries(playersToShow.map((p: any, i: number) => [`player${i}`, p?.avgRebounds || 0])) },
+                    { metric: "Assists", ...Object.fromEntries(playersToShow.map((p: any, i: number) => [`player${i}`, p?.avgAssists || 0])) },
+                    { metric: "FG%", ...Object.fromEntries(playersToShow.map((p: any, i: number) => [`player${i}`, p?.fieldGoalPercentage || 0])) },
+                    { metric: "FT%", ...Object.fromEntries(playersToShow.map((p: any, i: number) => [`player${i}`, p?.freeThrowPercentage || 0])) },
+                  ];
+                })()}
               >
                 <PolarGrid stroke="#374151" />
                 {/* @ts-expect-error Recharts type compatibility with React 18 */}
@@ -676,30 +775,24 @@ export default function Statistics() {
                   domain={[0, "dataMax"]}
                   tick={{ fontSize: 10, fill: "#9CA3AF" }}
                 />
-                <Radar
-                  name={playersData.players?.[0]?.playerName || "Player 1"}
-                  dataKey="player1"
-                  stroke="#EA580C"
-                  fill="#EA580C"
-                  fillOpacity={0.1}
-                  strokeWidth={2}
-                />
-                <Radar
-                  name={playersData.players?.[1]?.playerName || "Player 2"}
-                  dataKey="player2"
-                  stroke="#3B82F6"
-                  fill="#3B82F6"
-                  fillOpacity={0.1}
-                  strokeWidth={2}
-                />
-                <Radar
-                  name={playersData.players?.[2]?.playerName || "Player 3"}
-                  dataKey="player3"
-                  stroke="#10B981"
-                  fill="#10B981"
-                  fillOpacity={0.1}
-                  strokeWidth={2}
-                />
+                {(() => {
+                  const colors = ["#EA580C", "#3B82F6", "#10B981", "#8B5CF6", "#F59E0B"];
+                  const playersToShow = selectedRadarPlayers.length > 0
+                    ? selectedRadarPlayers.map(id => playersData?.players?.find((p: any) => p.playerId === id)).filter(Boolean)
+                    : playersData?.players?.slice(0, 3) || [];
+
+                  return playersToShow.map((player: any, index: number) => (
+                    <Radar
+                      key={player?.playerId || index}
+                      name={player?.playerName || `Player ${index + 1}`}
+                      dataKey={`player${index}`}
+                      stroke={colors[index % colors.length]}
+                      fill={colors[index % colors.length]}
+                      fillOpacity={0.1}
+                      strokeWidth={2}
+                    />
+                  ));
+                })()}
                 <Legend wrapperStyle={{ color: "#F9FAFB" }} />
                 <Tooltip
                   contentStyle={{
@@ -711,6 +804,11 @@ export default function Statistics() {
                 />
               </RadarChart>
             </ResponsiveContainer>
+            {selectedRadarPlayers.length === 0 && (
+              <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Showing top 3 players by default. Use the dropdown to customize.
+              </p>
+            )}
           </div>
 
           {/* Shooting Efficiency Analysis */}

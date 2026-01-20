@@ -8,6 +8,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import NotificationBell from "../components/NotificationBell";
+import { OfflineBanner } from "../components/OfflineBanner";
 
 // Import screens
 import HomeScreen from "../screens/HomeScreen";
@@ -283,5 +284,10 @@ function AppContent() {
 }
 
 export default function AppNavigator() {
-  return <AppContent />;
+  return (
+    <View style={{ flex: 1 }}>
+      <OfflineBanner />
+      <AppContent />
+    </View>
+  );
 }

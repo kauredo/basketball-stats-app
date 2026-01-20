@@ -109,6 +109,8 @@ export default defineSchema({
     weightKg: v.optional(v.number()),
     birthDate: v.optional(v.string()),
     active: v.boolean(),
+    imageUrl: v.optional(v.string()), // External URL (legacy support)
+    imageStorageId: v.optional(v.id("_storage")), // Convex file storage ID
   })
     .index("by_team", ["teamId"])
     .index("by_team_number", ["teamId", "number"])

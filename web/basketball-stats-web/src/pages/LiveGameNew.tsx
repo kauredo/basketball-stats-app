@@ -22,6 +22,7 @@ import {
   StatsModeContent,
   PlaysModeContent,
   LineupsModeContent,
+  StartingLineupSelector,
 } from "../components/livegame";
 import { ClockModeContent } from "../components/livegame/ClockModeContent";
 
@@ -68,6 +69,9 @@ const LiveGameNew: React.FC = () => {
   const [showHeatMap, setShowHeatMap] = useState(false);
   const [lastAction, setLastAction] = useState<LastAction | null>(null);
   const [shotClockSeconds, setShotClockSeconds] = useState(24);
+  const [selectedHomeStarters, setSelectedHomeStarters] = useState<Id<"players">[]>([]);
+  const [selectedAwayStarters, setSelectedAwayStarters] = useState<Id<"players">[]>([]);
+  const [isStartingGame, setIsStartingGame] = useState(false);
 
   // Convex queries
   const gameData = useQuery(
@@ -106,6 +110,7 @@ const LiveGameNew: React.FC = () => {
   const recordTimeoutMutation = useMutation(api.games.recordTimeout);
   const startOvertimeMutation = useMutation(api.games.startOvertime);
   const recordShotMutation = useMutation(api.shots.recordShot);
+  const updateGameSettingsMutation = useMutation(api.games.updateGameSettings);
 
   // Hooks
   const feedback = useFeedback();
@@ -619,6 +624,57 @@ const LiveGameNew: React.FC = () => {
     setShotClockSeconds(seconds);
   };
 
+  // Handler for starting lineup changes
+  const handleStartersChange = useCallback(
+    async (homeStarters: Id<"players">[], awayStarters: Id<"players">[]) => {
+      setSelectedHomeStarters(homeStarters);
+      setSelectedAwayStarters(awayStarters);
+
+      // Save to backend when both teams have 5 starters
+      if (token && gameId && homeStarters.length === 5 && awayStarters.length === 5) {
+        try {
+          await updateGameSettingsMutation({
+            token,
+            gameId: gameId as Id<"games">,
+            startingFive: {
+              homeTeam: homeStarters,
+              awayTeam: awayStarters,
+            },
+          });
+        } catch (error) {
+          console.error("Failed to save starting lineup:", error);
+        }
+      }
+    },
+    [token, gameId, updateGameSettingsMutation]
+  );
+
+  // Handler for starting game with selected starters
+  const handleStartGameWithStarters = useCallback(async () => {
+    if (!token || !gameId) return;
+    if (selectedHomeStarters.length !== 5 || selectedAwayStarters.length !== 5) return;
+
+    setIsStartingGame(true);
+    try {
+      // Save the starters first (in case they weren't saved yet)
+      await updateGameSettingsMutation({
+        token,
+        gameId: gameId as Id<"games">,
+        startingFive: {
+          homeTeam: selectedHomeStarters,
+          awayTeam: selectedAwayStarters,
+        },
+      });
+
+      // Then start the game
+      await startGame({ token, gameId: gameId as Id<"games"> });
+    } catch (error) {
+      console.error("Failed to start game:", error);
+    } finally {
+      setIsStartingGame(false);
+    }
+  }, [token, gameId, selectedHomeStarters, selectedAwayStarters, updateGameSettingsMutation, startGame]);
+
   const handleEndPeriod = async () => {
     if (!token || !gameId || !game) return;
     try {
@@ -659,6 +715,47 @@ const LiveGameNew: React.FC = () => {
     teamId: e.team?.id,
     points: e.points,
   }));
+
+  // Show starting lineup selector for scheduled games
+  if (game.status === "scheduled") {
+    return (
+      <div className="h-dvh bg-gray-100 dark:bg-gray-900 p-4 safe-area-inset">
+        <div className="max-w-4xl mx-auto h-full flex flex-col">
+          {/* Header with game info */}
+          <div className="mb-4 text-center">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {game.awayTeam?.name || "Away"} @ {game.homeTeam?.name || "Home"}
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {game.scheduledAt
+                ? new Date(game.scheduledAt).toLocaleDateString(undefined, {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "Game Setup"}
+            </p>
+          </div>
+
+          {/* Starting Lineup Selector */}
+          <div className="flex-1 overflow-hidden">
+            <StartingLineupSelector
+              homeTeamName={game.homeTeam?.name || "Home"}
+              awayTeamName={game.awayTeam?.name || "Away"}
+              homeStats={homeStats}
+              awayStats={awayStats}
+              initialHomeStarters={selectedHomeStarters}
+              initialAwayStarters={selectedAwayStarters}
+              onStartersChange={handleStartersChange}
+              onStartGame={handleStartGameWithStarters}
+              isStarting={isStartingGame}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <LiveGameLayout

@@ -329,11 +329,12 @@ export const update = mutation({
   },
 });
 
-// Delete league
+// Delete league (with cascade delete of all related data)
 export const remove = mutation({
   args: {
     token: v.string(),
     leagueId: v.id("leagues"),
+    force: v.optional(v.boolean()), // Force delete with all related data
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
@@ -347,30 +348,124 @@ export const remove = mutation({
       throw new Error("Only the league owner can delete the league");
     }
 
-    // Check if league has teams
+    // Get all teams in the league
     const teams = await ctx.db
       .query("teams")
       .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
-      .first();
+      .collect();
 
-    if (teams) {
-      throw new Error("Cannot delete league with existing teams");
+    // If there are teams and force is not true, return warning
+    if (teams.length > 0 && !args.force) {
+      const games = await ctx.db
+        .query("games")
+        .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
+        .collect();
+
+      throw new Error(
+        `This league has ${teams.length} team(s) and ${games.length} game(s). ` +
+        `Use force=true to delete all related data.`
+      );
     }
 
-    // Delete all memberships first
+    // Cascade delete all related data
+    // 1. Delete all games and their related data
+    const games = await ctx.db
+      .query("games")
+      .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
+      .collect();
+
+    for (const game of games) {
+      // Delete player stats for this game
+      const playerStats = await ctx.db
+        .query("playerStats")
+        .withIndex("by_game", (q) => q.eq("gameId", game._id))
+        .collect();
+      for (const stat of playerStats) {
+        await ctx.db.delete(stat._id);
+      }
+
+      // Delete team stats for this game
+      const teamStats = await ctx.db
+        .query("teamStats")
+        .withIndex("by_game", (q) => q.eq("gameId", game._id))
+        .collect();
+      for (const stat of teamStats) {
+        await ctx.db.delete(stat._id);
+      }
+
+      // Delete shots for this game
+      const shots = await ctx.db
+        .query("shots")
+        .withIndex("by_game", (q) => q.eq("gameId", game._id))
+        .collect();
+      for (const shot of shots) {
+        await ctx.db.delete(shot._id);
+      }
+
+      // Delete game events for this game
+      const events = await ctx.db
+        .query("gameEvents")
+        .withIndex("by_game", (q) => q.eq("gameId", game._id))
+        .collect();
+      for (const event of events) {
+        await ctx.db.delete(event._id);
+      }
+
+      // Delete the game
+      await ctx.db.delete(game._id);
+    }
+
+    // 2. Delete all teams and their players
+    for (const team of teams) {
+      // Delete all players on this team
+      const players = await ctx.db
+        .query("players")
+        .withIndex("by_team", (q) => q.eq("teamId", team._id))
+        .collect();
+      for (const player of players) {
+        await ctx.db.delete(player._id);
+      }
+
+      // Delete team logo from storage if exists
+      if (team.logoStorageId) {
+        await ctx.storage.delete(team.logoStorageId);
+      }
+
+      // Delete the team
+      await ctx.db.delete(team._id);
+    }
+
+    // 3. Delete all memberships
     const memberships = await ctx.db
       .query("leagueMemberships")
       .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
       .collect();
-
     for (const membership of memberships) {
       await ctx.db.delete(membership._id);
     }
 
-    // Delete league
+    // 4. Delete all notifications for this league
+    const notifications = await ctx.db
+      .query("notifications")
+      .filter((q) => q.eq(q.field("leagueId"), args.leagueId))
+      .collect();
+    for (const notification of notifications) {
+      await ctx.db.delete(notification._id);
+    }
+
+    // 5. Delete all notification preferences for this league
+    const prefs = await ctx.db
+      .query("notificationPreferences")
+      .filter((q) => q.eq(q.field("leagueId"), args.leagueId))
+      .collect();
+    for (const pref of prefs) {
+      await ctx.db.delete(pref._id);
+    }
+
+    // Finally, delete the league
     await ctx.db.delete(args.leagueId);
 
-    return { message: "League deleted successfully" };
+    return { message: "League and all related data deleted successfully" };
   },
 });
 

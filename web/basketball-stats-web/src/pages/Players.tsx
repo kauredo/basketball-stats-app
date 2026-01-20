@@ -6,6 +6,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { getErrorMessage } from "../utils/error";
+import ImageUpload from "../components/ImageUpload";
 import {
   UserIcon,
   ChartBarIcon,
@@ -38,6 +39,8 @@ const Players: React.FC = () => {
   const [playerFormErrors, setPlayerFormErrors] = useState<{ name?: string; number?: string }>({});
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [pendingImageStorageId, setPendingImageStorageId] = useState<Id<"_storage"> | null>(null);
+  const [clearImage, setClearImage] = useState(false);
 
   // Validation functions
   const validatePlayerName = (name: string) => {
@@ -66,6 +69,8 @@ const Players: React.FC = () => {
 
   const updatePlayer = useMutation(api.players.update);
   const removePlayer = useMutation(api.players.remove);
+  const setPlayerImage = useMutation(api.players.setPlayerImage);
+  const removePlayerImage = useMutation(api.players.removePlayerImage);
 
   const players = playersData?.players || [];
   const teams = teamsData?.teams || [];
@@ -89,6 +94,8 @@ const Players: React.FC = () => {
       active: player.active !== false,
     });
     setPlayerFormErrors({});
+    setPendingImageStorageId(null);
+    setClearImage(false);
     setShowEditModal(true);
   };
 
@@ -97,6 +104,7 @@ const Players: React.FC = () => {
 
     setIsUpdating(true);
     try {
+      // Update player info
       await updatePlayer({
         token,
         playerId: selectedPlayer.id as Id<"players">,
@@ -107,6 +115,21 @@ const Players: React.FC = () => {
         weightKg: playerForm.weightKg ? parseInt(playerForm.weightKg) : undefined,
         active: playerForm.active,
       });
+
+      // Handle image changes
+      if (pendingImageStorageId) {
+        await setPlayerImage({
+          token,
+          playerId: selectedPlayer.id as Id<"players">,
+          storageId: pendingImageStorageId,
+        });
+      } else if (clearImage && selectedPlayer.imageUrl) {
+        await removePlayerImage({
+          token,
+          playerId: selectedPlayer.id as Id<"players">,
+        });
+      }
+
       toast.success(`Player "${playerForm.name.trim()}" updated successfully`);
       setShowEditModal(false);
       setSelectedPlayer(null);
@@ -119,6 +142,8 @@ const Players: React.FC = () => {
         active: true,
       });
       setPlayerFormErrors({});
+      setPendingImageStorageId(null);
+      setClearImage(false);
     } catch (error) {
       console.error("Failed to update player:", error);
       const message = getErrorMessage(error, "Failed to update player. Please try again.");
@@ -176,8 +201,16 @@ const Players: React.FC = () => {
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-            <UserIcon className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center overflow-hidden">
+            {player.imageUrl ? (
+              <img
+                src={player.imageUrl}
+                alt={player.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <UserIcon className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+            )}
           </div>
           <div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">{player.name}</h3>
@@ -560,6 +593,20 @@ const Players: React.FC = () => {
                   Active player
                 </label>
               </div>
+
+              <ImageUpload
+                currentImageUrl={clearImage ? undefined : selectedPlayer.imageUrl}
+                onImageUploaded={(storageId) => {
+                  setPendingImageStorageId(storageId);
+                  setClearImage(false);
+                }}
+                onImageCleared={() => {
+                  setPendingImageStorageId(null);
+                  setClearImage(true);
+                }}
+                label="Player Photo"
+                placeholder="Click to upload player photo"
+              />
             </div>
 
             <div className="flex justify-end space-x-3 mt-6">
@@ -576,6 +623,8 @@ const Players: React.FC = () => {
                     active: true,
                   });
                   setPlayerFormErrors({});
+                  setPendingImageStorageId(null);
+                  setClearImage(false);
                 }}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >

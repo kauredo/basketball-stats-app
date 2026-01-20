@@ -48,6 +48,7 @@ export { CourtModeContent } from "./CourtModeContent";
 export { StatsModeContent } from "./StatsModeContent";
 export { PlaysModeContent } from "./PlaysModeContent";
 export { LineupsModeContent } from "./LineupsModeContent";
+export { StartingLineupSelector } from "./StartingLineupSelector";
 
 // Re-export types for convenience
 export type {

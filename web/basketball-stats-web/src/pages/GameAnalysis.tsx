@@ -402,7 +402,7 @@ const GameAnalysis: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis domain={[0, 100]} />
-                <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
+                <Tooltip formatter={(value) => typeof value === 'number' ? `${value.toFixed(1)}%` : value} />
                 <Legend />
                 <Bar dataKey="home" name={homeTeam?.team?.name || "Home"} fill="#f97316" />
                 <Bar dataKey="away" name={awayTeam?.team?.name || "Away"} fill="#3b82f6" />

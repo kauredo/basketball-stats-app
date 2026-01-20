@@ -2,6 +2,19 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getUserFromToken, canAccessLeague, canManageLeague } from "./lib/auth";
 
+// Helper to resolve image URL from either imageUrl or imageStorageId
+async function resolveImageUrl(
+  ctx: any,
+  imageUrl: string | undefined,
+  imageStorageId: any | undefined
+): Promise<string | undefined> {
+  if (imageStorageId) {
+    const url = await ctx.storage.getUrl(imageStorageId);
+    return url || undefined;
+  }
+  return imageUrl;
+}
+
 // List players (by team or by league)
 export const list = query({
   args: {
@@ -136,6 +149,9 @@ export const list = query({
           }
         }
 
+        // Resolve image URL
+        const imageUrl = await resolveImageUrl(ctx, player.imageUrl, player.imageStorageId);
+
         return {
           id: player._id,
           name: player.name,
@@ -146,6 +162,7 @@ export const list = query({
           birthDate: player.birthDate,
           age,
           active: player.active,
+          imageUrl,
           team: team
             ? {
                 id: team._id,
@@ -283,6 +300,9 @@ export const get = query({
       }
     }
 
+    // Resolve image URL
+    const imageUrl = await resolveImageUrl(ctx, player.imageUrl, player.imageStorageId);
+
     return {
       player: {
         id: player._id,
@@ -294,6 +314,7 @@ export const get = query({
         birthDate: player.birthDate,
         age,
         active: player.active,
+        imageUrl,
         team: {
           id: team._id,
           name: team.name,
@@ -482,5 +503,92 @@ export const remove = mutation({
     await ctx.db.delete(args.playerId);
 
     return { message: "Player deleted successfully" };
+  },
+});
+
+// Set player image (from Convex file storage)
+export const setPlayerImage = mutation({
+  args: {
+    token: v.string(),
+    playerId: v.id("players"),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const player = await ctx.db.get(args.playerId);
+    if (!player) throw new Error("Player not found");
+
+    const team = await ctx.db.get(player.teamId);
+    if (!team) throw new Error("Team not found");
+
+    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
+    if (!canManage && team.userId !== user._id) {
+      throw new Error("Access denied");
+    }
+
+    // Delete old image if exists
+    if (player.imageStorageId) {
+      try {
+        await ctx.storage.delete(player.imageStorageId);
+      } catch {
+        // Ignore errors if old file doesn't exist
+      }
+    }
+
+    // Update player with new storage ID, clear any legacy URL
+    await ctx.db.patch(args.playerId, {
+      imageStorageId: args.storageId,
+      imageUrl: undefined,
+    });
+
+    // Get the URL for the new image
+    const imageUrl = await ctx.storage.getUrl(args.storageId);
+
+    return {
+      imageUrl,
+      message: "Player image updated successfully",
+    };
+  },
+});
+
+// Remove player image
+export const removePlayerImage = mutation({
+  args: {
+    token: v.string(),
+    playerId: v.id("players"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const player = await ctx.db.get(args.playerId);
+    if (!player) throw new Error("Player not found");
+
+    const team = await ctx.db.get(player.teamId);
+    if (!team) throw new Error("Team not found");
+
+    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
+    if (!canManage && team.userId !== user._id) {
+      throw new Error("Access denied");
+    }
+
+    // Delete image from storage if exists
+    if (player.imageStorageId) {
+      try {
+        await ctx.storage.delete(player.imageStorageId);
+      } catch {
+        // Ignore errors if file doesn't exist
+      }
+    }
+
+    // Clear image fields
+    await ctx.db.patch(args.playerId, {
+      imageStorageId: undefined,
+      imageUrl: undefined,
+    });
+
+    return { message: "Player image removed successfully" };
   },
 });

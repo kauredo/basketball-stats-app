@@ -347,11 +347,12 @@ export const update = mutation({
   },
 });
 
-// Delete team
+// Delete team (with cascade delete of all related data)
 export const remove = mutation({
   args: {
     token: v.string(),
     teamId: v.id("teams"),
+    force: v.optional(v.boolean()), // Force delete with all related data
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
@@ -366,28 +367,103 @@ export const remove = mutation({
     }
 
     // Check if team has games
-    const homeGame = await ctx.db
+    const homeGames = await ctx.db
       .query("games")
       .withIndex("by_home_team", (q) => q.eq("homeTeamId", args.teamId))
-      .first();
+      .collect();
 
-    const awayGame = await ctx.db
+    const awayGames = await ctx.db
       .query("games")
       .withIndex("by_away_team", (q) => q.eq("awayTeamId", args.teamId))
-      .first();
+      .collect();
 
-    if (homeGame || awayGame) {
-      throw new Error("Cannot delete team with existing games");
+    const allGames = [...homeGames, ...awayGames];
+
+    if (allGames.length > 0 && !args.force) {
+      throw new Error(
+        `This team has ${allGames.length} game(s). Use force=true to delete all related data.`
+      );
     }
 
-    // Delete all players first
+    // Cascade delete all related data if force is true
+    if (args.force && allGames.length > 0) {
+      for (const game of allGames) {
+        // Delete player stats for this game
+        const playerStats = await ctx.db
+          .query("playerStats")
+          .withIndex("by_game", (q) => q.eq("gameId", game._id))
+          .collect();
+        for (const stat of playerStats) {
+          await ctx.db.delete(stat._id);
+        }
+
+        // Delete team stats for this game
+        const teamStats = await ctx.db
+          .query("teamStats")
+          .withIndex("by_game", (q) => q.eq("gameId", game._id))
+          .collect();
+        for (const stat of teamStats) {
+          await ctx.db.delete(stat._id);
+        }
+
+        // Delete shots for this game
+        const shots = await ctx.db
+          .query("shots")
+          .withIndex("by_game", (q) => q.eq("gameId", game._id))
+          .collect();
+        for (const shot of shots) {
+          await ctx.db.delete(shot._id);
+        }
+
+        // Delete game events for this game
+        const events = await ctx.db
+          .query("gameEvents")
+          .withIndex("by_game", (q) => q.eq("gameId", game._id))
+          .collect();
+        for (const event of events) {
+          await ctx.db.delete(event._id);
+        }
+
+        // Delete the game
+        await ctx.db.delete(game._id);
+      }
+    }
+
+    // Delete all players
     const players = await ctx.db
       .query("players")
       .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
       .collect();
 
     for (const player of players) {
+      // Delete any remaining player stats (from other teams' games)
+      const playerStatRecords = await ctx.db
+        .query("playerStats")
+        .withIndex("by_player", (q) => q.eq("playerId", player._id))
+        .collect();
+      for (const stat of playerStatRecords) {
+        await ctx.db.delete(stat._id);
+      }
+
+      // Delete any remaining shots
+      const playerShots = await ctx.db
+        .query("shots")
+        .withIndex("by_player", (q) => q.eq("playerId", player._id))
+        .collect();
+      for (const shot of playerShots) {
+        await ctx.db.delete(shot._id);
+      }
+
       await ctx.db.delete(player._id);
+    }
+
+    // Delete team stats
+    const teamStatRecords = await ctx.db
+      .query("teamStats")
+      .filter((q) => q.eq(q.field("teamId"), args.teamId))
+      .collect();
+    for (const stat of teamStatRecords) {
+      await ctx.db.delete(stat._id);
     }
 
     // Delete logo file from storage if exists
@@ -398,6 +474,6 @@ export const remove = mutation({
     // Delete team
     await ctx.db.delete(args.teamId);
 
-    return { message: "Team deleted successfully" };
+    return { message: "Team and all related data deleted successfully" };
   },
 });

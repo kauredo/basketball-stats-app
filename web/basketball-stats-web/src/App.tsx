@@ -7,6 +7,7 @@ import { ToastProvider } from "./contexts/ToastContext";
 
 import Layout from "./components/Layout";
 import PublicLayout from "./components/layouts/PublicLayout";
+import { OfflineBanner } from "./components/OfflineBanner";
 
 // Public pages
 import LandingPage from "./pages/public/LandingPage";
@@ -217,6 +218,7 @@ function App() {
   return (
     <ThemeProvider>
       <ToastProvider>
+        <OfflineBanner />
         <Router>
           <AuthProvider>
             <AppRoutes />
