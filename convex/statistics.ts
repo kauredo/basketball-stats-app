@@ -189,7 +189,8 @@ export const getPlayersStats = query({
         return {
           playerId: player._id,
           playerName: player.name,
-          team: team?.name || "Unknown",
+          teamId: player.teamId,
+          teamName: team?.name || "Unknown",
           position: player.position,
           gamesPlayed,
           ...aggregated,
@@ -670,7 +671,8 @@ function emptyPlayerStats(player: Doc<"players">, team: Doc<"teams"> | undefined
   return {
     playerId: player._id,
     playerName: player.name,
-    team: team?.name || "Unknown",
+    teamId: player.teamId,
+    teamName: team?.name || "Unknown",
     position: player.position,
     gamesPlayed: 0,
     totalPoints: 0,

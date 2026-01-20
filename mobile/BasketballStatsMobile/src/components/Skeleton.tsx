@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, ViewStyle, DimensionValue, useColorScheme } from "react-native";
+import { View, StyleSheet, ViewStyle, DimensionValue } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -7,6 +7,7 @@ import Animated, {
   withTiming,
   interpolate,
 } from "react-native-reanimated";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface SkeletonProps {
   width?: DimensionValue;
@@ -22,8 +23,8 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   style,
 }) => {
   const shimmer = useSharedValue(0);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
     shimmer.value = withRepeat(withTiming(1, { duration: 1500 }), -1, false);
@@ -51,8 +52,8 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
 // Skeleton Card for game cards, player cards, etc.
 export const SkeletonCard: React.FC<{ style?: ViewStyle }> = ({ style }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const cardStyle = isDark ? styles.cardDark : styles.cardLight;
 
   return (
@@ -75,8 +76,8 @@ export const SkeletonCard: React.FC<{ style?: ViewStyle }> = ({ style }) => {
 
 // Skeleton for basketball court loading state
 export const SkeletonCourt: React.FC<{ style?: ViewStyle }> = ({ style }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const cardStyle = isDark ? styles.cardDark : styles.cardLight;
 
   return (
@@ -97,8 +98,8 @@ export const SkeletonTable: React.FC<{
   rows?: number;
   style?: ViewStyle;
 }> = ({ rows = 5, style }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const cardStyle = isDark ? styles.cardDark : styles.cardLight;
   const borderStyle = isDark ? styles.borderBottomDark : styles.borderBottomLight;
 
@@ -145,8 +146,8 @@ export const SkeletonTable: React.FC<{
 
 // Skeleton for game list items
 export const SkeletonGameCard: React.FC<{ style?: ViewStyle }> = ({ style }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const gameCardStyle = isDark ? styles.gameCardDark : styles.gameCardLight;
 
   return (
@@ -183,8 +184,8 @@ export const SkeletonGameCard: React.FC<{ style?: ViewStyle }> = ({ style }) => 
 
 // Skeleton for player stats row
 export const SkeletonPlayerRow: React.FC<{ style?: ViewStyle }> = ({ style }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const playerRowStyle = isDark ? styles.playerRowDark : styles.playerRowLight;
 
   return (
@@ -205,8 +206,8 @@ export const SkeletonPlayerRow: React.FC<{ style?: ViewStyle }> = ({ style }) =>
 
 // Skeleton for stat buttons grid
 export const SkeletonStatButtons: React.FC<{ style?: ViewStyle }> = ({ style }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const cardStyle = isDark ? styles.cardDark : styles.cardLight;
 
   return (
@@ -250,8 +251,8 @@ export const SkeletonStatButtons: React.FC<{ style?: ViewStyle }> = ({ style }) 
 
 // Full screen loading skeleton
 export const SkeletonScreen: React.FC = () => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const screenStyle = isDark ? styles.screenDark : styles.screenLight;
   const screenHeaderStyle = isDark ? styles.screenHeaderDark : styles.screenHeaderLight;
 

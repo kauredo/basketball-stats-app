@@ -88,7 +88,7 @@ export const standingsColumns = [
  */
 export const playerStatsColumns = [
   { key: "playerName" as const, label: "Player" },
-  { key: "team" as const, label: "Team" },
+  { key: "teamName" as const, label: "Team" },
   { key: "gamesPlayed" as const, label: "GP" },
   { key: "avgPoints" as const, label: "PPG" },
   { key: "avgRebounds" as const, label: "RPG" },

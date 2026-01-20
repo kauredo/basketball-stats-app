@@ -68,7 +68,7 @@ function StatCard({ title, value, subtitle, icon, trend }: StatCardProps) {
 
 interface LeadersBoardProps {
   title: string;
-  leaders: Array<{ name: string; value: number }>;
+  leaders: Array<{ name: string; value: number; team?: string }>;
   unit?: string;
 }
 
@@ -83,7 +83,12 @@ function LeadersBoard({ title, leaders, unit = "" }: LeadersBoardProps) {
               <div className="w-6 h-6 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center justify-center mr-3">
                 {index + 1}
               </div>
-              <span className="text-gray-900 dark:text-white font-medium">{leader.name}</span>
+              <div className="flex flex-col">
+                <span className="text-gray-900 dark:text-white font-medium">{leader.name}</span>
+                {leader.team && (
+                  <span className="text-gray-500 dark:text-gray-400 text-xs">{leader.team}</span>
+                )}
+              </div>
             </div>
             <span className="text-gray-700 dark:text-gray-300 font-semibold">
               {leader.value.toFixed(1)}
