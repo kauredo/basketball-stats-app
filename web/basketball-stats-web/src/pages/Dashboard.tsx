@@ -18,18 +18,19 @@ const Dashboard: React.FC = () => {
   const recentGames = games.filter((game) => game.status === "completed").slice(0, 5);
   const upcomingGames = games.filter((game) => game.status === "scheduled").slice(0, 5);
 
-  const getStatusColor = (status: string) => {
+  // Return Tailwind background classes for game status
+  const getStatusBgClass = (status: string) => {
     switch (status) {
       case "active":
-        return "#EF4444";
+        return "bg-red-500"; // Live games
       case "paused":
-        return "#F59E0B";
+        return "bg-amber-500"; // Paused games
       case "completed":
-        return "#10B981";
+        return "bg-green-500"; // Finished games
       case "scheduled":
-        return "#3B82F6";
+        return "bg-blue-500"; // Upcoming games
       default:
-        return "#6B7280";
+        return "bg-gray-500";
     }
   };
 
@@ -73,8 +74,7 @@ const Dashboard: React.FC = () => {
         <div className="flex justify-between items-start mb-3">
           <div className="flex items-center space-x-2">
             <div
-              className="px-2 py-1 rounded-full text-xs font-medium text-white"
-              style={{ backgroundColor: getStatusColor(game.status) }}
+              className={`px-2 py-1 rounded-full text-xs font-medium text-white ${getStatusBgClass(game.status)}`}
             >
               {getStatusLabel(game.status)}
             </div>

@@ -49,41 +49,14 @@
 }
 
 @layer utilities {
-  /* Custom utility classes */
+  /* Custom bounce animation - Tailwind's animate-bounce-ball uses this */
   .animate-bounce-ball {
     animation: bounce 2s infinite;
   }
-
-  .animate-fade-in {
-    animation: fadeIn 0.4s ease-out;
-  }
-
-  .animate-slide-in {
-    animation: slideIn 0.3s ease-out;
-  }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* Note: fadeIn and slideIn keyframes are defined in tailwind.config.js
+   Use Tailwind's animate-fade-in and animate-slide-in classes */
 
 /* Reduced motion support for users who prefer it */
 @media (prefers-reduced-motion: reduce) {

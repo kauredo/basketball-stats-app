@@ -73,6 +73,10 @@ module.exports = {
           to: { opacity: "1", transform: "translateY(0)" },
         },
         slideIn: {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        slideInHorizontal: {
           from: { opacity: "0", transform: "translateX(-20px)" },
           to: { opacity: "1", transform: "translateX(0)" },
         },

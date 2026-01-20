@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme, ThemeMode } from "../contexts/ThemeContext";
-import Icon from "./Icon";
 import Logo from "./Logo";
 import NotificationBell from "./NotificationBell";
 import {
@@ -13,7 +12,6 @@ import {
   ChartBarIcon,
   ChevronDownIcon,
   UserIcon,
-  Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   TableCellsIcon,
   ArrowsRightLeftIcon,
@@ -21,6 +19,8 @@ import {
   SunIcon,
   MoonIcon,
   ComputerDesktopIcon,
+  Bars3Icon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 
 interface LayoutProps {
@@ -49,6 +49,7 @@ export default function Layout({ children }: LayoutProps) {
   const { user, selectedLeague, logout } = useAuth();
   const { mode, resolvedTheme, setMode } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -62,7 +63,13 @@ export default function Layout({ children }: LayoutProps) {
   const handleLogout = () => {
     logout();
     setShowUserMenu(false);
+    setSidebarOpen(false);
   };
+
+  // Close mobile sidebar when route changes
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   // Handle keyboard navigation in menu
   const handleMenuKeyDown = useCallback(
@@ -106,6 +113,182 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [showUserMenu]);
 
+  // Handle escape key to close mobile sidebar
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [sidebarOpen]);
+
+  // Sidebar content - shared between mobile and desktop
+  const SidebarContent = ({ onNavClick }: { onNavClick?: () => void }) => (
+    <>
+      <div className="flex h-16 shrink-0 items-center px-6">
+        <Logo variant={resolvedTheme === "dark" ? "light" : "dark"} size="md" />
+      </div>
+
+      {/* League info */}
+      {selectedLeague && (
+        <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
+          <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            Current League
+          </div>
+          <div className="text-sm font-medium text-gray-900 dark:text-white mt-1">
+            {selectedLeague.name}
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            {selectedLeague.leagueType} • {selectedLeague.season}
+          </div>
+        </div>
+      )}
+
+      {/* Theme toggle */}
+      <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between rounded-lg bg-gray-100 dark:bg-gray-700 p-1" role="group" aria-label="Theme selection">
+          {themeOptions.map((option) => (
+            <button
+              key={option.mode}
+              onClick={() => setMode(option.mode)}
+              className={`flex-1 flex items-center justify-center rounded-md py-1.5 px-2 transition-colors ${
+                mode === option.mode
+                  ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
+              aria-label={`Switch to ${option.label.toLowerCase()} theme`}
+              aria-pressed={mode === option.mode}
+            >
+              <option.icon className="h-4 w-4" aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <nav className="mt-4 flex-1">
+        <ul role="list" className="flex flex-1 flex-col gap-y-1 px-6">
+          {navigation.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <li key={item.name}>
+                <Link
+                  to={item.href}
+                  onClick={onNavClick}
+                  className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors ${
+                    isActive
+                      ? "bg-orange-600 text-white"
+                      : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  <item.icon
+                    className={`h-6 w-6 shrink-0 ${
+                      isActive
+                        ? "text-white"
+                        : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-white"
+                    }`}
+                    aria-hidden="true"
+                  />
+                  {item.name}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* User menu at bottom */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="relative">
+          <button
+            ref={menuButtonRef}
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown" && !showUserMenu) {
+                e.preventDefault();
+                setShowUserMenu(true);
+                setFocusedIndex(0);
+              }
+            }}
+            className="flex w-full items-center justify-between rounded-lg p-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            aria-expanded={showUserMenu}
+            aria-haspopup="menu"
+            aria-controls="user-menu"
+          >
+            <div className="flex items-center">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600">
+                <span className="text-sm font-medium text-white">
+                  {user?.firstName?.[0]}
+                  {user?.lastName?.[0]}
+                </span>
+              </div>
+              <div className="ml-3">
+                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                  {user?.firstName} {user?.lastName}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {selectedLeague?.role || "Member"}
+                </div>
+              </div>
+            </div>
+            <ChevronDownIcon
+              className={`h-5 w-5 text-gray-400 transition-transform ${showUserMenu ? "rotate-180" : ""}`}
+              aria-hidden="true"
+            />
+          </button>
+
+          {showUserMenu && (
+            <div
+              ref={menuRef}
+              id="user-menu"
+              role="menu"
+              aria-label="User menu"
+              onKeyDown={handleMenuKeyDown}
+              className="absolute bottom-full left-0 right-0 mb-2 rounded-md bg-white dark:bg-gray-700 py-1 shadow-lg ring-1 ring-black ring-opacity-5"
+            >
+              <Link
+                to="/app/profile"
+                role="menuitem"
+                tabIndex={focusedIndex === 0 ? 0 : -1}
+                className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
+                onClick={() => {
+                  setShowUserMenu(false);
+                  onNavClick?.();
+                }}
+              >
+                <UserIcon className="mr-3 h-5 w-5" aria-hidden="true" />
+                Profile
+              </Link>
+              <Link
+                to="/app/leagues"
+                role="menuitem"
+                tabIndex={focusedIndex === 1 ? 0 : -1}
+                className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
+                onClick={() => {
+                  setShowUserMenu(false);
+                  onNavClick?.();
+                }}
+              >
+                <TrophyIcon className="mr-3 h-5 w-5" aria-hidden="true" />
+                Switch League
+              </Link>
+              <button
+                role="menuitem"
+                tabIndex={focusedIndex === 2 ? 0 : -1}
+                onClick={handleLogout}
+                className="flex w-full items-center px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
+              >
+                <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" aria-hidden="true" />
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Skip to main content link for keyboard users */}
@@ -116,174 +299,64 @@ export default function Layout({ children }: LayoutProps) {
         Skip to main content
       </a>
 
-      {/* Sidebar */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-        <div className="flex h-16 shrink-0 items-center px-6">
-          <Logo variant={resolvedTheme === "dark" ? "light" : "dark"} size="md" />
-        </div>
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
-        {/* League info */}
-        {selectedLeague && (
-          <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
-            <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-              Current League
-            </div>
-            <div className="text-sm font-medium text-gray-900 dark:text-white mt-1">
-              {selectedLeague.name}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              {selectedLeague.leagueType} • {selectedLeague.season}
-            </div>
-          </div>
-        )}
+      {/* Mobile sidebar */}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile navigation"
+      >
+        {/* Close button for mobile */}
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="absolute top-4 right-4 p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          aria-label="Close navigation menu"
+        >
+          <XMarkIcon className="h-6 w-6" />
+        </button>
 
-        {/* Theme toggle */}
-        <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between rounded-lg bg-gray-100 dark:bg-gray-700 p-1" role="group" aria-label="Theme selection">
-            {themeOptions.map((option) => (
-              <button
-                key={option.mode}
-                onClick={() => setMode(option.mode)}
-                className={`flex-1 flex items-center justify-center rounded-md py-1.5 px-2 transition-colors ${
-                  mode === option.mode
-                    ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                }`}
-                aria-label={option.label}
-                aria-pressed={mode === option.mode}
-              >
-                <option.icon className="h-4 w-4" aria-hidden="true" />
-              </button>
-            ))}
-          </div>
-        </div>
+        <SidebarContent onNavClick={() => setSidebarOpen(false)} />
+      </div>
 
-        <nav className="mt-4">
-          <ul role="list" className="flex flex-1 flex-col gap-y-1 px-6">
-            {navigation.map((item) => {
-              const isActive = location.pathname === item.href;
-              return (
-                <li key={item.name}>
-                  <Link
-                    to={item.href}
-                    className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors ${
-                      isActive
-                        ? "bg-orange-600 text-white"
-                        : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}
-                  >
-                    <item.icon
-                      className={`h-6 w-6 shrink-0 ${
-                        isActive
-                          ? "text-white"
-                          : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-white"
-                      }`}
-                      aria-hidden="true"
-                    />
-                    {item.name}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        {/* User menu at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="relative">
-            <button
-              ref={menuButtonRef}
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowDown" && !showUserMenu) {
-                  e.preventDefault();
-                  setShowUserMenu(true);
-                  setFocusedIndex(0);
-                }
-              }}
-              className="flex w-full items-center justify-between rounded-lg p-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              aria-expanded={showUserMenu}
-              aria-haspopup="menu"
-              aria-controls="user-menu"
-            >
-              <div className="flex items-center">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600">
-                  <span className="text-sm font-medium text-white">
-                    {user?.firstName?.[0]}
-                    {user?.lastName?.[0]}
-                  </span>
-                </div>
-                <div className="ml-3">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {user?.firstName} {user?.lastName}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {selectedLeague?.role || "Member"}
-                  </div>
-                </div>
-              </div>
-              <ChevronDownIcon
-                className={`h-5 w-5 text-gray-400 transition-transform ${showUserMenu ? "rotate-180" : ""}`}
-                aria-hidden="true"
-              />
-            </button>
-
-            {showUserMenu && (
-              <div
-                ref={menuRef}
-                id="user-menu"
-                role="menu"
-                aria-label="User menu"
-                onKeyDown={handleMenuKeyDown}
-                className="absolute bottom-full left-0 right-0 mb-2 rounded-md bg-white dark:bg-gray-700 py-1 shadow-lg ring-1 ring-black ring-opacity-5"
-              >
-                <Link
-                  to="/app/profile"
-                  role="menuitem"
-                  tabIndex={focusedIndex === 0 ? 0 : -1}
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  <UserIcon className="mr-3 h-5 w-5" aria-hidden="true" />
-                  Profile
-                </Link>
-                <Link
-                  to="/app/leagues"
-                  role="menuitem"
-                  tabIndex={focusedIndex === 1 ? 0 : -1}
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  <TrophyIcon className="mr-3 h-5 w-5" aria-hidden="true" />
-                  Switch League
-                </Link>
-                <button
-                  role="menuitem"
-                  tabIndex={focusedIndex === 2 ? 0 : -1}
-                  onClick={handleLogout}
-                  className="flex w-full items-center px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
-                >
-                  <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" aria-hidden="true" />
-                  Sign out
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+      {/* Desktop sidebar - hidden on mobile */}
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:w-64 lg:flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+        <SidebarContent />
       </div>
 
       {/* Main content */}
-      <div className="pl-64">
+      <div className="lg:pl-64">
         {/* Top bar */}
         <div className="sticky top-0 z-40 bg-white dark:bg-gray-800 shadow border-b border-gray-200 dark:border-gray-700">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <div className="flex items-center gap-4">
+              {/* Hamburger menu button - visible on mobile only */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 -ml-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                aria-label="Open navigation menu"
+                aria-expanded={sidebarOpen}
+                aria-controls="mobile-sidebar"
+              >
+                <Bars3Icon className="h-6 w-6" />
+              </button>
+
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white truncate">
                 {selectedLeague?.name || "Basketball Stats"}
               </h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <span className="hidden sm:inline text-sm text-gray-600 dark:text-gray-300">
                 Welcome back, {user?.firstName}!
               </span>
               <NotificationBell />

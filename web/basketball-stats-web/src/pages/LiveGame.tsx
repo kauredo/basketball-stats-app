@@ -767,6 +767,60 @@ interface QuickStatModalProps {
   onCourtPlayers: PlayerStat[];
 }
 
+// Static class mappings for Tailwind (dynamic classes don't work with Tailwind's purge)
+const STAT_STYLES: Record<StatType | "default", { label: string; headerBg: string; badgeClass: string }> = {
+  assist: {
+    label: "Assist",
+    headerBg: "bg-purple-600",
+    badgeClass: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300",
+  },
+  steal: {
+    label: "Steal",
+    headerBg: "bg-cyan-600",
+    badgeClass: "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300",
+  },
+  block: {
+    label: "Block",
+    headerBg: "bg-cyan-600",
+    badgeClass: "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300",
+  },
+  turnover: {
+    label: "Turnover",
+    headerBg: "bg-amber-600",
+    badgeClass: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300",
+  },
+  foul: {
+    label: "Foul",
+    headerBg: "bg-amber-600",
+    badgeClass: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300",
+  },
+  freethrow: {
+    label: "Free Throw",
+    headerBg: "bg-green-600",
+    badgeClass: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300",
+  },
+  rebound: {
+    label: "Rebound",
+    headerBg: "bg-blue-600",
+    badgeClass: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300",
+  },
+  shot2: {
+    label: "2-Point Shot",
+    headerBg: "bg-blue-600",
+    badgeClass: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300",
+  },
+  shot3: {
+    label: "3-Point Shot",
+    headerBg: "bg-purple-600",
+    badgeClass: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300",
+  },
+  default: {
+    label: "Stat",
+    headerBg: "bg-gray-600",
+    badgeClass: "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
+  },
+};
+
 const QuickStatModal: React.FC<QuickStatModalProps> = ({
   isOpen,
   onClose,
@@ -776,35 +830,20 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
 }) => {
   if (!isOpen || !statType) return null;
 
-  const getStatInfo = (type: StatType) => {
-    switch (type) {
-      case "assist":
-        return { label: "Assist", color: "purple" };
-      case "steal":
-        return { label: "Steal", color: "cyan" };
-      case "block":
-        return { label: "Block", color: "cyan" };
-      case "turnover":
-        return { label: "Turnover", color: "amber" };
-      case "foul":
-        return { label: "Foul", color: "amber" };
-      case "freethrow":
-        return { label: "Free Throw", color: "green" };
-      case "rebound":
-        return { label: "Rebound", color: "blue" };
-      default:
-        return { label: type, color: "gray" };
-    }
-  };
-
-  const { label, color } = getStatInfo(statType);
+  const styles = STAT_STYLES[statType] || STAT_STYLES.default;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="quickstat-modal-title-old"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
         {/* Header */}
-        <div className={`px-6 py-4 bg-${color}-600`}>
-          <h3 className="text-lg font-bold text-white">Record {label}</h3>
+        <div className={`px-6 py-4 ${styles.headerBg}`}>
+          <h3 id="quickstat-modal-title-old" className="text-lg font-bold text-white">Record {styles.label}</h3>
           <p className="text-white/80 text-sm">Select a player</p>
         </div>
 
@@ -817,7 +856,7 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
               <button
                 key={player.id}
                 onClick={() => onRecord(player.playerId)}
-                className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -832,10 +871,8 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
                     </div>
                   </div>
                 </div>
-                <div
-                  className={`px-3 py-1 bg-${color}-100 dark:bg-${color}-900/30 text-${color}-700 dark:text-${color}-300 text-sm font-medium rounded-lg`}
-                >
-                  +{label.toUpperCase().slice(0, 3)}
+                <div className={`px-3 py-1 text-sm font-medium rounded-lg ${styles.badgeClass}`}>
+                  +{styles.label.toUpperCase().slice(0, 3)}
                 </div>
               </button>
             ))
@@ -846,7 +883,7 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
         <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
           >
             Cancel
           </button>

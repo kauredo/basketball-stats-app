@@ -54,18 +54,19 @@ const Games: React.FC = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  const getStatusColor = (status: string) => {
+  // Return Tailwind background classes for game status
+  const getStatusBgClass = (status: string) => {
     switch (status) {
       case "active":
-        return "#EF4444";
+        return "bg-red-500"; // Live games
       case "paused":
-        return "#F59E0B";
+        return "bg-amber-500"; // Paused games
       case "completed":
-        return "#10B981";
+        return "bg-green-500"; // Finished games
       case "scheduled":
-        return "#3B82F6";
+        return "bg-blue-500"; // Upcoming games
       default:
-        return "#6B7280";
+        return "bg-gray-500";
     }
   };
 
@@ -164,8 +165,7 @@ const Games: React.FC = () => {
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center space-x-3">
             <div
-              className="px-2 py-1 rounded-full text-xs font-medium text-white"
-              style={{ backgroundColor: getStatusColor(game.status) }}
+              className={`px-2 py-1 rounded-full text-xs font-medium text-white ${getStatusBgClass(game.status)}`}
             >
               {getStatusLabel(game.status)}
             </div>
