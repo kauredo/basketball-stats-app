@@ -867,9 +867,9 @@ export default function LiveGameScreen() {
 
   if (gameData === undefined || liveStats === undefined) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-dark-950">
+      <SafeAreaView className="flex-1 bg-surface-50 dark:bg-surface-950">
         <View className="flex-1 justify-center items-center">
-          <Text className="text-gray-900 dark:text-white text-base">Loading game...</Text>
+          <Text className="text-surface-900 dark:text-white text-base">Loading game...</Text>
         </View>
       </SafeAreaView>
     );
@@ -877,13 +877,13 @@ export default function LiveGameScreen() {
 
   if (!game) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-dark-950">
+      <SafeAreaView className="flex-1 bg-surface-50 dark:bg-surface-950">
         <View className="flex-1 justify-center items-center">
           <Icon name="basketball" size={48} color="#9CA3AF" />
-          <Text className="text-gray-900 dark:text-white text-lg font-semibold mt-4 mb-2">
+          <Text className="text-surface-900 dark:text-white text-lg font-semibold mt-4 mb-2">
             Game not found
           </Text>
-          <Text className="text-gray-600 dark:text-gray-400 text-center">
+          <Text className="text-surface-600 dark:text-surface-400 text-center">
             The requested game could not be found.
           </Text>
         </View>
@@ -894,36 +894,36 @@ export default function LiveGameScreen() {
   // Show pre-game setup if game is scheduled
   if (game.status === "scheduled") {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-dark-950">
+      <SafeAreaView className="flex-1 bg-surface-50 dark:bg-surface-950">
         <StatusBar style="light" />
         <ScrollView className="flex-1">
           {/* Header */}
-          <View className="bg-white dark:bg-gray-800 mx-4 mt-4 rounded-2xl p-4 border border-gray-200 dark:border-gray-700">
+          <View className="bg-white dark:bg-surface-800 mx-4 mt-4 rounded-2xl p-4 border border-surface-200 dark:border-surface-700">
             <View className="flex-row items-center mb-4">
               <Icon name="settings" size={24} color="#F97316" />
               <View className="ml-3 flex-1">
-                <Text className="text-gray-900 dark:text-white text-xl font-bold">
+                <Text className="text-surface-900 dark:text-white text-xl font-bold">
                   Pre-Game Setup
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                <Text className="text-surface-600 dark:text-surface-400 text-sm">
                   Select starting lineups before starting
                 </Text>
               </View>
             </View>
-            <View className="flex-row items-center justify-center py-3 border-t border-gray-200 dark:border-gray-700">
-              <Text className="text-gray-600 dark:text-gray-400 text-lg font-semibold">
+            <View className="flex-row items-center justify-center py-3 border-t border-surface-200 dark:border-surface-700">
+              <Text className="text-surface-600 dark:text-surface-400 text-lg font-semibold">
                 {game.awayTeam?.name}
               </Text>
-              <Text className="text-gray-400 mx-4 text-lg">VS</Text>
-              <Text className="text-gray-600 dark:text-gray-400 text-lg font-semibold">
+              <Text className="text-surface-400 mx-4 text-lg">VS</Text>
+              <Text className="text-surface-600 dark:text-surface-400 text-lg font-semibold">
                 {game.homeTeam?.name}
               </Text>
             </View>
           </View>
 
           {/* Quarter Duration */}
-          <View className="bg-white dark:bg-gray-800 mx-4 mt-4 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <Text className="text-gray-900 dark:text-white text-base font-semibold mb-3">
+          <View className="bg-white dark:bg-surface-800 mx-4 mt-4 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+            <Text className="text-surface-900 dark:text-white text-base font-semibold mb-3">
               Quarter Duration
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -935,12 +935,12 @@ export default function LiveGameScreen() {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }}
                   className={`px-4 py-2 rounded-lg ${
-                    quarterMinutes === mins ? "bg-primary-500" : "bg-gray-100 dark:bg-gray-700"
+                    quarterMinutes === mins ? "bg-primary-500" : "bg-surface-100 dark:bg-surface-700"
                   }`}
                 >
                   <Text
                     className={`font-medium ${
-                      quarterMinutes === mins ? "text-white" : "text-gray-700 dark:text-gray-300"
+                      quarterMinutes === mins ? "text-white" : "text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     {mins} min
@@ -951,9 +951,9 @@ export default function LiveGameScreen() {
           </View>
 
           {/* Away Team Starters */}
-          <View className="bg-white dark:bg-gray-800 mx-4 mt-4 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <View className="bg-white dark:bg-surface-800 mx-4 mt-4 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-gray-900 dark:text-white text-base font-semibold">
+              <Text className="text-surface-900 dark:text-white text-base font-semibold">
                 {game.awayTeam?.name} Starters
               </Text>
               <Text
@@ -971,10 +971,10 @@ export default function LiveGameScreen() {
                 className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
                   awayStarters.includes(stat.playerId)
                     ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
-                    : "bg-gray-100 dark:bg-gray-700"
+                    : "bg-surface-100 dark:bg-surface-700"
                 }`}
               >
-                <Text className="text-gray-900 dark:text-white font-medium">
+                <Text className="text-surface-900 dark:text-white font-medium">
                   #{stat.player?.number} {stat.player?.name}
                 </Text>
                 {awayStarters.includes(stat.playerId) && (
@@ -985,9 +985,9 @@ export default function LiveGameScreen() {
           </View>
 
           {/* Home Team Starters */}
-          <View className="bg-white dark:bg-gray-800 mx-4 mt-4 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <View className="bg-white dark:bg-surface-800 mx-4 mt-4 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-gray-900 dark:text-white text-base font-semibold">
+              <Text className="text-surface-900 dark:text-white text-base font-semibold">
                 {game.homeTeam?.name} Starters
               </Text>
               <Text
@@ -1005,10 +1005,10 @@ export default function LiveGameScreen() {
                 className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
                   homeStarters.includes(stat.playerId)
                     ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
-                    : "bg-gray-100 dark:bg-gray-700"
+                    : "bg-surface-100 dark:bg-surface-700"
                 }`}
               >
-                <Text className="text-gray-900 dark:text-white font-medium">
+                <Text className="text-surface-900 dark:text-white font-medium">
                   #{stat.player?.number} {stat.player?.name}
                 </Text>
                 {homeStarters.includes(stat.playerId) && (
@@ -1024,7 +1024,7 @@ export default function LiveGameScreen() {
             className={`mx-4 mt-6 mb-8 py-4 rounded-xl flex-row items-center justify-center ${
               homeStarters.length === 5 && awayStarters.length === 5
                 ? "bg-green-600"
-                : "bg-gray-400"
+                : "bg-surface-400"
             }`}
             disabled={homeStarters.length !== 5 || awayStarters.length !== 5}
           >
@@ -1083,7 +1083,7 @@ export default function LiveGameScreen() {
     : null;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-dark-950">
+    <SafeAreaView className="flex-1 bg-surface-50 dark:bg-surface-950">
       <StatusBar style="light" />
 
       {/* Enhanced Scoreboard */}
@@ -1119,7 +1119,7 @@ export default function LiveGameScreen() {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
             className={`flex-1 ${isLandscape ? "py-1.5" : "py-3"} rounded-xl mx-1 ${
-              activeTab === tab.key ? "bg-primary-500" : "bg-white dark:bg-gray-800"
+              activeTab === tab.key ? "bg-primary-500" : "bg-white dark:bg-surface-800"
             }`}
           >
             <View className="items-center flex-row justify-center">
@@ -1131,7 +1131,7 @@ export default function LiveGameScreen() {
               {!isLandscape && (
                 <Text
                   className={`text-xs mt-1 font-medium ${
-                    activeTab === tab.key ? "text-white" : "text-gray-600 dark:text-gray-400"
+                    activeTab === tab.key ? "text-white" : "text-surface-600 dark:text-surface-400"
                   }`}
                 >
                   {tab.label}
@@ -1140,7 +1140,7 @@ export default function LiveGameScreen() {
               {isLandscape && (
                 <Text
                   className={`text-[10px] ml-1 font-medium ${
-                    activeTab === tab.key ? "text-white" : "text-gray-600 dark:text-gray-400"
+                    activeTab === tab.key ? "text-white" : "text-surface-600 dark:text-surface-400"
                   }`}
                 >
                   {tab.label}
@@ -1167,12 +1167,12 @@ export default function LiveGameScreen() {
             <View className={`flex-1 ${isLandscape ? "flex-row gap-2" : ""}`}>
               {/* Large Court for Shot Recording */}
               <View
-                className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 ${
+                className={`bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 ${
                   isLandscape ? "flex-1 p-2" : "mb-4 flex-1 p-4"
                 }`}
               >
                 {!isLandscape && (
-                  <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                  <Text className="text-surface-900 dark:text-white font-semibold mb-3">
                     Shot Location (Tap to Record Shot)
                   </Text>
                 )}
@@ -1189,12 +1189,12 @@ export default function LiveGameScreen() {
 
               {/* Stat Buttons Grid */}
               <View
-                className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 ${
+                className={`bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 ${
                   isLandscape ? "w-40 p-2" : "p-4"
                 }`}
               >
                 {!isLandscape && (
-                  <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+                  <Text className="text-surface-900 dark:text-white font-semibold mb-3">
                     Quick Stats
                   </Text>
                 )}
@@ -1277,7 +1277,7 @@ export default function LiveGameScreen() {
             <View className={`flex-1 ${isLandscape ? "flex-row gap-4" : ""}`}>
               {/* Main Clock Display */}
               <View
-                className={`bg-gray-900 rounded-2xl p-6 items-center justify-center ${
+                className={`bg-surface-900 rounded-2xl p-6 items-center justify-center ${
                   isLandscape ? "flex-1" : "mb-4"
                 }`}
               >
@@ -1300,7 +1300,7 @@ export default function LiveGameScreen() {
                   {Math.floor(game.timeRemainingSeconds / 60)}:
                   {(game.timeRemainingSeconds % 60).toString().padStart(2, "0")}
                 </Text>
-                <Text className="text-gray-400 text-sm mt-2 uppercase tracking-widest">
+                <Text className="text-surface-400 text-sm mt-2 uppercase tracking-widest">
                   Game Clock
                 </Text>
 
@@ -1310,7 +1310,7 @@ export default function LiveGameScreen() {
                     className={`px-8 py-4 rounded-xl border-2 ${
                       shotClockSeconds <= 5 && isGameActive
                         ? "bg-red-500/20 border-red-500"
-                        : "bg-gray-800 border-gray-700"
+                        : "bg-surface-800 border-surface-700"
                     }`}
                   >
                     <Text
@@ -1320,7 +1320,7 @@ export default function LiveGameScreen() {
                     >
                       {shotClockSeconds}
                     </Text>
-                    <Text className="text-gray-400 text-xs mt-1 uppercase tracking-wider text-center">
+                    <Text className="text-surface-400 text-xs mt-1 uppercase tracking-wider text-center">
                       Shot Clock
                     </Text>
                   </View>
@@ -1382,42 +1382,42 @@ export default function LiveGameScreen() {
 
               {/* Score Display (shown in landscape or below clock in portrait) */}
               <View
-                className={`bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 ${isLandscape ? "w-56" : ""}`}
+                className={`bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700 ${isLandscape ? "w-56" : ""}`}
               >
-                <Text className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider text-center mb-4">
+                <Text className="text-surface-500 dark:text-surface-400 text-sm font-semibold uppercase tracking-wider text-center mb-4">
                   Score
                 </Text>
                 {/* Away Team */}
-                <View className="items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-                  <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1">
+                <View className="items-center mb-4 pb-4 border-b border-surface-200 dark:border-surface-700">
+                  <Text className="text-surface-500 dark:text-surface-400 text-xs mb-1">
                     {game.awayTeam?.name || "Away"}
                   </Text>
-                  <Text className="text-gray-900 dark:text-white text-4xl font-bold">
+                  <Text className="text-surface-900 dark:text-white text-4xl font-bold">
                     {game.awayScore}
                   </Text>
                 </View>
                 {/* Home Team */}
                 <View className="items-center">
-                  <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1">
+                  <Text className="text-surface-500 dark:text-surface-400 text-xs mb-1">
                     {game.homeTeam?.name || "Home"}
                   </Text>
-                  <Text className="text-gray-900 dark:text-white text-4xl font-bold">
+                  <Text className="text-surface-900 dark:text-white text-4xl font-bold">
                     {game.homeScore}
                   </Text>
                 </View>
 
                 {/* Timeout Buttons */}
-                <View className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <View className="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
                   <TouchableOpacity
                     onPress={() => handleTimeout(false)}
                     disabled={awayTeamStatsData.timeoutsRemaining === 0}
                     className={`py-2 px-4 rounded-lg mb-2 ${
                       awayTeamStatsData.timeoutsRemaining === 0
-                        ? "bg-gray-200 dark:bg-gray-700 opacity-50"
-                        : "bg-gray-200 dark:bg-gray-700"
+                        ? "bg-surface-200 dark:bg-surface-700 opacity-50"
+                        : "bg-surface-200 dark:bg-surface-700"
                     }`}
                   >
-                    <Text className="text-gray-900 dark:text-white text-center text-sm">
+                    <Text className="text-surface-900 dark:text-white text-center text-sm">
                       {game.awayTeam?.name} TO ({awayTeamStatsData.timeoutsRemaining})
                     </Text>
                   </TouchableOpacity>
@@ -1426,11 +1426,11 @@ export default function LiveGameScreen() {
                     disabled={homeTeamStatsData.timeoutsRemaining === 0}
                     className={`py-2 px-4 rounded-lg ${
                       homeTeamStatsData.timeoutsRemaining === 0
-                        ? "bg-gray-200 dark:bg-gray-700 opacity-50"
-                        : "bg-gray-200 dark:bg-gray-700"
+                        ? "bg-surface-200 dark:bg-surface-700 opacity-50"
+                        : "bg-surface-200 dark:bg-surface-700"
                     }`}
                   >
-                    <Text className="text-gray-900 dark:text-white text-center text-sm">
+                    <Text className="text-surface-900 dark:text-white text-center text-sm">
                       {game.homeTeam?.name} TO ({homeTeamStatsData.timeoutsRemaining})
                     </Text>
                   </TouchableOpacity>
@@ -1441,8 +1441,8 @@ export default function LiveGameScreen() {
           {activeTab === "stats" && (
             <View className="pb-6">
               {/* Away Team Stats */}
-              <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
-                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+              <View className="bg-white dark:bg-surface-800 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-700">
+                <Text className="text-surface-900 dark:text-white font-semibold mb-3">
                   {game.awayTeam?.name || "Away"}
                 </Text>
                 {awayPlayerStats.map((playerStat: PlayerStat) => {
@@ -1453,18 +1453,18 @@ export default function LiveGameScreen() {
                     <TouchableOpacity
                       key={playerStat.id}
                       onPress={() => canRecordStats && handleFoulPress(playerStat.playerId)}
-                      className={`flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700 ${
+                      className={`flex-row items-center py-3 border-b border-surface-200 dark:border-surface-700 ${
                         !playerStat.isOnCourt ? "opacity-50" : ""
                       }`}
                       disabled={!canRecordStats}
                     >
                       <View className="w-8 mr-2">
-                        <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                        <Text className="text-surface-600 dark:text-surface-400 text-xs">
                           #{player.number}
                         </Text>
                       </View>
                       <View className="flex-1">
-                        <Text className="text-gray-900 dark:text-white font-medium">
+                        <Text className="text-surface-900 dark:text-white font-medium">
                           {player.name}
                           {playerStat.fouledOut && (
                             <Text className="text-red-500 text-xs"> (OUT)</Text>
@@ -1473,30 +1473,30 @@ export default function LiveGameScreen() {
                       </View>
                       <View className="flex-row">
                         <View className="w-12 items-center">
-                          <Text className="text-gray-900 dark:text-white font-bold">
+                          <Text className="text-surface-900 dark:text-white font-bold">
                             {playerStat.points}
                           </Text>
-                          <Text className="text-gray-500 text-xs">PTS</Text>
+                          <Text className="text-surface-500 text-xs">PTS</Text>
                         </View>
                         <View className="w-10 items-center">
-                          <Text className="text-gray-900 dark:text-white">
+                          <Text className="text-surface-900 dark:text-white">
                             {playerStat.rebounds}
                           </Text>
-                          <Text className="text-gray-500 text-xs">REB</Text>
+                          <Text className="text-surface-500 text-xs">REB</Text>
                         </View>
                         <View className="w-10 items-center">
-                          <Text className="text-gray-900 dark:text-white">
+                          <Text className="text-surface-900 dark:text-white">
                             {playerStat.assists}
                           </Text>
-                          <Text className="text-gray-500 text-xs">AST</Text>
+                          <Text className="text-surface-500 text-xs">AST</Text>
                         </View>
                         <View className="w-8 items-center">
                           <Text
-                            className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}
+                            className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-surface-900 dark:text-white"}`}
                           >
                             {playerStat.fouls}
                           </Text>
-                          <Text className="text-gray-500 text-xs">PF</Text>
+                          <Text className="text-surface-500 text-xs">PF</Text>
                         </View>
                       </View>
                     </TouchableOpacity>
@@ -1505,8 +1505,8 @@ export default function LiveGameScreen() {
               </View>
 
               {/* Home Team Stats */}
-              <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+              <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+                <Text className="text-surface-900 dark:text-white font-semibold mb-3">
                   {game.homeTeam?.name || "Home"}
                 </Text>
                 {homePlayerStats.map((playerStat: PlayerStat) => {
@@ -1517,18 +1517,18 @@ export default function LiveGameScreen() {
                     <TouchableOpacity
                       key={playerStat.id}
                       onPress={() => canRecordStats && handleFoulPress(playerStat.playerId)}
-                      className={`flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700 ${
+                      className={`flex-row items-center py-3 border-b border-surface-200 dark:border-surface-700 ${
                         !playerStat.isOnCourt ? "opacity-50" : ""
                       }`}
                       disabled={!canRecordStats}
                     >
                       <View className="w-8 mr-2">
-                        <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                        <Text className="text-surface-600 dark:text-surface-400 text-xs">
                           #{player.number}
                         </Text>
                       </View>
                       <View className="flex-1">
-                        <Text className="text-gray-900 dark:text-white font-medium">
+                        <Text className="text-surface-900 dark:text-white font-medium">
                           {player.name}
                           {playerStat.fouledOut && (
                             <Text className="text-red-500 text-xs"> (OUT)</Text>
@@ -1537,30 +1537,30 @@ export default function LiveGameScreen() {
                       </View>
                       <View className="flex-row">
                         <View className="w-12 items-center">
-                          <Text className="text-gray-900 dark:text-white font-bold">
+                          <Text className="text-surface-900 dark:text-white font-bold">
                             {playerStat.points}
                           </Text>
-                          <Text className="text-gray-500 text-xs">PTS</Text>
+                          <Text className="text-surface-500 text-xs">PTS</Text>
                         </View>
                         <View className="w-10 items-center">
-                          <Text className="text-gray-900 dark:text-white">
+                          <Text className="text-surface-900 dark:text-white">
                             {playerStat.rebounds}
                           </Text>
-                          <Text className="text-gray-500 text-xs">REB</Text>
+                          <Text className="text-surface-500 text-xs">REB</Text>
                         </View>
                         <View className="w-10 items-center">
-                          <Text className="text-gray-900 dark:text-white">
+                          <Text className="text-surface-900 dark:text-white">
                             {playerStat.assists}
                           </Text>
-                          <Text className="text-gray-500 text-xs">AST</Text>
+                          <Text className="text-surface-500 text-xs">AST</Text>
                         </View>
                         <View className="w-8 items-center">
                           <Text
-                            className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-gray-900 dark:text-white"}`}
+                            className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-surface-900 dark:text-white"}`}
                           >
                             {playerStat.fouls}
                           </Text>
-                          <Text className="text-gray-500 text-xs">PF</Text>
+                          <Text className="text-surface-500 text-xs">PF</Text>
                         </View>
                       </View>
                     </TouchableOpacity>
@@ -1573,8 +1573,8 @@ export default function LiveGameScreen() {
           {activeTab === "subs" && (
             <View className="pb-6">
               {/* Away Team Subs */}
-              <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
-                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+              <View className="bg-white dark:bg-surface-800 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-700">
+                <Text className="text-surface-900 dark:text-white font-semibold mb-3">
                   {game.awayTeam?.name || "Away"}
                 </Text>
                 {awayPlayerStats.map((playerStat: PlayerStat) => {
@@ -1589,28 +1589,28 @@ export default function LiveGameScreen() {
                           ? "bg-green-900/30 border border-green-700"
                           : playerStat.fouledOut
                             ? "bg-red-900/30 border border-red-700"
-                            : "bg-gray-100 dark:bg-gray-700"
+                            : "bg-surface-100 dark:bg-surface-700"
                       }`}
                       onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
                       disabled={playerStat.fouledOut}
                     >
-                      <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
-                        <Text className="text-gray-900 dark:text-white font-bold">
+                      <View className="w-10 h-10 bg-surface-200 dark:bg-surface-600 rounded-full justify-center items-center mr-3">
+                        <Text className="text-surface-900 dark:text-white font-bold">
                           #{player.number}
                         </Text>
                       </View>
                       <View className="flex-1">
-                        <Text className="text-gray-900 dark:text-white font-medium">
+                        <Text className="text-surface-900 dark:text-white font-medium">
                           {player.name}
                         </Text>
-                        <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                        <Text className="text-surface-600 dark:text-surface-400 text-xs">
                           {playerStat.fouledOut ? "FOULED OUT" : player.position || "N/A"}
                         </Text>
                       </View>
                       <View
                         className={`px-4 py-2 rounded-lg ${
                           playerStat.fouledOut
-                            ? "bg-gray-600"
+                            ? "bg-surface-600"
                             : playerStat.isOnCourt
                               ? "bg-red-600"
                               : "bg-green-600"
@@ -1630,8 +1630,8 @@ export default function LiveGameScreen() {
               </View>
 
               {/* Home Team Subs */}
-              <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                <Text className="text-gray-900 dark:text-white font-semibold mb-3">
+              <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+                <Text className="text-surface-900 dark:text-white font-semibold mb-3">
                   {game.homeTeam?.name || "Home"}
                 </Text>
                 {homePlayerStats.map((playerStat: PlayerStat) => {
@@ -1646,28 +1646,28 @@ export default function LiveGameScreen() {
                           ? "bg-green-900/30 border border-green-700"
                           : playerStat.fouledOut
                             ? "bg-red-900/30 border border-red-700"
-                            : "bg-gray-100 dark:bg-gray-700"
+                            : "bg-surface-100 dark:bg-surface-700"
                       }`}
                       onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
                       disabled={playerStat.fouledOut}
                     >
-                      <View className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mr-3">
-                        <Text className="text-gray-900 dark:text-white font-bold">
+                      <View className="w-10 h-10 bg-surface-200 dark:bg-surface-600 rounded-full justify-center items-center mr-3">
+                        <Text className="text-surface-900 dark:text-white font-bold">
                           #{player.number}
                         </Text>
                       </View>
                       <View className="flex-1">
-                        <Text className="text-gray-900 dark:text-white font-medium">
+                        <Text className="text-surface-900 dark:text-white font-medium">
                           {player.name}
                         </Text>
-                        <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                        <Text className="text-surface-600 dark:text-surface-400 text-xs">
                           {playerStat.fouledOut ? "FOULED OUT" : player.position || "N/A"}
                         </Text>
                       </View>
                       <View
                         className={`px-4 py-2 rounded-lg ${
                           playerStat.fouledOut
-                            ? "bg-gray-600"
+                            ? "bg-surface-600"
                             : playerStat.isOnCourt
                               ? "bg-red-600"
                               : "bg-green-600"

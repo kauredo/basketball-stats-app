@@ -124,7 +124,7 @@ export function QuickStatModal({
     return (
       <TouchableOpacity
         onPress={() => handleRecord(item.playerId)}
-        className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 active:bg-gray-50 dark:active:bg-gray-700"
+        className="flex-row items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 active:bg-surface-50 dark:active:bg-surface-700"
         activeOpacity={0.7}
       >
         <View className="flex-row items-center flex-1">
@@ -134,15 +134,15 @@ export function QuickStatModal({
             <Text className="text-white font-bold text-sm">#{item.player.number}</Text>
           </View>
           <View>
-            <Text className="text-gray-900 dark:text-white font-medium text-sm">
+            <Text className="text-surface-900 dark:text-white font-medium text-sm">
               {item.player.name}
             </Text>
-            <Text className="text-gray-500 text-xs">
+            <Text className="text-surface-500 text-xs">
               {getStatValue(item)} {config.label.toUpperCase().slice(0, 3)}
             </Text>
           </View>
         </View>
-        <View className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
+        <View className="px-3 py-1 bg-surface-100 dark:bg-surface-700 rounded-lg">
           <Text className={`text-sm font-medium ${config.textClass}`}>{config.shortLabel}</Text>
         </View>
       </TouchableOpacity>
@@ -152,7 +152,7 @@ export function QuickStatModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 bg-black/70 justify-end">
-        <View className="bg-white dark:bg-gray-800 rounded-t-2xl max-h-[70%] border-t border-gray-200 dark:border-gray-700">
+        <View className="bg-surface-50 dark:bg-surface-800 rounded-t-2xl max-h-[70%] border-t border-surface-200 dark:border-surface-700">
           {/* Header with stat type */}
           <View className={`px-6 py-4 rounded-t-2xl ${config.bgClass}`}>
             <Text className="text-lg font-bold text-white">{config.label}</Text>
@@ -163,7 +163,7 @@ export function QuickStatModal({
           {onCourtPlayers.length === 0 ? (
             <View className="p-8 items-center">
               <Icon name="users" size={32} color="#9CA3AF" />
-              <Text className="text-gray-500 mt-2">No players on court</Text>
+              <Text className="text-surface-500 mt-2">No players on court</Text>
             </View>
           ) : (
             <FlatList
@@ -175,9 +175,9 @@ export function QuickStatModal({
           )}
 
           {/* Cancel button */}
-          <View className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <View className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
             <TouchableOpacity onPress={onClose} className="py-3" activeOpacity={0.7}>
-              <Text className="text-gray-600 dark:text-gray-400 font-medium text-center">
+              <Text className="text-surface-600 dark:text-surface-400 font-medium text-center">
                 Cancel
               </Text>
             </TouchableOpacity>

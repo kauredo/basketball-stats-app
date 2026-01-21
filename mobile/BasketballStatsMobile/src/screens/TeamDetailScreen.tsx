@@ -169,15 +169,15 @@ export default function TeamDetailScreen() {
 
   const renderPlayer = ({ item: player }: { item: Player }) => (
     <TouchableOpacity
-      className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 border border-gray-200 dark:border-gray-700 flex-row items-center"
+      className="bg-white dark:bg-surface-800 rounded-xl p-4 mb-3 border border-surface-200 dark:border-surface-700 flex-row items-center"
       onPress={() => navigation.navigate("PlayerStats", { playerId: player.id })}
     >
-      <View className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 items-center justify-center mr-4">
-        <Text className="text-gray-900 dark:text-white text-lg font-bold">{player.number}</Text>
+      <View className="w-12 h-12 rounded-full bg-surface-200 dark:bg-surface-700 items-center justify-center mr-4">
+        <Text className="text-surface-900 dark:text-white text-lg font-bold">{player.number}</Text>
       </View>
 
       <View className="flex-1">
-        <Text className="text-gray-900 dark:text-white text-base font-semibold">{player.name}</Text>
+        <Text className="text-surface-900 dark:text-white text-base font-semibold">{player.name}</Text>
         <View className="flex-row items-center mt-1">
           {player.position && (
             <View
@@ -199,7 +199,7 @@ export default function TeamDetailScreen() {
                   ? "text-green-500"
                   : player.status === "injured"
                     ? "text-red-500"
-                    : "text-gray-500"
+                    : "text-surface-500"
               }`}
             >
               {player.status.charAt(0).toUpperCase() + player.status.slice(1)}
@@ -243,14 +243,14 @@ export default function TeamDetailScreen() {
 
   if (playersData === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
-        <Text className="text-gray-900 dark:text-white text-base">Loading roster...</Text>
+      <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950">
+        <Text className="text-surface-900 dark:text-white text-base">Loading roster...</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-dark-950">
+    <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       <StatusBar style={statusBarStyle} />
 
       {/* Players List */}
@@ -263,10 +263,10 @@ export default function TeamDetailScreen() {
         ListEmptyComponent={
           <View className="items-center justify-center pt-15">
             <Icon name="user" size={48} color="#6B7280" className="mb-4" />
-            <Text className="text-gray-900 dark:text-white text-lg font-bold mb-2">
+            <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
               No players found
             </Text>
-            <Text className="text-gray-600 dark:text-gray-400 text-sm text-center leading-5">
+            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center leading-5">
               Add players to this team to get started
             </Text>
           </View>
@@ -285,21 +285,21 @@ export default function TeamDetailScreen() {
           activeOpacity={1}
           onPress={() => setShowOptionsMenu(false)}
         >
-          <View className="bg-white dark:bg-gray-800 rounded-t-3xl p-4 pb-8">
-            <View className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full self-center mb-4" />
-            <Text className="text-gray-900 dark:text-white text-lg font-bold mb-4 text-center">
+          <View className="bg-white dark:bg-surface-800 rounded-t-3xl p-4 pb-8">
+            <View className="w-10 h-1 bg-surface-300 dark:bg-surface-600 rounded-full self-center mb-4" />
+            <Text className="text-surface-900 dark:text-white text-lg font-bold mb-4 text-center">
               Team Options
             </Text>
 
             <TouchableOpacity
-              className="flex-row items-center p-4 bg-gray-100 dark:bg-gray-700 rounded-xl mb-3"
+              className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-700 rounded-xl mb-3"
               onPress={() => {
                 setShowOptionsMenu(false);
                 setShowEditModal(true);
               }}
             >
               <FontAwesome5 name="edit" size={18} color="#3B82F6" />
-              <Text className="text-gray-900 dark:text-white font-medium ml-3">Edit Team</Text>
+              <Text className="text-surface-900 dark:text-white font-medium ml-3">Edit Team</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -328,21 +328,21 @@ export default function TeamDetailScreen() {
       >
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="flex-1 bg-gray-50 dark:bg-dark-950"
+          className="flex-1 bg-surface-50 dark:bg-surface-950"
         >
           {/* Modal Header */}
-          <View className="flex-row items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <View className="flex-row items-center justify-between p-4 bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
             <TouchableOpacity onPress={() => setShowEditModal(false)}>
-              <Text className="text-gray-600 dark:text-gray-400 text-base">Cancel</Text>
+              <Text className="text-surface-600 dark:text-surface-400 text-base">Cancel</Text>
             </TouchableOpacity>
-            <Text className="text-gray-900 dark:text-white text-lg font-bold">Edit Team</Text>
+            <Text className="text-surface-900 dark:text-white text-lg font-bold">Edit Team</Text>
             <TouchableOpacity
               onPress={handleEditTeam}
               disabled={isUpdating || !editForm.name.trim()}
             >
               <Text
                 className={`text-base font-semibold ${
-                  isUpdating || !editForm.name.trim() ? "text-gray-400" : "text-primary-500"
+                  isUpdating || !editForm.name.trim() ? "text-surface-400" : "text-primary-500"
                 }`}
               >
                 {isUpdating ? "Saving..." : "Save"}
@@ -352,14 +352,14 @@ export default function TeamDetailScreen() {
 
           {/* Form */}
           <ScrollView className="flex-1 p-4">
-            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
               {/* Team Name */}
               <View className="mb-4">
-                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
                   Team Name *
                 </Text>
                 <TextInput
-                  className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
+                  className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base"
                   value={editForm.name}
                   onChangeText={(text) => setEditForm((prev) => ({ ...prev, name: text }))}
                   placeholder="Enter team name"
@@ -369,11 +369,11 @@ export default function TeamDetailScreen() {
 
               {/* City */}
               <View className="mb-4">
-                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
                   City
                 </Text>
                 <TextInput
-                  className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
+                  className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base"
                   value={editForm.city}
                   onChangeText={(text) => setEditForm((prev) => ({ ...prev, city: text }))}
                   placeholder="Enter city (optional)"
@@ -404,11 +404,11 @@ export default function TeamDetailScreen() {
 
               {/* Description */}
               <View>
-                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
                   Description
                 </Text>
                 <TextInput
-                  className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
+                  className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base"
                   value={editForm.description}
                   onChangeText={(text) => setEditForm((prev) => ({ ...prev, description: text }))}
                   placeholder="Enter description (optional)"

@@ -132,7 +132,7 @@ export default function QuickUndoFAB({
   return (
     <GestureDetector gesture={swipeGesture}>
       <Animated.View
-        className="absolute bottom-24 left-4 right-4 bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700"
+        className="absolute bottom-24 left-4 right-4 bg-surface-50 dark:bg-surface-900 rounded-xl overflow-hidden shadow-2xl border border-surface-200 dark:border-surface-700"
         style={animatedStyle}
       >
         <View className="flex-row items-center p-3 pr-2">
@@ -143,9 +143,9 @@ export default function QuickUndoFAB({
 
           {/* Action Text */}
           <View className="flex-1 flex-row items-center gap-1">
-            <Text className="text-gray-500 dark:text-gray-400 text-[13px]">Undo:</Text>
+            <Text className="text-surface-500 dark:text-surface-400 text-[13px]">Undo:</Text>
             <Text
-              className="text-gray-900 dark:text-white text-[14px] font-semibold flex-1"
+              className="text-surface-900 dark:text-white text-[14px] font-semibold flex-1"
               numberOfLines={1}
             >
               #{action.playerNumber} {statLabel}
@@ -169,7 +169,7 @@ export default function QuickUndoFAB({
         </View>
 
         {/* Progress Bar */}
-        <View className="h-1 bg-gray-100 dark:bg-gray-800">
+        <View className="h-1 bg-surface-100 dark:bg-surface-800">
           <View className="h-full bg-orange-500 w-full" />
         </View>
       </Animated.View>

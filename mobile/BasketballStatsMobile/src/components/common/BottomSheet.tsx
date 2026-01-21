@@ -103,7 +103,7 @@ export default function BottomSheet({
               <View style={styles.header}>
                 <Text style={styles.title}>{title}</Text>
                 <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-                  <Icon name="close" size={24} color="#9CA3AF" />
+                  <Icon name="close" size={24} color="#a69f96" />
                 </TouchableOpacity>
               </View>
             )}
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   sheet: {
-    backgroundColor: "#1F2937", // dark:bg-gray-800
+    backgroundColor: "#3d3835", // dark:bg-surface-800
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 34, // Safe area padding
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: "#4B5563",
+    backgroundColor: "#5c5650",
     borderRadius: 2,
     alignSelf: "center",
     marginTop: 12,
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#374151",
+    borderBottomColor: "#5c5650",
   },
   title: {
     fontSize: 18,

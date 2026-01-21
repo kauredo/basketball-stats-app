@@ -208,7 +208,7 @@ export default function ProfileScreen() {
   const statusBarStyle = resolvedTheme === "dark" ? "light" : "dark";
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-dark-950">
+    <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       <StatusBar style={statusBarStyle} />
       <ScrollView className="flex-1 px-4">
         {/* User Info */}
@@ -221,16 +221,16 @@ export default function ProfileScreen() {
               </Text>
             </View>
             <TouchableOpacity
-              className="absolute bottom-2 right-0 w-8 h-8 rounded-full bg-gray-800 dark:bg-gray-600 items-center justify-center border-2 border-white dark:border-gray-900"
+              className="absolute bottom-2 right-0 w-8 h-8 rounded-full bg-surface-800 dark:bg-surface-600 items-center justify-center border-2 border-white dark:border-surface-900"
               onPress={handleOpenEditProfile}
             >
               <Icon name="settings" size={14} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
-          <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+          <Text className="text-2xl font-bold text-surface-900 dark:text-white mb-1">
             {user?.firstName} {user?.lastName}
           </Text>
-          <Text className="text-base text-gray-600 dark:text-gray-400 mb-3">{user?.email}</Text>
+          <Text className="text-base text-surface-600 dark:text-surface-400 mb-3">{user?.email}</Text>
           <View className="bg-green-100 dark:bg-green-900 px-3 py-1 rounded-xl">
             <Text className="text-green-700 dark:text-green-400 text-xs font-semibold">
               {user?.role === "admin" ? "Administrator" : "User"}
@@ -241,18 +241,18 @@ export default function ProfileScreen() {
         {/* Current League */}
         {selectedLeague && (
           <View className="mb-8">
-            <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+            <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">
               Current League
             </Text>
-            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 flex-row justify-between items-center border border-gray-200 dark:border-gray-700">
+            <View className="bg-white dark:bg-surface-800 rounded-xl p-4 flex-row justify-between items-center border border-surface-200 dark:border-surface-700">
               <View className="flex-1">
-                <Text className="text-base font-bold text-gray-900 dark:text-white mb-1">
+                <Text className="text-base font-bold text-surface-900 dark:text-white mb-1">
                   {selectedLeague.name}
                 </Text>
-                <Text className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                <Text className="text-sm text-surface-600 dark:text-surface-400 capitalize">
                   {selectedLeague.leagueType}
                 </Text>
-                <Text className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                <Text className="text-sm text-surface-600 dark:text-surface-400 mt-0.5">
                   Season: {selectedLeague.season}
                 </Text>
                 {selectedLeague.membership && (
@@ -264,10 +264,10 @@ export default function ProfileScreen() {
                 )}
               </View>
               <TouchableOpacity
-                className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-md"
+                className="bg-surface-100 dark:bg-surface-700 px-3 py-2 rounded-md"
                 onPress={handleSwitchLeague}
               >
-                <Text className="text-gray-900 dark:text-white text-sm font-semibold">Switch</Text>
+                <Text className="text-surface-900 dark:text-white text-sm font-semibold">Switch</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -275,51 +275,51 @@ export default function ProfileScreen() {
 
         {/* League Stats */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">My Leagues</Text>
+          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">My Leagues</Text>
           <View className="flex-row flex-wrap gap-3">
-            <View className="bg-white dark:bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-200 dark:border-gray-700">
+            <View className="bg-white dark:bg-surface-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-surface-200 dark:border-surface-700">
               <Text className="text-2xl font-bold text-red-500 mb-1">{leagues.length}</Text>
-              <Text className="text-xs text-gray-600 dark:text-gray-400 text-center">
+              <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">
                 Total Leagues
               </Text>
             </View>
-            <View className="bg-white dark:bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-200 dark:border-gray-700">
+            <View className="bg-white dark:bg-surface-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-surface-200 dark:border-surface-700">
               <Text className="text-2xl font-bold text-red-500 mb-1">
                 {leagues.filter((l: any) => l.membership?.role === "admin").length}
               </Text>
-              <Text className="text-xs text-gray-600 dark:text-gray-400 text-center">As Admin</Text>
+              <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">As Admin</Text>
             </View>
-            <View className="bg-white dark:bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-200 dark:border-gray-700">
+            <View className="bg-white dark:bg-surface-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-surface-200 dark:border-surface-700">
               <Text className="text-2xl font-bold text-red-500 mb-1">
                 {leagues.filter((l: any) => l.membership?.role === "coach").length}
               </Text>
-              <Text className="text-xs text-gray-600 dark:text-gray-400 text-center">As Coach</Text>
+              <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">As Coach</Text>
             </View>
-            <View className="bg-white dark:bg-gray-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-gray-200 dark:border-gray-700">
+            <View className="bg-white dark:bg-surface-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-surface-200 dark:border-surface-700">
               <Text className="text-2xl font-bold text-red-500 mb-1">
                 {leagues.filter((l: any) => l.status === "active").length}
               </Text>
-              <Text className="text-xs text-gray-600 dark:text-gray-400 text-center">Active</Text>
+              <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">Active</Text>
             </View>
           </View>
         </View>
 
         {/* Account */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">Account</Text>
+          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">Account</Text>
 
           <TouchableOpacity
-            className="bg-white dark:bg-gray-800 rounded-lg p-4 flex-row items-center mb-2 border border-gray-200 dark:border-gray-700"
+            className="bg-white dark:bg-surface-800 rounded-lg p-4 flex-row items-center mb-2 border border-surface-200 dark:border-surface-700"
             onPress={handleOpenEditProfile}
           >
             <View className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center mr-3">
               <Icon name="user" size={20} color="#3B82F6" />
             </View>
             <View className="flex-1">
-              <Text className="text-base text-gray-900 dark:text-white font-medium">
+              <Text className="text-base text-surface-900 dark:text-white font-medium">
                 Edit Profile
               </Text>
-              <Text className="text-sm text-gray-500 dark:text-gray-400">Change your name</Text>
+              <Text className="text-sm text-surface-500 dark:text-surface-400">Change your name</Text>
             </View>
             <Icon
               name="chevron-right"
@@ -329,17 +329,17 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="bg-white dark:bg-gray-800 rounded-lg p-4 flex-row items-center mb-2 border border-gray-200 dark:border-gray-700"
+            className="bg-white dark:bg-surface-800 rounded-lg p-4 flex-row items-center mb-2 border border-surface-200 dark:border-surface-700"
             onPress={handleOpenChangePassword}
           >
             <View className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full items-center justify-center mr-3">
               <Icon name="settings" size={20} color="#F59E0B" />
             </View>
             <View className="flex-1">
-              <Text className="text-base text-gray-900 dark:text-white font-medium">
+              <Text className="text-base text-surface-900 dark:text-white font-medium">
                 Change Password
               </Text>
-              <Text className="text-sm text-gray-500 dark:text-gray-400">Update your password</Text>
+              <Text className="text-sm text-surface-500 dark:text-surface-400">Update your password</Text>
             </View>
             <Icon
               name="chevron-right"
@@ -351,16 +351,16 @@ export default function ProfileScreen() {
 
         {/* Appearance */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">Appearance</Text>
-          <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <Text className="text-gray-700 dark:text-gray-300 font-medium mb-3">Theme</Text>
+          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">Appearance</Text>
+          <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+            <Text className="text-surface-700 dark:text-surface-300 font-medium mb-3">Theme</Text>
             <View className="flex-row gap-2">
               {(["system", "light", "dark"] as ThemeMode[]).map((themeMode) => (
                 <TouchableOpacity
                   key={themeMode}
                   onPress={() => setMode(themeMode)}
                   className={`flex-1 py-3 px-2 rounded-lg items-center ${
-                    mode === themeMode ? "bg-primary-500" : "bg-gray-100 dark:bg-gray-700"
+                    mode === themeMode ? "bg-primary-500" : "bg-surface-100 dark:bg-surface-700"
                   }`}
                 >
                   <Icon
@@ -370,7 +370,7 @@ export default function ProfileScreen() {
                   />
                   <Text
                     className={`mt-1 text-sm font-medium ${
-                      mode === themeMode ? "text-white" : "text-gray-700 dark:text-gray-300"
+                      mode === themeMode ? "text-white" : "text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     {themeModeLabels[themeMode]}
@@ -383,19 +383,19 @@ export default function ProfileScreen() {
 
         {/* Notifications */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">
             Notifications
           </Text>
-          <View className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <View className="flex-row items-center p-4 border-b border-gray-200 dark:border-gray-700">
+          <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
+            <View className="flex-row items-center p-4 border-b border-surface-200 dark:border-surface-700">
               <View className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full items-center justify-center mr-3">
                 <Icon name="basketball" size={20} color="#F97316" />
               </View>
               <View className="flex-1">
-                <Text className="text-base text-gray-900 dark:text-white font-medium">
+                <Text className="text-base text-surface-900 dark:text-white font-medium">
                   Game Notifications
                 </Text>
-                <Text className="text-sm text-gray-500 dark:text-gray-400">
+                <Text className="text-sm text-surface-500 dark:text-surface-400">
                   Alerts when games start or end
                 </Text>
               </View>
@@ -407,15 +407,15 @@ export default function ProfileScreen() {
               />
             </View>
 
-            <View className="flex-row items-center p-4 border-b border-gray-200 dark:border-gray-700">
+            <View className="flex-row items-center p-4 border-b border-surface-200 dark:border-surface-700">
               <View className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center mr-3">
                 <Icon name="stats" size={20} color="#3B82F6" />
               </View>
               <View className="flex-1">
-                <Text className="text-base text-gray-900 dark:text-white font-medium">
+                <Text className="text-base text-surface-900 dark:text-white font-medium">
                   Score Updates
                 </Text>
-                <Text className="text-sm text-gray-500 dark:text-gray-400">
+                <Text className="text-sm text-surface-500 dark:text-surface-400">
                   Real-time score notifications
                 </Text>
               </View>
@@ -432,10 +432,10 @@ export default function ProfileScreen() {
                 <Icon name="basketball" size={20} color="#8B5CF6" />
               </View>
               <View className="flex-1">
-                <Text className="text-base text-gray-900 dark:text-white font-medium">
+                <Text className="text-base text-surface-900 dark:text-white font-medium">
                   League Announcements
                 </Text>
-                <Text className="text-sm text-gray-500 dark:text-gray-400">
+                <Text className="text-sm text-surface-500 dark:text-surface-400">
                   Updates from league admins
                 </Text>
               </View>
@@ -451,17 +451,17 @@ export default function ProfileScreen() {
 
         {/* App Info */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">About</Text>
-          <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">About</Text>
+          <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
             <View className="flex-row items-center">
               <View className="w-10 h-10 bg-primary-500/20 rounded-full items-center justify-center mr-3">
                 <Icon name="basketball" size={20} color="#F97316" />
               </View>
               <View>
-                <Text className="text-base text-gray-900 dark:text-white font-medium">
+                <Text className="text-base text-surface-900 dark:text-white font-medium">
                   Basketball Stats
                 </Text>
-                <Text className="text-sm text-gray-500 dark:text-gray-400">Version 1.0.0</Text>
+                <Text className="text-sm text-surface-500 dark:text-surface-400">Version 1.0.0</Text>
               </View>
             </View>
           </View>
@@ -485,17 +485,17 @@ export default function ProfileScreen() {
           onPress={() => setShowEditProfile(false)}
         >
           <Pressable
-            className="bg-white dark:bg-gray-800 rounded-2xl p-6 mx-6 w-[90%] max-w-sm"
+            className="bg-white dark:bg-surface-800 rounded-2xl p-6 mx-6 w-[90%] max-w-sm"
             onPress={(e) => e.stopPropagation()}
           >
-            <Text className="text-gray-900 dark:text-white text-xl font-bold text-center mb-6">
+            <Text className="text-surface-900 dark:text-white text-xl font-bold text-center mb-6">
               Edit Profile
             </Text>
 
             <View className="mb-4">
-              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">First Name</Text>
+              <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">First Name</Text>
               <TextInput
-                className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
+                className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg px-4 py-3 text-base"
                 value={editFirstName}
                 onChangeText={setEditFirstName}
                 placeholder="Enter first name"
@@ -505,9 +505,9 @@ export default function ProfileScreen() {
             </View>
 
             <View className="mb-6">
-              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">Last Name</Text>
+              <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">Last Name</Text>
               <TextInput
-                className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
+                className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg px-4 py-3 text-base"
                 value={editLastName}
                 onChangeText={setEditLastName}
                 placeholder="Enter last name"
@@ -518,10 +518,10 @@ export default function ProfileScreen() {
 
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className="flex-1 bg-gray-200 dark:bg-gray-700 py-3 rounded-lg"
+                className="flex-1 bg-surface-200 dark:bg-surface-700 py-3 rounded-lg"
                 onPress={() => setShowEditProfile(false)}
               >
-                <Text className="text-gray-700 dark:text-gray-300 text-center font-semibold">
+                <Text className="text-surface-700 dark:text-surface-300 text-center font-semibold">
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -548,19 +548,19 @@ export default function ProfileScreen() {
           onPress={() => setShowChangePassword(false)}
         >
           <Pressable
-            className="bg-white dark:bg-gray-800 rounded-2xl p-6 mx-6 w-[90%] max-w-sm"
+            className="bg-white dark:bg-surface-800 rounded-2xl p-6 mx-6 w-[90%] max-w-sm"
             onPress={(e) => e.stopPropagation()}
           >
-            <Text className="text-gray-900 dark:text-white text-xl font-bold text-center mb-6">
+            <Text className="text-surface-900 dark:text-white text-xl font-bold text-center mb-6">
               Change Password
             </Text>
 
             <View className="mb-4">
-              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+              <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">
                 Current Password
               </Text>
               <TextInput
-                className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
+                className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg px-4 py-3 text-base"
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
                 placeholder="Enter current password"
@@ -570,9 +570,9 @@ export default function ProfileScreen() {
             </View>
 
             <View className="mb-4">
-              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">New Password</Text>
+              <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">New Password</Text>
               <TextInput
-                className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
+                className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg px-4 py-3 text-base"
                 value={newPassword}
                 onChangeText={setNewPassword}
                 placeholder="Enter new password"
@@ -582,11 +582,11 @@ export default function ProfileScreen() {
             </View>
 
             <View className="mb-6">
-              <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+              <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">
                 Confirm New Password
               </Text>
               <TextInput
-                className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-4 py-3 text-base"
+                className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg px-4 py-3 text-base"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="Confirm new password"
@@ -597,10 +597,10 @@ export default function ProfileScreen() {
 
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className="flex-1 bg-gray-200 dark:bg-gray-700 py-3 rounded-lg"
+                className="flex-1 bg-surface-200 dark:bg-surface-700 py-3 rounded-lg"
                 onPress={() => setShowChangePassword(false)}
               >
-                <Text className="text-gray-700 dark:text-gray-300 text-center font-semibold">
+                <Text className="text-surface-700 dark:text-surface-300 text-center font-semibold">
                   Cancel
                 </Text>
               </TouchableOpacity>

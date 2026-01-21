@@ -22,18 +22,18 @@ interface StatRowProps {
 
 function StatRow({ label, homeValue, awayValue, homeWins }: StatRowProps) {
   return (
-    <View className="flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700">
+    <View className="flex-row items-center py-3 border-b border-surface-200 dark:border-surface-700">
       <Text
         className={`flex-1 text-right text-base font-semibold ${
-          homeWins === true ? "text-green-500" : "text-gray-900 dark:text-white"
+          homeWins === true ? "text-green-500" : "text-surface-900 dark:text-white"
         }`}
       >
         {homeValue}
       </Text>
-      <Text className="w-24 text-center text-sm text-gray-600 dark:text-gray-400">{label}</Text>
+      <Text className="w-24 text-center text-sm text-surface-600 dark:text-surface-400">{label}</Text>
       <Text
         className={`flex-1 text-left text-base font-semibold ${
-          homeWins === false ? "text-green-500" : "text-gray-900 dark:text-white"
+          homeWins === false ? "text-green-500" : "text-surface-900 dark:text-white"
         }`}
       >
         {awayValue}
@@ -68,19 +68,19 @@ function PlayerStatRow({
   const fgPct = fga > 0 ? ((fgm / fga) * 100).toFixed(0) : "0";
 
   return (
-    <View className="flex-row items-center py-3 border-b border-gray-200 dark:border-gray-700">
+    <View className="flex-row items-center py-3 border-b border-surface-200 dark:border-surface-700">
       <View className="flex-row items-center flex-1">
-        <View className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full justify-center items-center mr-2">
-          <Text className="text-gray-700 dark:text-gray-300 text-xs font-bold">{number}</Text>
+        <View className="w-8 h-8 bg-surface-200 dark:bg-surface-700 rounded-full justify-center items-center mr-2">
+          <Text className="text-surface-700 dark:text-surface-300 text-xs font-bold">{number}</Text>
         </View>
-        <Text className="text-gray-900 dark:text-white text-sm font-medium" numberOfLines={1}>
+        <Text className="text-surface-900 dark:text-white text-sm font-medium" numberOfLines={1}>
           {name}
         </Text>
       </View>
-      <Text className="w-10 text-center text-gray-900 dark:text-white font-bold">{points}</Text>
-      <Text className="w-10 text-center text-gray-600 dark:text-gray-400">{rebounds}</Text>
-      <Text className="w-10 text-center text-gray-600 dark:text-gray-400">{assists}</Text>
-      <Text className="w-16 text-center text-gray-600 dark:text-gray-400">
+      <Text className="w-10 text-center text-surface-900 dark:text-white font-bold">{points}</Text>
+      <Text className="w-10 text-center text-surface-600 dark:text-surface-400">{rebounds}</Text>
+      <Text className="w-10 text-center text-surface-600 dark:text-surface-400">{assists}</Text>
+      <Text className="w-16 text-center text-surface-600 dark:text-surface-400">
         {fgm}/{fga}
       </Text>
     </View>
@@ -118,17 +118,17 @@ export default function GameAnalysisScreen() {
 
   if (gameData === undefined || boxScoreData === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
-        <Text className="text-gray-600 dark:text-gray-400">Loading game analysis...</Text>
+      <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950">
+        <Text className="text-surface-600 dark:text-surface-400">Loading game analysis...</Text>
       </View>
     );
   }
 
   if (!gameData?.game) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950 p-8">
+      <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950 p-8">
         <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-gray-900 dark:text-white text-xl font-bold mt-4">Game Not Found</Text>
+        <Text className="text-surface-900 dark:text-white text-xl font-bold mt-4">Game Not Found</Text>
       </View>
     );
   }
@@ -195,27 +195,27 @@ export default function GameAnalysisScreen() {
             isHome ? "bg-orange-100 dark:bg-orange-900/30" : "bg-blue-100 dark:bg-blue-900/30"
           }`}
         >
-          <Text className="text-gray-900 dark:text-white font-bold text-base">
+          <Text className="text-surface-900 dark:text-white font-bold text-base">
             {team.team?.name}
           </Text>
         </View>
 
-        <View className="bg-white dark:bg-gray-800 rounded-b-xl border border-gray-200 dark:border-gray-700 border-t-0">
+        <View className="bg-white dark:bg-surface-800 rounded-b-xl border border-surface-200 dark:border-surface-700 border-t-0">
           {/* Header */}
-          <View className="flex-row items-center py-2 px-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
-            <Text className="flex-1 text-xs text-gray-500 dark:text-gray-500 font-semibold">
+          <View className="flex-row items-center py-2 px-3 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-750">
+            <Text className="flex-1 text-xs text-surface-500 dark:text-surface-500 font-semibold">
               PLAYER
             </Text>
-            <Text className="w-10 text-center text-xs text-gray-500 dark:text-gray-500 font-semibold">
+            <Text className="w-10 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
               PTS
             </Text>
-            <Text className="w-10 text-center text-xs text-gray-500 dark:text-gray-500 font-semibold">
+            <Text className="w-10 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
               REB
             </Text>
-            <Text className="w-10 text-center text-xs text-gray-500 dark:text-gray-500 font-semibold">
+            <Text className="w-10 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
               AST
             </Text>
-            <Text className="w-16 text-center text-xs text-gray-500 dark:text-gray-500 font-semibold">
+            <Text className="w-16 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
               FG
             </Text>
           </View>
@@ -243,15 +243,15 @@ export default function GameAnalysisScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-dark-950">
+    <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       {/* Score Header */}
-      <View className="bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700">
+      <View className="bg-white dark:bg-surface-800 p-4 border-b border-surface-200 dark:border-surface-700">
         <View className="flex-row items-center justify-between">
           <View className={`flex-1 items-center ${isAwayWinner ? "opacity-60" : ""}`}>
-            <Text className="text-gray-600 dark:text-gray-400 text-sm">
+            <Text className="text-surface-600 dark:text-surface-400 text-sm">
               {homeTeam?.team?.city || "Home"}
             </Text>
-            <Text className="text-gray-900 dark:text-white font-bold text-lg" numberOfLines={1}>
+            <Text className="text-surface-900 dark:text-white font-bold text-lg" numberOfLines={1}>
               {homeTeam?.team?.name || "Team"}
             </Text>
             <Text className="text-primary-500 text-3xl font-bold mt-1">{game.homeScore}</Text>
@@ -264,16 +264,16 @@ export default function GameAnalysisScreen() {
           </View>
 
           <View className="items-center px-4">
-            <Text className="text-gray-400 dark:text-gray-500 text-sm font-medium">
+            <Text className="text-surface-400 dark:text-surface-500 text-sm font-medium">
               {game.status === "completed" ? "FINAL" : game.status?.toUpperCase()}
             </Text>
           </View>
 
           <View className={`flex-1 items-center ${isHomeWinner ? "opacity-60" : ""}`}>
-            <Text className="text-gray-600 dark:text-gray-400 text-sm">
+            <Text className="text-surface-600 dark:text-surface-400 text-sm">
               {awayTeam?.team?.city || "Away"}
             </Text>
-            <Text className="text-gray-900 dark:text-white font-bold text-lg" numberOfLines={1}>
+            <Text className="text-surface-900 dark:text-white font-bold text-lg" numberOfLines={1}>
               {awayTeam?.team?.name || "Team"}
             </Text>
             <Text className="text-blue-500 text-3xl font-bold mt-1">{game.awayScore}</Text>
@@ -288,7 +288,7 @@ export default function GameAnalysisScreen() {
       </View>
 
       {/* Tabs */}
-      <View className="flex-row bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <View className="flex-row bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab.id}
@@ -299,7 +299,7 @@ export default function GameAnalysisScreen() {
           >
             <Text
               className={`font-medium ${
-                activeTab === tab.id ? "text-primary-500" : "text-gray-600 dark:text-gray-400"
+                activeTab === tab.id ? "text-primary-500" : "text-surface-600 dark:text-surface-400"
               }`}
             >
               {tab.label}
@@ -321,13 +321,13 @@ export default function GameAnalysisScreen() {
 
         {activeTab === "stats" && (
           <View className="p-4">
-            <View className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
               {/* Team Headers */}
-              <View className="flex-row items-center py-3 px-4 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700">
+              <View className="flex-row items-center py-3 px-4 bg-surface-50 dark:bg-surface-750 border-b border-surface-200 dark:border-surface-700">
                 <Text className="flex-1 text-right text-sm font-bold text-primary-500">
                   {homeTeam?.team?.name}
                 </Text>
-                <Text className="w-24 text-center text-xs text-gray-500 dark:text-gray-500">
+                <Text className="w-24 text-center text-xs text-surface-500 dark:text-surface-500">
                   STAT
                 </Text>
                 <Text className="flex-1 text-left text-sm font-bold text-blue-500">
@@ -423,7 +423,7 @@ export default function GameAnalysisScreen() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
               <TouchableOpacity
                 className={`px-4 py-2 rounded-full mr-2 ${
-                  selectedQuarter === undefined ? "bg-primary-500" : "bg-gray-200 dark:bg-gray-700"
+                  selectedQuarter === undefined ? "bg-primary-500" : "bg-surface-200 dark:bg-surface-700"
                 }`}
                 onPress={() => setSelectedQuarter(undefined)}
               >
@@ -431,7 +431,7 @@ export default function GameAnalysisScreen() {
                   className={
                     selectedQuarter === undefined
                       ? "text-white font-medium"
-                      : "text-gray-700 dark:text-gray-300"
+                      : "text-surface-700 dark:text-surface-300"
                   }
                 >
                   All
@@ -441,7 +441,7 @@ export default function GameAnalysisScreen() {
                 <TouchableOpacity
                   key={q}
                   className={`px-4 py-2 rounded-full mr-2 ${
-                    selectedQuarter === q ? "bg-primary-500" : "bg-gray-200 dark:bg-gray-700"
+                    selectedQuarter === q ? "bg-primary-500" : "bg-surface-200 dark:bg-surface-700"
                   }`}
                   onPress={() => setSelectedQuarter(q)}
                 >
@@ -449,7 +449,7 @@ export default function GameAnalysisScreen() {
                     className={
                       selectedQuarter === q
                         ? "text-white font-medium"
-                        : "text-gray-700 dark:text-gray-300"
+                        : "text-surface-700 dark:text-surface-300"
                     }
                   >
                     Q{q}
@@ -459,31 +459,31 @@ export default function GameAnalysisScreen() {
             </ScrollView>
 
             {/* Events List */}
-            <View className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
               {events.length > 0 ? (
                 events.map((event: any, index: number) => (
                   <View
                     key={event._id || index}
                     className={`p-3 flex-row items-center ${
                       index < events.length - 1
-                        ? "border-b border-gray-200 dark:border-gray-700"
+                        ? "border-b border-surface-200 dark:border-surface-700"
                         : ""
                     }`}
                   >
                     <View className="w-12 items-center">
-                      <Text className="text-gray-500 dark:text-gray-500 text-xs">
+                      <Text className="text-surface-500 dark:text-surface-500 text-xs">
                         Q{event.quarter}
                       </Text>
-                      <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                      <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium">
                         {event.gameTime || "--:--"}
                       </Text>
                     </View>
                     <View className="flex-1 ml-3">
-                      <Text className="text-gray-900 dark:text-white text-sm">
+                      <Text className="text-surface-900 dark:text-white text-sm">
                         {event.description || event.eventType}
                       </Text>
                       {event.playerName && (
-                        <Text className="text-gray-600 dark:text-gray-400 text-xs">
+                        <Text className="text-surface-600 dark:text-surface-400 text-xs">
                           {event.playerName}
                         </Text>
                       )}
@@ -500,7 +500,7 @@ export default function GameAnalysisScreen() {
               ) : (
                 <View className="p-8 items-center">
                   <Icon name="list" size={32} color="#9CA3AF" />
-                  <Text className="text-gray-600 dark:text-gray-400 mt-2">No plays recorded</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 mt-2">No plays recorded</Text>
                 </View>
               )}
             </View>

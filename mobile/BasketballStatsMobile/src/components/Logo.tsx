@@ -48,7 +48,7 @@ const Logo: React.FC<LogoProps> = ({
       : require("../../assets/logo.png");
 
   // Determine text color: use prop if provided, otherwise based on theme
-  const effectiveTextColor = textColor ?? (isDark ? "#FFFFFF" : "#111827");
+  const effectiveTextColor = textColor ?? (isDark ? "#fdfcfb" : "#252220");
 
   return (
     <View style={[styles.container, style]}>

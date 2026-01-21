@@ -55,7 +55,7 @@ export default function LoginScreen({
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-gray-50 dark:bg-dark-950"
+      className="flex-1 bg-surface-50 dark:bg-surface-950"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <StatusBar style="light" />
@@ -71,10 +71,10 @@ export default function LoginScreen({
       >
         <View className="items-center mb-12">
           <Icon name="basketball" size={64} color="#EA580C" className="mb-4" />
-          <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <Text className="text-3xl font-bold text-surface-900 dark:text-white mb-2">
             Basketball Stats
           </Text>
-          <Text className="text-base text-gray-600 dark:text-gray-400 text-center">
+          <Text className="text-base text-surface-600 dark:text-surface-400 text-center">
             Sign in to your account
           </Text>
         </View>
@@ -87,13 +87,13 @@ export default function LoginScreen({
           )}
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Email</Text>
+            <Text className="text-sm font-semibold text-surface-900 dark:text-white mb-2">Email</Text>
             <View className="relative">
               <View className="absolute left-4 top-3 z-10">
                 <Icon name="mail" size={20} color="#6B7280" />
               </View>
               <TextInput
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-12 pr-4 py-3 text-base text-gray-900 dark:text-white"
+                className="bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-600 rounded-lg pl-12 pr-4 py-3 text-base text-surface-900 dark:text-white"
                 value={email}
                 onChangeText={setEmail}
                 placeholder="Enter your email"
@@ -107,7 +107,7 @@ export default function LoginScreen({
           </View>
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+            <Text className="text-sm font-semibold text-surface-900 dark:text-white mb-2">
               Password
             </Text>
             <View className="relative">
@@ -115,7 +115,7 @@ export default function LoginScreen({
                 <Icon name="lock" size={20} color="#6B7280" />
               </View>
               <TextInput
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg pl-12 pr-12 py-3 text-base text-gray-900 dark:text-white"
+                className="bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-600 rounded-lg pl-12 pr-12 py-3 text-base text-surface-900 dark:text-white"
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Enter your password"
@@ -154,7 +154,7 @@ export default function LoginScreen({
         </View>
 
         <View className="flex-row justify-center items-center">
-          <Text className="text-gray-600 dark:text-gray-400 text-sm mr-2">
+          <Text className="text-surface-600 dark:text-surface-400 text-sm mr-2">
             Don&apos;t have an account?
           </Text>
           <TouchableOpacity onPress={onNavigateToSignup} disabled={isLoading}>

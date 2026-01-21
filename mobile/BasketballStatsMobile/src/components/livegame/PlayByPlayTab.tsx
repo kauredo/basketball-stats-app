@@ -150,14 +150,14 @@ export default function PlayByPlayTab({
     return (
       <View
         key={event.id}
-        className="flex-row px-3 py-2 border-b border-gray-200 dark:border-gray-700"
+        className="flex-row px-3 py-2 border-b border-surface-200 dark:border-surface-700"
       >
         {/* Time Column */}
         <View className="w-12 items-center">
-          <Text className="text-gray-500 dark:text-gray-500 text-[10px] font-medium">
+          <Text className="text-surface-500 dark:text-surface-500 text-[10px] font-medium">
             {formatQuarter(event.quarter)}
           </Text>
-          <Text className="text-gray-700 dark:text-gray-300 text-xs font-semibold">
+          <Text className="text-surface-700 dark:text-surface-300 text-xs font-semibold">
             {event.gameTimeDisplay}
           </Text>
         </View>
@@ -172,10 +172,10 @@ export default function PlayByPlayTab({
 
         {/* Description Column */}
         <View className="flex-1 justify-center">
-          <Text className="text-gray-900 dark:text-white text-sm">{event.description}</Text>
+          <Text className="text-surface-900 dark:text-white text-sm">{event.description}</Text>
           {/* Player Info */}
           {event.player && (
-            <Text className="text-gray-600 dark:text-gray-400 text-xs font-medium mt-0.5">
+            <Text className="text-surface-600 dark:text-surface-400 text-xs font-medium mt-0.5">
               #{event.player.number} {event.player.name}
             </Text>
           )}
@@ -185,7 +185,7 @@ export default function PlayByPlayTab({
           )}
           {/* Team Name */}
           {event.team && (
-            <Text className="text-gray-500 dark:text-gray-500 text-[11px] mt-0.5">
+            <Text className="text-surface-500 dark:text-surface-500 text-[11px] mt-0.5">
               {event.team.name}
             </Text>
           )}
@@ -196,43 +196,43 @@ export default function PlayByPlayTab({
 
   const renderQuarterHeader = (quarter: number) => (
     <View className="flex-row items-center py-2 px-3">
-      <View className="flex-1 h-px bg-gray-300 dark:bg-gray-600" />
-      <Text className="text-gray-500 dark:text-gray-400 text-[11px] font-semibold mx-2">
+      <View className="flex-1 h-px bg-surface-300 dark:bg-surface-600" />
+      <Text className="text-surface-500 dark:text-surface-400 text-[11px] font-semibold mx-2">
         {formatQuarter(quarter)}
       </Text>
-      <View className="flex-1 h-px bg-gray-300 dark:bg-gray-600" />
+      <View className="flex-1 h-px bg-surface-300 dark:bg-surface-600" />
     </View>
   );
 
   const renderEmptyState = () => (
     <View className="items-center py-8 px-6">
-      <View className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 justify-center items-center mb-3">
+      <View className="w-12 h-12 rounded-full bg-surface-200 dark:bg-surface-700 justify-center items-center mb-3">
         <Icon name="list" size={24} color="#6B7280" />
       </View>
-      <Text className="text-gray-900 dark:text-white text-sm font-semibold mb-1">
+      <Text className="text-surface-900 dark:text-white text-sm font-semibold mb-1">
         No events recorded yet
       </Text>
-      <Text className="text-gray-500 dark:text-gray-400 text-xs text-center">
+      <Text className="text-surface-500 dark:text-surface-400 text-xs text-center">
         Events will appear here as the game progresses
       </Text>
     </View>
   );
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+    <View className="flex-1 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
       {/* Quarter Filter */}
-      <View className="flex-row items-center border-b border-gray-200 dark:border-gray-700 px-3 py-1.5">
+      <View className="flex-row items-center border-b border-surface-200 dark:border-surface-700 px-3 py-1.5">
         {QUARTER_FILTERS.map((item) => (
           <TouchableOpacity
             key={item.key}
             className={`px-3 py-1.5 rounded-full mr-2 ${
-              selectedQuarter === item.key ? "bg-primary-500" : "bg-gray-200 dark:bg-gray-700"
+              selectedQuarter === item.key ? "bg-primary-500" : "bg-surface-200 dark:bg-surface-700"
             }`}
             onPress={() => setSelectedQuarter(item.key)}
           >
             <Text
               className={`text-xs font-semibold ${
-                selectedQuarter === item.key ? "text-white" : "text-gray-600 dark:text-gray-400"
+                selectedQuarter === item.key ? "text-white" : "text-surface-600 dark:text-surface-400"
               }`}
             >
               {item.label}

@@ -79,7 +79,7 @@ export function ReboundPromptModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 bg-black/70 justify-end">
-        <View className="bg-white dark:bg-gray-800 rounded-t-2xl max-h-[80%] border-t border-gray-200 dark:border-gray-700">
+        <View className="bg-surface-50 dark:bg-surface-800 rounded-t-2xl max-h-[80%] border-t border-surface-200 dark:border-surface-700">
           {/* Header - Blue to indicate rebound opportunity */}
           <View className="bg-blue-600 px-6 py-4 rounded-t-2xl">
             <Text className="text-lg font-bold text-white">Rebound</Text>
@@ -88,7 +88,7 @@ export function ReboundPromptModal({
 
           <ScrollView className="max-h-80">
             {/* Offensive Rebound - Shooter's Team */}
-            <View className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <View className="px-4 py-3 border-b border-surface-200 dark:border-surface-700">
               <View className="flex-row items-center justify-between mb-3">
                 <Text className="font-semibold text-orange-600 dark:text-orange-400 text-sm">
                   OFFENSIVE ({shooterTeamName})
@@ -111,13 +111,13 @@ export function ReboundPromptModal({
                     className="px-4 py-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg active:bg-orange-100"
                     activeOpacity={0.7}
                   >
-                    <Text className="text-gray-900 dark:text-white text-sm font-medium">
+                    <Text className="text-surface-900 dark:text-white text-sm font-medium">
                       #{player.player?.number}
                     </Text>
                   </TouchableOpacity>
                 ))}
                 {shooterOnCourt.length === 0 && (
-                  <Text className="text-gray-500 text-sm">No players on court</Text>
+                  <Text className="text-surface-500 text-sm">No players on court</Text>
                 )}
               </View>
             </View>
@@ -144,22 +144,22 @@ export function ReboundPromptModal({
                     className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg active:bg-blue-100"
                     activeOpacity={0.7}
                   >
-                    <Text className="text-gray-900 dark:text-white text-sm font-medium">
+                    <Text className="text-surface-900 dark:text-white text-sm font-medium">
                       #{player.player?.number}
                     </Text>
                   </TouchableOpacity>
                 ))}
                 {opposingOnCourt.length === 0 && (
-                  <Text className="text-gray-500 text-sm">No players on court</Text>
+                  <Text className="text-surface-500 text-sm">No players on court</Text>
                 )}
               </View>
             </View>
           </ScrollView>
 
           {/* Footer */}
-          <View className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <View className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
             <TouchableOpacity onPress={onClose} className="py-3" activeOpacity={0.7}>
-              <Text className="text-gray-600 dark:text-gray-400 font-medium text-center">
+              <Text className="text-surface-600 dark:text-surface-400 font-medium text-center">
                 Dismiss / No Rebound
               </Text>
             </TouchableOpacity>

@@ -128,7 +128,7 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   "wifi-off": { library: "ionicons", name: "wifi-outline" },
 };
 
-export default function Icon({ name, size = 24, color = "#6B7280", className, style }: IconProps) {
+export default function Icon({ name, size = 24, color = "#7a746c", className, style }: IconProps) {
   const iconConfig = iconMap[name];
 
   if (!iconConfig) {

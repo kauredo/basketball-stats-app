@@ -58,8 +58,8 @@ const StatButton: React.FC<StatButtonProps> = ({
     large: TOUCH_TARGETS.large,
   }[size];
 
-  const disabledBgColor = isDark ? "#374151" : "#D1D5DB";
-  const disabledBorderColor = isDark ? "#374151" : "#D1D5DB";
+  const disabledBgColor = isDark ? "#5c5650" : "#e8e4df";
+  const disabledBorderColor = isDark ? "#5c5650" : "#e8e4df";
 
   const buttonStyle = {
     filled: {

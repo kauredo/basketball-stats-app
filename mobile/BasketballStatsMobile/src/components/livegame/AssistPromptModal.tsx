@@ -48,7 +48,7 @@ export function AssistPromptModal({
     return (
       <TouchableOpacity
         onPress={() => handleAssist(item.playerId)}
-        className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 active:bg-purple-50 dark:active:bg-purple-900/20"
+        className="flex-row items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 active:bg-purple-50 dark:active:bg-purple-900/20"
         activeOpacity={0.7}
       >
         <View className="flex-row items-center flex-1">
@@ -56,10 +56,10 @@ export function AssistPromptModal({
             <Text className="text-white font-bold text-sm">#{item.player.number}</Text>
           </View>
           <View>
-            <Text className="text-gray-900 dark:text-white font-medium text-sm">
+            <Text className="text-surface-900 dark:text-white font-medium text-sm">
               {item.player.name}
             </Text>
-            <Text className="text-gray-500 text-xs">{(item as any).assists || 0} AST</Text>
+            <Text className="text-surface-500 text-xs">{(item as any).assists || 0} AST</Text>
           </View>
         </View>
         <View className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
@@ -72,7 +72,7 @@ export function AssistPromptModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 bg-black/70 justify-end">
-        <View className="bg-white dark:bg-gray-800 rounded-t-2xl max-h-[70%] border-t border-gray-200 dark:border-gray-700">
+        <View className="bg-surface-50 dark:bg-surface-800 rounded-t-2xl max-h-[70%] border-t border-surface-200 dark:border-surface-700">
           {/* Header - Green to indicate made shot */}
           <View className="bg-green-600 px-6 py-4 rounded-t-2xl">
             <View className="flex-row items-center justify-between">
@@ -89,15 +89,15 @@ export function AssistPromptModal({
           </View>
 
           {/* Section header */}
-          <View className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-            <Text className="text-xs text-gray-500 uppercase">Who assisted?</Text>
+          <View className="px-4 py-2 bg-surface-50 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700">
+            <Text className="text-xs text-surface-500 uppercase">Who assisted?</Text>
           </View>
 
           {/* Teammate list for assist */}
           {teammates.length === 0 ? (
             <View className="p-6 items-center">
               <Icon name="users" size={32} color="#9CA3AF" />
-              <Text className="text-gray-500 mt-2 text-center">No other players on court</Text>
+              <Text className="text-surface-500 mt-2 text-center">No other players on court</Text>
             </View>
           ) : (
             <FlatList
@@ -109,18 +109,18 @@ export function AssistPromptModal({
           )}
 
           {/* No assist / Cancel */}
-          <View className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex-row gap-2">
+          <View className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700 flex-row gap-2">
             <TouchableOpacity
               onPress={handleNoAssist}
-              className="flex-1 py-3 bg-gray-200 dark:bg-gray-700 rounded-lg"
+              className="flex-1 py-3 bg-surface-200 dark:bg-surface-700 rounded-lg"
               activeOpacity={0.7}
             >
-              <Text className="text-gray-700 dark:text-gray-300 font-medium text-center">
+              <Text className="text-surface-700 dark:text-surface-300 font-medium text-center">
                 No Assist
               </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={onClose} className="flex-1 py-3" activeOpacity={0.7}>
-              <Text className="text-gray-600 dark:text-gray-400 font-medium text-center">
+              <Text className="text-surface-600 dark:text-surface-400 font-medium text-center">
                 Cancel
               </Text>
             </TouchableOpacity>

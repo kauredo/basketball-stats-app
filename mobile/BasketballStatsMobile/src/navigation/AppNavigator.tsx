@@ -152,13 +152,13 @@ function LoadingScreen() {
   const isDark = colorScheme === "dark";
 
   return (
-    <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
+    <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950">
       <Image
         source={isDark ? require("../../assets/logo-light.png") : require("../../assets/logo.png")}
         style={{ width: 128, height: 128 }}
         resizeMode="contain"
       />
-      <Text className="text-base text-gray-600 dark:text-gray-400 mt-4">Loading...</Text>
+      <Text className="text-base text-surface-600 dark:text-surface-400 mt-4">Loading...</Text>
     </View>
   );
 }

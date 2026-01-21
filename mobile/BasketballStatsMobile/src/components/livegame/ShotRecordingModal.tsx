@@ -58,16 +58,16 @@ export function ShotRecordingModal({
     if (!item.player) return null;
 
     return (
-      <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+      <View className="flex-row items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700">
         <View className="flex-row items-center flex-1">
           <View className="w-10 h-10 bg-primary-500 rounded-full justify-center items-center mr-3">
             <Text className="text-white font-bold text-sm">#{item.player.number}</Text>
           </View>
           <View>
-            <Text className="text-gray-900 dark:text-white font-medium text-sm">
+            <Text className="text-surface-900 dark:text-white font-medium text-sm">
               {item.player.name}
             </Text>
-            <Text className="text-gray-500 text-xs">{item.points} PTS</Text>
+            <Text className="text-surface-500 text-xs">{item.points} PTS</Text>
           </View>
         </View>
         <View className="flex-row gap-2">
@@ -93,17 +93,17 @@ export function ShotRecordingModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 bg-black/70 justify-end">
-        <View className="bg-white dark:bg-gray-800 rounded-t-2xl max-h-[75%] border-t border-gray-200 dark:border-gray-700">
+        <View className="bg-surface-50 dark:bg-surface-800 rounded-t-2xl max-h-[75%] border-t border-surface-200 dark:border-surface-700">
           {/* Header with zone info */}
-          <View className="bg-gray-50 dark:bg-gray-900 px-6 py-4 rounded-t-2xl border-b border-gray-200 dark:border-gray-700">
+          <View className="bg-surface-50 dark:bg-surface-900 px-6 py-4 rounded-t-2xl border-b border-surface-200 dark:border-surface-700">
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
-                <Text className="text-lg font-bold text-gray-900 dark:text-white">
+                <Text className="text-lg font-bold text-surface-900 dark:text-white">
                   {shotType === "3pt" ? "3-Point Shot" : "2-Point Shot"}
                 </Text>
-                <Text className="text-sm text-gray-500 dark:text-gray-400">
+                <Text className="text-sm text-surface-500 dark:text-surface-400">
                   Shot from{" "}
-                  <Text className="font-medium text-gray-700 dark:text-gray-300">{zoneName}</Text>
+                  <Text className="font-medium text-surface-700 dark:text-surface-300">{zoneName}</Text>
                 </Text>
               </View>
               <View
@@ -130,7 +130,7 @@ export function ShotRecordingModal({
           {onCourtPlayers.length === 0 ? (
             <View className="p-8 items-center">
               <Icon name="users" size={32} color="#9CA3AF" />
-              <Text className="text-gray-500 mt-2">No players on court</Text>
+              <Text className="text-surface-500 mt-2">No players on court</Text>
             </View>
           ) : (
             <FlatList
@@ -142,9 +142,9 @@ export function ShotRecordingModal({
           )}
 
           {/* Cancel button */}
-          <View className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <View className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
             <TouchableOpacity onPress={onClose} className="py-3" activeOpacity={0.7}>
-              <Text className="text-gray-600 dark:text-gray-400 font-medium text-center">
+              <Text className="text-surface-600 dark:text-surface-400 font-medium text-center">
                 Cancel
               </Text>
             </TouchableOpacity>

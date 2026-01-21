@@ -41,7 +41,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
           width,
           height,
           borderRadius,
-          backgroundColor: isDark ? "#374151" : "#D1D5DB",
+          backgroundColor: isDark ? "#5c5650" : "#e8e4df",
         },
         animatedStyle,
         style,
@@ -276,19 +276,19 @@ export const SkeletonScreen: React.FC = () => {
 const styles = StyleSheet.create({
   // Dark mode card styles
   cardDark: {
-    backgroundColor: "#1F2937",
+    backgroundColor: "#3d3835",
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#374151",
+    borderColor: "#5c5650",
   },
   // Light mode card styles
   cardLight: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#fdfcfb",
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#f3f0ed",
   },
   cardHeader: {
     flexDirection: "row",
@@ -311,11 +311,11 @@ const styles = StyleSheet.create({
   },
   borderBottomDark: {
     borderBottomWidth: 1,
-    borderBottomColor: "#374151",
+    borderBottomColor: "#5c5650",
   },
   borderBottomLight: {
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#f3f0ed",
   },
   flex1: {
     flex: 1,
@@ -334,18 +334,18 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
   },
   gameCardDark: {
-    backgroundColor: "#1F2937",
+    backgroundColor: "#3d3835",
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#374151",
+    borderColor: "#5c5650",
   },
   gameCardLight: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#fdfcfb",
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#f3f0ed",
   },
   gameCardContent: {
     flexDirection: "row",
@@ -365,14 +365,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#374151",
+    borderBottomColor: "#5c5650",
   },
   playerRowLight: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#f3f0ed",
   },
   playerInfo: {
     flex: 1,
@@ -394,19 +394,19 @@ const styles = StyleSheet.create({
   },
   screenDark: {
     flex: 1,
-    backgroundColor: "#0F1419",
+    backgroundColor: "#1a1816",
   },
   screenLight: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#fdfcfb",
   },
   screenHeaderDark: {
-    backgroundColor: "#1F2937",
+    backgroundColor: "#3d3835",
     padding: 20,
     paddingTop: 60,
   },
   screenHeaderLight: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#fdfcfb",
     padding: 20,
     paddingTop: 60,
   },

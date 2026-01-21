@@ -58,8 +58,8 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
   const backgroundColor = getBackgroundColor(number);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const indicatorBorderColor = isDark ? "#1F2937" : "#FFFFFF";
-  const offCourtColor = isDark ? "#6B7280" : "#9CA3AF";
+  const indicatorBorderColor = isDark ? "#3d3835" : "#fdfcfb";
+  const offCourtColor = isDark ? "#7a746c" : "#a69f96";
 
   return (
     <View style={[styles.container, style]}>
@@ -137,10 +137,10 @@ export const PlayerAvatarWithDetails: React.FC<PlayerAvatarWithDetailsProps> = (
 }) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const nameColor = isDark ? "#FFFFFF" : "#111827";
-  const numberSmallColor = isDark ? "#9CA3AF" : "#6B7280";
-  const subtitleColor = isDark ? "#9CA3AF" : "#6B7280";
-  const statsColor = isDark ? "#6B7280" : "#9CA3AF";
+  const nameColor = isDark ? "#fdfcfb" : "#252220";
+  const numberSmallColor = isDark ? "#a69f96" : "#7a746c";
+  const subtitleColor = isDark ? "#a69f96" : "#7a746c";
+  const statsColor = isDark ? "#7a746c" : "#a69f96";
 
   return (
     <View style={[styles.detailsContainer, containerStyle]}>
@@ -192,9 +192,9 @@ export const PlayerAvatarRow: React.FC<{
   const overflow = players.length - maxDisplay;
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const avatarRowItemBorderColor = isDark ? "#1F2937" : "#FFFFFF";
-  const overflowBadgeBg = isDark ? "#374151" : "#E5E7EB";
-  const overflowBadgeBorderColor = isDark ? "#1F2937" : "#FFFFFF";
+  const avatarRowItemBorderColor = isDark ? "#3d3835" : "#fdfcfb";
+  const overflowBadgeBg = isDark ? "#5c5650" : "#f3f0ed";
+  const overflowBadgeBorderColor = isDark ? "#3d3835" : "#fdfcfb";
 
   return (
     <View style={[styles.avatarRow, style]}>
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     bottom: -2,
     right: -2,
     borderWidth: 2,
-    borderColor: "#1F2937",
+    borderColor: "#3d3835",
   },
   detailsContainer: {
     flexDirection: "row",
@@ -282,17 +282,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   numberSmall: {
-    color: "#9CA3AF",
+    color: "#a69f96",
     fontSize: 12,
     marginLeft: 4,
   },
   subtitle: {
-    color: "#9CA3AF",
+    color: "#a69f96",
     fontSize: 12,
     marginTop: 2,
   },
   stats: {
-    color: "#6B7280",
+    color: "#7a746c",
     fontSize: 10,
     marginTop: 4,
   },
@@ -302,18 +302,18 @@ const styles = StyleSheet.create({
   },
   avatarRowItem: {
     borderWidth: 2,
-    borderColor: "#1F2937",
+    borderColor: "#3d3835",
     borderRadius: 100,
   },
   overflowBadge: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#374151",
+    backgroundColor: "#5c5650",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#1F2937",
+    borderColor: "#3d3835",
   },
   overflowText: {
     color: "#FFFFFF",

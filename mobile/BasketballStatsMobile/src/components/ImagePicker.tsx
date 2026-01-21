@@ -159,17 +159,17 @@ export default function ImagePicker({
 
   return (
     <View className="mb-4">
-      <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">{label} (optional)</Text>
+      <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">{label} (optional)</Text>
       <TouchableOpacity
         onPress={showOptions}
         disabled={isUploading}
-        className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600 items-center justify-center"
+        className="bg-surface-50 dark:bg-surface-700 rounded-xl p-4 border border-surface-200 dark:border-surface-600 items-center justify-center"
         style={{ minHeight: 120 }}
       >
         {isUploading ? (
           <View className="items-center">
             <ActivityIndicator size="large" color="#F97316" />
-            <Text className="text-gray-500 dark:text-gray-400 text-sm mt-2">Uploading...</Text>
+            <Text className="text-surface-500 dark:text-surface-400 text-sm mt-2">Uploading...</Text>
           </View>
         ) : displayUrl ? (
           <View className="items-center">
@@ -182,10 +182,10 @@ export default function ImagePicker({
           </View>
         ) : (
           <View className="items-center">
-            <View className="w-16 h-16 bg-gray-100 dark:bg-gray-600 rounded-xl items-center justify-center">
-              <Icon name="basketball" size={32} color="#9CA3AF" />
+            <View className="w-16 h-16 bg-surface-100 dark:bg-surface-600 rounded-xl items-center justify-center">
+              <Icon name="basketball" size={32} color="#a69f96" />
             </View>
-            <Text className="text-gray-500 dark:text-gray-400 text-sm mt-2">{placeholder}</Text>
+            <Text className="text-surface-500 dark:text-surface-400 text-sm mt-2">{placeholder}</Text>
           </View>
         )}
       </TouchableOpacity>

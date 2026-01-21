@@ -228,22 +228,22 @@ export default function PlayerStatsScreen() {
   const renderStatCard = (category: StatCategory) => (
     <View
       key={category.title}
-      className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700"
+      className="bg-white dark:bg-surface-800 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-700"
     >
-      <Text className="text-gray-900 dark:text-white text-base font-bold mb-3">
+      <Text className="text-surface-900 dark:text-white text-base font-bold mb-3">
         {category.title}
       </Text>
       <View className="flex-row flex-wrap justify-between">
         {category.stats.map((stat, index) => (
           <View key={index} className="w-[48%] items-center mb-3">
             <Text
-              className={`text-gray-900 dark:text-white text-lg font-bold ${
+              className={`text-surface-900 dark:text-white text-lg font-bold ${
                 stat.highlight ? "text-red-500 text-2xl" : ""
               }`}
             >
               {stat.value}
             </Text>
-            <Text className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">{stat.label}</Text>
+            <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">{stat.label}</Text>
           </View>
         ))}
       </View>
@@ -256,51 +256,51 @@ export default function PlayerStatsScreen() {
     if (!recentGames.length) {
       return (
         <View className="items-center justify-center py-10">
-          <Text className="text-gray-600 dark:text-gray-400 text-base">No recent games</Text>
+          <Text className="text-surface-600 dark:text-surface-400 text-base">No recent games</Text>
         </View>
       );
     }
 
     return (
       <View className="mt-2">
-        <Text className="text-gray-900 dark:text-white text-lg font-bold mb-3">Recent Games</Text>
+        <Text className="text-surface-900 dark:text-white text-lg font-bold mb-3">Recent Games</Text>
         {recentGames.slice(0, 5).map((game: any, index: number) => (
           <View
             key={game.gameId || index}
-            className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-2 border border-gray-200 dark:border-gray-700"
+            className="bg-white dark:bg-surface-800 rounded-lg p-3 mb-2 border border-surface-200 dark:border-surface-700"
           >
             <View className="flex-row justify-between items-center mb-2">
-              <Text className="text-gray-600 dark:text-gray-400 text-xs">
+              <Text className="text-surface-600 dark:text-surface-400 text-xs">
                 {game.gameDate ? new Date(game.gameDate).toLocaleDateString() : ""}
               </Text>
-              <Text className="text-gray-900 dark:text-white text-xs font-semibold">
+              <Text className="text-surface-900 dark:text-white text-xs font-semibold">
                 vs {game.opponent || "Opponent"}
               </Text>
             </View>
             <View className="flex-row justify-around">
               <View className="items-center">
-                <Text className="text-gray-900 dark:text-white text-base font-bold">
+                <Text className="text-surface-900 dark:text-white text-base font-bold">
                   {game.points || 0}
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">PTS</Text>
+                <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">PTS</Text>
               </View>
               <View className="items-center">
-                <Text className="text-gray-900 dark:text-white text-base font-bold">
+                <Text className="text-surface-900 dark:text-white text-base font-bold">
                   {game.rebounds || 0}
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">REB</Text>
+                <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">REB</Text>
               </View>
               <View className="items-center">
-                <Text className="text-gray-900 dark:text-white text-base font-bold">
+                <Text className="text-surface-900 dark:text-white text-base font-bold">
                   {game.assists || 0}
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">AST</Text>
+                <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">AST</Text>
               </View>
               <View className="items-center">
-                <Text className="text-gray-900 dark:text-white text-base font-bold">
+                <Text className="text-surface-900 dark:text-white text-base font-bold">
                   {game.fieldGoalPercentage?.toFixed(0) || 0}%
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">FG%</Text>
+                <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">FG%</Text>
               </View>
             </View>
           </View>
@@ -311,16 +311,16 @@ export default function PlayerStatsScreen() {
 
   if (playerData === undefined || playerStats === undefined) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
-        <Text className="text-gray-900 dark:text-white text-base">Loading player stats...</Text>
+      <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950">
+        <Text className="text-surface-900 dark:text-white text-base">Loading player stats...</Text>
       </View>
     );
   }
 
   if (!playerData?.player) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950">
-        <Text className="text-gray-900 dark:text-white text-base">Player not found</Text>
+      <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950">
+        <Text className="text-surface-900 dark:text-white text-base">Player not found</Text>
       </View>
     );
   }
@@ -329,16 +329,16 @@ export default function PlayerStatsScreen() {
   const statCategories = getStatCategories();
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-dark-950">
+    <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       <StatusBar style="light" />
 
       {/* Player Header */}
-      <View className="bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700">
+      <View className="bg-white dark:bg-surface-800 p-4 border-b border-surface-200 dark:border-surface-700">
         <View className="flex-row items-center mb-4">
           <Text className="text-red-500 text-4xl font-bold mr-4">#{player.number}</Text>
           <View className="flex-1">
-            <Text className="text-gray-900 dark:text-white text-xl font-bold">{player.name}</Text>
-            <Text className="text-gray-600 dark:text-gray-400 text-sm mt-0.5">
+            <Text className="text-surface-900 dark:text-white text-xl font-bold">{player.name}</Text>
+            <Text className="text-surface-600 dark:text-surface-400 text-sm mt-0.5">
               {player.position} {player.heightCm ? `• ${player.heightCm}cm` : ""}{" "}
               {player.weightKg ? `• ${player.weightKg}kg` : ""}
             </Text>
@@ -347,7 +347,7 @@ export default function PlayerStatsScreen() {
         </View>
 
         {/* Period Selector */}
-        <View className="flex-row bg-gray-100 dark:bg-dark-950 rounded-lg p-1">
+        <View className="flex-row bg-surface-100 dark:bg-surface-950 rounded-lg p-1">
           <TouchableOpacity
             className={`flex-1 py-2 px-4 rounded-md items-center ${
               selectedPeriod === "season" ? "bg-red-500" : ""
@@ -356,7 +356,7 @@ export default function PlayerStatsScreen() {
           >
             <Text
               className={`text-sm font-semibold ${
-                selectedPeriod === "season" ? "text-white" : "text-gray-600 dark:text-gray-400"
+                selectedPeriod === "season" ? "text-white" : "text-surface-600 dark:text-surface-400"
               }`}
             >
               Season
@@ -370,7 +370,7 @@ export default function PlayerStatsScreen() {
           >
             <Text
               className={`text-sm font-semibold ${
-                selectedPeriod === "recent" ? "text-white" : "text-gray-600 dark:text-gray-400"
+                selectedPeriod === "recent" ? "text-white" : "text-surface-600 dark:text-surface-400"
               }`}
             >
               Recent
@@ -402,21 +402,21 @@ export default function PlayerStatsScreen() {
           activeOpacity={1}
           onPress={() => setShowOptionsMenu(false)}
         >
-          <View className="bg-white dark:bg-gray-800 rounded-t-3xl p-4 pb-8">
-            <View className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full self-center mb-4" />
-            <Text className="text-gray-900 dark:text-white text-lg font-bold mb-4 text-center">
+          <View className="bg-white dark:bg-surface-800 rounded-t-3xl p-4 pb-8">
+            <View className="w-10 h-1 bg-surface-300 dark:bg-surface-600 rounded-full self-center mb-4" />
+            <Text className="text-surface-900 dark:text-white text-lg font-bold mb-4 text-center">
               Player Options
             </Text>
 
             <TouchableOpacity
-              className="flex-row items-center p-4 bg-gray-100 dark:bg-gray-700 rounded-xl mb-3"
+              className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-700 rounded-xl mb-3"
               onPress={() => {
                 setShowOptionsMenu(false);
                 setShowEditModal(true);
               }}
             >
               <FontAwesome5 name="edit" size={18} color="#3B82F6" />
-              <Text className="text-gray-900 dark:text-white font-medium ml-3">Edit Player</Text>
+              <Text className="text-surface-900 dark:text-white font-medium ml-3">Edit Player</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -445,14 +445,14 @@ export default function PlayerStatsScreen() {
       >
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="flex-1 bg-gray-50 dark:bg-dark-950"
+          className="flex-1 bg-surface-50 dark:bg-surface-950"
         >
           {/* Modal Header */}
-          <View className="flex-row items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <View className="flex-row items-center justify-between p-4 bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
             <TouchableOpacity onPress={() => setShowEditModal(false)}>
-              <Text className="text-gray-600 dark:text-gray-400 text-base">Cancel</Text>
+              <Text className="text-surface-600 dark:text-surface-400 text-base">Cancel</Text>
             </TouchableOpacity>
-            <Text className="text-gray-900 dark:text-white text-lg font-bold">Edit Player</Text>
+            <Text className="text-surface-900 dark:text-white text-lg font-bold">Edit Player</Text>
             <TouchableOpacity
               onPress={handleEditPlayer}
               disabled={isUpdating || !editForm.name.trim() || !editForm.number}
@@ -460,7 +460,7 @@ export default function PlayerStatsScreen() {
               <Text
                 className={`text-base font-semibold ${
                   isUpdating || !editForm.name.trim() || !editForm.number
-                    ? "text-gray-400"
+                    ? "text-surface-400"
                     : "text-primary-500"
                 }`}
               >
@@ -471,14 +471,14 @@ export default function PlayerStatsScreen() {
 
           {/* Form */}
           <ScrollView className="flex-1 p-4">
-            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
               {/* Player Name */}
               <View className="mb-4">
-                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
                   Player Name *
                 </Text>
                 <TextInput
-                  className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
+                  className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base"
                   value={editForm.name}
                   onChangeText={(text) => setEditForm((prev) => ({ ...prev, name: text }))}
                   placeholder="Enter player name"
@@ -488,11 +488,11 @@ export default function PlayerStatsScreen() {
 
               {/* Jersey Number */}
               <View className="mb-4">
-                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
                   Jersey Number *
                 </Text>
                 <TextInput
-                  className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
+                  className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base"
                   value={editForm.number}
                   onChangeText={(text) => setEditForm((prev) => ({ ...prev, number: text }))}
                   placeholder="Enter jersey number"
@@ -503,7 +503,7 @@ export default function PlayerStatsScreen() {
 
               {/* Position */}
               <View className="mb-4">
-                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
                   Position
                 </Text>
                 <View className="flex-row flex-wrap gap-2">
@@ -513,7 +513,7 @@ export default function PlayerStatsScreen() {
                       className={`px-4 py-2 rounded-lg ${
                         editForm.position === pos
                           ? "bg-primary-500"
-                          : "bg-gray-100 dark:bg-gray-700"
+                          : "bg-surface-100 dark:bg-surface-700"
                       }`}
                       onPress={() => setEditForm((prev) => ({ ...prev, position: pos }))}
                     >
@@ -521,7 +521,7 @@ export default function PlayerStatsScreen() {
                         className={`font-medium ${
                           editForm.position === pos
                             ? "text-white"
-                            : "text-gray-700 dark:text-gray-300"
+                            : "text-surface-700 dark:text-surface-300"
                         }`}
                       >
                         {pos}
@@ -534,11 +534,11 @@ export default function PlayerStatsScreen() {
               {/* Height & Weight */}
               <View className="flex-row gap-3 mb-4">
                 <View className="flex-1">
-                  <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                  <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
                     Height (cm)
                   </Text>
                   <TextInput
-                    className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
+                    className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base"
                     value={editForm.heightCm}
                     onChangeText={(text) => setEditForm((prev) => ({ ...prev, heightCm: text }))}
                     placeholder="Height"
@@ -547,11 +547,11 @@ export default function PlayerStatsScreen() {
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
+                  <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
                     Weight (kg)
                   </Text>
                   <TextInput
-                    className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl text-base"
+                    className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base"
                     value={editForm.weightKg}
                     onChangeText={(text) => setEditForm((prev) => ({ ...prev, weightKg: text }))}
                     placeholder="Weight"
@@ -563,12 +563,12 @@ export default function PlayerStatsScreen() {
 
               {/* Active Status */}
               <View className="flex-row items-center justify-between">
-                <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium">
                   Active Player
                 </Text>
                 <TouchableOpacity
                   className={`w-12 h-7 rounded-full justify-center ${
-                    editForm.active ? "bg-primary-500" : "bg-gray-300 dark:bg-gray-600"
+                    editForm.active ? "bg-primary-500" : "bg-surface-300 dark:bg-surface-600"
                   }`}
                   onPress={() => setEditForm((prev) => ({ ...prev, active: !prev.active }))}
                 >

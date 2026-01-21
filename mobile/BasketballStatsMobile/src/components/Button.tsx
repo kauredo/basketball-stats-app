@@ -45,9 +45,9 @@ export default function Button({
       case "danger":
         return "text-white";
       case "secondary":
-        return isDark ? "text-gray-300" : "text-gray-700";
+        return isDark ? "text-surface-300" : "text-surface-700";
       case "ghost":
-        return isDark ? "text-gray-400" : "text-gray-600";
+        return isDark ? "text-surface-400" : "text-surface-600";
       default:
         return "text-white";
     }

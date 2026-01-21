@@ -165,7 +165,7 @@ export default function EnhancedScoreboard({
   const getStatusBadgeClass = () => {
     if (isGameActive) return "bg-red-500";
     if (isGamePaused) return "bg-amber-500";
-    if (game.status === "completed") return "bg-gray-500";
+    if (game.status === "completed") return "bg-surface-500";
     return "bg-blue-500";
   };
 
@@ -190,7 +190,7 @@ export default function EnhancedScoreboard({
               ? "bg-green-500"
               : isCurrent
                 ? "bg-orange-500"
-                : "bg-gray-400 dark:bg-gray-600"
+                : "bg-surface-400 dark:bg-surface-600"
           }`}
         />
       );
@@ -209,15 +209,15 @@ export default function EnhancedScoreboard({
   // Compact landscape layout
   if (isLandscape) {
     return (
-      <View className="bg-white dark:bg-gray-800 mx-4 mt-1 rounded-xl px-4 py-2 border border-gray-200 dark:border-gray-700">
+      <View className="bg-surface-50 dark:bg-surface-800 mx-4 mt-1 rounded-xl px-4 py-2 border border-surface-200 dark:border-surface-700">
         <View className="flex-row items-center justify-between">
           {/* Away Team */}
           <View className="flex-row items-center flex-1">
-            <Text className="text-gray-500 dark:text-gray-400 text-xs mr-2" numberOfLines={1}>
+            <Text className="text-surface-500 dark:text-surface-400 text-xs mr-2" numberOfLines={1}>
               {game.awayTeam?.name || "Away"}
             </Text>
             <Animated.Text
-              className="text-gray-900 dark:text-white text-2xl font-bold"
+              className="text-surface-900 dark:text-white text-2xl font-bold"
               style={awayScoreStyle}
             >
               {game.awayScore}
@@ -249,8 +249,8 @@ export default function EnhancedScoreboard({
               </Text>
             </TouchableOpacity>
 
-            <View className="bg-gray-100 dark:bg-gray-700/50 px-3 py-1 rounded-lg">
-              <Text className="text-gray-900 dark:text-white text-lg font-bold font-mono">
+            <View className="bg-surface-100 dark:bg-surface-700/50 px-3 py-1 rounded-lg">
+              <Text className="text-surface-900 dark:text-white text-lg font-bold font-mono">
                 {formatTime(game.timeRemainingSeconds)}
               </Text>
             </View>
@@ -296,12 +296,12 @@ export default function EnhancedScoreboard({
               </View>
             )}
             <Animated.Text
-              className="text-gray-900 dark:text-white text-2xl font-bold"
+              className="text-surface-900 dark:text-white text-2xl font-bold"
               style={homeScoreStyle}
             >
               {game.homeScore}
             </Animated.Text>
-            <Text className="text-gray-500 dark:text-gray-400 text-xs ml-2" numberOfLines={1}>
+            <Text className="text-surface-500 dark:text-surface-400 text-xs ml-2" numberOfLines={1}>
               {game.homeTeam?.name || "Home"}
             </Text>
           </View>
@@ -313,8 +313,8 @@ export default function EnhancedScoreboard({
             className="flex-1 bg-black/50 justify-center items-center"
             onPress={() => setShowQuarterSelector(false)}
           >
-            <View className="bg-white dark:bg-gray-800 rounded-2xl p-4 mx-8 w-64">
-              <Text className="text-gray-900 dark:text-white text-lg font-bold text-center mb-4">
+            <View className="bg-surface-50 dark:bg-surface-800 rounded-2xl p-4 mx-8 w-64">
+              <Text className="text-surface-900 dark:text-white text-lg font-bold text-center mb-4">
                 Select Quarter
               </Text>
               <View className="flex-row flex-wrap justify-center gap-2">
@@ -327,14 +327,14 @@ export default function EnhancedScoreboard({
                         ? "bg-orange-500"
                         : q < game.currentQuarter
                           ? "bg-green-500"
-                          : "bg-gray-200 dark:bg-gray-700"
+                          : "bg-surface-200 dark:bg-surface-700"
                     }`}
                   >
                     <Text
                       className={`font-bold text-lg ${
                         game.currentQuarter === q || q < game.currentQuarter
                           ? "text-white"
-                          : "text-gray-700 dark:text-gray-300"
+                          : "text-surface-700 dark:text-surface-300"
                       }`}
                     >
                       Q{q}
@@ -342,20 +342,20 @@ export default function EnhancedScoreboard({
                   </TouchableOpacity>
                 ))}
               </View>
-              <View className="flex-row justify-center gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <View className="flex-row justify-center gap-2 mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
                 {[5, 6, 7].map((q) => (
                   <TouchableOpacity
                     key={q}
                     onPress={() => handleQuarterSelect(q)}
                     className={`px-4 py-2 rounded-lg ${
-                      game.currentQuarter === q ? "bg-purple-500" : "bg-gray-200 dark:bg-gray-700"
+                      game.currentQuarter === q ? "bg-purple-500" : "bg-surface-200 dark:bg-surface-700"
                     }`}
                   >
                     <Text
                       className={`font-bold ${
                         game.currentQuarter === q
                           ? "text-white"
-                          : "text-gray-700 dark:text-gray-300"
+                          : "text-surface-700 dark:text-surface-300"
                       }`}
                     >
                       OT{q - 4}
@@ -364,7 +364,7 @@ export default function EnhancedScoreboard({
                 ))}
               </View>
               <TouchableOpacity onPress={() => setShowQuarterSelector(false)} className="mt-4 py-2">
-                <Text className="text-gray-500 text-center">Cancel</Text>
+                <Text className="text-surface-500 text-center">Cancel</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -375,16 +375,16 @@ export default function EnhancedScoreboard({
 
   // Portrait layout (original)
   return (
-    <View className="bg-white dark:bg-gray-800 mx-4 mt-2 rounded-2xl p-4 border border-gray-200 dark:border-gray-700">
+    <View className="bg-surface-50 dark:bg-surface-800 mx-4 mt-2 rounded-2xl p-4 border border-surface-200 dark:border-surface-700">
       {/* Main Score Row */}
       <View className="flex-row items-center justify-between">
         {/* Away Team */}
         <View className="flex-1 items-center">
-          <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1" numberOfLines={1}>
+          <Text className="text-surface-500 dark:text-surface-400 text-xs mb-1" numberOfLines={1}>
             {game.awayTeam?.name || "Away"}
           </Text>
           <Animated.Text
-            className="text-gray-900 dark:text-white text-4xl font-bold"
+            className="text-surface-900 dark:text-white text-4xl font-bold"
             style={awayScoreStyle}
           >
             {game.awayScore}
@@ -401,8 +401,8 @@ export default function EnhancedScoreboard({
 
           {/* Clock and Shot Clock Row */}
           <View className="flex-row items-center gap-2">
-            <View className="bg-gray-100 dark:bg-gray-700/50 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600">
-              <Text className="text-gray-900 dark:text-white text-2xl font-bold font-mono">
+            <View className="bg-surface-100 dark:bg-surface-700/50 px-4 py-2 rounded-xl border border-surface-200 dark:border-surface-600">
+              <Text className="text-surface-900 dark:text-white text-2xl font-bold font-mono">
                 {formatTime(game.timeRemainingSeconds)}
               </Text>
             </View>
@@ -466,11 +466,11 @@ export default function EnhancedScoreboard({
 
         {/* Home Team */}
         <View className="flex-1 items-center">
-          <Text className="text-gray-500 dark:text-gray-400 text-xs mb-1" numberOfLines={1}>
+          <Text className="text-surface-500 dark:text-surface-400 text-xs mb-1" numberOfLines={1}>
             {game.homeTeam?.name || "Home"}
           </Text>
           <Animated.Text
-            className="text-gray-900 dark:text-white text-4xl font-bold"
+            className="text-surface-900 dark:text-white text-4xl font-bold"
             style={homeScoreStyle}
           >
             {game.homeScore}
@@ -479,7 +479,7 @@ export default function EnhancedScoreboard({
       </View>
 
       {/* Stats Row - Team Fouls, Timeouts, Bonus */}
-      <View className="flex-row mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+      <View className="flex-row mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
         {/* Away Team Stats */}
         <View className="flex-1 items-start gap-1">
           <View className="flex-row items-center gap-2">
@@ -530,8 +530,8 @@ export default function EnhancedScoreboard({
           className="flex-1 bg-black/50 justify-center items-center"
           onPress={() => setShowQuarterSelector(false)}
         >
-          <View className="bg-white dark:bg-gray-800 rounded-2xl p-4 mx-8 w-64">
-            <Text className="text-gray-900 dark:text-white text-lg font-bold text-center mb-4">
+          <View className="bg-surface-50 dark:bg-surface-800 rounded-2xl p-4 mx-8 w-64">
+            <Text className="text-surface-900 dark:text-white text-lg font-bold text-center mb-4">
               Select Quarter
             </Text>
             <View className="flex-row flex-wrap justify-center gap-2">
@@ -544,14 +544,14 @@ export default function EnhancedScoreboard({
                       ? "bg-orange-500"
                       : q < game.currentQuarter
                         ? "bg-green-500"
-                        : "bg-gray-200 dark:bg-gray-700"
+                        : "bg-surface-200 dark:bg-surface-700"
                   }`}
                 >
                   <Text
                     className={`font-bold text-lg ${
                       game.currentQuarter === q || q < game.currentQuarter
                         ? "text-white"
-                        : "text-gray-700 dark:text-gray-300"
+                        : "text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     Q{q}
@@ -560,18 +560,18 @@ export default function EnhancedScoreboard({
               ))}
             </View>
             {/* Overtime options */}
-            <View className="flex-row justify-center gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <View className="flex-row justify-center gap-2 mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
               {[5, 6, 7].map((q) => (
                 <TouchableOpacity
                   key={q}
                   onPress={() => handleQuarterSelect(q)}
                   className={`px-4 py-2 rounded-lg ${
-                    game.currentQuarter === q ? "bg-purple-500" : "bg-gray-200 dark:bg-gray-700"
+                    game.currentQuarter === q ? "bg-purple-500" : "bg-surface-200 dark:bg-surface-700"
                   }`}
                 >
                   <Text
                     className={`font-bold ${
-                      game.currentQuarter === q ? "text-white" : "text-gray-700 dark:text-gray-300"
+                      game.currentQuarter === q ? "text-white" : "text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     OT{q - 4}
@@ -580,7 +580,7 @@ export default function EnhancedScoreboard({
               ))}
             </View>
             <TouchableOpacity onPress={() => setShowQuarterSelector(false)} className="mt-4 py-2">
-              <Text className="text-gray-500 text-center">Cancel</Text>
+              <Text className="text-surface-500 text-center">Cancel</Text>
             </TouchableOpacity>
           </View>
         </Pressable>

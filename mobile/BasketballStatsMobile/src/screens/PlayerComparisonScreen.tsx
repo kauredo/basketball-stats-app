@@ -45,21 +45,21 @@ function StatComparison({
     value1 === value2 ? null : higherIsBetter ? (value1 > value2 ? 1 : 2) : value1 < value2 ? 1 : 2;
 
   return (
-    <View className="flex-row items-center py-3 border-b border-gray-200 dark:border-gray-600">
+    <View className="flex-row items-center py-3 border-b border-surface-200 dark:border-surface-600">
       <View className="flex-1 items-end pr-3">
         <Text
-          className={`text-lg font-bold ${winner === 1 ? "text-green-400" : "text-gray-900 dark:text-white"}`}
+          className={`text-lg font-bold ${winner === 1 ? "text-green-400" : "text-surface-900 dark:text-white"}`}
         >
           {value1}
           {unit}
         </Text>
       </View>
       <View className="w-24 items-center">
-        <Text className="text-sm text-gray-600 dark:text-gray-400">{label}</Text>
+        <Text className="text-sm text-surface-600 dark:text-surface-400">{label}</Text>
       </View>
       <View className="flex-1 items-start pl-3">
         <Text
-          className={`text-lg font-bold ${winner === 2 ? "text-green-400" : "text-gray-900 dark:text-white"}`}
+          className={`text-lg font-bold ${winner === 2 ? "text-green-400" : "text-surface-900 dark:text-white"}`}
         >
           {value2}
           {unit}
@@ -91,9 +91,9 @@ function PlayerSelectModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white dark:bg-gray-800 rounded-t-3xl max-h-[70%]">
-          <View className="flex-row justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-            <Text className="text-gray-900 dark:text-white text-lg font-bold">{title}</Text>
+        <View className="bg-white dark:bg-surface-800 rounded-t-3xl max-h-[70%]">
+          <View className="flex-row justify-between items-center p-4 border-b border-surface-200 dark:border-surface-700">
+            <Text className="text-surface-900 dark:text-white text-lg font-bold">{title}</Text>
             <TouchableOpacity onPress={onClose}>
               <Icon name="close" size={24} color="#9CA3AF" />
             </TouchableOpacity>
@@ -103,20 +103,20 @@ function PlayerSelectModal({
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <TouchableOpacity
-                className="p-4 border-b border-gray-200 dark:border-gray-700 flex-row items-center"
+                className="p-4 border-b border-surface-200 dark:border-surface-700 flex-row items-center"
                 onPress={() => {
                   onSelect(item);
                   onClose();
                 }}
               >
                 <View className="w-10 h-10 bg-primary-500 rounded-full justify-center items-center mr-3">
-                  <Text className="text-gray-900 dark:text-white font-bold">#{item.number}</Text>
+                  <Text className="text-surface-900 dark:text-white font-bold">#{item.number}</Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-gray-900 dark:text-white font-medium text-base">
+                  <Text className="text-surface-900 dark:text-white font-medium text-base">
                     {item.name}
                   </Text>
-                  <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                  <Text className="text-surface-600 dark:text-surface-400 text-sm">
                     {item.team} • {item.position || "N/A"}
                   </Text>
                 </View>
@@ -124,7 +124,7 @@ function PlayerSelectModal({
             )}
             ListEmptyComponent={
               <View className="p-8 items-center">
-                <Text className="text-gray-600 dark:text-gray-400">No players available</Text>
+                <Text className="text-surface-600 dark:text-surface-400">No players available</Text>
               </View>
             }
           />
@@ -172,12 +172,12 @@ export default function PlayerComparisonScreen() {
 
   if (!selectedLeague) {
     return (
-      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-800 p-8">
+      <View className="flex-1 justify-center items-center bg-white dark:bg-surface-800 p-8">
         <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-gray-900 dark:text-white text-2xl font-bold mb-2 mt-4">
+        <Text className="text-surface-900 dark:text-white text-2xl font-bold mb-2 mt-4">
           No League Selected
         </Text>
-        <Text className="text-gray-600 dark:text-gray-400 text-base text-center">
+        <Text className="text-surface-600 dark:text-surface-400 text-base text-center">
           Please select a league to compare players.
         </Text>
       </View>
@@ -216,7 +216,7 @@ export default function PlayerComparisonScreen() {
     : null;
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-800">
+    <View className="flex-1 bg-white dark:bg-surface-800">
       <ScrollView
         className="flex-1"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -226,65 +226,65 @@ export default function PlayerComparisonScreen() {
           <View className="flex-row items-center justify-between mb-6">
             {/* Player 1 Selector */}
             <TouchableOpacity
-              className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-xl p-4 border border-orange-600 mr-2"
+              className="flex-1 bg-surface-100 dark:bg-surface-700 rounded-xl p-4 border border-orange-600 mr-2"
               onPress={() => setShowPlayer1Modal(true)}
             >
               {player1 ? (
                 <View className="items-center">
                   <View className="w-14 h-14 bg-orange-600 rounded-full justify-center items-center mb-2">
-                    <Text className="text-gray-900 dark:text-white font-bold text-lg">
+                    <Text className="text-surface-900 dark:text-white font-bold text-lg">
                       #{player1.number}
                     </Text>
                   </View>
                   <Text
-                    className="text-gray-900 dark:text-white font-medium text-center"
+                    className="text-surface-900 dark:text-white font-medium text-center"
                     numberOfLines={1}
                   >
                     {player1.name}
                   </Text>
-                  <Text className="text-gray-600 dark:text-gray-400 text-sm text-center">
+                  <Text className="text-surface-600 dark:text-surface-400 text-sm text-center">
                     {player1.team}
                   </Text>
                 </View>
               ) : (
                 <View className="items-center py-4">
                   <Icon name="user" size={32} color="#9CA3AF" />
-                  <Text className="text-gray-600 dark:text-gray-400 mt-2">Select Player 1</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 mt-2">Select Player 1</Text>
                 </View>
               )}
             </TouchableOpacity>
 
             {/* VS Icon */}
-            <View className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-full justify-center items-center mx-2">
-              <Text className="text-gray-900 dark:text-white font-bold">VS</Text>
+            <View className="w-12 h-12 bg-surface-200 dark:bg-surface-600 rounded-full justify-center items-center mx-2">
+              <Text className="text-surface-900 dark:text-white font-bold">VS</Text>
             </View>
 
             {/* Player 2 Selector */}
             <TouchableOpacity
-              className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-xl p-4 border border-blue-600 ml-2"
+              className="flex-1 bg-surface-100 dark:bg-surface-700 rounded-xl p-4 border border-blue-600 ml-2"
               onPress={() => setShowPlayer2Modal(true)}
             >
               {player2 ? (
                 <View className="items-center">
                   <View className="w-14 h-14 bg-blue-600 rounded-full justify-center items-center mb-2">
-                    <Text className="text-gray-900 dark:text-white font-bold text-lg">
+                    <Text className="text-surface-900 dark:text-white font-bold text-lg">
                       #{player2.number}
                     </Text>
                   </View>
                   <Text
-                    className="text-gray-900 dark:text-white font-medium text-center"
+                    className="text-surface-900 dark:text-white font-medium text-center"
                     numberOfLines={1}
                   >
                     {player2.name}
                   </Text>
-                  <Text className="text-gray-600 dark:text-gray-400 text-sm text-center">
+                  <Text className="text-surface-600 dark:text-surface-400 text-sm text-center">
                     {player2.team}
                   </Text>
                 </View>
               ) : (
                 <View className="items-center py-4">
                   <Icon name="user" size={32} color="#9CA3AF" />
-                  <Text className="text-gray-600 dark:text-gray-400 mt-2">Select Player 2</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 mt-2">Select Player 2</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -295,47 +295,47 @@ export default function PlayerComparisonScreen() {
             <View>
               {/* Player Info Cards */}
               <View className="flex-row mb-4">
-                <View className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mr-2 border-l-4 border-orange-500">
+                <View className="flex-1 bg-surface-100 dark:bg-surface-700 rounded-lg p-3 mr-2 border-l-4 border-orange-500">
                   <Text className="text-orange-500 font-bold text-base">
                     {comparisonData.player1.playerName}
                   </Text>
-                  <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                  <Text className="text-surface-600 dark:text-surface-400 text-sm">
                     {comparisonData.player1.teamName} • {comparisonData.player1.position || "N/A"}
                   </Text>
-                  <Text className="text-gray-500 text-xs mt-1">
+                  <Text className="text-surface-500 text-xs mt-1">
                     {comparisonData.player1.gamesPlayed} games played
                   </Text>
                 </View>
-                <View className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-3 ml-2 border-l-4 border-blue-500">
+                <View className="flex-1 bg-surface-100 dark:bg-surface-700 rounded-lg p-3 ml-2 border-l-4 border-blue-500">
                   <Text className="text-blue-500 font-bold text-base">
                     {comparisonData.player2.playerName}
                   </Text>
-                  <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                  <Text className="text-surface-600 dark:text-surface-400 text-sm">
                     {comparisonData.player2.teamName} • {comparisonData.player2.position || "N/A"}
                   </Text>
-                  <Text className="text-gray-500 text-xs mt-1">
+                  <Text className="text-surface-500 text-xs mt-1">
                     {comparisonData.player2.gamesPlayed} games played
                   </Text>
                 </View>
               </View>
 
               {/* Per Game Averages */}
-              <View className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-600">
+              <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-600">
                 <View className="flex-row items-center mb-4">
                   <Icon name="stats" size={20} color="#F97316" />
-                  <Text className="text-gray-900 dark:text-white text-lg font-semibold ml-2">
+                  <Text className="text-surface-900 dark:text-white text-lg font-semibold ml-2">
                     Per Game Averages
                   </Text>
                 </View>
 
-                <View className="flex-row items-center mb-2 pb-2 border-b border-gray-200 dark:border-gray-600">
+                <View className="flex-row items-center mb-2 pb-2 border-b border-surface-200 dark:border-surface-600">
                   <View className="flex-1 items-end pr-3">
                     <Text className="text-orange-500 font-medium text-xs">
                       {comparisonData.player1.playerName.split(" ")[0]}
                     </Text>
                   </View>
                   <View className="w-24 items-center">
-                    <Text className="text-gray-500 text-xs">STAT</Text>
+                    <Text className="text-surface-500 text-xs">STAT</Text>
                   </View>
                   <View className="flex-1 items-start pl-3">
                     <Text className="text-blue-500 font-medium text-xs">
@@ -383,19 +383,19 @@ export default function PlayerComparisonScreen() {
               </View>
 
               {/* Shooting Percentages */}
-              <View className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-600">
-                <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-4">
+              <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-600">
+                <Text className="text-surface-900 dark:text-white text-lg font-semibold mb-4">
                   Shooting Percentages
                 </Text>
 
-                <View className="flex-row items-center mb-2 pb-2 border-b border-gray-200 dark:border-gray-600">
+                <View className="flex-row items-center mb-2 pb-2 border-b border-surface-200 dark:border-surface-600">
                   <View className="flex-1 items-end pr-3">
                     <Text className="text-orange-500 font-medium text-xs">
                       {comparisonData.player1.playerName.split(" ")[0]}
                     </Text>
                   </View>
                   <View className="w-24 items-center">
-                    <Text className="text-gray-500 text-xs">STAT</Text>
+                    <Text className="text-surface-500 text-xs">STAT</Text>
                   </View>
                   <View className="flex-1 items-start pl-3">
                     <Text className="text-blue-500 font-medium text-xs">
@@ -426,8 +426,8 @@ export default function PlayerComparisonScreen() {
 
               {/* Shooting Chart */}
               {shootingData && shootingData2 && (
-                <View className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
-                  <Text className="text-gray-900 dark:text-white text-lg font-semibold mb-4">
+                <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-4 border border-surface-200 dark:border-surface-600">
+                  <Text className="text-surface-900 dark:text-white text-lg font-semibold mb-4">
                     Shooting Chart
                   </Text>
 
@@ -497,15 +497,15 @@ export default function PlayerComparisonScreen() {
               <View className="animate-spin">
                 <Icon name="basketball" size={32} color="#F97316" />
               </View>
-              <Text className="text-gray-600 dark:text-gray-400 mt-4">Loading comparison...</Text>
+              <Text className="text-surface-600 dark:text-surface-400 mt-4">Loading comparison...</Text>
             </View>
           ) : (
-            <View className="bg-gray-100 dark:bg-gray-700 rounded-xl p-8 items-center border border-gray-200 dark:border-gray-600">
+            <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-8 items-center border border-surface-200 dark:border-surface-600">
               <Icon name="user" size={48} color="#6B7280" />
-              <Text className="text-gray-900 dark:text-white text-lg font-medium mt-4 mb-2">
+              <Text className="text-surface-900 dark:text-white text-lg font-medium mt-4 mb-2">
                 Select Players to Compare
               </Text>
-              <Text className="text-gray-600 dark:text-gray-400 text-center">
+              <Text className="text-surface-600 dark:text-surface-400 text-center">
                 Tap on the player cards above to select two players and see a side-by-side
                 comparison of their statistics.
               </Text>

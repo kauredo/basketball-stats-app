@@ -46,7 +46,7 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
   return (
     <TouchableOpacity
       onPress={() => setExpanded(!expanded)}
-      className={`bg-white dark:bg-gray-800 px-4 py-3 ${
+      className={`bg-white dark:bg-surface-800 px-4 py-3 ${
         isFirst ? "rounded-t-xl" : ""
       } ${isLast && !expanded ? "rounded-b-xl" : ""} ${
         team.rank <= 4
@@ -64,7 +64,7 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
           {team.rank === 1 ? (
             <Icon name="basketball" size={20} color="#EAB308" />
           ) : (
-            <Text className="text-gray-600 dark:text-gray-400 font-bold text-base">
+            <Text className="text-surface-600 dark:text-surface-400 font-bold text-base">
               {team.rank}
             </Text>
           )}
@@ -72,24 +72,24 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
 
         {/* Team Info */}
         <View className="flex-1 ml-3">
-          <Text className="text-gray-900 dark:text-white font-semibold text-base">
+          <Text className="text-surface-900 dark:text-white font-semibold text-base">
             {team.teamName}
           </Text>
           {team.city && (
-            <Text className="text-gray-500 dark:text-gray-500 text-xs">{team.city}</Text>
+            <Text className="text-surface-500 dark:text-surface-500 text-xs">{team.city}</Text>
           )}
         </View>
 
         {/* Record */}
         <View className="flex-row items-center">
           <Text className="text-green-500 font-bold text-base">{team.wins}</Text>
-          <Text className="text-gray-500 dark:text-gray-500 mx-1">-</Text>
+          <Text className="text-surface-500 dark:text-surface-500 mx-1">-</Text>
           <Text className="text-red-500 font-bold text-base">{team.losses}</Text>
         </View>
 
         {/* Win Percentage */}
         <View className="w-16 items-end">
-          <Text className="text-gray-900 dark:text-white font-medium text-base">
+          <Text className="text-surface-900 dark:text-white font-medium text-base">
             .{team.winPercentage.toFixed(0).padStart(3, "0")}
           </Text>
         </View>
@@ -103,51 +103,51 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
       {/* Expanded Details */}
       {expanded && (
         <View
-          className={`mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 ${
+          className={`mt-3 pt-3 border-t border-surface-200 dark:border-surface-700 ${
             isLast ? "rounded-b-xl" : ""
           }`}
         >
           {/* Stats Grid */}
           <View className="flex-row flex-wrap gap-y-3">
             <View className="w-1/3 pr-2">
-              <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase">Games Back</Text>
-              <Text className="text-gray-900 dark:text-white font-medium text-sm">
+              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">Games Back</Text>
+              <Text className="text-surface-900 dark:text-white font-medium text-sm">
                 {team.gamesBack === 0 ? "-" : team.gamesBack.toFixed(1)}
               </Text>
             </View>
             <View className="w-1/3 pr-2">
-              <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase">Home</Text>
-              <Text className="text-gray-900 dark:text-white font-medium text-sm">
+              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">Home</Text>
+              <Text className="text-surface-900 dark:text-white font-medium text-sm">
                 {team.homeRecord}
               </Text>
             </View>
             <View className="w-1/3">
-              <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase">Away</Text>
-              <Text className="text-gray-900 dark:text-white font-medium text-sm">
+              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">Away</Text>
+              <Text className="text-surface-900 dark:text-white font-medium text-sm">
                 {team.awayRecord}
               </Text>
             </View>
             <View className="w-1/3 pr-2">
-              <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase">PPG</Text>
-              <Text className="text-gray-900 dark:text-white font-medium text-sm">
+              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">PPG</Text>
+              <Text className="text-surface-900 dark:text-white font-medium text-sm">
                 {team.avgPointsFor.toFixed(1)}
               </Text>
             </View>
             <View className="w-1/3 pr-2">
-              <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase">OPPG</Text>
-              <Text className="text-gray-900 dark:text-white font-medium text-sm">
+              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">OPPG</Text>
+              <Text className="text-surface-900 dark:text-white font-medium text-sm">
                 {team.avgPointsAgainst.toFixed(1)}
               </Text>
             </View>
             <View className="w-1/3">
-              <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase">Diff</Text>
+              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">Diff</Text>
               <Text
                 className={`font-medium text-sm ${
                   team.pointDiff > 0
                     ? "text-green-500"
                     : team.pointDiff < 0
                       ? "text-red-500"
-                      : "text-gray-600 dark:text-gray-400"
+                      : "text-surface-600 dark:text-surface-400"
                 }`}
               >
                 {team.pointDiff > 0 ? "+" : ""}
@@ -157,9 +157,9 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
           </View>
 
           {/* Last 5 and Streak */}
-          <View className="flex-row items-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+          <View className="flex-row items-center mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
             <View className="flex-1">
-              <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase mb-1">
+              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase mb-1">
                 Last 5
               </Text>
               <View className="flex-row gap-1">
@@ -176,15 +176,15 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
                 {[...Array(Math.max(0, 5 - team.last5.length))].map((_, i) => (
                   <View
                     key={`empty-${i}`}
-                    className="w-6 h-6 rounded bg-gray-200 dark:bg-gray-700 items-center justify-center"
+                    className="w-6 h-6 rounded bg-surface-200 dark:bg-surface-700 items-center justify-center"
                   >
-                    <Text className="text-gray-400 dark:text-gray-500 text-xs">-</Text>
+                    <Text className="text-surface-400 dark:text-surface-500 text-xs">-</Text>
                   </View>
                 ))}
               </View>
             </View>
             <View className="items-end">
-              <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase mb-1">
+              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase mb-1">
                 Streak
               </Text>
               <View className="flex-row items-center">
@@ -199,7 +199,7 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
                       ? "text-green-500"
                       : team.streakType === "L"
                         ? "text-red-500"
-                        : "text-gray-500"
+                        : "text-surface-500"
                   }`}
                 >
                   {team.streak}
@@ -281,12 +281,12 @@ export default function StandingsScreen() {
 
   if (!selectedLeague) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950 p-8">
+      <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950 p-8">
         <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-gray-900 dark:text-white text-2xl font-bold mt-4 mb-2">
+        <Text className="text-surface-900 dark:text-white text-2xl font-bold mt-4 mb-2">
           No League Selected
         </Text>
-        <Text className="text-gray-600 dark:text-gray-400 text-base text-center">
+        <Text className="text-surface-600 dark:text-surface-400 text-base text-center">
           Please select a league to view standings.
         </Text>
       </View>
@@ -295,7 +295,7 @@ export default function StandingsScreen() {
 
   if (standingsData === undefined) {
     return (
-      <View className="flex-1 bg-gray-50 dark:bg-dark-950">
+      <View className="flex-1 bg-surface-50 dark:bg-surface-950">
         <ScrollView className="p-4">
           <SkeletonTable rows={8} style={{ marginBottom: 16 }} />
         </ScrollView>
@@ -306,25 +306,25 @@ export default function StandingsScreen() {
   const standings = standingsData?.standings || [];
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-dark-950">
+    <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       <ScrollView
         className="flex-1"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Header Stats */}
         <View className="flex-row p-4 gap-3">
-          <View className="flex-1 bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase">League</Text>
+          <View className="flex-1 bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+            <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">League</Text>
             <Text
-              className="text-gray-900 dark:text-white font-bold text-base mt-1"
+              className="text-surface-900 dark:text-white font-bold text-base mt-1"
               numberOfLines={1}
             >
               {standingsData?.league?.name || selectedLeague.name}
             </Text>
           </View>
-          <View className="flex-1 bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase">Total Games</Text>
-            <Text className="text-gray-900 dark:text-white font-bold text-2xl mt-1">
+          <View className="flex-1 bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+            <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">Total Games</Text>
+            <Text className="text-surface-900 dark:text-white font-bold text-2xl mt-1">
               {standingsData?.totalGames || 0}
             </Text>
           </View>
@@ -336,13 +336,13 @@ export default function StandingsScreen() {
             onPress={handleExport}
             disabled={isExporting || standings.length === 0}
             className={`flex-row items-center justify-center py-3 px-4 rounded-xl ${
-              standings.length > 0 ? "bg-primary-500" : "bg-gray-300 dark:bg-gray-700"
+              standings.length > 0 ? "bg-primary-500" : "bg-surface-300 dark:bg-surface-700"
             }`}
           >
             <Icon name="stats" size={18} color={standings.length > 0 ? "#FFFFFF" : "#9CA3AF"} />
             <Text
               className={`ml-2 font-semibold ${
-                standings.length > 0 ? "text-white" : "text-gray-500"
+                standings.length > 0 ? "text-white" : "text-surface-500"
               }`}
             >
               {isExporting ? "Exporting..." : "Export Standings"}
@@ -356,26 +356,26 @@ export default function StandingsScreen() {
             {/* Table Header */}
             <View className="flex-row px-4 py-2 mb-1">
               <View className="w-8" />
-              <Text className="flex-1 ml-3 text-gray-500 dark:text-gray-500 text-xs uppercase font-semibold">
+              <Text className="flex-1 ml-3 text-surface-500 dark:text-surface-500 text-xs uppercase font-semibold">
                 Team
               </Text>
-              <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase font-semibold">
+              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase font-semibold">
                 Record
               </Text>
-              <Text className="w-16 text-right text-gray-500 dark:text-gray-500 text-xs uppercase font-semibold">
+              <Text className="w-16 text-right text-surface-500 dark:text-surface-500 text-xs uppercase font-semibold">
                 PCT
               </Text>
               <View className="w-6" />
             </View>
 
             {/* Standings Rows */}
-            <View className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+            <View className="border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden">
               {standings.map((team: StandingTeam, index: number) => (
                 <View
                   key={team.teamId}
                   className={
                     index < standings.length - 1
-                      ? "border-b border-gray-200 dark:border-gray-700"
+                      ? "border-b border-surface-200 dark:border-surface-700"
                       : ""
                   }
                 >
@@ -389,21 +389,21 @@ export default function StandingsScreen() {
             </View>
 
             {/* Legend */}
-            <View className="mt-4 bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <Text className="text-gray-500 dark:text-gray-500 text-xs uppercase font-semibold mb-3">
+            <View className="mt-4 bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase font-semibold mb-3">
                 Legend
               </Text>
               <View className="flex-row flex-wrap gap-x-4 gap-y-2">
                 <View className="flex-row items-center">
                   <View className="w-3 h-3 bg-green-500 rounded mr-2" />
-                  <Text className="text-gray-600 dark:text-gray-400 text-xs">Playoff Position</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 text-xs">Playoff Position</Text>
                 </View>
                 <View className="flex-row items-center">
                   <View className="w-3 h-3 bg-red-500 rounded mr-2" />
-                  <Text className="text-gray-600 dark:text-gray-400 text-xs">Bottom of League</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 text-xs">Bottom of League</Text>
                 </View>
               </View>
-              <Text className="text-gray-500 dark:text-gray-500 text-xs mt-3">
+              <Text className="text-surface-500 dark:text-surface-500 text-xs mt-3">
                 Tap a team row to see detailed stats
               </Text>
             </View>
@@ -411,10 +411,10 @@ export default function StandingsScreen() {
         ) : (
           <View className="px-4 py-12 items-center">
             <Icon name="basketball" size={48} color="#6B7280" />
-            <Text className="text-gray-900 dark:text-white text-lg font-semibold mt-4">
+            <Text className="text-surface-900 dark:text-white text-lg font-semibold mt-4">
               No Standings Yet
             </Text>
-            <Text className="text-gray-600 dark:text-gray-400 text-center mt-2">
+            <Text className="text-surface-600 dark:text-surface-400 text-center mt-2">
               Complete some games to see the league standings here.
             </Text>
           </View>

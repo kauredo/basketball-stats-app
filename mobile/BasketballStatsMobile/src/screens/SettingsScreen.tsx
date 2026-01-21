@@ -69,16 +69,16 @@ interface SettingRowProps {
 function SettingRow({ icon, title, subtitle, onPress, rightElement }: SettingRowProps) {
   return (
     <TouchableOpacity
-      className="flex-row items-center py-4 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+      className="flex-row items-center py-4 border-b border-surface-200 dark:border-surface-700 last:border-b-0"
       onPress={onPress}
       disabled={!onPress && !rightElement}
     >
-      <View className="w-10 h-10 bg-gray-100 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
+      <View className="w-10 h-10 bg-surface-100 dark:bg-surface-600 rounded-full justify-center items-center mr-4">
         <Icon name={icon as any} size={20} color="#9CA3AF" />
       </View>
       <View className="flex-1">
-        <Text className="text-gray-900 dark:text-white font-medium text-base">{title}</Text>
-        {subtitle && <Text className="text-gray-600 dark:text-gray-400 text-sm">{subtitle}</Text>}
+        <Text className="text-surface-900 dark:text-white font-medium text-base">{title}</Text>
+        {subtitle && <Text className="text-surface-600 dark:text-surface-400 text-sm">{subtitle}</Text>}
       </View>
       {rightElement || (onPress && <Icon name="chevron-right" size={20} color="#9CA3AF" />)}
     </TouchableOpacity>
@@ -256,22 +256,22 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
+    <View className="flex-1 bg-surface-50 dark:bg-surface-900">
       <ScrollView className="flex-1 p-4">
         {/* Appearance */}
         <View className="mb-6">
-          <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
+          <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
             Appearance
           </Text>
-          <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <Text className="text-gray-900 dark:text-white font-medium mb-3">Theme</Text>
+          <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+            <Text className="text-surface-900 dark:text-white font-medium mb-3">Theme</Text>
             <View className="flex-row gap-2">
               {(["system", "light", "dark"] as ThemeMode[]).map((themeMode) => (
                 <TouchableOpacity
                   key={themeMode}
                   onPress={() => setMode(themeMode)}
                   className={`flex-1 py-3 px-4 rounded-lg items-center ${
-                    mode === themeMode ? "bg-primary-500" : "bg-gray-100 dark:bg-gray-700"
+                    mode === themeMode ? "bg-primary-500" : "bg-surface-100 dark:bg-surface-700"
                   }`}
                 >
                   <Icon
@@ -281,7 +281,7 @@ export default function SettingsScreen() {
                   />
                   <Text
                     className={`mt-1 text-sm font-medium ${
-                      mode === themeMode ? "text-white" : "text-gray-700 dark:text-gray-300"
+                      mode === themeMode ? "text-white" : "text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     {themeModeLabels[themeMode]}
@@ -294,10 +294,10 @@ export default function SettingsScreen() {
 
         {/* Notification Preferences */}
         <View className="mb-6">
-          <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
+          <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
             Notifications
           </Text>
-          <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
             <SettingRow
               icon="basketball"
               title="Game Notifications"
@@ -325,14 +325,14 @@ export default function SettingsScreen() {
               }
             />
             <View className="flex-row items-center py-4">
-              <View className="w-10 h-10 bg-gray-100 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
+              <View className="w-10 h-10 bg-surface-100 dark:bg-surface-600 rounded-full justify-center items-center mr-4">
                 <Icon name="basketball" size={20} color="#9CA3AF" />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-900 dark:text-white font-medium text-base">
+                <Text className="text-surface-900 dark:text-white font-medium text-base">
                   League Announcements
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                <Text className="text-surface-600 dark:text-surface-400 text-sm">
                   Important updates from league admins
                 </Text>
               </View>
@@ -349,10 +349,10 @@ export default function SettingsScreen() {
         {/* Data Export - Only show if league selected */}
         {selectedLeague && (
           <View className="mb-6">
-            <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
+            <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
               Data Export
             </Text>
-            <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
               <SettingRow
                 icon="stats"
                 title="Export Player Statistics"
@@ -373,7 +373,7 @@ export default function SettingsScreen() {
               />
             </View>
             {isExporting && (
-              <Text className="text-gray-600 dark:text-gray-400 text-sm mt-2 text-center">
+              <Text className="text-surface-600 dark:text-surface-400 text-sm mt-2 text-center">
                 Preparing export...
               </Text>
             )}
@@ -382,30 +382,30 @@ export default function SettingsScreen() {
 
         {/* App Info */}
         <View className="mb-6">
-          <Text className="text-gray-600 dark:text-gray-400 text-sm font-semibold mb-3 uppercase">
+          <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
             About
           </Text>
-          <View className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <View className="flex-row items-center py-4 border-b border-gray-200 dark:border-gray-700">
+          <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+            <View className="flex-row items-center py-4 border-b border-surface-200 dark:border-surface-700">
               <View className="w-10 h-10 bg-primary-500/20 rounded-full justify-center items-center mr-4">
                 <Icon name="basketball" size={20} color="#F97316" />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-900 dark:text-white font-medium text-base">
+                <Text className="text-surface-900 dark:text-white font-medium text-base">
                   Basketball Stats
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-sm">Version 1.0.0</Text>
+                <Text className="text-surface-600 dark:text-surface-400 text-sm">Version 1.0.0</Text>
               </View>
             </View>
             <View className="flex-row items-center py-4">
-              <View className="w-10 h-10 bg-gray-100 dark:bg-gray-600 rounded-full justify-center items-center mr-4">
+              <View className="w-10 h-10 bg-surface-100 dark:bg-surface-600 rounded-full justify-center items-center mr-4">
                 <Icon name="user" size={20} color="#9CA3AF" />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-900 dark:text-white font-medium text-base">
+                <Text className="text-surface-900 dark:text-white font-medium text-base">
                   Powered by Convex
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-sm">
+                <Text className="text-surface-600 dark:text-surface-400 text-sm">
                   Real-time database & backend
                 </Text>
               </View>

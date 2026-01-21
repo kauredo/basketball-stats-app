@@ -54,7 +54,7 @@ export default function ShotClock({
     if (isViolation) return "bg-red-600";
     if (isWarning) return "bg-amber-500";
     if (isRunning) return "bg-orange-500";
-    return "bg-gray-600";
+    return "bg-surface-600";
   };
 
   const config = sizeConfig[size];

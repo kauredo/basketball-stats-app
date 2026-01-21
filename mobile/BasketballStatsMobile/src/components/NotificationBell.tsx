@@ -12,7 +12,7 @@ interface NotificationBellProps {
   color?: string;
 }
 
-export default function NotificationBell({ color = "#6B7280" }: NotificationBellProps) {
+export default function NotificationBell({ color = "#7a746c" }: NotificationBellProps) {
   const navigation = useNavigation<NavigationProp>();
   const { unreadCount } = useNotifications();
 
