@@ -91,11 +91,11 @@ export function ShotRecordingModal({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 bg-black/70 justify-end">
-        <View className="bg-surface-50 dark:bg-surface-800 rounded-t-2xl max-h-[75%] border-t border-surface-200 dark:border-surface-700">
+    <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
+      <View className="flex-1 bg-black/70 justify-center items-center px-4 py-2">
+        <View className="bg-surface-50 dark:bg-surface-800 rounded-2xl max-h-[96%] w-full max-w-lg border border-surface-200 dark:border-surface-700 overflow-hidden">
           {/* Header with zone info */}
-          <View className="bg-surface-50 dark:bg-surface-900 px-6 py-4 rounded-t-2xl border-b border-surface-200 dark:border-surface-700">
+          <View className="bg-surface-50 dark:bg-surface-900 px-6 py-4 border-b border-surface-200 dark:border-surface-700">
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
                 <Text className="text-lg font-bold text-surface-900 dark:text-white">

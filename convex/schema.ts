@@ -167,6 +167,9 @@ export default defineSchema({
       })
     ),
     userId: v.optional(v.id("users")),
+    // Shot clock state (for cross-instance sync)
+    shotClockSeconds: v.optional(v.number()), // Seconds remaining when paused/reset
+    shotClockStartedAt: v.optional(v.number()), // Server timestamp when clock started (null = paused)
   })
     .index("by_league", ["leagueId"])
     .index("by_league_status", ["leagueId", "status"])

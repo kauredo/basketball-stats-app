@@ -77,11 +77,11 @@ export function ReboundPromptModal({
   const opposingOnCourt = opposingTeamPlayers.filter((p) => p.isOnCourt);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 bg-black/70 justify-end">
-        <View className="bg-surface-50 dark:bg-surface-800 rounded-t-2xl max-h-[80%] border-t border-surface-200 dark:border-surface-700">
+    <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
+      <View className="flex-1 bg-black/70 justify-center items-center px-4 py-2">
+        <View className="bg-surface-50 dark:bg-surface-800 rounded-2xl max-h-[96%] w-full max-w-lg border border-surface-200 dark:border-surface-700 overflow-hidden">
           {/* Header - Blue to indicate rebound opportunity */}
-          <View className="bg-blue-600 px-6 py-4 rounded-t-2xl">
+          <View className="bg-blue-600 px-6 py-4">
             <Text className="text-lg font-bold text-white">Rebound</Text>
             <Text className="text-blue-200 text-sm">Missed {getShotTypeLabel(shotType)}</Text>
           </View>

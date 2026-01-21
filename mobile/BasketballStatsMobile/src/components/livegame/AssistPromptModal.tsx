@@ -70,11 +70,11 @@ export function AssistPromptModal({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 bg-black/70 justify-end">
-        <View className="bg-surface-50 dark:bg-surface-800 rounded-t-2xl max-h-[70%] border-t border-surface-200 dark:border-surface-700">
+    <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
+      <View className="flex-1 bg-black/70 justify-center items-center px-4 py-2">
+        <View className="bg-surface-50 dark:bg-surface-800 rounded-2xl max-h-[96%] w-full max-w-lg border border-surface-200 dark:border-surface-700 overflow-hidden">
           {/* Header - Green to indicate made shot */}
-          <View className="bg-green-600 px-6 py-4 rounded-t-2xl">
+          <View className="bg-green-600 px-6 py-4">
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
                 <Text className="text-lg font-bold text-white">Assist?</Text>

@@ -21,6 +21,7 @@ import {
   StartingLineupSelector,
 } from "../components/livegame";
 import { ClockModeContent } from "../components/livegame/ClockModeContent";
+import { TimeEditModal } from "../components/livegame/modals/TimeEditModal";
 
 // Import types
 import type {
@@ -42,6 +43,7 @@ import type {
 // Import hooks
 import { useFeedback } from "../hooks/livegame/useFeedback";
 import { useGameClock } from "../hooks/livegame/useGameClock";
+import { useShotClock } from "../hooks/livegame/useShotClock";
 
 /**
  * Refactored LiveGame page - modular, one-page, no-scroll design.
@@ -64,10 +66,11 @@ const LiveGameNew: React.FC = () => {
   const [recentShots, setRecentShots] = useState<ShotLocation[]>([]);
   const [showHeatMap, setShowHeatMap] = useState(false);
   const [lastAction, setLastAction] = useState<LastAction | null>(null);
-  const [shotClockSeconds, setShotClockSeconds] = useState(24);
   const [selectedHomeStarters, setSelectedHomeStarters] = useState<Id<"players">[]>([]);
   const [selectedAwayStarters, setSelectedAwayStarters] = useState<Id<"players">[]>([]);
   const [isStartingGame, setIsStartingGame] = useState(false);
+  const [showGameClockEdit, setShowGameClockEdit] = useState(false);
+  const [showShotClockEdit, setShowShotClockEdit] = useState(false);
 
   // Convex queries
   const gameData = useQuery(
@@ -95,6 +98,7 @@ const LiveGameNew: React.FC = () => {
   const pauseGame = useMutation(api.games.pause);
   const resumeGame = useMutation(api.games.resume);
   const endGame = useMutation(api.games.end);
+  const reactivateGame = useMutation(api.games.reactivate);
   const recordStat = useMutation(api.stats.recordStat);
   const undoStat = useMutation(api.stats.undoStat);
   const swapSubstituteMutation = useMutation(api.stats.swapSubstitute);
@@ -107,6 +111,7 @@ const LiveGameNew: React.FC = () => {
   const _startOvertimeMutation = useMutation(api.games.startOvertime);
   const recordShotMutation = useMutation(api.shots.recordShot);
   const updateGameSettingsMutation = useMutation(api.games.updateGameSettings);
+  const setGameTimeMutation = useMutation(api.games.setGameTime);
 
   // Hooks
   const feedback = useFeedback();
@@ -167,8 +172,21 @@ const LiveGameNew: React.FC = () => {
     quarterDuration: (gameSettings.quarterMinutes || 12) * 60,
   });
 
+  // Shot clock synced with Convex
+  const shotClock = useShotClock({
+    gameId: gameId as Id<"games"> | undefined,
+    token: token ?? undefined,
+    serverSeconds: game?.shotClockSeconds,
+    serverStartedAt: game?.shotClockStartedAt,
+    serverIsRunning: game?.shotClockIsRunning,
+    gameTimeRemainingSeconds: game?.timeRemainingSeconds,
+    initialSeconds: 24,
+    offensiveReboundReset: 14,
+    warningThreshold: 5,
+  });
+
   // Handlers
-  const handleGameControl = async (action: "start" | "pause" | "resume" | "end") => {
+  const handleGameControl = async (action: "start" | "pause" | "resume" | "end" | "reactivate") => {
     if (!token || !gameId) return;
 
     try {
@@ -185,6 +203,9 @@ const LiveGameNew: React.FC = () => {
           break;
         case "end":
           await endGame({ token, gameId: gameIdTyped, forceEnd: true });
+          break;
+        case "reactivate":
+          await reactivateGame({ token, gameId: gameIdTyped });
           break;
       }
     } catch (error) {
@@ -617,7 +638,12 @@ const LiveGameNew: React.FC = () => {
   };
 
   const handleResetShotClock = (seconds: number = 24) => {
-    setShotClockSeconds(seconds);
+    // Convex mutation handles auto-start when game is active
+    if (seconds === 14) {
+      shotClock.resetOffensiveRebound();
+    } else {
+      shotClock.reset();
+    }
   };
 
   // Handler for starting lineup changes
@@ -692,9 +718,32 @@ const LiveGameNew: React.FC = () => {
         resetTime: true,
       });
       // Reset shot clock
-      setShotClockSeconds(24);
+      shotClock.reset();
     } catch (error) {
       console.error("Failed to end period:", error);
+    }
+  };
+
+  // Handle manual game clock edit
+  const handleSetGameTime = async (seconds: number) => {
+    if (!token || !gameId) return;
+    try {
+      await setGameTimeMutation({
+        token,
+        gameId: gameId as Id<"games">,
+        timeRemainingSeconds: seconds,
+      });
+    } catch (error) {
+      console.error("Failed to set game time:", error);
+    }
+  };
+
+  // Handle manual shot clock edit
+  const handleSetShotClockTime = async (seconds: number) => {
+    try {
+      await shotClock.setTime(seconds);
+    } catch (error) {
+      console.error("Failed to set shot clock time:", error);
     }
   };
 
@@ -803,6 +852,10 @@ const LiveGameNew: React.FC = () => {
           onToggleHeatMap={() => setShowHeatMap(!showHeatMap)}
           allShots={persistedShots}
           onStatSelect={handleStatSelect}
+          homeTimeoutsRemaining={homeTeamStats.timeoutsRemaining}
+          awayTimeoutsRemaining={awayTeamStats.timeoutsRemaining}
+          onTimeoutHome={handleTimeoutHome}
+          onTimeoutAway={handleTimeoutAway}
           swappingPlayer={swappingPlayer}
           onSwap={handleSwapSubstitute}
           onSubIn={handleSubstituteIn}
@@ -858,21 +911,19 @@ const LiveGameNew: React.FC = () => {
       {activeMode === "clock" && (
         <ClockModeContent
           timeRemainingSeconds={game.timeRemainingSeconds}
-          shotClockSeconds={shotClockSeconds}
+          shotClockSeconds={shotClock.displaySeconds}
+          shotClockFormatted={shotClock.formattedTime}
+          shotClockIsWarning={shotClock.isWarning}
+          showViolationButton={shotClock.showViolationButton}
+          violationGameTime={shotClock.violationGameTime}
+          onViolationPause={shotClock.handleViolationPause}
           currentQuarter={game.currentQuarter}
           status={game.status as "scheduled" | "active" | "paused" | "completed"}
-          isOvertime={game.currentQuarter > 4}
-          homeScore={game.homeScore}
-          awayScore={game.awayScore}
-          homeTeamName={game.homeTeam?.name || "Home"}
-          awayTeamName={game.awayTeam?.name || "Away"}
-          homeTimeoutsRemaining={homeTeamStats.timeoutsRemaining}
-          awayTimeoutsRemaining={awayTeamStats.timeoutsRemaining}
           onGameControl={handleGameControl}
-          onTimeoutHome={handleTimeoutHome}
-          onTimeoutAway={handleTimeoutAway}
           onResetShotClock={handleResetShotClock}
           onEndPeriod={handleEndPeriod}
+          onEditGameClock={() => setShowGameClockEdit(true)}
+          onEditShotClock={() => setShowShotClockEdit(true)}
         />
       )}
 
@@ -951,6 +1002,26 @@ const LiveGameNew: React.FC = () => {
         onClose={() => setFreeThrowSequence(null)}
         onRecord={handleFreeThrowResult}
         sequence={freeThrowSequence}
+      />
+
+      {/* Time Edit Modals */}
+      <TimeEditModal
+        isOpen={showGameClockEdit}
+        onClose={() => setShowGameClockEdit(false)}
+        currentSeconds={game.timeRemainingSeconds}
+        onSave={handleSetGameTime}
+        title="Edit Game Clock"
+        mode="game"
+      />
+
+      <TimeEditModal
+        isOpen={showShotClockEdit}
+        onClose={() => setShowShotClockEdit(false)}
+        currentSeconds={shotClock.seconds}
+        maxSeconds={24}
+        onSave={handleSetShotClockTime}
+        title="Edit Shot Clock"
+        mode="shot"
       />
     </LiveGameLayout>
   );

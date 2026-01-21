@@ -1,31 +1,27 @@
 import React from "react";
-import { PlayIcon, PauseIcon, StopIcon, ClockIcon } from "@heroicons/react/24/solid";
-import { GameStatus } from "../../types/livegame";
+import { PlayIcon, PauseIcon, StopIcon } from "@heroicons/react/24/solid";
+import type { GameStatus } from "../../types/livegame";
 
 interface ClockModeContentProps {
   // Clock state
   timeRemainingSeconds: number;
   shotClockSeconds: number;
+  shotClockFormatted?: string; // Formatted display like "24.0"
+  shotClockIsWarning?: boolean; // Is in warning state
+  shotClockIsViolation?: boolean; // Is at 0 (violation)
+  showViolationButton?: boolean; // Show the retroactive stop button
+  violationGameTime?: number | null; // Game time when violation occurred
+  onViolationPause?: () => void; // Handler for retroactive pause
   currentQuarter: number;
   status: GameStatus;
-  isOvertime: boolean;
-
-  // Scores
-  homeScore: number;
-  awayScore: number;
-  homeTeamName: string;
-  awayTeamName: string;
-
-  // Timeouts
-  homeTimeoutsRemaining: number;
-  awayTimeoutsRemaining: number;
 
   // Controls
   onGameControl: (action: "start" | "pause" | "resume" | "end") => void;
-  onTimeoutHome?: () => void;
-  onTimeoutAway?: () => void;
   onResetShotClock?: (seconds?: number) => void;
   onEndPeriod?: () => void;
+  // Time editing
+  onEditGameClock?: () => void;
+  onEditShotClock?: () => void;
 }
 
 /**
@@ -36,20 +32,18 @@ interface ClockModeContentProps {
 export const ClockModeContent: React.FC<ClockModeContentProps> = ({
   timeRemainingSeconds,
   shotClockSeconds,
+  shotClockFormatted,
+  shotClockIsWarning,
+  showViolationButton,
+  violationGameTime,
+  onViolationPause,
   currentQuarter,
   status,
-  isOvertime,
-  homeScore,
-  awayScore,
-  homeTeamName,
-  awayTeamName,
-  homeTimeoutsRemaining,
-  awayTimeoutsRemaining,
   onGameControl,
-  onTimeoutHome,
-  onTimeoutAway,
   onResetShotClock,
   onEndPeriod,
+  onEditGameClock,
+  onEditShotClock,
 }) => {
   // Format game clock time
   const formatTime = (seconds: number): string => {
@@ -72,7 +66,7 @@ export const ClockModeContent: React.FC<ClockModeContentProps> = ({
   return (
     <div className="h-full flex flex-col gap-4 p-4">
       {/* Main Clock Display */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-surface-900 rounded-2xl p-8 min-h-[300px]">
+      <div className="h-full flex-1 flex flex-col items-center justify-center bg-surface-900 rounded-2xl p-8 min-h-[500px]">
         {/* Quarter Badge */}
         <div className="mb-4">
           <span className="px-4 py-2 bg-primary-500 text-white text-xl font-bold rounded-full">
@@ -82,35 +76,47 @@ export const ClockModeContent: React.FC<ClockModeContentProps> = ({
 
         {/* Game Clock */}
         <div className="text-center mb-8">
-          <div
+          <button
+            onClick={onEditGameClock}
+            disabled={!onEditGameClock}
             className={`font-mono font-bold tracking-wider transition-colors ${
               timeRemainingSeconds <= 60 && isActive ? "text-red-500 animate-pulse" : "text-white"
-            }`}
+            } ${onEditGameClock ? "hover:opacity-80 cursor-pointer" : ""}`}
             style={{ fontSize: "clamp(4rem, 15vw, 12rem)" }}
+            title={onEditGameClock ? "Click to edit time" : undefined}
           >
             {formatTime(timeRemainingSeconds)}
-          </div>
-          <p className="text-surface-400 text-lg mt-2 uppercase tracking-widest">Game Clock</p>
+          </button>
+          <p className="text-surface-400 text-lg mt-2 uppercase tracking-widest">
+            Game Clock {onEditGameClock && <span className="text-xs">(tap to edit)</span>}
+          </p>
         </div>
 
         {/* Shot Clock */}
         <div className="flex items-center gap-4 mb-8">
-          <div
+          <button
+            onClick={onEditShotClock}
+            disabled={!onEditShotClock}
             className={`text-center px-8 py-4 rounded-xl border-2 ${
-              shotClockSeconds <= 5 && isActive
+              (shotClockIsWarning || shotClockSeconds <= 5) && isActive
                 ? "bg-red-500/20 border-red-500 animate-pulse"
                 : "bg-surface-800 border-surface-700"
-            }`}
+            } ${onEditShotClock ? "hover:opacity-80 cursor-pointer" : ""}`}
+            title={onEditShotClock ? "Click to edit time" : undefined}
           >
             <div
               className={`font-mono font-bold text-6xl ${
-                shotClockSeconds <= 5 && isActive ? "text-red-500" : "text-amber-400"
+                (shotClockIsWarning || shotClockSeconds <= 5) && isActive
+                  ? "text-red-500"
+                  : "text-amber-400"
               }`}
             >
-              {shotClockSeconds}
+              {shotClockFormatted || shotClockSeconds}
             </div>
-            <p className="text-surface-400 text-sm mt-1 uppercase tracking-wider">Shot Clock</p>
-          </div>
+            <p className="text-surface-400 text-sm mt-1 uppercase tracking-wider">
+              Shot Clock {onEditShotClock && <span className="text-xs">(tap to edit)</span>}
+            </p>
+          </button>
 
           {/* Shot Clock Reset Buttons */}
           {onResetShotClock && (
@@ -130,6 +136,26 @@ export const ClockModeContent: React.FC<ClockModeContentProps> = ({
             </div>
           )}
         </div>
+
+        {/* Violation Button - appears for 5 seconds when shot clock hits 0 */}
+        {showViolationButton && onViolationPause && (
+          <div className="mb-6 animate-pulse">
+            <button
+              onClick={onViolationPause}
+              className="px-8 py-4 bg-red-600 hover:bg-red-500 text-white text-xl font-bold rounded-xl transition-colors shadow-lg border-2 border-red-400"
+            >
+              <div className="flex items-center gap-3">
+                <StopIcon className="w-8 h-8" />
+                <div className="text-left">
+                  <div>SHOT CLOCK VIOLATION</div>
+                  <div className="text-sm font-normal opacity-80">
+                    Tap to stop clock at {formatTime(violationGameTime ?? 0)}
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+        )}
 
         {/* Game Control Buttons */}
         <div className="flex gap-4">
@@ -160,49 +186,6 @@ export const ClockModeContent: React.FC<ClockModeContentProps> = ({
             >
               <StopIcon className="w-8 h-8" />
               End Period
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Score Display */}
-      <div className="grid grid-cols-3 gap-4">
-        {/* Away Team */}
-        <div className="bg-white dark:bg-surface-800 rounded-xl p-6 text-center border border-surface-200 dark:border-surface-700">
-          <p className="text-surface-500 dark:text-surface-400 text-sm font-semibold uppercase tracking-wider mb-2">
-            {awayTeamName}
-          </p>
-          <p className="text-5xl font-bold text-surface-900 dark:text-white">{awayScore}</p>
-          {onTimeoutAway && (
-            <button
-              onClick={onTimeoutAway}
-              disabled={awayTimeoutsRemaining === 0}
-              className="mt-4 px-4 py-2 bg-surface-200 dark:bg-surface-700 hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-900 dark:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Timeout ({awayTimeoutsRemaining})
-            </button>
-          )}
-        </div>
-
-        {/* VS / Clock Icon */}
-        <div className="flex flex-col items-center justify-center">
-          <ClockIcon className="w-12 h-12 text-surface-400 dark:text-surface-600" />
-          <span className="text-surface-400 dark:text-surface-500 text-2xl font-bold mt-2">VS</span>
-        </div>
-
-        {/* Home Team */}
-        <div className="bg-white dark:bg-surface-800 rounded-xl p-6 text-center border border-surface-200 dark:border-surface-700">
-          <p className="text-surface-500 dark:text-surface-400 text-sm font-semibold uppercase tracking-wider mb-2">
-            {homeTeamName}
-          </p>
-          <p className="text-5xl font-bold text-surface-900 dark:text-white">{homeScore}</p>
-          {onTimeoutHome && (
-            <button
-              onClick={onTimeoutHome}
-              disabled={homeTimeoutsRemaining === 0}
-              className="mt-4 px-4 py-2 bg-surface-200 dark:bg-surface-700 hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-900 dark:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Timeout ({homeTimeoutsRemaining})
             </button>
           )}
         </div>

@@ -150,11 +150,11 @@ export function QuickStatModal({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 bg-black/70 justify-end">
-        <View className="bg-surface-50 dark:bg-surface-800 rounded-t-2xl max-h-[70%] border-t border-surface-200 dark:border-surface-700">
+    <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
+      <View className="flex-1 bg-black/70 justify-center items-center px-4 py-2">
+        <View className="bg-surface-50 dark:bg-surface-800 rounded-2xl max-h-[96%] w-full max-w-lg border border-surface-200 dark:border-surface-700 overflow-hidden">
           {/* Header with stat type */}
-          <View className={`px-6 py-4 rounded-t-2xl ${config.bgClass}`}>
+          <View className={`px-6 py-4 ${config.bgClass}`}>
             <Text className="text-lg font-bold text-white">{config.label}</Text>
             <Text className="text-white/70 text-sm">Select player</Text>
           </View>

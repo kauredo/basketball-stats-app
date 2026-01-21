@@ -36,7 +36,7 @@ interface EnhancedScoreboardProps {
   homeTeamStats: TeamStats;
   awayTeamStats: TeamStats;
   timeoutsPerTeam: number;
-  onGameControl: (action: "start" | "pause" | "resume" | "end") => void;
+  onGameControl: (action: "start" | "pause" | "resume" | "end" | "reactivate") => void;
   onTimeoutHome?: () => void;
   onTimeoutAway?: () => void;
   onQuarterChange?: (quarter: number) => void;
@@ -61,6 +61,7 @@ export default function EnhancedScoreboard({
   isLandscape = false,
 }: EnhancedScoreboardProps) {
   const [showQuarterSelector, setShowQuarterSelector] = useState(false);
+  const [showEndPeriodModal, setShowEndPeriodModal] = useState(false);
 
   // Score animation
   const homeScoreScale = useSharedValue(1);
@@ -140,28 +141,89 @@ export default function EnhancedScoreboard({
   };
 
   const handleEndPeriodPress = () => {
-    if (onEndPeriod) {
-      // Use the proper end period flow
-      onEndPeriod();
-    } else {
-      // Fallback to direct end if no handler provided
-      Alert.alert("End Game", "Are you sure you want to end this game?", [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "End Game",
-          style: "destructive",
-          onPress: () => onGameControl("end"),
-        },
-      ]);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setShowEndPeriodModal(true);
+  };
+
+  const handleEndQuarter = () => {
+    setShowEndPeriodModal(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    // Advance to next quarter
+    if (onQuarterChange) {
+      onQuarterChange(game.currentQuarter + 1);
+    }
+    // Pause the game when ending quarter
+    if (game.status === "active") {
+      onGameControl("pause");
     }
   };
 
+  const handleEndHalf = () => {
+    setShowEndPeriodModal(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    // End of first half (Q2) → go to Q3, End of second half (Q4) → end game or OT
+    if (game.currentQuarter <= 2) {
+      // First half - advance to Q3
+      if (onQuarterChange) {
+        onQuarterChange(3);
+      }
+      if (game.status === "active") {
+        onGameControl("pause");
+      }
+    } else {
+      // Second half - this is essentially end game
+      onGameControl("end");
+    }
+  };
+
+  const handleEndGame = () => {
+    setShowEndPeriodModal(false);
+    Alert.alert("End Game", "Are you sure you want to end this game?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "End Game",
+        style: "destructive",
+        onPress: () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          onGameControl("end");
+        },
+      },
+    ]);
+  };
+
+  const getEndPeriodOptions = () => {
+    const quarter = game.currentQuarter;
+    const isFirstHalf = quarter <= 2;
+    const isOvertime = quarter > 4;
+
+    return {
+      quarterLabel: isOvertime ? `End OT${quarter - 4}` : `End Q${quarter}`,
+      halfLabel: isFirstHalf ? "End 1st Half" : "End 2nd Half",
+      showHalf: !isOvertime,
+    };
+  };
+
+  console.log(game.status);
   const isGameActive = game.status === "active";
   const isGamePaused = game.status === "paused";
   const canStart = game.status === "scheduled";
   const canPause = game.status === "active";
   const canResume = game.status === "paused";
   const canEndPeriod = game.status === "active" || game.status === "paused";
+  const canReactivate = game.status === "completed";
+
+  const handleReactivateGame = () => {
+    Alert.alert("Resume Game", "This game has ended. Do you want to resume it?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Resume Game",
+        onPress: () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          onGameControl("reactivate");
+        },
+      },
+    ]);
+  };
 
   // Get status badge styling
   const getStatusBadgeClass = () => {
@@ -283,6 +345,14 @@ export default function EnhancedScoreboard({
                   <Icon name="stop" size={14} color="#FFFFFF" />
                 </TouchableOpacity>
               )}
+              {canReactivate && (
+                <TouchableOpacity
+                  onPress={handleReactivateGame}
+                  className="bg-emerald-500 p-1.5 rounded-lg"
+                >
+                  <Icon name="refresh" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
@@ -369,6 +439,61 @@ export default function EnhancedScoreboard({
               </View>
               <TouchableOpacity onPress={() => setShowQuarterSelector(false)} className="mt-4 py-2">
                 <Text className="text-surface-500 text-center">Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Modal>
+
+        {/* End Period Modal - Landscape */}
+        <Modal visible={showEndPeriodModal} animationType="fade" transparent>
+          <Pressable
+            className="flex-1 bg-black/50 justify-center items-center"
+            onPress={() => setShowEndPeriodModal(false)}
+          >
+            <View className="bg-surface-50 dark:bg-surface-800 rounded-2xl p-4 mx-8 w-72">
+              <Text className="text-surface-900 dark:text-white text-lg font-bold text-center mb-2">
+                Stop Game
+              </Text>
+              <Text className="text-surface-500 dark:text-surface-400 text-sm text-center mb-4">
+                What would you like to do?
+              </Text>
+
+              {/* End Quarter Option */}
+              <TouchableOpacity
+                onPress={handleEndQuarter}
+                className="bg-amber-500 py-3 px-4 rounded-xl mb-2 flex-row items-center justify-center"
+              >
+                <Icon name="arrow-right" size={18} color="#FFFFFF" />
+                <Text className="text-white font-semibold text-base ml-2">
+                  {getEndPeriodOptions().quarterLabel}
+                </Text>
+              </TouchableOpacity>
+
+              {/* End Half Option (only show if not in overtime) */}
+              {getEndPeriodOptions().showHalf && (
+                <TouchableOpacity
+                  onPress={handleEndHalf}
+                  className="bg-orange-500 py-3 px-4 rounded-xl mb-2 flex-row items-center justify-center"
+                >
+                  <Icon name="pause" size={18} color="#FFFFFF" />
+                  <Text className="text-white font-semibold text-base ml-2">
+                    {getEndPeriodOptions().halfLabel}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {/* End Game Option */}
+              <TouchableOpacity
+                onPress={handleEndGame}
+                className="bg-red-500 py-3 px-4 rounded-xl mb-2 flex-row items-center justify-center"
+              >
+                <Icon name="stop" size={18} color="#FFFFFF" />
+                <Text className="text-white font-semibold text-base ml-2">End Game</Text>
+              </TouchableOpacity>
+
+              {/* Cancel */}
+              <TouchableOpacity onPress={() => setShowEndPeriodModal(false)} className="py-3 mt-1">
+                <Text className="text-surface-500 text-center font-medium">Cancel</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -463,6 +588,14 @@ export default function EnhancedScoreboard({
                 className="bg-red-500 px-4 py-2 rounded-lg"
               >
                 <Icon name="stop" size={16} color="#FFFFFF" />
+              </TouchableOpacity>
+            )}
+            {canReactivate && (
+              <TouchableOpacity
+                onPress={handleReactivateGame}
+                className="bg-emerald-500 px-4 py-2 rounded-lg"
+              >
+                <Icon name="refresh" size={16} color="#FFFFFF" />
               </TouchableOpacity>
             )}
           </View>
@@ -589,6 +722,61 @@ export default function EnhancedScoreboard({
             </View>
             <TouchableOpacity onPress={() => setShowQuarterSelector(false)} className="mt-4 py-2">
               <Text className="text-surface-500 text-center">Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* End Period Modal */}
+      <Modal visible={showEndPeriodModal} animationType="fade" transparent>
+        <Pressable
+          className="flex-1 bg-black/50 justify-center items-center"
+          onPress={() => setShowEndPeriodModal(false)}
+        >
+          <View className="bg-surface-50 dark:bg-surface-800 rounded-2xl p-4 mx-8 w-72">
+            <Text className="text-surface-900 dark:text-white text-lg font-bold text-center mb-2">
+              Stop Game
+            </Text>
+            <Text className="text-surface-500 dark:text-surface-400 text-sm text-center mb-4">
+              What would you like to do?
+            </Text>
+
+            {/* End Quarter Option */}
+            <TouchableOpacity
+              onPress={handleEndQuarter}
+              className="bg-amber-500 py-3 px-4 rounded-xl mb-2 flex-row items-center justify-center"
+            >
+              <Icon name="arrow-right" size={18} color="#FFFFFF" />
+              <Text className="text-white font-semibold text-base ml-2">
+                {getEndPeriodOptions().quarterLabel}
+              </Text>
+            </TouchableOpacity>
+
+            {/* End Half Option (only show if not in overtime) */}
+            {getEndPeriodOptions().showHalf && (
+              <TouchableOpacity
+                onPress={handleEndHalf}
+                className="bg-orange-500 py-3 px-4 rounded-xl mb-2 flex-row items-center justify-center"
+              >
+                <Icon name="pause" size={18} color="#FFFFFF" />
+                <Text className="text-white font-semibold text-base ml-2">
+                  {getEndPeriodOptions().halfLabel}
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {/* End Game Option */}
+            <TouchableOpacity
+              onPress={handleEndGame}
+              className="bg-red-500 py-3 px-4 rounded-xl mb-2 flex-row items-center justify-center"
+            >
+              <Icon name="stop" size={18} color="#FFFFFF" />
+              <Text className="text-white font-semibold text-base ml-2">End Game</Text>
+            </TouchableOpacity>
+
+            {/* Cancel */}
+            <TouchableOpacity onPress={() => setShowEndPeriodModal(false)} className="py-3 mt-1">
+              <Text className="text-surface-500 text-center font-medium">Cancel</Text>
             </TouchableOpacity>
           </View>
         </Pressable>

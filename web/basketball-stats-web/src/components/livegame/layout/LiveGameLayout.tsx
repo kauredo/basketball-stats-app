@@ -29,7 +29,7 @@ interface LiveGameLayoutProps {
   timeoutsPerTeam: number;
   activeMode: GameMode;
   onModeChange: (mode: GameMode) => void;
-  onGameControl: (action: "start" | "pause" | "resume" | "end") => void;
+  onGameControl: (action: "start" | "pause" | "resume" | "end" | "reactivate") => void;
   onTimeoutHome?: () => void;
   onTimeoutAway?: () => void;
   onQuarterChange?: (quarter: number) => void;

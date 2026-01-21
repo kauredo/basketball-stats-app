@@ -159,10 +159,10 @@ export default function FoulTypeModal({
   const isFoulLimitReached = player.fouls >= foulLimit - 1;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
       <View style={styles.overlay}>
         <View style={styles.container}>
-          {/* Header */}
+          {/* Header with Player Info */}
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               {step !== "foulType" && (
@@ -174,28 +174,22 @@ export default function FoulTypeModal({
                   }}
                   style={styles.backButton}
                 >
-                  <Icon name="arrow-left" size={20} color="#9CA3AF" />
+                  <Icon name="arrow-left" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
               )}
-              <Text style={styles.title}>FOUL</Text>
+              <View style={styles.playerNumber}>
+                <Text style={styles.playerNumberText}>#{player.number}</Text>
+              </View>
+              <View style={styles.playerDetails}>
+                <Text style={styles.playerName}>{player.name}</Text>
+                <Text style={[styles.playerFouls, isFoulLimitReached && styles.foulWarning]}>
+                  {player.fouls} fouls{isFoulLimitReached && " • FOUL TROUBLE"}
+                </Text>
+              </View>
             </View>
-            <TouchableOpacity onPress={handleClose}>
+            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
               <Icon name="close" size={24} color="#9CA3AF" />
             </TouchableOpacity>
-          </View>
-
-          {/* Player Info */}
-          <View style={styles.playerInfo}>
-            <View style={styles.playerNumber}>
-              <Text style={styles.playerNumberText}>#{player.number}</Text>
-            </View>
-            <View style={styles.playerDetails}>
-              <Text style={styles.playerName}>{player.name}</Text>
-              <Text style={[styles.playerFouls, isFoulLimitReached && styles.foulWarning]}>
-                Current fouls: {player.fouls}
-                {isFoulLimitReached && " (FOUL TROUBLE!)"}
-              </Text>
-            </View>
           </View>
 
           {/* Step Content */}
@@ -301,69 +295,69 @@ export default function FoulTypeModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   container: {
     backgroundColor: "#1F2937",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: "80%",
-    paddingBottom: 34,
+    borderRadius: 24,
+    maxHeight: "96%",
+    width: "100%",
+    maxWidth: 500,
+    paddingBottom: 16,
+    overflow: "hidden",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+    padding: 12,
+    backgroundColor: "#111827",
     borderBottomWidth: 1,
     borderBottomColor: "#374151",
   },
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    flex: 1,
+    gap: 10,
   },
   backButton: {
-    padding: 4,
+    padding: 8,
+    marginLeft: -8,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  playerInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    backgroundColor: "#111827",
+  closeButton: {
+    padding: 8,
+    marginRight: -4,
   },
   playerNumber: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "#F97316",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
   },
   playerNumberText: {
     color: "#FFFFFF",
     fontWeight: "700",
-    fontSize: 16,
+    fontSize: 14,
   },
   playerDetails: {
     flex: 1,
   },
   playerName: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
   },
   playerFouls: {
     color: "#9CA3AF",
-    fontSize: 13,
-    marginTop: 2,
+    fontSize: 12,
+    marginTop: 1,
   },
   foulWarning: {
     color: "#EF4444",
@@ -382,7 +376,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#111827",
     borderWidth: 2,
     borderRadius: 12,
-    padding: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     alignItems: "center",
   },
   foulButtonLabel: {

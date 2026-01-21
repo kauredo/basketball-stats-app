@@ -35,7 +35,9 @@ import ShotRecordingModal, { type OnCourtPlayer } from "../components/livegame/S
 import AssistPromptModal from "../components/livegame/AssistPromptModal";
 import ReboundPromptModal from "../components/livegame/ReboundPromptModal";
 import QuickStatModal, { type QuickStatType } from "../components/livegame/QuickStatModal";
+import TimeEditModal from "../components/livegame/TimeEditModal";
 import useSoundFeedback from "../hooks/useSoundFeedback";
+import useShotClock from "../hooks/useShotClock";
 
 type LiveGameRouteProp = RouteProp<RootStackParamList, "LiveGame">;
 
@@ -184,9 +186,6 @@ export default function LiveGameScreen() {
     "court"
   );
 
-  // Shot clock state
-  const [shotClockSeconds, setShotClockSeconds] = useState(24);
-
   // Court tap state - for ShotRecordingModal
   const [pendingShot, setPendingShot] = useState<PendingShot | null>(null);
   const [recentShots, setRecentShots] = useState<Array<{ x: number; y: number; made: boolean }>>(
@@ -209,6 +208,10 @@ export default function LiveGameScreen() {
   const [lastAction, setLastAction] = useState<LastAction | null>(null);
   const [showOvertimePrompt, setShowOvertimePrompt] = useState(false);
 
+  // Time edit states
+  const [showGameClockEdit, setShowGameClockEdit] = useState(false);
+  const [showShotClockEdit, setShowShotClockEdit] = useState(false);
+
   // Pre-game lineup selection state
   const [homeStarters, setHomeStarters] = useState<Id<"players">[]>([]);
   const [awayStarters, setAwayStarters] = useState<Id<"players">[]>([]);
@@ -226,11 +229,25 @@ export default function LiveGameScreen() {
     token && gameId ? { token, gameId } : "skip"
   );
 
+  // Shot clock synced with Convex
+  const shotClock = useShotClock({
+    gameId,
+    token: token ?? undefined,
+    serverSeconds: gameData?.game?.shotClockSeconds,
+    serverStartedAt: gameData?.game?.shotClockStartedAt,
+    serverIsRunning: gameData?.game?.shotClockIsRunning,
+    gameTimeRemainingSeconds: gameData?.game?.timeRemainingSeconds,
+    initialSeconds: 24,
+    offensiveReboundReset: 14,
+    warningThreshold: 5,
+  });
+
   // Mutations
   const startGame = useMutation(api.games.start);
   const pauseGame = useMutation(api.games.pause);
   const resumeGame = useMutation(api.games.resume);
   const endGame = useMutation(api.games.end);
+  const reactivateGame = useMutation(api.games.reactivate);
   const updateGameSettings = useMutation(api.games.updateGameSettings);
   const recordStat = useMutation(api.stats.recordStat);
   const substituteMutation = useMutation(api.stats.substitute);
@@ -241,6 +258,7 @@ export default function LiveGameScreen() {
   const undoStat = useMutation(api.stats.undoStat);
   const recordShotMutation = useMutation(api.shots.recordShot);
   const setQuarterMutation = useMutation(api.games.setQuarter);
+  const setGameTimeMutation = useMutation(api.games.setGameTime);
 
   const game = gameData?.game;
   const allStats = liveStats?.stats || [];
@@ -376,7 +394,7 @@ export default function LiveGameScreen() {
     game?.timeRemainingSeconds,
   ]);
 
-  const handleGameControl = async (action: "start" | "pause" | "resume" | "end") => {
+  const handleGameControl = async (action: "start" | "pause" | "resume" | "end" | "reactivate") => {
     if (!game || !token) return;
 
     try {
@@ -392,6 +410,9 @@ export default function LiveGameScreen() {
           break;
         case "end":
           await endGame({ token, gameId, forceEnd: true });
+          break;
+        case "reactivate":
+          await reactivateGame({ token, gameId });
           break;
       }
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -485,6 +506,29 @@ export default function LiveGameScreen() {
         },
       ]
     );
+  };
+
+  // Handle manual game clock edit
+  const handleSetGameTime = async (seconds: number) => {
+    if (!token || !gameId) return;
+    try {
+      await setGameTimeMutation({
+        token,
+        gameId,
+        timeRemainingSeconds: seconds,
+      });
+    } catch (error) {
+      console.error("Failed to set game time:", error);
+    }
+  };
+
+  // Handle manual shot clock edit
+  const handleSetShotClockTime = async (seconds: number) => {
+    try {
+      await shotClock.setTime(seconds);
+    } catch (error) {
+      console.error("Failed to set shot clock time:", error);
+    }
   };
 
   const handleRecordStat = async (
@@ -1134,7 +1178,7 @@ export default function LiveGameScreen() {
               />
               {!isLandscape && (
                 <Text
-                  className={`text-xs mt-1 font-medium ${
+                  className={`text-xs ml-1 font-medium ${
                     activeTab === tab.key ? "text-white" : "text-surface-600 dark:text-surface-400"
                   }`}
                 >
@@ -1160,15 +1204,13 @@ export default function LiveGameScreen() {
         <ScrollView
           className="flex-1 px-4"
           contentContainerStyle={{
-            flexGrow: isLandscape ? 0 : 1,
             paddingBottom: isLandscape ? 8 : 16,
-            minHeight: isLandscape ? undefined : "100%",
           }}
           showsVerticalScrollIndicator={isLandscape}
         >
           {/* Court Tab */}
           {activeTab === "court" && (
-            <View className={`flex-1 ${isLandscape ? "flex-row gap-2" : ""}`}>
+            <View className={isLandscape ? "flex-1 flex-row gap-3" : "flex-1"}>
               {/* Large Court for Shot Recording */}
               <View
                 className={`bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 ${
@@ -1194,7 +1236,7 @@ export default function LiveGameScreen() {
               {/* Stat Buttons Grid */}
               <View
                 className={`bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 ${
-                  isLandscape ? "w-40 p-2" : "p-4"
+                  isLandscape ? "w-36 p-2 justify-center" : "p-4"
                 }`}
               >
                 {!isLandscape && (
@@ -1202,16 +1244,17 @@ export default function LiveGameScreen() {
                     Quick Stats
                   </Text>
                 )}
-                <View className={isLandscape ? "flex-1 justify-center" : ""}>
-                  <View className={`${isLandscape ? "flex-col gap-1" : "flex-row mb-2"}`}>
-                    <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
+                {isLandscape ? (
+                  /* Landscape: Compact 2-column grid */
+                  <View className="gap-1">
+                    <View className="flex-row gap-1">
                       <StatButton
                         label="REB"
                         shortLabel="+R"
                         color="#2563EB"
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("rebound")}
-                        size={isLandscape ? "compact" : "normal"}
+                        size="compact"
                       />
                       <StatButton
                         label="AST"
@@ -1219,17 +1262,17 @@ export default function LiveGameScreen() {
                         color="#7C3AED"
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("assist")}
-                        size={isLandscape ? "compact" : "normal"}
+                        size="compact"
                       />
                     </View>
-                    <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
+                    <View className="flex-row gap-1">
                       <StatButton
                         label="STL"
                         shortLabel="+S"
                         color="#0891B2"
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("steal")}
-                        size={isLandscape ? "compact" : "normal"}
+                        size="compact"
                       />
                       <StatButton
                         label="BLK"
@@ -1237,19 +1280,17 @@ export default function LiveGameScreen() {
                         color="#0D9488"
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("block")}
-                        size={isLandscape ? "compact" : "normal"}
+                        size="compact"
                       />
                     </View>
-                  </View>
-                  <View className={`${isLandscape ? "flex-col gap-1" : "flex-row mb-2"}`}>
-                    <View className={isLandscape ? "flex-row" : "flex-1 flex-row"}>
+                    <View className="flex-row gap-1">
                       <StatButton
                         label="TO"
                         shortLabel="+T"
                         color="#F59E0B"
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("turnover")}
-                        size={isLandscape ? "compact" : "normal"}
+                        size="compact"
                       />
                       <StatButton
                         label="FOUL"
@@ -1257,188 +1298,447 @@ export default function LiveGameScreen() {
                         color="#DC2626"
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("foul")}
-                        size={isLandscape ? "compact" : "normal"}
+                        size="compact"
                       />
                     </View>
+                    <View className="flex-row gap-1">
+                      <StatButton
+                        label="FT"
+                        shortLabel="FT"
+                        color="#059669"
+                        disabled={!canRecordStats}
+                        onPress={() => setPendingQuickStat("freethrow")}
+                        size="compact"
+                      />
+                    </View>
+                    {/* Timeout Buttons - Landscape */}
+                    <View className="border-t border-surface-200 dark:border-surface-700 mt-1 pt-1 gap-1">
+                      <TouchableOpacity
+                        onPress={() => handleTimeout(false)}
+                        disabled={!canRecordStats || awayTeamStatsData.timeoutsRemaining === 0}
+                        className={`py-1.5 px-2 rounded-lg border border-surface-200 dark:border-surface-600 ${
+                          !canRecordStats || awayTeamStatsData.timeoutsRemaining === 0
+                            ? "opacity-50"
+                            : ""
+                        } bg-surface-100 dark:bg-surface-700`}
+                      >
+                        <Text className="text-surface-700 dark:text-surface-300 font-semibold text-xs text-center">
+                          {game.awayTeam?.name?.slice(0, 8) || "Away"} TO (
+                          {awayTeamStatsData.timeoutsRemaining})
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => handleTimeout(true)}
+                        disabled={!canRecordStats || homeTeamStatsData.timeoutsRemaining === 0}
+                        className={`py-1.5 px-2 rounded-lg border border-surface-200 dark:border-surface-600 ${
+                          !canRecordStats || homeTeamStatsData.timeoutsRemaining === 0
+                            ? "opacity-50"
+                            : ""
+                        } bg-surface-100 dark:bg-surface-700`}
+                      >
+                        <Text className="text-surface-700 dark:text-surface-300 font-semibold text-xs text-center">
+                          {game.homeTeam?.name?.slice(0, 8) || "Home"} TO (
+                          {homeTeamStatsData.timeoutsRemaining})
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <View className={`${isLandscape ? "flex-row" : "flex-row"}`}>
-                    <StatButton
-                      label="FREE THROW"
-                      shortLabel="FT"
-                      color="#059669"
-                      disabled={!canRecordStats}
-                      onPress={() => setPendingQuickStat("freethrow")}
-                      size={isLandscape ? "compact" : "normal"}
-                    />
+                ) : (
+                  /* Portrait: Original layout */
+                  <View>
+                    <View className="flex-row mb-2">
+                      <View className="flex-1 flex-row">
+                        <StatButton
+                          label="REB"
+                          shortLabel="+R"
+                          color="#2563EB"
+                          disabled={!canRecordStats}
+                          onPress={() => setPendingQuickStat("rebound")}
+                          size="normal"
+                        />
+                        <StatButton
+                          label="AST"
+                          shortLabel="+A"
+                          color="#7C3AED"
+                          disabled={!canRecordStats}
+                          onPress={() => setPendingQuickStat("assist")}
+                          size="normal"
+                        />
+                      </View>
+                      <View className="flex-1 flex-row">
+                        <StatButton
+                          label="STL"
+                          shortLabel="+S"
+                          color="#0891B2"
+                          disabled={!canRecordStats}
+                          onPress={() => setPendingQuickStat("steal")}
+                          size="normal"
+                        />
+                        <StatButton
+                          label="BLK"
+                          shortLabel="+B"
+                          color="#0D9488"
+                          disabled={!canRecordStats}
+                          onPress={() => setPendingQuickStat("block")}
+                          size="normal"
+                        />
+                      </View>
+                    </View>
+                    <View className="flex-row mb-2">
+                      <View className="flex-1 flex-row">
+                        <StatButton
+                          label="TO"
+                          shortLabel="+T"
+                          color="#F59E0B"
+                          disabled={!canRecordStats}
+                          onPress={() => setPendingQuickStat("turnover")}
+                          size="normal"
+                        />
+                        <StatButton
+                          label="FOUL"
+                          shortLabel="+F"
+                          color="#DC2626"
+                          disabled={!canRecordStats}
+                          onPress={() => setPendingQuickStat("foul")}
+                          size="normal"
+                        />
+                      </View>
+                    </View>
+                    <View className="flex-row">
+                      <StatButton
+                        label="FREE THROW"
+                        shortLabel="FT"
+                        color="#059669"
+                        disabled={!canRecordStats}
+                        onPress={() => setPendingQuickStat("freethrow")}
+                        size="normal"
+                      />
+                    </View>
+                    {/* Timeout Buttons - Portrait */}
+                    <View className="border-t border-surface-200 dark:border-surface-700 mt-3 pt-3">
+                      <View className="flex-row gap-2">
+                        <TouchableOpacity
+                          onPress={() => handleTimeout(false)}
+                          disabled={!canRecordStats || awayTeamStatsData.timeoutsRemaining === 0}
+                          className={`flex-1 py-2 px-3 rounded-lg border border-surface-200 dark:border-surface-600 ${
+                            !canRecordStats || awayTeamStatsData.timeoutsRemaining === 0
+                              ? "opacity-50"
+                              : ""
+                          } bg-surface-100 dark:bg-surface-700`}
+                        >
+                          <Text className="text-surface-500 dark:text-surface-400 text-[10px] uppercase tracking-wide text-center">
+                            {game.awayTeam?.name || "Away"}
+                          </Text>
+                          <Text className="text-surface-700 dark:text-surface-300 font-semibold text-sm text-center">
+                            TO ({awayTeamStatsData.timeoutsRemaining})
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => handleTimeout(true)}
+                          disabled={!canRecordStats || homeTeamStatsData.timeoutsRemaining === 0}
+                          className={`flex-1 py-2 px-3 rounded-lg border border-surface-200 dark:border-surface-600 ${
+                            !canRecordStats || homeTeamStatsData.timeoutsRemaining === 0
+                              ? "opacity-50"
+                              : ""
+                          } bg-surface-100 dark:bg-surface-700`}
+                        >
+                          <Text className="text-surface-500 dark:text-surface-400 text-[10px] uppercase tracking-wide text-center">
+                            {game.homeTeam?.name || "Home"}
+                          </Text>
+                          <Text className="text-surface-700 dark:text-surface-300 font-semibold text-sm text-center">
+                            TO ({homeTeamStatsData.timeoutsRemaining})
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
                   </View>
-                </View>
+                )}
               </View>
             </View>
           )}
 
           {/* Clock Tab */}
           {activeTab === "clock" && (
-            <View className={`flex-1 ${isLandscape ? "flex-row gap-4" : ""}`}>
+            <View className="flex-1">
               {/* Main Clock Display */}
               <View
-                className={`bg-surface-900 rounded-2xl p-6 items-center justify-center ${
-                  isLandscape ? "flex-1" : "mb-4"
+                className={`bg-surface-900 rounded-2xl items-center justify-center flex-1 ${
+                  isLandscape ? "p-4" : "p-6"
                 }`}
               >
-                {/* Quarter Badge */}
-                <View className="bg-primary-500 px-4 py-2 rounded-full mb-4">
-                  <Text className="text-white text-lg font-bold">
-                    {game.currentQuarter <= 4
-                      ? `Q${game.currentQuarter}`
-                      : `OT${game.currentQuarter - 4}`}
-                  </Text>
-                </View>
+                {isLandscape ? (
+                  /* Landscape: Inline layout - Quarter | Game Clock | Shot Clock | Controls */
+                  <View className="flex-row items-center justify-center gap-6 w-full">
+                    {/* Quarter Badge */}
+                    <View className="bg-primary-500 rounded-full px-4 py-2">
+                      <Text className="text-white font-bold text-lg">
+                        {game.currentQuarter <= 4
+                          ? `Q${game.currentQuarter}`
+                          : `OT${game.currentQuarter - 4}`}
+                      </Text>
+                    </View>
 
-                {/* Game Clock */}
-                <Text
-                  className={`font-mono font-bold text-white ${
-                    game.timeRemainingSeconds <= 60 && isGameActive ? "text-red-500" : ""
-                  }`}
-                  style={{ fontSize: isLandscape ? 72 : 80 }}
-                >
-                  {Math.floor(game.timeRemainingSeconds / 60)}:
-                  {(game.timeRemainingSeconds % 60).toString().padStart(2, "0")}
-                </Text>
-                <Text className="text-surface-400 text-sm mt-2 uppercase tracking-widest">
-                  Game Clock
-                </Text>
-
-                {/* Shot Clock */}
-                <View className="flex-row items-center gap-4 mt-6">
-                  <View
-                    className={`px-8 py-4 rounded-xl border-2 ${
-                      shotClockSeconds <= 5 && isGameActive
-                        ? "bg-red-500/20 border-red-500"
-                        : "bg-surface-800 border-surface-700"
-                    }`}
-                  >
-                    <Text
-                      className={`font-mono font-bold text-5xl ${
-                        shotClockSeconds <= 5 && isGameActive ? "text-red-500" : "text-amber-400"
-                      }`}
-                    >
-                      {shotClockSeconds}
-                    </Text>
-                    <Text className="text-surface-400 text-xs mt-1 uppercase tracking-wider text-center">
-                      Shot Clock
-                    </Text>
-                  </View>
-
-                  {/* Shot Clock Reset Buttons */}
-                  <View className="gap-2">
+                    {/* Game Clock */}
                     <TouchableOpacity
-                      onPress={() => {
-                        setShotClockSeconds(24);
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                      }}
-                      className="bg-amber-600 px-4 py-3 rounded-lg"
+                      onPress={() => setShowGameClockEdit(true)}
+                      activeOpacity={0.7}
+                      className="items-center"
                     >
-                      <Text className="text-white font-bold text-lg">24</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setShotClockSeconds(14);
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                      }}
-                      className="bg-amber-700 px-4 py-3 rounded-lg"
-                    >
-                      <Text className="text-white font-bold text-lg">14</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                {/* Game Controls */}
-                <View className="flex-row gap-3 mt-6">
-                  {isGameActive && (
-                    <TouchableOpacity
-                      onPress={() => handleGameControl("pause")}
-                      className="bg-amber-600 px-6 py-3 rounded-xl flex-row items-center"
-                    >
-                      <Icon name="pause" size={24} color="#FFFFFF" />
-                      <Text className="text-white text-lg font-bold ml-2">Pause</Text>
-                    </TouchableOpacity>
-                  )}
-                  {isGamePaused && (
-                    <>
-                      <TouchableOpacity
-                        onPress={() => handleGameControl("resume")}
-                        className="bg-green-600 px-6 py-3 rounded-xl flex-row items-center"
+                      <Text
+                        className={`font-mono font-bold ${
+                          game.timeRemainingSeconds <= 60 && isGameActive
+                            ? "text-red-500"
+                            : "text-white"
+                        }`}
+                        style={{ fontSize: 56 }}
                       >
-                        <Icon name="play" size={24} color="#FFFFFF" />
-                        <Text className="text-white text-lg font-bold ml-2">Resume</Text>
-                      </TouchableOpacity>
+                        {Math.floor(game.timeRemainingSeconds / 60)}:
+                        {(game.timeRemainingSeconds % 60).toString().padStart(2, "0")}
+                      </Text>
+                      <Text className="text-surface-500 text-[10px] uppercase tracking-wider">
+                        Game
+                      </Text>
+                    </TouchableOpacity>
+
+                    {/* Divider */}
+                    <View className="w-px h-16 bg-surface-700" />
+
+                    {/* Shot Clock + Reset */}
+                    <View className="flex-row items-center gap-3">
                       <TouchableOpacity
-                        onPress={handleEndPeriod}
-                        className="bg-red-600 px-6 py-3 rounded-xl flex-row items-center"
+                        onPress={() => setShowShotClockEdit(true)}
+                        activeOpacity={0.7}
+                        className={`px-5 py-3 rounded-xl border-2 items-center ${
+                          (shotClock.isWarning || shotClock.displaySeconds <= 5) && isGameActive
+                            ? "bg-red-500/20 border-red-500"
+                            : "bg-surface-800 border-surface-700"
+                        }`}
                       >
-                        <Icon name="stop" size={24} color="#FFFFFF" />
-                        <Text className="text-white text-lg font-bold ml-2">End Period</Text>
+                        <Text
+                          className={`font-mono font-bold text-4xl ${
+                            (shotClock.isWarning || shotClock.displaySeconds <= 5) && isGameActive
+                              ? "text-red-500"
+                              : "text-amber-400"
+                          }`}
+                        >
+                          {shotClock.formattedTime}
+                        </Text>
+                        <Text className="text-surface-500 text-[10px] uppercase tracking-wider">
+                          Shot
+                        </Text>
                       </TouchableOpacity>
-                    </>
-                  )}
-                </View>
-              </View>
+                      <View className="gap-1">
+                        <TouchableOpacity
+                          onPress={() => {
+                            shotClock.reset();
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                          }}
+                          className="bg-amber-600 px-3 py-2 rounded-lg"
+                        >
+                          <Text className="text-white font-bold text-base">24</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            shotClock.resetOffensiveRebound();
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                          }}
+                          className="bg-amber-700 px-3 py-2 rounded-lg"
+                        >
+                          <Text className="text-white font-bold text-base">14</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
 
-              {/* Score Display (shown in landscape or below clock in portrait) */}
-              <View
-                className={`bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700 ${isLandscape ? "w-56" : ""}`}
-              >
-                <Text className="text-surface-500 dark:text-surface-400 text-sm font-semibold uppercase tracking-wider text-center mb-4">
-                  Score
-                </Text>
-                {/* Away Team */}
-                <View className="items-center mb-4 pb-4 border-b border-surface-200 dark:border-surface-700">
-                  <Text className="text-surface-500 dark:text-surface-400 text-xs mb-1">
-                    {game.awayTeam?.name || "Away"}
-                  </Text>
-                  <Text className="text-surface-900 dark:text-white text-4xl font-bold">
-                    {game.awayScore}
-                  </Text>
-                </View>
-                {/* Home Team */}
-                <View className="items-center">
-                  <Text className="text-surface-500 dark:text-surface-400 text-xs mb-1">
-                    {game.homeTeam?.name || "Home"}
-                  </Text>
-                  <Text className="text-surface-900 dark:text-white text-4xl font-bold">
-                    {game.homeScore}
-                  </Text>
-                </View>
+                    {/* Divider */}
+                    <View className="w-px h-16 bg-surface-700" />
 
-                {/* Timeout Buttons */}
-                <View className="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
-                  <TouchableOpacity
-                    onPress={() => handleTimeout(false)}
-                    disabled={awayTeamStatsData.timeoutsRemaining === 0}
-                    className={`py-2 px-4 rounded-lg mb-2 ${
-                      awayTeamStatsData.timeoutsRemaining === 0
-                        ? "bg-surface-200 dark:bg-surface-700 opacity-50"
-                        : "bg-surface-200 dark:bg-surface-700"
-                    }`}
-                  >
-                    <Text className="text-surface-900 dark:text-white text-center text-sm">
-                      {game.awayTeam?.name} TO ({awayTeamStatsData.timeoutsRemaining})
+                    {/* Game Controls */}
+                    <View className="flex-row gap-4">
+                      {isGameActive && (
+                        <TouchableOpacity
+                          onPress={() => handleGameControl("pause")}
+                          className="bg-amber-600 px-6 py-3 rounded-xl flex-row items-center"
+                        >
+                          <Icon name="pause" size={20} color="#FFFFFF" />
+                          <Text className="text-white font-bold ml-2">Pause</Text>
+                        </TouchableOpacity>
+                      )}
+                      {isGamePaused && (
+                        <TouchableOpacity
+                          onPress={() => handleGameControl("resume")}
+                          className="bg-green-600 px-6 py-3 rounded-xl flex-row items-center"
+                        >
+                          <Icon name="play" size={20} color="#FFFFFF" />
+                          <Text className="text-white font-bold ml-2">Resume</Text>
+                        </TouchableOpacity>
+                      )}
+                      {isGamePaused && (
+                        <TouchableOpacity
+                          onPress={handleEndPeriod}
+                          className="bg-red-600 px-6 py-3 rounded-xl flex-row items-center"
+                        >
+                          <Icon name="stop" size={20} color="#FFFFFF" />
+                          <Text className="text-white font-bold ml-2">End</Text>
+                        </TouchableOpacity>
+                      )}
+                      {!isGameActive && !isGamePaused && (
+                        <TouchableOpacity
+                          onPress={() => handleGameControl("start")}
+                          className="bg-green-600 px-6 py-3 rounded-xl flex-row items-center"
+                        >
+                          <Icon name="play" size={20} color="#FFFFFF" />
+                          <Text className="text-white font-bold ml-2">Start</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </View>
+                ) : (
+                  /* Portrait: Stacked layout */
+                  <>
+                    {/* Quarter Badge */}
+                    <View className="bg-primary-500 px-4 py-2 rounded-full mb-4">
+                      <Text className="text-white text-lg font-bold">
+                        {game.currentQuarter <= 4
+                          ? `Q${game.currentQuarter}`
+                          : `OT${game.currentQuarter - 4}`}
+                      </Text>
+                    </View>
+
+                    {/* Game Clock */}
+                    <TouchableOpacity
+                      onPress={() => setShowGameClockEdit(true)}
+                      activeOpacity={0.7}
+                    >
+                      <Text
+                        className={`font-mono font-bold text-white ${
+                          game.timeRemainingSeconds <= 60 && isGameActive ? "text-red-500" : ""
+                        }`}
+                        style={{ fontSize: 80 }}
+                      >
+                        {Math.floor(game.timeRemainingSeconds / 60)}:
+                        {(game.timeRemainingSeconds % 60).toString().padStart(2, "0")}
+                      </Text>
+                    </TouchableOpacity>
+                    <Text className="text-surface-400 text-sm mt-2 uppercase tracking-widest">
+                      Game Clock (tap to edit)
                     </Text>
-                  </TouchableOpacity>
+
+                    {/* Shot Clock */}
+                    <View className="flex-row items-center gap-4 mt-6">
+                      <TouchableOpacity
+                        onPress={() => setShowShotClockEdit(true)}
+                        activeOpacity={0.7}
+                        className={`px-8 py-4 rounded-xl border-2 ${
+                          (shotClock.isWarning || shotClock.displaySeconds <= 5) && isGameActive
+                            ? "bg-red-500/20 border-red-500"
+                            : "bg-surface-800 border-surface-700"
+                        }`}
+                      >
+                        <Text
+                          className={`font-mono font-bold text-5xl ${
+                            (shotClock.isWarning || shotClock.displaySeconds <= 5) && isGameActive
+                              ? "text-red-500"
+                              : "text-amber-400"
+                          }`}
+                        >
+                          {shotClock.formattedTime}
+                        </Text>
+                        <Text className="text-surface-400 text-xs mt-1 uppercase tracking-wider text-center">
+                          Shot Clock
+                        </Text>
+                      </TouchableOpacity>
+                      <View className="gap-2">
+                        <TouchableOpacity
+                          onPress={() => {
+                            shotClock.reset();
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                          }}
+                          className="bg-amber-600 px-4 py-3 rounded-lg"
+                        >
+                          <Text className="text-white font-bold text-lg">24</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            shotClock.resetOffensiveRebound();
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                          }}
+                          className="bg-amber-700 px-4 py-3 rounded-lg"
+                        >
+                          <Text className="text-white font-bold text-lg">14</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+
+                    {/* Violation Button */}
+                    {shotClock.showViolationButton && (
+                      <TouchableOpacity
+                        onPress={shotClock.handleViolationPause}
+                        className="mt-4 px-6 py-4 bg-red-600 rounded-xl border-2 border-red-400"
+                      >
+                        <View className="flex-row items-center justify-center gap-3">
+                          <Icon name="stop" size={28} color="#FFFFFF" />
+                          <View>
+                            <Text className="text-white text-lg font-bold">
+                              SHOT CLOCK VIOLATION
+                            </Text>
+                            <Text className="text-white/80 text-sm">
+                              Tap to stop at {Math.floor((shotClock.violationGameTime ?? 0) / 60)}:
+                              {String((shotClock.violationGameTime ?? 0) % 60).padStart(2, "0")}
+                            </Text>
+                          </View>
+                        </View>
+                      </TouchableOpacity>
+                    )}
+
+                    {/* Game Controls */}
+                    <View className="flex-row gap-3 mt-6">
+                      {isGameActive && (
+                        <TouchableOpacity
+                          onPress={() => handleGameControl("pause")}
+                          className="bg-amber-600 px-6 py-3 rounded-xl flex-row items-center"
+                        >
+                          <Icon name="pause" size={24} color="#FFFFFF" />
+                          <Text className="text-white text-lg font-bold ml-2">Pause</Text>
+                        </TouchableOpacity>
+                      )}
+                      {isGamePaused && (
+                        <View className="flex-row gap-3">
+                          <TouchableOpacity
+                            onPress={() => handleGameControl("resume")}
+                            className="bg-green-600 px-6 py-3 rounded-xl flex-row items-center"
+                          >
+                            <Icon name="play" size={24} color="#FFFFFF" />
+                            <Text className="text-white text-lg font-bold ml-2">Resume</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={handleEndPeriod}
+                            className="bg-red-600 px-6 py-3 rounded-xl flex-row items-center"
+                          >
+                            <Icon name="stop" size={24} color="#FFFFFF" />
+                            <Text className="text-white text-lg font-bold ml-2">End Period</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
+                  </>
+                )}
+
+                {/* Violation Button for landscape */}
+                {isLandscape && shotClock.showViolationButton && (
                   <TouchableOpacity
-                    onPress={() => handleTimeout(true)}
-                    disabled={homeTeamStatsData.timeoutsRemaining === 0}
-                    className={`py-2 px-4 rounded-lg ${
-                      homeTeamStatsData.timeoutsRemaining === 0
-                        ? "bg-surface-200 dark:bg-surface-700 opacity-50"
-                        : "bg-surface-200 dark:bg-surface-700"
-                    }`}
+                    onPress={shotClock.handleViolationPause}
+                    className="mt-3 px-4 py-2 bg-red-600 rounded-xl border-2 border-red-400"
                   >
-                    <Text className="text-surface-900 dark:text-white text-center text-sm">
-                      {game.homeTeam?.name} TO ({homeTeamStatsData.timeoutsRemaining})
-                    </Text>
+                    <View className="flex-row items-center justify-center gap-2">
+                      <Icon name="stop" size={20} color="#FFFFFF" />
+                      <Text className="text-white font-bold">
+                        VIOLATION - Tap to stop at{" "}
+                        {Math.floor((shotClock.violationGameTime ?? 0) / 60)}:
+                        {String((shotClock.violationGameTime ?? 0) % 60).padStart(2, "0")}
+                      </Text>
+                    </View>
                   </TouchableOpacity>
-                </View>
+                )}
               </View>
             </View>
           )}
@@ -1796,6 +2096,26 @@ export default function LiveGameScreen() {
         onStartOvertime={handleStartOvertime}
         onEndAsTie={handleEndAsTie}
         onDismiss={() => setShowOvertimePrompt(false)}
+      />
+
+      {/* Time Edit Modals */}
+      <TimeEditModal
+        visible={showGameClockEdit}
+        onClose={() => setShowGameClockEdit(false)}
+        currentSeconds={game.timeRemainingSeconds}
+        onSave={handleSetGameTime}
+        title="Edit Game Clock"
+        mode="game"
+      />
+
+      <TimeEditModal
+        visible={showShotClockEdit}
+        onClose={() => setShowShotClockEdit(false)}
+        currentSeconds={shotClock.seconds}
+        maxSeconds={24}
+        onSave={handleSetShotClockTime}
+        title="Edit Shot Clock"
+        mode="shot"
       />
 
       {/* Quick Undo FAB */}

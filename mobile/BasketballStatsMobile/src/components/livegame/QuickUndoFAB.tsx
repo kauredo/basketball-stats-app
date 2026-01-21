@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
+import { View, Text, TouchableOpacity, useColorScheme, useWindowDimensions } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withTiming,
   runOnJS,
+  Easing,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
@@ -52,10 +53,13 @@ export default function QuickUndoFAB({
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const dismissIconColor = isDark ? "#a69f96" : "#7a746c"; // surface-500/600
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const isLandscape = screenWidth > screenHeight;
 
   const translateY = useSharedValue(100);
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(0);
+  const progressWidth = useSharedValue(100); // Percentage for progress bar
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -65,9 +69,16 @@ export default function QuickUndoFAB({
         clearTimeout(timeoutRef.current);
       }
 
-      // Show animation
+      // Reset and show animation
+      progressWidth.value = 100;
       translateY.value = withSpring(0, { damping: 15 });
       opacity.value = withTiming(1, { duration: 200 });
+
+      // Animate progress bar from 100% to 0%
+      progressWidth.value = withTiming(0, {
+        duration: autoDismissMs,
+        easing: Easing.linear,
+      });
 
       // Auto-dismiss after autoDismissMs
       timeoutRef.current = setTimeout(() => {
@@ -77,6 +88,7 @@ export default function QuickUndoFAB({
       // Hide immediately
       translateY.value = 100;
       opacity.value = 0;
+      progressWidth.value = 100;
     }
 
     return () => {
@@ -129,15 +141,25 @@ export default function QuickUndoFAB({
     opacity: opacity.value,
   }));
 
+  const progressBarStyle = useAnimatedStyle(() => ({
+    width: `${progressWidth.value}%`,
+  }));
+
   if (!action) return null;
 
   const statLabel = STAT_TYPE_LABELS[action.statType] || action.statType.toUpperCase();
   const madeText = action.wasMade !== undefined ? (action.wasMade ? " Made" : " Missed") : "";
 
+  // Position: centered horizontally, near bottom but above safe area
+  // In landscape, position more towards center-bottom to avoid buttons
+  const positionClass = isLandscape
+    ? "absolute bottom-4 left-1/2 -translate-x-1/2 w-80"
+    : "absolute bottom-6 left-4 right-4";
+
   return (
     <GestureDetector gesture={swipeGesture}>
       <Animated.View
-        className="absolute bottom-24 left-4 right-4 bg-surface-50 dark:bg-surface-900 rounded-xl overflow-hidden shadow-2xl border border-surface-200 dark:border-surface-700"
+        className={`${positionClass} bg-surface-50 dark:bg-surface-900 rounded-xl overflow-hidden shadow-2xl border border-surface-200 dark:border-surface-700`}
         style={animatedStyle}
       >
         <View className="flex-row items-center p-3 pr-2">
@@ -177,9 +199,9 @@ export default function QuickUndoFAB({
           </TouchableOpacity>
         </View>
 
-        {/* Progress Bar */}
+        {/* Animated Progress Bar */}
         <View className="h-1 bg-surface-100 dark:bg-surface-800">
-          <View className="h-full bg-orange-500 w-full" />
+          <Animated.View className="h-full bg-orange-500" style={progressBarStyle} />
         </View>
       </Animated.View>
     </GestureDetector>

@@ -192,6 +192,10 @@ export const get = query({
       })
     );
 
+    // Shot clock state - return raw values, client calculates current time
+    const shotClockSeconds = game.shotClockSeconds ?? 24;
+    const shotClockIsRunning = !!game.shotClockStartedAt;
+
     return {
       game: {
         id: game._id,
@@ -205,6 +209,10 @@ export const get = query({
         homeScore: game.homeScore,
         awayScore: game.awayScore,
         gameSettings: game.gameSettings,
+        // Shot clock state for cross-instance sync
+        shotClockSeconds,
+        shotClockStartedAt: game.shotClockStartedAt,
+        shotClockIsRunning,
         homeTeam: homeTeam
           ? {
               id: homeTeam._id,
@@ -417,9 +425,15 @@ export const start = mutation({
       }
     }
 
+    const now = Date.now();
+    const shotClockSeconds = game.shotClockSeconds ?? 24;
+
     await ctx.db.patch(args.gameId, {
       status: "active",
-      startedAt: game.startedAt || Date.now(),
+      startedAt: game.startedAt || now,
+      // Also start shot clock
+      shotClockSeconds,
+      shotClockStartedAt: now,
     });
 
     // Schedule the first timer tick
@@ -453,8 +467,18 @@ export const pause = mutation({
       throw new Error("Game is not active");
     }
 
+    // Calculate current shot clock value before pausing
+    let shotClockSeconds = game.shotClockSeconds ?? 24;
+    if (game.shotClockStartedAt) {
+      const elapsed = (Date.now() - game.shotClockStartedAt) / 1000;
+      shotClockSeconds = Math.max(0, shotClockSeconds - elapsed);
+    }
+
     await ctx.db.patch(args.gameId, {
       status: "paused",
+      // Pause shot clock (store current value, clear start time)
+      shotClockSeconds,
+      shotClockStartedAt: undefined,
     });
 
     // Timer tick will see paused status and stop
@@ -485,8 +509,14 @@ export const resume = mutation({
       throw new Error("Game is not paused");
     }
 
+    const now = Date.now();
+    const shotClockSeconds = game.shotClockSeconds ?? 24;
+
     await ctx.db.patch(args.gameId, {
       status: "active",
+      // Resume shot clock from current value
+      shotClockSeconds,
+      shotClockStartedAt: now,
     });
 
     // Resume timer ticks
@@ -533,6 +563,38 @@ export const end = mutation({
     });
 
     return { message: "Game ended", status: "completed" };
+  },
+});
+
+// Reactivate a completed game (allows resuming accidentally ended games)
+export const reactivate = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    if (game.status !== "completed") {
+      throw new Error("Game is not completed");
+    }
+
+    // Reactivate the game in paused state so user can review before resuming
+    await ctx.db.patch(args.gameId, {
+      status: "paused",
+      endedAt: undefined,
+    });
+
+    return { message: "Game reactivated", status: "paused" };
   },
 });
 
@@ -1275,5 +1337,181 @@ export const addGameNote = mutation({
     });
 
     return { message: "Note added" };
+  },
+});
+
+// Retroactive pause - pause game and set time to a specific value
+// Used for shot clock violations where the game clock should stop at violation moment
+export const retroactivePause = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    timeRemainingSeconds: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    // Calculate current shot clock value before pausing
+    let shotClockSeconds = game.shotClockSeconds ?? 24;
+    if (game.shotClockStartedAt) {
+      const elapsed = (Date.now() - game.shotClockStartedAt) / 1000;
+      shotClockSeconds = Math.max(0, shotClockSeconds - elapsed);
+    }
+
+    await ctx.db.patch(args.gameId, {
+      status: "paused",
+      timeRemainingSeconds: Math.max(0, args.timeRemainingSeconds),
+      // Also pause shot clock
+      shotClockSeconds,
+      shotClockStartedAt: undefined,
+    });
+
+    return {
+      message: "Game paused retroactively",
+      status: "paused",
+      timeRemainingSeconds: args.timeRemainingSeconds,
+    };
+  },
+});
+
+// =====================
+// Shot Clock Mutations
+// =====================
+
+// Start the shot clock
+export const startShotClock = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    // Only start if not already running
+    if (game.shotClockStartedAt) {
+      return { message: "Shot clock already running" };
+    }
+
+    const currentSeconds = game.shotClockSeconds ?? 24;
+
+    await ctx.db.patch(args.gameId, {
+      shotClockSeconds: currentSeconds,
+      shotClockStartedAt: Date.now(),
+    });
+
+    return { message: "Shot clock started", seconds: currentSeconds };
+  },
+});
+
+// Pause the shot clock
+export const pauseShotClock = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    // Calculate current seconds remaining
+    let currentSeconds = game.shotClockSeconds ?? 24;
+    if (game.shotClockStartedAt) {
+      const elapsed = (Date.now() - game.shotClockStartedAt) / 1000;
+      currentSeconds = Math.max(0, currentSeconds - elapsed);
+    }
+
+    await ctx.db.patch(args.gameId, {
+      shotClockSeconds: currentSeconds,
+      shotClockStartedAt: undefined,
+    });
+
+    return { message: "Shot clock paused", seconds: currentSeconds };
+  },
+});
+
+// Reset shot clock to 24 seconds (or custom value)
+export const resetShotClock = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    seconds: v.optional(v.number()),
+    autoStart: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    const newSeconds = args.seconds ?? 24;
+    const shouldStart = args.autoStart && game.status === "active";
+
+    await ctx.db.patch(args.gameId, {
+      shotClockSeconds: newSeconds,
+      shotClockStartedAt: shouldStart ? Date.now() : undefined,
+    });
+
+    return { message: "Shot clock reset", seconds: newSeconds, isRunning: shouldStart };
+  },
+});
+
+/**
+ * Set the game clock time manually (for corrections during game)
+ */
+export const setGameTime = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    timeRemainingSeconds: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const hasAccess = await canAccessLeague(ctx, user._id, game.leagueId);
+    if (!hasAccess) throw new Error("Access denied");
+
+    const newTime = Math.max(0, Math.floor(args.timeRemainingSeconds));
+
+    await ctx.db.patch(args.gameId, {
+      timeRemainingSeconds: newTime,
+    });
+
+    return { message: "Game time updated", timeRemainingSeconds: newTime };
   },
 });

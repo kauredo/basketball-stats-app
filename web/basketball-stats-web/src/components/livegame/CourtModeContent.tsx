@@ -25,6 +25,12 @@ interface CourtModeContentProps {
   // Stat recording
   onStatSelect: (statType: StatType) => void;
 
+  // Timeouts
+  homeTimeoutsRemaining?: number;
+  awayTimeoutsRemaining?: number;
+  onTimeoutHome?: () => void;
+  onTimeoutAway?: () => void;
+
   // Substitution
   swappingPlayer: Id<"players"> | null;
   onSwap: (playerOut: Id<"players">, playerIn: Id<"players">) => void;
@@ -57,6 +63,10 @@ export const CourtModeContent: React.FC<CourtModeContentProps> = ({
   onToggleHeatMap,
   allShots = [],
   onStatSelect,
+  homeTimeoutsRemaining,
+  awayTimeoutsRemaining,
+  onTimeoutHome,
+  onTimeoutAway,
   swappingPlayer,
   onSwap,
   onSubIn,
@@ -120,6 +130,38 @@ export const CourtModeContent: React.FC<CourtModeContentProps> = ({
               <div className="h-px flex-1 mx-2 sm:mx-3 bg-gradient-to-r from-surface-200 dark:from-surface-700 to-transparent" />
             </div>
             <QuickStatButtonGrid onStatSelect={onStatSelect} disabled={disabled} />
+
+            {/* Timeout Buttons */}
+            {(onTimeoutHome || onTimeoutAway) && (
+              <div className="mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
+                <div className="flex gap-2">
+                  {onTimeoutAway && (
+                    <button
+                      onClick={onTimeoutAway}
+                      disabled={disabled || awayTimeoutsRemaining === 0}
+                      className="flex-1 py-2.5 px-3 bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 font-semibold text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-surface-200 dark:border-surface-600"
+                    >
+                      <span className="block text-[10px] text-surface-500 dark:text-surface-400 uppercase tracking-wide mb-0.5">
+                        {awayTeamName}
+                      </span>
+                      Timeout ({awayTimeoutsRemaining ?? 0})
+                    </button>
+                  )}
+                  {onTimeoutHome && (
+                    <button
+                      onClick={onTimeoutHome}
+                      disabled={disabled || homeTimeoutsRemaining === 0}
+                      className="flex-1 py-2.5 px-3 bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 font-semibold text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-surface-200 dark:border-surface-600"
+                    >
+                      <span className="block text-[10px] text-surface-500 dark:text-surface-400 uppercase tracking-wide mb-0.5">
+                        {homeTeamName}
+                      </span>
+                      Timeout ({homeTimeoutsRemaining ?? 0})
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

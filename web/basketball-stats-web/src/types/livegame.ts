@@ -308,7 +308,7 @@ export interface ScoreboardProps {
   homeTeamStats: TeamStatsData;
   awayTeamStats: TeamStatsData;
   timeoutsPerTeam: number;
-  onGameControl: (action: "start" | "pause" | "resume" | "end") => void;
+  onGameControl: (action: "start" | "pause" | "resume" | "end" | "reactivate") => void;
   onTimeoutHome?: () => void;
   onTimeoutAway?: () => void;
   onQuarterChange?: (quarter: number) => void;

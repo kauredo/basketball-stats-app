@@ -59,11 +59,14 @@ export function MiniCourt({
   let courtHeight: number;
 
   if (isLandscape) {
-    // Account for scoreboard (~60px), tabs (~40px), safe areas (~40px), and padding
-    const availableHeight = screenHeight - 160;
-    courtHeight = Math.min(availableHeight * 0.85, 220);
+    // In landscape, maximize court size while leaving room for buttons panel
+    // Account for scoreboard (~50px), tabs (~36px), safe areas (~20px), and padding (~16px)
+    const availableHeight = screenHeight - 122;
+    // Take up most of the available height
+    courtHeight = Math.min(availableHeight * 0.95, 280);
     courtWidth = courtHeight * ASPECT_RATIO;
-    const maxWidth = screenWidth * 0.5;
+    // Leave room for buttons panel (~144px = w-36) plus gap (~12px)
+    const maxWidth = screenWidth - 180;
     if (courtWidth > maxWidth) {
       courtWidth = maxWidth;
       courtHeight = courtWidth / ASPECT_RATIO;

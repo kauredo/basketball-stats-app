@@ -1,9 +1,21 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation } from "convex/react";
-import { api } from "../../../../../convex/_generated/api";
-import type { Id } from "../../../../../convex/_generated/dataModel";
-import { ShotClockState } from "../../types/livegame";
-import { useFeedback } from "./useFeedback";
+import * as Haptics from "expo-haptics";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
+import { playSound } from "../utils/soundManager";
+
+export interface ShotClockState {
+  seconds: number;
+  isRunning: boolean;
+  isWarning: boolean;
+  isViolation: boolean;
+}
+
+interface ViolationState {
+  showButton: boolean;
+  gameTimeAtViolation: number | null;
+}
 
 interface UseShotClockOptions {
   // Convex sync props
@@ -15,23 +27,24 @@ interface UseShotClockOptions {
   serverIsRunning?: boolean;
   // Game clock time (for violation tracking)
   gameTimeRemainingSeconds?: number;
-  // Local-only options (fallback if no Convex sync)
+  // Local-only options
   initialSeconds?: number;
   offensiveReboundReset?: number;
   warningThreshold?: number;
   violationButtonDuration?: number; // How long to show violation button (ms)
   onViolation?: () => void;
-}
-
-interface ViolationState {
-  showButton: boolean;
-  gameTimeAtViolation: number | null;
+  enableSound?: boolean;
+  enableHaptics?: boolean;
 }
 
 /**
- * Hook for managing shot clock state.
- * Syncs with Convex for cross-instance coordination when gameId/token provided.
- * Falls back to local-only mode if no Convex props.
+ * Hook for managing shot clock state with Convex sync.
+ * Features:
+ * - Syncs with Convex for cross-instance coordination
+ * - Warning state at 5 seconds (configurable)
+ * - Violation state at 0 seconds with retroactive pause option
+ * - Sound and haptic feedback
+ * - Reset to 24 or 14 seconds
  */
 export function useShotClock({
   gameId,
@@ -45,6 +58,8 @@ export function useShotClock({
   warningThreshold = 5,
   violationButtonDuration = 5000, // 5 seconds default
   onViolation,
+  enableSound = true,
+  enableHaptics = true,
 }: UseShotClockOptions = {}) {
   const [state, setState] = useState<ShotClockState>({
     seconds: serverSeconds ?? initialSeconds,
@@ -60,7 +75,6 @@ export function useShotClock({
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const violationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const feedback = useFeedback();
   const lastWarningRef = useRef<number | null>(null);
   const hasPlayedViolationRef = useRef(false);
   // Store game time in ref to avoid re-creating interval when it changes
@@ -69,6 +83,31 @@ export function useShotClock({
   // Convex mutations
   const resetShotClockMutation = useMutation(api.games.resetShotClock);
   const retroactivePauseMutation = useMutation(api.games.retroactivePause);
+
+  // Play feedback
+  const playFeedback = useCallback(
+    async (type: "warning" | "violation") => {
+      if (enableSound) {
+        try {
+          if (type === "violation") {
+            await playSound("buzzer");
+          } else {
+            await playSound("whistle");
+          }
+        } catch (e) {
+          // Sound playback failed, continue silently
+        }
+      }
+      if (enableHaptics) {
+        if (type === "violation") {
+          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        } else {
+          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        }
+      }
+    },
+    [enableSound, enableHaptics]
+  );
 
   // Keep game time ref updated
   useEffect(() => {
@@ -128,7 +167,7 @@ export function useShotClock({
         if (isWarning && !prev.isWarning && lastWarningRef.current !== roundedSeconds) {
           lastWarningRef.current = roundedSeconds;
           if (roundedSeconds === warningThreshold) {
-            feedback.shotClockWarning();
+            playFeedback("warning");
           }
         }
 
@@ -136,7 +175,7 @@ export function useShotClock({
         if (isViolation && !hasPlayedViolationRef.current) {
           hasPlayedViolationRef.current = true;
           onViolation?.();
-          feedback.buzzer();
+          playFeedback("violation");
 
           // Show violation button and capture game time
           setViolationState({
@@ -174,7 +213,7 @@ export function useShotClock({
     serverSeconds,
     warningThreshold,
     onViolation,
-    feedback,
+    playFeedback,
     violationButtonDuration,
   ]);
 
@@ -188,6 +227,10 @@ export function useShotClock({
         gameId,
         timeRemainingSeconds: violationState.gameTimeAtViolation,
       });
+      // Haptic feedback for action
+      if (enableHaptics) {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
     } catch (error) {
       console.error("Failed to retroactively pause:", error);
     }
@@ -197,7 +240,7 @@ export function useShotClock({
     if (violationTimeoutRef.current) {
       clearTimeout(violationTimeoutRef.current);
     }
-  }, [gameId, token, violationState.gameTimeAtViolation, retroactivePauseMutation]);
+  }, [gameId, token, violationState.gameTimeAtViolation, retroactivePauseMutation, enableHaptics]);
 
   // Dismiss violation button without pausing
   const dismissViolation = useCallback(() => {

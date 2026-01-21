@@ -50,7 +50,7 @@ export const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
         }
       />
 
-      <ModalBody maxHeight="max-h-60">
+      <ModalBody maxHeight="max-h-80">
         {/* Section header */}
         <div className="px-4 py-2 bg-surface-50 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700">
           <span className="text-xs text-surface-500 uppercase">Who assisted?</span>
