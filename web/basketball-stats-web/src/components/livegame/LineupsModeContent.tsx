@@ -124,39 +124,43 @@ const LineupCombinations: React.FC<LineupCombinationsProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
       <div
         className={`px-3 py-2 ${
-          isHomeTeam ? "bg-orange-50 dark:bg-orange-900/20" : "bg-gray-50 dark:bg-gray-700/50"
+          isHomeTeam
+            ? "bg-primary-50 dark:bg-primary-900/20"
+            : "bg-surface-50 dark:bg-surface-700/50"
         }`}
       >
-        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{teamName} Lineups</h3>
+        <h3 className="font-semibold text-surface-900 dark:text-white text-sm">
+          {teamName} Lineups
+        </h3>
       </div>
       <div className="p-2 space-y-1">
         {sortedLineups.slice(0, 5).map((lineup, idx) => (
           <div
             key={idx}
-            className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/30 rounded"
+            className="flex items-center justify-between p-2 bg-surface-50 dark:bg-surface-700/30 rounded"
           >
             <div className="flex gap-1">
               {lineup.players.map((playerId) => (
                 <span
                   key={playerId}
-                  className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-600 rounded text-xs font-medium"
+                  className="px-1.5 py-0.5 bg-surface-200 dark:bg-surface-600 rounded text-xs font-medium"
                 >
                   #{getPlayerNumber(playerId)}
                 </span>
               ))}
             </div>
             <div className="flex items-center gap-3 text-xs">
-              <span className="text-gray-500">{lineup.minutesPlayed}m</span>
+              <span className="text-surface-500">{lineup.minutesPlayed}m</span>
               <span
                 className={`font-semibold ${
                   lineup.plusMinus > 0
                     ? "text-green-600"
                     : lineup.plusMinus < 0
                       ? "text-red-600"
-                      : "text-gray-500"
+                      : "text-surface-500"
                 }`}
               >
                 {lineup.plusMinus > 0 ? "+" : ""}

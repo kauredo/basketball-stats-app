@@ -1,4 +1,4 @@
-import { FAQItem } from "../components/marketing/FAQAccordion";
+import type { FAQItem } from "../components/marketing/FAQAccordion";
 
 export const faqData: FAQItem[] = [
   {

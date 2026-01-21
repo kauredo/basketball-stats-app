@@ -82,18 +82,20 @@ export const QuickUndoFAB: React.FC<QuickUndoFABProps> = ({
         isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       }`}
     >
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden min-w-[240px] sm:min-w-[280px]">
+      <div className="bg-white dark:bg-surface-900 rounded-xl shadow-2xl border border-surface-200 dark:border-surface-700 overflow-hidden min-w-[240px] sm:min-w-[280px]">
         {/* Content */}
         <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3">
           {/* Undo Icon */}
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center flex-shrink-0">
-            <ArrowUturnLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 dark:text-orange-500" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary-100 dark:bg-primary-500/20 flex items-center justify-center flex-shrink-0">
+            <ArrowUturnLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600 dark:text-primary-500" />
           </div>
 
           {/* Action Text */}
           <div className="flex-1 min-w-0">
-            <span className="text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs">Undo:</span>
-            <p className="text-gray-900 dark:text-white font-semibold text-xs sm:text-sm truncate">
+            <span className="text-surface-500 dark:text-surface-400 text-[10px] sm:text-xs">
+              Undo:
+            </span>
+            <p className="text-surface-900 dark:text-white font-semibold text-xs sm:text-sm truncate">
               #{action.playerNumber} {statLabel}
               {madeText}
             </p>
@@ -102,7 +104,7 @@ export const QuickUndoFAB: React.FC<QuickUndoFABProps> = ({
           {/* Undo Button */}
           <button
             onClick={handleUndo}
-            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-bold rounded-lg transition-colors active:scale-95 touch-manipulation"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-bold rounded-lg transition-colors active:scale-95 touch-manipulation"
           >
             UNDO
           </button>
@@ -110,16 +112,16 @@ export const QuickUndoFAB: React.FC<QuickUndoFABProps> = ({
           {/* Dismiss Button */}
           <button
             onClick={handleDismiss}
-            className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-white transition-colors"
+            className="p-1.5 text-surface-400 dark:text-surface-500 hover:text-surface-600 dark:hover:text-white transition-colors"
           >
             <XMarkIcon className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
 
         {/* Progress Bar */}
-        <div className="h-1 bg-gray-100 dark:bg-gray-800">
+        <div className="h-1 bg-surface-100 dark:bg-surface-800">
           <div
-            className="h-full bg-orange-500 transition-all duration-50"
+            className="h-full bg-primary-500 transition-all duration-50"
             style={{ width: `${progress}%` }}
           />
         </div>

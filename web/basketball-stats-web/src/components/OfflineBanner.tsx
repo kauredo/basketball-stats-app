@@ -10,9 +10,7 @@ export const OfflineBanner: React.FC = () => {
   return (
     <div
       className={`fixed top-0 left-0 right-0 z-[100] px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ${
-        isOnline
-          ? "bg-green-600 text-white"
-          : "bg-amber-600 text-white"
+        isOnline ? "bg-green-600 text-white" : "bg-amber-600 text-white"
       }`}
     >
       {isOnline ? (

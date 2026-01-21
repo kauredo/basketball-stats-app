@@ -68,7 +68,10 @@ export function useOnlineStatus(): OnlineStatus {
 /**
  * Hook to cache data locally for offline access (in-memory cache)
  */
-export function useOfflineCache<T>(key: string, data: T | undefined): {
+export function useOfflineCache<T>(
+  key: string,
+  data: T | undefined
+): {
   data: T | undefined;
   isCached: boolean;
 } {

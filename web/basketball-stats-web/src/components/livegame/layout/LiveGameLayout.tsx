@@ -78,7 +78,7 @@ export const LiveGameLayout: React.FC<LiveGameLayoutProps> = ({
   shotClockSeconds = 24,
 }) => {
   return (
-    <div className="h-dvh flex flex-col overflow-hidden bg-gray-100 dark:bg-gray-900">
+    <div className="h-dvh flex flex-col overflow-hidden bg-surface-100 dark:bg-surface-900">
       {/* Subtle gradient overlay for depth */}
       <div
         className="absolute inset-0 pointer-events-none opacity-50 dark:opacity-30"
@@ -93,10 +93,10 @@ export const LiveGameLayout: React.FC<LiveGameLayoutProps> = ({
       {/* Back button - Fixed at top left */}
       <Link
         to="/app/games"
-        className="absolute top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 shadow-sm"
+        className="absolute top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 group bg-white/80 dark:bg-surface-800/80 backdrop-blur-sm border border-surface-200 dark:border-surface-700 hover:bg-white dark:hover:bg-surface-800 shadow-sm"
       >
-        <XMarkIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
-        <span className="text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+        <XMarkIcon className="h-4 w-4 text-surface-500 dark:text-surface-400 group-hover:text-surface-900 dark:group-hover:text-white transition-colors" />
+        <span className="text-surface-600 dark:text-surface-400 group-hover:text-surface-900 dark:group-hover:text-white transition-colors">
           Exit
         </span>
       </Link>

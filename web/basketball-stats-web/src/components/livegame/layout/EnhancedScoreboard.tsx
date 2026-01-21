@@ -78,14 +78,14 @@ const AnimatedScore: React.FC<AnimatedScoreProps> = ({ score, isWinning = false 
         className={`
           font-mono text-4xl sm:text-5xl font-black tabular-nums tracking-tight
           transition-all duration-300 ease-out
-          ${isAnimating ? "scale-110 text-orange-500" : "scale-100"}
-          ${isWinning ? "text-emerald-600 dark:text-emerald-400" : "text-gray-900 dark:text-white"}
+          ${isAnimating ? "scale-110 text-primary-500" : "scale-100"}
+          ${isWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}
         `}
       >
         {score}
       </span>
       {isAnimating && (
-        <span className="absolute inset-0 font-mono text-4xl sm:text-5xl font-black tabular-nums tracking-tight text-orange-500 animate-ping opacity-50">
+        <span className="absolute inset-0 font-mono text-4xl sm:text-5xl font-black tabular-nums tracking-tight text-primary-500 animate-ping opacity-50">
           {score}
         </span>
       )}
@@ -133,7 +133,7 @@ const TeamPanel: React.FC<TeamPanelProps> = ({
       <div className={`flex flex-col gap-1 ${isHome ? "items-end" : "items-start"}`}>
         {/* Team Name */}
         <span
-          className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide truncate max-w-[100px] sm:max-w-[120px]"
+          className="text-sm font-semibold text-surface-700 dark:text-surface-300 uppercase tracking-wide truncate max-w-[100px] sm:max-w-[120px]"
           title={name}
         >
           {name}
@@ -143,12 +143,14 @@ const TeamPanel: React.FC<TeamPanelProps> = ({
         <div className={`flex items-center gap-2 ${isHome ? "flex-row-reverse" : ""}`}>
           {/* Fouls */}
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-gray-500 dark:text-gray-500 uppercase">Fouls</span>
+            <span className="text-[10px] text-surface-500 dark:text-surface-500 uppercase">
+              Fouls
+            </span>
             <span
               className={`text-xs font-bold px-1.5 py-0.5 rounded ${
                 fouls >= 4
                   ? "bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400"
-                  : "bg-gray-200 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400"
+                  : "bg-surface-200 dark:bg-surface-700/50 text-surface-600 dark:text-surface-400"
               }`}
             >
               {fouls}
@@ -172,7 +174,7 @@ const TeamPanel: React.FC<TeamPanelProps> = ({
             <button
               onClick={onTimeout}
               aria-label="Call timeout"
-              className="text-[10px] px-2.5 py-1.5 min-h-[32px] min-w-[32px] rounded bg-orange-100 dark:bg-amber-500/20 text-orange-600 dark:text-amber-400 hover:bg-orange-200 dark:hover:bg-amber-500/30 font-semibold uppercase tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+              className="text-[10px] px-2.5 py-1.5 min-h-[32px] min-w-[32px] rounded bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-500/30 font-semibold uppercase tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             >
               TO
             </button>
@@ -286,7 +288,7 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
   const awayWinning = differential < 0;
 
   return (
-    <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+    <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 shadow-sm">
       {/* Main content */}
       <div className="relative px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between">
@@ -317,7 +319,7 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
                     : isPaused
                       ? "bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-500/50"
                       : isCompleted
-                        ? "bg-gray-100 dark:bg-gray-600/50 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-500/50"
+                        ? "bg-surface-100 dark:bg-surface-600/50 text-surface-600 dark:text-surface-400 border-surface-300 dark:border-surface-500/50"
                         : "bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-500/50"
                 }
               `}
@@ -358,8 +360,8 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
                         quartersCompleted.includes(q)
                           ? "bg-emerald-500 dark:bg-emerald-400"
                           : game.currentQuarter === q
-                            ? "bg-orange-500 dark:bg-amber-400"
-                            : "bg-gray-300 dark:bg-gray-600"
+                            ? "bg-primary-500 dark:bg-primary-400"
+                            : "bg-surface-300 dark:bg-surface-600"
                       }
                     `}
                   />
@@ -377,11 +379,11 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
                   aria-controls="quarter-selector-listbox"
                   aria-label={`Current quarter: ${formatQuarter(game.currentQuarter)}. Click to change quarter.`}
                   className={`
-                    text-sm font-bold px-3 py-1 rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
+                    text-sm font-bold px-3 py-1 rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
                     ${
                       !isCompleted
-                        ? "bg-gray-100 dark:bg-gray-700/50 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500"
-                        : "bg-gray-50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-default"
+                        ? "bg-surface-100 dark:bg-surface-700/50 border-surface-300 dark:border-surface-600 text-surface-700 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700 hover:border-surface-400 dark:hover:border-surface-500"
+                        : "bg-surface-50 dark:bg-surface-800/30 border-surface-200 dark:border-surface-700 text-surface-400 dark:text-surface-500 cursor-default"
                     }
                   `}
                 >
@@ -393,7 +395,7 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
                     id="quarter-selector-listbox"
                     role="listbox"
                     aria-label="Select quarter"
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-800 backdrop-blur rounded-xl shadow-lg border border-gray-200 dark:border-gray-600 z-20 p-2"
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-surface-800 backdrop-blur rounded-xl shadow-lg border border-surface-200 dark:border-surface-600 z-20 p-2"
                   >
                     <div className="flex gap-1">
                       {[1, 2, 3, 4].map((q) => (
@@ -409,13 +411,13 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
                           }}
                           onKeyDown={(e) => handleQuarterKeyDown(e, q)}
                           className={`
-                            w-10 h-10 rounded-lg font-bold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-inset
+                            w-10 h-10 rounded-lg font-bold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-inset
                             ${
                               game.currentQuarter === q
-                                ? "bg-orange-500 text-white"
+                                ? "bg-primary-500 text-white"
                                 : quartersCompleted.includes(q)
                                   ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30"
-                                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                                  : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-600"
                             }
                           `}
                         >
@@ -495,7 +497,7 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
             ? "bg-gradient-to-r from-transparent via-red-500/50 to-transparent"
             : isPaused
               ? "bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"
-              : "bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"
+              : "bg-gradient-to-r from-transparent via-surface-300 dark:via-surface-600 to-transparent"
         }`}
       />
     </div>

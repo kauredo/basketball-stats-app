@@ -60,7 +60,13 @@ const STAT_INFO: Record<StatType, { label: string; bgClass: string; badgeClass: 
 };
 
 const getStatInfo = (type: StatType) => {
-  return STAT_INFO[type] || { label: type, bgClass: "bg-gray-600", badgeClass: "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300" };
+  return (
+    STAT_INFO[type] || {
+      label: type,
+      bgClass: "bg-surface-600",
+      badgeClass: "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300",
+    }
+  );
 };
 
 /**
@@ -107,41 +113,41 @@ export const QuickStatModal: React.FC<QuickStatModalProps> = ({
     >
       <div
         ref={focusTrapRef}
-        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden"
+        className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md border border-surface-200 dark:border-surface-700 overflow-hidden"
       >
         {/* Header */}
         <div className={`px-6 py-4 ${bgClass}`}>
-          <h3 id="quickstat-modal-title" className="text-lg font-bold text-white">Record {label}</h3>
+          <h3 id="quickstat-modal-title" className="text-lg font-bold text-white">
+            Record {label}
+          </h3>
           <p className="text-white/80 text-sm">Select a player</p>
         </div>
 
         {/* Player list */}
         <div className="max-h-80 overflow-y-auto">
           {onCourtPlayers.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">No players on court</div>
+            <div className="p-8 text-center text-surface-500">No players on court</div>
           ) : (
             onCourtPlayers.map((player) => (
               <button
                 key={player.id}
                 onClick={() => onRecord(player.playerId)}
-                className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-white font-bold text-sm">#{player.player?.number}</span>
                   </div>
                   <div className="text-left">
-                    <div className="text-gray-900 dark:text-white font-medium text-sm">
+                    <div className="text-surface-900 dark:text-white font-medium text-sm">
                       {player.player?.name}
                     </div>
-                    <div className="text-gray-500 text-xs">
+                    <div className="text-surface-500 text-xs">
                       {player.isHomeTeam ? "Home" : "Away"}
                     </div>
                   </div>
                 </div>
-                <div
-                  className={`px-3 py-1 text-sm font-medium rounded-lg ${badgeClass}`}
-                >
+                <div className={`px-3 py-1 text-sm font-medium rounded-lg ${badgeClass}`}>
                   +{label.toUpperCase().slice(0, 3)}
                 </div>
               </button>
@@ -150,11 +156,11 @@ export const QuickStatModal: React.FC<QuickStatModalProps> = ({
         </div>
 
         {/* Cancel button */}
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
           <button
             ref={cancelButtonRef}
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
+            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded"
           >
             Cancel
           </button>

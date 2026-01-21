@@ -3,7 +3,6 @@ import { useQuery } from "convex/react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
-import Icon from "../components/Icon";
 import {
   TrophyIcon,
   UsersIcon,
@@ -50,16 +49,22 @@ function StatCard({ title, value, subtitle, icon, trend }: StatCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+    <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 shadow-soft">
       <div className="flex items-center">
         {icon && <div className="flex-shrink-0 mr-4">{icon}</div>}
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{title}</h3>
+          <h3 className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
+            {title}
+          </h3>
           <div className="flex items-center">
-            <span className="text-2xl font-bold text-gray-900 dark:text-white mr-2">{value}</span>
+            <span className="text-2xl font-bold text-surface-900 dark:text-white mr-2" data-stat>
+              {value}
+            </span>
             {getTrendIcon()}
           </div>
-          {subtitle && <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{subtitle}</p>}
+          {subtitle && (
+            <p className="text-sm text-surface-600 dark:text-surface-400 mt-1">{subtitle}</p>
+          )}
         </div>
       </div>
     </div>
@@ -74,30 +79,32 @@ interface LeadersBoardProps {
 
 function LeadersBoard({ title, leaders, unit = "" }: LeadersBoardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
+    <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 shadow-soft">
+      <h3 className="section-header mb-4">{title}</h3>
       <div className="space-y-3">
         {leaders.slice(0, 5).map((leader, index) => (
           <div key={leader.name} className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-6 h-6 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center justify-center mr-3">
+              <div className="w-6 h-6 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center mr-3">
                 {index + 1}
               </div>
               <div className="flex flex-col">
-                <span className="text-gray-900 dark:text-white font-medium">{leader.name}</span>
+                <span className="text-surface-900 dark:text-white font-medium">{leader.name}</span>
                 {leader.team && (
-                  <span className="text-gray-500 dark:text-gray-400 text-xs">{leader.team}</span>
+                  <span className="text-surface-500 dark:text-surface-400 text-xs">
+                    {leader.team}
+                  </span>
                 )}
               </div>
             </div>
-            <span className="text-gray-700 dark:text-gray-300 font-semibold">
+            <span className="text-surface-700 dark:text-surface-300 font-semibold" data-stat>
               {leader.value.toFixed(1)}
               {unit}
             </span>
           </div>
         ))}
         {leaders.length === 0 && (
-          <p className="text-gray-600 dark:text-gray-400 text-sm">No data available</p>
+          <p className="text-surface-600 dark:text-surface-400 text-sm">No data available</p>
         )}
       </div>
     </div>
@@ -110,54 +117,86 @@ interface StandingsTableProps {
 
 function StandingsTable({ standings }: StandingsTableProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <h3 id="standings-table-heading" className="text-lg font-semibold text-gray-900 dark:text-white">League Standings</h3>
+    <div className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 shadow-soft">
+      <div className="p-6 border-b border-surface-200 dark:border-surface-700">
+        <h3 id="standings-table-heading" className="section-header">
+          League Standings
+        </h3>
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700" aria-labelledby="standings-table-heading">
-          <thead className="bg-gray-100 dark:bg-gray-700">
+        <table
+          className="min-w-full divide-y divide-surface-200 dark:divide-surface-700"
+          aria-labelledby="standings-table-heading"
+        >
+          <thead className="bg-surface-100 dark:bg-surface-700">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase tracking-wider"
+              >
                 Team
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase tracking-wider"
+              >
                 <abbr title="Wins">W</abbr>
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase tracking-wider"
+              >
                 <abbr title="Losses">L</abbr>
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase tracking-wider"
+              >
                 <abbr title="Win Percentage">Win%</abbr>
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase tracking-wider"
+              >
                 <abbr title="Points Per Game">PPG</abbr>
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="bg-white dark:bg-surface-800 divide-y divide-surface-200 dark:divide-surface-700">
             {standings.slice(0, 10).map((team, index) => (
-              <tr key={team.teamId} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+              <tr key={team.teamId} className="hover:bg-surface-100 dark:hover:bg-surface-700">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    <span className="w-6 h-6 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center justify-center mr-3">
+                    <span className="w-6 h-6 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center mr-3">
                       {index + 1}
                     </span>
-                    <span className="text-gray-900 dark:text-white font-medium">
+                    <span className="text-surface-900 dark:text-white font-medium">
                       {team.teamName}
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                <td
+                  className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                  data-stat
+                >
                   {team.wins}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                <td
+                  className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                  data-stat
+                >
                   {team.losses}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                <td
+                  className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                  data-stat
+                >
                   {team.winPercentage.toFixed(1)}%
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                <td
+                  className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                  data-stat
+                >
                   {team.avgPoints?.toFixed(1) || "0.0"}
                 </td>
               </tr>
@@ -230,7 +269,7 @@ export default function Statistics() {
     return (
       <div className="statistics-container">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
         </div>
       </div>
     );
@@ -240,11 +279,11 @@ export default function Statistics() {
     return (
       <div className="statistics-container">
         <div className="text-center py-12">
-          <TrophyIcon className="mx-auto h-12 w-12 text-gray-600 dark:text-gray-400" />
-          <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">
+          <TrophyIcon className="mx-auto h-12 w-12 text-surface-600 dark:text-surface-400" />
+          <h3 className="mt-2 text-lg font-medium text-surface-900 dark:text-white">
             No League Selected
           </h3>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-surface-600 dark:text-surface-400">
             Please select a league to view statistics.
           </p>
         </div>
@@ -270,8 +309,8 @@ export default function Statistics() {
     <div className="space-y-6">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Statistics Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h1 className="text-display-lg text-surface-900 dark:text-white">Statistics Dashboard</h1>
+          <p className="text-surface-600 dark:text-surface-400">
             {selectedLeague.name} - {selectedLeague.season}
           </p>
         </div>
@@ -285,7 +324,7 @@ export default function Statistics() {
               }
             }}
             disabled={!playersData?.players?.length}
-            className="flex items-center space-x-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-lg text-sm"
             title="Export Player Stats to CSV"
           >
             <ArrowDownTrayIcon className="w-4 h-4" />
@@ -293,7 +332,7 @@ export default function Statistics() {
           </button>
           <button
             onClick={printPage}
-            className="flex items-center space-x-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg text-sm transition-colors"
+            className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-lg text-sm"
             title="Print / Save as PDF"
           >
             <PrinterIcon className="w-4 h-4" />
@@ -304,7 +343,7 @@ export default function Statistics() {
 
       {/* Tab Navigation */}
       <div
-        className="flex space-x-4 border-b border-gray-200 dark:border-gray-700"
+        className="flex space-x-4 border-b border-surface-200 dark:border-surface-700"
         role="tablist"
         aria-label="Statistics views"
       >
@@ -314,7 +353,7 @@ export default function Statistics() {
           aria-controls="panel-overview"
           id="tab-overview"
           tabIndex={activeTab === "overview" ? 0 : -1}
-          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-t ${activeTab === "overview" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
+          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-t ${activeTab === "overview" ? "text-primary-500 border-b-2 border-primary-500" : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white"}`}
           onClick={() => setActiveTab("overview")}
         >
           Overview
@@ -325,7 +364,7 @@ export default function Statistics() {
           aria-controls="panel-players"
           id="tab-players"
           tabIndex={activeTab === "players" ? 0 : -1}
-          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-t ${activeTab === "players" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
+          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-t ${activeTab === "players" ? "text-primary-500 border-b-2 border-primary-500" : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white"}`}
           onClick={() => setActiveTab("players")}
         >
           Players
@@ -336,7 +375,7 @@ export default function Statistics() {
           aria-controls="panel-teams"
           id="tab-teams"
           tabIndex={activeTab === "teams" ? 0 : -1}
-          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-t ${activeTab === "teams" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
+          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-t ${activeTab === "teams" ? "text-primary-500 border-b-2 border-primary-500" : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white"}`}
           onClick={() => setActiveTab("teams")}
         >
           Teams
@@ -347,7 +386,7 @@ export default function Statistics() {
           aria-controls="panel-charts"
           id="tab-charts"
           tabIndex={activeTab === "charts" ? 0 : -1}
-          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-t ${activeTab === "charts" ? "text-orange-500 border-b-2 border-orange-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
+          className={`px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-t ${activeTab === "charts" ? "text-primary-500 border-b-2 border-primary-500" : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white"}`}
           onClick={() => setActiveTab("charts")}
         >
           Charts
@@ -368,7 +407,7 @@ export default function Statistics() {
               title="Total Games"
               value={leagueInfo.totalGames}
               subtitle="Completed games"
-              icon={<TrophyIcon className="h-8 w-8 text-orange-500" />}
+              icon={<TrophyIcon className="h-8 w-8 text-primary-500" />}
             />
             <StatCard
               title="Total Teams"
@@ -421,18 +460,16 @@ export default function Statistics() {
           role="tabpanel"
           id="panel-players"
           aria-labelledby="tab-players"
-          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+          className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 shadow-soft"
         >
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Player Statistics
-            </h3>
+          <div className="p-6 border-b border-surface-200 dark:border-surface-700 flex justify-between items-center">
+            <h3 className="section-header">Player Statistics</h3>
             <div className="flex items-center space-x-2">
-              <label className="text-gray-600 dark:text-gray-400 text-sm">Sort by:</label>
+              <label className="text-surface-600 dark:text-surface-400 text-sm">Sort by:</label>
               <select
                 value={sortBy}
                 onChange={(e) => handleSortChange(e.target.value)}
-                className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-md px-3 py-1 text-surface-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="avgPoints">Points</option>
                 <option value="avgRebounds">Rebounds</option>
@@ -444,75 +481,129 @@ export default function Statistics() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700" aria-label="Player statistics">
-              <thead className="bg-gray-100 dark:bg-gray-700">
+            <table
+              className="min-w-full divide-y divide-surface-200 dark:divide-surface-700"
+              aria-label="Player statistics"
+            >
+              <thead className="bg-surface-100 dark:bg-surface-700">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     Player
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     Team
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Games Played">GP</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Points Per Game">PPG</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Rebounds Per Game">RPG</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Assists Per Game">APG</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Field Goal Percentage">FG%</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="3-Point Percentage">3P%</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Free Throw Percentage">FT%</abbr>
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="bg-white dark:bg-surface-800 divide-y divide-surface-200 dark:divide-surface-700">
                 {playersData.players?.map((player: any) => (
-                  <tr key={player.playerId} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <tr
+                    key={player.playerId}
+                    className="hover:bg-surface-100 dark:hover:bg-surface-700"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <span className="text-gray-900 dark:text-white font-medium">
+                        <span className="text-surface-900 dark:text-white font-medium">
                           {player.playerName}
                         </span>
                         {player.position && (
-                          <span className="text-gray-600 dark:text-gray-400 text-xs">
+                          <span className="text-surface-600 dark:text-surface-400 text-xs">
                             {player.position}
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300">
                       {player.teamName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {player.gamesPlayed}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {player.avgPoints?.toFixed(1) || "0.0"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {player.avgRebounds?.toFixed(1) || "0.0"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {player.avgAssists?.toFixed(1) || "0.0"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {player.fieldGoalPercentage?.toFixed(1) || "0.0"}%
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {player.threePointPercentage?.toFixed(1) || "0.0"}%
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {player.freeThrowPercentage?.toFixed(1) || "0.0"}%
                     </td>
                   </tr>
@@ -523,12 +614,16 @@ export default function Statistics() {
 
           {/* Pagination */}
           {playersData.pagination && (
-            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="px-6 py-4 border-t border-surface-200 dark:border-surface-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-400">
                 <span>
-                  Showing {((playersData.pagination.currentPage - 1) * playersData.pagination.perPage) + 1} to{" "}
-                  {Math.min(playersData.pagination.currentPage * playersData.pagination.perPage, playersData.pagination.totalCount)} of{" "}
-                  {playersData.pagination.totalCount} players
+                  Showing{" "}
+                  {(playersData.pagination.currentPage - 1) * playersData.pagination.perPage + 1} to{" "}
+                  {Math.min(
+                    playersData.pagination.currentPage * playersData.pagination.perPage,
+                    playersData.pagination.totalCount
+                  )}{" "}
+                  of {playersData.pagination.totalCount} players
                 </span>
                 <select
                   value={perPage}
@@ -536,7 +631,7 @@ export default function Statistics() {
                     setPerPage(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="ml-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm"
+                  className="ml-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded px-2 py-1 text-sm"
                 >
                   <option value={10}>10 per page</option>
                   <option value={20}>20 per page</option>
@@ -548,31 +643,33 @@ export default function Statistics() {
                 <button
                   onClick={() => setCurrentPage(1)}
                   disabled={currentPage === 1}
-                  className="px-3 py-2 min-h-[44px] rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                  className="btn-ghost px-3 py-2 min-h-[44px] rounded border border-surface-300 dark:border-surface-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-100 dark:hover:bg-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
                   First
                 </button>
                 <button
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-2 min-h-[44px] rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                  className="btn-ghost px-3 py-2 min-h-[44px] rounded border border-surface-300 dark:border-surface-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-100 dark:hover:bg-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
                   Previous
                 </button>
-                <span className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
+                <span className="px-3 py-2 text-sm text-surface-700 dark:text-surface-300">
                   Page {playersData.pagination.currentPage} of {playersData.pagination.totalPages}
                 </span>
                 <button
-                  onClick={() => setCurrentPage(Math.min(playersData.pagination.totalPages, currentPage + 1))}
+                  onClick={() =>
+                    setCurrentPage(Math.min(playersData.pagination.totalPages, currentPage + 1))
+                  }
                   disabled={currentPage >= playersData.pagination.totalPages}
-                  className="px-3 py-2 min-h-[44px] rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                  className="btn-ghost px-3 py-2 min-h-[44px] rounded border border-surface-300 dark:border-surface-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-100 dark:hover:bg-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
                   Next
                 </button>
                 <button
                   onClick={() => setCurrentPage(playersData.pagination.totalPages)}
                   disabled={currentPage >= playersData.pagination.totalPages}
-                  className="px-3 py-2 min-h-[44px] rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                  className="btn-ghost px-3 py-2 min-h-[44px] rounded border border-surface-300 dark:border-surface-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-100 dark:hover:bg-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
                   Last
                 </button>
@@ -588,73 +685,121 @@ export default function Statistics() {
           role="tabpanel"
           id="panel-teams"
           aria-labelledby="tab-teams"
-          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+          className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 shadow-soft"
         >
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Team Statistics</h3>
+          <div className="p-6 border-b border-surface-200 dark:border-surface-700">
+            <h3 className="section-header">Team Statistics</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700" aria-label="Team statistics">
-              <thead className="bg-gray-100 dark:bg-gray-700">
+            <table
+              className="min-w-full divide-y divide-surface-200 dark:divide-surface-700"
+              aria-label="Team statistics"
+            >
+              <thead className="bg-surface-100 dark:bg-surface-700">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     Team
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Wins">W</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Losses">L</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Win Percentage">Win%</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Points Per Game">PPG</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Rebounds Per Game">RPG</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Assists Per Game">APG</abbr>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-surface-700 dark:text-surface-300 uppercase"
+                  >
                     <abbr title="Field Goal Percentage">FG%</abbr>
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="bg-white dark:bg-surface-800 divide-y divide-surface-200 dark:divide-surface-700">
                 {teamsData.teams?.map((team: any, index: number) => (
-                  <tr key={team.teamId} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <tr key={team.teamId} className="hover:bg-surface-100 dark:hover:bg-surface-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <span className="w-6 h-6 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center justify-center mr-3">
+                        <span className="w-6 h-6 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center mr-3">
                           {index + 1}
                         </span>
-                        <span className="text-gray-900 dark:text-white font-medium">
+                        <span className="text-surface-900 dark:text-white font-medium">
                           {team.teamName}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {team.wins}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {team.losses}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {team.winPercentage?.toFixed(1) || "0.0"}%
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {team.avgPoints?.toFixed(1) || "0.0"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {team.avgRebounds?.toFixed(1) || "0.0"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {team.avgAssists?.toFixed(1) || "0.0"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {team.fieldGoalPercentage?.toFixed(1) || "0.0"}%
                     </td>
                   </tr>
@@ -674,33 +819,37 @@ export default function Statistics() {
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
           {/* Team Performance Comparison */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 id="team-performance-heading" className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 shadow-soft">
+            <h3 id="team-performance-heading" className="section-header mb-4">
               Team Performance Comparison
             </h3>
-            <div role="img" aria-labelledby="team-performance-heading" aria-describedby="team-performance-desc">
+            <div
+              role="img"
+              aria-labelledby="team-performance-heading"
+              aria-describedby="team-performance-desc"
+            >
               <p id="team-performance-desc" className="sr-only">
                 Bar chart comparing points, rebounds, and assists across teams
               </p>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={teamsData.teams?.slice(0, 8) || []}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#5c5650" />
                 <XAxis
                   dataKey="teamName"
-                  stroke="#9CA3AF"
+                  stroke="#a69f96"
                   fontSize={12}
                   angle={-45}
                   textAnchor="end"
                   height={80}
                 />
-                <YAxis stroke="#9CA3AF" fontSize={12} />
+                <YAxis stroke="#a69f96" fontSize={12} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#1F2937",
-                    border: "1px solid #374151",
+                    backgroundColor: "#3d3835",
+                    border: "1px solid #5c5650",
                     borderRadius: "8px",
-                    color: "#F9FAFB",
+                    color: "#fdfcfb",
                   }}
                 />
                 <Legend />
@@ -712,11 +861,15 @@ export default function Statistics() {
           </div>
 
           {/* Win Percentage Distribution */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 id="win-distribution-heading" className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 shadow-soft">
+            <h3 id="win-distribution-heading" className="section-header mb-4">
               Win Percentage Distribution
             </h3>
-            <div role="img" aria-labelledby="win-distribution-heading" aria-describedby="win-distribution-desc">
+            <div
+              role="img"
+              aria-labelledby="win-distribution-heading"
+              aria-describedby="win-distribution-desc"
+            >
               <p id="win-distribution-desc" className="sr-only">
                 Pie chart showing win percentage distribution across teams
               </p>
@@ -740,10 +893,10 @@ export default function Statistics() {
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#1F2937",
-                    border: "1px solid #374151",
+                    backgroundColor: "#3d3835",
+                    border: "1px solid #5c5650",
                     borderRadius: "8px",
-                    color: "#F9FAFB",
+                    color: "#fdfcfb",
                   }}
                 />
               </PieChart>
@@ -751,22 +904,31 @@ export default function Statistics() {
           </div>
 
           {/* Top Players Performance Radar */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <div role="img" aria-labelledby="player-radar-heading" aria-describedby="player-radar-desc">
+          <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 shadow-soft">
+            <div
+              role="img"
+              aria-labelledby="player-radar-heading"
+              aria-describedby="player-radar-desc"
+            >
               <p id="player-radar-desc" className="sr-only">
-                Radar chart comparing player performance across points, rebounds, assists, field goal percentage, and free throw percentage
+                Radar chart comparing player performance across points, rebounds, assists, field
+                goal percentage, and free throw percentage
               </p>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-              <h3 id="player-radar-heading" className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 id="player-radar-heading" className="section-header">
                 Player Performance Comparison
               </h3>
               <div className="flex flex-wrap gap-2">
                 <select
-                  className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm text-gray-900 dark:text-white"
+                  className="bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-md px-3 py-1.5 text-sm text-surface-900 dark:text-white"
                   value=""
                   onChange={(e) => {
-                    if (e.target.value && selectedRadarPlayers.length < 5 && !selectedRadarPlayers.includes(e.target.value)) {
+                    if (
+                      e.target.value &&
+                      selectedRadarPlayers.length < 5 &&
+                      !selectedRadarPlayers.includes(e.target.value)
+                    ) {
                       setSelectedRadarPlayers([...selectedRadarPlayers, e.target.value]);
                     }
                   }}
@@ -783,7 +945,7 @@ export default function Statistics() {
                 {selectedRadarPlayers.length > 0 && (
                   <button
                     onClick={() => setSelectedRadarPlayers([])}
-                    className="px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md"
+                    className="btn-ghost px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md"
                   >
                     Clear all
                   </button>
@@ -804,8 +966,12 @@ export default function Statistics() {
                     >
                       {player?.playerName || "Unknown"}
                       <button
-                        onClick={() => setSelectedRadarPlayers(selectedRadarPlayers.filter(id => id !== playerId))}
-                        className="ml-2 hover:text-gray-200"
+                        onClick={() =>
+                          setSelectedRadarPlayers(
+                            selectedRadarPlayers.filter((id) => id !== playerId)
+                          )
+                        }
+                        className="ml-2 hover:text-surface-200"
                       >
                         &times;
                       </button>
@@ -818,32 +984,72 @@ export default function Statistics() {
               <RadarChart
                 data={(() => {
                   // Use selected players or default to top 3
-                  const playersToShow = selectedRadarPlayers.length > 0
-                    ? selectedRadarPlayers.map(id => playersData?.players?.find((p: any) => p.playerId === id)).filter(Boolean)
-                    : playersData?.players?.slice(0, 3) || [];
+                  const playersToShow =
+                    selectedRadarPlayers.length > 0
+                      ? selectedRadarPlayers
+                          .map((id) => playersData?.players?.find((p: any) => p.playerId === id))
+                          .filter(Boolean)
+                      : playersData?.players?.slice(0, 3) || [];
 
                   return [
-                    { metric: "Points", ...Object.fromEntries(playersToShow.map((p: any, i: number) => [`player${i}`, p?.avgPoints || 0])) },
-                    { metric: "Rebounds", ...Object.fromEntries(playersToShow.map((p: any, i: number) => [`player${i}`, p?.avgRebounds || 0])) },
-                    { metric: "Assists", ...Object.fromEntries(playersToShow.map((p: any, i: number) => [`player${i}`, p?.avgAssists || 0])) },
-                    { metric: "FG%", ...Object.fromEntries(playersToShow.map((p: any, i: number) => [`player${i}`, p?.fieldGoalPercentage || 0])) },
-                    { metric: "FT%", ...Object.fromEntries(playersToShow.map((p: any, i: number) => [`player${i}`, p?.freeThrowPercentage || 0])) },
+                    {
+                      metric: "Points",
+                      ...Object.fromEntries(
+                        playersToShow.map((p: any, i: number) => [`player${i}`, p?.avgPoints || 0])
+                      ),
+                    },
+                    {
+                      metric: "Rebounds",
+                      ...Object.fromEntries(
+                        playersToShow.map((p: any, i: number) => [
+                          `player${i}`,
+                          p?.avgRebounds || 0,
+                        ])
+                      ),
+                    },
+                    {
+                      metric: "Assists",
+                      ...Object.fromEntries(
+                        playersToShow.map((p: any, i: number) => [`player${i}`, p?.avgAssists || 0])
+                      ),
+                    },
+                    {
+                      metric: "FG%",
+                      ...Object.fromEntries(
+                        playersToShow.map((p: any, i: number) => [
+                          `player${i}`,
+                          p?.fieldGoalPercentage || 0,
+                        ])
+                      ),
+                    },
+                    {
+                      metric: "FT%",
+                      ...Object.fromEntries(
+                        playersToShow.map((p: any, i: number) => [
+                          `player${i}`,
+                          p?.freeThrowPercentage || 0,
+                        ])
+                      ),
+                    },
                   ];
                 })()}
               >
-                <PolarGrid stroke="#374151" />
-                {/* @ts-expect-error Recharts type compatibility with React 18 */}
-                <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fill: "#9CA3AF" }} />
+                <PolarGrid stroke="#5c5650" />
+                {/* @ts-expect-error - recharts types not fully compatible with React 19 */}
+                <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fill: "#a69f96" }} />
                 <PolarRadiusAxis
                   angle={90}
                   domain={[0, "dataMax"]}
-                  tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                  tick={{ fontSize: 10, fill: "#a69f96" }}
                 />
                 {(() => {
                   const colors = ["#EA580C", "#3B82F6", "#10B981", "#8B5CF6", "#F59E0B"];
-                  const playersToShow = selectedRadarPlayers.length > 0
-                    ? selectedRadarPlayers.map(id => playersData?.players?.find((p: any) => p.playerId === id)).filter(Boolean)
-                    : playersData?.players?.slice(0, 3) || [];
+                  const playersToShow =
+                    selectedRadarPlayers.length > 0
+                      ? selectedRadarPlayers
+                          .map((id) => playersData?.players?.find((p: any) => p.playerId === id))
+                          .filter(Boolean)
+                      : playersData?.players?.slice(0, 3) || [];
 
                   return playersToShow.map((player: any, index: number) => (
                     <Radar
@@ -857,52 +1063,56 @@ export default function Statistics() {
                     />
                   ));
                 })()}
-                <Legend wrapperStyle={{ color: "#F9FAFB" }} />
+                <Legend wrapperStyle={{ color: "#fdfcfb" }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#1F2937",
-                    border: "1px solid #374151",
+                    backgroundColor: "#3d3835",
+                    border: "1px solid #5c5650",
                     borderRadius: "8px",
-                    color: "#F9FAFB",
+                    color: "#fdfcfb",
                   }}
                 />
               </RadarChart>
             </ResponsiveContainer>
             {selectedRadarPlayers.length === 0 && (
-              <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
+              <p className="text-center text-sm text-surface-500 dark:text-surface-400 mt-2">
                 Showing top 3 players by default. Use the dropdown to customize.
               </p>
             )}
           </div>
 
           {/* Shooting Efficiency Analysis */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 id="shooting-efficiency-heading" className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 shadow-soft">
+            <h3 id="shooting-efficiency-heading" className="section-header mb-4">
               Team Shooting Efficiency
             </h3>
-            <div role="img" aria-labelledby="shooting-efficiency-heading" aria-describedby="shooting-efficiency-desc">
+            <div
+              role="img"
+              aria-labelledby="shooting-efficiency-heading"
+              aria-describedby="shooting-efficiency-desc"
+            >
               <p id="shooting-efficiency-desc" className="sr-only">
                 Line chart comparing field goal, 3-point, and free throw percentages across teams
               </p>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={teamsData.teams?.slice(0, 8) || []}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#5c5650" />
                 <XAxis
                   dataKey="teamName"
-                  stroke="#9CA3AF"
+                  stroke="#a69f96"
                   fontSize={12}
                   angle={-45}
                   textAnchor="end"
                   height={80}
                 />
-                <YAxis stroke="#9CA3AF" fontSize={12} domain={[0, 100]} />
+                <YAxis stroke="#a69f96" fontSize={12} domain={[0, 100]} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#1F2937",
-                    border: "1px solid #374151",
+                    backgroundColor: "#3d3835",
+                    border: "1px solid #5c5650",
                     borderRadius: "8px",
-                    color: "#F9FAFB",
+                    color: "#fdfcfb",
                   }}
                 />
                 <Legend />

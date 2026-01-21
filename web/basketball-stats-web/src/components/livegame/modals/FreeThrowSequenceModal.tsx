@@ -26,7 +26,7 @@ export const FreeThrowSequenceModal: React.FC<FreeThrowSequenceModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-sm border border-surface-200 dark:border-surface-700 overflow-hidden">
         {/* Header */}
         <div className="bg-green-600 px-6 py-4">
           <h3 className="text-lg font-bold text-white">Free Throw</h3>
@@ -38,7 +38,7 @@ export const FreeThrowSequenceModal: React.FC<FreeThrowSequenceModalProps> = ({
         <div className="p-6">
           {/* Attempt indicator */}
           <div className="text-center mb-6">
-            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+            <div className="text-3xl font-bold text-surface-900 dark:text-white mb-1">
               {currentAttempt} of {totalAttempts}
             </div>
             {isOneAndOne && (
@@ -62,7 +62,7 @@ export const FreeThrowSequenceModal: React.FC<FreeThrowSequenceModalProps> = ({
                 </div>
               ))}
               {/* Current attempt placeholder */}
-              <div className="w-8 h-8 rounded-full flex items-center justify-center border-2 border-dashed border-gray-400 dark:border-gray-600 text-gray-400 font-bold text-sm">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center border-2 border-dashed border-surface-400 dark:border-surface-600 text-surface-400 font-bold text-sm">
                 ?
               </div>
             </div>
@@ -86,10 +86,10 @@ export const FreeThrowSequenceModal: React.FC<FreeThrowSequenceModalProps> = ({
         </div>
 
         {/* Cancel button */}
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
           <button
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors"
           >
             Cancel
           </button>

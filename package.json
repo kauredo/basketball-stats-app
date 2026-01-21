@@ -14,7 +14,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "convex:dev": "convex dev",
-    "convex:deploy": "convex deploy"
+    "convex:deploy": "convex deploy",
+    "full_check": "npm run typecheck && npm run lint && npm run format"
   },
   "devDependencies": {
     "convex": "^1.31.5",

@@ -28,8 +28,8 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({ event, isHomeTeam 
         };
       case "shot_missed":
         return {
-          bg: "bg-gray-100 dark:bg-gray-700/30",
-          border: "border-gray-300 dark:border-gray-600",
+          bg: "bg-surface-100 dark:bg-surface-700/30",
+          border: "border-surface-300 dark:border-surface-600",
           icon: "✗",
         };
       case "free_throw_made":
@@ -40,8 +40,8 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({ event, isHomeTeam 
         };
       case "free_throw_missed":
         return {
-          bg: "bg-gray-100 dark:bg-gray-700/30",
-          border: "border-gray-300 dark:border-gray-600",
+          bg: "bg-surface-100 dark:bg-surface-700/30",
+          border: "border-surface-300 dark:border-surface-600",
           icon: "○",
         };
       case "rebound":
@@ -82,8 +82,8 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({ event, isHomeTeam 
         };
       case "substitution":
         return {
-          bg: "bg-gray-50 dark:bg-gray-700/30",
-          border: "border-gray-200 dark:border-gray-700",
+          bg: "bg-surface-50 dark:bg-surface-700/30",
+          border: "border-surface-200 dark:border-surface-700",
           icon: "🔄",
         };
       case "timeout":
@@ -95,14 +95,14 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({ event, isHomeTeam 
       case "quarter_start":
       case "quarter_end":
         return {
-          bg: "bg-gray-200 dark:bg-gray-600",
-          border: "border-gray-400 dark:border-gray-500",
+          bg: "bg-surface-200 dark:bg-surface-600",
+          border: "border-surface-400 dark:border-surface-500",
           icon: "📢",
         };
       default:
         return {
-          bg: "bg-gray-50 dark:bg-gray-700/30",
-          border: "border-gray-200 dark:border-gray-700",
+          bg: "bg-surface-50 dark:bg-surface-700/30",
+          border: "border-surface-200 dark:border-surface-700",
           icon: "•",
         };
     }
@@ -119,7 +119,7 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({ event, isHomeTeam 
       `}
     >
       {/* Time */}
-      <div className="text-[10px] text-gray-500 dark:text-gray-400 font-mono w-10 flex-shrink-0">
+      <div className="text-[10px] text-surface-500 dark:text-surface-400 font-mono w-10 flex-shrink-0">
         {formatTime(event.timeRemaining)}
       </div>
 
@@ -128,7 +128,7 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({ event, isHomeTeam 
 
       {/* Description */}
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-900 dark:text-white">{event.description}</p>
+        <p className="text-xs text-surface-900 dark:text-white">{event.description}</p>
         {event.points && event.points > 0 && (
           <span className="text-[10px] text-green-600 dark:text-green-400 font-semibold">
             +{event.points}

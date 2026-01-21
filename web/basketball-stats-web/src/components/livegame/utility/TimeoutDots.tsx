@@ -31,7 +31,7 @@ export const TimeoutDots: React.FC<TimeoutDotsProps> = ({
         <div
           key={i}
           className={`w-2 h-2 rounded-full transition-colors ${
-            i < remaining ? "bg-orange-500" : "bg-gray-400 dark:bg-gray-600"
+            i < remaining ? "bg-primary-500" : "bg-surface-400 dark:bg-surface-600"
           }`}
           aria-hidden="true"
         />
@@ -43,7 +43,7 @@ export const TimeoutDots: React.FC<TimeoutDotsProps> = ({
     return (
       <button
         onClick={onTimeoutClick}
-        className="flex items-center gap-1 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
+        className="flex items-center gap-1 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded"
         aria-label={`Call timeout. ${srText}`}
       >
         {dots}

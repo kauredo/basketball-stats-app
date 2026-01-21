@@ -143,6 +143,12 @@ export default function Icon({ name, size = 24, color = "#6B7280", className, st
   }[iconConfig.library];
 
   return (
-    <IconComponent name={iconConfig.name as any} size={size} color={color} className={className} style={style} />
+    <IconComponent
+      name={iconConfig.name as any}
+      size={size}
+      color={color}
+      className={className}
+      style={style}
+    />
   );
 }

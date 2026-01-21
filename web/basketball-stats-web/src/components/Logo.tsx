@@ -58,7 +58,7 @@ export default function Logo({
         }}
       />
       {showText && (
-        <span className={`ml-2 font-bold text-gray-900 dark:text-white ${textSize}`}>
+        <span className={`ml-2 font-bold text-surface-900 dark:text-white ${textSize}`}>
           Basketball Stats
         </span>
       )}

@@ -46,7 +46,7 @@ export const PlayByPlayList: React.FC<PlayByPlayListProps> = ({
 
   if (sortedEvents.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
+      <div className="h-full flex items-center justify-center text-surface-500 dark:text-surface-400 text-sm">
         No plays recorded yet
       </div>
     );

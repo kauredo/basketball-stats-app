@@ -106,7 +106,7 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
     >
       <div
         ref={focusTrapRef}
-        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden"
+        className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md border border-surface-200 dark:border-surface-700 overflow-hidden"
       >
         {/* Header */}
         <div className="bg-amber-600 px-6 py-4">
@@ -119,16 +119,16 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
         {!showShootingDetails ? (
           /* Foul Type Selection */
           <div className="p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Select foul type:</p>
+            <p className="text-sm text-surface-500 dark:text-surface-400 mb-3">Select foul type:</p>
             <div className="grid grid-cols-2 gap-2">
               {(Object.keys(FOUL_TYPE_LABELS) as FoulType[]).map((type) => {
                 const colorClasses: Record<FoulType, string> = {
                   personal:
-                    "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white",
+                    "bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-900 dark:text-white",
                   shooting:
                     "bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300",
                   offensive:
-                    "bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300",
+                    "bg-primary-100 dark:bg-primary-900/30 hover:bg-primary-200 dark:hover:bg-primary-900/50 text-primary-700 dark:text-primary-300",
                   technical:
                     "bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300",
                   flagrant1:
@@ -162,14 +162,14 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
             <div className="space-y-4">
               {/* Shot Type */}
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Shot type:</p>
+                <p className="text-sm text-surface-500 dark:text-surface-400 mb-2">Shot type:</p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShotType("2pt")}
                     className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
                       shotType === "2pt"
                         ? "bg-blue-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     2PT
@@ -179,7 +179,7 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
                     className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
                       shotType === "3pt"
                         ? "bg-purple-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     3PT
@@ -189,7 +189,7 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
 
               {/* And-1 */}
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                <p className="text-sm text-surface-500 dark:text-surface-400 mb-2">
                   And-1? (shot was made)
                 </p>
                 <div className="flex gap-2">
@@ -198,7 +198,7 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
                     className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
                       !wasAndOne
                         ? "bg-red-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     No
@@ -208,7 +208,7 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
                     className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
                       wasAndOne
                         ? "bg-green-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     Yes (And-1)
@@ -218,7 +218,9 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
 
               {/* Who was fouled */}
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Who was fouled?</p>
+                <p className="text-sm text-surface-500 dark:text-surface-400 mb-2">
+                  Who was fouled?
+                </p>
                 <div className="max-h-40 overflow-y-auto space-y-1">
                   {opponentOnCourt.map((player) => (
                     <button
@@ -227,13 +229,13 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
                       className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors ${
                         fouledPlayer === player.playerId
                           ? "bg-green-100 dark:bg-green-900/30 border-2 border-green-500"
-                          : "bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          : "bg-surface-50 dark:bg-surface-700/50 hover:bg-surface-100 dark:hover:bg-surface-700"
                       }`}
                     >
-                      <span className="font-bold text-sm text-gray-900 dark:text-white">
+                      <span className="font-bold text-sm text-surface-900 dark:text-white">
                         #{player.player?.number}
                       </span>
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                      <span className="text-sm text-surface-700 dark:text-surface-300">
                         {player.player?.name}
                       </span>
                     </button>
@@ -245,7 +247,7 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
               <button
                 onClick={handleShootingFoulConfirm}
                 disabled={!fouledPlayer}
-                className="w-full py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white font-bold rounded-lg transition-colors"
+                className="w-full py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-surface-300 dark:disabled:bg-surface-700 text-white font-bold rounded-lg transition-colors"
               >
                 Confirm Shooting Foul
               </button>
@@ -254,11 +256,11 @@ export const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
         )}
 
         {/* Cancel button */}
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
           <button
             ref={cancelButtonRef}
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
+            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded"
           >
             Cancel
           </button>

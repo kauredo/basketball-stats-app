@@ -21,10 +21,10 @@ export const PlaysModeContent: React.FC<PlaysModeContentProps> = ({
   const [selectedQuarter, setSelectedQuarter] = useState<number | "all">("all");
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="h-full flex flex-col bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
       {/* Header with filter */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Play-by-Play</h3>
+      <div className="flex items-center justify-between px-3 py-2 border-b border-surface-200 dark:border-surface-700">
+        <h3 className="font-semibold text-surface-900 dark:text-white text-sm">Play-by-Play</h3>
         <QuarterFilterTabs
           currentQuarter={currentQuarter}
           selectedQuarter={selectedQuarter}

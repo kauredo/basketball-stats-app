@@ -67,11 +67,11 @@ export const CourtModeContent: React.FC<CourtModeContentProps> = ({
   return (
     <div className="h-full grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 min-h-0">
       {/* Left: Court Panel (50% on desktop, full width on mobile) */}
-      <div className="flex flex-col rounded-xl sm:rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm min-h-0 flex-shrink">
+      <div className="flex flex-col rounded-xl sm:rounded-2xl overflow-hidden bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 shadow-sm min-h-0 flex-shrink">
         <div className="p-3 sm:p-4 flex-1 flex flex-col min-h-0">
           {/* Court Header */}
           <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <h3 className="text-gray-900 dark:text-gray-200 font-semibold text-xs sm:text-sm uppercase tracking-wide">
+            <h3 className="text-surface-900 dark:text-surface-200 font-semibold text-xs sm:text-sm uppercase tracking-wide">
               Shot Recording
             </h3>
             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -82,7 +82,7 @@ export const CourtModeContent: React.FC<CourtModeContentProps> = ({
                   className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded-md sm:rounded-lg font-semibold border transition-colors ${
                     showHeatMap
                       ? "bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-500/30"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-amber-50 dark:hover:bg-amber-500/10"
+                      : "bg-surface-100 dark:bg-surface-700 text-surface-500 dark:text-surface-400 border-surface-300 dark:border-surface-600 hover:bg-amber-50 dark:hover:bg-amber-500/10"
                   }`}
                   title="Toggle heat map"
                 >
@@ -112,12 +112,12 @@ export const CourtModeContent: React.FC<CourtModeContentProps> = ({
           </div>
 
           {/* Quick Stats */}
-          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-surface-200 dark:border-surface-700">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-gray-600 dark:text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide font-semibold">
+              <p className="text-surface-600 dark:text-surface-400 text-[10px] sm:text-xs uppercase tracking-wide font-semibold">
                 Quick Actions
               </p>
-              <div className="h-px flex-1 mx-2 sm:mx-3 bg-gradient-to-r from-gray-200 dark:from-gray-700 to-transparent" />
+              <div className="h-px flex-1 mx-2 sm:mx-3 bg-gradient-to-r from-surface-200 dark:from-surface-700 to-transparent" />
             </div>
             <QuickStatButtonGrid onStatSelect={onStatSelect} disabled={disabled} />
           </div>

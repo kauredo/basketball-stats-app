@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Dimensions, Image } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+  Dimensions,
+  Image,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
@@ -55,9 +63,7 @@ function LeaderItem({ rank, playerName, teamName, value, unit = "" }: LeaderItem
       </View>
       <View className="flex-1">
         <Text className="text-gray-900 dark:text-white text-sm font-medium">{playerName}</Text>
-        {teamName && (
-          <Text className="text-gray-500 dark:text-gray-400 text-xs">{teamName}</Text>
-        )}
+        {teamName && <Text className="text-gray-500 dark:text-gray-400 text-xs">{teamName}</Text>}
       </View>
       <Text className="text-gray-900 dark:text-white text-base font-semibold">
         {value.toFixed(1)}

@@ -33,7 +33,7 @@ export const BenchPlayerGrid: React.FC<BenchPlayerGridProps> = ({
             ${
               isSwapTarget
                 ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700 hover:bg-green-100 dark:hover:bg-green-900/40 cursor-pointer active:scale-95"
-                : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-default"
+                : "bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-400 cursor-default"
             }
             ${disabled ? "opacity-50 cursor-not-allowed" : ""}
           `}

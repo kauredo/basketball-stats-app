@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -36,9 +30,7 @@ function StatRow({ label, homeValue, awayValue, homeWins }: StatRowProps) {
       >
         {homeValue}
       </Text>
-      <Text className="w-24 text-center text-sm text-gray-600 dark:text-gray-400">
-        {label}
-      </Text>
+      <Text className="w-24 text-center text-sm text-gray-600 dark:text-gray-400">{label}</Text>
       <Text
         className={`flex-1 text-left text-base font-semibold ${
           homeWins === false ? "text-green-500" : "text-gray-900 dark:text-white"
@@ -136,9 +128,7 @@ export default function GameAnalysisScreen() {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-dark-950 p-8">
         <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-gray-900 dark:text-white text-xl font-bold mt-4">
-          Game Not Found
-        </Text>
+        <Text className="text-gray-900 dark:text-white text-xl font-bold mt-4">Game Not Found</Text>
       </View>
     );
   }
@@ -169,7 +159,20 @@ export default function GameAnalysisScreen() {
         ftm: acc.ftm + (p.freeThrowsMade || 0),
         fta: acc.fta + (p.freeThrowsAttempted || 0),
       }),
-      { points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0, turnovers: 0, fgm: 0, fga: 0, threePm: 0, threePa: 0, ftm: 0, fta: 0 }
+      {
+        points: 0,
+        rebounds: 0,
+        assists: 0,
+        steals: 0,
+        blocks: 0,
+        turnovers: 0,
+        fgm: 0,
+        fga: 0,
+        threePm: 0,
+        threePa: 0,
+        ftm: 0,
+        fta: 0,
+      }
     );
   };
 
@@ -296,9 +299,7 @@ export default function GameAnalysisScreen() {
           >
             <Text
               className={`font-medium ${
-                activeTab === tab.id
-                  ? "text-primary-500"
-                  : "text-gray-600 dark:text-gray-400"
+                activeTab === tab.id ? "text-primary-500" : "text-gray-600 dark:text-gray-400"
               }`}
             >
               {tab.label}
@@ -419,16 +420,10 @@ export default function GameAnalysisScreen() {
         {activeTab === "plays" && (
           <View className="p-4">
             {/* Quarter Filter */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              className="mb-4"
-            >
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
               <TouchableOpacity
                 className={`px-4 py-2 rounded-full mr-2 ${
-                  selectedQuarter === undefined
-                    ? "bg-primary-500"
-                    : "bg-gray-200 dark:bg-gray-700"
+                  selectedQuarter === undefined ? "bg-primary-500" : "bg-gray-200 dark:bg-gray-700"
                 }`}
                 onPress={() => setSelectedQuarter(undefined)}
               >
@@ -446,9 +441,7 @@ export default function GameAnalysisScreen() {
                 <TouchableOpacity
                   key={q}
                   className={`px-4 py-2 rounded-full mr-2 ${
-                    selectedQuarter === q
-                      ? "bg-primary-500"
-                      : "bg-gray-200 dark:bg-gray-700"
+                    selectedQuarter === q ? "bg-primary-500" : "bg-gray-200 dark:bg-gray-700"
                   }`}
                   onPress={() => setSelectedQuarter(q)}
                 >
@@ -507,9 +500,7 @@ export default function GameAnalysisScreen() {
               ) : (
                 <View className="p-8 items-center">
                   <Icon name="list" size={32} color="#9CA3AF" />
-                  <Text className="text-gray-600 dark:text-gray-400 mt-2">
-                    No plays recorded
-                  </Text>
+                  <Text className="text-gray-600 dark:text-gray-400 mt-2">No plays recorded</Text>
                 </View>
               )}
             </View>

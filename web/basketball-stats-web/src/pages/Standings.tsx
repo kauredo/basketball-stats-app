@@ -86,13 +86,13 @@ const Standings: React.FC = () => {
     className?: string;
   }> = ({ field, label, className = "" }) => (
     <th
-      className={`px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors ${className}`}
+      className={`px-4 py-3 text-left text-xs font-medium text-surface-600 dark:text-surface-400 uppercase tracking-wider cursor-pointer hover:text-surface-900 dark:hover:text-white transition-colors ${className}`}
       onClick={() => handleSort(field)}
     >
       <div className="flex items-center space-x-1">
         <span>{label}</span>
         {sortField === field && (
-          <span className="text-orange-500">{sortDirection === "asc" ? "↑" : "↓"}</span>
+          <span className="text-primary-500">{sortDirection === "asc" ? "↑" : "↓"}</span>
         )}
       </div>
     </th>
@@ -101,7 +101,7 @@ const Standings: React.FC = () => {
   if (standingsData === undefined) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -111,10 +111,10 @@ const Standings: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-display-lg text-surface-900 dark:text-white mb-2">
             League Standings
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-surface-600 dark:text-surface-400">
             {standingsData?.league?.name} - {standingsData?.league?.season}
           </p>
         </div>
@@ -129,7 +129,7 @@ const Standings: React.FC = () => {
                 }
               }}
               disabled={sortedStandings.length === 0}
-              className="flex items-center space-x-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               title="Export to CSV"
             >
               <ArrowDownTrayIcon className="w-4 h-4" />
@@ -137,16 +137,16 @@ const Standings: React.FC = () => {
             </button>
             <button
               onClick={printPage}
-              className="flex items-center space-x-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg text-sm transition-colors"
+              className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-xl text-sm"
               title="Print / Save as PDF"
             >
               <PrinterIcon className="w-4 h-4" />
               <span>Print</span>
             </button>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg px-4 py-2 border border-gray-200 dark:border-gray-700">
-            <div className="text-sm text-gray-600 dark:text-gray-400">Total Games</div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-surface-800 rounded-xl px-4 py-2 border border-surface-200 dark:border-surface-700">
+            <div className="text-sm text-surface-600 dark:text-surface-400">Total Games</div>
+            <div className="text-2xl font-bold text-surface-900 dark:text-white" data-stat>
               {standingsData?.totalGames || 0}
             </div>
           </div>
@@ -155,43 +155,43 @@ const Standings: React.FC = () => {
 
       {/* Standings Table */}
       {sortedStandings.length > 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white dark:bg-surface-800 rounded-2xl shadow-soft border border-surface-200 dark:border-surface-700 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-900">
+            <table className="min-w-full divide-y divide-surface-200 dark:divide-surface-700">
+              <thead className="bg-surface-50 dark:bg-surface-900">
                 <tr>
                   <SortHeader field="rank" label="#" className="w-12" />
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-surface-600 dark:text-surface-400 uppercase tracking-wider">
                     Team
                   </th>
                   <SortHeader field="wins" label="W" />
                   <SortHeader field="losses" label="L" />
                   <SortHeader field="winPercentage" label="PCT" />
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-surface-600 dark:text-surface-400 uppercase tracking-wider">
                     GB
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-surface-600 dark:text-surface-400 uppercase tracking-wider">
                     Home
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-surface-600 dark:text-surface-400 uppercase tracking-wider">
                     Away
                   </th>
                   <SortHeader field="avgPointsFor" label="PPG" />
                   <SortHeader field="avgPointsAgainst" label="OPPG" />
                   <SortHeader field="pointDiff" label="DIFF" />
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-surface-600 dark:text-surface-400 uppercase tracking-wider">
                     L5
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-surface-600 dark:text-surface-400 uppercase tracking-wider">
                     STRK
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-surface-200 dark:divide-surface-700">
                 {sortedStandings.map((team, index) => (
                   <tr
                     key={team.teamId}
-                    className={`hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors ${
+                    className={`hover:bg-surface-100 dark:hover:bg-surface-700/50 transition-colors ${
                       index < 4
                         ? "bg-green-900/10"
                         : index >= sortedStandings.length - 2
@@ -204,7 +204,10 @@ const Standings: React.FC = () => {
                         {team.rank === 1 ? (
                           <TrophyIcon className="w-5 h-5 text-yellow-500" />
                         ) : (
-                          <span className="text-gray-600 dark:text-gray-400 font-medium">
+                          <span
+                            className="text-surface-600 dark:text-surface-400 font-medium"
+                            data-stat
+                          >
                             {team.rank}
                           </span>
                         )}
@@ -212,41 +215,65 @@ const Standings: React.FC = () => {
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-xs font-bold text-gray-900 dark:text-white">
+                        <div className="w-8 h-8 bg-surface-100 dark:bg-surface-700 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-xs font-bold text-surface-900 dark:text-white">
                             {team.teamName.substring(0, 2).toUpperCase()}
                           </span>
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="text-sm font-medium text-surface-900 dark:text-white">
                             {team.teamName}
                           </div>
-                          {team.city && <div className="text-xs text-gray-500">{team.city}</div>}
+                          {team.city && <div className="text-xs text-surface-500">{team.city}</div>}
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-green-400 font-medium">
+                    <td
+                      className="px-4 py-4 whitespace-nowrap text-sm text-green-400 font-medium"
+                      data-stat
+                    >
                       {team.wins}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-red-400 font-medium">
+                    <td
+                      className="px-4 py-4 whitespace-nowrap text-sm text-red-400 font-medium"
+                      data-stat
+                    >
                       {team.losses}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-medium">
+                    <td
+                      className="px-4 py-4 whitespace-nowrap text-sm text-surface-900 dark:text-white font-medium"
+                      data-stat
+                    >
                       .{team.winPercentage.toFixed(0).padStart(3, "0")}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                    <td
+                      className="px-4 py-4 whitespace-nowrap text-sm text-surface-600 dark:text-surface-400"
+                      data-stat
+                    >
                       {team.gamesBack === 0 ? "-" : team.gamesBack.toFixed(1)}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-4 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {team.homeRecord}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                    <td
+                      className="px-4 py-4 whitespace-nowrap text-sm text-surface-700 dark:text-surface-300"
+                      data-stat
+                    >
                       {team.awayRecord}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    <td
+                      className="px-4 py-4 whitespace-nowrap text-sm text-surface-900 dark:text-white"
+                      data-stat
+                    >
                       {team.avgPointsFor}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    <td
+                      className="px-4 py-4 whitespace-nowrap text-sm text-surface-900 dark:text-white"
+                      data-stat
+                    >
                       {team.avgPointsAgainst}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
@@ -256,8 +283,9 @@ const Standings: React.FC = () => {
                             ? "text-green-400"
                             : team.pointDiff < 0
                               ? "text-red-400"
-                              : "text-gray-600 dark:text-gray-400"
+                              : "text-surface-600 dark:text-surface-400"
                         }`}
+                        data-stat
                       >
                         {team.pointDiff > 0 ? "+" : ""}
                         {team.pointDiff}
@@ -278,7 +306,7 @@ const Standings: React.FC = () => {
                         {[...Array(5 - team.last5.length)].map((_, i) => (
                           <span
                             key={`empty-${i}`}
-                            className="w-5 h-5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 text-xs font-medium flex items-center justify-center"
+                            className="w-5 h-5 rounded bg-surface-100 dark:bg-surface-700 text-surface-500 text-xs font-medium flex items-center justify-center"
                           >
                             -
                           </span>
@@ -298,8 +326,9 @@ const Standings: React.FC = () => {
                               ? "text-green-400"
                               : team.streakType === "L"
                                 ? "text-red-400"
-                                : "text-gray-500"
+                                : "text-surface-500"
                           }`}
+                          data-stat
                         >
                           {team.streak}
                         </span>
@@ -312,56 +341,56 @@ const Standings: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-12 border border-gray-200 dark:border-gray-700 text-center">
-          <TrophyIcon className="mx-auto h-12 w-12 text-gray-500 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        <div className="bg-white dark:bg-surface-800 rounded-2xl shadow-soft p-12 border border-surface-200 dark:border-surface-700 text-center">
+          <TrophyIcon className="mx-auto h-12 w-12 text-surface-500 mb-4" />
+          <h3 className="text-lg font-medium text-surface-900 dark:text-white mb-2">
             No Standings Yet
           </h3>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-surface-600 dark:text-surface-400">
             Complete some games to see the league standings here.
           </p>
         </div>
       )}
 
       {/* Legend */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">Legend</h4>
+      <div className="bg-white dark:bg-surface-800 rounded-2xl shadow-soft p-4 border border-surface-200 dark:border-surface-700">
+        <h4 className="section-header mb-3">Legend</h4>
         <div className="flex flex-wrap gap-6 text-sm">
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 dark:text-gray-400">W</span>
-            <span className="text-gray-500">- Wins</span>
+            <span className="text-surface-600 dark:text-surface-400">W</span>
+            <span className="text-surface-500">- Wins</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 dark:text-gray-400">L</span>
-            <span className="text-gray-500">- Losses</span>
+            <span className="text-surface-600 dark:text-surface-400">L</span>
+            <span className="text-surface-500">- Losses</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 dark:text-gray-400">PCT</span>
-            <span className="text-gray-500">- Win Percentage</span>
+            <span className="text-surface-600 dark:text-surface-400">PCT</span>
+            <span className="text-surface-500">- Win Percentage</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 dark:text-gray-400">GB</span>
-            <span className="text-gray-500">- Games Back</span>
+            <span className="text-surface-600 dark:text-surface-400">GB</span>
+            <span className="text-surface-500">- Games Back</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 dark:text-gray-400">PPG</span>
-            <span className="text-gray-500">- Points Per Game</span>
+            <span className="text-surface-600 dark:text-surface-400">PPG</span>
+            <span className="text-surface-500">- Points Per Game</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 dark:text-gray-400">OPPG</span>
-            <span className="text-gray-500">- Opponent PPG</span>
+            <span className="text-surface-600 dark:text-surface-400">OPPG</span>
+            <span className="text-surface-500">- Opponent PPG</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 dark:text-gray-400">DIFF</span>
-            <span className="text-gray-500">- Point Differential</span>
+            <span className="text-surface-600 dark:text-surface-400">DIFF</span>
+            <span className="text-surface-500">- Point Differential</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 dark:text-gray-400">L5</span>
-            <span className="text-gray-500">- Last 5 Games</span>
+            <span className="text-surface-600 dark:text-surface-400">L5</span>
+            <span className="text-surface-500">- Last 5 Games</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 dark:text-gray-400">STRK</span>
-            <span className="text-gray-500">- Current Streak</span>
+            <span className="text-surface-600 dark:text-surface-400">STRK</span>
+            <span className="text-surface-500">- Current Streak</span>
           </div>
         </div>
       </div>

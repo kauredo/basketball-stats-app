@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { BellIcon, CheckIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { BellIcon, CheckIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { BellAlertIcon } from "@heroicons/react/24/solid";
 import { useNotifications } from "../contexts/NotificationContext";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 
 const NotificationBell: React.FC = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } =
@@ -39,25 +39,6 @@ const NotificationBell: React.FC = () => {
     return new Date(timestamp).toLocaleDateString();
   };
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "game_reminder":
-        return "clock";
-      case "game_start":
-        return "play";
-      case "game_end":
-        return "flag";
-      case "score_update":
-        return "chart";
-      case "team_update":
-        return "users";
-      case "league_announcement":
-        return "megaphone";
-      default:
-        return "bell";
-    }
-  };
-
   const getTypeColor = (type: string) => {
     switch (type) {
       case "game_reminder":
@@ -69,11 +50,11 @@ const NotificationBell: React.FC = () => {
       case "score_update":
         return "text-yellow-400";
       case "team_update":
-        return "text-orange-400";
+        return "text-primary-400";
       case "league_announcement":
         return "text-pink-400";
       default:
-        return "text-gray-400";
+        return "text-surface-400";
     }
   };
 
@@ -127,16 +108,16 @@ const NotificationBell: React.FC = () => {
       {/* Bell Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
+        className="relative p-2 rounded-full text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
       >
         {unreadCount > 0 ? (
-          <BellAlertIcon className="h-6 w-6 text-orange-500" />
+          <BellAlertIcon className="h-6 w-6 text-primary-500" />
         ) : (
           <BellIcon className="h-6 w-6" />
         )}
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-orange-600 text-xs font-bold text-white">
+          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-xs font-bold text-white">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -144,14 +125,16 @@ const NotificationBell: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-surface-800 rounded-2xl shadow-elevated ring-1 ring-black/5 z-50 animate-scale-in">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-surface-200 dark:border-surface-700">
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white">
+              Notifications
+            </h3>
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllAsRead()}
-                className="text-sm text-orange-500 hover:text-orange-400 transition-colors"
+                className="text-sm text-primary-500 hover:text-primary-400 transition-colors"
               >
                 Mark all as read
               </button>
@@ -162,31 +145,31 @@ const NotificationBell: React.FC = () => {
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <BellIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-3" />
-                <p className="text-gray-600 dark:text-gray-400">No notifications yet</p>
-                <p className="text-sm text-gray-500 mt-1">
+                <BellIcon className="mx-auto h-12 w-12 text-surface-400 dark:text-surface-600 mb-3" />
+                <p className="text-surface-600 dark:text-surface-400">No notifications yet</p>
+                <p className="text-sm text-surface-500 mt-1">
                   You&apos;ll see game updates and announcements here
                 </p>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              <ul className="divide-y divide-surface-200 dark:divide-surface-700">
                 {notifications.map((notification) => (
                   <li
                     key={notification._id}
-                    className={`relative px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${
-                      !notification.read ? "bg-gray-100 dark:bg-gray-700/30" : ""
+                    className={`relative px-4 py-3 hover:bg-surface-100 dark:hover:bg-surface-700/50 transition-colors cursor-pointer ${
+                      !notification.read ? "bg-surface-100 dark:bg-surface-700/30" : ""
                     }`}
                     onClick={() => handleNotificationClick(notification)}
                   >
-                    <div className="flex items-start space-x-3">
+                    <div className="flex items-start gap-3">
                       {/* Unread indicator */}
                       {!notification.read && (
-                        <span className="absolute left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-orange-500" />
+                        <span className="absolute left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary-500" />
                       )}
 
                       {/* Icon */}
                       <div
-                        className={`flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center ${getTypeColor(
+                        className={`flex-shrink-0 w-8 h-8 rounded-full bg-surface-100 dark:bg-surface-700 flex items-center justify-center ${getTypeColor(
                           notification.type
                         )}`}
                       >
@@ -206,29 +189,29 @@ const NotificationBell: React.FC = () => {
                         <p
                           className={`text-sm font-medium ${
                             notification.read
-                              ? "text-gray-700 dark:text-gray-300"
-                              : "text-gray-900 dark:text-white"
+                              ? "text-surface-700 dark:text-surface-300"
+                              : "text-surface-900 dark:text-white"
                           }`}
                         >
                           {notification.title}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                        <p className="text-sm text-surface-600 dark:text-surface-400 line-clamp-2">
                           {notification.body}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-surface-500 mt-1">
                           {formatTime(notification.createdAt)}
                         </p>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex-shrink-0 flex space-x-1">
+                      <div className="flex-shrink-0 flex gap-1">
                         {!notification.read && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               markAsRead(notification._id);
                             }}
-                            className="p-1 text-gray-500 hover:text-green-400 transition-colors"
+                            className="p-1 text-surface-500 hover:text-green-400 transition-colors"
                             title="Mark as read"
                           >
                             <CheckIcon className="h-4 w-4" />
@@ -239,7 +222,7 @@ const NotificationBell: React.FC = () => {
                             e.stopPropagation();
                             deleteNotification(notification._id);
                           }}
-                          className="p-1 text-gray-500 hover:text-red-400 transition-colors"
+                          className="p-1 text-surface-500 hover:text-red-400 transition-colors"
                           title="Delete"
                         >
                           <TrashIcon className="h-4 w-4" />
@@ -254,10 +237,10 @@ const NotificationBell: React.FC = () => {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-center">
+            <div className="px-4 py-2 border-t border-surface-200 dark:border-surface-700 text-center">
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="text-sm text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white transition-colors"
               >
                 Close
               </button>

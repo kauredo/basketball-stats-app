@@ -90,8 +90,8 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
       {/* On-court indicator */}
       {isOnCourt !== undefined && (
         <div
-          className={`absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-white dark:border-gray-900 ${
-            isOnCourt ? "bg-green-500" : "bg-gray-400 dark:bg-gray-600"
+          className={`absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-white dark:border-surface-900 ${
+            isOnCourt ? "bg-green-500" : "bg-surface-400 dark:bg-surface-600"
           }`}
           style={{
             width: Math.max(8, width * 0.25),
@@ -140,18 +140,18 @@ export const PlayerAvatarWithDetails: React.FC<PlayerAvatarWithDetailsProps> = (
       />
       <div className="ml-3 flex-1">
         <div className="flex items-center">
-          <span className="text-gray-900 dark:text-white font-medium">{name || "Unknown"}</span>
+          <span className="text-surface-900 dark:text-white font-medium">{name || "Unknown"}</span>
           {number !== undefined && (
-            <span className="text-gray-600 dark:text-gray-400 text-sm ml-1">#{number}</span>
+            <span className="text-surface-600 dark:text-surface-400 text-sm ml-1">#{number}</span>
           )}
         </div>
         {(position || team) && (
-          <div className="text-gray-600 dark:text-gray-400 text-sm">
+          <div className="text-surface-600 dark:text-surface-400 text-sm">
             {[position, team].filter(Boolean).join(" • ")}
           </div>
         )}
         {stats && (
-          <div className="text-gray-500 text-xs mt-1">
+          <div className="text-surface-500 text-xs mt-1">
             {stats.points !== undefined && <span className="mr-2">PTS: {stats.points}</span>}
             {stats.rebounds !== undefined && <span className="mr-2">REB: {stats.rebounds}</span>}
             {stats.assists !== undefined && <span>AST: {stats.assists}</span>}

@@ -24,27 +24,27 @@ export function useFocusTrap(
     if (!containerRef.current) return [];
 
     const focusableSelectors = [
-      'button:not([disabled])',
-      'a[href]',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      'textarea:not([disabled])',
+      "button:not([disabled])",
+      "a[href]",
+      "input:not([disabled])",
+      "select:not([disabled])",
+      "textarea:not([disabled])",
       '[tabindex]:not([tabindex="-1"])',
-    ].join(', ');
+    ].join(", ");
 
     return Array.from(
       containerRef.current.querySelectorAll<HTMLElement>(focusableSelectors)
     ).filter((el) => {
       // Filter out elements that are not visible
       const style = window.getComputedStyle(el);
-      return style.display !== 'none' && style.visibility !== 'hidden';
+      return style.display !== "none" && style.visibility !== "hidden";
     });
   }, []);
 
   // Handle tab key to trap focus
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key !== 'Tab' || !containerRef.current) return;
+      if (event.key !== "Tab" || !containerRef.current) return;
 
       const focusableElements = getFocusableElements();
       if (focusableElements.length === 0) return;
@@ -89,11 +89,11 @@ export function useFocusTrap(
     const timeoutId = setTimeout(setInitialFocus, 0);
 
     // Add event listener for tab key
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       clearTimeout(timeoutId);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
 
       // Return focus to previously focused element
       if (returnFocusOnDeactivate && previousActiveElement.current) {

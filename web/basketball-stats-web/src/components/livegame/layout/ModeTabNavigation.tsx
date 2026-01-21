@@ -53,7 +53,7 @@ export const ModeTabNavigation: React.FC<ModeTabNavigationProps> = ({
   className = "",
 }) => {
   return (
-    <div className={`flex h-12 rounded-xl p-1 bg-gray-200 dark:bg-gray-800 ${className}`}>
+    <div className={`flex h-12 rounded-xl p-1 bg-surface-200 dark:bg-surface-800 ${className}`}>
       {TABS.map((tab) => {
         const isActive = activeMode === tab.key;
         const Icon = isActive ? tab.iconSolid : tab.icon;
@@ -67,8 +67,8 @@ export const ModeTabNavigation: React.FC<ModeTabNavigationProps> = ({
               transition-all duration-200 ease-out
               ${
                 isActive
-                  ? "bg-orange-600 text-white shadow-sm"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  ? "bg-primary-600 text-white shadow-sm"
+                  : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700"
               }
             `}
           >

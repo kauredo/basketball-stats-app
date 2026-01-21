@@ -27,20 +27,20 @@ export const QuarterBreakdown: React.FC<QuarterBreakdownProps> = ({
   const awayTotal = awayScoresByQuarter.reduce((a, b) => a + b, 0);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50">
-        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Score by Quarter</h3>
+    <div className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+      <div className="px-3 py-2 bg-surface-50 dark:bg-surface-700/50">
+        <h3 className="font-semibold text-surface-900 dark:text-white text-sm">Score by Quarter</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-gray-500 dark:text-gray-400 text-xs uppercase">
+            <tr className="text-surface-500 dark:text-surface-400 text-xs uppercase">
               <th className="text-left px-3 py-2 font-medium">Team</th>
               {quarterLabels.map((label, i) => (
                 <th
                   key={i}
                   className={`text-center px-2 py-2 font-medium ${
-                    i + 1 === currentQuarter ? "text-orange-600 dark:text-orange-400" : ""
+                    i + 1 === currentQuarter ? "text-primary-600 dark:text-primary-400" : ""
                   }`}
                 >
                   {label}
@@ -51,8 +51,8 @@ export const QuarterBreakdown: React.FC<QuarterBreakdownProps> = ({
           </thead>
           <tbody>
             {/* Away Team */}
-            <tr className="border-t border-gray-100 dark:border-gray-700">
-              <td className="px-3 py-2 font-medium text-gray-900 dark:text-white">
+            <tr className="border-t border-surface-100 dark:border-surface-700">
+              <td className="px-3 py-2 font-medium text-surface-900 dark:text-white">
                 {awayTeamName}
               </td>
               {quarterLabels.map((_, i) => (
@@ -60,20 +60,20 @@ export const QuarterBreakdown: React.FC<QuarterBreakdownProps> = ({
                   key={i}
                   className={`text-center px-2 py-2 ${
                     i + 1 === currentQuarter
-                      ? "font-semibold text-gray-900 dark:text-white"
-                      : "text-gray-600 dark:text-gray-400"
+                      ? "font-semibold text-surface-900 dark:text-white"
+                      : "text-surface-600 dark:text-surface-400"
                   }`}
                 >
                   {awayScoresByQuarter[i] ?? "-"}
                 </td>
               ))}
-              <td className="text-center px-3 py-2 font-bold text-gray-900 dark:text-white">
+              <td className="text-center px-3 py-2 font-bold text-surface-900 dark:text-white">
                 {awayTotal}
               </td>
             </tr>
             {/* Home Team */}
-            <tr className="border-t border-gray-100 dark:border-gray-700 bg-orange-50/30 dark:bg-orange-900/10">
-              <td className="px-3 py-2 font-medium text-gray-900 dark:text-white">
+            <tr className="border-t border-surface-100 dark:border-surface-700 bg-primary-50/30 dark:bg-primary-900/10">
+              <td className="px-3 py-2 font-medium text-surface-900 dark:text-white">
                 {homeTeamName}
               </td>
               {quarterLabels.map((_, i) => (
@@ -81,14 +81,14 @@ export const QuarterBreakdown: React.FC<QuarterBreakdownProps> = ({
                   key={i}
                   className={`text-center px-2 py-2 ${
                     i + 1 === currentQuarter
-                      ? "font-semibold text-gray-900 dark:text-white"
-                      : "text-gray-600 dark:text-gray-400"
+                      ? "font-semibold text-surface-900 dark:text-white"
+                      : "text-surface-600 dark:text-surface-400"
                   }`}
                 >
                   {homeScoresByQuarter[i] ?? "-"}
                 </td>
               ))}
-              <td className="text-center px-3 py-2 font-bold text-gray-900 dark:text-white">
+              <td className="text-center px-3 py-2 font-bold text-surface-900 dark:text-white">
                 {homeTotal}
               </td>
             </tr>

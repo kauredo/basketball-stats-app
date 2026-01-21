@@ -1,23 +1,19 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
-import { getShotZone } from "@basketball-stats/shared";
 
 // Import all new modular components
 import {
   LiveGameLayout,
-  EnhancedScoreboard,
-  ModeTabNavigation,
   ShotRecordingModal,
   AssistPromptModal,
   ReboundPromptModal,
   QuickStatModal,
   FoulRecordingModal,
   FreeThrowSequenceModal,
-  QuickUndoFAB,
   CourtModeContent,
   StatsModeContent,
   PlaysModeContent,
@@ -27,7 +23,7 @@ import {
 import { ClockModeContent } from "../components/livegame/ClockModeContent";
 
 // Import types
-import {
+import type {
   GameMode,
   PlayerStat,
   TeamStatsData,
@@ -64,7 +60,7 @@ const LiveGameNew: React.FC = () => {
   const [pendingQuickStat, setPendingQuickStat] = useState<StatType | null>(null);
   const [pendingFoul, setPendingFoul] = useState<PlayerStat | null>(null);
   const [freeThrowSequence, setFreeThrowSequence] = useState<FreeThrowSequence | null>(null);
-  const [actionHistory, setActionHistory] = useState<ActionHistoryItem[]>([]);
+  const [_actionHistory, setActionHistory] = useState<ActionHistoryItem[]>([]);
   const [recentShots, setRecentShots] = useState<ShotLocation[]>([]);
   const [showHeatMap, setShowHeatMap] = useState(false);
   const [lastAction, setLastAction] = useState<LastAction | null>(null);
@@ -108,7 +104,7 @@ const LiveGameNew: React.FC = () => {
   const recordFoulWithContextMutation = useMutation(api.stats.recordFoulWithContext);
   const recordFreeThrowMutation = useMutation(api.stats.recordFreeThrow);
   const recordTimeoutMutation = useMutation(api.games.recordTimeout);
-  const startOvertimeMutation = useMutation(api.games.startOvertime);
+  const _startOvertimeMutation = useMutation(api.games.startOvertime);
   const recordShotMutation = useMutation(api.shots.recordShot);
   const updateGameSettingsMutation = useMutation(api.games.updateGameSettings);
 
@@ -153,7 +149,7 @@ const LiveGameNew: React.FC = () => {
 
   const isActive = game?.status === "active";
   const isPaused = game?.status === "paused";
-  const isCompleted = game?.status === "completed";
+  const _isCompleted = game?.status === "completed";
   const canRecordStats = isActive || isPaused;
 
   // Transform persisted shots to ShotLocation format for heat maps
@@ -166,7 +162,7 @@ const LiveGameNew: React.FC = () => {
   }));
 
   // Game clock (for optional local countdown)
-  const gameClock = useGameClock({
+  const _gameClock = useGameClock({
     initialSeconds: game?.timeRemainingSeconds || 0,
     quarterDuration: (gameSettings.quarterMinutes || 12) * 60,
   });
@@ -419,7 +415,7 @@ const LiveGameNew: React.FC = () => {
     if (!token || !gameId) return;
 
     try {
-      const result = await recordFoulWithContextMutation({
+      const _result = await recordFoulWithContextMutation({
         token,
         gameId: gameId as Id<"games">,
         playerId,
@@ -673,7 +669,14 @@ const LiveGameNew: React.FC = () => {
     } finally {
       setIsStartingGame(false);
     }
-  }, [token, gameId, selectedHomeStarters, selectedAwayStarters, updateGameSettingsMutation, startGame]);
+  }, [
+    token,
+    gameId,
+    selectedHomeStarters,
+    selectedAwayStarters,
+    updateGameSettingsMutation,
+    startGame,
+  ]);
 
   const handleEndPeriod = async () => {
     if (!token || !gameId || !game) return;
@@ -698,7 +701,7 @@ const LiveGameNew: React.FC = () => {
   // Loading state
   if (!game) {
     return (
-      <div className="h-dvh flex items-center justify-center bg-gray-900">
+      <div className="h-dvh flex items-center justify-center bg-surface-900">
         <div className="text-white text-xl">Loading game...</div>
       </div>
     );
@@ -719,14 +722,14 @@ const LiveGameNew: React.FC = () => {
   // Show starting lineup selector for scheduled games
   if (game.status === "scheduled") {
     return (
-      <div className="h-dvh bg-gray-100 dark:bg-gray-900 p-4 safe-area-inset">
+      <div className="h-dvh bg-surface-100 dark:bg-surface-900 p-4 safe-area-inset">
         <div className="max-w-4xl mx-auto h-full flex flex-col">
           {/* Header with game info */}
           <div className="mb-4 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-bold text-surface-900 dark:text-white">
               {game.awayTeam?.name || "Away"} @ {game.homeTeam?.name || "Home"}
             </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-surface-600 dark:text-surface-400 mt-1">
               {game.scheduledAt
                 ? new Date(game.scheduledAt).toLocaleDateString(undefined, {
                     weekday: "long",

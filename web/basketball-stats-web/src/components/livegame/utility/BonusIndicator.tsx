@@ -13,7 +13,9 @@ interface BonusIndicatorProps {
 export const BonusIndicator: React.FC<BonusIndicatorProps> = ({ inBonus, inDoubleBonus }) => {
   if (!inBonus) return null;
 
-  const statusText = inDoubleBonus ? "Double bonus - two free throws on any foul" : "Bonus - one-and-one free throws";
+  const statusText = inDoubleBonus
+    ? "Double bonus - two free throws on any foul"
+    : "Bonus - one-and-one free throws";
 
   return (
     <span

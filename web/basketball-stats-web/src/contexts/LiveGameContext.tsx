@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
-import { Id } from "../../../../convex/_generated/dataModel";
-import {
+import type { Id } from "../../../../convex/_generated/dataModel";
+import type {
   GameMode,
   PlayerStat,
   TeamStatsData,

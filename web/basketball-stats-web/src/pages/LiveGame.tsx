@@ -2,22 +2,20 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import {
   PlayIcon,
   PauseIcon,
   StopIcon,
-  ClockIcon,
   UserGroupIcon,
   ChartBarIcon,
   ArrowUturnLeftIcon,
   Cog6ToothIcon,
-  ExclamationTriangleIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
 import Icon from "../components/Icon";
-import { COLORS, svgToCourtCoords, getShotZone } from "@basketball-stats/shared";
+import { COLORS } from "@basketball-stats/shared";
 
 // Action history item for undo functionality
 interface ActionHistoryItem {
@@ -53,16 +51,7 @@ interface FreeThrowSequence {
   results: boolean[];
 }
 
-interface TeamStatsData {
-  offensiveRebounds: number;
-  defensiveRebounds: number;
-  teamFouls: number;
-  foulsThisQuarter: number;
-  foulsByQuarter: { q1: number; q2: number; q3: number; q4: number; ot: number };
-  timeoutsRemaining: number;
-  inBonus: boolean;
-  inDoubleBonus: boolean;
-}
+// TeamStatsData interface removed - was unused
 
 // Sound/Haptic Feedback Hook
 const useFeedback = () => {
@@ -263,7 +252,7 @@ const MiniCourt: React.FC<MiniCourtProps> = ({ onCourtClick, disabled, recentSho
       <svg
         ref={svgRef}
         viewBox={`0 0 ${COURT_WIDTH} ${COURT_HEIGHT}`}
-        className={`w-full rounded-lg ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-crosshair hover:shadow-lg hover:shadow-orange-500/20"}`}
+        className={`w-full rounded-lg ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-crosshair hover:shadow-lg hover:shadow-primary-500/20"}`}
         onClick={handleClick}
         style={{ aspectRatio: `${COURT_WIDTH}/${COURT_HEIGHT}` }}
       >
@@ -427,17 +416,19 @@ const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md border border-surface-200 dark:border-surface-700 overflow-hidden">
         {/* Header with zone info */}
-        <div className="bg-gray-50 dark:bg-gray-900 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-surface-50 dark:bg-surface-900 px-6 py-4 border-b border-surface-200 dark:border-surface-700">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-bold text-surface-900 dark:text-white">
                 {shotType === "3pt" ? "3-Point Shot" : "2-Point Shot"}
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-surface-500 dark:text-surface-400">
                 Shot from{" "}
-                <span className="font-medium text-gray-700 dark:text-gray-300">{zoneName}</span>
+                <span className="font-medium text-surface-700 dark:text-surface-300">
+                  {zoneName}
+                </span>
               </p>
             </div>
             <div
@@ -455,22 +446,22 @@ const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
         {/* Player list with made/missed buttons */}
         <div className="max-h-80 overflow-y-auto">
           {onCourtPlayers.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">No players on court</div>
+            <div className="p-8 text-center text-surface-500">No players on court</div>
           ) : (
             onCourtPlayers.map((player) => (
               <div
                 key={player.id}
-                className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                className="flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-white font-bold text-sm">#{player.player?.number}</span>
                   </div>
                   <div>
-                    <div className="text-gray-900 dark:text-white font-medium text-sm">
+                    <div className="text-surface-900 dark:text-white font-medium text-sm">
                       {player.player?.name}
                     </div>
-                    <div className="text-gray-500 text-xs">{player.points} PTS</div>
+                    <div className="text-surface-500 text-xs">{player.points} PTS</div>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -493,10 +484,10 @@ const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
         </div>
 
         {/* Cancel button */}
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
           <button
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors"
           >
             Cancel
           </button>
@@ -553,7 +544,7 @@ const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
   onNoAssist,
   scorerName,
   scorerNumber,
-  shotType,
+  shotType: _shotType,
   points,
   teammates,
 }) => {
@@ -561,7 +552,7 @@ const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md border border-surface-200 dark:border-surface-700 overflow-hidden">
         {/* Header */}
         <div className="bg-green-600 px-6 py-4">
           <div className="flex items-center justify-between">
@@ -579,27 +570,27 @@ const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
 
         {/* Teammate list for assist */}
         <div className="max-h-60 overflow-y-auto">
-          <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-xs text-gray-500 uppercase">Who assisted?</span>
+          <div className="px-4 py-2 bg-surface-50 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700">
+            <span className="text-xs text-surface-500 uppercase">Who assisted?</span>
           </div>
           {teammates.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">No other players on court</div>
+            <div className="p-6 text-center text-surface-500">No other players on court</div>
           ) : (
             teammates.map((player) => (
               <button
                 key={player.id}
                 onClick={() => onAssist(player.playerId)}
-                className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-white font-bold text-sm">#{player.player?.number}</span>
                   </div>
                   <div className="text-left">
-                    <div className="text-gray-900 dark:text-white font-medium text-sm">
+                    <div className="text-surface-900 dark:text-white font-medium text-sm">
                       {player.player?.name}
                     </div>
-                    <div className="text-gray-500 text-xs">{player.assists} AST</div>
+                    <div className="text-surface-500 text-xs">{player.assists} AST</div>
                   </div>
                 </div>
                 <div className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-lg">
@@ -611,16 +602,16 @@ const AssistPromptModal: React.FC<AssistPromptModalProps> = ({
         </div>
 
         {/* No assist / Cancel */}
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700 flex gap-2">
           <button
             onClick={onNoAssist}
-            className="flex-1 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            className="flex-1 py-2.5 bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 font-medium rounded-lg hover:bg-surface-300 dark:hover:bg-surface-600 transition-colors"
           >
             No Assist
           </button>
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="flex-1 py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors"
           >
             Cancel
           </button>
@@ -672,7 +663,8 @@ const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
     return () => {
       if (autoDismissTimer) window.clearTimeout(autoDismissTimer);
     };
-  }, [isOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]); // Only re-run when modal opens/closes
 
   if (!isOpen) return null;
 
@@ -681,7 +673,7 @@ const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-lg border border-surface-200 dark:border-surface-700 overflow-hidden">
         {/* Header */}
         <div className="bg-blue-600 px-6 py-4">
           <h3 className="text-lg font-bold text-white">Rebound</h3>
@@ -692,14 +684,14 @@ const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
 
         <div className="max-h-80 overflow-y-auto">
           {/* Offensive Rebound - Shooter's Team */}
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+          <div className="px-4 py-3 border-b border-surface-200 dark:border-surface-700">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-orange-600 dark:text-orange-400 text-sm">
+              <h4 className="font-semibold text-primary-600 dark:text-primary-400 text-sm">
                 OFFENSIVE ({shooterTeamName})
               </h4>
               <button
                 onClick={() => onTeamRebound(shooterTeamId, "offensive")}
-                className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-medium rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
+                className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-medium rounded hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
               >
                 TEAM
               </button>
@@ -709,7 +701,7 @@ const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
                 <button
                   key={player.id}
                   onClick={() => onPlayerRebound(player.playerId, "offensive")}
-                  className="px-3 py-2 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 border border-orange-200 dark:border-orange-700 rounded-lg text-sm font-medium text-gray-900 dark:text-white transition-colors"
+                  className="px-3 py-2 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/40 border border-primary-200 dark:border-primary-700 rounded-lg text-sm font-medium text-surface-900 dark:text-white transition-colors"
                 >
                   #{player.player?.number}
                 </button>
@@ -735,7 +727,7 @@ const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
                 <button
                   key={player.id}
                   onClick={() => onPlayerRebound(player.playerId, "defensive")}
-                  className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-700 rounded-lg text-sm font-medium text-gray-900 dark:text-white transition-colors"
+                  className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-700 rounded-lg text-sm font-medium text-surface-900 dark:text-white transition-colors"
                 >
                   #{player.player?.number}
                 </button>
@@ -745,10 +737,10 @@ const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
           <button
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors"
           >
             Dismiss / No Rebound
           </button>
@@ -768,7 +760,10 @@ interface QuickStatModalProps {
 }
 
 // Static class mappings for Tailwind (dynamic classes don't work with Tailwind's purge)
-const STAT_STYLES: Record<StatType | "default", { label: string; headerBg: string; badgeClass: string }> = {
+const STAT_STYLES: Record<
+  StatType | "default",
+  { label: string; headerBg: string; badgeClass: string }
+> = {
   assist: {
     label: "Assist",
     headerBg: "bg-purple-600",
@@ -816,8 +811,8 @@ const STAT_STYLES: Record<StatType | "default", { label: string; headerBg: strin
   },
   default: {
     label: "Stat",
-    headerBg: "bg-gray-600",
-    badgeClass: "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
+    headerBg: "bg-surface-600",
+    badgeClass: "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300",
   },
 };
 
@@ -840,33 +835,35 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
       aria-labelledby="quickstat-modal-title-old"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md border border-surface-200 dark:border-surface-700 overflow-hidden">
         {/* Header */}
         <div className={`px-6 py-4 ${styles.headerBg}`}>
-          <h3 id="quickstat-modal-title-old" className="text-lg font-bold text-white">Record {styles.label}</h3>
+          <h3 id="quickstat-modal-title-old" className="text-lg font-bold text-white">
+            Record {styles.label}
+          </h3>
           <p className="text-white/80 text-sm">Select a player</p>
         </div>
 
         {/* Player list */}
         <div className="max-h-80 overflow-y-auto">
           {onCourtPlayers.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">No players on court</div>
+            <div className="p-8 text-center text-surface-500">No players on court</div>
           ) : (
             onCourtPlayers.map((player) => (
               <button
                 key={player.id}
                 onClick={() => onRecord(player.playerId)}
-                className="w-full flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500"
+                className="w-full flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-white font-bold text-sm">#{player.player?.number}</span>
                   </div>
                   <div className="text-left">
-                    <div className="text-gray-900 dark:text-white font-medium text-sm">
+                    <div className="text-surface-900 dark:text-white font-medium text-sm">
                       {player.player?.name}
                     </div>
-                    <div className="text-gray-500 text-xs">
+                    <div className="text-surface-500 text-xs">
                       {player.isHomeTeam ? "Home" : "Away"}
                     </div>
                   </div>
@@ -880,10 +877,10 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
         </div>
 
         {/* Cancel button */}
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
           <button
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
+            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded"
           >
             Cancel
           </button>
@@ -912,8 +909,8 @@ const FoulDots: React.FC<FoulDotsProps> = ({ fouls, foulLimit, fouledOut }) => {
                 ? "bg-red-600"
                 : fouls >= foulLimit - 1
                   ? "bg-yellow-500"
-                  : "bg-orange-500"
-              : "bg-gray-300 dark:bg-gray-600"
+                  : "bg-primary-500"
+              : "bg-surface-300 dark:bg-surface-600"
           }`}
         />
       ))}
@@ -954,7 +951,7 @@ const TimeoutDots: React.FC<TimeoutDotsProps> = ({ remaining, total, teamSide })
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
-          className={`w-2 h-2 rounded-full ${i < remaining ? "bg-orange-500" : "bg-gray-400"}`}
+          className={`w-2 h-2 rounded-full ${i < remaining ? "bg-primary-500" : "bg-surface-400"}`}
         />
       ))}
     </div>
@@ -981,9 +978,9 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
   onRecord,
   selectedPlayer,
   opponentPlayers,
-  isOpponentTeam,
+  isOpponentTeam: _isOpponentTeam,
 }) => {
-  const [foulType, setFoulType] = useState<FoulType>("personal");
+  const [_foulType, setFoulType] = useState<FoulType>("personal");
   const [showShootingDetails, setShowShootingDetails] = useState(false);
   const [shotType, setShotType] = useState<"2pt" | "3pt">("2pt");
   const [wasAndOne, setWasAndOne] = useState(false);
@@ -1027,7 +1024,7 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md border border-surface-200 dark:border-surface-700 overflow-hidden">
         {/* Header */}
         <div className="bg-amber-600 px-6 py-4">
           <h3 className="text-lg font-bold text-white">
@@ -1039,11 +1036,11 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
         {!showShootingDetails ? (
           /* Foul Type Selection */
           <div className="p-4">
-            <p className="text-sm text-gray-500 mb-3">Select foul type:</p>
+            <p className="text-sm text-surface-500 mb-3">Select foul type:</p>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => handleFoulTypeSelect("personal")}
-                className="py-3 px-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium text-gray-900 dark:text-white transition-colors"
+                className="py-3 px-4 bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 rounded-lg font-medium text-surface-900 dark:text-white transition-colors"
               >
                 Personal
               </button>
@@ -1055,7 +1052,7 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
               </button>
               <button
                 onClick={() => handleFoulTypeSelect("offensive")}
-                className="py-3 px-4 bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 dark:hover:bg-orange-900/50 rounded-lg font-medium text-orange-700 dark:text-orange-300 transition-colors"
+                className="py-3 px-4 bg-primary-100 dark:bg-primary-900/30 hover:bg-primary-200 dark:hover:bg-primary-900/50 rounded-lg font-medium text-primary-700 dark:text-primary-300 transition-colors"
               >
                 Offensive
               </button>
@@ -1092,14 +1089,14 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
             <div className="space-y-4">
               {/* Shot Type */}
               <div>
-                <p className="text-sm text-gray-500 mb-2">Shot type:</p>
+                <p className="text-sm text-surface-500 mb-2">Shot type:</p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShotType("2pt")}
                     className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
                       shotType === "2pt"
                         ? "bg-blue-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     2PT
@@ -1109,7 +1106,7 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
                     className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
                       shotType === "3pt"
                         ? "bg-purple-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     3PT
@@ -1119,14 +1116,14 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
 
               {/* And-1 */}
               <div>
-                <p className="text-sm text-gray-500 mb-2">And-1? (shot was made)</p>
+                <p className="text-sm text-surface-500 mb-2">And-1? (shot was made)</p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setWasAndOne(false)}
                     className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
                       !wasAndOne
                         ? "bg-red-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     No
@@ -1136,7 +1133,7 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
                     className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
                       wasAndOne
                         ? "bg-green-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     Yes (And-1)
@@ -1146,7 +1143,7 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
 
               {/* Who was fouled */}
               <div>
-                <p className="text-sm text-gray-500 mb-2">Who was fouled?</p>
+                <p className="text-sm text-surface-500 mb-2">Who was fouled?</p>
                 <div className="max-h-40 overflow-y-auto space-y-1">
                   {opponentOnCourt.map((player) => (
                     <button
@@ -1155,7 +1152,7 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
                       className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors ${
                         fouledPlayer === player.playerId
                           ? "bg-green-100 dark:bg-green-900/30 border-2 border-green-500"
-                          : "bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          : "bg-surface-50 dark:bg-surface-700/50 hover:bg-surface-100 dark:hover:bg-surface-700"
                       }`}
                     >
                       <span className="font-bold text-sm">#{player.player?.number}</span>
@@ -1169,7 +1166,7 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
               <button
                 onClick={handleShootingFoulConfirm}
                 disabled={!fouledPlayer}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white font-bold rounded-lg transition-colors"
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-surface-300 dark:disabled:bg-surface-700 text-white font-bold rounded-lg transition-colors"
               >
                 Record Shooting Foul
               </button>
@@ -1178,10 +1175,10 @@ const FoulRecordingModal: React.FC<FoulRecordingModalProps> = ({
         )}
 
         {/* Cancel */}
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
           <button
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors"
           >
             Cancel
           </button>
@@ -1212,7 +1209,7 @@ const FreeThrowSequenceModal: React.FC<FreeThrowSequenceModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-sm border border-surface-200 dark:border-surface-700 overflow-hidden">
         {/* Header */}
         <div className="bg-green-600 px-6 py-4">
           <h3 className="text-lg font-bold text-white">
@@ -1226,9 +1223,9 @@ const FreeThrowSequenceModal: React.FC<FreeThrowSequenceModalProps> = ({
 
         {/* Results so far */}
         {results.length > 0 && (
-          <div className="px-6 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-3 bg-surface-50 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 uppercase">Results:</span>
+              <span className="text-xs text-surface-500 uppercase">Results:</span>
               {results.map((made, i) => (
                 <span
                   key={i}
@@ -1262,10 +1259,10 @@ const FreeThrowSequenceModal: React.FC<FreeThrowSequenceModalProps> = ({
         </div>
 
         {/* Cancel */}
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
           <button
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors"
           >
             Cancel Free Throws
           </button>
@@ -1322,10 +1319,10 @@ const QuickUndoChip: React.FC<QuickUndoChipProps> = ({ lastAction, onUndo, onDis
 
   return (
     <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 animate-in slide-in-from-bottom">
-      <div className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-full shadow-lg">
+      <div className="flex items-center gap-2 bg-surface-900 text-white px-4 py-2 rounded-full shadow-lg">
         <button
           onClick={onUndo}
-          className="flex items-center gap-2 hover:text-orange-400 transition-colors"
+          className="flex items-center gap-2 hover:text-primary-400 transition-colors"
         >
           <ArrowUturnLeftIcon className="h-4 w-4" />
           <span className="text-sm">
@@ -1337,7 +1334,7 @@ const QuickUndoChip: React.FC<QuickUndoChipProps> = ({ lastAction, onUndo, onDis
             setVisible(false);
             onDismiss();
           }}
-          className="text-gray-400 hover:text-white"
+          className="text-surface-400 hover:text-white"
         >
           <Icon name="x" size={16} />
         </button>
@@ -1368,12 +1365,12 @@ const OvertimePromptModal: React.FC<OvertimePromptModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="bg-orange-600 px-6 py-4">
+      <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-sm border border-surface-200 dark:border-surface-700 overflow-hidden">
+        <div className="bg-primary-600 px-6 py-4">
           <h3 className="text-lg font-bold text-white text-center">
             Game Tied {homeScore}-{awayScore}
           </h3>
-          <p className="text-orange-200 text-sm text-center">End of Regulation</p>
+          <p className="text-primary-200 text-sm text-center">End of Regulation</p>
         </div>
 
         <div className="p-6 space-y-3">
@@ -1385,16 +1382,16 @@ const OvertimePromptModal: React.FC<OvertimePromptModalProps> = ({
           </button>
           <button
             onClick={onEndAsTie}
-            className="w-full py-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-colors"
+            className="w-full py-4 bg-surface-200 dark:bg-surface-700 hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 font-medium rounded-xl transition-colors"
           >
             End as Tie
           </button>
         </div>
 
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
           <button
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors"
           >
             Cancel
           </button>
@@ -1415,7 +1412,7 @@ interface TeamStatsSummaryProps {
 const TeamStatsSummary: React.FC<TeamStatsSummaryProps> = ({
   stats,
   teamName,
-  isExpanded,
+  isExpanded: _isExpanded,
   onToggle,
 }) => {
   // Calculate team totals
@@ -1441,16 +1438,18 @@ const TeamStatsSummary: React.FC<TeamStatsSummaryProps> = ({
   return (
     <button
       onClick={onToggle}
-      className="w-full text-left px-3 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      className="w-full text-left px-3 py-2 bg-surface-50 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
     >
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{teamName}</span>
+        <span className="text-xs font-semibold text-surface-600 dark:text-surface-400">
+          {teamName}
+        </span>
         <div className="flex items-center gap-3 text-xs">
-          <span className="text-gray-600 dark:text-gray-400">{fgPct}% FG</span>
-          <span className="text-gray-600 dark:text-gray-400">{tpPct}% 3P</span>
-          <span className="text-gray-600 dark:text-gray-400">{ftPct}% FT</span>
-          <span className="text-gray-600 dark:text-gray-400">{totals.reb} REB</span>
-          <span className="text-gray-600 dark:text-gray-400">{totals.to} TO</span>
+          <span className="text-surface-600 dark:text-surface-400">{fgPct}% FG</span>
+          <span className="text-surface-600 dark:text-surface-400">{tpPct}% 3P</span>
+          <span className="text-surface-600 dark:text-surface-400">{ftPct}% FT</span>
+          <span className="text-surface-600 dark:text-surface-400">{totals.reb} REB</span>
+          <span className="text-surface-600 dark:text-surface-400">{totals.to} TO</span>
         </div>
       </div>
     </button>
@@ -1511,52 +1510,60 @@ const QuarterBreakdown: React.FC<QuarterBreakdownProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-      <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Score by Period</h4>
+    <div className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+      <h4 className="text-sm font-semibold text-surface-900 dark:text-white mb-3">
+        Score by Period
+      </h4>
       <div className="overflow-x-auto">
         <table className="min-w-full text-xs">
           <thead>
-            <tr className="border-b border-gray-300 dark:border-gray-600">
-              <th className="text-left py-2 px-2 text-gray-700 dark:text-gray-300 font-medium">
+            <tr className="border-b border-surface-300 dark:border-surface-600">
+              <th className="text-left py-2 px-2 text-surface-700 dark:text-surface-300 font-medium">
                 Team
               </th>
               {periods.map((p) => (
                 <th
                   key={p}
-                  className="text-center py-2 px-2 text-gray-700 dark:text-gray-300 font-medium w-10"
+                  className="text-center py-2 px-2 text-surface-700 dark:text-surface-300 font-medium w-10"
                 >
                   {p}
                 </th>
               ))}
-              <th className="text-center py-2 px-2 text-gray-700 dark:text-gray-300 font-bold w-14">
+              <th className="text-center py-2 px-2 text-surface-700 dark:text-surface-300 font-bold w-14">
                 Final
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-gray-200 dark:border-gray-700">
-              <td className="py-2 px-2 text-gray-900 dark:text-white font-medium truncate max-w-[80px]">
+            <tr className="border-b border-surface-200 dark:border-surface-700">
+              <td className="py-2 px-2 text-surface-900 dark:text-white font-medium truncate max-w-[80px]">
                 {awayTeamName}
               </td>
               {periods.map((p) => (
-                <td key={p} className="text-center py-2 px-2 text-gray-600 dark:text-gray-400">
+                <td
+                  key={p}
+                  className="text-center py-2 px-2 text-surface-600 dark:text-surface-400"
+                >
                   {getQuarterScore(p, "away")}
                 </td>
               ))}
-              <td className="text-center py-2 px-2 text-gray-900 dark:text-white font-bold">
+              <td className="text-center py-2 px-2 text-surface-900 dark:text-white font-bold">
                 {awayScore}
               </td>
             </tr>
             <tr>
-              <td className="py-2 px-2 text-gray-900 dark:text-white font-medium truncate max-w-[80px]">
+              <td className="py-2 px-2 text-surface-900 dark:text-white font-medium truncate max-w-[80px]">
                 {homeTeamName}
               </td>
               {periods.map((p) => (
-                <td key={p} className="text-center py-2 px-2 text-gray-600 dark:text-gray-400">
+                <td
+                  key={p}
+                  className="text-center py-2 px-2 text-surface-600 dark:text-surface-400"
+                >
                   {getQuarterScore(p, "home")}
                 </td>
               ))}
-              <td className="text-center py-2 px-2 text-gray-900 dark:text-white font-bold">
+              <td className="text-center py-2 px-2 text-surface-900 dark:text-white font-bold">
                 {homeScore}
               </td>
             </tr>
@@ -1615,12 +1622,12 @@ const PlayByPlayPanel: React.FC<PlayByPlayPanelProps> = ({ events, isLoading }) 
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
         <div className="animate-pulse space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="flex items-center gap-3">
-              <div className="w-12 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="w-12 h-4 bg-surface-200 dark:bg-surface-700 rounded"></div>
+              <div className="flex-1 h-4 bg-surface-200 dark:bg-surface-700 rounded"></div>
             </div>
           ))}
         </div>
@@ -1630,33 +1637,33 @@ const PlayByPlayPanel: React.FC<PlayByPlayPanelProps> = ({ events, isLoading }) 
 
   if (events.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 text-center">
-        <p className="text-gray-500 dark:text-gray-400">No events recorded yet</p>
+      <div className="bg-white dark:bg-surface-800 rounded-xl p-6 border border-surface-200 dark:border-surface-700 text-center">
+        <p className="text-surface-500 dark:text-surface-400">No events recorded yet</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Play-by-Play</h4>
+    <div className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+      <div className="p-3 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900">
+        <h4 className="text-sm font-semibold text-surface-900 dark:text-white">Play-by-Play</h4>
       </div>
       <div className="max-h-80 overflow-y-auto">
         {events.map((event) => (
           <div
             key={event.id}
-            className="flex items-start gap-3 px-3 py-2 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+            className="flex items-start gap-3 px-3 py-2 border-b border-surface-100 dark:border-surface-800 hover:bg-surface-50 dark:hover:bg-surface-700/50"
           >
             <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="text-[10px] text-gray-500 font-mono w-10">
+              <span className="text-[10px] text-surface-500 font-mono w-10">
                 Q{event.quarter > 4 ? "OT" + (event.quarter - 4) : event.quarter}
               </span>
-              <span className="text-[10px] text-gray-400 font-mono w-10">
+              <span className="text-[10px] text-surface-400 font-mono w-10">
                 {event.gameTimeDisplay}
               </span>
             </div>
             <span className="text-sm flex-shrink-0">{getEventIcon(event.eventType)}</span>
-            <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+            <span className="text-sm text-surface-700 dark:text-surface-300 flex-1">
               {event.description}
             </span>
           </div>
@@ -1695,26 +1702,26 @@ const InlineSubPanel: React.FC<InlineSubPanelProps> = ({
   const isSwapping = !!swappingPlayer && onCourtPlayers.some((p) => p.playerId === swappingPlayer);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+      <div className="px-4 py-2 bg-surface-50 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700">
         <div className="flex items-center justify-between">
-          <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{teamName}</h4>
-          <span className="text-xs text-gray-500">{onCourtPlayers.length}/5 on court</span>
+          <h4 className="font-semibold text-surface-900 dark:text-white text-sm">{teamName}</h4>
+          <span className="text-xs text-surface-500">{onCourtPlayers.length}/5 on court</span>
         </div>
       </div>
 
       {/* On Court Players */}
       <div className="px-3 py-2">
-        <div className="text-xs text-gray-500 uppercase mb-1.5">On Court</div>
+        <div className="text-xs text-surface-500 uppercase mb-1.5">On Court</div>
         <div className="space-y-1.5">
           {onCourtPlayers.map((player) => (
             <div
               key={player.id}
               className={`flex items-center justify-between py-1.5 px-2 rounded-lg transition-colors ${
                 swappingPlayer === player.playerId
-                  ? "bg-orange-100 dark:bg-orange-900/30 border border-orange-400"
-                  : "bg-gray-50 dark:bg-gray-700/50"
+                  ? "bg-primary-100 dark:bg-primary-900/30 border border-primary-400"
+                  : "bg-surface-50 dark:bg-surface-700/50"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -1722,7 +1729,7 @@ const InlineSubPanel: React.FC<InlineSubPanelProps> = ({
                   <span className="text-white font-bold text-xs">#{player.player?.number}</span>
                 </div>
                 <div>
-                  <div className="text-gray-900 dark:text-white text-sm font-medium leading-tight">
+                  <div className="text-surface-900 dark:text-white text-sm font-medium leading-tight">
                     {player.player?.name}
                   </div>
                   <FoulDots fouls={player.fouls} foulLimit={foulLimit} />
@@ -1732,7 +1739,7 @@ const InlineSubPanel: React.FC<InlineSubPanelProps> = ({
                 (swappingPlayer === player.playerId ? (
                   <button
                     onClick={onCancelSwap}
-                    className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded transition-colors"
+                    className="px-2 py-1 bg-surface-200 dark:bg-surface-600 text-surface-700 dark:text-surface-300 text-xs font-medium rounded transition-colors"
                   >
                     Cancel
                   </button>
@@ -1740,7 +1747,7 @@ const InlineSubPanel: React.FC<InlineSubPanelProps> = ({
                   <button
                     onClick={() => onStartSwap(player.playerId)}
                     disabled={isSwapping && swappingPlayer !== player.playerId}
-                    className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-medium rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors disabled:opacity-50"
+                    className="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-medium rounded hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors disabled:opacity-50"
                   >
                     SWAP
                   </button>
@@ -1751,8 +1758,8 @@ const InlineSubPanel: React.FC<InlineSubPanelProps> = ({
       </div>
 
       {/* Bench */}
-      <div className="px-3 py-2 border-t border-gray-100 dark:border-gray-700">
-        <div className="text-xs text-gray-500 uppercase mb-1.5">Bench</div>
+      <div className="px-3 py-2 border-t border-surface-100 dark:border-surface-700">
+        <div className="text-xs text-surface-500 uppercase mb-1.5">Bench</div>
         <div className="flex flex-wrap gap-1.5">
           {benchPlayers.map((player) => (
             <button
@@ -1766,21 +1773,21 @@ const InlineSubPanel: React.FC<InlineSubPanelProps> = ({
               className={`px-2 py-1.5 rounded text-xs font-medium transition-colors ${
                 isSwapping
                   ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50 cursor-pointer"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                  : "bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-400"
               } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               #{player.player?.number}
             </button>
           ))}
           {benchPlayers.length === 0 && (
-            <span className="text-xs text-gray-400 italic">No bench players</span>
+            <span className="text-xs text-surface-400 italic">No bench players</span>
           )}
         </div>
       </div>
 
       {/* Fouled Out */}
       {fouledOutPlayers.length > 0 && (
-        <div className="px-3 py-2 border-t border-gray-100 dark:border-gray-700 bg-red-50 dark:bg-red-900/10">
+        <div className="px-3 py-2 border-t border-surface-100 dark:border-surface-700 bg-red-50 dark:bg-red-900/10">
           <div className="text-xs text-red-500 uppercase mb-1">Fouled Out</div>
           <div className="flex flex-wrap gap-1.5">
             {fouledOutPlayers.map((player) => (
@@ -1925,9 +1932,10 @@ const LiveGame: React.FC = () => {
         setQuarterMinutes(settings.quarterMinutes);
       }
     }
-  }, [game?.status, game?.gameSettings, homeStats.length, awayStats.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.status, game?.gameSettings, homeStats.length, awayStats.length]); // Initial setup only
 
-  const formatTime = (seconds: number): string => {
+  const _formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
@@ -2159,7 +2167,7 @@ const LiveGame: React.FC = () => {
     }
   };
 
-  const handleSubstitute = async (playerId: Id<"players">, isOnCourt: boolean) => {
+  const _handleSubstitute = async (playerId: Id<"players">, isOnCourt: boolean) => {
     if (!token || !gameId) return;
 
     try {
@@ -2496,10 +2504,10 @@ const LiveGame: React.FC = () => {
 
   if (gameData === undefined || liveStats === undefined) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-surface-50 dark:bg-surface-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading game...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-surface-600 dark:text-surface-400">Loading game...</p>
         </div>
       </div>
     );
@@ -2507,15 +2515,19 @@ const LiveGame: React.FC = () => {
 
   if (!game) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-surface-50 dark:bg-surface-900 flex items-center justify-center">
         <div className="text-center py-12">
           <Icon
             name="basketball"
             size={48}
-            className="mx-auto mb-4 text-gray-600 dark:text-gray-400"
+            className="mx-auto mb-4 text-surface-600 dark:text-surface-400"
           />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Game not found</h3>
-          <p className="text-gray-600 dark:text-gray-400">The requested game could not be found.</p>
+          <h3 className="text-lg font-medium text-surface-900 dark:text-white mb-2">
+            Game not found
+          </h3>
+          <p className="text-surface-600 dark:text-surface-400">
+            The requested game could not be found.
+          </p>
         </div>
       </div>
     );
@@ -2531,7 +2543,7 @@ const LiveGame: React.FC = () => {
   const gameSettings = (game.gameSettings as any) || {};
   const quartersCompleted = gameSettings.quartersCompleted || [];
   const isQuickGame = gameSettings.isQuickGame || false;
-  const configuredQuarterMinutes = gameSettings.quarterMinutes || 12;
+  const _configuredQuarterMinutes = gameSettings.quarterMinutes || 12;
   const foulLimit = (liveStats?.game as any)?.foulLimit || gameSettings.foulLimit || 5;
 
   // Get stat type label for action history
@@ -2563,18 +2575,18 @@ const LiveGame: React.FC = () => {
   // Show pre-game configuration if game is scheduled
   if (isScheduled) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+      <div className="min-h-screen bg-surface-50 dark:bg-surface-900 p-6">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 mb-6 border border-surface-200 dark:border-surface-700">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Cog6ToothIcon className="h-8 w-8 text-orange-500" />
+                <Cog6ToothIcon className="h-8 w-8 text-primary-500" />
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="text-2xl font-bold text-surface-900 dark:text-white">
                     Pre-Game Setup
                   </h1>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-surface-600 dark:text-surface-400">
                     Configure game settings before starting
                   </p>
                 </div>
@@ -2586,15 +2598,15 @@ const LiveGame: React.FC = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-3 gap-8 items-center py-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="grid grid-cols-3 gap-8 items-center py-4 border-t border-surface-200 dark:border-surface-700">
               <div className="text-center">
-                <h2 className="text-lg font-bold text-gray-700 dark:text-gray-300">
+                <h2 className="text-lg font-bold text-surface-700 dark:text-surface-300">
                   {game.awayTeam?.name}
                 </h2>
               </div>
-              <div className="text-center text-2xl font-bold text-gray-500">VS</div>
+              <div className="text-center text-2xl font-bold text-surface-500">VS</div>
               <div className="text-center">
-                <h2 className="text-lg font-bold text-gray-700 dark:text-gray-300">
+                <h2 className="text-lg font-bold text-surface-700 dark:text-surface-300">
                   {game.homeTeam?.name}
                 </h2>
               </div>
@@ -2604,8 +2616,8 @@ const LiveGame: React.FC = () => {
           {/* Game Settings Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Quarter Duration */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="bg-white dark:bg-surface-800 rounded-xl p-6 border border-surface-200 dark:border-surface-700">
+              <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
                 Quarter Duration
               </h3>
               <div className="flex flex-wrap gap-3">
@@ -2615,8 +2627,8 @@ const LiveGame: React.FC = () => {
                     onClick={() => setQuarterMinutes(mins)}
                     className={`px-4 py-2.5 rounded-xl font-medium transition-colors ${
                       quarterMinutes === mins
-                        ? "bg-orange-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        ? "bg-primary-600 text-white"
+                        : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-600"
                     }`}
                   >
                     {mins} min
@@ -2631,19 +2643,21 @@ const LiveGame: React.FC = () => {
                     onChange={(e) =>
                       setQuarterMinutes(Math.min(20, Math.max(1, parseInt(e.target.value) || 12)))
                     }
-                    className="w-16 px-2 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center"
+                    className="w-16 px-2 py-2.5 rounded-xl border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white text-center"
                   />
-                  <span className="text-gray-600 dark:text-gray-400 text-sm">min</span>
+                  <span className="text-surface-600 dark:text-surface-400 text-sm">min</span>
                 </div>
               </div>
             </div>
 
             {/* Foul Limit */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="bg-white dark:bg-surface-800 rounded-xl p-6 border border-surface-200 dark:border-surface-700">
+              <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
                 Foul Limit
               </h3>
-              <p className="text-sm text-gray-500 mb-4">Players foul out after this many fouls</p>
+              <p className="text-sm text-surface-500 mb-4">
+                Players foul out after this many fouls
+              </p>
               <div className="flex gap-3">
                 {[5, 6].map((limit) => (
                   <button
@@ -2651,8 +2665,8 @@ const LiveGame: React.FC = () => {
                     onClick={() => setFoulLimitSetting(limit as 5 | 6)}
                     className={`flex-1 px-6 py-3 rounded-xl font-medium transition-colors ${
                       foulLimitSetting === limit
-                        ? "bg-orange-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        ? "bg-primary-600 text-white"
+                        : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-600"
                     }`}
                   >
                     {limit} Fouls
@@ -2667,22 +2681,22 @@ const LiveGame: React.FC = () => {
 
           {/* Starting Five Selection */}
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-1">
               Starting Lineups
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-surface-500">
               First 5 players are selected by default. Tap to change.
             </p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Away Team Starters */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-surface-800 rounded-xl p-6 border border-surface-200 dark:border-surface-700">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-surface-900 dark:text-white">
                   {game.awayTeam?.name}
                 </h3>
                 <span
-                  className={`text-sm font-medium ${awayStarters.length === 5 ? "text-green-500" : "text-orange-500"}`}
+                  className={`text-sm font-medium ${awayStarters.length === 5 ? "text-green-500" : "text-primary-500"}`}
                 >
                   {awayStarters.length}/5 selected
                 </span>
@@ -2694,15 +2708,15 @@ const LiveGame: React.FC = () => {
                     onClick={() => toggleStarter(stat.playerId, false)}
                     className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
                       awayStarters.includes(stat.playerId)
-                        ? "bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-500"
-                        : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
+                        : "bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600"
                     }`}
                   >
-                    <span className="text-gray-900 dark:text-white font-medium">
+                    <span className="text-surface-900 dark:text-white font-medium">
                       #{stat.player?.number} {stat.player?.name}
                     </span>
                     {awayStarters.includes(stat.playerId) && (
-                      <CheckIcon className="h-5 w-5 text-orange-500" />
+                      <CheckIcon className="h-5 w-5 text-primary-500" />
                     )}
                   </button>
                 ))}
@@ -2710,13 +2724,13 @@ const LiveGame: React.FC = () => {
             </div>
 
             {/* Home Team Starters */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-surface-800 rounded-xl p-6 border border-surface-200 dark:border-surface-700">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-surface-900 dark:text-white">
                   {game.homeTeam?.name}
                 </h3>
                 <span
-                  className={`text-sm font-medium ${homeStarters.length === 5 ? "text-green-500" : "text-orange-500"}`}
+                  className={`text-sm font-medium ${homeStarters.length === 5 ? "text-green-500" : "text-primary-500"}`}
                 >
                   {homeStarters.length}/5 selected
                 </span>
@@ -2728,15 +2742,15 @@ const LiveGame: React.FC = () => {
                     onClick={() => toggleStarter(stat.playerId, true)}
                     className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
                       homeStarters.includes(stat.playerId)
-                        ? "bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-500"
-                        : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
+                        : "bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600"
                     }`}
                   >
-                    <span className="text-gray-900 dark:text-white font-medium">
+                    <span className="text-surface-900 dark:text-white font-medium">
                       #{stat.player?.number} {stat.player?.name}
                     </span>
                     {homeStarters.includes(stat.playerId) && (
-                      <CheckIcon className="h-5 w-5 text-orange-500" />
+                      <CheckIcon className="h-5 w-5 text-primary-500" />
                     )}
                   </button>
                 ))}
@@ -2758,22 +2772,22 @@ const LiveGame: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-surface-50 dark:bg-surface-900 p-6">
       {/* Compact Scoreboard with Team Fouls & Timeouts */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-3 mb-4 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-surface-800 rounded-xl p-3 mb-4 border border-surface-200 dark:border-surface-700">
         <div className="flex items-center justify-between">
           {/* Away Team */}
           <div className="flex flex-col items-start gap-1">
             <div className="flex items-center gap-3">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white w-12 text-center">
+              <div className="text-3xl font-bold text-surface-900 dark:text-white w-12 text-center">
                 {game.awayScore}
               </div>
               <div className="flex flex-col">
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 max-w-[100px] truncate">
+                <div className="text-sm font-medium text-surface-600 dark:text-surface-400 max-w-[100px] truncate">
                   {game.awayTeam?.name}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-gray-500">
+                  <span className="text-[10px] text-surface-500">
                     TF: {(liveStats?.teamStats as any)?.away?.foulsThisQuarter || 0}
                   </span>
                   <BonusIndicator
@@ -2798,7 +2812,7 @@ const LiveGame: React.FC = () => {
                   onClick={() =>
                     game.awayTeam?.id && handleTimeout(game.awayTeam.id as Id<"teams">)
                   }
-                  className="text-[10px] text-orange-600 hover:text-orange-700 font-medium"
+                  className="text-[10px] text-primary-600 hover:text-primary-700 font-medium"
                 >
                   TO
                 </button>
@@ -2818,8 +2832,8 @@ const LiveGame: React.FC = () => {
                     quartersCompleted.includes(q)
                       ? "bg-green-500"
                       : game.currentQuarter === q
-                        ? "bg-orange-500"
-                        : "bg-gray-300 dark:bg-gray-600"
+                        ? "bg-primary-500"
+                        : "bg-surface-300 dark:bg-surface-600"
                   }`}
                 />
               ))}
@@ -2830,14 +2844,14 @@ const LiveGame: React.FC = () => {
               <button
                 onClick={() => !isCompleted && setShowQuarterSelector(!showQuarterSelector)}
                 disabled={isCompleted}
-                className={`text-sm font-bold px-2 py-1 rounded ${!isCompleted ? "hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" : ""}`}
+                className={`text-sm font-bold px-2 py-1 rounded ${!isCompleted ? "hover:bg-surface-100 dark:hover:bg-surface-700 cursor-pointer" : ""}`}
               >
                 {game.currentQuarter <= 4
                   ? `Q${game.currentQuarter}`
                   : `OT${game.currentQuarter - 4}`}
               </button>
               {showQuarterSelector && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20 p-2">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white dark:bg-surface-800 rounded-lg shadow-lg border border-surface-200 dark:border-surface-700 z-20 p-2">
                   <div className="flex gap-1">
                     {[1, 2, 3, 4].map((q) => (
                       <button
@@ -2845,10 +2859,10 @@ const LiveGame: React.FC = () => {
                         onClick={() => handleQuarterChange(q)}
                         className={`w-8 h-8 rounded font-bold text-sm ${
                           game.currentQuarter === q
-                            ? "bg-orange-600 text-white"
+                            ? "bg-primary-600 text-white"
                             : quartersCompleted.includes(q)
                               ? "bg-green-100 dark:bg-green-900/30 text-green-700"
-                              : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200"
+                              : "bg-surface-100 dark:bg-surface-700 hover:bg-surface-200"
                         }`}
                       >
                         {q}
@@ -2867,7 +2881,7 @@ const LiveGame: React.FC = () => {
                   : isPaused
                     ? "bg-yellow-600 text-white"
                     : isCompleted
-                      ? "bg-gray-600 text-white"
+                      ? "bg-surface-600 text-white"
                       : "bg-blue-600 text-white"
               }`}
             >
@@ -2880,7 +2894,7 @@ const LiveGame: React.FC = () => {
                 {actionHistory.length > 0 && (
                   <button
                     onClick={() => setShowActionHistory(!showActionHistory)}
-                    className="p-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="p-1.5 bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-300 rounded hover:bg-surface-200 dark:hover:bg-surface-600"
                     title="Undo"
                   >
                     <ArrowUturnLeftIcon className="h-4 w-4" />
@@ -2921,7 +2935,7 @@ const LiveGame: React.FC = () => {
           <div className="flex flex-col items-end gap-1">
             <div className="flex items-center gap-3">
               <div className="flex flex-col items-end">
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 max-w-[100px] truncate text-right">
+                <div className="text-sm font-medium text-surface-600 dark:text-surface-400 max-w-[100px] truncate text-right">
                   {game.homeTeam?.name}
                 </div>
                 <div className="flex items-center gap-2">
@@ -2929,12 +2943,12 @@ const LiveGame: React.FC = () => {
                     inBonus={(liveStats?.teamStats as any)?.home?.inBonus || false}
                     inDoubleBonus={(liveStats?.teamStats as any)?.home?.inDoubleBonus || false}
                   />
-                  <span className="text-[10px] text-gray-500">
+                  <span className="text-[10px] text-surface-500">
                     TF: {(liveStats?.teamStats as any)?.home?.foulsThisQuarter || 0}
                   </span>
                 </div>
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white w-12 text-center">
+              <div className="text-3xl font-bold text-surface-900 dark:text-white w-12 text-center">
                 {game.homeScore}
               </div>
             </div>
@@ -2944,7 +2958,7 @@ const LiveGame: React.FC = () => {
                   onClick={() =>
                     game.homeTeam?.id && handleTimeout(game.homeTeam.id as Id<"teams">)
                   }
-                  className="text-[10px] text-orange-600 hover:text-orange-700 font-medium"
+                  className="text-[10px] text-primary-600 hover:text-primary-700 font-medium"
                 >
                   TO
                 </button>
@@ -2973,8 +2987,8 @@ const LiveGame: React.FC = () => {
             key={tab.key}
             className={`flex-1 flex items-center justify-center py-3 px-4 rounded-xl font-medium transition-colors ${
               activeTab === tab.key
-                ? "bg-orange-600 text-white"
-                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                ? "bg-primary-600 text-white"
+                : "bg-white dark:bg-surface-800 text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700"
             }`}
             onClick={() => setActiveTab(tab.key as "court" | "stats")}
           >
@@ -2990,9 +3004,9 @@ const LiveGame: React.FC = () => {
           {/* Court, Quick Stats, and Substitutions in one row */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             {/* Court - Smaller, left side */}
-            <div className="lg:col-span-5 bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
+            <div className="lg:col-span-5 bg-white dark:bg-surface-800 rounded-xl p-3 border border-surface-200 dark:border-surface-700">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-gray-900 dark:text-white font-semibold text-sm">
+                <h3 className="text-surface-900 dark:text-white font-semibold text-sm">
                   Tap Court to Record
                 </h3>
                 <div className="flex gap-1">
@@ -3013,55 +3027,55 @@ const LiveGame: React.FC = () => {
               </div>
 
               {/* Quick Stats below court */}
-              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-gray-500 text-xs mb-2">Quick Stats</p>
+              <div className="mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
+                <p className="text-surface-500 text-xs mb-2">Quick Stats</p>
                 <div className="grid grid-cols-4 gap-1.5">
                   <button
                     onClick={() => setPendingQuickStat("rebound")}
                     disabled={!canRecordStats}
-                    className="py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                    className="py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-surface-300 dark:disabled:bg-surface-700 text-white rounded-lg font-bold transition-colors text-xs"
                   >
                     REB
                   </button>
                   <button
                     onClick={() => setPendingQuickStat("assist")}
                     disabled={!canRecordStats}
-                    className="py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                    className="py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-surface-300 dark:disabled:bg-surface-700 text-white rounded-lg font-bold transition-colors text-xs"
                   >
                     AST
                   </button>
                   <button
                     onClick={() => setPendingQuickStat("steal")}
                     disabled={!canRecordStats}
-                    className="py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                    className="py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-surface-300 dark:disabled:bg-surface-700 text-white rounded-lg font-bold transition-colors text-xs"
                   >
                     STL
                   </button>
                   <button
                     onClick={() => setPendingQuickStat("block")}
                     disabled={!canRecordStats}
-                    className="py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                    className="py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-surface-300 dark:disabled:bg-surface-700 text-white rounded-lg font-bold transition-colors text-xs"
                   >
                     BLK
                   </button>
                   <button
                     onClick={() => setPendingQuickStat("turnover")}
                     disabled={!canRecordStats}
-                    className="py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                    className="py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-surface-300 dark:disabled:bg-surface-700 text-white rounded-lg font-bold transition-colors text-xs"
                   >
                     TO
                   </button>
                   <button
                     onClick={() => setPendingQuickStat("foul")}
                     disabled={!canRecordStats}
-                    className="py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs"
+                    className="py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-surface-300 dark:disabled:bg-surface-700 text-white rounded-lg font-bold transition-colors text-xs"
                   >
                     FOUL
                   </button>
                   <button
                     onClick={() => setPendingQuickStat("freethrow")}
                     disabled={!canRecordStats}
-                    className="py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-bold transition-colors text-xs col-span-2"
+                    className="py-2 bg-green-600 hover:bg-green-700 disabled:bg-surface-300 dark:disabled:bg-surface-700 text-white rounded-lg font-bold transition-colors text-xs col-span-2"
                   >
                     FREE THROW
                   </button>
@@ -3112,7 +3126,7 @@ const LiveGame: React.FC = () => {
 
           {/* Team Stats Summary */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
               <TeamStatsSummary
                 stats={awayStats}
                 teamName={game.awayTeam?.name || "Away"}
@@ -3120,7 +3134,7 @@ const LiveGame: React.FC = () => {
                 onToggle={() => setShowAwayStatsSummary(!showAwayStatsSummary)}
               />
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
               <TeamStatsSummary
                 stats={homeStats}
                 teamName={game.homeTeam?.name || "Home"}
@@ -3133,69 +3147,69 @@ const LiveGame: React.FC = () => {
           {/* Box Scores */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Away Team Stats */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="bg-white dark:bg-surface-800 rounded-xl p-6 border border-surface-200 dark:border-surface-700">
+              <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
                 {game.awayTeam?.name} - Player Stats
               </h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <thead>
-                    <tr className="border-b border-gray-300 dark:border-gray-600">
-                      <th className="text-left py-2 px-3 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <tr className="border-b border-surface-300 dark:border-surface-600">
+                      <th className="text-left py-2 px-3 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         Player
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         PTS
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         REB
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         AST
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         STL
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         BLK
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         TO
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         PF
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-surface-200 dark:divide-surface-700">
                     {awayStats.map((stat) => (
                       <tr key={stat.id} className={stat.isOnCourt ? "" : "opacity-50"}>
-                        <td className="py-3 px-3 text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-3 text-sm text-surface-900 dark:text-white">
                           #{stat.player?.number} {stat.player?.name}
                           {stat.isOnCourt && (
                             <span className="ml-2 text-green-400 text-xs">ON</span>
                           )}
                           {stat.fouledOut && <span className="ml-2 text-red-400 text-xs">OUT</span>}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white font-bold">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white font-bold">
                           {stat.points}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.rebounds}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.assists}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.steals}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.blocks}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.turnovers}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.fouls}
                         </td>
                       </tr>
@@ -3206,69 +3220,69 @@ const LiveGame: React.FC = () => {
             </div>
 
             {/* Home Team Stats */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="bg-white dark:bg-surface-800 rounded-xl p-6 border border-surface-200 dark:border-surface-700">
+              <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
                 {game.homeTeam?.name} - Player Stats
               </h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <thead>
-                    <tr className="border-b border-gray-300 dark:border-gray-600">
-                      <th className="text-left py-2 px-3 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    <tr className="border-b border-surface-300 dark:border-surface-600">
+                      <th className="text-left py-2 px-3 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         Player
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         PTS
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         REB
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         AST
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         STL
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         BLK
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         TO
                       </th>
-                      <th className="text-center py-2 px-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">
+                      <th className="text-center py-2 px-2 text-xs font-medium text-surface-700 dark:text-surface-300 uppercase">
                         PF
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-surface-200 dark:divide-surface-700">
                     {homeStats.map((stat) => (
                       <tr key={stat.id} className={stat.isOnCourt ? "" : "opacity-50"}>
-                        <td className="py-3 px-3 text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-3 text-sm text-surface-900 dark:text-white">
                           #{stat.player?.number} {stat.player?.name}
                           {stat.isOnCourt && (
                             <span className="ml-2 text-green-400 text-xs">ON</span>
                           )}
                           {stat.fouledOut && <span className="ml-2 text-red-400 text-xs">OUT</span>}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white font-bold">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white font-bold">
                           {stat.points}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.rebounds}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.assists}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.steals}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.blocks}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.turnovers}
                         </td>
-                        <td className="py-3 px-2 text-center text-sm text-gray-900 dark:text-white">
+                        <td className="py-3 px-2 text-center text-sm text-surface-900 dark:text-white">
                           {stat.fouls}
                         </td>
                       </tr>
@@ -3389,33 +3403,33 @@ const LiveGame: React.FC = () => {
       {/* Action History Panel */}
       {showActionHistory && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-96 max-h-[70vh] overflow-hidden border border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <div className="bg-white dark:bg-surface-800 rounded-2xl w-96 max-h-[70vh] overflow-hidden border border-surface-200 dark:border-surface-700">
+            <div className="flex justify-between items-center p-4 border-b border-surface-200 dark:border-surface-700">
+              <h3 className="text-lg font-bold text-surface-900 dark:text-white flex items-center gap-2">
                 <ArrowUturnLeftIcon className="h-5 w-5" />
                 Action History
               </h3>
               <button
                 onClick={() => setShowActionHistory(false)}
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                className="text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white"
               >
                 <Icon name="x" size={24} />
               </button>
             </div>
             <div className="overflow-y-auto max-h-[calc(70vh-120px)]">
               {actionHistory.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">No actions recorded yet</div>
+                <div className="p-8 text-center text-surface-500">No actions recorded yet</div>
               ) : (
                 actionHistory.map((action) => (
                   <div
                     key={action.id}
-                    className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className="flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-700"
                   >
                     <div>
-                      <div className="text-gray-900 dark:text-white font-medium">
+                      <div className="text-surface-900 dark:text-white font-medium">
                         #{action.playerNumber} {action.playerName}
                       </div>
-                      <div className="text-gray-600 dark:text-gray-400 text-sm">
+                      <div className="text-surface-600 dark:text-surface-400 text-sm">
                         {getStatLabel(action.statType, action.made)}
                       </div>
                     </div>
@@ -3429,10 +3443,10 @@ const LiveGame: React.FC = () => {
                 ))
               )}
             </div>
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <div className="p-4 border-t border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900">
               <button
                 onClick={() => setShowActionHistory(false)}
-                className="w-full py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="w-full py-2 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white transition-colors"
               >
                 Close
               </button>
@@ -3444,26 +3458,26 @@ const LiveGame: React.FC = () => {
       {/* End Period Confirmation Modal */}
       {showEndPeriodConfirm && game && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-96 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 w-96 border border-surface-200 dark:border-surface-700">
             <div className="flex items-center gap-3 mb-4">
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center ${
                   game.currentQuarter >= 4
                     ? "bg-red-100 dark:bg-red-900/30"
-                    : "bg-orange-100 dark:bg-orange-900/30"
+                    : "bg-primary-100 dark:bg-primary-900/30"
                 }`}
               >
                 <StopIcon
                   className={`h-6 w-6 ${
-                    game.currentQuarter >= 4 ? "text-red-600" : "text-orange-600"
+                    game.currentQuarter >= 4 ? "text-red-600" : "text-primary-600"
                   }`}
                 />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-bold text-surface-900 dark:text-white">
                   {game.currentQuarter >= 4 ? "End Game?" : `End Quarter ${game.currentQuarter}?`}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-surface-600 dark:text-surface-400">
                   {game.currentQuarter >= 4
                     ? "This will mark the game as complete"
                     : `Move to Q${game.currentQuarter + 1}`}
@@ -3480,15 +3494,15 @@ const LiveGame: React.FC = () => {
                       quartersCompleted.includes(q)
                         ? "bg-green-500 text-white"
                         : game.currentQuarter === q
-                          ? "bg-orange-500 text-white"
-                          : "bg-gray-200 dark:bg-gray-700 text-gray-500"
+                          ? "bg-primary-500 text-white"
+                          : "bg-surface-200 dark:bg-surface-700 text-surface-500"
                     }`}
                   >
                     Q{q}
                   </div>
                 ))}
               </div>
-              <p className="text-gray-600 dark:text-gray-400 text-center text-sm">
+              <p className="text-surface-600 dark:text-surface-400 text-center text-sm">
                 {game.currentQuarter >= 4
                   ? "The game will be marked as final."
                   : `Quarter ${game.currentQuarter} will be marked complete and the game will pause for Q${game.currentQuarter + 1}.`}
@@ -3498,7 +3512,7 @@ const LiveGame: React.FC = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowEndPeriodConfirm(false)}
-                className="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="flex-1 py-3 bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300 rounded-xl font-medium hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
               >
                 Cancel
               </button>
@@ -3507,7 +3521,7 @@ const LiveGame: React.FC = () => {
                 className={`flex-1 py-3 text-white rounded-xl font-medium transition-colors ${
                   game.currentQuarter >= 4
                     ? "bg-red-600 hover:bg-red-700"
-                    : "bg-orange-600 hover:bg-orange-700"
+                    : "bg-primary-600 hover:bg-primary-700"
                 }`}
               >
                 {game.currentQuarter >= 4 ? "End Game" : `End Q${game.currentQuarter}`}

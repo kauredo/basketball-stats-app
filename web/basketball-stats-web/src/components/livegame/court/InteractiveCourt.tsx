@@ -192,12 +192,17 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
         onClick={handleClick}
         style={{ aspectRatio: `${COURT_WIDTH}/${COURT_HEIGHT}` }}
         role={onCourtClick ? "application" : "img"}
-        aria-label={onCourtClick ? "Interactive basketball court. Tap to record a shot location." : "Basketball court shot chart"}
+        aria-label={
+          onCourtClick
+            ? "Interactive basketball court. Tap to record a shot location."
+            : "Basketball court shot chart"
+        }
         aria-describedby={showHeatMap ? "court-heatmap-desc" : undefined}
       >
         {showHeatMap && (
           <desc id="court-heatmap-desc">
-            Heat map showing shooting percentages by zone. Green indicates high percentage zones, yellow indicates medium, and red indicates low percentage zones.
+            Heat map showing shooting percentages by zone. Green indicates high percentage zones,
+            yellow indicates medium, and red indicates low percentage zones.
           </desc>
         )}
         {/* Definitions for gradients */}
@@ -429,10 +434,10 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
       {!disabled && !compact && onCourtClick && (
         <div
           className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide
-            bg-white/90 dark:bg-gray-900/90 backdrop-blur-md
-            border border-gray-200 dark:border-gray-700
-            text-gray-600 dark:text-gray-400
-            shadow-lg shadow-gray-200/50 dark:shadow-black/30"
+            bg-white/90 dark:bg-surface-900/90 backdrop-blur-md
+            border border-surface-200 dark:border-surface-700
+            text-surface-600 dark:text-surface-400
+            shadow-lg shadow-surface-200/50 dark:shadow-black/30"
         >
           Tap court to record shot
         </div>

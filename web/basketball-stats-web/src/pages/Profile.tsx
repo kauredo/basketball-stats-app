@@ -94,27 +94,27 @@ const Profile: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Account Settings</h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <h1 className="text-display-sm text-surface-900 dark:text-white mb-2">Account Settings</h1>
+        <p className="text-surface-600 dark:text-surface-400">
           Manage your profile and security settings
         </p>
       </div>
 
       {/* User Info Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6">
-        <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center">
+      <div className="surface-card p-6 mb-6">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 bg-primary-500 rounded-full flex items-center justify-center">
             <span className="text-2xl font-bold text-white">
               {user?.firstName?.[0]}
               {user?.lastName?.[0]}
             </span>
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-xl font-semibold text-surface-900 dark:text-white">
               {user?.firstName} {user?.lastName}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">{user?.email}</p>
-            <span className="inline-block mt-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded">
+            <p className="text-surface-600 dark:text-surface-400">{user?.email}</p>
+            <span className="inline-block mt-1 px-2 py-0.5 bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300 text-xs rounded-lg font-medium">
               {user?.role === "admin" ? "Administrator" : "User"}
             </span>
           </div>
@@ -122,13 +122,13 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 mb-6 bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-transparent">
+      <div className="flex gap-1 mb-6 bg-surface-100 dark:bg-surface-800 p-1 rounded-xl">
         <button
           onClick={() => setActiveTab("profile")}
-          className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${
             activeTab === "profile"
-              ? "bg-orange-600 text-white"
-              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              ? "bg-primary-500 text-white shadow-soft"
+              : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-surface-200 dark:hover:bg-surface-700"
           }`}
         >
           <UserCircleIcon className="w-5 h-5" />
@@ -136,10 +136,10 @@ const Profile: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab("password")}
-          className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${
             activeTab === "password"
-              ? "bg-orange-600 text-white"
-              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              ? "bg-primary-500 text-white shadow-soft"
+              : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-surface-200 dark:hover:bg-surface-700"
           }`}
         >
           <KeyIcon className="w-5 h-5" />
@@ -147,10 +147,10 @@ const Profile: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab("notifications")}
-          className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${
             activeTab === "notifications"
-              ? "bg-orange-600 text-white"
-              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+              ? "bg-primary-500 text-white shadow-soft"
+              : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-surface-200 dark:hover:bg-surface-700"
           }`}
         >
           <BellIcon className="w-5 h-5" />
@@ -160,12 +160,14 @@ const Profile: React.FC = () => {
 
       {/* Profile Tab */}
       {activeTab === "profile" && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Edit Profile</h3>
+        <div className="surface-card p-6">
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
+            Edit Profile
+          </h3>
 
           {profileMessage && (
             <div
-              className={`mb-4 p-3 rounded-lg flex items-center space-x-2 ${
+              className={`mb-4 p-3 rounded-xl flex items-center gap-2 ${
                 profileMessage.type === "success"
                   ? "bg-green-900/50 border border-green-700 text-green-400"
                   : "bg-red-900/50 border border-red-700 text-red-400"
@@ -184,7 +186,7 @@ const Profile: React.FC = () => {
             <div>
               <label
                 htmlFor="firstName"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1"
               >
                 First Name
               </label>
@@ -193,7 +195,7 @@ const Profile: React.FC = () => {
                 id="firstName"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white placeholder-surface-500 dark:placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 required
               />
             </div>
@@ -201,7 +203,7 @@ const Profile: React.FC = () => {
             <div>
               <label
                 htmlFor="lastName"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1"
               >
                 Last Name
               </label>
@@ -210,29 +212,25 @@ const Profile: React.FC = () => {
                 id="lastName"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white placeholder-surface-500 dark:placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                 Email
               </label>
               <input
                 type="email"
                 value={user?.email || ""}
                 disabled
-                className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                className="w-full px-4 py-3 bg-surface-200 dark:bg-surface-600 border border-surface-200 dark:border-surface-600 rounded-xl text-surface-500 dark:text-surface-400 cursor-not-allowed"
               />
-              <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>
+              <p className="mt-1 text-xs text-surface-500">Email cannot be changed</p>
             </div>
 
-            <button
-              type="submit"
-              disabled={profileLoading}
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="submit" disabled={profileLoading} className="btn-primary w-full py-3">
               {profileLoading ? "Saving..." : "Save Changes"}
             </button>
           </form>
@@ -241,14 +239,14 @@ const Profile: React.FC = () => {
 
       {/* Password Tab */}
       {activeTab === "password" && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="surface-card p-6">
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
             Change Password
           </h3>
 
           {passwordMessage && (
             <div
-              className={`mb-4 p-3 rounded-lg flex items-center space-x-2 ${
+              className={`mb-4 p-3 rounded-xl flex items-center gap-2 ${
                 passwordMessage.type === "success"
                   ? "bg-green-900/50 border border-green-700 text-green-400"
                   : "bg-red-900/50 border border-red-700 text-red-400"
@@ -267,7 +265,7 @@ const Profile: React.FC = () => {
             <div>
               <label
                 htmlFor="currentPassword"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1"
               >
                 Current Password
               </label>
@@ -276,7 +274,7 @@ const Profile: React.FC = () => {
                 id="currentPassword"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white placeholder-surface-500 dark:placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 required
               />
             </div>
@@ -284,7 +282,7 @@ const Profile: React.FC = () => {
             <div>
               <label
                 htmlFor="newPassword"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1"
               >
                 New Password
               </label>
@@ -293,11 +291,11 @@ const Profile: React.FC = () => {
                 id="newPassword"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white placeholder-surface-500 dark:placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 required
                 minLength={8}
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-surface-500">
                 Must be at least 8 characters with uppercase, lowercase, and number
               </p>
             </div>
@@ -305,7 +303,7 @@ const Profile: React.FC = () => {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1"
               >
                 Confirm New Password
               </label>
@@ -314,16 +312,12 @@ const Profile: React.FC = () => {
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white placeholder-surface-500 dark:placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 required
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={passwordLoading}
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="submit" disabled={passwordLoading} className="btn-primary w-full py-3">
               {passwordLoading ? "Changing..." : "Change Password"}
             </button>
           </form>

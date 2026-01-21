@@ -57,18 +57,23 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
     >
       <div
         ref={focusTrapRef}
-        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden"
+        className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md border border-surface-200 dark:border-surface-700 overflow-hidden"
       >
         {/* Header with zone info */}
-        <div className="bg-gray-50 dark:bg-gray-900 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-surface-50 dark:bg-surface-900 px-6 py-4 border-b border-surface-200 dark:border-surface-700">
           <div className="flex items-center justify-between">
             <div>
-              <h3 id="shot-modal-title" className="text-lg font-bold text-gray-900 dark:text-white">
+              <h3
+                id="shot-modal-title"
+                className="text-lg font-bold text-surface-900 dark:text-white"
+              >
                 {shotType === "3pt" ? "3-Point Shot" : "2-Point Shot"}
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-surface-500 dark:text-surface-400">
                 Shot from{" "}
-                <span className="font-medium text-gray-700 dark:text-gray-300">{zoneName}</span>
+                <span className="font-medium text-surface-700 dark:text-surface-300">
+                  {zoneName}
+                </span>
               </p>
             </div>
             <div
@@ -86,22 +91,22 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
         {/* Player list with made/missed buttons */}
         <div className="max-h-80 overflow-y-auto">
           {onCourtPlayers.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">No players on court</div>
+            <div className="p-8 text-center text-surface-500">No players on court</div>
           ) : (
             onCourtPlayers.map((player) => (
               <div
                 key={player.id}
-                className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                className="flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-white font-bold text-sm">#{player.player?.number}</span>
                   </div>
                   <div>
-                    <div className="text-gray-900 dark:text-white font-medium text-sm">
+                    <div className="text-surface-900 dark:text-white font-medium text-sm">
                       {player.player?.name}
                     </div>
-                    <div className="text-gray-500 text-xs">{player.points} PTS</div>
+                    <div className="text-surface-500 text-xs">{player.points} PTS</div>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -124,11 +129,11 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
         </div>
 
         {/* Cancel button */}
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
           <button
             ref={cancelButtonRef}
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
+            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded"
           >
             Cancel
           </button>

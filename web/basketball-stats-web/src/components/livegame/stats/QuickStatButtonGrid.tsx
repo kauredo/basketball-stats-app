@@ -113,10 +113,10 @@ export const QuickStatButtonGrid: React.FC<QuickStatButtonGridProps> = ({
             rounded-lg sm:rounded-xl font-bold transition-all duration-200
             ${compact ? "text-[9px] sm:text-[10px]" : "text-[10px] sm:text-xs"}
             active:scale-95 touch-manipulation
-            disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-gray-400 dark:disabled:bg-gray-600
+            disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-surface-400 dark:disabled:bg-surface-600
             shadow-sm hover:shadow
             select-none
-            focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-900
+            focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-surface-900
           `}
           style={{
             gridColumn: btn.colSpan ? `span ${btn.colSpan}` : undefined,

@@ -70,17 +70,17 @@ export const StartingLineupSelector: React.FC<StartingLineupSelectorProps> = ({
     starters: Id<"players">[],
     isHome: boolean
   ) => (
-    <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="flex-1 bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
       <div
         className={`px-4 py-3 ${
-          isHome ? "bg-orange-50 dark:bg-orange-900/20" : "bg-gray-50 dark:bg-gray-700/50"
+          isHome ? "bg-primary-50 dark:bg-primary-900/20" : "bg-surface-50 dark:bg-surface-700/50"
         }`}
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900 dark:text-white">{teamName}</h3>
+          <h3 className="font-semibold text-surface-900 dark:text-white">{teamName}</h3>
           <span
             className={`text-sm font-medium ${
-              starters.length === 5 ? "text-green-600" : "text-orange-600"
+              starters.length === 5 ? "text-green-600" : "text-primary-600"
             }`}
           >
             {starters.length}/5 selected
@@ -101,8 +101,8 @@ export const StartingLineupSelector: React.FC<StartingLineupSelectorProps> = ({
                 isSelected
                   ? "border-green-500 bg-green-50 dark:bg-green-900/20"
                   : isDisabled
-                    ? "border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-50 cursor-not-allowed"
-                    : "border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    ? "border-surface-200 dark:border-surface-700 bg-surface-100 dark:bg-surface-800 opacity-50 cursor-not-allowed"
+                    : "border-surface-200 dark:border-surface-700 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-surface-50 dark:hover:bg-surface-700"
               }`}
             >
               <div className="flex items-center gap-3">
@@ -110,25 +110,23 @@ export const StartingLineupSelector: React.FC<StartingLineupSelectorProps> = ({
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
                     isSelected
                       ? "bg-green-500 text-white"
-                      : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                      : "bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300"
                   }`}
                 >
                   {playerStat.player?.number ?? "?"}
                 </div>
                 <div className="text-left">
-                  <p className="font-medium text-gray-900 dark:text-white">
+                  <p className="font-medium text-surface-900 dark:text-white">
                     {playerStat.player?.name || "Unknown"}
                   </p>
                   {playerStat.player?.position && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-surface-500 dark:text-surface-400">
                       {playerStat.player.position}
                     </p>
                   )}
                 </div>
               </div>
-              {isSelected && (
-                <CheckIcon className="w-6 h-6 text-green-500" />
-              )}
+              {isSelected && <CheckIcon className="w-6 h-6 text-green-500" />}
             </button>
           );
         })}
@@ -141,12 +139,12 @@ export const StartingLineupSelector: React.FC<StartingLineupSelectorProps> = ({
       {/* Header */}
       <div className="text-center mb-4">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <UserGroupIcon className="w-6 h-6 text-orange-500" />
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          <UserGroupIcon className="w-6 h-6 text-primary-500" />
+          <h2 className="text-xl font-bold text-surface-900 dark:text-white">
             Select Starting Lineups
           </h2>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-surface-600 dark:text-surface-400">
           Choose 5 players from each team to start the game
         </p>
       </div>
@@ -158,14 +156,14 @@ export const StartingLineupSelector: React.FC<StartingLineupSelectorProps> = ({
       </div>
 
       {/* Start Game Button */}
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
         <button
           onClick={onStartGame}
           disabled={!canStart || isStarting}
           className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
             canStart && !isStarting
               ? "bg-green-600 hover:bg-green-700 text-white"
-              : "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+              : "bg-surface-300 dark:bg-surface-700 text-surface-500 dark:text-surface-400 cursor-not-allowed"
           }`}
         >
           {isStarting

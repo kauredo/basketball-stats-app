@@ -34,15 +34,15 @@ const StatButton: React.FC<StatButtonProps> = ({
     flex flex-col items-center justify-center
     rounded-xl font-bold
     transition-all duration-150
-    focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900
+    focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-surface-900
     ${sizeClasses[size]}
     ${disabled ? "opacity-50 cursor-not-allowed" : "hover:scale-105 active:scale-95 cursor-pointer"}
   `;
 
   const variantStyles =
     variant === "filled"
-      ? { backgroundColor: disabled ? "#374151" : color }
-      : { border: `2px solid ${disabled ? "#374151" : color}`, backgroundColor: "transparent" };
+      ? { backgroundColor: disabled ? "#52524d" : color }
+      : { border: `2px solid ${disabled ? "#52524d" : color}`, backgroundColor: "transparent" };
 
   return (
     <button

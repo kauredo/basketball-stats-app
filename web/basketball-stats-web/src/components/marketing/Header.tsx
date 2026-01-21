@@ -15,7 +15,7 @@ export default function Header() {
   const { mode, setMode } = useTheme();
 
   return (
-    <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+    <header className="sticky top-0 z-50 bg-white dark:bg-surface-900 border-b border-surface-200 dark:border-surface-800">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -31,8 +31,8 @@ export default function Header() {
                 to={link.href}
                 className={`text-sm font-medium transition-colors ${
                   location.pathname === link.href
-                    ? "text-orange-600"
-                    : "text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-500"
+                    ? "text-primary-600"
+                    : "text-surface-700 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-500"
                 }`}
               >
                 {link.label}
@@ -43,18 +43,24 @@ export default function Header() {
           {/* Theme Toggle + Auth Buttons */}
           <div className="hidden md:flex md:items-center md:space-x-4">
             {/* Theme Toggle */}
-            <div className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+            <div className="flex items-center space-x-1 bg-surface-100 dark:bg-surface-800 rounded-lg p-1">
               <button
                 onClick={() => setMode("light")}
                 className={`p-1.5 rounded-md transition-colors ${
                   mode === "light"
-                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm"
+                    : "text-surface-500 hover:text-surface-700 dark:hover:text-surface-300"
                 }`}
                 aria-label="Light mode"
                 aria-pressed={mode === "light"}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -67,13 +73,19 @@ export default function Header() {
                 onClick={() => setMode("system")}
                 className={`p-1.5 rounded-md transition-colors ${
                   mode === "system"
-                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm"
+                    : "text-surface-500 hover:text-surface-700 dark:hover:text-surface-300"
                 }`}
                 aria-label="System preference"
                 aria-pressed={mode === "system"}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -86,13 +98,19 @@ export default function Header() {
                 onClick={() => setMode("dark")}
                 className={`p-1.5 rounded-md transition-colors ${
                   mode === "dark"
-                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm"
+                    : "text-surface-500 hover:text-surface-700 dark:hover:text-surface-300"
                 }`}
                 aria-label="Dark mode"
                 aria-pressed={mode === "dark"}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -105,13 +123,13 @@ export default function Header() {
 
             <Link
               to="/login"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-500 transition-colors"
+              className="text-sm font-medium text-surface-700 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-500 transition-colors"
             >
               Log in
             </Link>
             <Link
               to="/signup"
-              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors"
+              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
             >
               Sign up
             </Link>
@@ -119,7 +137,7 @@ export default function Header() {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="md:hidden p-2 rounded-md text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileMenuOpen}
@@ -130,7 +148,7 @@ export default function Header() {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="md:hidden py-4 border-t border-surface-200 dark:border-surface-800">
             <div className="flex flex-col space-y-4">
               {navLinks.map((link) => (
                 <Link
@@ -138,31 +156,41 @@ export default function Header() {
                   to={link.href}
                   className={`text-base font-medium ${
                     location.pathname === link.href
-                      ? "text-orange-600"
-                      : "text-gray-700 dark:text-gray-300"
+                      ? "text-primary-600"
+                      : "text-surface-700 dark:text-surface-300"
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
-              <hr className="border-gray-200 dark:border-gray-700" />
+              <hr className="border-surface-200 dark:border-surface-700" />
 
               {/* Mobile Theme Toggle */}
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Theme:</span>
-                <div className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1" role="group" aria-label="Theme selection">
+                <span className="text-sm text-surface-500 dark:text-surface-400">Theme:</span>
+                <div
+                  className="flex items-center space-x-1 bg-surface-100 dark:bg-surface-800 rounded-lg p-1"
+                  role="group"
+                  aria-label="Theme selection"
+                >
                   <button
                     onClick={() => setMode("light")}
                     className={`p-1.5 rounded-md transition-colors ${
                       mode === "light"
-                        ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                        ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm"
+                        : "text-surface-500 hover:text-surface-700 dark:hover:text-surface-300"
                     }`}
                     aria-label="Light mode"
                     aria-pressed={mode === "light"}
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -175,13 +203,19 @@ export default function Header() {
                     onClick={() => setMode("system")}
                     className={`p-1.5 rounded-md transition-colors ${
                       mode === "system"
-                        ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                        ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm"
+                        : "text-surface-500 hover:text-surface-700 dark:hover:text-surface-300"
                     }`}
                     aria-label="System preference"
                     aria-pressed={mode === "system"}
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -194,13 +228,19 @@ export default function Header() {
                     onClick={() => setMode("dark")}
                     className={`p-1.5 rounded-md transition-colors ${
                       mode === "dark"
-                        ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                        ? "bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm"
+                        : "text-surface-500 hover:text-surface-700 dark:hover:text-surface-300"
                     }`}
                     aria-label="Dark mode"
                     aria-pressed={mode === "dark"}
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -215,14 +255,14 @@ export default function Header() {
               <div className="flex flex-col space-y-3 pt-2">
                 <Link
                   to="/login"
-                  className="text-base font-medium text-gray-700 dark:text-gray-300"
+                  className="text-base font-medium text-surface-700 dark:text-surface-300"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Log in
                 </Link>
                 <Link
                   to="/signup"
-                  className="inline-flex items-center justify-center px-4 py-2 text-base font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg"
+                  className="inline-flex items-center justify-center px-4 py-2 text-base font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign up

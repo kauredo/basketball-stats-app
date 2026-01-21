@@ -43,7 +43,7 @@ const ShotChart: React.FC<ShotChartProps> = ({
   title,
   onCourtTap,
   interactive = false,
-  selectedPlayerId,
+  selectedPlayerId: _selectedPlayerId,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [ripples, setRipples] = useState<RippleEffect[]>([]);
@@ -127,8 +127,8 @@ const ShotChart: React.FC<ShotChartProps> = ({
         viewBox="0 0 500 470"
         width={width}
         height={height}
-        className={`bg-gray-800 rounded-lg transition-shadow ${
-          interactive ? "cursor-crosshair hover:shadow-lg hover:shadow-orange-500/20" : ""
+        className={`bg-surface-800 rounded-lg transition-shadow ${
+          interactive ? "cursor-crosshair hover:shadow-lg hover:shadow-primary-500/20" : ""
         }`}
         onClick={handleCourtClick}
         role={interactive ? "button" : undefined}
@@ -295,26 +295,26 @@ const ShotChart: React.FC<ShotChartProps> = ({
             className="w-4 h-4 rounded-full"
             style={{ backgroundColor: COLORS.shots.made3pt }}
           ></div>
-          <span className="text-gray-400">Made 3PT</span>
+          <span className="text-surface-400">Made 3PT</span>
         </div>
         <div className="flex items-center space-x-2">
           <div
             className="w-4 h-4 rounded-full"
             style={{ backgroundColor: COLORS.shots.made2pt }}
           ></div>
-          <span className="text-gray-400">Made 2PT</span>
+          <span className="text-surface-400">Made 2PT</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 font-bold" style={{ color: COLORS.shots.missed3pt }}>
             ✕
           </div>
-          <span className="text-gray-400">Missed 3PT</span>
+          <span className="text-surface-400">Missed 3PT</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 font-bold" style={{ color: COLORS.shots.missed2pt }}>
             ✕
           </div>
-          <span className="text-gray-400">Missed 2PT</span>
+          <span className="text-surface-400">Missed 2PT</span>
         </div>
       </div>
 

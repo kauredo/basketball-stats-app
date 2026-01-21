@@ -6,7 +6,7 @@
 
 ## P0 - Critical Issues
 
-*All P0 issues resolved*
+_All P0 issues resolved_
 
 ---
 
@@ -20,7 +20,7 @@
 
 ## P2 - Medium Priority
 
-*All P2 issues resolved*
+_All P2 issues resolved_
 
 ---
 
@@ -100,11 +100,13 @@
 ## Recently Completed (January 20, 2026)
 
 ### P1/P2 Fixes
+
 - [x] **Mobile responsive sidebar** - Added hamburger menu, slide-out drawer, overlay backdrop, and escape key handling to Layout.tsx
 - [x] **Theme toggle aria-labels** - Changed from "Light" to "Switch to light theme" for better screen reader clarity
 - [x] **animate-bounce investigation** - Verified Tailwind's bounce uses `transform: translateY()` (GPU-accelerated). No fix needed; issue was incorrectly identified.
 
 ### /harden - Accessibility & Edge Cases
+
 - [x] **Modal focus traps** - Added `useFocusTrap` hook and applied to QuickStatModal, AssistPromptModal, ReboundPromptModal, FoulRecordingModal, ShotRecordingModal
 - [x] **ARIA attributes** - Added `role="dialog"`, `aria-modal`, `aria-labelledby` to all modals
 - [x] **QuarterFilterTabs touch targets** - Increased to `min-h-[44px] min-w-[44px]` with proper ARIA tablist
@@ -117,6 +119,7 @@
 - [x] **Mobile haptics fallback** - Wrapped `Haptics.impactAsync` in try-catch
 
 ### /normalize - Design System Alignment
+
 - [x] **Dynamic Tailwind classes** - Replaced `bg-${color}-100` with static STAT_STYLES mapping in QuickStatModal and LiveGame.tsx
 - [x] **Status color tokens** - Replaced hex colors with Tailwind classes (`bg-red-500`, `bg-amber-500`, etc.) in Dashboard.tsx and Games.tsx
 - [x] **Duplicate CSS keyframes** - Removed fadeIn/slideIn duplicates from index.css, consolidated in tailwind.config.js
@@ -125,6 +128,6 @@
 
 ## Fix Commands Quick Reference
 
-| Command | Remaining | Description |
-|---------|-----------|-------------|
-| `/clarify` | 1 | PlayerAvatar alt text |
+| Command    | Remaining | Description           |
+| ---------- | --------- | --------------------- |
+| `/clarify` | 1         | PlayerAvatar alt text |

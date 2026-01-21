@@ -50,17 +50,17 @@ export const ShotClock: React.FC<ShotClockProps> = ({
     }
     if (isRunning) {
       return {
-        bg: "bg-orange-100 dark:bg-orange-600/20",
-        text: "text-orange-700 dark:text-orange-400",
-        border: "border-orange-400 dark:border-orange-500",
-        shadow: "shadow-orange-200/50 dark:shadow-orange-500/10",
+        bg: "bg-primary-100 dark:bg-primary-600/20",
+        text: "text-primary-700 dark:text-primary-400",
+        border: "border-primary-400 dark:border-primary-500",
+        shadow: "shadow-primary-200/50 dark:shadow-primary-500/10",
         animation: "",
       };
     }
     return {
-      bg: "bg-gray-100 dark:bg-gray-700/50",
-      text: "text-gray-600 dark:text-gray-400",
-      border: "border-gray-300 dark:border-gray-600",
+      bg: "bg-surface-100 dark:bg-surface-700/50",
+      text: "text-surface-600 dark:text-surface-400",
+      border: "border-surface-300 dark:border-surface-600",
       shadow: "",
       animation: "",
     };

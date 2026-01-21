@@ -3,13 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
-import { Id } from "../../../../convex/_generated/dataModel";
-import {
-  TrophyIcon,
-  ChartBarIcon,
-  TableCellsIcon,
-  PlayIcon,
-} from "@heroicons/react/24/outline";
+import type { Id } from "../../../../convex/_generated/dataModel";
+import { TrophyIcon, ChartBarIcon, TableCellsIcon, PlayIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from "../components/Breadcrumb";
 import {
   BarChart,
@@ -20,9 +15,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
 
 type TabType = "boxscore" | "charts" | "plays";
@@ -57,7 +49,7 @@ const GameAnalysis: React.FC = () => {
   if (gameData === undefined || boxScoreData === undefined) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -65,10 +57,10 @@ const GameAnalysis: React.FC = () => {
   if (!gameData?.game) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Game not found</h3>
+        <h3 className="text-lg font-semibold text-surface-900 dark:text-white">Game not found</h3>
         <button
           onClick={() => navigate("/app/games")}
-          className="mt-4 text-orange-500 hover:text-orange-400"
+          className="mt-4 text-primary-500 hover:text-primary-400 transition-colors"
         >
           Back to Games
         </button>
@@ -165,81 +157,99 @@ const GameAnalysis: React.FC = () => {
     const sortedPlayers = [...team.players].sort((a, b) => (b.points || 0) - (a.points || 0));
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="surface-card overflow-hidden">
         <div
-          className={`px-4 py-3 border-b border-gray-200 dark:border-gray-700 ${
-            isHome ? "bg-orange-50 dark:bg-orange-900/20" : "bg-blue-50 dark:bg-blue-900/20"
+          className={`px-4 py-3 border-b border-surface-200 dark:border-surface-700 ${
+            isHome ? "bg-primary-50 dark:bg-primary-900/20" : "bg-blue-50 dark:bg-blue-900/20"
           }`}
         >
-          <h3 className="font-bold text-gray-900 dark:text-white flex items-center">
+          <h3 className="font-bold text-surface-900 dark:text-white flex items-center">
             {team.team?.name}
             {((isHome && isHomeWinner) || (!isHome && isAwayWinner)) && (
               <TrophyIcon className="w-5 h-5 ml-2 text-yellow-500" />
             )}
-            <span className="ml-auto text-2xl">{team.score}</span>
+            <span className="ml-auto text-2xl tabular-nums" data-stat>
+              {team.score}
+            </span>
           </h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+            <thead className="bg-surface-50 dark:bg-surface-800/50">
               <tr>
-                <th className="px-3 py-2 text-left text-gray-600 dark:text-gray-300">Player</th>
-                <th className="px-2 py-2 text-center text-gray-600 dark:text-gray-300">MIN</th>
-                <th className="px-2 py-2 text-center text-gray-600 dark:text-gray-300">PTS</th>
-                <th className="px-2 py-2 text-center text-gray-600 dark:text-gray-300">REB</th>
-                <th className="px-2 py-2 text-center text-gray-600 dark:text-gray-300">AST</th>
-                <th className="px-2 py-2 text-center text-gray-600 dark:text-gray-300">STL</th>
-                <th className="px-2 py-2 text-center text-gray-600 dark:text-gray-300">BLK</th>
-                <th className="px-2 py-2 text-center text-gray-600 dark:text-gray-300">TO</th>
-                <th className="px-2 py-2 text-center text-gray-600 dark:text-gray-300">PF</th>
-                <th className="px-2 py-2 text-center text-gray-600 dark:text-gray-300">FG</th>
-                <th className="px-2 py-2 text-center text-gray-600 dark:text-gray-300">3PT</th>
-                <th className="px-2 py-2 text-center text-gray-600 dark:text-gray-300">FT</th>
+                <th className="px-3 py-2 text-left text-surface-600 dark:text-surface-400">
+                  Player
+                </th>
+                <th className="px-2 py-2 text-center text-surface-600 dark:text-surface-400">
+                  MIN
+                </th>
+                <th className="px-2 py-2 text-center text-surface-600 dark:text-surface-400">
+                  PTS
+                </th>
+                <th className="px-2 py-2 text-center text-surface-600 dark:text-surface-400">
+                  REB
+                </th>
+                <th className="px-2 py-2 text-center text-surface-600 dark:text-surface-400">
+                  AST
+                </th>
+                <th className="px-2 py-2 text-center text-surface-600 dark:text-surface-400">
+                  STL
+                </th>
+                <th className="px-2 py-2 text-center text-surface-600 dark:text-surface-400">
+                  BLK
+                </th>
+                <th className="px-2 py-2 text-center text-surface-600 dark:text-surface-400">TO</th>
+                <th className="px-2 py-2 text-center text-surface-600 dark:text-surface-400">PF</th>
+                <th className="px-2 py-2 text-center text-surface-600 dark:text-surface-400">FG</th>
+                <th className="px-2 py-2 text-center text-surface-600 dark:text-surface-400">
+                  3PT
+                </th>
+                <th className="px-2 py-2 text-center text-surface-600 dark:text-surface-400">FT</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-surface-200 dark:divide-surface-700">
               {sortedPlayers.map((player: any, index: number) => (
                 <tr
                   key={player.player?.id || index}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  className="hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors"
                 >
-                  <td className="px-3 py-2 text-gray-900 dark:text-white">
+                  <td className="px-3 py-2 text-surface-900 dark:text-white">
                     <span className="font-medium">{player.player?.name || "Unknown"}</span>
-                    <span className="text-gray-500 dark:text-gray-400 ml-1">
+                    <span className="text-surface-500 dark:text-surface-400 ml-1">
                       #{player.player?.number}
                     </span>
                   </td>
-                  <td className="px-2 py-2 text-center text-gray-600 dark:text-gray-400">
+                  <td className="px-2 py-2 text-center text-surface-600 dark:text-surface-400 tabular-nums">
                     {player.minutesPlayed || 0}
                   </td>
-                  <td className="px-2 py-2 text-center font-bold text-gray-900 dark:text-white">
+                  <td className="px-2 py-2 text-center font-bold text-surface-900 dark:text-white tabular-nums">
                     {player.points || 0}
                   </td>
-                  <td className="px-2 py-2 text-center text-gray-600 dark:text-gray-400">
+                  <td className="px-2 py-2 text-center text-surface-600 dark:text-surface-400 tabular-nums">
                     {player.rebounds || 0}
                   </td>
-                  <td className="px-2 py-2 text-center text-gray-600 dark:text-gray-400">
+                  <td className="px-2 py-2 text-center text-surface-600 dark:text-surface-400 tabular-nums">
                     {player.assists || 0}
                   </td>
-                  <td className="px-2 py-2 text-center text-gray-600 dark:text-gray-400">
+                  <td className="px-2 py-2 text-center text-surface-600 dark:text-surface-400 tabular-nums">
                     {player.steals || 0}
                   </td>
-                  <td className="px-2 py-2 text-center text-gray-600 dark:text-gray-400">
+                  <td className="px-2 py-2 text-center text-surface-600 dark:text-surface-400 tabular-nums">
                     {player.blocks || 0}
                   </td>
-                  <td className="px-2 py-2 text-center text-gray-600 dark:text-gray-400">
+                  <td className="px-2 py-2 text-center text-surface-600 dark:text-surface-400 tabular-nums">
                     {player.turnovers || 0}
                   </td>
-                  <td className="px-2 py-2 text-center text-gray-600 dark:text-gray-400">
+                  <td className="px-2 py-2 text-center text-surface-600 dark:text-surface-400 tabular-nums">
                     {player.fouls || 0}
                   </td>
-                  <td className="px-2 py-2 text-center text-gray-600 dark:text-gray-400">
+                  <td className="px-2 py-2 text-center text-surface-600 dark:text-surface-400 tabular-nums">
                     {player.fieldGoals}
                   </td>
-                  <td className="px-2 py-2 text-center text-gray-600 dark:text-gray-400">
+                  <td className="px-2 py-2 text-center text-surface-600 dark:text-surface-400 tabular-nums">
                     {player.threePointers}
                   </td>
-                  <td className="px-2 py-2 text-center text-gray-600 dark:text-gray-400">
+                  <td className="px-2 py-2 text-center text-surface-600 dark:text-surface-400 tabular-nums">
                     {player.freeThrows}
                   </td>
                 </tr>
@@ -300,43 +310,47 @@ const GameAnalysis: React.FC = () => {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Game Analysis</h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <h1 className="text-display-sm text-surface-900 dark:text-white">Game Analysis</h1>
+        <p className="text-surface-600 dark:text-surface-400">
           {game.status === "completed" ? "Final" : game.status}
         </p>
       </div>
 
       {/* Score Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+      <div className="surface-card p-8">
         <div className="flex items-center justify-between">
           <div className={`text-center flex-1 ${isAwayWinner ? "opacity-60" : ""}`}>
-            <p className="text-lg text-gray-600 dark:text-gray-400">{homeTeam?.team?.city}</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+            <p className="text-lg text-surface-600 dark:text-surface-400">{homeTeam?.team?.city}</p>
+            <p className="text-2xl font-bold text-surface-900 dark:text-white">
               {homeTeam?.team?.name}
             </p>
-            <p className="text-5xl font-bold text-orange-500 mt-2">{game.homeScore}</p>
+            <p className="text-stat-xl text-primary-500 mt-2" data-stat>
+              {game.homeScore}
+            </p>
             {isHomeWinner && (
-              <span className="inline-flex items-center mt-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 text-sm font-medium rounded">
+              <span className="inline-flex items-center mt-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 text-sm font-medium rounded-full">
                 <TrophyIcon className="w-4 h-4 mr-1" /> Winner
               </span>
             )}
           </div>
 
           <div className="text-center px-8">
-            <p className="text-gray-500 dark:text-gray-400 text-xl">VS</p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+            <p className="text-surface-500 dark:text-surface-400 text-xl font-medium">VS</p>
+            <p className="text-sm text-surface-500 dark:text-surface-500 mt-2 tabular-nums">
               Q{game.currentQuarter || 4}
             </p>
           </div>
 
           <div className={`text-center flex-1 ${isHomeWinner ? "opacity-60" : ""}`}>
-            <p className="text-lg text-gray-600 dark:text-gray-400">{awayTeam?.team?.city}</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+            <p className="text-lg text-surface-600 dark:text-surface-400">{awayTeam?.team?.city}</p>
+            <p className="text-2xl font-bold text-surface-900 dark:text-white">
               {awayTeam?.team?.name}
             </p>
-            <p className="text-5xl font-bold text-blue-500 mt-2">{game.awayScore}</p>
+            <p className="text-stat-xl text-blue-500 mt-2" data-stat>
+              {game.awayScore}
+            </p>
             {isAwayWinner && (
-              <span className="inline-flex items-center mt-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 text-sm font-medium rounded">
+              <span className="inline-flex items-center mt-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 text-sm font-medium rounded-full">
                 <TrophyIcon className="w-4 h-4 mr-1" /> Winner
               </span>
             )}
@@ -345,16 +359,16 @@ const GameAnalysis: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="flex space-x-8">
+      <div className="border-b border-surface-200 dark:border-surface-700">
+        <nav className="flex gap-8">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === tab.id
-                  ? "border-orange-500 text-orange-500"
-                  : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  ? "border-primary-500 text-primary-500"
+                  : "border-transparent text-surface-500 hover:text-surface-700 dark:hover:text-surface-300"
               }`}
             >
               <tab.icon className="w-5 h-5 mr-2" />
@@ -375,64 +389,106 @@ const GameAnalysis: React.FC = () => {
       {activeTab === "charts" && (
         <div className="space-y-6">
           {/* Team Comparison Chart */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+          <div className="surface-card p-6">
+            <h3 className="text-lg font-bold text-surface-900 dark:text-white mb-4">
               Team Comparison
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={comparisonData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="stat" type="category" width={80} />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-surface-700)" />
+                <XAxis type="number" stroke="var(--color-surface-500)" />
+                <YAxis
+                  dataKey="stat"
+                  type="category"
+                  width={80}
+                  stroke="var(--color-surface-500)"
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "var(--color-surface-800)",
+                    border: "1px solid var(--color-surface-700)",
+                    borderRadius: "12px",
+                    color: "white",
+                  }}
+                />
                 <Legend />
-                <Bar dataKey="home" name={homeTeam?.team?.name || "Home"} fill="#f97316" />
-                <Bar dataKey="away" name={awayTeam?.team?.name || "Away"} fill="#3b82f6" />
+                <Bar
+                  dataKey="home"
+                  name={homeTeam?.team?.name || "Home"}
+                  fill="#f97316"
+                  radius={[0, 4, 4, 0]}
+                />
+                <Bar
+                  dataKey="away"
+                  name={awayTeam?.team?.name || "Away"}
+                  fill="#3b82f6"
+                  radius={[0, 4, 4, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           {/* Shooting Comparison */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+          <div className="surface-card p-6">
+            <h3 className="text-lg font-bold text-surface-900 dark:text-white mb-4">
               Shooting Percentages
             </h3>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={shootingComparisonData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis domain={[0, 100]} />
-                <Tooltip formatter={(value) => typeof value === 'number' ? `${value.toFixed(1)}%` : value} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-surface-700)" />
+                <XAxis dataKey="name" stroke="var(--color-surface-500)" />
+                <YAxis domain={[0, 100]} stroke="var(--color-surface-500)" />
+                <Tooltip
+                  formatter={(value) =>
+                    typeof value === "number" ? `${value.toFixed(1)}%` : value
+                  }
+                  contentStyle={{
+                    backgroundColor: "var(--color-surface-800)",
+                    border: "1px solid var(--color-surface-700)",
+                    borderRadius: "12px",
+                    color: "white",
+                  }}
+                />
                 <Legend />
-                <Bar dataKey="home" name={homeTeam?.team?.name || "Home"} fill="#f97316" />
-                <Bar dataKey="away" name={awayTeam?.team?.name || "Away"} fill="#3b82f6" />
+                <Bar
+                  dataKey="home"
+                  name={homeTeam?.team?.name || "Home"}
+                  fill="#f97316"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="away"
+                  name={awayTeam?.team?.name || "Away"}
+                  fill="#3b82f6"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           {/* Shooting Stats Summary */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-              <h4 className="font-bold text-gray-900 dark:text-white mb-4 text-orange-500">
+            <div className="surface-card p-6">
+              <h4 className="font-bold text-surface-900 dark:text-white mb-4 text-primary-500">
                 {homeTeam?.team?.name} Shooting
               </h4>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Field Goals</span>
-                  <span className="text-gray-900 dark:text-white">
+                  <span className="text-surface-600 dark:text-surface-400">Field Goals</span>
+                  <span className="text-surface-900 dark:text-white tabular-nums">
                     {homeShootingStats.made}/{homeShootingStats.total} ({homeShootingStats.pct}%)
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">2-Pointers</span>
-                  <span className="text-gray-900 dark:text-white">
+                  <span className="text-surface-600 dark:text-surface-400">2-Pointers</span>
+                  <span className="text-surface-900 dark:text-white tabular-nums">
                     {homeShootingStats.twosMade}/{homeShootingStats.twos} (
                     {homeShootingStats.twosPct}%)
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">3-Pointers</span>
-                  <span className="text-gray-900 dark:text-white">
+                  <span className="text-surface-600 dark:text-surface-400">3-Pointers</span>
+                  <span className="text-surface-900 dark:text-white tabular-nums">
                     {homeShootingStats.threesMade}/{homeShootingStats.threes} (
                     {homeShootingStats.threesPct}%)
                   </span>
@@ -440,27 +496,27 @@ const GameAnalysis: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-              <h4 className="font-bold text-gray-900 dark:text-white mb-4 text-blue-500">
+            <div className="surface-card p-6">
+              <h4 className="font-bold text-surface-900 dark:text-white mb-4 text-blue-500">
                 {awayTeam?.team?.name} Shooting
               </h4>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Field Goals</span>
-                  <span className="text-gray-900 dark:text-white">
+                  <span className="text-surface-600 dark:text-surface-400">Field Goals</span>
+                  <span className="text-surface-900 dark:text-white tabular-nums">
                     {awayShootingStats.made}/{awayShootingStats.total} ({awayShootingStats.pct}%)
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">2-Pointers</span>
-                  <span className="text-gray-900 dark:text-white">
+                  <span className="text-surface-600 dark:text-surface-400">2-Pointers</span>
+                  <span className="text-surface-900 dark:text-white tabular-nums">
                     {awayShootingStats.twosMade}/{awayShootingStats.twos} (
                     {awayShootingStats.twosPct}%)
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">3-Pointers</span>
-                  <span className="text-gray-900 dark:text-white">
+                  <span className="text-surface-600 dark:text-surface-400">3-Pointers</span>
+                  <span className="text-surface-900 dark:text-white tabular-nums">
                     {awayShootingStats.threesMade}/{awayShootingStats.threes} (
                     {awayShootingStats.threesPct}%)
                   </span>
@@ -472,17 +528,19 @@ const GameAnalysis: React.FC = () => {
       )}
 
       {activeTab === "plays" && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="surface-card overflow-hidden">
           {/* Quarter Filter */}
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center space-x-2">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Filter by quarter:</span>
-            <div className="flex space-x-1">
+          <div className="px-4 py-3 border-b border-surface-200 dark:border-surface-700 flex items-center gap-2">
+            <span className="text-sm text-surface-600 dark:text-surface-400">
+              Filter by quarter:
+            </span>
+            <div className="flex gap-1">
               <button
                 onClick={() => setSelectedQuarter(undefined)}
-                className={`px-3 py-1 text-sm rounded ${
+                className={`px-3 py-1 text-sm rounded-lg font-medium transition-colors ${
                   selectedQuarter === undefined
-                    ? "bg-orange-500 text-white"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    ? "bg-primary-500 text-white"
+                    : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-600"
                 }`}
               >
                 All
@@ -491,10 +549,10 @@ const GameAnalysis: React.FC = () => {
                 <button
                   key={q}
                   onClick={() => setSelectedQuarter(q)}
-                  className={`px-3 py-1 text-sm rounded ${
+                  className={`px-3 py-1 text-sm rounded-lg font-medium transition-colors ${
                     selectedQuarter === q
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                      ? "bg-primary-500 text-white"
+                      : "bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-600"
                   }`}
                 >
                   Q{q}
@@ -504,34 +562,34 @@ const GameAnalysis: React.FC = () => {
           </div>
 
           {/* Events List */}
-          <div className="divide-y divide-gray-200 dark:divide-gray-700 max-h-96 overflow-y-auto">
+          <div className="divide-y divide-surface-200 dark:divide-surface-700 max-h-96 overflow-y-auto">
             {events.length === 0 ? (
-              <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+              <div className="px-4 py-8 text-center text-surface-500 dark:text-surface-400">
                 No play-by-play data available for this game.
               </div>
             ) : (
               events.map((event: any) => (
                 <div
                   key={event.id}
-                  className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-start space-x-3"
+                  className="px-4 py-3 hover:bg-surface-50 dark:hover:bg-surface-700/50 flex items-start gap-3 transition-colors"
                 >
                   <span className="text-xl">{getEventIcon(event.eventType)}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 dark:text-white">
+                    <p className="text-sm text-surface-900 dark:text-white">
                       {event.description || event.eventType.replace(/_/g, " ")}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-surface-500 dark:text-surface-400">
                       {event.player?.name && (
                         <span className="font-medium">
                           #{event.player.number} {event.player.name}
                         </span>
                       )}
                       {event.team?.name && (
-                        <span className="ml-2 text-gray-400">({event.team.name})</span>
+                        <span className="ml-2 text-surface-400">({event.team.name})</span>
                       )}
                     </p>
                   </div>
-                  <div className="text-right text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-right text-xs text-surface-500 dark:text-surface-400 tabular-nums">
                     <p>Q{event.quarter}</p>
                     <p>{event.gameTimeDisplay}</p>
                   </div>

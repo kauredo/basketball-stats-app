@@ -363,7 +363,7 @@ export const remove = mutation({
 
       throw new Error(
         `This league has ${teams.length} team(s) and ${games.length} game(s). ` +
-        `Use force=true to delete all related data.`
+          `Use force=true to delete all related data.`
       );
     }
 

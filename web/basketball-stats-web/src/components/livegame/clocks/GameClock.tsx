@@ -37,7 +37,7 @@ export const GameClock: React.FC<GameClockProps> = ({
     if (isRunning) {
       return "text-red-600 dark:text-red-500";
     }
-    return "text-gray-900 dark:text-gray-100";
+    return "text-surface-900 dark:text-surface-100";
   };
 
   return (
@@ -45,8 +45,8 @@ export const GameClock: React.FC<GameClockProps> = ({
       className={`
         inline-flex items-center ${config.gap} ${config.padding}
         rounded-xl
-        bg-gray-100/80 dark:bg-gray-800/60
-        border border-gray-200 dark:border-gray-700
+        bg-surface-100/80 dark:bg-surface-800/60
+        border border-surface-200 dark:border-surface-700
         transition-all duration-200
       `}
       role="timer"
@@ -74,7 +74,7 @@ export const GameClock: React.FC<GameClockProps> = ({
           ${
             isRunning
               ? "text-red-400 dark:text-red-500 animate-pulse"
-              : "text-gray-500 dark:text-gray-500"
+              : "text-surface-500 dark:text-surface-500"
           }
           transition-colors duration-200
         `}

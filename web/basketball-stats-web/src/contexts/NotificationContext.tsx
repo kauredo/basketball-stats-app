@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "./AuthContext";
 
 interface Notification {
@@ -129,7 +129,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       // Request notification permission
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
-        console.log("Notification permission denied");
         return false;
       }
 
@@ -148,8 +147,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       // For demo purposes, we'll just show that the API is working
       // Real push requires VAPID keys to be configured
-      console.log("Push notification support is available but VAPID keys need to be configured");
-      console.log("See convex/notifications.ts for setup instructions");
+      if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.log(
+          "Push notification support is available but VAPID keys need to be configured. See convex/notifications.ts for setup instructions"
+        );
+      }
 
       // Check if there's an existing subscription
       const existingSubscription = await registration.pushManager.getSubscription();

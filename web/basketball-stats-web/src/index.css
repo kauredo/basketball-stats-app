@@ -1,64 +1,153 @@
+/* Plus Jakarta Sans - distinctive geometric sans */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   html {
-    font-family:
-      -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
-      "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  }
-
-  body {
-    @apply text-white bg-gray-900;
+    @apply antialiased;
+    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
+  body {
+    @apply font-sans text-surface-900 bg-surface-50;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Dark mode base */
+  .dark body {
+    @apply text-surface-50 bg-surface-950;
+  }
+
+  /* Tabular figures for numbers - critical for stats display */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Stat numbers should always be tabular */
+  [data-stat], .stat-value {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
   code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+    @apply font-mono;
+  }
+
+  /* Selection styling */
+  ::selection {
+    @apply bg-primary-500/30;
   }
 }
 
 @layer components {
-  /* Reusable focus ring for all interactive elements */
+  /* Focus ring - orange brand color */
   .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-50 dark:focus:ring-offset-surface-950;
   }
 
   .focus-ring-inset {
-    @apply focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-inset;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-inset;
   }
 
-  /* Button base styles with consistent focus */
+  /* Button system */
   .btn {
-    @apply inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center font-semibold transition-all duration-200 focus-ring disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
   }
 
   .btn-primary {
-    @apply btn bg-orange-600 text-white hover:bg-orange-700;
+    @apply btn bg-primary-500 text-white hover:bg-primary-600 shadow-soft hover:shadow-elevated;
   }
 
   .btn-secondary {
-    @apply btn bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700;
+    @apply btn bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-200 hover:bg-surface-200 dark:hover:bg-surface-700 border border-surface-200 dark:border-surface-700;
   }
 
   .btn-ghost {
-    @apply btn text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800;
+    @apply btn text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 hover:text-surface-900 dark:hover:text-surface-50;
+  }
+
+  .btn-danger {
+    @apply btn bg-status-active text-white hover:bg-red-700;
+  }
+
+  /* Surface/Card system - avoid overusing cards */
+  .surface {
+    @apply bg-surface-50 dark:bg-surface-900;
+  }
+
+  .surface-raised {
+    @apply bg-white dark:bg-surface-800 shadow-soft;
+  }
+
+  .surface-sunken {
+    @apply bg-surface-100 dark:bg-surface-900;
+  }
+
+  /* Borders should use warm neutrals */
+  .border-default {
+    @apply border-surface-200 dark:border-surface-700;
+  }
+
+  /* Live indicator - prominent red pulse */
+  .live-indicator {
+    @apply relative flex items-center gap-2;
+  }
+
+  .live-indicator::before {
+    content: '';
+    @apply w-2 h-2 bg-status-active rounded-full animate-pulse-live;
+  }
+
+  /* Stat display - bold, confident numbers */
+  .stat-display {
+    @apply font-display text-stat-lg tracking-tight tabular-nums;
+  }
+
+  .stat-display-xl {
+    @apply font-display text-stat-xl tracking-tighter tabular-nums;
+  }
+
+  /* Section headers - editorial feel */
+  .section-header {
+    @apply text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400;
   }
 }
 
 @layer utilities {
-  /* Custom bounce animation - Tailwind's animate-bounce-ball uses this */
-  .animate-bounce-ball {
-    animation: bounce 2s infinite;
+  /* Warm surface backgrounds */
+  .bg-warm-white {
+    @apply bg-surface-50;
+  }
+
+  .bg-warm-black {
+    @apply bg-surface-950;
+  }
+
+  /* Text colors using warm palette */
+  .text-primary-on-dark {
+    @apply text-surface-50;
+  }
+
+  .text-secondary {
+    @apply text-surface-600 dark:text-surface-400;
+  }
+
+  .text-tertiary {
+    @apply text-surface-500 dark:text-surface-500;
+  }
+
+  /* Dramatic shadow for emphasis */
+  .shadow-dramatic {
+    @apply shadow-elevated dark:shadow-none dark:ring-1 dark:ring-surface-700;
   }
 }
 
-/* Note: fadeIn and slideIn keyframes are defined in tailwind.config.js
-   Use Tailwind's animate-fade-in and animate-slide-in classes */
-
-/* Reduced motion support for users who prefer it */
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -67,14 +156,5 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-
-  .animate-bounce-ball,
-  .animate-fade-in,
-  .animate-slide-in,
-  .animate-pulse,
-  .animate-spin,
-  .animate-ping {
-    animation: none !important;
   }
 }

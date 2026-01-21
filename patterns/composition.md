@@ -6,13 +6,13 @@ DRY (Don't Repeat Yourself) principles for building maintainable, consistent UI 
 
 When building or extending components, follow this precedence (most to least preferred):
 
-| Priority | Approach | When to Use |
-|----------|----------|-------------|
-| 1 | **Design tokens** | Always — single source of truth for values |
-| 2 | **Base component** | One implementation, never duplicated |
-| 3 | **Variant props** | Variations via props, not new components |
-| 4 | **Composition slots** | children, render props for flexibility |
-| 5 | **className overrides** | Last resort for one-offs |
+| Priority | Approach                | When to Use                                |
+| -------- | ----------------------- | ------------------------------------------ |
+| 1        | **Design tokens**       | Always — single source of truth for values |
+| 2        | **Base component**      | One implementation, never duplicated       |
+| 3        | **Variant props**       | Variations via props, not new components   |
+| 4        | **Composition slots**   | children, render props for flexibility     |
+| 5        | **className overrides** | Last resort for one-offs                   |
 
 ---
 
@@ -78,7 +78,7 @@ Every UI element should have exactly one base implementation.
 // components/PrimaryButton.tsx
 const PrimaryButton = styled.button`...`;
 
-// components/SecondaryButton.tsx  
+// components/SecondaryButton.tsx
 const SecondaryButton = styled.button`...`;
 
 // components/IconButton.tsx
@@ -91,26 +91,14 @@ const IconButton = styled.button`...`;
 // ✅ One button, multiple variants
 // components/Button.tsx
 interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md" | "lg";
   children: React.ReactNode;
 }
 
-export const Button = ({ 
-  variant = 'primary', 
-  size = 'md',
-  children,
-  ...props 
-}: ButtonProps) => {
+export const Button = ({ variant = "primary", size = "md", children, ...props }: ButtonProps) => {
   return (
-    <button 
-      className={cn(
-        baseStyles,
-        variantStyles[variant],
-        sizeStyles[size]
-      )}
-      {...props}
-    >
+    <button className={cn(baseStyles, variantStyles[variant], sizeStyles[size])} {...props}>
       {children}
     </button>
   );
@@ -141,20 +129,20 @@ Add variations through props, not by creating new components.
 ```tsx
 // Define variant styles as a map
 const variants = {
-  primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
-  secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-  ghost: 'hover:bg-accent hover:text-accent-foreground',
-  destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+  primary: "bg-primary text-primary-foreground hover:bg-primary/90",
+  secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+  ghost: "hover:bg-accent hover:text-accent-foreground",
+  destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
 } as const;
 
 const sizes = {
-  sm: 'h-8 px-3 text-xs',
-  md: 'h-10 px-4 text-sm',
-  lg: 'h-12 px-6 text-base',
+  sm: "h-8 px-3 text-xs",
+  md: "h-10 px-4 text-sm",
+  lg: "h-12 px-6 text-base",
 } as const;
 
 // Component uses the maps
-export const Button = ({ variant = 'primary', size = 'md', ...props }) => (
+export const Button = ({ variant = "primary", size = "md", ...props }) => (
   <button className={cn(variants[variant], sizes[size])} {...props} />
 );
 ```
@@ -173,9 +161,7 @@ Use children and render props for flexible composition.
   <CardHeader>
     <CardTitle>Title</CardTitle>
   </CardHeader>
-  <CardContent>
-    {/* Any content */}
-  </CardContent>
+  <CardContent>{/* Any content */}</CardContent>
 </Card>
 ```
 
@@ -183,13 +169,7 @@ Use children and render props for flexible composition.
 
 ```tsx
 // When you need access to internal state
-<Dropdown
-  trigger={({ open }) => (
-    <Button aria-expanded={open}>
-      Menu {open ? '▲' : '▼'}
-    </Button>
-  )}
->
+<Dropdown trigger={({ open }) => <Button aria-expanded={open}>Menu {open ? "▲" : "▼"}</Button>}>
   <DropdownItem>Option 1</DropdownItem>
   <DropdownItem>Option 2</DropdownItem>
 </Dropdown>
@@ -234,7 +214,7 @@ const SubmitButton = styled.button`
 
 ```tsx
 // ✅ Uses base button, adds specialization
-const SubmitButton = ({ children = 'Submit', ...props }) => (
+const SubmitButton = ({ children = "Submit", ...props }) => (
   <Button type="submit" variant="primary" {...props}>
     {children}
   </Button>
@@ -246,23 +226,13 @@ const SubmitButton = ({ children = 'Submit', ...props }) => (
 ```tsx
 // Lock in specific configuration
 export const IconButton = ({ label, icon, ...props }) => (
-  <Button 
-    size="icon" 
-    variant="ghost"
-    aria-label={label}
-    {...props}
-  >
+  <Button size="icon" variant="ghost" aria-label={label} {...props}>
     {icon}
   </Button>
 );
 
 // Lock in styling
-export const PillButton = (props) => (
-  <Button 
-    className="rounded-full"
-    {...props}
-  />
-);
+export const PillButton = (props) => <Button className="rounded-full" {...props} />;
 ```
 
 ---
@@ -275,9 +245,7 @@ For true one-offs, use className. But ask yourself: should this be a variant?
 
 ```tsx
 // Specific layout need in one place
-<Button className="mt-4 w-full">
-  Continue
-</Button>
+<Button className="mt-4 w-full">Continue</Button>
 ```
 
 ### Suspicious: Repeated Override
@@ -326,12 +294,12 @@ components/
 
 ```tsx
 // components/ui/index.ts
-export { Button } from './button';
-export { Input } from './input';
-export { Card, CardHeader, CardContent, CardFooter } from './card';
+export { Button } from "./button";
+export { Input } from "./input";
+export { Card, CardHeader, CardContent, CardFooter } from "./card";
 
 // Usage
-import { Button, Input, Card } from '@/components/ui';
+import { Button, Input, Card } from "@/components/ui";
 ```
 
 ---
@@ -356,18 +324,18 @@ const RedButton = () => <button style={{background: 'red'}} />;
 
 ```tsx
 // ❌ Too many boolean props
-<Button 
-  isPrimary 
-  isLarge 
-  isRounded 
-  hasIcon 
+<Button
+  isPrimary
+  isLarge
+  isRounded
+  hasIcon
   isLoading
 />
 
 // ✅ Grouped, meaningful props
-<Button 
-  variant="primary" 
-  size="lg" 
+<Button
+  variant="primary"
+  size="lg"
   loading
 >
   <Icon /> Label

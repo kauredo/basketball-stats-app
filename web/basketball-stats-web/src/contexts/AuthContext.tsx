@@ -4,11 +4,11 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  ReactNode,
+  type ReactNode,
 } from "react";
 import { useMutation, useConvex } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import type {
   User as SharedUser,
   League as SharedLeague,
@@ -108,7 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     initialize();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally run only on mount
 
   const login = useCallback(
     async (email: string, password: string) => {

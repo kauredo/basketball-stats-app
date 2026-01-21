@@ -37,7 +37,7 @@ import PlayerDetail from "./pages/PlayerDetail";
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-8">
+    <div className="min-h-screen bg-surface-50 dark:bg-surface-900 flex items-center justify-center p-8">
       <div className="text-center">
         <img
           src="/assets/logo.png"
@@ -49,7 +49,7 @@ function LoadingScreen() {
           alt="Basketball Stats App"
           className="w-32 h-32 mx-auto mb-4 hidden dark:block"
         />
-        <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        <p className="text-surface-600 dark:text-surface-400">Loading...</p>
       </div>
     </div>
   );

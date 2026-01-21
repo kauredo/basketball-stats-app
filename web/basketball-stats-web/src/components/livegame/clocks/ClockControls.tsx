@@ -35,7 +35,9 @@ export const ClockControls: React.FC<ClockControlsProps> = ({
   const smallButtonSize = size === "sm" ? "w-6 h-6 text-[10px]" : "w-8 h-8 text-xs";
 
   if (isCompleted) {
-    return <div className="text-xs text-gray-500 dark:text-gray-400 font-medium px-3">FINAL</div>;
+    return (
+      <div className="text-xs text-surface-500 dark:text-surface-400 font-medium px-3">FINAL</div>
+    );
   }
 
   return (
@@ -81,17 +83,17 @@ export const ClockControls: React.FC<ClockControlsProps> = ({
       {/* Shot Clock Reset Buttons */}
       {showShotClockReset && onResetShotClock && (isRunning || isPaused) && (
         <>
-          <div className="w-px h-6 bg-gray-600 mx-1" />
+          <div className="w-px h-6 bg-surface-600 mx-1" />
           <button
             onClick={() => onResetShotClock(true)}
-            className={`${smallButtonSize} rounded bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold flex items-center justify-center transition-colors active:scale-95`}
+            className={`${smallButtonSize} rounded bg-surface-700 hover:bg-surface-600 text-surface-300 font-bold flex items-center justify-center transition-colors active:scale-95`}
             title="Reset shot clock to 24"
           >
             24
           </button>
           <button
             onClick={() => onResetShotClock(false)}
-            className={`${smallButtonSize} rounded bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold flex items-center justify-center transition-colors active:scale-95`}
+            className={`${smallButtonSize} rounded bg-surface-700 hover:bg-surface-600 text-surface-300 font-bold flex items-center justify-center transition-colors active:scale-95`}
             title="Reset shot clock to 14"
           >
             14

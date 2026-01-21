@@ -52,7 +52,7 @@ Primitives are the raw building blocks. They have no semantic meaning.
   /* Typography */
   --font-sans: system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, monospace;
-  
+
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -142,9 +142,9 @@ Semantic tokens map primitives to meaning. They change with theme.
 <!DOCTYPE html>
 <html data-theme="light">
   <head>
-    <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" content="#fafafa">
-    <link rel="stylesheet" href="/tokens/index.css">
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fafafa" />
+    <link rel="stylesheet" href="/tokens/index.css" />
   </head>
   <body>
     <!-- App -->
@@ -155,34 +155,34 @@ Semantic tokens map primitives to meaning. They change with theme.
 ### JavaScript Toggle
 
 ```typescript
-function setTheme(theme: 'light' | 'dark' | 'system') {
+function setTheme(theme: "light" | "dark" | "system") {
   const root = document.documentElement;
-  
-  if (theme === 'system') {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    root.dataset.theme = prefersDark ? 'dark' : 'light';
+
+  if (theme === "system") {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = prefersDark ? "dark" : "light";
   } else {
     root.dataset.theme = theme;
   }
-  
+
   // Update meta theme-color
-  const themeColor = getComputedStyle(root).getPropertyValue('--color-bg-primary');
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor.trim());
-  
+  const themeColor = getComputedStyle(root).getPropertyValue("--color-bg-primary");
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColor.trim());
+
   // Persist preference
-  localStorage.setItem('theme', theme);
+  localStorage.setItem("theme", theme);
 }
 
 // Initialize on load
 function initTheme() {
-  const saved = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
-  setTheme(saved || 'system');
+  const saved = localStorage.getItem("theme") as "light" | "dark" | "system" | null;
+  setTheme(saved || "system");
 }
 
 // Listen for system changes
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-  if (localStorage.getItem('theme') === 'system') {
-    setTheme('system');
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+  if (localStorage.getItem("theme") === "system") {
+    setTheme("system");
   }
 });
 ```
@@ -190,30 +190,30 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
 ### React Hook
 
 ```tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-type Theme = 'light' | 'dark' | 'system';
+type Theme = "light" | "dark" | "system";
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>('system');
+  const [theme, setThemeState] = useState<Theme>("system");
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme') as Theme | null;
+    const saved = localStorage.getItem("theme") as Theme | null;
     if (saved) setThemeState(saved);
   }, []);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    
+
     const root = document.documentElement;
-    if (newTheme === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.dataset.theme = prefersDark ? 'dark' : 'light';
+    if (newTheme === "system") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      root.dataset.theme = prefersDark ? "dark" : "light";
     } else {
       root.dataset.theme = newTheme;
     }
-    
-    localStorage.setItem('theme', newTheme);
+
+    localStorage.setItem("theme", newTheme);
   };
 
   return { theme, setTheme };
@@ -258,11 +258,7 @@ export function useTheme() {
 ```css
 /* Acceptable: decorative gradient using primitives */
 .hero-gradient {
-  background: linear-gradient(
-    135deg,
-    var(--blue-500) 0%,
-    var(--purple-500) 100%
-  );
+  background: linear-gradient(135deg, var(--blue-500) 0%, var(--purple-500) 100%);
 }
 ```
 
@@ -274,7 +270,7 @@ export function useTheme() {
 
 ```css
 /* Just import the tokens */
-@import '/tokens/index.css';
+@import "/tokens/index.css";
 
 .button {
   background: var(--color-primary);
@@ -290,31 +286,31 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: 'var(--color-bg-primary)',
-        foreground: 'var(--color-text-primary)',
+        background: "var(--color-bg-primary)",
+        foreground: "var(--color-text-primary)",
         primary: {
-          DEFAULT: 'var(--color-primary)',
-          foreground: 'var(--color-primary-foreground)',
+          DEFAULT: "var(--color-primary)",
+          foreground: "var(--color-primary-foreground)",
         },
         secondary: {
-          DEFAULT: 'var(--color-bg-secondary)',
-          foreground: 'var(--color-text-secondary)',
+          DEFAULT: "var(--color-bg-secondary)",
+          foreground: "var(--color-text-secondary)",
         },
         muted: {
-          DEFAULT: 'var(--color-bg-tertiary)',
-          foreground: 'var(--color-text-muted)',
+          DEFAULT: "var(--color-bg-tertiary)",
+          foreground: "var(--color-text-muted)",
         },
-        border: 'var(--color-border-default)',
+        border: "var(--color-border-default)",
       },
       borderRadius: {
-        sm: 'var(--radius-sm)',
-        md: 'var(--radius-md)',
-        lg: 'var(--radius-lg)',
+        sm: "var(--radius-sm)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
       },
       boxShadow: {
-        sm: 'var(--shadow-sm)',
-        md: 'var(--shadow-md)',
-        lg: 'var(--shadow-lg)',
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
       },
     },
   },
@@ -383,7 +379,7 @@ Borders may need to be more prominent:
 }
 
 [data-theme="dark"] {
-  --color-border-default: var(--gray-700);  /* Not gray-800, needs contrast */
+  --color-border-default: var(--gray-700); /* Not gray-800, needs contrast */
 }
 ```
 
@@ -397,7 +393,7 @@ Consider inverting or adjusting:
 }
 
 [data-theme="dark"] .icon {
-  opacity: 0.9;  /* Slightly dimmed */
+  opacity: 0.9; /* Slightly dimmed */
 }
 ```
 
@@ -416,6 +412,7 @@ Always declare color-scheme for native elements:
 ```
 
 This affects:
+
 - Scrollbar colors
 - Form control colors
 - `<select>` dropdown backgrounds
@@ -440,7 +437,9 @@ This affects:
 
 ```css
 /* Force a theme for testing */
-html { data-theme: dark !important; }
+html {
+  data-theme: dark !important;
+}
 
 /* Or use media query override in DevTools */
 @media (prefers-color-scheme: dark) {
@@ -472,30 +471,36 @@ html { data-theme: dark !important; }
 
 ```html
 <!-- ❌ Bad: Separate files -->
-<link rel="stylesheet" href="light.css" media="(prefers-color-scheme: light)">
-<link rel="stylesheet" href="dark.css" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="light.css" media="(prefers-color-scheme: light)" />
+<link rel="stylesheet" href="dark.css" media="(prefers-color-scheme: dark)" />
 
 <!-- ✅ Good: Single file with data-theme -->
-<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="tokens.css" />
 ```
 
 ### Don't: Duplicate Component Styles
 
 ```css
 /* ❌ Bad: Duplicating styles for each theme */
-.button { background: blue; }
-.dark .button { background: lightblue; }
+.button {
+  background: blue;
+}
+.dark .button {
+  background: lightblue;
+}
 
 /* ✅ Good: Single definition using tokens */
-.button { background: var(--color-primary); }
+.button {
+  background: var(--color-primary);
+}
 ```
 
 ### Don't: Forget System Preference
 
 ```typescript
 // ❌ Bad: Only light/dark options
-type Theme = 'light' | 'dark';
+type Theme = "light" | "dark";
 
 // ✅ Good: Include system option
-type Theme = 'light' | 'dark' | 'system';
+type Theme = "light" | "dark" | "system";
 ```

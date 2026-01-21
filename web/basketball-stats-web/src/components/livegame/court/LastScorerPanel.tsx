@@ -33,14 +33,14 @@ export const LastScorerPanel: React.FC<LastScorerPanelProps> = ({
           : "";
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-2">
+    <div className="bg-surface-100 dark:bg-surface-700/50 rounded-lg p-2">
       <div className="flex items-center justify-between gap-2">
         {/* Last action info */}
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <p className="text-[10px] text-surface-500 dark:text-surface-400 uppercase tracking-wide">
             Last
           </p>
-          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+          <p className="text-sm font-semibold text-surface-900 dark:text-white truncate">
             #{lastAction.playerNumber}{" "}
             {isScoring ? `${pointsText} ${madeText}` : lastAction.displayText}
           </p>
@@ -55,10 +55,10 @@ export const LastScorerPanel: React.FC<LastScorerPanelProps> = ({
               disabled={disabled}
               className={`
                 flex items-center gap-1 px-2 py-1 rounded
-                bg-orange-100 dark:bg-orange-900/30
-                text-orange-700 dark:text-orange-300
+                bg-primary-100 dark:bg-primary-900/30
+                text-primary-700 dark:text-primary-300
                 text-xs font-medium
-                hover:bg-orange-200 dark:hover:bg-orange-900/50
+                hover:bg-primary-200 dark:hover:bg-primary-900/50
                 transition-colors
                 ${disabled ? "opacity-50 cursor-not-allowed" : "active:scale-95"}
               `}
@@ -76,10 +76,10 @@ export const LastScorerPanel: React.FC<LastScorerPanelProps> = ({
               disabled={disabled}
               className={`
                 flex items-center gap-1 px-2 py-1 rounded
-                bg-gray-200 dark:bg-gray-600
-                text-gray-700 dark:text-gray-300
+                bg-surface-200 dark:bg-surface-600
+                text-surface-700 dark:text-surface-300
                 text-xs font-medium
-                hover:bg-gray-300 dark:hover:bg-gray-500
+                hover:bg-surface-300 dark:hover:bg-surface-500
                 transition-colors
                 ${disabled ? "opacity-50 cursor-not-allowed" : "active:scale-95"}
               `}

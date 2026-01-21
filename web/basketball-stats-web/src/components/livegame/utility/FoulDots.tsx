@@ -38,13 +38,13 @@ export const FoulDots: React.FC<FoulDotsProps> = ({
 
         let colorClass: string;
         if (!isFilled) {
-          colorClass = "bg-gray-300 dark:bg-gray-600";
+          colorClass = "bg-surface-300 dark:bg-surface-600";
         } else if (fouledOut || isLastFoul) {
           colorClass = "bg-red-600";
         } else if (fouls >= foulLimit - 1) {
           colorClass = "bg-yellow-500";
         } else {
-          colorClass = "bg-orange-500";
+          colorClass = "bg-primary-500";
         }
 
         return (

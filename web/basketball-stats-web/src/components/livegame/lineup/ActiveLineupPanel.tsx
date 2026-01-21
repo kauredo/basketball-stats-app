@@ -31,128 +31,8 @@ const POSITION_NAMES: Record<Position, string> = {
   C: "Center",
 };
 
-// Jersey SVG Component
-const JerseySVG: React.FC<{
-  number: number;
-  size?: "sm" | "md" | "lg";
-  variant?: "filled" | "outline";
-  color?: string;
-  textColor?: string;
-  fouledOut?: boolean;
-  fouls?: number;
-  foulLimit?: number;
-}> = ({
-  number,
-  size = "md",
-  variant = "filled",
-  color = "#3b82f6",
-  textColor = "#ffffff",
-  fouledOut = false,
-  fouls = 0,
-  foulLimit = 5,
-}) => {
-  const sizes = {
-    sm: { width: 36, height: 42, fontSize: 14 },
-    md: { width: 48, height: 56, fontSize: 18 },
-    lg: { width: 64, height: 74, fontSize: 24 },
-  };
-  const { width, height, fontSize } = sizes[size];
-
-  // Calculate foul intensity (0-1)
-  const foulIntensity = Math.min(fouls / foulLimit, 1);
-
-  return (
-    <svg
-      width={width}
-      height={height}
-      viewBox="0 0 64 74"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={`transition-all duration-300 ${fouledOut ? "opacity-40 grayscale" : ""}`}
-    >
-      {/* Jersey Body */}
-      <path
-        d="M32 8C32 8 24 8 20 12L8 20V28L12 32V68C12 70 14 72 16 72H48C50 72 52 70 52 68V32L56 28V20L44 12C40 8 32 8 32 8Z"
-        fill={variant === "filled" ? color : "transparent"}
-        stroke={color}
-        strokeWidth={variant === "outline" ? 2 : 0}
-        className="transition-colors duration-300"
-      />
-      {/* Neck */}
-      <path
-        d="M26 8C26 8 28 14 32 14C36 14 38 8 38 8"
-        stroke={variant === "filled" ? textColor : color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-      {/* Sleeves */}
-      <path
-        d="M8 20L4 28L8 32"
-        stroke={variant === "filled" ? textColor : color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.3"
-      />
-      <path
-        d="M56 20L60 28L56 32"
-        stroke={variant === "filled" ? textColor : color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.3"
-      />
-      {/* Number */}
-      <text
-        x="32"
-        y="48"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill={variant === "filled" ? textColor : color}
-        fontSize={fontSize}
-        fontWeight="900"
-        fontFamily="system-ui, -apple-system, sans-serif"
-        className="select-none"
-      >
-        {number}
-      </text>
-      {/* Foul indicator bar at bottom */}
-      {fouls > 0 && !fouledOut && (
-        <rect
-          x="16"
-          y="66"
-          width={32 * foulIntensity}
-          height="3"
-          rx="1.5"
-          fill={foulIntensity >= 0.8 ? "#ef4444" : foulIntensity >= 0.6 ? "#f59e0b" : "#fbbf24"}
-          className="transition-all duration-300"
-        />
-      )}
-      {/* Fouled out X */}
-      {fouledOut && (
-        <>
-          <line
-            x1="20"
-            y1="28"
-            x2="44"
-            y2="56"
-            stroke="#ef4444"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-          <line
-            x1="44"
-            y1="28"
-            x2="20"
-            y2="56"
-            stroke="#ef4444"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-        </>
-      )}
-    </svg>
-  );
-};
+// Re-export JerseyIcon for use in this file
+import { JerseyIcon } from "../../JerseyIcon";
 
 // Position slot on the court formation
 const PositionSlot: React.FC<{
@@ -256,7 +136,7 @@ const PositionSlot: React.FC<{
             ? "ring-2 ring-emerald-500 bg-emerald-50 dark:bg-emerald-500/20 scale-105"
             : ""
         }
-        ${isSelected ? "ring-2 ring-orange-500 bg-orange-50 dark:bg-orange-500/20" : ""}
+        ${isSelected ? "ring-2 ring-primary-500 bg-primary-50 dark:bg-primary-500/20" : ""}
         ${
           needsSub && !isDragOver
             ? "ring-2 ring-red-500 bg-red-50 dark:bg-red-500/10 animate-pulse"
@@ -264,8 +144,8 @@ const PositionSlot: React.FC<{
         }
         ${
           isEmpty && !isDragOver
-            ? "border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50"
-            : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+            ? "border-2 border-dashed border-surface-300 dark:border-surface-600 bg-surface-50 dark:bg-surface-800/50"
+            : "bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700"
         }
         ${isDragging ? "opacity-50 scale-95" : ""}
         ${disabled ? "opacity-60 cursor-not-allowed" : "hover:scale-105 active:scale-95"}
@@ -283,9 +163,9 @@ const PositionSlot: React.FC<{
             needsSub
               ? "bg-red-500 text-white"
               : isEmpty
-                ? "bg-gray-400 dark:bg-gray-600 text-white"
+                ? "bg-surface-400 dark:bg-surface-600 text-white"
                 : isHomeTeam
-                  ? "bg-orange-500 text-white"
+                  ? "bg-primary-500 text-white"
                   : "bg-blue-500 text-white"
           }
         `}
@@ -295,7 +175,7 @@ const PositionSlot: React.FC<{
 
       {player ? (
         <>
-          <JerseySVG
+          <JerseyIcon
             number={player.player?.number || 0}
             size="md"
             color={primaryColor}
@@ -303,19 +183,19 @@ const PositionSlot: React.FC<{
             fouls={player.fouls}
             foulLimit={foulLimit}
           />
-          <span className="text-[9px] sm:text-[10px] font-semibold text-gray-600 dark:text-gray-400 mt-1 truncate max-w-full">
+          <span className="text-[9px] sm:text-[10px] font-semibold text-surface-600 dark:text-surface-400 mt-1 truncate max-w-full">
             {player.player?.name?.split(" ").pop()}
           </span>
           {/* Points display */}
-          <span className="text-[10px] sm:text-xs font-black text-gray-900 dark:text-white">
+          <span className="text-[10px] sm:text-xs font-black text-surface-900 dark:text-white">
             {player.points} pts
           </span>
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-3 sm:py-4">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-dashed border-gray-400 dark:border-gray-600 flex items-center justify-center">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-dashed border-surface-400 dark:border-surface-600 flex items-center justify-center">
             <svg
-              className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400"
+              className="w-4 h-4 sm:w-5 sm:h-5 text-surface-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -328,66 +208,97 @@ const PositionSlot: React.FC<{
               />
             </svg>
           </div>
-          <span className="text-[9px] sm:text-[10px] text-gray-400 mt-1">Empty</span>
-        </div>
-      )}
-
-      {/* Drag handle indicator */}
-      {player && !disabled && !player.fouledOut && (
-        <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 flex gap-0.5">
-          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
-          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
-          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+          <span className="text-[9px] sm:text-[10px] text-surface-400 mt-1">Empty</span>
         </div>
       )}
     </div>
   );
 };
 
-// Bench player card (draggable)
+// Bench player card (draggable and droppable)
 const BenchPlayerCard: React.FC<{
   player: PlayerStat;
   isHomeTeam: boolean;
-  isDropTarget: boolean;
+  isSwapTarget: boolean;
+  isSelected: boolean;
   foulLimit: number;
-  disabled: boolean;
+  canInteract: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
+  onDropFromCourt: (courtPlayerId: Id<"players">) => void;
   onClick: () => void;
 }> = ({
   player,
   isHomeTeam,
-  isDropTarget,
+  isSwapTarget,
+  isSelected,
   foulLimit,
-  disabled,
+  canInteract,
   onDragStart,
   onDragEnd,
+  onDropFromCourt,
   onClick,
 }) => {
+  const [isDragOver, setIsDragOver] = useState(false);
   const primaryColor = isHomeTeam ? "#f97316" : "#3b82f6";
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    const fromBench = e.dataTransfer.types.includes("frombench");
+    // Only accept drops from court (not from other bench players)
+    if (!fromBench) {
+      setIsDragOver(true);
+    }
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
+      const courtPlayerId = e.dataTransfer.getData("playerId") as Id<"players">;
+      const fromBench = e.dataTransfer.getData("fromBench") === "true";
+
+      // Only accept drops from court players
+      if (!fromBench && courtPlayerId) {
+        onDropFromCourt(courtPlayerId);
+      }
+    },
+    [onDropFromCourt]
+  );
 
   return (
     <div
-      draggable={!disabled}
+      draggable={canInteract}
       onDragStart={(e) => {
         e.dataTransfer.setData("playerId", player.playerId);
         e.dataTransfer.setData("fromBench", "true");
         onDragStart();
       }}
       onDragEnd={onDragEnd}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
       onClick={onClick}
       className={`
         flex flex-col items-center p-1.5 sm:p-2 rounded-lg
-        transition-all duration-200 cursor-grab active:cursor-grabbing
+        transition-all duration-200
+        ${canInteract ? "cursor-pointer hover:scale-105 hover:shadow-md active:scale-95" : "cursor-default"}
         ${
-          isDropTarget
+          isDragOver
             ? "ring-2 ring-emerald-500 bg-emerald-50 dark:bg-emerald-500/20 scale-105"
-            : "bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
+            : isSelected
+              ? "ring-2 ring-primary-500 bg-primary-50 dark:bg-primary-500/20"
+              : isSwapTarget
+                ? "ring-2 ring-emerald-400 ring-dashed bg-emerald-50/50 dark:bg-emerald-500/10"
+                : "bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700"
         }
-        ${disabled ? "opacity-50 cursor-not-allowed" : "hover:scale-105 hover:shadow-md"}
       `}
     >
-      <JerseySVG
+      <JerseyIcon
         number={player.player?.number || 0}
         size="sm"
         variant="outline"
@@ -395,7 +306,7 @@ const BenchPlayerCard: React.FC<{
         fouls={player.fouls}
         foulLimit={foulLimit}
       />
-      <span className="text-[8px] sm:text-[9px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 truncate max-w-[40px] sm:max-w-[48px]">
+      <span className="text-[8px] sm:text-[9px] font-medium text-surface-500 dark:text-surface-400 mt-0.5 truncate max-w-[40px] sm:max-w-[48px]">
         {player.player?.name?.split(" ").pop()}
       </span>
     </div>
@@ -442,7 +353,7 @@ const SubstitutionAlert: React.FC<{
 
 /**
  * Redesigned ActiveLineupPanel with:
- * - Jersey SVG display for players
+ * - JerseyIcon display for players
  * - Position-based court formation layout
  * - Drag-and-drop substitutions
  * - Foul-out detection with visual alerts
@@ -464,6 +375,8 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
   const [draggingPlayer, setDraggingPlayer] = useState<Id<"players"> | null>(null);
   const [draggingFromPosition, setDraggingFromPosition] = useState<number | null>(null);
   const [showAlert, setShowAlert] = useState(true);
+  // Track selected bench player for bench-first swap flow
+  const [selectedBenchPlayer, setSelectedBenchPlayer] = useState<Id<"players"> | null>(null);
   // Local state to track custom position assignments (player IDs by position index)
   const [customPositions, setCustomPositions] = useState<(Id<"players"> | null)[]>([
     null,
@@ -546,6 +459,15 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
     if (disabled) return;
 
     if (player) {
+      // If a bench player is selected, complete the swap (bench → court flow)
+      if (selectedBenchPlayer) {
+        onSwap(player.playerId, selectedBenchPlayer);
+        setSelectedBenchPlayer(null);
+        setSelectedPositionIndex(null);
+        onCancelSwap();
+        return;
+      }
+
       // If we have a position selected and clicking another court player, swap positions
       if (selectedPositionIndex !== null && selectedPositionIndex !== positionIndex) {
         handleSwapPositions(selectedPositionIndex, positionIndex);
@@ -556,14 +478,16 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
       // If clicking the same position that's selected, deselect it
       if (selectedPositionIndex === positionIndex) {
         setSelectedPositionIndex(null);
+        onCancelSwap();
         return;
       }
 
-      // If substitution is in progress from this team
+      // If substitution is in progress from this team (court player selected)
       if (swappingFromThisTeam) {
         // If clicking same player, cancel
         if (swappingPlayer === player.playerId) {
           onCancelSwap();
+          setSelectedPositionIndex(null);
           return;
         }
         // Clicking a different court player while swapping - swap positions instead
@@ -573,6 +497,7 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
         if (swappingPlayerIndex !== -1) {
           handleSwapPositions(swappingPlayerIndex, positionIndex);
           onCancelSwap();
+          setSelectedPositionIndex(null);
           return;
         }
       }
@@ -581,7 +506,14 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
       setSelectedPositionIndex(positionIndex);
       onStartSwap(player.playerId);
     } else {
-      // Clicking empty slot - clear position selection
+      // Clicking empty slot
+      // If bench player is selected, add them to this slot
+      if (selectedBenchPlayer && onSubIn) {
+        onSubIn(selectedBenchPlayer);
+        setSelectedBenchPlayer(null);
+        return;
+      }
+      // Clear position selection
       setSelectedPositionIndex(null);
     }
   };
@@ -589,19 +521,40 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
   const handleBenchPlayerClick = (player: PlayerStat) => {
     if (disabled) return;
 
-    // Clear position selection when interacting with bench
-    setSelectedPositionIndex(null);
-
+    // If a court player is selected (swap in progress), complete the swap
     if (swappingFromThisTeam && swappingPlayer) {
-      // Complete the swap
       onSwap(swappingPlayer, player.playerId);
+      setSelectedPositionIndex(null);
+      setSelectedBenchPlayer(null);
+      return;
+    }
+
+    // If clicking the same bench player that's already selected, deselect
+    if (selectedBenchPlayer === player.playerId) {
+      setSelectedBenchPlayer(null);
       return;
     }
 
     // If there are empty slots, clicking a bench player adds them directly
     if (needsSubs && onSubIn) {
       onSubIn(player.playerId);
+      return;
     }
+
+    // Select this bench player for bench-first swap flow
+    // Clear any court selection first
+    setSelectedPositionIndex(null);
+    onCancelSwap();
+    setSelectedBenchPlayer(player.playerId);
+  };
+
+  // Handle dropping a court player onto a bench player
+  const handleDropFromCourtToBench = (
+    courtPlayerId: Id<"players">,
+    benchPlayerId: Id<"players">
+  ) => {
+    if (disabled) return;
+    onSwap(courtPlayerId, benchPlayerId);
   };
 
   // Handle drop from bench: swap bench player with court player, or add to empty slot
@@ -637,8 +590,8 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
     <div
       className={`
       rounded-xl sm:rounded-2xl overflow-hidden
-      bg-white dark:bg-gray-800
-      border border-gray-200 dark:border-gray-700
+      bg-white dark:bg-surface-800
+      border border-surface-200 dark:border-surface-700
       shadow-sm
       ${compact ? "p-2 sm:p-3" : "p-3 sm:p-4"}
     `}
@@ -647,25 +600,29 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
       <div className="flex items-center justify-between mb-2 sm:mb-3">
         <div className="flex items-center gap-2">
           <div
-            className={`w-1 h-5 sm:h-6 rounded-full ${isHomeTeam ? "bg-orange-500" : "bg-blue-500"}`}
+            className={`w-1 h-5 sm:h-6 rounded-full ${isHomeTeam ? "bg-primary-500" : "bg-blue-500"}`}
           />
           <h3
-            className={`font-bold text-gray-900 dark:text-gray-200 uppercase tracking-wide ${compact ? "text-[10px] sm:text-xs" : "text-xs sm:text-sm"}`}
+            className={`font-bold text-surface-900 dark:text-surface-200 uppercase tracking-wide ${compact ? "text-[10px] sm:text-xs" : "text-xs sm:text-sm"}`}
           >
             {teamName}
           </h3>
-          <span className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 font-medium">
+          <span className="text-[10px] sm:text-xs text-surface-400 dark:text-surface-500 font-medium">
             {onCourt.length}/5
           </span>
         </div>
-        {isSwapping && swappingFromThisTeam && (
+        {(isSwapping && swappingFromThisTeam) || selectedBenchPlayer ? (
           <button
-            onClick={onCancelSwap}
+            onClick={() => {
+              onCancelSwap();
+              setSelectedPositionIndex(null);
+              setSelectedBenchPlayer(null);
+            }}
             className="text-[10px] sm:text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-semibold px-2 py-1 rounded bg-red-100 dark:bg-red-500/10 border border-red-300 dark:border-red-500/30 transition-colors"
           >
-            Cancel Sub
+            Cancel
           </button>
-        )}
+        ) : null}
       </div>
 
       {/* Substitution Alert */}
@@ -675,7 +632,7 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
 
       {/* Court Formation - 5 position slots */}
       <div className="mb-2 sm:mb-3">
-        <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-widest font-semibold mb-2 sm:mb-3">
+        <div className="text-[9px] sm:text-[10px] text-surface-500 dark:text-surface-500 uppercase tracking-widest font-semibold mb-2 sm:mb-3">
           On Court
         </div>
 
@@ -694,7 +651,10 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
                   positionIndex={idx}
                   player={player}
                   isHomeTeam={isHomeTeam}
-                  isDropTarget={swappingFromThisTeam && canAcceptDropFromBench}
+                  isDropTarget={
+                    (swappingFromThisTeam && canAcceptDropFromBench) ||
+                    (selectedBenchPlayer !== null && (!!player || (needsSubHere && !!onSubIn)))
+                  }
                   isDragging={draggingFromPosition === idx}
                   isSelected={swappingPlayer === player?.playerId || selectedPositionIndex === idx}
                   needsSub={needsSubHere}
@@ -721,14 +681,19 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
 
       {/* Bench Players */}
       {onBench.length > 0 && (
-        <div className="pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="pt-2 sm:pt-3 border-t border-surface-200 dark:border-surface-700">
           <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-            <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-widest font-semibold">
+            <span className="text-[9px] sm:text-[10px] text-surface-500 dark:text-surface-500 uppercase tracking-widest font-semibold">
               Bench ({onBench.length})
             </span>
             {swappingFromThisTeam && (
               <span className="text-[9px] sm:text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold animate-pulse">
                 Tap or drag to substitute
+              </span>
+            )}
+            {selectedBenchPlayer && !swappingFromThisTeam && (
+              <span className="text-[9px] sm:text-[10px] text-primary-600 dark:text-primary-400 font-semibold animate-pulse">
+                Now tap a court player to swap
               </span>
             )}
           </div>
@@ -738,11 +703,15 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
                 key={player.playerId}
                 player={player}
                 isHomeTeam={isHomeTeam}
-                isDropTarget={swappingFromThisTeam}
+                isSwapTarget={swappingFromThisTeam}
+                isSelected={selectedBenchPlayer === player.playerId}
                 foulLimit={foulLimit}
-                disabled={disabled || (!swappingFromThisTeam && !needsSubs)}
+                canInteract={!disabled}
                 onDragStart={() => setDraggingPlayer(player.playerId)}
                 onDragEnd={() => setDraggingPlayer(null)}
+                onDropFromCourt={(courtPlayerId) =>
+                  handleDropFromCourtToBench(courtPlayerId, player.playerId)
+                }
                 onClick={() => handleBenchPlayerClick(player)}
               />
             ))}
@@ -762,10 +731,11 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
                 key={player.playerId}
                 className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30"
               >
-                <JerseySVG
+                <JerseyIcon
                   number={player.player?.number || 0}
                   size="sm"
                   color="#ef4444"
+                  fouls={5}
                   fouledOut
                 />
                 <span className="text-[9px] sm:text-[10px] font-medium text-red-600 dark:text-red-400 line-through">
@@ -779,8 +749,8 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
 
       {/* Empty bench state */}
       {onBench.length === 0 && needsSubs && (
-        <div className="pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-center py-3 sm:py-4 text-gray-400 dark:text-gray-500">
+        <div className="pt-2 sm:pt-3 border-t border-surface-200 dark:border-surface-700">
+          <div className="text-center py-3 sm:py-4 text-surface-400 dark:text-surface-500">
             <svg
               className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 opacity-50"
               fill="none"

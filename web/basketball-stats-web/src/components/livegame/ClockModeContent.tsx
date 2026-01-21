@@ -72,10 +72,10 @@ export const ClockModeContent: React.FC<ClockModeContentProps> = ({
   return (
     <div className="h-full flex flex-col gap-4 p-4">
       {/* Main Clock Display */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-gray-900 rounded-2xl p-8 min-h-[300px]">
+      <div className="flex-1 flex flex-col items-center justify-center bg-surface-900 rounded-2xl p-8 min-h-[300px]">
         {/* Quarter Badge */}
         <div className="mb-4">
-          <span className="px-4 py-2 bg-orange-500 text-white text-xl font-bold rounded-full">
+          <span className="px-4 py-2 bg-primary-500 text-white text-xl font-bold rounded-full">
             {formatQuarter(currentQuarter)}
           </span>
         </div>
@@ -90,7 +90,7 @@ export const ClockModeContent: React.FC<ClockModeContentProps> = ({
           >
             {formatTime(timeRemainingSeconds)}
           </div>
-          <p className="text-gray-400 text-lg mt-2 uppercase tracking-widest">Game Clock</p>
+          <p className="text-surface-400 text-lg mt-2 uppercase tracking-widest">Game Clock</p>
         </div>
 
         {/* Shot Clock */}
@@ -99,7 +99,7 @@ export const ClockModeContent: React.FC<ClockModeContentProps> = ({
             className={`text-center px-8 py-4 rounded-xl border-2 ${
               shotClockSeconds <= 5 && isActive
                 ? "bg-red-500/20 border-red-500 animate-pulse"
-                : "bg-gray-800 border-gray-700"
+                : "bg-surface-800 border-surface-700"
             }`}
           >
             <div
@@ -109,7 +109,7 @@ export const ClockModeContent: React.FC<ClockModeContentProps> = ({
             >
               {shotClockSeconds}
             </div>
-            <p className="text-gray-400 text-sm mt-1 uppercase tracking-wider">Shot Clock</p>
+            <p className="text-surface-400 text-sm mt-1 uppercase tracking-wider">Shot Clock</p>
           </div>
 
           {/* Shot Clock Reset Buttons */}
@@ -168,16 +168,16 @@ export const ClockModeContent: React.FC<ClockModeContentProps> = ({
       {/* Score Display */}
       <div className="grid grid-cols-3 gap-4">
         {/* Away Team */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 text-center border border-gray-200 dark:border-gray-700">
-          <p className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
+        <div className="bg-white dark:bg-surface-800 rounded-xl p-6 text-center border border-surface-200 dark:border-surface-700">
+          <p className="text-surface-500 dark:text-surface-400 text-sm font-semibold uppercase tracking-wider mb-2">
             {awayTeamName}
           </p>
-          <p className="text-5xl font-bold text-gray-900 dark:text-white">{awayScore}</p>
+          <p className="text-5xl font-bold text-surface-900 dark:text-white">{awayScore}</p>
           {onTimeoutAway && (
             <button
               onClick={onTimeoutAway}
               disabled={awayTimeoutsRemaining === 0}
-              className="mt-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-4 px-4 py-2 bg-surface-200 dark:bg-surface-700 hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-900 dark:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Timeout ({awayTimeoutsRemaining})
             </button>
@@ -186,21 +186,21 @@ export const ClockModeContent: React.FC<ClockModeContentProps> = ({
 
         {/* VS / Clock Icon */}
         <div className="flex flex-col items-center justify-center">
-          <ClockIcon className="w-12 h-12 text-gray-400 dark:text-gray-600" />
-          <span className="text-gray-400 dark:text-gray-500 text-2xl font-bold mt-2">VS</span>
+          <ClockIcon className="w-12 h-12 text-surface-400 dark:text-surface-600" />
+          <span className="text-surface-400 dark:text-surface-500 text-2xl font-bold mt-2">VS</span>
         </div>
 
         {/* Home Team */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 text-center border border-gray-200 dark:border-gray-700">
-          <p className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
+        <div className="bg-white dark:bg-surface-800 rounded-xl p-6 text-center border border-surface-200 dark:border-surface-700">
+          <p className="text-surface-500 dark:text-surface-400 text-sm font-semibold uppercase tracking-wider mb-2">
             {homeTeamName}
           </p>
-          <p className="text-5xl font-bold text-gray-900 dark:text-white">{homeScore}</p>
+          <p className="text-5xl font-bold text-surface-900 dark:text-white">{homeScore}</p>
           {onTimeoutHome && (
             <button
               onClick={onTimeoutHome}
               disabled={homeTimeoutsRemaining === 0}
-              className="mt-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-4 px-4 py-2 bg-surface-200 dark:bg-surface-700 hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-900 dark:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Timeout ({homeTimeoutsRemaining})
             </button>

@@ -25,7 +25,7 @@ export default function Breadcrumb({ items, showHome = true }: BreadcrumbProps) 
     : normalizedItems;
 
   return (
-    <nav className="flex items-center space-x-1 text-sm mb-4" aria-label="Breadcrumb">
+    <nav className="flex items-center gap-1 text-sm mb-4" aria-label="Breadcrumb">
       {allItems.map((item, index) => {
         const isLast = index === allItems.length - 1;
         const isHome = index === 0 && showHome;
@@ -33,22 +33,22 @@ export default function Breadcrumb({ items, showHome = true }: BreadcrumbProps) 
         return (
           <React.Fragment key={index}>
             {index > 0 && (
-              <ChevronRightIcon className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+              <ChevronRightIcon className="w-4 h-4 text-surface-400 dark:text-surface-500 flex-shrink-0" />
             )}
             {isLast ? (
-              <span className="text-gray-900 dark:text-white font-medium truncate max-w-[200px]">
+              <span className="text-surface-900 dark:text-white font-medium truncate max-w-[200px]">
                 {item.label}
               </span>
             ) : item.href ? (
               <Link
                 to={item.href}
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors flex items-center"
+                className="text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-300 transition-colors flex items-center"
               >
                 {isHome && <HomeIcon className="w-4 h-4 mr-1" />}
                 <span className="truncate max-w-[150px]">{item.label}</span>
               </Link>
             ) : (
-              <span className="text-gray-500 dark:text-gray-400 truncate max-w-[150px]">
+              <span className="text-surface-500 dark:text-surface-400 truncate max-w-[150px]">
                 {item.label}
               </span>
             )}

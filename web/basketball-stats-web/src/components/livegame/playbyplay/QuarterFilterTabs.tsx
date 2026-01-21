@@ -24,7 +24,11 @@ export const QuarterFilterTabs: React.FC<QuarterFilterTabsProps> = ({
   ];
 
   return (
-    <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg" role="tablist" aria-label="Filter by quarter">
+    <div
+      className="flex gap-1 p-1 bg-surface-100 dark:bg-surface-700/50 rounded-lg"
+      role="tablist"
+      aria-label="Filter by quarter"
+    >
       {tabs.map((tab) => (
         <button
           key={tab.value}
@@ -34,11 +38,11 @@ export const QuarterFilterTabs: React.FC<QuarterFilterTabsProps> = ({
           aria-controls={`quarter-panel-${tab.value}`}
           className={`
             min-h-[44px] min-w-[44px] px-3 py-2 rounded text-sm font-medium transition-all
-            focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1
+            focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1
             ${
               selectedQuarter === tab.value
-                ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-600/50"
+                ? "bg-white dark:bg-surface-600 text-surface-900 dark:text-white shadow-sm"
+                : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-surface-600/50"
             }
           `}
         >

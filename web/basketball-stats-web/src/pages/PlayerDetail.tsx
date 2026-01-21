@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { ChartBarIcon, UserIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from "../components/Breadcrumb";
@@ -15,12 +15,13 @@ interface StatCardProps {
 
 function StatCard({ label, value, highlight = false }: StatCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-      <p className="text-gray-500 dark:text-gray-400 text-sm">{label}</p>
+    <div className="surface-card p-4">
+      <p className="section-header">{label}</p>
       <p
-        className={`text-2xl font-bold ${
-          highlight ? "text-primary-500" : "text-gray-900 dark:text-white"
+        className={`text-stat-md font-bold tabular-nums ${
+          highlight ? "text-primary-500" : "text-surface-900 dark:text-white"
         }`}
+        data-stat
       >
         {value}
       </p>
@@ -35,9 +36,11 @@ interface StatRowProps {
 
 function StatRow({ label, value }: StatRowProps) {
   return (
-    <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-      <span className="text-gray-600 dark:text-gray-400">{label}</span>
-      <span className="text-gray-900 dark:text-white font-medium">{value}</span>
+    <div className="flex justify-between items-center py-2 border-b border-surface-200 dark:border-surface-700 last:border-b-0">
+      <span className="text-surface-600 dark:text-surface-400">{label}</span>
+      <span className="text-surface-900 dark:text-white font-medium tabular-nums" data-stat>
+        {value}
+      </span>
     </div>
   );
 }
@@ -62,11 +65,11 @@ const PlayerDetail: React.FC = () => {
   if (!selectedLeague) {
     return (
       <div className="flex flex-col items-center justify-center h-96">
-        <UserIcon className="w-16 h-16 text-gray-400 mb-4" />
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+        <UserIcon className="w-16 h-16 text-surface-400 mb-4" />
+        <h2 className="text-xl font-semibold text-surface-900 dark:text-white mb-2">
           No League Selected
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-surface-600 dark:text-surface-400">
           Please select a league to view player details.
         </p>
       </div>
@@ -88,8 +91,8 @@ const PlayerDetail: React.FC = () => {
   if (!player) {
     return (
       <div className="flex flex-col items-center justify-center h-96">
-        <UserIcon className="w-16 h-16 text-gray-400 mb-4" />
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+        <UserIcon className="w-16 h-16 text-surface-400 mb-4" />
+        <h2 className="text-xl font-semibold text-surface-900 dark:text-white mb-2">
           Player Not Found
         </h2>
         <button
@@ -103,49 +106,45 @@ const PlayerDetail: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto space-y-6">
       {/* Breadcrumb */}
-      <Breadcrumb
-        items={[
-          { label: "Players", href: "/players" },
-          { label: player.name },
-        ]}
-      />
+      <Breadcrumb items={[{ label: "Players", href: "/players" }, { label: player.name }]} />
 
       {/* Header */}
-      <div className="mb-6">
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl p-6 text-white">
-          <div className="flex items-center gap-6">
-            <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center">
-              <span className="text-4xl font-bold">#{player.number}</span>
+      <div className="bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 rounded-2xl p-8 text-white shadow-elevated">
+        <div className="flex items-center gap-6">
+          <div className="w-24 h-24 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+            <span className="text-4xl font-bold tracking-tight">#{player.number}</span>
+          </div>
+          <div className="flex-1">
+            <h1 className="text-display-sm">{player.name}</h1>
+            <div className="flex items-center gap-4 mt-2 text-white/80">
+              <span className="font-medium">{player.position || "N/A"}</span>
+              {player.heightCm && <span>{player.heightCm} cm</span>}
+              {player.weightKg && <span>{player.weightKg} kg</span>}
             </div>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold">{player.name}</h1>
-              <div className="flex items-center gap-4 mt-2 text-white/80">
-                <span>{player.position || "N/A"}</span>
-                {player.heightCm && <span>{player.heightCm} cm</span>}
-                {player.weightKg && <span>{player.weightKg} kg</span>}
-              </div>
-              <Link to={`/app/teams`} className="text-white/90 hover:text-white mt-1 inline-block">
-                {player.team?.name || "No Team"}
-              </Link>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigate(`/app/shot-charts?player=${playerId}`)}
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2"
-              >
-                <ChartBarIcon className="w-5 h-5" />
-                Shot Chart
-              </button>
-              <button
-                onClick={() => navigate(`/app/compare?player1=${playerId}`)}
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2"
-              >
-                <TrophyIcon className="w-5 h-5" />
-                Compare
-              </button>
-            </div>
+            <Link
+              to={`/app/teams`}
+              className="text-white/90 hover:text-white mt-1 inline-block transition-colors"
+            >
+              {player.team?.name || "No Team"}
+            </Link>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => navigate(`/app/shot-charts?player=${playerId}`)}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center gap-2 transition-colors"
+            >
+              <ChartBarIcon className="w-5 h-5" />
+              Shot Chart
+            </button>
+            <button
+              onClick={() => navigate(`/app/compare?player1=${playerId}`)}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center gap-2 transition-colors"
+            >
+              <TrophyIcon className="w-5 h-5" />
+              Compare
+            </button>
           </div>
         </div>
       </div>
@@ -153,7 +152,7 @@ const PlayerDetail: React.FC = () => {
       {/* Stats Overview */}
       {stats && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <StatCard label="Games Played" value={stats.gamesPlayed || 0} />
             <StatCard label="PPG" value={stats.avgPoints?.toFixed(1) || "0.0"} highlight />
             <StatCard label="RPG" value={stats.avgRebounds?.toFixed(1) || "0.0"} highlight />
@@ -162,10 +161,12 @@ const PlayerDetail: React.FC = () => {
             <StatCard label="3P%" value={`${stats.threePointPercentage?.toFixed(1) || "0.0"}%`} />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Scoring Stats */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Scoring</h3>
+            <div className="surface-card p-6">
+              <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
+                Scoring
+              </h3>
               <div className="space-y-1">
                 <StatRow label="Total Points" value={stats.totalPoints || 0} />
                 <StatRow
@@ -185,8 +186,8 @@ const PlayerDetail: React.FC = () => {
             </div>
 
             {/* Other Stats */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="surface-card p-6">
+              <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
                 Other Stats
               </h3>
               <div className="space-y-1">
@@ -204,57 +205,69 @@ const PlayerDetail: React.FC = () => {
       )}
 
       {/* Recent Games */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Games</h3>
+      <div className="surface-card overflow-hidden">
+        <div className="p-6 border-b border-surface-200 dark:border-surface-700">
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white">Recent Games</h3>
         </div>
         {recentGames.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+              <thead className="bg-surface-50 dark:bg-surface-800/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider">
                     Opponent
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider">
                     PTS
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider">
                     REB
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider">
                     AST
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider">
                     FG%
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-surface-200 dark:divide-surface-700">
                 {recentGames.slice(0, 10).map((game: any, index: number) => (
                   <tr
                     key={game.gameId || index}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    className="hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-900 dark:text-white">
                       {game.gameDate ? new Date(game.gameDate).toLocaleDateString() : "N/A"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-surface-900 dark:text-white">
                       vs {game.opponent || "Unknown"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-semibold text-gray-900 dark:text-white">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-center font-semibold text-surface-900 dark:text-white tabular-nums"
+                      data-stat
+                    >
                       {game.points || 0}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-center text-surface-700 dark:text-surface-300 tabular-nums"
+                      data-stat
+                    >
                       {game.rebounds || 0}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-center text-surface-700 dark:text-surface-300 tabular-nums"
+                      data-stat
+                    >
                       {game.assists || 0}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-center text-surface-700 dark:text-surface-300 tabular-nums"
+                      data-stat
+                    >
                       {game.fieldGoalPercentage?.toFixed(0) || 0}%
                     </td>
                   </tr>
@@ -263,7 +276,7 @@ const PlayerDetail: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+          <div className="p-8 text-center text-surface-500 dark:text-surface-400">
             No games played yet this season.
           </div>
         )}

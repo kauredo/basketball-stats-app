@@ -35,10 +35,8 @@ export default function ImagePicker({
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 
   const requestPermissions = async () => {
-    const { status: cameraStatus } =
-      await ImagePickerLib.requestCameraPermissionsAsync();
-    const { status: mediaStatus } =
-      await ImagePickerLib.requestMediaLibraryPermissionsAsync();
+    const { status: cameraStatus } = await ImagePickerLib.requestCameraPermissionsAsync();
+    const { status: mediaStatus } = await ImagePickerLib.requestMediaLibraryPermissionsAsync();
 
     if (cameraStatus !== "granted" || mediaStatus !== "granted") {
       Alert.alert(
@@ -161,9 +159,7 @@ export default function ImagePicker({
 
   return (
     <View className="mb-4">
-      <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">
-        {label} (optional)
-      </Text>
+      <Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">{label} (optional)</Text>
       <TouchableOpacity
         onPress={showOptions}
         disabled={isUploading}
@@ -173,9 +169,7 @@ export default function ImagePicker({
         {isUploading ? (
           <View className="items-center">
             <ActivityIndicator size="large" color="#F97316" />
-            <Text className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-              Uploading...
-            </Text>
+            <Text className="text-gray-500 dark:text-gray-400 text-sm mt-2">Uploading...</Text>
           </View>
         ) : displayUrl ? (
           <View className="items-center">
@@ -191,9 +185,7 @@ export default function ImagePicker({
             <View className="w-16 h-16 bg-gray-100 dark:bg-gray-600 rounded-xl items-center justify-center">
               <Icon name="basketball" size={32} color="#9CA3AF" />
             </View>
-            <Text className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-              {placeholder}
-            </Text>
+            <Text className="text-gray-500 dark:text-gray-400 text-sm mt-2">{placeholder}</Text>
           </View>
         )}
       </TouchableOpacity>

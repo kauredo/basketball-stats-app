@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { getErrorMessage } from "../utils/error";
@@ -13,7 +13,31 @@ import {
   CalendarIcon,
   ClockIcon,
   BoltIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
+
+const statusConfig = {
+  scheduled: {
+    label: "Scheduled",
+    classes: "bg-status-scheduled/10 text-status-scheduled",
+    animate: false,
+  },
+  active: {
+    label: "Live",
+    classes: "bg-status-active/15 text-status-active",
+    animate: true,
+  },
+  paused: {
+    label: "Paused",
+    classes: "bg-status-paused/10 text-status-paused",
+    animate: false,
+  },
+  completed: {
+    label: "Final",
+    classes: "bg-surface-200 dark:bg-surface-700 text-surface-600 dark:text-surface-300",
+    animate: false,
+  },
+};
 
 const Games: React.FC = () => {
   const { token, selectedLeague } = useAuth();
@@ -61,12 +85,9 @@ const Games: React.FC = () => {
 
     if (aOrder !== bOrder) return aOrder - bOrder;
 
-    // Within same status, sort by date
     if (a.status === "scheduled" && b.status === "scheduled") {
-      // Upcoming: earliest first
       return (a.scheduledAt || 0) - (b.scheduledAt || 0);
     }
-    // Completed/other: most recent first
     return (b.createdAt || 0) - (a.createdAt || 0);
   });
 
@@ -74,37 +95,6 @@ const Games: React.FC = () => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-  };
-
-  // Return Tailwind classes for game status - simplified subtle styling
-  const getStatusClasses = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300";
-      case "paused":
-        return "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300";
-      case "completed":
-        return "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400";
-      case "scheduled":
-        return "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400";
-      default:
-        return "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400";
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "active":
-        return "Live";
-      case "paused":
-        return "Paused";
-      case "completed":
-        return "Final";
-      case "scheduled":
-        return "Scheduled";
-      default:
-        return status;
-    }
   };
 
   const handleCreateGame = async () => {
@@ -159,7 +149,6 @@ const Games: React.FC = () => {
       toast.success("Quick game started!");
       setShowQuickGameModal(false);
       setQuickGameSettings({ homeTeamName: "", awayTeamName: "", quarterMinutes: 12 });
-      // Navigate directly to the live game page
       navigate(`/app/games/${result.gameId}/live`);
     } catch (error) {
       console.error("Failed to create quick game:", error);
@@ -172,6 +161,7 @@ const Games: React.FC = () => {
 
   const renderGameRow = (game: any) => {
     const isGameLive = game.status === "active";
+    const status = statusConfig[game.status as keyof typeof statusConfig];
     const winner =
       game.status === "completed"
         ? game.homeScore > game.awayScore
@@ -183,39 +173,54 @@ const Games: React.FC = () => {
     const canGoToLive = game.status !== "completed";
 
     return (
-      <tr key={game.id} className="border-b border-gray-200 dark:border-gray-700">
+      <tr
+        key={game.id}
+        className="border-b border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors"
+      >
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-2">
             <div
-              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusClasses(game.status)}`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${status.classes}`}
             >
-              {getStatusLabel(game.status)}
+              {status.animate && (
+                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse-live" />
+              )}
+              {status.label}
             </div>
-            {isGameLive && <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>}
           </div>
         </td>
 
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <div
-              className={`${winner === "away" ? "font-semibold text-gray-900 dark:text-white" : "font-normal text-gray-700 dark:text-gray-300"}`}
+              className={`font-medium ${winner === "away" ? "text-surface-900 dark:text-surface-50" : "text-surface-600 dark:text-surface-300"}`}
             >
               {game.awayTeam?.name || "Away Team"}
             </div>
-            <div className="text-sm text-gray-500">vs {game.homeTeam?.name || "Home Team"}</div>
+            <div className="text-sm text-surface-500 dark:text-surface-400">
+              @ {game.homeTeam?.name || "Home Team"}
+            </div>
           </div>
         </td>
 
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="text-lg">
+          <div className="flex items-center gap-2 font-mono text-lg" data-stat>
             <span
-              className={winner === "away" ? "font-bold text-gray-900 dark:text-white" : "font-medium text-gray-600 dark:text-gray-400"}
+              className={
+                winner === "away"
+                  ? "font-bold text-surface-900 dark:text-surface-50"
+                  : "text-surface-500 dark:text-surface-400"
+              }
             >
               {game.awayScore}
             </span>
-            <span className="text-gray-400 mx-2">-</span>
+            <span className="text-surface-300 dark:text-surface-600">–</span>
             <span
-              className={winner === "home" ? "font-bold text-gray-900 dark:text-white" : "font-medium text-gray-600 dark:text-gray-400"}
+              className={
+                winner === "home"
+                  ? "font-bold text-surface-900 dark:text-surface-50"
+                  : "text-surface-500 dark:text-surface-400"
+              }
             >
               {game.homeScore}
             </span>
@@ -224,39 +229,38 @@ const Games: React.FC = () => {
 
         <td className="px-6 py-4 whitespace-nowrap">
           {isGameLive && (
-            <div className="text-sm text-gray-700 dark:text-gray-300">
-              <div>Q{game.currentQuarter}</div>
-              <div className="font-mono">{formatTime(game.timeRemainingSeconds)}</div>
-            </div>
-          )}
-          {game.status === "completed" && (
-            <div className="text-sm text-gray-500">
-              <div>Final</div>
+            <div className="text-sm">
+              <div className="text-surface-500 dark:text-surface-400">Q{game.currentQuarter}</div>
+              <div
+                className="font-mono font-medium text-surface-900 dark:text-surface-50"
+                data-stat
+              >
+                {formatTime(game.timeRemainingSeconds)}
+              </div>
             </div>
           )}
           {game.status === "scheduled" && game.scheduledAt && (
-            <div className="text-sm text-gray-500 flex items-center">
-              <CalendarIcon className="w-4 h-4 mr-1" />
+            <div className="flex items-center gap-1.5 text-sm text-surface-500 dark:text-surface-400">
+              <CalendarIcon className="w-4 h-4" />
               {new Date(game.scheduledAt).toLocaleDateString()}
             </div>
           )}
         </td>
 
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             {canGoToLive && (
               <Link
                 to={`/app/games/${game.id}/live`}
-                className="p-2 bg-orange-600 hover:bg-orange-700 rounded-lg text-white transition-colors inline-flex"
+                className="btn-primary p-2 rounded-lg"
                 title="Live Game"
               >
                 <PlayIcon className="w-4 h-4" />
               </Link>
             )}
-
             <Link
               to={`/app/games/${game.id}/analysis`}
-              className="p-2 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 rounded-lg text-gray-600 dark:text-gray-400 transition-colors inline-flex"
+              className="btn-secondary p-2 rounded-lg"
               title="Analysis"
             >
               <ChartBarIcon className="w-4 h-4" />
@@ -270,29 +274,32 @@ const Games: React.FC = () => {
   if (gamesData === undefined || teamsData === undefined) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Games</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage and monitor basketball games</p>
+          <h1 className="text-display-lg text-surface-900 dark:text-surface-50">Games</h1>
+          <p className="text-surface-500 dark:text-surface-400">
+            Manage and monitor your basketball games
+          </p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => setShowQuickGameModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            className="btn-secondary px-4 py-2.5 rounded-xl text-sm"
           >
             <BoltIcon className="w-4 h-4 mr-2" />
             Quick Game
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+            className="btn-primary px-4 py-2.5 rounded-xl text-sm"
           >
             <PlusIcon className="w-4 h-4 mr-2" />
             Create Game
@@ -301,56 +308,65 @@ const Games: React.FC = () => {
       </div>
 
       {/* Games Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden shadow-soft">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-900">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  Matchup
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  Score
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  Actions
-                </th>
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-surface-50 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700">
+                <th className="px-6 py-3 text-left section-header">Status</th>
+                <th className="px-6 py-3 text-left section-header">Matchup</th>
+                <th className="px-6 py-3 text-left section-header">Score</th>
+                <th className="px-6 py-3 text-left section-header">Time</th>
+                <th className="px-6 py-3 text-left section-header">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {sortedGames.map(renderGameRow)}
-            </tbody>
+            <tbody>{sortedGames.map(renderGameRow)}</tbody>
           </table>
         </div>
 
         {games.length === 0 && (
-          <div className="text-center py-12">
-            <ClockIcon className="mx-auto h-12 w-12 text-gray-600 dark:text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No games</h3>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Get started by creating your first game.
+          <div className="text-center py-16">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-surface-100 dark:bg-surface-800 mb-4">
+              <ClockIcon className="w-7 h-7 text-surface-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-surface-50 mb-1">
+              No games yet
+            </h3>
+            <p className="text-surface-500 dark:text-surface-400 mb-6">
+              Create your first game to get started
             </p>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="btn-primary px-5 py-2.5 rounded-xl"
+            >
+              Create your first game
+            </button>
           </div>
         )}
       </div>
 
       {/* Create Game Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Create New Game
-            </h3>
+        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md shadow-dramatic border border-surface-200 dark:border-surface-700 animate-scale-in">
+            <div className="flex items-center justify-between p-6 border-b border-surface-200 dark:border-surface-700">
+              <h3 className="text-lg font-semibold text-surface-900 dark:text-surface-50">
+                Create New Game
+              </h3>
+              <button
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setSelectedTeams({ home: null, away: null });
+                }}
+                className="p-2 rounded-lg text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
 
-            <div className="space-y-4">
+            <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
                   Home Team
                 </label>
                 <select
@@ -358,7 +374,7 @@ const Games: React.FC = () => {
                   onChange={(e) =>
                     setSelectedTeams((prev) => ({ ...prev, home: e.target.value || null }))
                   }
-                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
                 >
                   <option value="">Select Home Team</option>
                   {teams.map((team: any) => (
@@ -370,7 +386,7 @@ const Games: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
                   Away Team
                 </label>
                 <select
@@ -378,7 +394,7 @@ const Games: React.FC = () => {
                   onChange={(e) =>
                     setSelectedTeams((prev) => ({ ...prev, away: e.target.value || null }))
                   }
-                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
                 >
                   <option value="">Select Away Team</option>
                   {teams.map((team: any) => (
@@ -390,13 +406,13 @@ const Games: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 mt-6">
+            <div className="flex justify-end gap-3 p-6 border-t border-surface-200 dark:border-surface-700">
               <button
                 onClick={() => {
                   setShowCreateModal(false);
                   setSelectedTeams({ home: null, away: null });
                 }}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                className="btn-secondary px-4 py-2.5 rounded-xl"
               >
                 Cancel
               </button>
@@ -408,7 +424,7 @@ const Games: React.FC = () => {
                   selectedTeams.home === selectedTeams.away ||
                   isCreating
                 }
-                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary px-4 py-2.5 rounded-xl"
               >
                 {isCreating ? "Creating..." : "Create Game"}
               </button>
@@ -419,21 +435,36 @@ const Games: React.FC = () => {
 
       {/* Quick Game Modal */}
       {showQuickGameModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                <BoltIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md shadow-dramatic border border-surface-200 dark:border-surface-700 animate-scale-in">
+            <div className="flex items-center justify-between p-6 border-b border-surface-200 dark:border-surface-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary-500/10 rounded-xl flex items-center justify-center">
+                  <BoltIcon className="w-5 h-5 text-primary-500" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-surface-900 dark:text-surface-50">
+                    Quick Game
+                  </h3>
+                  <p className="text-sm text-surface-500 dark:text-surface-400">
+                    Play without adding teams
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Quick Game</h3>
-                <p className="text-sm text-gray-500">Play without adding teams to your league</p>
-              </div>
+              <button
+                onClick={() => {
+                  setShowQuickGameModal(false);
+                  setQuickGameSettings({ homeTeamName: "", awayTeamName: "", quarterMinutes: 12 });
+                }}
+                className="p-2 rounded-lg text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
                   Home Team Name
                 </label>
                 <input
@@ -443,12 +474,12 @@ const Games: React.FC = () => {
                     setQuickGameSettings((prev) => ({ ...prev, homeTeamName: e.target.value }))
                   }
                   placeholder="e.g., Lakers"
-                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
                   Away Team Name
                 </label>
                 <input
@@ -458,25 +489,25 @@ const Games: React.FC = () => {
                     setQuickGameSettings((prev) => ({ ...prev, awayTeamName: e.target.value }))
                   }
                   placeholder="e.g., Celtics"
-                  className="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
                   Quarter Length
                 </label>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   {[5, 8, 10, 12].map((mins) => (
                     <button
                       key={mins}
                       onClick={() =>
                         setQuickGameSettings((prev) => ({ ...prev, quarterMinutes: mins }))
                       }
-                      className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
+                      className={`py-2.5 rounded-xl text-sm font-medium transition-all ${
                         quickGameSettings.quarterMinutes === mins
-                          ? "bg-orange-600 text-white"
-                          : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                          ? "bg-primary-500 text-white shadow-soft"
+                          : "bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-600"
                       }`}
                     >
                       {mins} min
@@ -485,21 +516,21 @@ const Games: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  This will create two temporary teams with 15 numbered players each (Player 1,
-                  Player 2, etc.). You can select starting lineups and track full stats.
+              <div className="bg-surface-50 dark:bg-surface-900 rounded-xl p-4">
+                <p className="text-sm text-surface-500 dark:text-surface-400">
+                  Creates two temporary teams with 15 numbered players each. You can select lineups
+                  and track full stats.
                 </p>
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 mt-6">
+            <div className="flex justify-end gap-3 p-6 border-t border-surface-200 dark:border-surface-700">
               <button
                 onClick={() => {
                   setShowQuickGameModal(false);
                   setQuickGameSettings({ homeTeamName: "", awayTeamName: "", quarterMinutes: 12 });
                 }}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                className="btn-secondary px-4 py-2.5 rounded-xl"
               >
                 Cancel
               </button>
@@ -510,9 +541,9 @@ const Games: React.FC = () => {
                   !quickGameSettings.awayTeamName.trim() ||
                   isCreating
                 }
-                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary px-4 py-2.5 rounded-xl"
               >
-                {isCreating ? "Creating..." : "Start Quick Game"}
+                {isCreating ? "Creating..." : "Start Game"}
               </button>
             </div>
           </div>

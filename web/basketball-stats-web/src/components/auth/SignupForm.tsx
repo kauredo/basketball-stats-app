@@ -85,20 +85,20 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-surface-50 dark:bg-surface-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="mx-auto flex items-center justify-center">
             <LogoIcon variant="auto" size="xl" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+          <h2 className="mt-6 text-center text-display-sm text-surface-900 dark:text-white">
             Create your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-center text-sm text-surface-600 dark:text-surface-400">
             Or{" "}
             <button
               onClick={onSwitchToLogin}
-              className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded"
+              className="font-medium text-primary-500 hover:text-primary-400 focus:outline-none focus-ring rounded"
             >
               sign in to your existing account
             </button>
@@ -108,7 +108,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div role="alert" aria-live="polite" aria-atomic="true">
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800 text-red-800 dark:text-red-300 px-4 py-3 rounded-md">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800 text-red-800 dark:text-red-300 px-4 py-3 rounded-xl">
                 {error}
               </div>
             )}
@@ -119,7 +119,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
               <div>
                 <label
                   htmlFor="firstName"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  className="block text-sm font-medium text-surface-700 dark:text-surface-300"
                 >
                   First name
                 </label>
@@ -131,7 +131,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   required
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  className="mt-1 relative block w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                  className="mt-1 relative block w-full px-4 py-3 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-800 placeholder-surface-500 dark:placeholder-surface-400 text-surface-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors"
                   placeholder="John"
                   disabled={isLoading}
                 />
@@ -140,7 +140,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
               <div>
                 <label
                   htmlFor="lastName"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  className="block text-sm font-medium text-surface-700 dark:text-surface-300"
                 >
                   Last name
                 </label>
@@ -152,7 +152,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   required
                   value={formData.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  className="mt-1 relative block w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                  className="mt-1 relative block w-full px-4 py-3 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-800 placeholder-surface-500 dark:placeholder-surface-400 text-surface-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors"
                   placeholder="Doe"
                   disabled={isLoading}
                 />
@@ -162,7 +162,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-surface-700 dark:text-surface-300"
               >
                 Email address
               </label>
@@ -174,7 +174,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                 required
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                className="mt-1 relative block w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                className="mt-1 relative block w-full px-4 py-3 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-800 placeholder-surface-500 dark:placeholder-surface-400 text-surface-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors"
                 placeholder="john.doe@example.com"
                 disabled={isLoading}
               />
@@ -183,7 +183,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-surface-700 dark:text-surface-300"
               >
                 Password
               </label>
@@ -196,7 +196,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   required
                   value={formData.password}
                   onChange={(e) => handleInputChange("password", e.target.value)}
-                  className="relative block w-full px-3 py-2 pr-10 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                  className="relative block w-full px-4 py-3 pr-10 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-800 placeholder-surface-500 dark:placeholder-surface-400 text-surface-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors"
                   placeholder="Enter password (min. 6 chars)"
                   disabled={isLoading}
                 />
@@ -209,7 +209,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   <Icon
                     name={showPassword ? "eye-off" : "eye"}
                     size={20}
-                    className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    className="text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-300 transition-colors"
                   />
                 </button>
               </div>
@@ -218,7 +218,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
             <div>
               <label
                 htmlFor="passwordConfirmation"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-surface-700 dark:text-surface-300"
               >
                 Confirm password
               </label>
@@ -231,7 +231,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   required
                   value={formData.passwordConfirmation}
                   onChange={(e) => handleInputChange("passwordConfirmation", e.target.value)}
-                  className="relative block w-full px-3 py-2 pr-10 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                  className="relative block w-full px-4 py-3 pr-10 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-800 placeholder-surface-500 dark:placeholder-surface-400 text-surface-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors"
                   placeholder="Confirm your password"
                   disabled={isLoading}
                 />
@@ -244,7 +244,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
                   <Icon
                     name={showConfirmPassword ? "eye-off" : "eye"}
                     size={20}
-                    className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    className="text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-300 transition-colors"
                   />
                 </button>
               </div>
@@ -252,11 +252,7 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
           </div>
 
           <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="submit" disabled={isLoading} className="btn-primary w-full py-3">
               {isLoading ? "Creating account..." : "Create account"}
             </button>
           </div>

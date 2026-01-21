@@ -4,7 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  ReactNode,
+  type ReactNode,
 } from "react";
 
 export type ThemeMode = "light" | "dark" | "system";

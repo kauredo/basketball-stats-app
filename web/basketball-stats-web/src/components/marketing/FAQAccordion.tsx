@@ -20,16 +20,16 @@ function FAQAccordionItem({
   onToggle: () => void;
 }) {
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+    <div className="border-b border-surface-200 dark:border-surface-700 last:border-b-0">
       <button
         onClick={onToggle}
-        className="w-full py-5 flex items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 rounded-lg"
+        className="w-full py-5 flex items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-900 rounded-lg"
         aria-expanded={isOpen}
       >
-        <span className="text-base font-medium text-gray-900 dark:text-white pr-4">
+        <span className="text-base font-medium text-surface-900 dark:text-white pr-4">
           {item.question}
         </span>
-        <span className="flex-shrink-0 text-gray-500 dark:text-gray-400">
+        <span className="flex-shrink-0 text-surface-500 dark:text-surface-400">
           <Icon name={isOpen ? "chevron-up" : "chevron-down"} size={20} />
         </span>
       </button>
@@ -38,7 +38,7 @@ function FAQAccordionItem({
           isOpen ? "max-h-96 pb-5" : "max-h-0"
         }`}
       >
-        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{item.answer}</p>
+        <p className="text-surface-600 dark:text-surface-400 leading-relaxed">{item.answer}</p>
       </div>
     </div>
   );
@@ -52,7 +52,7 @@ export default function FAQAccordion({ items }: FAQAccordionProps) {
   };
 
   return (
-    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+    <div className="divide-y divide-surface-200 dark:divide-surface-700">
       {items.map((item, index) => (
         <FAQAccordionItem
           key={index}

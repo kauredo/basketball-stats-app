@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 interface ImageUploadProps {
@@ -108,7 +108,7 @@ export default function ImageUpload({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
         {label}
       </label>
 
@@ -127,23 +127,19 @@ export default function ImageUpload({
         onDrop={handleDrop}
         className={`relative border-2 border-dashed rounded-lg p-4 cursor-pointer transition-colors ${
           isDragging
-            ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
-            : "border-gray-300 dark:border-gray-600 hover:border-orange-500 dark:hover:border-orange-500"
+            ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+            : "border-surface-300 dark:border-surface-600 hover:border-primary-500 dark:hover:border-primary-500"
         } ${isUploading ? "cursor-wait" : ""}`}
       >
         {isUploading ? (
           <div className="flex flex-col items-center justify-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mb-2"></div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Uploading...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mb-2"></div>
+            <p className="text-sm text-surface-500 dark:text-surface-400">Uploading...</p>
           </div>
         ) : displayUrl ? (
           <div className="flex items-center justify-center py-2">
             <div className="relative">
-              <img
-                src={displayUrl}
-                alt="Preview"
-                className="h-20 w-20 object-cover rounded-lg"
-              />
+              <img src={displayUrl} alt="Preview" className="h-20 w-20 object-cover rounded-lg" />
               <button
                 type="button"
                 onClick={(e) => {
@@ -155,16 +151,16 @@ export default function ImageUpload({
                 <XMarkIcon className="w-4 h-4" />
               </button>
             </div>
-            <div className="ml-4 text-sm text-gray-500 dark:text-gray-400">
+            <div className="ml-4 text-sm text-surface-500 dark:text-surface-400">
               <p>Click to change</p>
               <p>or drag new image</p>
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-4">
-            <PhotoIcon className="h-10 w-10 text-gray-400 mb-2" />
-            <p className="text-sm text-gray-600 dark:text-gray-400">{placeholder}</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            <PhotoIcon className="h-10 w-10 text-surface-400 mb-2" />
+            <p className="text-sm text-surface-600 dark:text-surface-400">{placeholder}</p>
+            <p className="text-xs text-surface-400 dark:text-surface-500 mt-1">
               PNG, JPG, GIF up to 10MB
             </p>
           </div>

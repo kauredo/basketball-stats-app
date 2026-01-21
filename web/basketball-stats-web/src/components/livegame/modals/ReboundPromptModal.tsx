@@ -99,24 +99,26 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
     >
       <div
         ref={focusTrapRef}
-        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+        className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-lg border border-surface-200 dark:border-surface-700 overflow-hidden"
       >
         {/* Header */}
         <div className="bg-blue-600 px-6 py-4">
-          <h3 id="rebound-modal-title" className="text-lg font-bold text-white">Rebound</h3>
+          <h3 id="rebound-modal-title" className="text-lg font-bold text-white">
+            Rebound
+          </h3>
           <p className="text-blue-200 text-sm">Missed {getShotTypeLabel(shotType)}</p>
         </div>
 
         <div className="max-h-80 overflow-y-auto">
           {/* Offensive Rebound - Shooter's Team */}
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+          <div className="px-4 py-3 border-b border-surface-200 dark:border-surface-700">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-orange-600 dark:text-orange-400 text-sm">
+              <h4 className="font-semibold text-primary-600 dark:text-primary-400 text-sm">
                 OFFENSIVE ({shooterTeamName})
               </h4>
               <button
                 onClick={() => onTeamRebound(shooterTeamId, "offensive")}
-                className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-medium rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
+                className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-medium rounded hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
               >
                 TEAM
               </button>
@@ -126,7 +128,7 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
                 <button
                   key={player.id}
                   onClick={() => onPlayerRebound(player.playerId, "offensive")}
-                  className="px-3 py-2 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 border border-orange-200 dark:border-orange-700 rounded-lg text-sm font-medium text-gray-900 dark:text-white transition-colors active:scale-95"
+                  className="px-3 py-2 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/40 border border-primary-200 dark:border-primary-700 rounded-lg text-sm font-medium text-surface-900 dark:text-white transition-colors active:scale-95"
                 >
                   #{player.player?.number}
                 </button>
@@ -152,7 +154,7 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
                 <button
                   key={player.id}
                   onClick={() => onPlayerRebound(player.playerId, "defensive")}
-                  className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-700 rounded-lg text-sm font-medium text-gray-900 dark:text-white transition-colors active:scale-95"
+                  className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-700 rounded-lg text-sm font-medium text-surface-900 dark:text-white transition-colors active:scale-95"
                 >
                   #{player.player?.number}
                 </button>
@@ -162,11 +164,11 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
           <button
             ref={dismissButtonRef}
             onClick={onClose}
-            className="w-full py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
           >
             Dismiss / No Rebound
           </button>

@@ -43,26 +43,26 @@ export const PlayerQuickCard: React.FC<PlayerQuickCardProps> = ({
       className={`
         ${padding}
         rounded-lg text-center transition-all w-full min-h-[44px]
-        focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
         ${
           isSelected
-            ? "bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-500 ring-2 ring-orange-500/30"
+            ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500 ring-2 ring-primary-500/30"
             : isSwapTarget
               ? "bg-green-50 dark:bg-green-900/20 border-2 border-green-500 ring-2 ring-green-500/30"
-              : "bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+              : "bg-surface-50 dark:bg-surface-700/50 border border-surface-200 dark:border-surface-600 hover:bg-surface-100 dark:hover:bg-surface-700"
         }
         ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-95"}
         ${player.fouledOut ? "opacity-60" : ""}
       `}
     >
       {/* Number */}
-      <div className={`font-bold text-gray-900 dark:text-white ${numberSize}`}>
+      <div className={`font-bold text-surface-900 dark:text-white ${numberSize}`}>
         #{player.player?.number}
       </div>
 
       {/* Name (last name) */}
       <div
-        className={`text-gray-500 dark:text-gray-400 truncate ${nameSize}`}
+        className={`text-surface-500 dark:text-surface-400 truncate ${nameSize}`}
         title={player.player?.name}
       >
         {player.player?.name?.split(" ").pop()}
@@ -80,7 +80,9 @@ export const PlayerQuickCard: React.FC<PlayerQuickCardProps> = ({
 
       {/* Mini Stats Row (optional) */}
       {showStats && (
-        <div className={`flex justify-center gap-1 mt-1 text-gray-500 dark:text-gray-400 ${statSize}`}>
+        <div
+          className={`flex justify-center gap-1 mt-1 text-surface-500 dark:text-surface-400 ${statSize}`}
+        >
           <span>{player.points}p</span>
           <span>{player.rebounds}r</span>
           <span>{player.assists}a</span>
