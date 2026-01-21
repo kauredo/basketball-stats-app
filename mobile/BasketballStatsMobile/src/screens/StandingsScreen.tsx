@@ -110,7 +110,9 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
           {/* Stats Grid */}
           <View className="flex-row flex-wrap gap-y-3">
             <View className="w-1/3 pr-2">
-              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">Games Back</Text>
+              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">
+                Games Back
+              </Text>
               <Text className="text-surface-900 dark:text-white font-medium text-sm">
                 {team.gamesBack === 0 ? "-" : team.gamesBack.toFixed(1)}
               </Text>
@@ -323,7 +325,9 @@ export default function StandingsScreen() {
             </Text>
           </View>
           <View className="flex-1 bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-            <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">Total Games</Text>
+            <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">
+              Total Games
+            </Text>
             <Text className="text-surface-900 dark:text-white font-bold text-2xl mt-1">
               {standingsData?.totalGames || 0}
             </Text>
@@ -396,11 +400,15 @@ export default function StandingsScreen() {
               <View className="flex-row flex-wrap gap-x-4 gap-y-2">
                 <View className="flex-row items-center">
                   <View className="w-3 h-3 bg-green-500 rounded mr-2" />
-                  <Text className="text-surface-600 dark:text-surface-400 text-xs">Playoff Position</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 text-xs">
+                    Playoff Position
+                  </Text>
                 </View>
                 <View className="flex-row items-center">
                   <View className="w-3 h-3 bg-red-500 rounded mr-2" />
-                  <Text className="text-surface-600 dark:text-surface-400 text-xs">Bottom of League</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 text-xs">
+                    Bottom of League
+                  </Text>
                 </View>
               </View>
               <Text className="text-surface-500 dark:text-surface-500 text-xs mt-3">

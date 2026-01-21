@@ -4,7 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  ReactNode,
+  type ReactNode,
 } from "react";
 import { useColorScheme as useSystemColorScheme } from "react-native";
 import { useColorScheme } from "nativewind";

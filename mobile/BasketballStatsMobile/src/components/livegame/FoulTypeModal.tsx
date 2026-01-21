@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
-import { Id } from "../../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../../convex/_generated/dataModel";
 
 export type FoulType =
   | "personal"
@@ -52,7 +52,7 @@ export default function FoulTypeModal({
   playerTeamId,
 }: FoulTypeModalProps) {
   const [step, setStep] = useState<ModalStep>("foulType");
-  const [selectedFoulType, setSelectedFoulType] = useState<FoulType | null>(null);
+  const [_selectedFoulType, setSelectedFoulType] = useState<FoulType | null>(null);
   const [shotType, setShotType] = useState<"2pt" | "3pt" | null>(null);
   const [wasAndOne, setWasAndOne] = useState<boolean | null>(null);
 

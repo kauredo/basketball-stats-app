@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Switch, Alert, Share } from "
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
-import { useTheme, ThemeMode } from "../contexts/ThemeContext";
+import { useTheme, type ThemeMode } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 
 // Column definitions for export
@@ -78,7 +78,9 @@ function SettingRow({ icon, title, subtitle, onPress, rightElement }: SettingRow
       </View>
       <View className="flex-1">
         <Text className="text-surface-900 dark:text-white font-medium text-base">{title}</Text>
-        {subtitle && <Text className="text-surface-600 dark:text-surface-400 text-sm">{subtitle}</Text>}
+        {subtitle && (
+          <Text className="text-surface-600 dark:text-surface-400 text-sm">{subtitle}</Text>
+        )}
       </View>
       {rightElement || (onPress && <Icon name="chevron-right" size={20} color="#9CA3AF" />)}
     </TouchableOpacity>
@@ -394,7 +396,9 @@ export default function SettingsScreen() {
                 <Text className="text-surface-900 dark:text-white font-medium text-base">
                   Basketball Stats
                 </Text>
-                <Text className="text-surface-600 dark:text-surface-400 text-sm">Version 1.0.0</Text>
+                <Text className="text-surface-600 dark:text-surface-400 text-sm">
+                  Version 1.0.0
+                </Text>
               </View>
             </View>
             <View className="flex-row items-center py-4">

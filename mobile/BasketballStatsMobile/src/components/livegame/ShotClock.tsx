@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { View, Text } from "react-native";
+import React from "react";
+import { Text } from "react-native";
 import Animated, {
   useAnimatedStyle,
   withRepeat,
@@ -36,6 +36,7 @@ export default function ShotClock({
     } else {
       opacity.value = 1;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Reanimated shared values are stable refs
   }, [isWarning, isViolation]);
 
   const animatedStyle = useAnimatedStyle(() => ({

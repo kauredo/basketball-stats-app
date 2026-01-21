@@ -9,14 +9,13 @@ import {
   Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
-import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
-import { RootStackParamList } from "../navigation/AppNavigator";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 
 type StatisticsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -39,7 +38,9 @@ function StatCard({ title, value, subtitle, color = "#EA580C" }: StatCardProps) 
         <Icon name="stats" size={16} color="#FFFFFF" />
       </View>
       <View className="flex-1">
-        <Text className="text-surface-600 dark:text-surface-400 text-xs font-medium mb-0.5">{title}</Text>
+        <Text className="text-surface-600 dark:text-surface-400 text-xs font-medium mb-0.5">
+          {title}
+        </Text>
         <Text className="text-surface-900 dark:text-white text-xl font-bold mb-0.5">{value}</Text>
         {subtitle && <Text className="text-surface-500 text-xs">{subtitle}</Text>}
       </View>
@@ -63,7 +64,9 @@ function LeaderItem({ rank, playerName, teamName, value, unit = "" }: LeaderItem
       </View>
       <View className="flex-1">
         <Text className="text-surface-900 dark:text-white text-sm font-medium">{playerName}</Text>
-        {teamName && <Text className="text-surface-500 dark:text-surface-400 text-xs">{teamName}</Text>}
+        {teamName && (
+          <Text className="text-surface-500 dark:text-surface-400 text-xs">{teamName}</Text>
+        )}
       </View>
       <Text className="text-surface-900 dark:text-white text-base font-semibold">
         {value.toFixed(1)}
@@ -196,7 +199,9 @@ export default function StatisticsScreen() {
         >
           <Text
             className={`text-base font-medium ${
-              activeTab === "overview" ? "text-primary-500" : "text-surface-600 dark:text-surface-400"
+              activeTab === "overview"
+                ? "text-primary-500"
+                : "text-surface-600 dark:text-surface-400"
             }`}
           >
             Overview
@@ -210,7 +215,9 @@ export default function StatisticsScreen() {
         >
           <Text
             className={`text-base font-medium ${
-              activeTab === "leaders" ? "text-primary-500" : "text-surface-600 dark:text-surface-400"
+              activeTab === "leaders"
+                ? "text-primary-500"
+                : "text-surface-600 dark:text-surface-400"
             }`}
           >
             Leaders
@@ -224,7 +231,9 @@ export default function StatisticsScreen() {
         >
           <Text
             className={`text-base font-medium ${
-              activeTab === "standings" ? "text-primary-500" : "text-surface-600 dark:text-surface-400"
+              activeTab === "standings"
+                ? "text-primary-500"
+                : "text-surface-600 dark:text-surface-400"
             }`}
           >
             Standings

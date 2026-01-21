@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
-import { Id } from "../../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../../convex/_generated/dataModel";
 import Icon from "../Icon";
 
 interface GameEvent {
@@ -58,7 +58,7 @@ const QUARTER_FILTERS = [
 export default function PlayByPlayTab({
   events,
   isLoading,
-  currentQuarter,
+  currentQuarter: _currentQuarter,
   onRefresh,
 }: PlayByPlayTabProps) {
   const [selectedQuarter, setSelectedQuarter] = useState<string>("all");
@@ -232,7 +232,9 @@ export default function PlayByPlayTab({
           >
             <Text
               className={`text-xs font-semibold ${
-                selectedQuarter === item.key ? "text-white" : "text-surface-600 dark:text-surface-400"
+                selectedQuarter === item.key
+                  ? "text-white"
+                  : "text-surface-600 dark:text-surface-400"
               }`}
             >
               {item.label}

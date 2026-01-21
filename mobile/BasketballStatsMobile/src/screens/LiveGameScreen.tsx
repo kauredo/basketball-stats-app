@@ -9,32 +9,32 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from "react-native";
-import { useRoute, RouteProp } from "@react-navigation/native";
+import { useRoute, type RouteProp } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { MiniCourt } from "../components/court/MiniCourt";
-import { RootStackParamList } from "../navigation/AppNavigator";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 import { TOUCH_TARGETS } from "@basketball-stats/shared";
 
 // Import components
 import EnhancedScoreboard from "../components/livegame/EnhancedScoreboard";
-import FoulTypeModal, { FoulType } from "../components/livegame/FoulTypeModal";
+import FoulTypeModal, { type FoulType } from "../components/livegame/FoulTypeModal";
 import FreeThrowSequenceModal, {
-  FreeThrowSequence,
+  type FreeThrowSequence,
 } from "../components/livegame/FreeThrowSequenceModal";
-import QuickUndoFAB, { LastAction } from "../components/livegame/QuickUndoFAB";
+import QuickUndoFAB, { type LastAction } from "../components/livegame/QuickUndoFAB";
 import OvertimePromptModal from "../components/livegame/OvertimePromptModal";
 import PlayByPlayTab from "../components/livegame/PlayByPlayTab";
-import ShotRecordingModal, { OnCourtPlayer } from "../components/livegame/ShotRecordingModal";
+import ShotRecordingModal, { type OnCourtPlayer } from "../components/livegame/ShotRecordingModal";
 import AssistPromptModal from "../components/livegame/AssistPromptModal";
 import ReboundPromptModal from "../components/livegame/ReboundPromptModal";
-import QuickStatModal, { QuickStatType } from "../components/livegame/QuickStatModal";
+import QuickStatModal, { type QuickStatType } from "../components/livegame/QuickStatModal";
 import useSoundFeedback from "../hooks/useSoundFeedback";
 
 type LiveGameRouteProp = RouteProp<RootStackParamList, "LiveGame">;
@@ -935,12 +935,16 @@ export default function LiveGameScreen() {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }}
                   className={`px-4 py-2 rounded-lg ${
-                    quarterMinutes === mins ? "bg-primary-500" : "bg-surface-100 dark:bg-surface-700"
+                    quarterMinutes === mins
+                      ? "bg-primary-500"
+                      : "bg-surface-100 dark:bg-surface-700"
                   }`}
                 >
                   <Text
                     className={`font-medium ${
-                      quarterMinutes === mins ? "text-white" : "text-surface-700 dark:text-surface-300"
+                      quarterMinutes === mins
+                        ? "text-white"
+                        : "text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     {mins} min

@@ -87,17 +87,19 @@ export default function LoginScreen({
           )}
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-surface-900 dark:text-white mb-2">Email</Text>
+            <Text className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+              Email
+            </Text>
             <View className="relative">
-              <View className="absolute left-4 top-3 z-10">
-                <Icon name="mail" size={20} color="#6B7280" />
+              <View className="absolute left-4 top-3.5 z-10">
+                <Icon name="mail" size={20} color="#a69f96" />
               </View>
               <TextInput
-                className="bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-600 rounded-lg pl-12 pr-4 py-3 text-base text-surface-900 dark:text-white"
+                className="bg-white dark:bg-surface-800 border border-surface-300 dark:border-surface-600 rounded-xl pl-12 pr-4 py-3.5 text-base text-surface-900 dark:text-white min-h-[48px]"
                 value={email}
                 onChangeText={setEmail}
                 placeholder="Enter your email"
-                placeholderTextColor="#6B7280"
+                placeholderTextColor="#a69f96"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -107,27 +109,27 @@ export default function LoginScreen({
           </View>
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-surface-900 dark:text-white mb-2">
+            <Text className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
               Password
             </Text>
             <View className="relative">
-              <View className="absolute left-4 top-3 z-10">
-                <Icon name="lock" size={20} color="#6B7280" />
+              <View className="absolute left-4 top-3.5 z-10">
+                <Icon name="lock" size={20} color="#a69f96" />
               </View>
               <TextInput
-                className="bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-600 rounded-lg pl-12 pr-12 py-3 text-base text-surface-900 dark:text-white"
+                className="bg-white dark:bg-surface-800 border border-surface-300 dark:border-surface-600 rounded-xl pl-12 pr-14 py-3.5 text-base text-surface-900 dark:text-white min-h-[48px]"
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Enter your password"
-                placeholderTextColor="#6B7280"
+                placeholderTextColor="#a69f96"
                 secureTextEntry={!isPasswordVisible}
                 editable={!isLoading}
               />
               <TouchableOpacity
-                className="absolute right-4 top-3"
+                className="absolute right-2 top-1 min-w-[44px] min-h-[44px] items-center justify-center"
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               >
-                <Icon name={isPasswordVisible ? "eye-off" : "eye"} size={20} color="#6B7280" />
+                <Icon name={isPasswordVisible ? "eye-off" : "eye"} size={20} color="#a69f96" />
               </TouchableOpacity>
             </View>
           </View>

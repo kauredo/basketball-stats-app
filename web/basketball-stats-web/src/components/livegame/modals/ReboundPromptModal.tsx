@@ -1,7 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { PlayerStat, StatType } from "../../../types/livegame";
-import { useFocusTrap } from "../../../hooks/useFocusTrap";
+import {
+  BaseModal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalCancelButton,
+} from "../../ui/BaseModal";
 
 interface ReboundPromptModalProps {
   isOpen: boolean;
@@ -39,9 +45,6 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
 }) => {
   const [autoDismissTimer, setAutoDismissTimer] = useState<number | null>(null);
   const dismissButtonRef = useRef<HTMLButtonElement>(null);
-  const focusTrapRef = useFocusTrap(isOpen, {
-    initialFocusRef: dismissButtonRef,
-  });
 
   useEffect(() => {
     if (isOpen) {
@@ -57,29 +60,6 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
     };
   }, [isOpen, autoDismissMs]);
 
-  // Handle escape key to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen, onClose]);
-
-  // Focus management - focus dismiss button when modal opens
-  useEffect(() => {
-    if (isOpen && dismissButtonRef.current) {
-      dismissButtonRef.current.focus();
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
   const shooterOnCourt = shooterTeamPlayers.filter((p) => p.isOnCourt);
   const opposingOnCourt = opposingTeamPlayers.filter((p) => p.isOnCourt);
 
@@ -90,91 +70,77 @@ export const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="rebound-modal-title"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Rebound"
+      maxWidth="lg"
+      initialFocusRef={dismissButtonRef}
     >
-      <div
-        ref={focusTrapRef}
-        className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-lg border border-surface-200 dark:border-surface-700 overflow-hidden"
-      >
-        {/* Header */}
-        <div className="bg-blue-600 px-6 py-4">
-          <h3 id="rebound-modal-title" className="text-lg font-bold text-white">
-            Rebound
-          </h3>
-          <p className="text-blue-200 text-sm">Missed {getShotTypeLabel(shotType)}</p>
-        </div>
+      <ModalHeader
+        title="Rebound"
+        subtitle={`Missed ${getShotTypeLabel(shotType)}`}
+        variant="info"
+      />
 
-        <div className="max-h-80 overflow-y-auto">
-          {/* Offensive Rebound - Shooter's Team */}
-          <div className="px-4 py-3 border-b border-surface-200 dark:border-surface-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-primary-600 dark:text-primary-400 text-sm">
-                OFFENSIVE ({shooterTeamName})
-              </h4>
-              <button
-                onClick={() => onTeamRebound(shooterTeamId, "offensive")}
-                className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-medium rounded hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
-              >
-                TEAM
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {shooterOnCourt.map((player) => (
-                <button
-                  key={player.id}
-                  onClick={() => onPlayerRebound(player.playerId, "offensive")}
-                  className="px-3 py-2 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/40 border border-primary-200 dark:border-primary-700 rounded-lg text-sm font-medium text-surface-900 dark:text-white transition-colors active:scale-95"
-                >
-                  #{player.player?.number}
-                </button>
-              ))}
-            </div>
+      <ModalBody maxHeight="max-h-80">
+        {/* Offensive Rebound - Shooter's Team */}
+        <div className="px-4 py-3 border-b border-surface-200 dark:border-surface-700">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-semibold text-primary-600 dark:text-primary-400 text-sm">
+              OFFENSIVE ({shooterTeamName})
+            </h4>
+            <button
+              onClick={() => onTeamRebound(shooterTeamId, "offensive")}
+              className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-medium rounded hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
+            >
+              TEAM
+            </button>
           </div>
-
-          {/* Defensive Rebound - Opposing Team */}
-          <div className="px-4 py-3">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-blue-600 dark:text-blue-400 text-sm">
-                DEFENSIVE ({opposingTeamName})
-              </h4>
+          <div className="flex flex-wrap gap-2">
+            {shooterOnCourt.map((player) => (
               <button
-                onClick={() => onTeamRebound(opposingTeamId, "defensive")}
-                className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                key={player.id}
+                onClick={() => onPlayerRebound(player.playerId, "offensive")}
+                className="px-3 py-2 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/40 border border-primary-200 dark:border-primary-700 rounded-lg text-sm font-medium text-surface-900 dark:text-white transition-colors active:scale-95"
               >
-                TEAM
+                #{player.player?.number}
               </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {opposingOnCourt.map((player) => (
-                <button
-                  key={player.id}
-                  onClick={() => onPlayerRebound(player.playerId, "defensive")}
-                  className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-700 rounded-lg text-sm font-medium text-surface-900 dark:text-white transition-colors active:scale-95"
-                >
-                  #{player.player?.number}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
-          <button
-            ref={dismissButtonRef}
-            onClick={onClose}
-            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
-          >
-            Dismiss / No Rebound
-          </button>
+        {/* Defensive Rebound - Opposing Team */}
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-semibold text-blue-600 dark:text-blue-400 text-sm">
+              DEFENSIVE ({opposingTeamName})
+            </h4>
+            <button
+              onClick={() => onTeamRebound(opposingTeamId, "defensive")}
+              className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+            >
+              TEAM
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {opposingOnCourt.map((player) => (
+              <button
+                key={player.id}
+                onClick={() => onPlayerRebound(player.playerId, "defensive")}
+                className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-700 rounded-lg text-sm font-medium text-surface-900 dark:text-white transition-colors active:scale-95"
+              >
+                #{player.player?.number}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-    </div>
+      </ModalBody>
+
+      <ModalFooter>
+        <ModalCancelButton onClick={onClose}>Dismiss / No Rebound</ModalCancelButton>
+      </ModalFooter>
+    </BaseModal>
   );
 };
 

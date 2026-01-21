@@ -12,10 +12,10 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 interface Team {
   id: Id<"teams">;
@@ -71,7 +71,9 @@ function TeamSelectModal({
                     {item.name}
                   </Text>
                   {item.city && (
-                    <Text className="text-surface-600 dark:text-surface-400 text-sm">{item.city}</Text>
+                    <Text className="text-surface-600 dark:text-surface-400 text-sm">
+                      {item.city}
+                    </Text>
                   )}
                 </View>
               </TouchableOpacity>
@@ -220,7 +222,9 @@ export default function CreateGameScreen() {
                 <View className="w-10 h-10 bg-surface-200 dark:bg-surface-600 rounded-full justify-center items-center mr-3">
                   <Icon name="user" size={20} color="#9CA3AF" />
                 </View>
-                <Text className="text-surface-600 dark:text-surface-400 flex-1">Select home team</Text>
+                <Text className="text-surface-600 dark:text-surface-400 flex-1">
+                  Select home team
+                </Text>
                 <Icon name="chevron-right" size={20} color="#9CA3AF" />
               </View>
             )}
@@ -259,7 +263,9 @@ export default function CreateGameScreen() {
                 <View className="w-10 h-10 bg-surface-200 dark:bg-surface-600 rounded-full justify-center items-center mr-3">
                   <Icon name="user" size={20} color="#9CA3AF" />
                 </View>
-                <Text className="text-surface-600 dark:text-surface-400 flex-1">Select away team</Text>
+                <Text className="text-surface-600 dark:text-surface-400 flex-1">
+                  Select away team
+                </Text>
                 <Icon name="chevron-right" size={20} color="#9CA3AF" />
               </View>
             )}
@@ -268,7 +274,9 @@ export default function CreateGameScreen() {
 
         {/* Schedule */}
         <View className="mb-6">
-          <Text className="text-surface-900 dark:text-white text-lg font-semibold mb-4">Schedule</Text>
+          <Text className="text-surface-900 dark:text-white text-lg font-semibold mb-4">
+            Schedule
+          </Text>
 
           {/* Date */}
           <View className="bg-white dark:bg-surface-700 rounded-xl p-4 border border-surface-200 dark:border-surface-600 mb-3">

@@ -11,10 +11,10 @@ import {
   Modal,
   FlatList,
 } from "react-native";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 
@@ -195,7 +195,9 @@ export default function CreatePlayerScreen() {
 
         {/* Jersey Number */}
         <View className="mb-4">
-          <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">Jersey Number *</Text>
+          <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">
+            Jersey Number *
+          </Text>
           <TextInput
             className="bg-white dark:bg-surface-700 rounded-xl p-4 text-surface-900 dark:text-white text-base border border-surface-200 dark:border-surface-600"
             placeholder="Enter jersey number"
@@ -209,14 +211,18 @@ export default function CreatePlayerScreen() {
 
         {/* Position */}
         <View className="mb-4">
-          <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">Position (optional)</Text>
+          <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">
+            Position (optional)
+          </Text>
           <TouchableOpacity
             className="bg-white dark:bg-surface-700 rounded-xl p-4 border border-surface-200 dark:border-surface-600 flex-row items-center justify-between"
             onPress={() => setShowPositionModal(true)}
           >
             <Text
               className={
-                position ? "text-surface-900 dark:text-white" : "text-surface-600 dark:text-surface-400"
+                position
+                  ? "text-surface-900 dark:text-white"
+                  : "text-surface-600 dark:text-surface-400"
               }
             >
               {position ? POSITIONS.find((p) => p.value === position)?.label : "Select position"}
@@ -274,7 +280,9 @@ export default function CreatePlayerScreen() {
         <View className="flex-1 bg-black/50 justify-end">
           <View className="bg-white dark:bg-surface-800 rounded-t-3xl max-h-[70%]">
             <View className="flex-row justify-between items-center p-4 border-b border-surface-200 dark:border-surface-700">
-              <Text className="text-surface-900 dark:text-white text-lg font-bold">Select Team</Text>
+              <Text className="text-surface-900 dark:text-white text-lg font-bold">
+                Select Team
+              </Text>
               <TouchableOpacity onPress={() => setShowTeamModal(false)}>
                 <Icon name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -298,7 +306,9 @@ export default function CreatePlayerScreen() {
                       {item.name}
                     </Text>
                     {item.city && (
-                      <Text className="text-surface-600 dark:text-surface-400 text-sm">{item.city}</Text>
+                      <Text className="text-surface-600 dark:text-surface-400 text-sm">
+                        {item.city}
+                      </Text>
                     )}
                   </View>
                 </TouchableOpacity>
@@ -338,7 +348,9 @@ export default function CreatePlayerScreen() {
               >
                 <View>
                   <Text className="text-surface-900 dark:text-white font-medium">{pos.label}</Text>
-                  <Text className="text-surface-600 dark:text-surface-400 text-sm">{pos.value}</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 text-sm">
+                    {pos.value}
+                  </Text>
                 </View>
                 {position === pos.value && <Icon name="stats" size={20} color="#F97316" />}
               </TouchableOpacity>

@@ -146,7 +146,8 @@ export default function ImageUpload({
                   e.stopPropagation();
                   handleClear();
                 }}
-                className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
+                className="absolute -top-2 -right-2 p-1.5 bg-status-active rounded-full text-white hover:brightness-110 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-status-active focus:ring-offset-2"
+                aria-label="Remove image"
               >
                 <XMarkIcon className="w-4 h-4" />
               </button>

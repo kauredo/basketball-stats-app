@@ -166,7 +166,9 @@ export default function SignupScreen({ onNavigateToLogin }: SignupScreenProps) {
           </View>
 
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-surface-900 dark:text-white mb-2">Email</Text>
+            <Text className="text-sm font-semibold text-surface-900 dark:text-white mb-2">
+              Email
+            </Text>
             <View className="relative">
               <View className="absolute left-4 top-3 z-10">
                 <Icon name="mail" size={20} color="#6B7280" />

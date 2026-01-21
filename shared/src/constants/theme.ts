@@ -25,12 +25,12 @@ export const COLORS = {
     freeThrowMissed: "#FBBF24", // Yellow - missed free throws
   },
 
-  // Game status colors
+  // Game status colors (unified across platforms)
   status: {
-    active: "#EF4444", // Red - live game
-    paused: "#F59E0B", // Amber - paused
-    completed: "#10B981", // Emerald - final
-    scheduled: "#3B82F6", // Blue - upcoming
+    active: "#dc2626", // Deeper red - live game
+    paused: "#d97706", // Amber - paused
+    completed: "#059669", // Emerald - final
+    scheduled: "#2563eb", // Blue - upcoming
   },
 
   // Heatmap gradient colors (cold to hot)
@@ -55,19 +55,35 @@ export const COLORS = {
     900: "#7c2d12",
   },
 
-  // Dark theme backgrounds
+  // Warm surface colors (tinted toward orange/brown, not cold blue-gray)
+  // This creates a cohesive brand feel across web and mobile
+  surface: {
+    50: "#fdfcfb", // Warm off-white (not pure white)
+    100: "#f9f7f5",
+    200: "#f3f0ed",
+    300: "#e8e4df",
+    400: "#d4cdc5",
+    500: "#a69f96",
+    600: "#7a746c",
+    700: "#5c5650",
+    800: "#3d3835",
+    900: "#252220",
+    950: "#1a1816", // Warm near-black (not pure black)
+  },
+
+  // Dark theme backgrounds (kept for backwards compatibility)
   dark: {
-    50: "#f8fafc",
-    100: "#f1f5f9",
-    200: "#e2e8f0",
-    300: "#cbd5e1",
-    400: "#94a3b8",
-    500: "#64748b",
-    600: "#475569",
-    700: "#334155",
-    800: "#1e293b",
-    900: "#0f172a",
-    950: "#0f1419", // Main dark background
+    50: "#fdfcfb",
+    100: "#f9f7f5",
+    200: "#f3f0ed",
+    300: "#e8e4df",
+    400: "#d4cdc5",
+    500: "#a69f96",
+    600: "#7a746c",
+    700: "#5c5650",
+    800: "#3d3835",
+    900: "#252220",
+    950: "#1a1816",
   },
 
   // Stat button categories
@@ -87,6 +103,23 @@ export const COLORS = {
     info: "#3B82F6",
   },
 } as const;
+
+/**
+ * Type for game status keys
+ */
+export type GameStatusKey = keyof typeof COLORS.status;
+
+/**
+ * Type-safe helper to get status color
+ * Returns fallback color if status is not found
+ */
+export const getStatusColor = (status: string, fallback = "#6B7280"): string => {
+  const validStatuses: GameStatusKey[] = ["active", "paused", "completed", "scheduled"];
+  if (validStatuses.includes(status as GameStatusKey)) {
+    return COLORS.status[status as GameStatusKey];
+  }
+  return fallback;
+};
 
 /**
  * Court dimensions and scaling constants
@@ -376,6 +409,71 @@ export function getShotZone(x: number, y: number): keyof typeof SHOT_ZONES | "un
   return "top3";
 }
 
+/**
+ * Navigation theme colors for consistent navigation styling
+ * Use these values for headers, tab bars, and navigation chrome
+ */
+export const NAV_COLORS = {
+  light: {
+    background: COLORS.surface[50],
+    card: COLORS.surface[50],
+    text: COLORS.surface[900],
+    border: COLORS.surface[300],
+    tabBarBg: COLORS.surface[50],
+    tabBarBorder: COLORS.surface[300],
+    headerBg: COLORS.surface[50],
+    headerText: COLORS.surface[900],
+    inactiveTab: COLORS.surface[600],
+  },
+  dark: {
+    background: COLORS.surface[950],
+    card: COLORS.surface[800],
+    text: COLORS.surface[50],
+    border: COLORS.surface[700],
+    tabBarBg: COLORS.surface[900],
+    tabBarBorder: COLORS.surface[800],
+    headerBg: COLORS.surface[900],
+    headerText: COLORS.surface[50],
+    inactiveTab: COLORS.surface[500],
+  },
+  primary: COLORS.primary[500],
+} as const;
+
+/**
+ * Theme-aware color utilities
+ * Provides consistent color selection based on theme mode
+ */
+export const getThemedColors = (isDark: boolean) => ({
+  // Backgrounds
+  background: isDark ? COLORS.surface[950] : COLORS.surface[50],
+  card: isDark ? COLORS.surface[800] : COLORS.surface[50],
+  cardElevated: isDark ? COLORS.surface[800] : "#ffffff",
+
+  // Text
+  text: isDark ? COLORS.surface[50] : COLORS.surface[900],
+  textSecondary: isDark ? COLORS.surface[400] : COLORS.surface[600],
+  textMuted: isDark ? COLORS.surface[500] : COLORS.surface[500],
+
+  // Borders
+  border: isDark ? COLORS.surface[700] : COLORS.surface[300],
+  borderSubtle: isDark ? COLORS.surface[800] : COLORS.surface[200],
+
+  // Input specific
+  inputBg: isDark ? COLORS.surface[800] : "#ffffff",
+  inputBorder: isDark ? COLORS.surface[600] : COLORS.surface[300],
+  placeholder: COLORS.surface[500],
+
+  // Icons
+  icon: isDark ? COLORS.surface[500] : COLORS.surface[600],
+  iconMuted: isDark ? COLORS.surface[600] : COLORS.surface[400],
+
+  // Status
+  ...COLORS.status,
+
+  // Primary
+  primary: COLORS.primary[500],
+});
+
 // Export all theme utilities
 export default {
   COLORS,
@@ -384,8 +482,10 @@ export default {
   ANIMATIONS,
   STAT_BUTTON_CONFIG,
   SHOT_ZONES,
+  NAV_COLORS,
   getHeatmapColor,
   courtToSvgCoords,
   svgToCourtCoords,
   getShotZone,
+  getThemedColors,
 };

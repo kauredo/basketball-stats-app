@@ -13,16 +13,16 @@ import {
   ScrollView,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import ImagePicker from "../components/ImagePicker";
-import { RootStackParamList } from "../navigation/AppNavigator";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 type TeamDetailRouteProp = RouteProp<RootStackParamList, "TeamDetail">;
@@ -177,7 +177,9 @@ export default function TeamDetailScreen() {
       </View>
 
       <View className="flex-1">
-        <Text className="text-surface-900 dark:text-white text-base font-semibold">{player.name}</Text>
+        <Text className="text-surface-900 dark:text-white text-base font-semibold">
+          {player.name}
+        </Text>
         <View className="flex-row items-center mt-1">
           {player.position && (
             <View

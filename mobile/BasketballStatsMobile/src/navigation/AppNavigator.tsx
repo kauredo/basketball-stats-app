@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { View, Text, TouchableOpacity, Image, useColorScheme } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { NAV_COLORS } from "@basketball-stats/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
@@ -61,13 +62,12 @@ const Tab = createBottomTabNavigator<TabParamList>();
 function TabNavigator() {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
+  const colors = isDark ? NAV_COLORS.dark : NAV_COLORS.light;
 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-
           // Set the icon based on the route name
           if (route.name === "Home") {
             return <FontAwesome5 name="home" size={size} color={color} />;
@@ -82,17 +82,17 @@ function TabNavigator() {
           }
         },
         tabBarStyle: {
-          backgroundColor: isDark ? "#1F2937" : "#FFFFFF",
-          borderTopColor: isDark ? "#374151" : "#E5E7EB",
+          backgroundColor: colors.tabBarBg,
+          borderTopColor: colors.tabBarBorder,
           height: 60,
           paddingBottom: 8,
         },
-        tabBarActiveTintColor: "#EF4444",
-        tabBarInactiveTintColor: isDark ? "#9CA3AF" : "#6B7280",
+        tabBarActiveTintColor: NAV_COLORS.primary,
+        tabBarInactiveTintColor: colors.inactiveTab,
         headerStyle: {
-          backgroundColor: isDark ? "#1F2937" : "#FFFFFF",
+          backgroundColor: colors.headerBg,
         },
-        headerTintColor: isDark ? "#F9FAFB" : "#111827",
+        headerTintColor: colors.headerText,
         headerTitleStyle: {
           fontWeight: "bold",
         },
@@ -106,7 +106,7 @@ function TabNavigator() {
           tabBarLabel: "Home",
           headerRight: () => (
             <View style={{ marginRight: 8 }}>
-              <NotificationBell color={isDark ? "#9CA3AF" : "#6B7280"} />
+              <NotificationBell color={colors.inactiveTab} />
             </View>
           ),
         }}
@@ -168,15 +168,16 @@ function AppContent() {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
-  // Custom navigation themes
+  // Custom navigation themes using design system tokens
   const LightNavigationTheme = {
     ...DefaultTheme,
     colors: {
       ...DefaultTheme.colors,
-      background: "#F9FAFB",
-      card: "#FFFFFF",
-      text: "#111827",
-      border: "#E5E7EB",
+      background: NAV_COLORS.light.background,
+      card: NAV_COLORS.light.card,
+      text: NAV_COLORS.light.text,
+      border: NAV_COLORS.light.border,
+      primary: NAV_COLORS.primary,
     },
   };
 
@@ -184,12 +185,15 @@ function AppContent() {
     ...DarkTheme,
     colors: {
       ...DarkTheme.colors,
-      background: "#0F1419",
-      card: "#1F2937",
-      text: "#F9FAFB",
-      border: "#374151",
+      background: NAV_COLORS.dark.background,
+      card: NAV_COLORS.dark.card,
+      text: NAV_COLORS.dark.text,
+      border: NAV_COLORS.dark.border,
+      primary: NAV_COLORS.primary,
     },
   };
+
+  const colors = isDark ? NAV_COLORS.dark : NAV_COLORS.light;
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -207,9 +211,9 @@ function AppContent() {
         <Stack.Navigator
           screenOptions={{
             headerStyle: {
-              backgroundColor: isDark ? "#1F2937" : "#FFFFFF",
+              backgroundColor: colors.headerBg,
             },
-            headerTintColor: isDark ? "#F9FAFB" : "#111827",
+            headerTintColor: colors.headerText,
             headerTitleStyle: {
               fontWeight: "bold",
             },

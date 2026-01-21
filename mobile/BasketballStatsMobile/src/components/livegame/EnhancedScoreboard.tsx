@@ -76,6 +76,7 @@ export default function EnhancedScoreboard({
       );
       prevHomeScore.value = game.homeScore;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Reanimated shared values are stable refs
   }, [game.homeScore]);
 
   useEffect(() => {
@@ -86,6 +87,7 @@ export default function EnhancedScoreboard({
       );
       prevAwayScore.value = game.awayScore;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Reanimated shared values are stable refs
   }, [game.awayScore]);
 
   const homeScoreStyle = useAnimatedStyle(() => ({
@@ -348,7 +350,9 @@ export default function EnhancedScoreboard({
                     key={q}
                     onPress={() => handleQuarterSelect(q)}
                     className={`px-4 py-2 rounded-lg ${
-                      game.currentQuarter === q ? "bg-purple-500" : "bg-surface-200 dark:bg-surface-700"
+                      game.currentQuarter === q
+                        ? "bg-purple-500"
+                        : "bg-surface-200 dark:bg-surface-700"
                     }`}
                   >
                     <Text
@@ -566,12 +570,16 @@ export default function EnhancedScoreboard({
                   key={q}
                   onPress={() => handleQuarterSelect(q)}
                   className={`px-4 py-2 rounded-lg ${
-                    game.currentQuarter === q ? "bg-purple-500" : "bg-surface-200 dark:bg-surface-700"
+                    game.currentQuarter === q
+                      ? "bg-purple-500"
+                      : "bg-surface-200 dark:bg-surface-700"
                   }`}
                 >
                   <Text
                     className={`font-bold ${
-                      game.currentQuarter === q ? "text-white" : "text-surface-700 dark:text-surface-300"
+                      game.currentQuarter === q
+                        ? "text-white"
+                        : "text-surface-700 dark:text-surface-300"
                     }`}
                   >
                     OT{q - 4}

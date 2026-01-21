@@ -1,11 +1,11 @@
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity, RefreshControl, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useNotifications } from "../contexts/NotificationContext";
-import { Id } from "../../../../convex/_generated/dataModel";
-import { RootStackParamList } from "../navigation/AppNavigator";
+import type { Id } from "../../../../convex/_generated/dataModel";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 import Icon from "../components/Icon";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -137,7 +137,9 @@ export default function NotificationsScreen() {
         <View className="flex-1">
           <Text
             className={`text-base font-semibold ${
-              item.read ? "text-surface-700 dark:text-surface-300" : "text-surface-900 dark:text-white"
+              item.read
+                ? "text-surface-700 dark:text-surface-300"
+                : "text-surface-900 dark:text-white"
             }`}
             numberOfLines={1}
           >
@@ -172,7 +174,9 @@ export default function NotificationsScreen() {
       <View className="w-20 h-20 rounded-full bg-surface-200 dark:bg-surface-700 items-center justify-center mb-4">
         <FontAwesome5 name="bell" size={32} color="#9CA3AF" />
       </View>
-      <Text className="text-surface-900 dark:text-white text-xl font-bold mb-2">No Notifications</Text>
+      <Text className="text-surface-900 dark:text-white text-xl font-bold mb-2">
+        No Notifications
+      </Text>
       <Text className="text-surface-600 dark:text-surface-400 text-center">
         You&apos;ll see game updates and announcements here when they arrive.
       </Text>

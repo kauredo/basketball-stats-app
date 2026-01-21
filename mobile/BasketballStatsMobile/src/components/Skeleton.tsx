@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, ViewStyle, DimensionValue } from "react-native";
+import { View, StyleSheet, type ViewStyle, type DimensionValue } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
   withTiming,
   interpolate,
+  ReduceMotion,
 } from "react-native-reanimated";
 import { useTheme } from "../contexts/ThemeContext";
 
@@ -27,10 +28,17 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
-    shimmer.value = withRepeat(withTiming(1, { duration: 1500 }), -1, false);
+    // Respect reduced motion preferences
+    shimmer.value = withRepeat(
+      withTiming(1, { duration: 1500, reduceMotion: ReduceMotion.System }),
+      -1,
+      false
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- shimmer is a stable Reanimated shared value
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
+    // When reduced motion is enabled, just show a static opacity
     opacity: interpolate(shimmer.value, [0, 0.5, 1], [0.3, 0.6, 0.3]),
   }));
 

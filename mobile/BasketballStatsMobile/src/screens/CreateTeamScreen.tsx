@@ -12,7 +12,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import ImagePicker from "../components/ImagePicker";
@@ -83,11 +83,13 @@ export default function CreateTeamScreen() {
       <ScrollView className="flex-1 p-4">
         {/* Team Name */}
         <View className="mb-4">
-          <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">Team Name *</Text>
+          <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
+            Team Name <Text className="text-primary-500">*</Text>
+          </Text>
           <TextInput
-            className="bg-white dark:bg-surface-700 rounded-xl p-4 text-surface-900 dark:text-white text-base border border-surface-200 dark:border-surface-600"
+            className="bg-white dark:bg-surface-800 rounded-xl px-4 py-3.5 text-surface-900 dark:text-white text-base border border-surface-300 dark:border-surface-600 min-h-[48px]"
             placeholder="Enter team name"
-            placeholderTextColor="#6B7280"
+            placeholderTextColor="#a69f96"
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
@@ -96,11 +98,13 @@ export default function CreateTeamScreen() {
 
         {/* City */}
         <View className="mb-4">
-          <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">City (optional)</Text>
+          <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
+            City <Text className="text-surface-500">(optional)</Text>
+          </Text>
           <TextInput
-            className="bg-white dark:bg-surface-700 rounded-xl p-4 text-surface-900 dark:text-white text-base border border-surface-200 dark:border-surface-600"
+            className="bg-white dark:bg-surface-800 rounded-xl px-4 py-3.5 text-surface-900 dark:text-white text-base border border-surface-300 dark:border-surface-600 min-h-[48px]"
             placeholder="Enter city"
-            placeholderTextColor="#6B7280"
+            placeholderTextColor="#a69f96"
             value={city}
             onChangeText={setCity}
             autoCapitalize="words"
@@ -117,13 +121,13 @@ export default function CreateTeamScreen() {
 
         {/* Description */}
         <View className="mb-6">
-          <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">
-            Description (optional)
+          <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
+            Description <Text className="text-surface-500">(optional)</Text>
           </Text>
           <TextInput
-            className="bg-white dark:bg-surface-700 rounded-xl p-4 text-surface-900 dark:text-white text-base border border-surface-200 dark:border-surface-600"
+            className="bg-white dark:bg-surface-800 rounded-xl px-4 py-3.5 text-surface-900 dark:text-white text-base border border-surface-300 dark:border-surface-600"
             placeholder="Enter team description"
-            placeholderTextColor="#6B7280"
+            placeholderTextColor="#a69f96"
             value={description}
             onChangeText={setDescription}
             multiline

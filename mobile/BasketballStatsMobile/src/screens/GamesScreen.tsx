@@ -1,14 +1,15 @@
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity, RefreshControl, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import { useQuery } from "convex/react";
+import { getStatusColor } from "@basketball-stats/shared";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-import { RootStackParamList } from "../navigation/AppNavigator";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 import { SkeletonGameCard } from "../components/Skeleton";
 
 type GamesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -26,13 +27,6 @@ interface Game {
   startedAt?: number;
   endedAt?: number;
 }
-
-const GAME_STATUS_COLORS: Record<string, string> = {
-  active: "#EF4444",
-  paused: "#F59E0B",
-  completed: "#10B981",
-  scheduled: "#3B82F6",
-};
 
 export default function GamesScreen() {
   const navigation = useNavigation<GamesScreenNavigationProp>();
@@ -119,7 +113,7 @@ export default function GamesScreen() {
           <View className="flex-row items-center">
             <View
               className="px-2 py-1 rounded-xl mr-2"
-              style={{ backgroundColor: GAME_STATUS_COLORS[game.status] || "#6B7280" }}
+              style={{ backgroundColor: getStatusColor(game.status) }}
             >
               <Text className="text-white text-xs font-semibold">
                 {getStatusLabel(game.status)}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -10,7 +10,7 @@ import Animated, {
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
-import { Id } from "../../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../../convex/_generated/dataModel";
 
 export interface LastAction {
   playerId: Id<"players">;
@@ -49,6 +49,10 @@ export default function QuickUndoFAB({
   onDismiss,
   autoDismissMs = 8000,
 }: QuickUndoFABProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const dismissIconColor = isDark ? "#a69f96" : "#7a746c"; // surface-500/600
+
   const translateY = useSharedValue(100);
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(0);
@@ -80,6 +84,7 @@ export default function QuickUndoFAB({
         clearTimeout(timeoutRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- dismiss uses Reanimated shared values which are stable refs
   }, [action, autoDismissMs]);
 
   const dismiss = () => {
@@ -153,18 +158,22 @@ export default function QuickUndoFAB({
             </Text>
           </View>
 
-          {/* Undo Button */}
+          {/* Undo Button - min 44px touch target */}
           <TouchableOpacity
-            className="bg-orange-500 px-3.5 py-2 rounded-lg mr-2"
+            className="bg-orange-500 px-4 py-3 rounded-lg mr-1 min-h-[44px] justify-center"
             onPress={handleUndo}
             activeOpacity={0.7}
           >
             <Text className="text-white text-xs font-bold">UNDO</Text>
           </TouchableOpacity>
 
-          {/* Dismiss Button */}
-          <TouchableOpacity className="p-1" onPress={dismiss} activeOpacity={0.7}>
-            <Icon name="close" size={18} color="#9CA3AF" />
+          {/* Dismiss Button - min 44px touch target */}
+          <TouchableOpacity
+            className="p-3 min-w-[44px] min-h-[44px] items-center justify-center"
+            onPress={dismiss}
+            activeOpacity={0.7}
+          >
+            <Icon name="close" size={18} color={dismissIconColor} />
           </TouchableOpacity>
         </View>
 

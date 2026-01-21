@@ -11,16 +11,16 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useRoute, useNavigation, type RouteProp } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
-import { RootStackParamList } from "../navigation/AppNavigator";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 type PlayerStatsRouteProp = RouteProp<RootStackParamList, "PlayerStats">;
@@ -243,7 +243,9 @@ export default function PlayerStatsScreen() {
             >
               {stat.value}
             </Text>
-            <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">{stat.label}</Text>
+            <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">
+              {stat.label}
+            </Text>
           </View>
         ))}
       </View>
@@ -263,7 +265,9 @@ export default function PlayerStatsScreen() {
 
     return (
       <View className="mt-2">
-        <Text className="text-surface-900 dark:text-white text-lg font-bold mb-3">Recent Games</Text>
+        <Text className="text-surface-900 dark:text-white text-lg font-bold mb-3">
+          Recent Games
+        </Text>
         {recentGames.slice(0, 5).map((game: any, index: number) => (
           <View
             key={game.gameId || index}
@@ -337,7 +341,9 @@ export default function PlayerStatsScreen() {
         <View className="flex-row items-center mb-4">
           <Text className="text-red-500 text-4xl font-bold mr-4">#{player.number}</Text>
           <View className="flex-1">
-            <Text className="text-surface-900 dark:text-white text-xl font-bold">{player.name}</Text>
+            <Text className="text-surface-900 dark:text-white text-xl font-bold">
+              {player.name}
+            </Text>
             <Text className="text-surface-600 dark:text-surface-400 text-sm mt-0.5">
               {player.position} {player.heightCm ? `• ${player.heightCm}cm` : ""}{" "}
               {player.weightKg ? `• ${player.weightKg}kg` : ""}
@@ -356,7 +362,9 @@ export default function PlayerStatsScreen() {
           >
             <Text
               className={`text-sm font-semibold ${
-                selectedPeriod === "season" ? "text-white" : "text-surface-600 dark:text-surface-400"
+                selectedPeriod === "season"
+                  ? "text-white"
+                  : "text-surface-600 dark:text-surface-400"
               }`}
             >
               Season
@@ -370,7 +378,9 @@ export default function PlayerStatsScreen() {
           >
             <Text
               className={`text-sm font-semibold ${
-                selectedPeriod === "recent" ? "text-white" : "text-surface-600 dark:text-surface-400"
+                selectedPeriod === "recent"
+                  ? "text-white"
+                  : "text-surface-600 dark:text-surface-400"
               }`}
             >
               Recent

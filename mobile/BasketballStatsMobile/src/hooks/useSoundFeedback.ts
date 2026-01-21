@@ -7,7 +7,7 @@ import {
   unloadAllSounds,
   setSoundEnabled,
   getSoundEnabled,
-  SoundType,
+  type SoundType,
 } from "../utils/soundManager";
 
 interface SoundFeedbackOptions {

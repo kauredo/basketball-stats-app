@@ -1,4 +1,4 @@
-import { AudioPlayer, createAudioPlayer, setAudioModeAsync } from "expo-audio";
+import { setAudioModeAsync, type AudioPlayer } from "expo-audio";
 
 export type SoundType =
   | "made"

@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { View, StyleSheet, useColorScheme, useWindowDimensions } from "react-native";
+import { StyleSheet, useColorScheme, useWindowDimensions } from "react-native";
 import Svg, { Rect, Circle, Path, G, Line } from "react-native-svg";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, { runOnJS } from "react-native-reanimated";
@@ -132,7 +132,7 @@ export function MiniCourt({
       ? shots.slice(-(maxShots ?? defaultMaxShots))
       : shots.slice(-(maxShots ?? defaultMaxShots));
 
-  const isInteractive = !!onCourtTap && !disabled;
+  const _isInteractive = !!onCourtTap && !disabled;
 
   return (
     <GestureDetector gesture={tapGesture}>

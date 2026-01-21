@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
-import { useRoute, RouteProp } from "@react-navigation/native";
+import { useRoute, type RouteProp } from "@react-navigation/native";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
-import { RootStackParamList } from "../navigation/AppNavigator";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 
 type GameAnalysisRouteProp = RouteProp<RootStackParamList, "GameAnalysis">;
 
@@ -30,7 +30,9 @@ function StatRow({ label, homeValue, awayValue, homeWins }: StatRowProps) {
       >
         {homeValue}
       </Text>
-      <Text className="w-24 text-center text-sm text-surface-600 dark:text-surface-400">{label}</Text>
+      <Text className="w-24 text-center text-sm text-surface-600 dark:text-surface-400">
+        {label}
+      </Text>
       <Text
         className={`flex-1 text-left text-base font-semibold ${
           homeWins === false ? "text-green-500" : "text-surface-900 dark:text-white"
@@ -128,7 +130,9 @@ export default function GameAnalysisScreen() {
     return (
       <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950 p-8">
         <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-surface-900 dark:text-white text-xl font-bold mt-4">Game Not Found</Text>
+        <Text className="text-surface-900 dark:text-white text-xl font-bold mt-4">
+          Game Not Found
+        </Text>
       </View>
     );
   }
@@ -423,7 +427,9 @@ export default function GameAnalysisScreen() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
               <TouchableOpacity
                 className={`px-4 py-2 rounded-full mr-2 ${
-                  selectedQuarter === undefined ? "bg-primary-500" : "bg-surface-200 dark:bg-surface-700"
+                  selectedQuarter === undefined
+                    ? "bg-primary-500"
+                    : "bg-surface-200 dark:bg-surface-700"
                 }`}
                 onPress={() => setSelectedQuarter(undefined)}
               >
@@ -500,7 +506,9 @@ export default function GameAnalysisScreen() {
               ) : (
                 <View className="p-8 items-center">
                   <Icon name="list" size={32} color="#9CA3AF" />
-                  <Text className="text-surface-600 dark:text-surface-400 mt-2">No plays recorded</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 mt-2">
+                    No plays recorded
+                  </Text>
                 </View>
               )}
             </View>

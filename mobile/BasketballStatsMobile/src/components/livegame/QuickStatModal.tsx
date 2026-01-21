@@ -2,8 +2,8 @@ import React from "react";
 import { View, Text, Modal, TouchableOpacity, FlatList } from "react-native";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
-import { Id } from "../../../../../convex/_generated/dataModel";
-import { OnCourtPlayer } from "./ShotRecordingModal";
+import type { Id } from "../../../../../convex/_generated/dataModel";
+import type { OnCourtPlayer } from "./ShotRecordingModal";
 
 export type QuickStatType =
   | "rebound"

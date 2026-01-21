@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Modal, TouchableOpacity, FlatList, useColorScheme } from "react-native";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
-import { Id } from "../../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../../convex/_generated/dataModel";
 
 export interface OnCourtPlayer {
   id: string;
@@ -41,7 +41,7 @@ export function ShotRecordingModal({
   onCourtPlayers,
 }: ShotRecordingModalProps) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const _isDark = colorScheme === "dark";
 
   const points = shotType === "3pt" ? 3 : 2;
 
@@ -103,7 +103,9 @@ export function ShotRecordingModal({
                 </Text>
                 <Text className="text-sm text-surface-500 dark:text-surface-400">
                   Shot from{" "}
-                  <Text className="font-medium text-surface-700 dark:text-surface-300">{zoneName}</Text>
+                  <Text className="font-medium text-surface-700 dark:text-surface-300">
+                    {zoneName}
+                  </Text>
                 </Text>
               </View>
               <View

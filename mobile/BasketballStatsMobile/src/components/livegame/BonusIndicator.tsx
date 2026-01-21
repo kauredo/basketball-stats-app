@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { Text, StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -41,6 +41,7 @@ export default function BonusIndicator({
       scale.value = withTiming(1);
       opacity.value = withTiming(1);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Reanimated shared values are stable refs
   }, [inBonus, inDoubleBonus, animate]);
 
   const animatedStyle = useAnimatedStyle(() => ({

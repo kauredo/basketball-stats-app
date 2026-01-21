@@ -12,7 +12,7 @@ import {
 import { BarChart } from "react-native-chart-kit";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 
@@ -249,7 +249,9 @@ export default function PlayerComparisonScreen() {
               ) : (
                 <View className="items-center py-4">
                   <Icon name="user" size={32} color="#9CA3AF" />
-                  <Text className="text-surface-600 dark:text-surface-400 mt-2">Select Player 1</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 mt-2">
+                    Select Player 1
+                  </Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -284,7 +286,9 @@ export default function PlayerComparisonScreen() {
               ) : (
                 <View className="items-center py-4">
                   <Icon name="user" size={32} color="#9CA3AF" />
-                  <Text className="text-surface-600 dark:text-surface-400 mt-2">Select Player 2</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 mt-2">
+                    Select Player 2
+                  </Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -497,7 +501,9 @@ export default function PlayerComparisonScreen() {
               <View className="animate-spin">
                 <Icon name="basketball" size={32} color="#F97316" />
               </View>
-              <Text className="text-surface-600 dark:text-surface-400 mt-4">Loading comparison...</Text>
+              <Text className="text-surface-600 dark:text-surface-400 mt-4">
+                Loading comparison...
+              </Text>
             </View>
           ) : (
             <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-8 items-center border border-surface-200 dark:border-surface-600">

@@ -10,13 +10,7 @@ import Animated, {
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
-import { Id } from "../../../../../convex/_generated/dataModel";
-
-interface PlayerInfo {
-  id: Id<"players">;
-  name: string;
-  number: number;
-}
+import type { Id } from "../../../../../convex/_generated/dataModel";
 
 export interface FreeThrowSequence {
   playerId: Id<"players">;
@@ -51,7 +45,7 @@ export default function FreeThrowSequenceModal({
 
   // Animation values
   const translateX = useSharedValue(0);
-  const scale = useSharedValue(1);
+  const _scale = useSharedValue(1);
   const madeButtonScale = useSharedValue(1);
   const missedButtonScale = useSharedValue(1);
 

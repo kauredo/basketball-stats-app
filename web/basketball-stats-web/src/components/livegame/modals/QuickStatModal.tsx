@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { PlayerStat, StatType } from "../../../types/livegame";
-import { useFocusTrap } from "../../../hooks/useFocusTrap";
+import { BaseModal, ModalBody, ModalFooter, ModalCancelButton } from "../../ui/BaseModal";
+import { PlayerListEmpty } from "../../ui/PlayerListItem";
 
 interface QuickStatModalProps {
   isOpen: boolean;
@@ -81,92 +82,59 @@ export const QuickStatModal: React.FC<QuickStatModalProps> = ({
   onCourtPlayers,
 }) => {
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
-  const focusTrapRef = useFocusTrap(isOpen && !!statType, {
-    initialFocusRef: cancelButtonRef,
-  });
 
-  // Handle escape key to close modal
-  useEffect(() => {
-    if (!isOpen || !statType) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen, statType, onClose]);
-
-  if (!isOpen || !statType) return null;
+  if (!statType) return null;
 
   const { label, bgClass, badgeClass } = getStatInfo(statType);
 
   return (
-    <div
-      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="quickstat-modal-title"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Record ${label}`}
+      initialFocusRef={cancelButtonRef}
     >
-      <div
-        ref={focusTrapRef}
-        className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md border border-surface-200 dark:border-surface-700 overflow-hidden"
-      >
-        {/* Header */}
-        <div className={`px-6 py-4 ${bgClass}`}>
-          <h3 id="quickstat-modal-title" className="text-lg font-bold text-white">
-            Record {label}
-          </h3>
-          <p className="text-white/80 text-sm">Select a player</p>
-        </div>
-
-        {/* Player list */}
-        <div className="max-h-80 overflow-y-auto">
-          {onCourtPlayers.length === 0 ? (
-            <div className="p-8 text-center text-surface-500">No players on court</div>
-          ) : (
-            onCourtPlayers.map((player) => (
-              <button
-                key={player.id}
-                onClick={() => onRecord(player.playerId)}
-                className="w-full flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm">#{player.player?.number}</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="text-surface-900 dark:text-white font-medium text-sm">
-                      {player.player?.name}
-                    </div>
-                    <div className="text-surface-500 text-xs">
-                      {player.isHomeTeam ? "Home" : "Away"}
-                    </div>
-                  </div>
-                </div>
-                <div className={`px-3 py-1 text-sm font-medium rounded-lg ${badgeClass}`}>
-                  +{label.toUpperCase().slice(0, 3)}
-                </div>
-              </button>
-            ))
-          )}
-        </div>
-
-        {/* Cancel button */}
-        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
-          <button
-            ref={cancelButtonRef}
-            onClick={onClose}
-            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded"
-          >
-            Cancel
-          </button>
-        </div>
+      {/* Custom header with dynamic background color */}
+      <div className={`px-6 py-4 ${bgClass}`}>
+        <h3 className="text-lg font-bold text-white">Record {label}</h3>
+        <p className="text-white/80 text-sm">Select a player</p>
       </div>
-    </div>
+
+      <ModalBody maxHeight="max-h-80">
+        {onCourtPlayers.length === 0 ? (
+          <PlayerListEmpty message="No players on court" />
+        ) : (
+          onCourtPlayers.map((player) => (
+            <button
+              key={player.id}
+              onClick={() => onRecord(player.playerId)}
+              className="w-full flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-sm">#{player.player?.number}</span>
+                </div>
+                <div className="text-left">
+                  <div className="text-surface-900 dark:text-white font-medium text-sm">
+                    {player.player?.name}
+                  </div>
+                  <div className="text-surface-500 text-xs">
+                    {player.isHomeTeam ? "Home" : "Away"}
+                  </div>
+                </div>
+              </div>
+              <div className={`px-3 py-1 text-sm font-medium rounded-lg ${badgeClass}`}>
+                +{label.toUpperCase().slice(0, 3)}
+              </div>
+            </button>
+          ))
+        )}
+      </ModalBody>
+
+      <ModalFooter>
+        <ModalCancelButton onClick={onClose} />
+      </ModalFooter>
+    </BaseModal>
   );
 };
 

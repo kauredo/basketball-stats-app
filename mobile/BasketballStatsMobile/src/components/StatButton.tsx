@@ -1,7 +1,19 @@
 import React from "react";
-import { TouchableOpacity, Text, View, StyleSheet, ViewStyle, useColorScheme } from "react-native";
+import {
+  TouchableOpacity,
+  Text,
+  View,
+  StyleSheet,
+  useColorScheme,
+  type ViewStyle,
+} from "react-native";
 import * as Haptics from "expo-haptics";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  useReducedMotion,
+} from "react-native-reanimated";
 import { COLORS, TOUCH_TARGETS } from "@basketball-stats/shared";
 
 interface StatButtonProps {
@@ -30,12 +42,16 @@ const StatButton: React.FC<StatButtonProps> = ({
   const scale = useSharedValue(1);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const reducedMotion = useReducedMotion();
 
   const handlePressIn = () => {
+    // Skip animation if reduced motion is preferred
+    if (reducedMotion) return;
     scale.value = withSpring(0.95, { damping: 15 });
   };
 
   const handlePressOut = () => {
+    if (reducedMotion) return;
     scale.value = withSpring(1, { damping: 15 });
   };
 

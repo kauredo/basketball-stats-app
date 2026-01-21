@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import { View, Text, Modal, TouchableOpacity, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
-import { Id } from "../../../../../convex/_generated/dataModel";
-import { OnCourtPlayer } from "./ShotRecordingModal";
+import type { Id } from "../../../../../convex/_generated/dataModel";
+import type { OnCourtPlayer } from "./ShotRecordingModal";
 
 interface ReboundPromptModalProps {
   visible: boolean;

@@ -1,14 +1,16 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import { useQuery } from "convex/react";
+import { getStatusColor } from "@basketball-stats/shared";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-import { RootStackParamList } from "../navigation/AppNavigator";
+import EmptyState from "../components/EmptyState";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 import { SkeletonCard, SkeletonGameCard } from "../components/Skeleton";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -26,13 +28,6 @@ interface Game {
   startedAt?: number;
   endedAt?: number;
 }
-
-const GAME_STATUS_COLORS: Record<string, string> = {
-  active: "#EF4444",
-  paused: "#F59E0B",
-  completed: "#10B981",
-  scheduled: "#3B82F6",
-};
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
@@ -100,7 +95,9 @@ export default function HomeScreen() {
       <TouchableOpacity
         key={game.id}
         className={`bg-white dark:bg-surface-800 rounded-xl p-4 mb-3 border ${
-          isLive ? "border-primary-500 border-2 shadow-lg" : "border-surface-200 dark:border-surface-700"
+          isLive
+            ? "border-primary-500 border-2 shadow-lg"
+            : "border-surface-200 dark:border-surface-700"
         }`}
         onPress={() => handleGamePress(game)}
         disabled={!isLive}
@@ -110,14 +107,14 @@ export default function HomeScreen() {
             <View className="flex-row justify-between items-center w-full py-1">
               <Text
                 className={`text-surface-900 dark:text-white text-base font-semibold flex-1 ${
-                  winner === "away" && game.status === "completed" ? "text-green-400" : ""
+                  winner === "away" && game.status === "completed" ? "text-status-completed" : ""
                 }`}
               >
                 {game.awayTeam?.name || "Away Team"}
               </Text>
               <Text
                 className={`text-surface-900 dark:text-white text-lg font-bold min-w-[30px] text-right ${
-                  winner === "away" && game.status === "completed" ? "text-green-400" : ""
+                  winner === "away" && game.status === "completed" ? "text-status-completed" : ""
                 }`}
               >
                 {game.awayScore}
@@ -127,14 +124,14 @@ export default function HomeScreen() {
             <View className="flex-row justify-between items-center w-full py-1">
               <Text
                 className={`text-surface-900 dark:text-white text-base font-semibold flex-1 ${
-                  winner === "home" && game.status === "completed" ? "text-green-400" : ""
+                  winner === "home" && game.status === "completed" ? "text-status-completed" : ""
                 }`}
               >
                 {game.homeTeam?.name || "Home Team"}
               </Text>
               <Text
                 className={`text-surface-900 dark:text-white text-lg font-bold min-w-[30px] text-right ${
-                  winner === "home" && game.status === "completed" ? "text-green-400" : ""
+                  winner === "home" && game.status === "completed" ? "text-status-completed" : ""
                 }`}
               >
                 {game.homeScore}
@@ -146,7 +143,7 @@ export default function HomeScreen() {
         <View className="flex-row justify-between items-center">
           <View
             className="px-2 py-1 rounded-xl"
-            style={{ backgroundColor: GAME_STATUS_COLORS[game.status] || "#6B7280" }}
+            style={{ backgroundColor: getStatusColor(game.status) }}
           >
             <Text className="text-white text-xs font-semibold">{getStatusLabel(game.status)}</Text>
           </View>
@@ -276,7 +273,9 @@ export default function HomeScreen() {
           <View className="mb-6">
             <View className="flex-row items-center mb-3">
               <Icon name="stats" size={16} color="#10B981" className="mr-2" />
-              <Text className="text-surface-900 dark:text-white text-lg font-bold">Recent Games</Text>
+              <Text className="text-surface-900 dark:text-white text-lg font-bold">
+                Recent Games
+              </Text>
             </View>
             {recentGames.map((game: Game) => renderGameCard(game, false))}
           </View>
@@ -284,15 +283,13 @@ export default function HomeScreen() {
 
         {/* Empty State */}
         {liveGames.length === 0 && recentGames.length === 0 && (
-          <View className="items-center justify-center pt-15">
-            <Icon name="basketball" size={48} color="#6B7280" className="mb-4" />
-            <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
-              No games found
-            </Text>
-            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center leading-5">
-              Create a game to start tracking basketball statistics
-            </Text>
-          </View>
+          <EmptyState
+            icon="basketball"
+            title="No games yet"
+            description="Create your first game to start tracking basketball statistics"
+            actionLabel="Create Game"
+            onAction={() => navigation.navigate("CreateGame")}
+          />
         )}
       </ScrollView>
     </View>

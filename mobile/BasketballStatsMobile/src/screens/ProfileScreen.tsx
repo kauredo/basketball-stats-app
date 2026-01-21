@@ -15,7 +15,7 @@ import { StatusBar } from "expo-status-bar";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
-import { useTheme, ThemeMode } from "../contexts/ThemeContext";
+import { useTheme, type ThemeMode } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 
 // Theme mode labels and icons
@@ -230,7 +230,9 @@ export default function ProfileScreen() {
           <Text className="text-2xl font-bold text-surface-900 dark:text-white mb-1">
             {user?.firstName} {user?.lastName}
           </Text>
-          <Text className="text-base text-surface-600 dark:text-surface-400 mb-3">{user?.email}</Text>
+          <Text className="text-base text-surface-600 dark:text-surface-400 mb-3">
+            {user?.email}
+          </Text>
           <View className="bg-green-100 dark:bg-green-900 px-3 py-1 rounded-xl">
             <Text className="text-green-700 dark:text-green-400 text-xs font-semibold">
               {user?.role === "admin" ? "Administrator" : "User"}
@@ -267,7 +269,9 @@ export default function ProfileScreen() {
                 className="bg-surface-100 dark:bg-surface-700 px-3 py-2 rounded-md"
                 onPress={handleSwitchLeague}
               >
-                <Text className="text-surface-900 dark:text-white text-sm font-semibold">Switch</Text>
+                <Text className="text-surface-900 dark:text-white text-sm font-semibold">
+                  Switch
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -275,7 +279,9 @@ export default function ProfileScreen() {
 
         {/* League Stats */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">My Leagues</Text>
+          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">
+            My Leagues
+          </Text>
           <View className="flex-row flex-wrap gap-3">
             <View className="bg-white dark:bg-surface-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-surface-200 dark:border-surface-700">
               <Text className="text-2xl font-bold text-red-500 mb-1">{leagues.length}</Text>
@@ -287,19 +293,25 @@ export default function ProfileScreen() {
               <Text className="text-2xl font-bold text-red-500 mb-1">
                 {leagues.filter((l: any) => l.membership?.role === "admin").length}
               </Text>
-              <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">As Admin</Text>
+              <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">
+                As Admin
+              </Text>
             </View>
             <View className="bg-white dark:bg-surface-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-surface-200 dark:border-surface-700">
               <Text className="text-2xl font-bold text-red-500 mb-1">
                 {leagues.filter((l: any) => l.membership?.role === "coach").length}
               </Text>
-              <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">As Coach</Text>
+              <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">
+                As Coach
+              </Text>
             </View>
             <View className="bg-white dark:bg-surface-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-surface-200 dark:border-surface-700">
               <Text className="text-2xl font-bold text-red-500 mb-1">
                 {leagues.filter((l: any) => l.status === "active").length}
               </Text>
-              <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">Active</Text>
+              <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">
+                Active
+              </Text>
             </View>
           </View>
         </View>
@@ -319,7 +331,9 @@ export default function ProfileScreen() {
               <Text className="text-base text-surface-900 dark:text-white font-medium">
                 Edit Profile
               </Text>
-              <Text className="text-sm text-surface-500 dark:text-surface-400">Change your name</Text>
+              <Text className="text-sm text-surface-500 dark:text-surface-400">
+                Change your name
+              </Text>
             </View>
             <Icon
               name="chevron-right"
@@ -339,7 +353,9 @@ export default function ProfileScreen() {
               <Text className="text-base text-surface-900 dark:text-white font-medium">
                 Change Password
               </Text>
-              <Text className="text-sm text-surface-500 dark:text-surface-400">Update your password</Text>
+              <Text className="text-sm text-surface-500 dark:text-surface-400">
+                Update your password
+              </Text>
             </View>
             <Icon
               name="chevron-right"
@@ -351,7 +367,9 @@ export default function ProfileScreen() {
 
         {/* Appearance */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">Appearance</Text>
+          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">
+            Appearance
+          </Text>
           <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
             <Text className="text-surface-700 dark:text-surface-300 font-medium mb-3">Theme</Text>
             <View className="flex-row gap-2">
@@ -461,7 +479,9 @@ export default function ProfileScreen() {
                 <Text className="text-base text-surface-900 dark:text-white font-medium">
                   Basketball Stats
                 </Text>
-                <Text className="text-sm text-surface-500 dark:text-surface-400">Version 1.0.0</Text>
+                <Text className="text-sm text-surface-500 dark:text-surface-400">
+                  Version 1.0.0
+                </Text>
               </View>
             </View>
           </View>
@@ -493,7 +513,9 @@ export default function ProfileScreen() {
             </Text>
 
             <View className="mb-4">
-              <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">First Name</Text>
+              <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">
+                First Name
+              </Text>
               <TextInput
                 className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg px-4 py-3 text-base"
                 value={editFirstName}
@@ -570,7 +592,9 @@ export default function ProfileScreen() {
             </View>
 
             <View className="mb-4">
-              <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">New Password</Text>
+              <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">
+                New Password
+              </Text>
               <TextInput
                 className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg px-4 py-3 text-base"
                 value={newPassword}

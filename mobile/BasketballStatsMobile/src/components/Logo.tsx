@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image, Text, StyleSheet, ViewStyle, useColorScheme } from "react-native";
+import { View, Image, Text, StyleSheet, useColorScheme, type ViewStyle } from "react-native";
 
 interface LogoProps {
   variant?: "light" | "dark" | "auto";

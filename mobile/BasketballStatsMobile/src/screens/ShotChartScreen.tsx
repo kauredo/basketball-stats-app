@@ -11,10 +11,10 @@ import {
 import * as Haptics from "expo-haptics";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-import { MiniCourt, ShotMarker } from "../components/court/MiniCourt";
+import { MiniCourt, type ShotMarker } from "../components/court/MiniCourt";
 
 interface PlayerOption {
   id: Id<"players">;
@@ -203,7 +203,9 @@ export default function ShotChartScreen() {
                   <Icon name="user" size={24} color="#9CA3AF" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-surface-600 dark:text-surface-400 text-lg">Select a Player</Text>
+                  <Text className="text-surface-600 dark:text-surface-400 text-lg">
+                    Select a Player
+                  </Text>
                   <Text className="text-surface-500">Tap to choose</Text>
                 </View>
                 <Icon name="chevron-right" size={20} color="#9CA3AF" />
@@ -322,7 +324,9 @@ export default function ShotChartScreen() {
                     <Text className="text-3xl font-bold text-surface-900 dark:text-white">
                       {shotChartData.stats.totalShots}
                     </Text>
-                    <Text className="text-surface-600 dark:text-surface-400 text-sm">Total Shots</Text>
+                    <Text className="text-surface-600 dark:text-surface-400 text-sm">
+                      Total Shots
+                    </Text>
                   </View>
                   <View className="items-center">
                     <Text className="text-3xl font-bold text-green-500">
@@ -417,7 +421,9 @@ export default function ShotChartScreen() {
               <View className="animate-spin">
                 <Icon name="basketball" size={32} color="#F97316" />
               </View>
-              <Text className="text-surface-600 dark:text-surface-400 mt-4">Loading shot chart...</Text>
+              <Text className="text-surface-600 dark:text-surface-400 mt-4">
+                Loading shot chart...
+              </Text>
             </View>
           ) : (
             <View className="bg-white dark:bg-surface-700 rounded-xl p-8 items-center border border-surface-200 dark:border-surface-600">

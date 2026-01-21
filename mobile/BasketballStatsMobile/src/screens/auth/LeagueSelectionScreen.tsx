@@ -11,7 +11,7 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
-import { Id } from "../../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../../convex/_generated/dataModel";
 import { useAuth } from "../../contexts/AuthContext";
 import Icon from "../../components/Icon";
 
@@ -35,7 +35,7 @@ interface League {
 }
 
 export default function LeagueSelectionScreen() {
-  const { token, selectedLeague, selectLeague, setUserLeagues, isLoading: authLoading } = useAuth();
+  const { token, selectedLeague, selectLeague } = useAuth();
   const [inviteCode, setInviteCode] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [showJoinForm, setShowJoinForm] = useState(false);
@@ -105,7 +105,9 @@ export default function LeagueSelectionScreen() {
     return (
       <TouchableOpacity
         className={`bg-white dark:bg-surface-800 rounded-xl p-4 mb-3 border-2 ${
-          isSelected ? "border-primary-500 bg-primary-900" : "border-surface-200 dark:border-surface-700"
+          isSelected
+            ? "border-primary-500 bg-primary-900"
+            : "border-surface-200 dark:border-surface-700"
         }`}
         onPress={() => handleSelectLeague(league)}
       >
@@ -174,7 +176,10 @@ export default function LeagueSelectionScreen() {
       </View>
 
       {league.description && (
-        <Text className="text-surface-700 dark:text-surface-300 text-sm leading-5 mb-3" numberOfLines={2}>
+        <Text
+          className="text-surface-700 dark:text-surface-300 text-sm leading-5 mb-3"
+          numberOfLines={2}
+        >
           {league.description}
         </Text>
       )}
@@ -210,7 +215,9 @@ export default function LeagueSelectionScreen() {
       <StatusBar style="light" />
 
       <View className="px-6 pt-6 pb-4">
-        <Text className="text-3xl font-bold text-surface-900 dark:text-white mb-2">Select League</Text>
+        <Text className="text-3xl font-bold text-surface-900 dark:text-white mb-2">
+          Select League
+        </Text>
         <Text className="text-base text-surface-600 dark:text-surface-400">
           {userLeagues.length > 0
             ? "Choose a league to continue"
@@ -228,7 +235,9 @@ export default function LeagueSelectionScreen() {
           <>
             {userLeagues.length > 0 && (
               <View className="flex-row justify-between items-center mb-4 mt-6">
-                <Text className="text-lg font-bold text-surface-900 dark:text-white">My Leagues</Text>
+                <Text className="text-lg font-bold text-surface-900 dark:text-white">
+                  My Leagues
+                </Text>
               </View>
             )}
           </>

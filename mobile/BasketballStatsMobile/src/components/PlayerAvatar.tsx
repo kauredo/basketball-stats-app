@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, ViewStyle, useColorScheme } from "react-native";
+import { View, Text, Image, StyleSheet, useColorScheme, type ViewStyle } from "react-native";
 import { COLORS } from "@basketball-stats/shared";
 
 interface PlayerAvatarProps {
@@ -237,6 +237,7 @@ export const PlayerAvatarRow: React.FC<{
   );
 };
 
+// Static styles that don't depend on theme
 const styles = StyleSheet.create({
   container: {
     position: "relative",
@@ -262,7 +263,6 @@ const styles = StyleSheet.create({
     bottom: -2,
     right: -2,
     borderWidth: 2,
-    borderColor: "#3d3835",
   },
   detailsContainer: {
     flexDirection: "row",
@@ -277,22 +277,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   name: {
-    color: "#FFFFFF",
     fontWeight: "500",
     fontSize: 14,
   },
   numberSmall: {
-    color: "#a69f96",
     fontSize: 12,
     marginLeft: 4,
   },
   subtitle: {
-    color: "#a69f96",
     fontSize: 12,
     marginTop: 2,
   },
   stats: {
-    color: "#7a746c",
     fontSize: 10,
     marginTop: 4,
   },
@@ -302,18 +298,15 @@ const styles = StyleSheet.create({
   },
   avatarRowItem: {
     borderWidth: 2,
-    borderColor: "#3d3835",
     borderRadius: 100,
   },
   overflowBadge: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#5c5650",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#3d3835",
   },
   overflowText: {
     color: "#FFFFFF",

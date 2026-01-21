@@ -1,7 +1,14 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { PlayerStat } from "../../../types/livegame";
-import { useFocusTrap } from "../../../hooks/useFocusTrap";
+import {
+  BaseModal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalCancelButton,
+} from "../../ui/BaseModal";
+import { PlayerListItem, PlayerListEmpty, MadeButton, MissButton } from "../../ui/PlayerListItem";
 
 interface ShotRecordingModalProps {
   isOpen: boolean;
@@ -25,121 +32,60 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
   onCourtPlayers,
 }) => {
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
-  const focusTrapRef = useFocusTrap(isOpen, {
-    initialFocusRef: cancelButtonRef,
-  });
-
-  // Handle escape key to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
   const points = shotType === "3pt" ? 3 : 2;
 
   return (
-    <div
-      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="shot-modal-title"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={shotType === "3pt" ? "3-Point Shot" : "2-Point Shot"}
+      initialFocusRef={cancelButtonRef}
     >
-      <div
-        ref={focusTrapRef}
-        className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md border border-surface-200 dark:border-surface-700 overflow-hidden"
-      >
-        {/* Header with zone info */}
-        <div className="bg-surface-50 dark:bg-surface-900 px-6 py-4 border-b border-surface-200 dark:border-surface-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3
-                id="shot-modal-title"
-                className="text-lg font-bold text-surface-900 dark:text-white"
-              >
-                {shotType === "3pt" ? "3-Point Shot" : "2-Point Shot"}
-              </h3>
-              <p className="text-sm text-surface-500 dark:text-surface-400">
-                Shot from{" "}
-                <span className="font-medium text-surface-700 dark:text-surface-300">
-                  {zoneName}
-                </span>
-              </p>
-            </div>
-            <div
-              className={`px-3 py-1 rounded-full text-sm font-bold ${
-                shotType === "3pt"
-                  ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
-                  : "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
-              }`}
-            >
-              +{points} PTS
-            </div>
-          </div>
-        </div>
-
-        {/* Player list with made/missed buttons */}
-        <div className="max-h-80 overflow-y-auto">
-          {onCourtPlayers.length === 0 ? (
-            <div className="p-8 text-center text-surface-500">No players on court</div>
-          ) : (
-            onCourtPlayers.map((player) => (
-              <div
-                key={player.id}
-                className="flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm">#{player.player?.number}</span>
-                  </div>
-                  <div>
-                    <div className="text-surface-900 dark:text-white font-medium text-sm">
-                      {player.player?.name}
-                    </div>
-                    <div className="text-surface-500 text-xs">{player.points} PTS</div>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => onRecord(player.playerId, true)}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition-colors active:scale-95"
-                  >
-                    MADE
-                  </button>
-                  <button
-                    onClick={() => onRecord(player.playerId, false)}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition-colors active:scale-95"
-                  >
-                    MISS
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Cancel button */}
-        <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
-          <button
-            ref={cancelButtonRef}
-            onClick={onClose}
-            className="w-full py-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded"
+      <ModalHeader
+        title={shotType === "3pt" ? "3-Point Shot" : "2-Point Shot"}
+        subtitle={
+          <>
+            Shot from{" "}
+            <span className="font-medium text-surface-700 dark:text-surface-300">{zoneName}</span>
+          </>
+        }
+        badge={
+          <div
+            className={`px-3 py-1.5 rounded-full text-sm font-bold ${
+              shotType === "3pt"
+                ? "bg-shots-made3pt/15 text-shots-made3pt dark:bg-shots-made3pt/25"
+                : "bg-shots-made2pt/15 text-shots-made2pt dark:bg-shots-made2pt/25"
+            }`}
           >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
+            +{points} PTS
+          </div>
+        }
+      />
+
+      <ModalBody maxHeight="max-h-80">
+        {onCourtPlayers.length === 0 ? (
+          <PlayerListEmpty message="No players on court" />
+        ) : (
+          onCourtPlayers.map((player) => (
+            <PlayerListItem
+              key={player.id}
+              player={player.player}
+              stats={`${player.points} PTS`}
+              actions={
+                <>
+                  <MadeButton onClick={() => onRecord(player.playerId, true)} />
+                  <MissButton onClick={() => onRecord(player.playerId, false)} />
+                </>
+              }
+            />
+          ))
+        )}
+      </ModalBody>
+
+      <ModalFooter>
+        <ModalCancelButton onClick={onClose} />
+      </ModalFooter>
+    </BaseModal>
   );
 };
 
