@@ -423,6 +423,30 @@ export const start = mutation({
           await ctx.db.patch(playerStat._id, { isOnCourt: true });
         }
       }
+
+      // Start lineup stints for both teams
+      const quarterMinutes = settings?.quarterMinutes || 12;
+      const startingGameTime = quarterMinutes * 60;
+
+      if (startingFive.homeTeam && startingFive.homeTeam.length === 5) {
+        await ctx.runMutation(internal.lineups.startLineupStint, {
+          gameId: args.gameId,
+          teamId: game.homeTeamId,
+          players: startingFive.homeTeam,
+          quarter: 1,
+          gameTime: startingGameTime,
+        });
+      }
+
+      if (startingFive.awayTeam && startingFive.awayTeam.length === 5) {
+        await ctx.runMutation(internal.lineups.startLineupStint, {
+          gameId: args.gameId,
+          teamId: game.awayTeamId,
+          players: startingFive.awayTeam,
+          quarter: 1,
+          gameTime: startingGameTime,
+        });
+      }
     }
 
     const now = Date.now();
@@ -555,6 +579,13 @@ export const end = mutation({
         "Cannot end game before all 4 quarters are completed. Use forceEnd to override."
       );
     }
+
+    // End all active lineup stints
+    await ctx.runMutation(internal.lineups.endAllGameStints, {
+      gameId: args.gameId,
+      quarter: game.currentQuarter,
+      gameTime: game.timeRemainingSeconds,
+    });
 
     await ctx.db.patch(args.gameId, {
       status: "completed",

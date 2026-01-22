@@ -13,6 +13,7 @@ import type * as files from "../files.js";
 import type * as games from "../games.js";
 import type * as leagues from "../leagues.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lineups from "../lineups.js";
 import type * as notifications from "../notifications.js";
 import type * as players from "../players.js";
 import type * as seed from "../seed.js";
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   games: typeof games;
   leagues: typeof leagues;
   "lib/auth": typeof lib_auth;
+  lineups: typeof lineups;
   notifications: typeof notifications;
   players: typeof players;
   seed: typeof seed;

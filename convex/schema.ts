@@ -340,4 +340,26 @@ export default defineSchema({
     .index("by_user_read", ["userId", "read"])
     .index("by_user_league", ["userId", "leagueId"])
     .index("by_created", ["createdAt"]),
+
+  // Lineup stints for tracking player combinations
+  lineupStints: defineTable({
+    gameId: v.id("games"),
+    teamId: v.id("teams"),
+    players: v.array(v.id("players")), // Sorted array of 5 player IDs
+    startQuarter: v.number(),
+    startGameTime: v.number(), // Seconds remaining when stint started
+    startTimestamp: v.number(), // Server timestamp when stint started
+    endQuarter: v.optional(v.number()),
+    endGameTime: v.optional(v.number()),
+    endTimestamp: v.optional(v.number()),
+    secondsPlayed: v.number(),
+    pointsScored: v.number(),
+    pointsAllowed: v.number(),
+    plusMinus: v.number(),
+    isActive: v.boolean(),
+  })
+    .index("by_game", ["gameId"])
+    .index("by_game_team", ["gameId", "teamId"])
+    .index("by_team", ["teamId"])
+    .index("by_game_active", ["gameId", "isActive"]),
 });

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { getUserFromToken, getUserLeagueRole } from "./lib/auth";
 
 // Record a stat action
@@ -191,6 +192,13 @@ export const recordStat = mutation({
       await ctx.db.patch(args.gameId, {
         homeScore: newHomeScore,
         awayScore: newAwayScore,
+      });
+
+      // Update lineup stats for both teams' active stints
+      await ctx.runMutation(internal.lineups.updateLineupStats, {
+        gameId: args.gameId,
+        scoringTeamId: player.teamId,
+        points: pointsScored,
       });
 
       // Update plus/minus for all on-court players
@@ -591,6 +599,35 @@ export const substitute = mutation({
       isOnCourt: args.isOnCourt,
     });
 
+    // Handle lineup stint tracking
+    // End the current stint first
+    await ctx.runMutation(internal.lineups.endLineupStint, {
+      gameId: args.gameId,
+      teamId: player.teamId,
+      quarter: game.currentQuarter,
+      gameTime: game.timeRemainingSeconds,
+    });
+
+    // Get the new on-court players for this team
+    const teamStats = await ctx.db
+      .query("playerStats")
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", player.teamId))
+      .filter((q) => q.eq(q.field("isOnCourt"), true))
+      .collect();
+
+    const newOnCourtPlayers = teamStats.map((s) => s.playerId);
+
+    // Start a new stint with the new lineup (only if we have exactly 5 players)
+    if (newOnCourtPlayers.length === 5) {
+      await ctx.runMutation(internal.lineups.startLineupStint, {
+        gameId: args.gameId,
+        teamId: player.teamId,
+        players: newOnCourtPlayers,
+        quarter: game.currentQuarter,
+        gameTime: game.timeRemainingSeconds,
+      });
+    }
+
     return {
       message: args.isOnCourt ? `${player.name} entered the game` : `${player.name} left the game`,
       isOnCourt: args.isOnCourt,
@@ -665,6 +702,35 @@ export const swapSubstitute = mutation({
     // Perform atomic swap
     await ctx.db.patch(playerOutStat._id, { isOnCourt: false });
     await ctx.db.patch(playerInStat._id, { isOnCourt: true });
+
+    // Handle lineup stint tracking
+    // End the current stint and start a new one with the new lineup
+    await ctx.runMutation(internal.lineups.endLineupStint, {
+      gameId: args.gameId,
+      teamId: playerOut.teamId,
+      quarter: game.currentQuarter,
+      gameTime: game.timeRemainingSeconds,
+    });
+
+    // Get the new on-court players for this team
+    const teamStats = await ctx.db
+      .query("playerStats")
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", playerOut.teamId))
+      .filter((q) => q.eq(q.field("isOnCourt"), true))
+      .collect();
+
+    const newOnCourtPlayers = teamStats.map((s) => s.playerId);
+
+    // Start a new stint with the new lineup (only if we have exactly 5 players)
+    if (newOnCourtPlayers.length === 5) {
+      await ctx.runMutation(internal.lineups.startLineupStint, {
+        gameId: args.gameId,
+        teamId: playerOut.teamId,
+        players: newOnCourtPlayers,
+        quarter: game.currentQuarter,
+        gameTime: game.timeRemainingSeconds,
+      });
+    }
 
     return {
       message: `${playerIn.name} substituted for ${playerOut.name}`,

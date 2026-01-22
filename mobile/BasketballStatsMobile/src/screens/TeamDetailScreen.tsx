@@ -23,6 +23,8 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import ImagePicker from "../components/ImagePicker";
+import LineupStatsCard from "../components/LineupStatsCard";
+import PairStatsCard from "../components/PairStatsCard";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import { FontAwesome5 } from "@expo/vector-icons";
 
@@ -82,6 +84,18 @@ export default function TeamDetailScreen() {
   const teamsStatsData = useQuery(
     api.statistics.getTeamsStats,
     token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
+
+  // Fetch lineup stats
+  const lineupStatsData = useQuery(
+    api.lineups.getTeamLineupStats,
+    token && teamId ? { token, teamId: teamId as Id<"teams">, limit: 5 } : "skip"
+  );
+
+  // Fetch pair stats
+  const pairStatsData = useQuery(
+    api.lineups.getTeamPairStats,
+    token && teamId ? { token, teamId: teamId as Id<"teams">, limit: 10 } : "skip"
   );
 
   // Mutations
@@ -344,9 +358,23 @@ export default function TeamDetailScreen() {
         </View>
       )}
 
+      {/* Lineup Stats */}
+      <LineupStatsCard
+        lineups={lineupStatsData?.lineups || []}
+        isLoading={lineupStatsData === undefined}
+      />
+
+      {/* Pair Stats */}
+      <View className="mt-4">
+        <PairStatsCard
+          pairs={pairStatsData?.pairs || []}
+          isLoading={pairStatsData === undefined}
+        />
+      </View>
+
       {/* Recent Games */}
       {games.length > 0 && (
-        <View className="bg-white dark:bg-surface-800 rounded-xl mb-4 border border-surface-200 dark:border-surface-700 overflow-hidden">
+        <View className="bg-white dark:bg-surface-800 rounded-xl mb-4 mt-4 border border-surface-200 dark:border-surface-700 overflow-hidden">
           <View className="flex-row items-center justify-between px-4 py-3 border-b border-surface-200 dark:border-surface-700">
             <Text className="text-sm font-semibold text-surface-900 dark:text-white">
               Recent Games

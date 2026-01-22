@@ -413,3 +413,37 @@ export interface GameTimerState {
 export interface ConnectionStatus {
   status: "connected" | "connecting" | "disconnected" | "error";
 }
+
+// ============================================
+// Lineup Stats Types
+// ============================================
+
+export interface LineupPlayerInfo {
+  id: string;
+  name: string;
+  number: number;
+}
+
+export interface LineupStats {
+  players: LineupPlayerInfo[];
+  playerIds: string[];
+  teamId?: string;
+  minutesPlayed: number;
+  pointsScored: number;
+  pointsAllowed: number;
+  plusMinus: number;
+  gamesPlayed: number;
+  netRating: number;
+}
+
+export interface PairStats {
+  player1: LineupPlayerInfo;
+  player2: LineupPlayerInfo;
+  player1Id: string;
+  player2Id: string;
+  teamId?: string;
+  minutesTogether: number;
+  plusMinus: number;
+  gamesPlayed: number;
+  netRating: number;
+}

@@ -166,6 +166,7 @@ export const seedDatabase = mutation({
     // Optionally clear existing data
     if (args.clearExisting) {
       const tables = [
+        "lineupStints",
         "shots",
         "gameEvents",
         "playerStats",
@@ -507,6 +508,91 @@ export const seedDatabase = mutation({
                 description: `${eventType} by player`,
               });
             }
+
+            // Create lineup stints for this game
+            // Simulate 3-5 different lineups per team per game
+            const numStintsPerTeam = randomBetween(3, 5);
+
+            for (const isHomeTeam of [true, false]) {
+              const teamId = isHomeTeam ? homeTeamId : awayTeamId;
+              const teamPlayers = isHomeTeam ? homePlayers : awayPlayers;
+              const teamScore = isHomeTeam ? actualHomeScore : actualAwayScore;
+              const oppScore = isHomeTeam ? actualAwayScore : actualHomeScore;
+
+              // Calculate total game minutes (48 for regulation)
+              const totalMinutes = 48;
+              let remainingMinutes = totalMinutes;
+              let currentQuarter = 1;
+              let currentGameTime = 720; // Start of quarter
+
+              for (let stintIdx = 0; stintIdx < numStintsPerTeam; stintIdx++) {
+                // Select 5 players for this stint
+                // First stint uses starters (first 5), later stints mix in bench
+                let stintPlayers: Id<"players">[];
+                if (stintIdx === 0) {
+                  stintPlayers = teamPlayers.slice(0, 5);
+                } else {
+                  // Mix starters and bench
+                  const starters = teamPlayers.slice(0, 5);
+                  const bench = teamPlayers.slice(5);
+                  const numBenchIn = randomBetween(1, Math.min(3, bench.length));
+
+                  // Remove some starters
+                  const startersInLineup = starters.slice(0, 5 - numBenchIn);
+                  const benchInLineup = bench.slice(0, numBenchIn);
+                  stintPlayers = [...startersInLineup, ...benchInLineup];
+                }
+
+                // Ensure we have exactly 5 players
+                if (stintPlayers.length !== 5) {
+                  stintPlayers = teamPlayers.slice(0, 5);
+                }
+
+                // Sort players for consistent comparison
+                stintPlayers.sort();
+
+                // Calculate stint duration
+                const isLastStint = stintIdx === numStintsPerTeam - 1;
+                const stintMinutes = isLastStint
+                  ? remainingMinutes
+                  : Math.min(randomBetween(8, 15), remainingMinutes - 5);
+
+                const stintSeconds = Math.round(stintMinutes * 60);
+
+                // Calculate points for this stint (proportional to time)
+                const stintFraction = stintMinutes / totalMinutes;
+                const stintPointsScored = Math.round(teamScore * stintFraction * randomFloat(0.8, 1.2));
+                const stintPointsAllowed = Math.round(oppScore * stintFraction * randomFloat(0.8, 1.2));
+                const stintPlusMinus = stintPointsScored - stintPointsAllowed;
+
+                // Calculate end time
+                const endGameTime = Math.max(0, currentGameTime - (stintSeconds % 720));
+                const quartersElapsed = Math.floor(stintSeconds / 720);
+                const endQuarter = Math.min(4, currentQuarter + quartersElapsed);
+
+                await ctx.db.insert("lineupStints", {
+                  gameId,
+                  teamId,
+                  players: stintPlayers,
+                  startQuarter: currentQuarter,
+                  startGameTime: currentGameTime,
+                  startTimestamp: scheduledAt + (stintIdx * 10 * 60 * 1000),
+                  endQuarter,
+                  endGameTime,
+                  endTimestamp: scheduledAt + ((stintIdx + 1) * 10 * 60 * 1000),
+                  secondsPlayed: stintSeconds,
+                  pointsScored: stintPointsScored,
+                  pointsAllowed: stintPointsAllowed,
+                  plusMinus: stintPlusMinus,
+                  isActive: false,
+                });
+
+                // Update for next stint
+                remainingMinutes -= stintMinutes;
+                currentQuarter = endQuarter;
+                currentGameTime = endGameTime === 0 ? 720 : endGameTime;
+              }
+            }
           }
         }
       }
@@ -592,6 +678,75 @@ export const seedDatabase = mutation({
           isOnCourt: isStarter,
         });
       }
+
+      // Create active lineup stints for the active game
+      // Home team active lineup
+      const homeStarters = homePlayers.slice(0, 5).sort();
+      await ctx.db.insert("lineupStints", {
+        gameId: activeGameId,
+        teamId: teamIds[0],
+        players: homeStarters,
+        startQuarter: 2,
+        startGameTime: 420,
+        startTimestamp: Date.now() - 5 * 60 * 1000,
+        secondsPlayed: 0,
+        pointsScored: 0,
+        pointsAllowed: 0,
+        plusMinus: 0,
+        isActive: true,
+      });
+
+      // Home team completed stint from Q1
+      await ctx.db.insert("lineupStints", {
+        gameId: activeGameId,
+        teamId: teamIds[0],
+        players: homeStarters,
+        startQuarter: 1,
+        startGameTime: 720,
+        startTimestamp: Date.now() - 30 * 60 * 1000,
+        endQuarter: 2,
+        endGameTime: 420,
+        endTimestamp: Date.now() - 5 * 60 * 1000,
+        secondsPlayed: 720 + 300, // Q1 + part of Q2
+        pointsScored: randomBetween(15, 25),
+        pointsAllowed: randomBetween(15, 25),
+        plusMinus: randomBetween(-5, 5),
+        isActive: false,
+      });
+
+      // Away team active lineup
+      const awayStarters = awayPlayers.slice(0, 5).sort();
+      await ctx.db.insert("lineupStints", {
+        gameId: activeGameId,
+        teamId: teamIds[1],
+        players: awayStarters,
+        startQuarter: 2,
+        startGameTime: 420,
+        startTimestamp: Date.now() - 5 * 60 * 1000,
+        secondsPlayed: 0,
+        pointsScored: 0,
+        pointsAllowed: 0,
+        plusMinus: 0,
+        isActive: true,
+      });
+
+      // Away team completed stint from Q1
+      await ctx.db.insert("lineupStints", {
+        gameId: activeGameId,
+        teamId: teamIds[1],
+        players: awayStarters,
+        startQuarter: 1,
+        startGameTime: 720,
+        startTimestamp: Date.now() - 30 * 60 * 1000,
+        endQuarter: 2,
+        endGameTime: 420,
+        endTimestamp: Date.now() - 5 * 60 * 1000,
+        secondsPlayed: 720 + 300,
+        pointsScored: randomBetween(15, 25),
+        pointsAllowed: randomBetween(15, 25),
+        plusMinus: randomBetween(-5, 5),
+        isActive: false,
+      });
     }
 
     return {
@@ -602,6 +757,7 @@ export const seedDatabase = mutation({
         teams: teamIds.length,
         players: teamIds.length * 11, // Average
         games: gameIds.length + 1, // +1 for active game
+        lineupStints: "~" + (gameIds.length * 2 * 4 + 4), // ~4 stints per team per game + active game stints
       },
       credentials: {
         demo: { email: "demo@example.com", password: "demo123" },
@@ -704,6 +860,7 @@ export const clearDatabase = mutation({
   args: {},
   handler: async (ctx) => {
     const tables = [
+      "lineupStints",
       "notifications",
       "notificationPreferences",
       "pushSubscriptions",

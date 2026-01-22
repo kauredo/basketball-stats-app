@@ -7,6 +7,8 @@ import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { getErrorMessage } from "../utils/error";
 import Breadcrumb from "../components/Breadcrumb";
+import LineupStatsTable from "../components/LineupStatsTable";
+import PairStatsGrid from "../components/PairStatsGrid";
 import {
   UserIcon,
   TrophyIcon,
@@ -17,6 +19,9 @@ import {
   CalendarIcon,
   XMarkIcon,
   UsersIcon,
+  UserGroupIcon,
+  ArrowTrendingUpIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 
 interface EditFormState {
@@ -62,6 +67,18 @@ const TeamDetail: React.FC = () => {
   const teamsStatsData = useQuery(
     api.statistics.getTeamsStats,
     token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
+
+  // Fetch lineup stats
+  const lineupStatsData = useQuery(
+    api.lineups.getTeamLineupStats,
+    token && teamId ? { token, teamId: teamId as Id<"teams">, limit: 10 } : "skip"
+  );
+
+  // Fetch pair stats
+  const pairStatsData = useQuery(
+    api.lineups.getTeamPairStats,
+    token && teamId ? { token, teamId: teamId as Id<"teams">, limit: 20 } : "skip"
   );
 
   const updateTeam = useMutation(api.teams.update);
@@ -135,35 +152,43 @@ const TeamDetail: React.FC = () => {
   const getPositionColor = (position?: string) => {
     switch (position) {
       case "PG":
-        return "bg-blue-500/20 text-blue-500";
+        return "bg-blue-500/15 text-blue-600 dark:text-blue-400";
       case "SG":
-        return "bg-violet-500/20 text-violet-500";
+        return "bg-violet-500/15 text-violet-600 dark:text-violet-400";
       case "SF":
-        return "bg-green-500/20 text-green-500";
+        return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400";
       case "PF":
-        return "bg-amber-500/20 text-amber-500";
+        return "bg-amber-500/15 text-amber-600 dark:text-amber-400";
       case "C":
-        return "bg-red-500/20 text-red-500";
+        return "bg-red-500/15 text-red-600 dark:text-red-400";
       default:
-        return "bg-surface-500/20 text-surface-500";
+        return "bg-surface-500/15 text-surface-600 dark:text-surface-400";
     }
   };
 
   if (teamData === undefined || playersData === undefined) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent"></div>
+      <div className="flex flex-col justify-center items-center h-64 gap-3">
+        <div className="relative w-10 h-10">
+          <div className="absolute inset-0 rounded-full border-2 border-surface-200 dark:border-surface-700" />
+          <div className="absolute inset-0 rounded-full border-2 border-primary-500 border-t-transparent animate-spin" />
+        </div>
+        <p className="text-sm text-surface-500">Loading team...</p>
       </div>
     );
   }
 
   if (!team) {
     return (
-      <div className="text-center py-12">
-        <h3 className="text-lg font-semibold text-surface-900 dark:text-white">Team not found</h3>
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <div className="w-16 h-16 rounded-2xl bg-surface-100 dark:bg-surface-800 flex items-center justify-center mb-4">
+          <UsersIcon className="w-8 h-8 text-surface-400" />
+        </div>
+        <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-2">Team not found</h3>
+        <p className="text-surface-500 text-sm mb-4">This team may have been deleted or doesn't exist.</p>
         <button
           onClick={() => navigate("/app/teams")}
-          className="mt-4 text-primary-500 hover:text-primary-400 transition-colors"
+          className="btn-secondary px-4 py-2 rounded-xl"
         >
           Back to Teams
         </button>
@@ -172,319 +197,377 @@ const TeamDetail: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Breadcrumb */}
       <Breadcrumb items={[{ label: "Teams", href: "/app/teams" }, { label: team.name }]} />
 
       {/* Team Header */}
-      <div className="surface-card p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center gap-4">
-            {team.logoUrl ? (
-              <img
-                src={team.logoUrl}
-                alt={team.name}
-                className="w-20 h-20 rounded-2xl object-cover bg-surface-200 dark:bg-surface-700"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-2xl bg-primary-500/10 flex items-center justify-center">
-                <UsersIcon className="w-10 h-10 text-primary-500" />
+      <header className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+        <div className="p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+            <div className="flex items-start gap-5">
+              {team.logoUrl ? (
+                <img
+                  src={team.logoUrl}
+                  alt={team.name}
+                  className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover bg-surface-100 dark:bg-surface-700 flex-shrink-0"
+                />
+              ) : (
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-primary-500/20 to-primary-500/10 flex items-center justify-center flex-shrink-0">
+                  <UsersIcon className="w-10 h-10 md:w-12 md:h-12 text-primary-500" />
+                </div>
+              )}
+              <div className="min-w-0">
+                <h1 className="text-2xl md:text-3xl font-bold text-surface-900 dark:text-white tracking-tight">
+                  {team.name}
+                </h1>
+                {team.city && (
+                  <p className="text-surface-500 dark:text-surface-400 mt-1">{team.city}</p>
+                )}
+                {team.description && (
+                  <p className="text-sm text-surface-500 mt-2 max-w-lg line-clamp-2">
+                    {team.description}
+                  </p>
+                )}
               </div>
-            )}
-            <div>
-              <h1 className="text-display-sm text-surface-900 dark:text-white">{team.name}</h1>
-              {team.city && (
-                <p className="text-surface-600 dark:text-surface-400">{team.city}</p>
-              )}
-              {team.description && (
-                <p className="text-sm text-surface-500 dark:text-surface-500 mt-1 max-w-md">
-                  {team.description}
-                </p>
-              )}
+            </div>
+
+            <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+              <button
+                onClick={openEditModal}
+                className="btn-secondary px-3 md:px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
+              >
+                <PencilIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Edit</span>
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="px-3 md:px-4 py-2 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-colors flex items-center gap-2 text-sm font-medium"
+              >
+                <TrashIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Delete</span>
+              </button>
             </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={openEditModal}
-              className="btn-secondary px-4 py-2 rounded-xl flex items-center gap-2"
-            >
-              <PencilIcon className="w-4 h-4" />
-              Edit
-            </button>
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="px-4 py-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors flex items-center gap-2"
-            >
-              <TrashIcon className="w-4 h-4" />
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Record */}
-        <div className="surface-card p-4">
-          <div className="flex items-center gap-2 text-surface-600 dark:text-surface-400 mb-2">
-            <TrophyIcon className="w-4 h-4" />
-            <span className="text-sm font-medium">Record</span>
-          </div>
-          <div className="text-stat-lg text-surface-900 dark:text-white" data-stat>
-            {wins}-{losses}
-          </div>
-          <div className="text-sm text-surface-500">{winPct}% Win Rate</div>
         </div>
 
-        {/* Players */}
-        <div className="surface-card p-4">
-          <div className="flex items-center gap-2 text-surface-600 dark:text-surface-400 mb-2">
-            <UserIcon className="w-4 h-4" />
-            <span className="text-sm font-medium">Roster</span>
-          </div>
-          <div className="text-stat-lg text-surface-900 dark:text-white" data-stat>
-            {players.length}
-          </div>
-          <div className="text-sm text-surface-500">Players</div>
-        </div>
+        {/* Quick Stats Bar */}
+        <div className="border-t border-surface-200 dark:border-surface-700 bg-surface-50/50 dark:bg-surface-900/50 px-6 md:px-8 py-4">
+          <div className="flex items-center gap-8 md:gap-12 overflow-x-auto">
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-primary-500/10 flex items-center justify-center">
+                <TrophyIcon className="w-5 h-5 text-primary-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-surface-900 dark:text-white tabular-nums tracking-tight">
+                  {wins}-{losses}
+                </p>
+                <p className="text-xs text-surface-500 font-medium">{winPct}% Win Rate</p>
+              </div>
+            </div>
 
-        {/* PPG */}
-        <div className="surface-card p-4">
-          <div className="flex items-center gap-2 text-surface-600 dark:text-surface-400 mb-2">
-            <ChartBarIcon className="w-4 h-4" />
-            <span className="text-sm font-medium">PPG</span>
-          </div>
-          <div className="text-stat-lg text-surface-900 dark:text-white" data-stat>
-            {teamStats?.avgPoints?.toFixed(1) ?? "0.0"}
-          </div>
-          <div className="text-sm text-surface-500">Points Per Game</div>
-        </div>
+            <div className="w-px h-10 bg-surface-200 dark:bg-surface-700 flex-shrink-0" />
 
-        {/* FG% */}
-        <div className="surface-card p-4">
-          <div className="flex items-center gap-2 text-surface-600 dark:text-surface-400 mb-2">
-            <ChartBarIcon className="w-4 h-4" />
-            <span className="text-sm font-medium">FG%</span>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-surface-100 dark:bg-surface-700 flex items-center justify-center">
+                <UserIcon className="w-5 h-5 text-surface-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-surface-900 dark:text-white tabular-nums tracking-tight">
+                  {players.length}
+                </p>
+                <p className="text-xs text-surface-500 font-medium">Players</p>
+              </div>
+            </div>
+
+            {teamStats && (
+              <>
+                <div className="w-px h-10 bg-surface-200 dark:bg-surface-700 flex-shrink-0" />
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-surface-100 dark:bg-surface-700 flex items-center justify-center">
+                    <ArrowTrendingUpIcon className="w-5 h-5 text-surface-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-surface-900 dark:text-white tabular-nums tracking-tight">
+                      {teamStats.avgPoints?.toFixed(1) ?? "0.0"}
+                    </p>
+                    <p className="text-xs text-surface-500 font-medium">PPG</p>
+                  </div>
+                </div>
+
+                <div className="w-px h-10 bg-surface-200 dark:bg-surface-700 flex-shrink-0" />
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-surface-100 dark:bg-surface-700 flex items-center justify-center">
+                    <ChartBarIcon className="w-5 h-5 text-surface-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-surface-900 dark:text-white tabular-nums tracking-tight">
+                      {teamStats.fieldGoalPercentage?.toFixed(1) ?? "0.0"}%
+                    </p>
+                    <p className="text-xs text-surface-500 font-medium">FG%</p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-          <div className="text-stat-lg text-surface-900 dark:text-white" data-stat>
-            {teamStats?.fieldGoalPercentage?.toFixed(1) ?? "0.0"}%
-          </div>
-          <div className="text-sm text-surface-500">Field Goal %</div>
         </div>
-      </div>
+      </header>
+
+      {/* Team Statistics Section */}
+      {teamStats && (
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="section-header">Season Averages</h2>
+          </div>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+            {[
+              { label: "RPG", value: teamStats.avgRebounds?.toFixed(1) ?? "0.0" },
+              { label: "APG", value: teamStats.avgAssists?.toFixed(1) ?? "0.0" },
+              { label: "SPG", value: teamStats.avgSteals?.toFixed(1) ?? "0.0" },
+              { label: "BPG", value: teamStats.avgBlocks?.toFixed(1) ?? "0.0" },
+              { label: "3P%", value: `${teamStats.threePointPercentage?.toFixed(1) ?? "0.0"}%` },
+              { label: "FT%", value: `${teamStats.freeThrowPercentage?.toFixed(1) ?? "0.0"}%` },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 p-4 text-center"
+              >
+                <p className="text-xl md:text-2xl font-bold text-surface-900 dark:text-white tabular-nums">
+                  {stat.value}
+                </p>
+                <p className="text-xs text-surface-500 font-medium mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Roster */}
-        <div className="lg:col-span-2 surface-card overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200 dark:border-surface-700">
-            <h2 className="text-lg font-semibold text-surface-900 dark:text-white">Roster</h2>
-            <Link
-              to={`/app/teams/${teamId}/players/new`}
-              className="btn-primary px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5"
-            >
-              <PlusIcon className="w-4 h-4" />
-              Add Player
-            </Link>
-          </div>
-
-          {players.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 px-6">
-              <div className="w-12 h-12 rounded-2xl bg-surface-100 dark:bg-surface-700 flex items-center justify-center mb-3">
-                <UserIcon className="w-6 h-6 text-surface-400" />
+        <section className="lg:col-span-2">
+          <div className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200 dark:border-surface-700">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-surface-900 dark:text-white">Roster</h2>
+                <span className="px-2 py-0.5 rounded-full bg-surface-100 dark:bg-surface-700 text-xs font-medium text-surface-600 dark:text-surface-400">
+                  {players.length}
+                </span>
               </div>
-              <p className="text-surface-900 dark:text-white font-semibold mb-1">No players yet</p>
-              <p className="text-surface-500 dark:text-surface-400 text-sm text-center">
-                Add players to this team to get started
-              </p>
+              <Link
+                to={`/app/teams/${teamId}/players/new`}
+                className="btn-primary px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5"
+              >
+                <PlusIcon className="w-4 h-4" />
+                Add Player
+              </Link>
             </div>
-          ) : (
-            <div className="divide-y divide-surface-200 dark:divide-surface-700">
-              {players.map((player: any) => (
-                <div
-                  key={player.id}
-                  className="flex items-center gap-4 px-6 py-4 hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-surface-100 dark:bg-surface-700 flex items-center justify-center">
-                    <span className="text-lg font-bold text-surface-900 dark:text-white">
-                      {player.number}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-surface-900 dark:text-white truncate">
-                      {player.name}
-                    </p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      {player.position && (
-                        <span
-                          className={`px-2 py-0.5 rounded text-xs font-semibold ${getPositionColor(player.position)}`}
-                        >
-                          {player.position}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-surface-600 dark:text-surface-400">
-                      {player.status === "active" ? (
-                        <span className="text-green-500">Active</span>
-                      ) : player.status === "injured" ? (
-                        <span className="text-red-500">Injured</span>
-                      ) : (
-                        <span className="text-surface-500">Inactive</span>
-                      )}
-                    </p>
-                  </div>
+
+            {players.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 px-6">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-surface-100 to-surface-200 dark:from-surface-700 dark:to-surface-800 flex items-center justify-center mb-4 shadow-soft">
+                  <UserIcon className="w-7 h-7 text-surface-400" />
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Recent Games */}
-        <div className="surface-card overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-surface-200 dark:border-surface-700">
-            <h2 className="font-semibold text-surface-900 dark:text-white">Recent Games</h2>
-            <Link
-              to="/app/games"
-              className="text-sm text-primary-500 hover:text-primary-400 transition-colors"
-            >
-              View All
-            </Link>
-          </div>
-
-          {games.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 px-4">
-              <CalendarIcon className="w-8 h-8 text-surface-400 mb-2" />
-              <p className="text-surface-500 dark:text-surface-400 text-sm text-center">
-                No games yet
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-surface-200 dark:divide-surface-700">
-              {games.slice(0, 5).map((game: any) => {
-                const isHome = game.homeTeam?.id === teamId;
-                const opponent = isHome ? game.awayTeam : game.homeTeam;
-                const teamScore = isHome ? game.homeScore : game.awayScore;
-                const opponentScore = isHome ? game.awayScore : game.homeScore;
-                const won = teamScore > opponentScore;
-                const isCompleted = game.status === "completed";
-
-                return (
+                <p className="text-surface-900 dark:text-white font-semibold mb-1">No players yet</p>
+                <p className="text-surface-500 text-sm text-center max-w-xs">
+                  Add players to this team to start tracking their stats
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-surface-100 dark:divide-surface-800">
+                {players.map((player: any) => (
                   <Link
-                    key={game.id}
-                    to={`/app/games/${game.id}/analysis`}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors"
+                    key={player.id}
+                    to={`/app/players/${player.id}`}
+                    className="flex items-center gap-4 px-6 py-4 hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors group"
                   >
-                    <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
-                        isCompleted
-                          ? won
-                            ? "bg-green-500/10 text-green-500"
-                            : "bg-red-500/10 text-red-500"
-                          : "bg-surface-100 dark:bg-surface-700 text-surface-500"
-                      }`}
-                    >
-                      {isCompleted ? (won ? "W" : "L") : "-"}
+                    <div className="w-12 h-12 rounded-xl bg-surface-100 dark:bg-surface-700 flex items-center justify-center flex-shrink-0">
+                      <span className="text-lg font-bold text-surface-900 dark:text-white tabular-nums">
+                        {player.number}
+                      </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-surface-900 dark:text-white truncate">
-                        {isHome ? "vs" : "@"} {opponent?.name || "Unknown"}
+                      <p className="font-semibold text-surface-900 dark:text-white truncate group-hover:text-primary-500 transition-colors">
+                        {player.name}
                       </p>
-                      <p className="text-xs text-surface-500">
-                        {game.scheduledAt
-                          ? new Date(game.scheduledAt).toLocaleDateString()
-                          : "No date"}
-                      </p>
-                    </div>
-                    {isCompleted && (
-                      <div className="text-sm font-bold tabular-nums text-surface-900 dark:text-white">
-                        {teamScore}-{opponentScore}
+                      <div className="flex items-center gap-2 mt-1">
+                        {player.position && (
+                          <span
+                            className={`px-2 py-0.5 rounded text-xs font-semibold ${getPositionColor(player.position)}`}
+                          >
+                            {player.position}
+                          </span>
+                        )}
+                        <span
+                          className={`text-xs font-medium ${
+                            player.status === "active" || player.active !== false
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : player.status === "injured"
+                                ? "text-red-500"
+                                : "text-surface-500"
+                          }`}
+                        >
+                          {player.status === "active" || player.active !== false
+                            ? "Active"
+                            : player.status === "injured"
+                              ? "Injured"
+                              : "Inactive"}
+                        </span>
                       </div>
-                    )}
+                    </div>
+                    <ChevronRightIcon className="w-5 h-5 text-surface-300 dark:text-surface-600 group-hover:text-surface-400 transition-colors flex-shrink-0" />
                   </Link>
-                );
-              })}
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Recent Games */}
+        <section>
+          <div className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-surface-200 dark:border-surface-700">
+              <h2 className="font-semibold text-surface-900 dark:text-white">Recent Games</h2>
+              <Link
+                to="/app/games"
+                className="text-sm font-medium text-primary-500 hover:text-primary-400 transition-colors"
+              >
+                View All
+              </Link>
             </div>
-          )}
-        </div>
+
+            {games.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 px-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-surface-100 to-surface-200 dark:from-surface-700 dark:to-surface-800 flex items-center justify-center mb-3">
+                  <CalendarIcon className="w-6 h-6 text-surface-400" />
+                </div>
+                <p className="text-surface-500 text-sm text-center">No games scheduled yet</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-surface-100 dark:divide-surface-800">
+                {games.slice(0, 5).map((game: any) => {
+                  const isHome = game.homeTeam?.id === teamId;
+                  const opponent = isHome ? game.awayTeam : game.homeTeam;
+                  const teamScore = isHome ? game.homeScore : game.awayScore;
+                  const opponentScore = isHome ? game.awayScore : game.homeScore;
+                  const won = teamScore > opponentScore;
+                  const isCompleted = game.status === "completed";
+
+                  return (
+                    <Link
+                      key={game.id}
+                      to={`/app/games/${game.id}/analysis`}
+                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors group"
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 ${
+                          isCompleted
+                            ? won
+                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                              : "bg-red-500/15 text-red-600 dark:text-red-400"
+                            : "bg-surface-100 dark:bg-surface-700 text-surface-400"
+                        }`}
+                      >
+                        {isCompleted ? (won ? "W" : "L") : "-"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-surface-900 dark:text-white truncate group-hover:text-primary-500 transition-colors">
+                          {isHome ? "vs" : "@"} {opponent?.name || "Unknown"}
+                        </p>
+                        <p className="text-xs text-surface-500 mt-0.5">
+                          {game.scheduledAt
+                            ? new Date(game.scheduledAt).toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                              })
+                            : "No date"}
+                        </p>
+                      </div>
+                      {isCompleted && (
+                        <div className="text-sm font-bold tabular-nums text-surface-900 dark:text-white flex-shrink-0">
+                          {teamScore}-{opponentScore}
+                        </div>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
 
-      {/* Team Stats */}
-      {teamStats && (
-        <div className="surface-card p-6">
-          <h2 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
-            Team Statistics
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div>
-              <p className="text-sm text-surface-600 dark:text-surface-400">RPG</p>
-              <p className="text-xl font-bold text-surface-900 dark:text-white tabular-nums">
-                {teamStats.avgRebounds?.toFixed(1) ?? "0.0"}
-              </p>
+      {/* Lineup Analysis Section */}
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="section-header">Lineup Analysis</h2>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* 5-Man Lineups */}
+          <div className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+            <div className="flex items-center gap-2.5 px-6 py-4 border-b border-surface-200 dark:border-surface-700">
+              <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">
+                <UsersIcon className="w-4 h-4 text-primary-500" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-surface-900 dark:text-white">5-Man Lineups</h3>
+                <p className="text-xs text-surface-500">Best performing combinations</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-surface-600 dark:text-surface-400">APG</p>
-              <p className="text-xl font-bold text-surface-900 dark:text-white tabular-nums">
-                {teamStats.avgAssists?.toFixed(1) ?? "0.0"}
-              </p>
+            <LineupStatsTable
+              lineups={lineupStatsData?.lineups || []}
+              isLoading={lineupStatsData === undefined}
+            />
+          </div>
+
+          {/* Player Pairs / Chemistry */}
+          <div className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+            <div className="flex items-center gap-2.5 px-6 py-4 border-b border-surface-200 dark:border-surface-700">
+              <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">
+                <UserGroupIcon className="w-4 h-4 text-primary-500" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-surface-900 dark:text-white">Player Chemistry</h3>
+                <p className="text-xs text-surface-500">Two-player pair performance</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-surface-600 dark:text-surface-400">3P%</p>
-              <p className="text-xl font-bold text-surface-900 dark:text-white tabular-nums">
-                {teamStats.threePointPercentage?.toFixed(1) ?? "0.0"}%
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-surface-600 dark:text-surface-400">FT%</p>
-              <p className="text-xl font-bold text-surface-900 dark:text-white tabular-nums">
-                {teamStats.freeThrowPercentage?.toFixed(1) ?? "0.0"}%
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-surface-600 dark:text-surface-400">SPG</p>
-              <p className="text-xl font-bold text-surface-900 dark:text-white tabular-nums">
-                {teamStats.avgSteals?.toFixed(1) ?? "0.0"}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-surface-600 dark:text-surface-400">BPG</p>
-              <p className="text-xl font-bold text-surface-900 dark:text-white tabular-nums">
-                {teamStats.avgBlocks?.toFixed(1) ?? "0.0"}
-              </p>
-            </div>
+            <PairStatsGrid
+              pairs={pairStatsData?.pairs || []}
+              isLoading={pairStatsData === undefined}
+            />
           </div>
         </div>
-      )}
+      </section>
 
       {/* Edit Team Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div
+          className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={(e) => e.target === e.currentTarget && setShowEditModal(false)}
+        >
           <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md shadow-dramatic border border-surface-200 dark:border-surface-700 animate-scale-in">
             <div className="flex items-center justify-between p-6 border-b border-surface-200 dark:border-surface-700">
-              <h3 className="text-lg font-semibold text-surface-900 dark:text-surface-50">
-                Edit Team
-              </h3>
+              <h3 className="text-lg font-semibold text-surface-900 dark:text-white">Edit Team</h3>
               <button
                 onClick={() => setShowEditModal(false)}
-                className="p-2 rounded-lg text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+                className="p-2 -m-2 rounded-lg text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-5">
               <div>
                 <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                  Team Name *
+                  Team Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={editForm.name}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
-                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
+                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
                   placeholder="Enter team name"
+                  autoFocus
                 />
               </div>
 
@@ -496,7 +579,7 @@ const TeamDetail: React.FC = () => {
                   type="text"
                   value={editForm.city}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, city: e.target.value }))}
-                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
+                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
                   placeholder="Enter city (optional)"
                 />
               </div>
@@ -509,13 +592,13 @@ const TeamDetail: React.FC = () => {
                   value={editForm.description}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
                   rows={3}
-                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow resize-none"
+                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow resize-none"
                   placeholder="Enter description (optional)"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 p-6 border-t border-surface-200 dark:border-surface-700">
+            <div className="flex justify-end gap-3 p-6 border-t border-surface-200 dark:border-surface-700 bg-surface-50/50 dark:bg-surface-900/50">
               <button
                 onClick={() => setShowEditModal(false)}
                 className="btn-secondary px-4 py-2.5 rounded-xl"
@@ -525,7 +608,7 @@ const TeamDetail: React.FC = () => {
               <button
                 onClick={handleUpdateTeam}
                 disabled={!editForm.name.trim() || isUpdating}
-                className="btn-primary px-4 py-2.5 rounded-xl"
+                className="btn-primary px-5 py-2.5 rounded-xl"
               >
                 {isUpdating ? "Saving..." : "Save Changes"}
               </button>
@@ -536,22 +619,25 @@ const TeamDetail: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div
+          className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={(e) => e.target === e.currentTarget && setShowDeleteConfirm(false)}
+        >
           <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-sm shadow-dramatic border border-surface-200 dark:border-surface-700 animate-scale-in">
-            <div className="p-6">
-              <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TrashIcon className="w-6 h-6 text-red-500" />
+            <div className="p-6 text-center">
+              <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrashIcon className="w-7 h-7 text-red-500" />
               </div>
-              <h3 className="text-lg font-semibold text-surface-900 dark:text-surface-50 text-center mb-2">
+              <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-2">
                 Delete Team?
               </h3>
-              <p className="text-surface-600 dark:text-surface-400 text-center text-sm">
-                Are you sure you want to delete "{team.name}"? This action cannot be undone and will
-                also remove all associated player data.
+              <p className="text-surface-500 text-sm leading-relaxed">
+                Are you sure you want to delete <span className="font-medium text-surface-700 dark:text-surface-300">"{team.name}"</span>?
+                This action cannot be undone and will remove all associated player data.
               </p>
             </div>
 
-            <div className="flex gap-3 p-6 border-t border-surface-200 dark:border-surface-700">
+            <div className="flex gap-3 p-6 border-t border-surface-200 dark:border-surface-700 bg-surface-50/50 dark:bg-surface-900/50">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="flex-1 btn-secondary px-4 py-2.5 rounded-xl"
@@ -561,9 +647,9 @@ const TeamDetail: React.FC = () => {
               <button
                 onClick={handleDeleteTeam}
                 disabled={isDeleting}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors"
+                className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-surface-800 transition-colors disabled:opacity-50"
               >
-                {isDeleting ? "Deleting..." : "Delete"}
+                {isDeleting ? "Deleting..." : "Delete Team"}
               </button>
             </div>
           </div>
