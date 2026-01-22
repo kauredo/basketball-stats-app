@@ -349,10 +349,27 @@ export const getTeamsStats = query({
             gamesPlayed > 0 ? Math.round((totalDefensiveRebounds / gamesPlayed) * 10) / 10 : 0,
           avgAssists:
             gamesPlayed > 0 ? Math.round((aggregated.totalAssists / gamesPlayed) * 10) / 10 : 0,
+          avgSteals:
+            gamesPlayed > 0 ? Math.round((aggregated.totalSteals / gamesPlayed) * 10) / 10 : 0,
+          avgBlocks:
+            gamesPlayed > 0 ? Math.round((aggregated.totalBlocks / gamesPlayed) * 10) / 10 : 0,
           fieldGoalPercentage:
             aggregated.totalFieldGoalsAttempted > 0
               ? Math.round(
                   (aggregated.totalFieldGoalsMade / aggregated.totalFieldGoalsAttempted) * 1000
+                ) / 10
+              : 0,
+          threePointPercentage:
+            aggregated.totalThreePointersAttempted > 0
+              ? Math.round(
+                  (aggregated.totalThreePointersMade / aggregated.totalThreePointersAttempted) *
+                    1000
+                ) / 10
+              : 0,
+          freeThrowPercentage:
+            aggregated.totalFreeThrowsAttempted > 0
+              ? Math.round(
+                  (aggregated.totalFreeThrowsMade / aggregated.totalFreeThrowsAttempted) * 1000
                 ) / 10
               : 0,
         };

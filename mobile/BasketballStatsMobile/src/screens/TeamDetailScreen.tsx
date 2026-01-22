@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   RefreshControl,
   Modal,
@@ -95,7 +94,7 @@ export default function TeamDetailScreen() {
   // Fetch pair stats
   const pairStatsData = useQuery(
     api.lineups.getTeamPairStats,
-    token && teamId ? { token, teamId: teamId as Id<"teams">, limit: 10 } : "skip"
+    token && teamId ? { token, teamId: teamId as Id<"teams">, limit: 20 } : "skip"
   );
 
   // Mutations
@@ -210,24 +209,16 @@ export default function TeamDetailScreen() {
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <View className="flex-row items-center">
-          <TouchableOpacity
-            className="bg-primary-500 px-3 py-1.5 rounded-lg mr-2"
-            onPress={() => navigation.navigate("CreatePlayer", { teamId })}
-          >
-            <Text className="text-white font-semibold text-sm">Add Player</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="p-2 mr-1" onPress={() => setShowOptionsMenu(true)}>
-            <FontAwesome5
-              name="ellipsis-v"
-              size={18}
-              color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
-            />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity className="p-2 mr-1" onPress={() => setShowOptionsMenu(true)}>
+          <FontAwesome5
+            name="ellipsis-v"
+            size={18}
+            color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
+          />
+        </TouchableOpacity>
       ),
     });
-  }, [navigation, teamId, resolvedTheme]);
+  }, [navigation, resolvedTheme]);
 
   if (teamData === undefined || playersData === undefined) {
     return (
@@ -261,10 +252,7 @@ export default function TeamDetailScreen() {
               <Text className="text-surface-600 dark:text-surface-400 text-sm">{team.city}</Text>
             )}
             {team?.description && (
-              <Text
-                className="text-surface-500 text-xs mt-1"
-                numberOfLines={2}
-              >
+              <Text className="text-surface-500 text-xs mt-1" numberOfLines={2}>
                 {team.description}
               </Text>
             )}
@@ -366,10 +354,7 @@ export default function TeamDetailScreen() {
 
       {/* Pair Stats */}
       <View className="mt-4">
-        <PairStatsCard
-          pairs={pairStatsData?.pairs || []}
-          isLoading={pairStatsData === undefined}
-        />
+        <PairStatsCard pairs={pairStatsData?.pairs || []} isLoading={pairStatsData === undefined} />
       </View>
 
       {/* Recent Games */}
@@ -408,11 +393,7 @@ export default function TeamDetailScreen() {
                 >
                   <Text
                     className={`text-sm font-bold ${
-                      isCompleted
-                        ? won
-                          ? "text-green-500"
-                          : "text-red-500"
-                        : "text-surface-500"
+                      isCompleted ? (won ? "text-green-500" : "text-red-500") : "text-surface-500"
                     }`}
                   >
                     {isCompleted ? (won ? "W" : "L") : "-"}
@@ -423,9 +404,7 @@ export default function TeamDetailScreen() {
                     {isHome ? "vs" : "@"} {opponent?.name || "Unknown"}
                   </Text>
                   <Text className="text-xs text-surface-500">
-                    {game.scheduledAt
-                      ? new Date(game.scheduledAt).toLocaleDateString()
-                      : "No date"}
+                    {game.scheduledAt ? new Date(game.scheduledAt).toLocaleDateString() : "No date"}
                   </Text>
                 </View>
                 {isCompleted && (
@@ -439,84 +418,109 @@ export default function TeamDetailScreen() {
         </View>
       )}
 
-      {/* Roster Section Header */}
-      <View className="flex-row items-center justify-between mb-2">
-        <Text className="text-sm font-semibold text-surface-900 dark:text-white">Roster</Text>
-        <Text className="text-xs text-surface-500">{players.length} players</Text>
-      </View>
-    </View>
-  );
-
-  const renderPlayer = ({ item: player }: { item: Player }) => (
-    <TouchableOpacity
-      className="mx-4 mb-3 bg-white dark:bg-surface-800 rounded-xl p-4 flex-row items-center border border-surface-200 dark:border-surface-700"
-      onPress={() => navigation.navigate("PlayerStats", { playerId: player.id })}
-    >
-      <View className="w-12 h-12 rounded-full bg-surface-100 dark:bg-surface-700 items-center justify-center mr-4">
-        <Text className="text-surface-900 dark:text-white text-lg font-bold">{player.number}</Text>
-      </View>
-
-      <View className="flex-1">
-        <Text className="text-surface-900 dark:text-white text-base font-semibold">
-          {player.name}
-        </Text>
-        <View className="flex-row items-center mt-1">
-          {player.position && (
-            <View
-              className="px-2 py-0.5 rounded mr-2"
-              style={{ backgroundColor: getPositionColor(player.position) + "20" }}
-            >
-              <Text
-                className="text-xs font-semibold"
-                style={{ color: getPositionColor(player.position) }}
-              >
-                {player.position}
+      {/* Roster Card */}
+      <View className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden mb-4">
+        {/* Roster Header */}
+        <View className="flex-row items-center justify-between px-4 py-3 border-b border-surface-200 dark:border-surface-700">
+          <View className="flex-row items-center">
+            <Text className="text-base font-semibold text-surface-900 dark:text-white">Roster</Text>
+            <View className="ml-2 px-2 py-0.5 rounded-full bg-surface-100 dark:bg-surface-700">
+              <Text className="text-xs font-medium text-surface-600 dark:text-surface-400">
+                {players.length}
               </Text>
             </View>
-          )}
-          <Text
-            className={`text-xs font-medium ${
-              player.active !== false ? "text-green-500" : "text-surface-500"
-            }`}
+          </View>
+          <TouchableOpacity
+            className="bg-primary-500 px-3 py-1.5 rounded-lg flex-row items-center"
+            onPress={() => navigation.navigate("CreatePlayer", { teamId })}
           >
-            {player.active !== false ? "Active" : "Inactive"}
-          </Text>
+            <Icon name="plus" size={14} color="#FFFFFF" />
+            <Text className="text-white font-semibold text-xs ml-1">Add</Text>
+          </TouchableOpacity>
         </View>
-      </View>
 
-      <Icon
-        name="chevron-right"
-        size={20}
-        color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
-      />
-    </TouchableOpacity>
+        {/* Player List */}
+        {players.length === 0 ? (
+          <View className="items-center justify-center py-12 px-4">
+            <View className="w-14 h-14 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
+              <Icon name="user" size={28} color="#F97316" />
+            </View>
+            <Text className="text-surface-900 dark:text-white font-semibold mb-1">
+              No players yet
+            </Text>
+            <Text className="text-surface-500 text-sm text-center">
+              Add players to this team to start tracking their stats
+            </Text>
+          </View>
+        ) : (
+          <View>
+            {players.map((player: Player, index: number) => (
+              <TouchableOpacity
+                key={player.id}
+                className={`flex-row items-center px-4 py-3 ${
+                  index < players.length - 1
+                    ? "border-b border-surface-100 dark:border-surface-800"
+                    : ""
+                }`}
+                onPress={() => navigation.navigate("PlayerStats", { playerId: player.id })}
+              >
+                <View className="w-11 h-11 rounded-xl bg-surface-100 dark:bg-surface-700 items-center justify-center">
+                  <Text className="text-surface-900 dark:text-white text-base font-bold">
+                    {player.number}
+                  </Text>
+                </View>
+
+                <View className="flex-1 ml-3">
+                  <Text className="text-surface-900 dark:text-white text-sm font-semibold">
+                    {player.name}
+                  </Text>
+                  <View className="flex-row items-center mt-0.5">
+                    {player.position && (
+                      <View
+                        className="px-1.5 py-0.5 rounded mr-2"
+                        style={{ backgroundColor: getPositionColor(player.position) + "20" }}
+                      >
+                        <Text
+                          className="text-[10px] font-semibold"
+                          style={{ color: getPositionColor(player.position) }}
+                        >
+                          {player.position}
+                        </Text>
+                      </View>
+                    )}
+                    <Text
+                      className={`text-[10px] font-medium ${
+                        player.active !== false ? "text-green-500" : "text-surface-500"
+                      }`}
+                    >
+                      {player.active !== false ? "Active" : "Inactive"}
+                    </Text>
+                  </View>
+                </View>
+
+                <Icon
+                  name="chevron-right"
+                  size={18}
+                  color={resolvedTheme === "dark" ? "#6B7280" : "#9CA3AF"}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
+    </View>
   );
 
   return (
     <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       <StatusBar style={statusBarStyle} />
 
-      <FlatList
-        data={players}
-        renderItem={renderPlayer}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={renderHeader}
+      <ScrollView
         contentContainerStyle={{ paddingBottom: 24 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        ListEmptyComponent={
-          <View className="mx-4 items-center justify-center py-12 bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
-            <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
-              <Icon name="user" size={32} color="#F97316" />
-            </View>
-            <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
-              No players yet
-            </Text>
-            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center leading-5 px-8">
-              Add players to this team to get started
-            </Text>
-          </View>
-        }
-      />
+      >
+        {renderHeader()}
+      </ScrollView>
 
       {/* Options Menu Modal */}
       <Modal
