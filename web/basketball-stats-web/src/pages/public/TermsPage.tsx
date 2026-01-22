@@ -132,10 +132,10 @@ export default function TermsPage() {
                 <p className="text-surface-600 dark:text-surface-400">
                   If you have any questions about these Terms, please contact us at{" "}
                   <a
-                    href="mailto:legal@basketballstats.app"
+                    href="mailto:legal@basketballstatsapp.com"
                     className="text-primary-600 hover:text-primary-500"
                   >
-                    legal@basketballstats.app
+                    legal@basketballstatsapp.com
                   </a>
                 </p>
               </section>

@@ -814,7 +814,7 @@ export const getInviteCode = query({
 
     return {
       inviteCode: league.inviteCode,
-      inviteUrl: `https://basketballstats.app/join/${league.inviteCode}`,
+      inviteUrl: `https://basketballstatsapp.com/join/${league.inviteCode}`,
     };
   },
 });
@@ -951,7 +951,8 @@ export const updateMemberRole = mutation({
     // Get the target membership
     const membership = await ctx.db.get(args.membershipId);
     if (!membership) throw new Error("Membership not found");
-    if (membership.leagueId !== args.leagueId) throw new Error("Membership does not belong to this league");
+    if (membership.leagueId !== args.leagueId)
+      throw new Error("Membership does not belong to this league");
 
     // Get the target user
     const targetUser = await ctx.db.get(membership.userId);
@@ -1004,7 +1005,8 @@ export const removeMember = mutation({
     // Get the target membership
     const membership = await ctx.db.get(args.membershipId);
     if (!membership) throw new Error("Membership not found");
-    if (membership.leagueId !== args.leagueId) throw new Error("Membership does not belong to this league");
+    if (membership.leagueId !== args.leagueId)
+      throw new Error("Membership does not belong to this league");
 
     // Get the target user for the response message
     const targetUser = await ctx.db.get(membership.userId);

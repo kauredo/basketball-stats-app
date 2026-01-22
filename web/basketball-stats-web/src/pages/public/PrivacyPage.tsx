@@ -114,10 +114,10 @@ export default function PrivacyPage() {
                 <p className="text-surface-600 dark:text-surface-400">
                   If you have any questions about this Privacy Policy, please contact us at{" "}
                   <a
-                    href="mailto:privacy@basketballstats.app"
+                    href="mailto:privacy@basketballstatsapp.com"
                     className="text-primary-600 hover:text-primary-500"
                   >
-                    privacy@basketballstats.app
+                    privacy@basketballstatsapp.com
                   </a>
                 </p>
               </section>

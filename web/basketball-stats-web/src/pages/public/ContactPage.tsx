@@ -167,10 +167,10 @@ export default function ContactPage() {
             <p className="text-surface-600 dark:text-surface-400">
               You can also reach us directly at{" "}
               <a
-                href="mailto:support@basketballstats.app"
+                href="mailto:support@basketballstatsapp.com"
                 className="text-primary-600 hover:text-primary-500 font-medium"
               >
-                support@basketballstats.app
+                support@basketballstatsapp.com
               </a>
             </p>
           </div>

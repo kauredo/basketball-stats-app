@@ -45,7 +45,7 @@ export default function FAQPage() {
                 <Icon name="arrow-right" size={20} className="ml-2" />
               </Link>
               <a
-                href="mailto:support@basketballstats.app"
+                href="mailto:support@basketballstatsapp.com"
                 className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-surface-700 dark:text-surface-300 bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 rounded-lg transition-colors"
               >
                 Contact Support
