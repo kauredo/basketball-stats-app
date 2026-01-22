@@ -71,12 +71,7 @@ export default function LeagueSettingsScreen() {
 
   const handleCopyInviteCode = () => {
     if (!inviteData?.inviteCode) return;
-    Alert.alert(
-      "Invite Code",
-      inviteData.inviteCode,
-      [{ text: "OK" }],
-      { cancelable: true }
-    );
+    Alert.alert("Invite Code", inviteData.inviteCode, [{ text: "OK" }], { cancelable: true });
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
   };
@@ -391,11 +386,7 @@ export default function LeagueSettingsScreen() {
                   </Text>
                 </View>
               </View>
-              <Icon
-                name="chevron-right"
-                size={20}
-                color={isDark ? "#9CA3AF" : "#6B7280"}
-              />
+              <Icon name="chevron-right" size={20} color={isDark ? "#9CA3AF" : "#6B7280"} />
             </TouchableOpacity>
           </View>
         </View>
@@ -425,7 +416,7 @@ export default function LeagueSettingsScreen() {
               </TouchableOpacity>
             </View>
             <Text className="text-surface-500 dark:text-surface-400 text-xs">
-              New members will join as "Member" role by default
+              New members will join as &quot;Member&quot; role by default
             </Text>
           </View>
         </View>

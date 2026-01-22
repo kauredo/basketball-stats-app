@@ -176,9 +176,7 @@ export default function MembersList({ canManage }: MembersListProps) {
       {sortedMembers.length === 0 ? (
         <div className="text-center py-12">
           <UsersIcon className="mx-auto h-12 w-12 text-surface-400" />
-          <h3 className="mt-2 text-sm font-medium text-surface-900 dark:text-white">
-            No members
-          </h3>
+          <h3 className="mt-2 text-sm font-medium text-surface-900 dark:text-white">No members</h3>
           <p className="mt-1 text-sm text-surface-500 dark:text-surface-400">
             Share your invite code to add members.
           </p>

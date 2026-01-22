@@ -3,6 +3,7 @@
     "name": "Basketball Stats",
     "slug": "BasketballStatsMobile",
     "version": "1.0.0",
+    "scheme": "basketballstats",
     "entryPoint": "./index.ts",
     "orientation": "default",
     "icon": "./assets/icon.png",

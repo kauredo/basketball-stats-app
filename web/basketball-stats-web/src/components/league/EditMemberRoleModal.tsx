@@ -111,9 +111,7 @@ export default function EditMemberRoleModal({
     <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 w-full max-w-md border border-surface-200 dark:border-surface-700 animate-scale-in shadow-elevated">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-medium text-surface-900 dark:text-white">
-            Change Role
-          </h3>
+          <h3 className="text-lg font-medium text-surface-900 dark:text-white">Change Role</h3>
           <button
             onClick={onClose}
             className="p-2 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
@@ -134,9 +132,7 @@ export default function EditMemberRoleModal({
             </span>
           </div>
           <div>
-            <div className="font-medium text-surface-900 dark:text-white">
-              {member.user?.name}
-            </div>
+            <div className="font-medium text-surface-900 dark:text-white">{member.user?.name}</div>
             <div className="text-sm text-surface-500 dark:text-surface-400">
               {member.user?.email}
             </div>
@@ -162,9 +158,7 @@ export default function EditMemberRoleModal({
                   <Icon className={`w-5 h-5 ${role.color}`} />
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="font-medium text-surface-900 dark:text-white">
-                    {role.label}
-                  </div>
+                  <div className="font-medium text-surface-900 dark:text-white">{role.label}</div>
                   <div className="text-sm text-surface-500 dark:text-surface-400">
                     {role.description}
                   </div>
@@ -176,9 +170,7 @@ export default function EditMemberRoleModal({
                       : "border-surface-300 dark:border-surface-500"
                   }`}
                 >
-                  {isSelected && (
-                    <div className="w-2 h-2 rounded-full bg-white" />
-                  )}
+                  {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                 </div>
               </button>
             );
@@ -187,10 +179,7 @@ export default function EditMemberRoleModal({
 
         {/* Actions */}
         <div className="flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="btn-secondary px-4 py-2 rounded-xl"
-          >
+          <button onClick={onClose} className="btn-secondary px-4 py-2 rounded-xl">
             Cancel
           </button>
           <button

@@ -1,19 +1,11 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
-import Icon from "../components/Icon";
-import type { IconName } from "../components/Icon";
+import Icon, { type IconName } from "../components/Icon";
 
 interface Member {
   id: Id<"leagueMemberships">;
@@ -113,9 +105,7 @@ export default function LeagueMembersScreen() {
     return (
       <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-900">
         <ActivityIndicator size="large" color="#F97316" />
-        <Text className="text-surface-600 dark:text-surface-400 mt-4">
-          Loading members...
-        </Text>
+        <Text className="text-surface-600 dark:text-surface-400 mt-4">Loading members...</Text>
       </View>
     );
   }
@@ -177,38 +167,29 @@ export default function LeagueMembersScreen() {
   };
 
   const handleChangeRole = (member: Member) => {
-    Alert.alert(
-      "Change Role",
-      `Select a new role for ${member.user?.name}`,
-      [
-        ...roleOptions.map((role) => ({
-          text: `${role.label}${member.role === role.value ? " (current)" : ""}`,
-          onPress: async () => {
-            if (member.role === role.value) return;
-            setIsUpdating(true);
-            try {
-              await updateMemberRole({
-                token: token!,
-                leagueId: selectedLeague!.id,
-                membershipId: member.id,
-                newRole: role.value as
-                  | "admin"
-                  | "coach"
-                  | "scorekeeper"
-                  | "member"
-                  | "viewer",
-              });
-              Alert.alert("Success", `Role updated to ${role.label}`);
-            } catch (error: any) {
-              Alert.alert("Error", error.message || "Failed to update role");
-            } finally {
-              setIsUpdating(false);
-            }
-          },
-        })),
-        { text: "Cancel", style: "cancel" },
-      ]
-    );
+    Alert.alert("Change Role", `Select a new role for ${member.user?.name}`, [
+      ...roleOptions.map((role) => ({
+        text: `${role.label}${member.role === role.value ? " (current)" : ""}`,
+        onPress: async () => {
+          if (member.role === role.value) return;
+          setIsUpdating(true);
+          try {
+            await updateMemberRole({
+              token: token!,
+              leagueId: selectedLeague!.id,
+              membershipId: member.id,
+              newRole: role.value as "admin" | "coach" | "scorekeeper" | "member" | "viewer",
+            });
+            Alert.alert("Success", `Role updated to ${role.label}`);
+          } catch (error: any) {
+            Alert.alert("Error", error.message || "Failed to update role");
+          } finally {
+            setIsUpdating(false);
+          }
+        },
+      })),
+      { text: "Cancel", style: "cancel" },
+    ]);
   };
 
   const handleRemoveMember = (member: Member) => {
@@ -243,8 +224,7 @@ export default function LeagueMembersScreen() {
   const handleMemberAction = (member: Member) => {
     if (!canEditMember(member) && !canRemoveMember(member)) return;
 
-    const options: { text: string; onPress?: () => void; style?: "cancel" | "destructive" }[] =
-      [];
+    const options: { text: string; onPress?: () => void; style?: "cancel" | "destructive" }[] = [];
 
     if (canEditMember(member)) {
       options.push({
@@ -333,10 +313,7 @@ export default function LeagueMembersScreen() {
           className={`flex-row items-center px-2.5 py-1.5 rounded-lg ${config.bgColor} ${config.darkBgColor}`}
         >
           <Icon name={config.icon} size={14} color={config.color} />
-          <Text
-            className="text-sm font-medium ml-1.5"
-            style={{ color: config.color }}
-          >
+          <Text className="text-sm font-medium ml-1.5" style={{ color: config.color }}>
             {member.displayRole}
           </Text>
         </View>
@@ -344,11 +321,7 @@ export default function LeagueMembersScreen() {
         {/* Chevron for actionable items */}
         {canInteract && (
           <View className="ml-2">
-            <Icon
-              name="chevron-right"
-              size={16}
-              color={isDark ? "#6B7280" : "#9CA3AF"}
-            />
+            <Icon name="chevron-right" size={16} color={isDark ? "#6B7280" : "#9CA3AF"} />
           </View>
         )}
       </TouchableOpacity>
@@ -360,8 +333,7 @@ export default function LeagueMembersScreen() {
       {/* Header info */}
       <View className="px-4 py-3 bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
         <Text className="text-surface-600 dark:text-surface-400 text-sm">
-          {sortedMembers.length} member{sortedMembers.length !== 1 ? "s" : ""} in{" "}
-          {league.name}
+          {sortedMembers.length} member{sortedMembers.length !== 1 ? "s" : ""} in {league.name}
         </Text>
         {!canManage && (
           <Text className="text-blue-600 dark:text-blue-400 text-xs mt-1">

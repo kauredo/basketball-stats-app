@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useAuth } from "../../contexts/AuthContext";
+import { useDeepLink } from "../../contexts/DeepLinkContext";
 import Button from "../../components/Button";
 import Icon from "../../components/Icon";
 
@@ -28,6 +29,7 @@ export default function LoginScreen({
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const { login, isLoading, error, clearError } = useAuth();
+  const { pendingInviteCode } = useDeepLink();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -80,6 +82,14 @@ export default function LoginScreen({
         </View>
 
         <View className="mb-8">
+          {pendingInviteCode && (
+            <View className="bg-primary-500/10 border border-primary-500/20 rounded-lg p-3 mb-4">
+              <Text className="text-primary-600 dark:text-primary-400 text-sm text-center font-medium">
+                Sign in to join your league
+              </Text>
+            </View>
+          )}
+
           {error && (
             <View className="bg-red-100 border border-red-200 rounded-lg p-3 mb-4">
               <Text className="text-red-600 text-sm text-center">{error}</Text>

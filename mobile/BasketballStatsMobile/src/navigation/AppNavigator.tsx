@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { View, Text, TouchableOpacity, Image, useColorScheme } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
 import { NAV_COLORS } from "@basketball-stats/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -167,6 +168,20 @@ function LoadingScreen() {
   );
 }
 
+// Deep linking configuration
+const linking = {
+  prefixes: [
+    Linking.createURL("/"), // basketballstats://
+    "https://basketballstatsapp.com",
+  ],
+  config: {
+    screens: {
+      // Deep links are handled by DeepLinkContext, not direct navigation
+      // This config just enables URL parsing
+    },
+  },
+};
+
 function AppContent() {
   const { isAuthenticated, selectedLeague, isLoading } = useAuth();
   const { resolvedTheme } = useTheme();
@@ -204,7 +219,11 @@ function AppContent() {
   }
 
   return (
-    <NavigationContainer theme={isDark ? DarkNavigationTheme : LightNavigationTheme}>
+    <NavigationContainer
+      theme={isDark ? DarkNavigationTheme : LightNavigationTheme}
+      linking={linking}
+      fallback={<LoadingScreen />}
+    >
       {!isAuthenticated ? (
         <AuthNavigator />
       ) : !selectedLeague ? (

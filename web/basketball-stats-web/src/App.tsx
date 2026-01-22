@@ -36,6 +36,7 @@ import ShotCharts from "./pages/ShotCharts";
 import PlayerDetail from "./pages/PlayerDetail";
 import TeamDetail from "./pages/TeamDetail";
 import LeagueSettings from "./pages/LeagueSettings";
+import JoinPage from "./pages/JoinPage";
 
 function LoadingScreen() {
   return (
@@ -119,12 +120,25 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
   if (isAuthenticated) {
+    // Check if there's a pending invite code to process
+    const pendingInviteCode = sessionStorage.getItem("pendingInviteCode");
+    if (pendingInviteCode) {
+      return <Navigate to={`/join/${pendingInviteCode}`} replace />;
+    }
+
+    // Check if we have a "from" location to return to
+    const from = (location.state as { from?: string })?.from;
+    if (from) {
+      return <Navigate to={from} replace />;
+    }
+
     return <Navigate to="/app" replace />;
   }
 
@@ -201,6 +215,9 @@ function AppRoutes() {
           </PublicOnlyRoute>
         }
       />
+
+      {/* Join league route - handles both authenticated and unauthenticated users */}
+      <Route path="/join/:inviteCode" element={<JoinPage />} />
 
       {/* Protected app routes */}
       <Route

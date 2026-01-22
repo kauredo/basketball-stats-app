@@ -5,10 +5,7 @@ import type { Id } from "../../../../../convex/_generated/dataModel";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { getErrorMessage } from "../../utils/error";
-import {
-  XMarkIcon,
-  ExclamationTriangleIcon,
-} from "@heroicons/react/24/outline";
+import { XMarkIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 interface Member {
   id: Id<"leagueMemberships">;
@@ -26,11 +23,7 @@ interface RemoveMemberModalProps {
   onSuccess: () => void;
 }
 
-export default function RemoveMemberModal({
-  member,
-  onClose,
-  onSuccess,
-}: RemoveMemberModalProps) {
+export default function RemoveMemberModal({ member, onClose, onSuccess }: RemoveMemberModalProps) {
   const { token, selectedLeague } = useAuth();
   const toast = useToast();
   const [isRemoving, setIsRemoving] = useState(false);
@@ -66,9 +59,7 @@ export default function RemoveMemberModal({
             <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
               <ExclamationTriangleIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
             </div>
-            <h3 className="text-lg font-medium text-surface-900 dark:text-white">
-              Remove Member
-            </h3>
+            <h3 className="text-lg font-medium text-surface-900 dark:text-white">Remove Member</h3>
           </div>
           <button
             onClick={onClose}
@@ -109,16 +100,13 @@ export default function RemoveMemberModal({
           </div>
 
           <p className="text-sm text-surface-500 dark:text-surface-500 mt-4">
-            This person will lose access to the league immediately. They can rejoin
-            using an invite code.
+            This person will lose access to the league immediately. They can rejoin using an invite
+            code.
           </p>
         </div>
 
         <div className="flex justify-end space-x-3">
-          <button
-            onClick={onClose}
-            className="btn-secondary px-4 py-2 rounded-xl"
-          >
+          <button onClick={onClose} className="btn-secondary px-4 py-2 rounded-xl">
             Cancel
           </button>
           <button

@@ -124,9 +124,7 @@ export default function InviteCodeSection() {
 
       {/* Instructions */}
       <div className="bg-surface-50 dark:bg-surface-800/50 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-        <h4 className="text-sm font-medium text-surface-900 dark:text-white mb-2">
-          How it works
-        </h4>
+        <h4 className="text-sm font-medium text-surface-900 dark:text-white mb-2">How it works</h4>
         <ul className="text-sm text-surface-600 dark:text-surface-400 space-y-1.5">
           <li className="flex items-start gap-2">
             <span className="text-primary-500 font-medium">1.</span>

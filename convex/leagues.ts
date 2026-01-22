@@ -230,7 +230,7 @@ function getDefaultSettings(leagueType: string) {
       foulLimit: 5,
       timeoutsPerTeam: 4,
       overtimeMinutes: 4,
-      bonusMode: "college",
+      bonusMode: "nba",
       playersPerRoster: 12,
       trackAdvancedStats: true,
     },
@@ -256,8 +256,8 @@ function getDefaultSettings(leagueType: string) {
       quarterMinutes: 10,
       foulLimit: 5,
       timeoutsPerTeam: 3,
-      overtimeMinutes: 3,
-      bonusMode: "college",
+      overtimeMinutes: 5,
+      bonusMode: "nba",
       playersPerRoster: 12,
       trackAdvancedStats: false,
     },
@@ -586,6 +586,44 @@ export const join = mutation({
         joinedAt: membership!.joinedAt,
       },
       message: "Successfully joined league",
+    };
+  },
+});
+
+// Get league info from invite code (for confirmation before joining)
+export const getLeagueByInviteCode = query({
+  args: {
+    code: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const league = await ctx.db
+      .query("leagues")
+      .withIndex("by_invite_code", (q) => q.eq("inviteCode", args.code))
+      .first();
+
+    if (!league) {
+      return null;
+    }
+
+    // Get member count
+    const memberships = await ctx.db
+      .query("leagueMemberships")
+      .withIndex("by_league_status", (q) => q.eq("leagueId", league._id).eq("status", "active"))
+      .collect();
+
+    // Get team count
+    const teams = await ctx.db
+      .query("teams")
+      .withIndex("by_league", (q) => q.eq("leagueId", league._id))
+      .collect();
+
+    return {
+      id: league._id,
+      name: league.name,
+      description: league.description,
+      leagueType: league.leagueType,
+      membersCount: memberships.length,
+      teamsCount: teams.length,
     };
   },
 });

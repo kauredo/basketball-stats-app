@@ -5,6 +5,7 @@ import * as SecureStore from "expo-secure-store";
 import { AuthProvider } from "./src/contexts/AuthContext";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
 import { NotificationProvider } from "./src/contexts/NotificationContext";
+import { DeepLinkProvider } from "./src/contexts/DeepLinkContext";
 import AuthErrorBoundary from "./src/components/AuthErrorBoundary";
 import AppNavigator from "./src/navigation/AppNavigator";
 
@@ -81,9 +82,11 @@ function App() {
         <AuthErrorBoundary>
           <ThemeProvider>
             <AuthProvider>
-              <NotificationProvider>
-                <AppNavigator />
-              </NotificationProvider>
+              <DeepLinkProvider>
+                <NotificationProvider>
+                  <AppNavigator />
+                </NotificationProvider>
+              </DeepLinkProvider>
             </AuthProvider>
           </ThemeProvider>
         </AuthErrorBoundary>
