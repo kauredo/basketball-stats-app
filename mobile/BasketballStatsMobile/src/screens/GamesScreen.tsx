@@ -309,17 +309,57 @@ export default function GamesScreen() {
         contentContainerStyle={{ padding: 16 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         stickySectionHeadersEnabled={false}
+        ListHeaderComponent={
+          <TouchableOpacity
+            className="flex-row items-center justify-between bg-primary-500 rounded-2xl p-4 mb-4"
+            onPress={() => navigation.navigate("CreateGame")}
+            activeOpacity={0.8}
+            style={{
+              shadowColor: "#F97316",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 8,
+            }}
+          >
+            <View className="flex-row items-center">
+              <View className="w-10 h-10 bg-white/20 rounded-xl items-center justify-center mr-3">
+                <Icon name="basketball" size={22} color="#FFFFFF" />
+              </View>
+              <View>
+                <Text className="text-white text-base font-bold">New Game</Text>
+                <Text className="text-white/70 text-xs">Start tracking a game</Text>
+              </View>
+            </View>
+            <Icon name="chevron-right" size={20} color="rgba(255,255,255,0.6)" />
+          </TouchableOpacity>
+        }
         ListEmptyComponent={
-          <View className="items-center justify-center pt-20">
+          <View className="items-center justify-center pt-12">
             <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
               <Icon name="basketball" size={32} color="#F97316" />
             </View>
             <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
               No games yet
             </Text>
-            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center leading-5 px-8">
-              Games will appear here once they&apos;re scheduled or started
+            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center leading-5 px-8 mb-6">
+              Create your first game to start tracking stats
             </Text>
+            <TouchableOpacity
+              className="flex-row items-center bg-primary-500 rounded-xl px-5 py-3"
+              onPress={() => navigation.navigate("CreateGame")}
+              activeOpacity={0.8}
+              style={{
+                shadowColor: "#F97316",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 8,
+              }}
+            >
+              <Icon name="plus" size={18} color="#FFFFFF" />
+              <Text className="text-white text-sm font-bold ml-2">Create your first game</Text>
+            </TouchableOpacity>
           </View>
         }
       />

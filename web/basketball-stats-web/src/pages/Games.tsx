@@ -381,16 +381,16 @@ const Games: React.FC = () => {
         <div className="flex gap-3">
           <button
             onClick={() => setShowQuickGameModal(true)}
-            className="btn-secondary px-4 py-2.5 rounded-xl text-sm"
+            className="group flex items-center gap-2 px-4 py-2.5 bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 text-sm font-medium rounded-xl border border-surface-200 dark:border-surface-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900"
           >
-            <BoltIcon className="w-4 h-4 mr-2" />
+            <BoltIcon className="w-4 h-4 text-primary-500" />
             Quick Game
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="btn-primary px-4 py-2.5 rounded-xl text-sm"
+            className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white text-sm font-medium rounded-xl shadow-soft hover:shadow-glow-orange transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900"
           >
-            <PlusIcon className="w-4 h-4 mr-2" />
+            <PlusIcon className="w-4 h-4" />
             Create Game
           </button>
         </div>
@@ -426,8 +426,9 @@ const Games: React.FC = () => {
             </p>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="btn-primary px-5 py-2.5 rounded-xl"
+              className="group inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-medium rounded-xl shadow-soft hover:shadow-glow-orange transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900"
             >
+              <PlusIcon className="w-5 h-5" />
               Create your first game
             </button>
           </div>

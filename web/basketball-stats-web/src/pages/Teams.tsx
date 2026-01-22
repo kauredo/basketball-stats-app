@@ -267,9 +267,9 @@ const Teams: React.FC = () => {
             setSelectedTeam(team);
             setShowCreatePlayerModal(true);
           }}
-          className="btn-secondary px-3 py-2 text-xs rounded-xl"
+          className="group flex items-center gap-1.5 px-3 py-2 bg-surface-100 dark:bg-surface-700 hover:bg-primary-500 hover:text-white text-surface-700 dark:text-surface-300 text-xs font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-800"
         >
-          <UserPlusIcon className="w-4 h-4 mr-1" />
+          <UserPlusIcon className="w-4 h-4" />
           Add Player
         </button>
       </div>
@@ -318,9 +318,9 @@ const Teams: React.FC = () => {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="btn-primary px-4 py-2 text-sm rounded-xl"
+          className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white text-sm font-medium rounded-xl shadow-soft hover:shadow-glow-orange transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900"
         >
-          <PlusIcon className="w-4 h-4 mr-2" />
+          <PlusIcon className="w-4 h-4" />
           Create Team
         </button>
       </div>
@@ -339,10 +339,10 @@ const Teams: React.FC = () => {
           <div className="mt-6">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="btn-primary px-4 py-2 text-sm rounded-xl"
+              className="group inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white text-sm font-medium rounded-xl shadow-soft hover:shadow-glow-orange transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900"
             >
-              <PlusIcon className="w-4 h-4 mr-2" />
-              Create Team
+              <PlusIcon className="w-5 h-5" />
+              Create your first team
             </button>
           </div>
         </div>

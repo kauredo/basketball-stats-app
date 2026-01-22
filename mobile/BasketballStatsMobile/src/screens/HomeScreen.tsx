@@ -358,36 +358,31 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Quick Actions */}
+        {/* Quick Action - New Game */}
         <View className="mb-6">
-          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
-            Quick Actions
-          </Text>
-          <View className="flex-row">
-            <TouchableOpacity
-              className="flex-1 bg-primary-500 rounded-xl p-3 mr-2 items-center"
-              onPress={() => navigation.navigate("CreateGame")}
-            >
-              <Icon name="basketball" size={20} color="#FFFFFF" />
-              <Text className="text-white text-xs font-semibold mt-1">New Game</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="flex-1 bg-blue-600 rounded-xl p-3 mr-2 items-center"
-              onPress={() => navigation.navigate("CreateTeam")}
-            >
-              <Icon name="users" size={20} color="#FFFFFF" />
-              <Text className="text-white text-xs font-semibold mt-1">New Team</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="flex-1 bg-green-600 rounded-xl p-3 items-center"
-              onPress={() => navigation.navigate("CreatePlayer")}
-            >
-              <Icon name="user" size={20} color="#FFFFFF" />
-              <Text className="text-white text-xs font-semibold mt-1">Add Player</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            className="flex-row items-center justify-between bg-primary-500 rounded-2xl p-4 shadow-lg"
+            onPress={() => navigation.navigate("CreateGame")}
+            activeOpacity={0.8}
+            style={{
+              shadowColor: "#F97316",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 8,
+            }}
+          >
+            <View className="flex-row items-center">
+              <View className="w-10 h-10 bg-white/20 rounded-xl items-center justify-center mr-3">
+                <Icon name="basketball" size={22} color="#FFFFFF" />
+              </View>
+              <View>
+                <Text className="text-white text-base font-bold">New Game</Text>
+                <Text className="text-white/70 text-xs">Start tracking now</Text>
+              </View>
+            </View>
+            <Icon name="chevron-right" size={20} color="rgba(255,255,255,0.6)" />
+          </TouchableOpacity>
         </View>
 
         {/* Empty State - When no games at all */}

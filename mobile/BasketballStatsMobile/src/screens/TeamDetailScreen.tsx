@@ -431,11 +431,12 @@ export default function TeamDetailScreen() {
             </View>
           </View>
           <TouchableOpacity
-            className="bg-primary-500 px-3 py-1.5 rounded-lg flex-row items-center"
+            className="bg-surface-100 dark:bg-surface-700 px-3 py-2 rounded-xl flex-row items-center"
             onPress={() => navigation.navigate("CreatePlayer", { teamId })}
+            activeOpacity={0.7}
           >
-            <Icon name="plus" size={14} color="#FFFFFF" />
-            <Text className="text-white font-semibold text-xs ml-1">Add</Text>
+            <Icon name="user-plus" size={14} color="#F97316" />
+            <Text className="text-primary-500 font-semibold text-xs ml-1.5">Add Player</Text>
           </TouchableOpacity>
         </View>
 
