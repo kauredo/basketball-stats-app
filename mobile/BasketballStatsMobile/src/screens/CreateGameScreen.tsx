@@ -375,6 +375,13 @@ export default function CreateGameScreen() {
     token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
   );
 
+  // Fetch league settings
+  const leagueSettingsData = useQuery(
+    api.leagues.getSettings,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
+  const leagueSettings = leagueSettingsData?.settings;
+
   const teams: Team[] =
     teamsData?.teams.map((t) => ({
       id: t.id,
@@ -686,6 +693,24 @@ export default function CreateGameScreen() {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* League Settings Info */}
+          {leagueSettings && (
+            <View className="mt-3 bg-surface-100 dark:bg-surface-800 rounded-xl p-3">
+              <View className="flex-row items-start">
+                <Icon name="alert" size={16} color="#6B7280" />
+                <View className="ml-2 flex-1">
+                  <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium">
+                    Other rules from league settings
+                  </Text>
+                  <Text className="text-surface-500 dark:text-surface-400 text-xs mt-1">
+                    {leagueSettings.foulLimit} foul limit • {leagueSettings.timeoutsPerTeam}{" "}
+                    timeouts • {leagueSettings.bonusMode === "college" ? "College" : "NBA"} bonus
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
         </View>
 
         {/* Create Button */}

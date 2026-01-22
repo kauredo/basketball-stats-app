@@ -12,6 +12,7 @@ import {
   UserGroupIcon,
   CalendarDaysIcon,
   TrophyIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 
@@ -52,6 +53,7 @@ export default function LeagueSelectionPage() {
   // Settings modal state
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [settingsLeagueId, setSettingsLeagueId] = useState<Id<"leagues"> | null>(null);
+  const [isSettingsViewOnly, setIsSettingsViewOnly] = useState(false);
   const [settingsFormData, setSettingsFormData] = useState({
     quarterMinutes: 12,
     foulLimit: 6,
@@ -168,9 +170,10 @@ export default function LeagueSelectionPage() {
     }
   };
 
-  const handleOpenSettings = (e: React.MouseEvent, leagueId: Id<"leagues">) => {
+  const handleOpenSettings = (e: React.MouseEvent, leagueId: Id<"leagues">, viewOnly = false) => {
     e.stopPropagation();
     setSettingsLeagueId(leagueId);
+    setIsSettingsViewOnly(viewOnly);
     setShowSettingsModal(true);
     setSettingsError(null);
   };
@@ -368,18 +371,31 @@ export default function LeagueSelectionPage() {
                                 {role}
                               </span>
                             )}
-                            {canManageLeague(league) && (
+                            {canManageLeague(league) ? (
                               <button
                                 type="button"
-                                onClick={(e) => handleOpenSettings(e, league.id)}
+                                onClick={(e) => handleOpenSettings(e, league.id, false)}
                                 className={`p-2 rounded-lg transition-colors ${
                                   isSelected
                                     ? "hover:bg-white/20 text-white"
                                     : "hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-500"
                                 }`}
-                                aria-label={`Settings for ${league.name}`}
+                                aria-label={`Edit settings for ${league.name}`}
                               >
                                 <Cog6ToothIcon className="w-5 h-5" />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => handleOpenSettings(e, league.id, true)}
+                                className={`p-2 rounded-lg transition-colors ${
+                                  isSelected
+                                    ? "hover:bg-white/20 text-white"
+                                    : "hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-500"
+                                }`}
+                                aria-label={`View rules for ${league.name}`}
+                              >
+                                <InformationCircleIcon className="w-5 h-5" />
                               </button>
                             )}
                           </div>
@@ -619,13 +635,21 @@ export default function LeagueSelectionPage() {
         >
           <div className="bg-white dark:bg-surface-900 rounded-2xl w-full max-w-lg shadow-dramatic animate-scale-in max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-6 border-b border-surface-200 dark:border-surface-800">
-              <h3 className="text-xl font-bold text-surface-900 dark:text-white">
-                League Settings
-              </h3>
+              <div>
+                <h3 className="text-xl font-bold text-surface-900 dark:text-white">
+                  {isSettingsViewOnly ? "League Rules" : "League Settings"}
+                </h3>
+                {isSettingsViewOnly && (
+                  <p className="text-sm text-surface-500 mt-1">
+                    Contact a league admin to change settings
+                  </p>
+                )}
+              </div>
               <button
                 onClick={() => {
                   setShowSettingsModal(false);
                   setSettingsLeagueId(null);
+                  setIsSettingsViewOnly(false);
                 }}
                 className="p-2 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
               >
@@ -645,7 +669,78 @@ export default function LeagueSelectionPage() {
                   <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
                   <p className="text-surface-500 mt-4 text-sm">Loading settings...</p>
                 </div>
+              ) : isSettingsViewOnly ? (
+                /* View-Only Display */
+                <div className="space-y-6">
+                  {/* Game Rules */}
+                  <div>
+                    <h4 className="section-header mb-4">Game Rules</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 rounded-lg bg-surface-50 dark:bg-surface-800">
+                        <p className="text-xs text-surface-500 mb-1">Quarter Length</p>
+                        <p className="font-medium text-surface-900 dark:text-white">
+                          {settingsFormData.quarterMinutes} min
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-surface-50 dark:bg-surface-800">
+                        <p className="text-xs text-surface-500 mb-1">Foul Limit</p>
+                        <p className="font-medium text-surface-900 dark:text-white">
+                          {settingsFormData.foulLimit} fouls
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-surface-50 dark:bg-surface-800">
+                        <p className="text-xs text-surface-500 mb-1">Timeouts / Team</p>
+                        <p className="font-medium text-surface-900 dark:text-white">
+                          {settingsFormData.timeoutsPerTeam}
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-surface-50 dark:bg-surface-800">
+                        <p className="text-xs text-surface-500 mb-1">Overtime</p>
+                        <p className="font-medium text-surface-900 dark:text-white">
+                          {settingsFormData.overtimeMinutes} min
+                        </p>
+                      </div>
+                      <div className="col-span-2 p-3 rounded-lg bg-surface-50 dark:bg-surface-800">
+                        <p className="text-xs text-surface-500 mb-1">Bonus Mode</p>
+                        <p className="font-medium text-surface-900 dark:text-white">
+                          {settingsFormData.bonusMode === "college"
+                            ? "College (7th team foul)"
+                            : "NBA (5th team foul)"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* League Rules */}
+                  <div>
+                    <h4 className="section-header mb-4">League Rules</h4>
+                    <div className="space-y-3">
+                      <div className="p-3 rounded-lg bg-surface-50 dark:bg-surface-800">
+                        <p className="text-xs text-surface-500 mb-1">Max Roster Size</p>
+                        <p className="font-medium text-surface-900 dark:text-white">
+                          {settingsFormData.playersPerRoster} players
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-surface-50 dark:bg-surface-800">
+                        <div>
+                          <p className="text-xs text-surface-500 mb-1">Advanced Stats</p>
+                          <p className="font-medium text-surface-900 dark:text-white">
+                            {settingsFormData.trackAdvancedStats ? "Enabled" : "Disabled"}
+                          </p>
+                        </div>
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            settingsFormData.trackAdvancedStats
+                              ? "bg-emerald-500"
+                              : "bg-surface-300 dark:bg-surface-600"
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               ) : (
+                /* Editable Form */
                 <form id="settings-form" onSubmit={handleSaveSettings} className="space-y-6">
                   {/* Game Rules */}
                   <div>
@@ -845,24 +940,40 @@ export default function LeagueSelectionPage() {
 
             {settingsData && (
               <div className="p-6 border-t border-surface-200 dark:border-surface-800 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSettingsModal(false);
-                    setSettingsLeagueId(null);
-                  }}
-                  className="flex-1 btn-secondary py-3"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  form="settings-form"
-                  disabled={isSavingSettings}
-                  className="flex-1 btn-primary py-3"
-                >
-                  {isSavingSettings ? "Saving..." : "Save Changes"}
-                </button>
+                {isSettingsViewOnly ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSettingsModal(false);
+                      setSettingsLeagueId(null);
+                      setIsSettingsViewOnly(false);
+                    }}
+                    className="flex-1 btn-primary py-3"
+                  >
+                    Close
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowSettingsModal(false);
+                        setSettingsLeagueId(null);
+                      }}
+                      className="flex-1 btn-secondary py-3"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      form="settings-form"
+                      disabled={isSavingSettings}
+                      className="flex-1 btn-primary py-3"
+                    >
+                      {isSavingSettings ? "Saving..." : "Save Changes"}
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>

@@ -79,6 +79,13 @@ const Games: React.FC = () => {
     token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
   );
 
+  // Fetch league settings for display in game creation
+  const leagueSettingsData = useQuery(
+    api.leagues.getSettings,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
+  const leagueSettings = leagueSettingsData?.settings;
+
   const createGame = useMutation(api.games.create);
   const createQuickGame = useMutation(api.games.createQuickGame);
   const createTeam = useMutation(api.teams.create);
@@ -572,6 +579,25 @@ const Games: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* League Settings Info */}
+              {leagueSettings && (
+                <div className="pt-2">
+                  <div className="flex items-start gap-2 p-3 bg-surface-50 dark:bg-surface-900 rounded-xl">
+                    <InformationCircleIcon className="w-5 h-5 text-surface-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
+                        Game will use league settings
+                      </p>
+                      <p className="text-xs text-surface-500">
+                        {leagueSettings.quarterMinutes} min quarters • {leagueSettings.foulLimit}{" "}
+                        foul limit • {leagueSettings.bonusMode === "college" ? "College" : "NBA"}{" "}
+                        bonus
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-3 p-6 border-t border-surface-200 dark:border-surface-700">
@@ -694,11 +720,17 @@ const Games: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-surface-50 dark:bg-surface-900 rounded-xl p-4">
+              <div className="bg-surface-50 dark:bg-surface-900 rounded-xl p-4 space-y-2">
                 <p className="text-sm text-surface-500 dark:text-surface-400">
                   Creates two temporary teams with 15 numbered players each. You can select lineups
                   and track full stats.
                 </p>
+                {leagueSettings && (
+                  <p className="text-xs text-surface-400 pt-1 border-t border-surface-200 dark:border-surface-700">
+                    Uses league rules: {leagueSettings.foulLimit} foul limit •{" "}
+                    {leagueSettings.bonusMode === "college" ? "College" : "NBA"} bonus
+                  </p>
+                )}
               </div>
             </div>
 

@@ -24,6 +24,13 @@ export default function LeagueSettingsScreen() {
   const isDark = resolvedTheme === "dark";
   const [isSaving, setIsSaving] = useState(false);
 
+  // Check if user can edit settings
+  const canEdit =
+    selectedLeague?.role === "admin" ||
+    selectedLeague?.role === "owner" ||
+    (selectedLeague as any)?.membership?.role === "admin" ||
+    (selectedLeague as any)?.membership?.role === "owner";
+
   // Picker colors based on theme
   const pickerTextColor = isDark ? "#FFFFFF" : "#1f2937";
   const pickerIconColor = isDark ? "#9CA3AF" : "#6B7280";
@@ -114,105 +121,146 @@ export default function LeagueSettingsScreen() {
     );
   }
 
+  // Helper component for read-only display
+  const ReadOnlyValue = ({ label, value }: { label: string; value: string }) => (
+    <View className="p-4 border-b border-surface-200 dark:border-surface-700">
+      <Text className="text-surface-500 dark:text-surface-400 text-xs mb-1">{label}</Text>
+      <Text className="text-surface-900 dark:text-white font-medium text-base">{value}</Text>
+    </View>
+  );
+
   return (
     <View className="flex-1 bg-surface-50 dark:bg-surface-900">
       <ScrollView className="flex-1 p-4">
+        {/* View-only notice for non-admins */}
+        {!canEdit && (
+          <View className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+            <Text className="text-blue-700 dark:text-blue-300 text-sm text-center">
+              Contact a league admin to change these settings
+            </Text>
+          </View>
+        )}
+
         {/* Game Rules Section */}
         <View className="mb-6">
           <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
             Game Rules
           </Text>
           <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
-            {/* Quarter Length */}
-            <View className="p-4 border-b border-surface-200 dark:border-surface-700">
-              <Text className="text-surface-900 dark:text-white font-medium mb-2">
-                Quarter Length
-              </Text>
-              <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
-                <Picker
-                  selectedValue={quarterMinutes}
-                  onValueChange={(value) => setQuarterMinutes(value)}
-                  style={{ color: pickerTextColor }}
-                  dropdownIconColor={pickerIconColor}
-                >
-                  <Picker.Item label="5 minutes" value={5} />
-                  <Picker.Item label="6 minutes" value={6} />
-                  <Picker.Item label="8 minutes" value={8} />
-                  <Picker.Item label="10 minutes" value={10} />
-                  <Picker.Item label="12 minutes" value={12} />
-                </Picker>
-              </View>
-            </View>
+            {canEdit ? (
+              <>
+                {/* Quarter Length - Editable */}
+                <View className="p-4 border-b border-surface-200 dark:border-surface-700">
+                  <Text className="text-surface-900 dark:text-white font-medium mb-2">
+                    Quarter Length
+                  </Text>
+                  <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
+                    <Picker
+                      selectedValue={quarterMinutes}
+                      onValueChange={(value) => setQuarterMinutes(value)}
+                      style={{ color: pickerTextColor }}
+                      dropdownIconColor={pickerIconColor}
+                    >
+                      <Picker.Item label="5 minutes" value={5} />
+                      <Picker.Item label="6 minutes" value={6} />
+                      <Picker.Item label="8 minutes" value={8} />
+                      <Picker.Item label="10 minutes" value={10} />
+                      <Picker.Item label="12 minutes" value={12} />
+                    </Picker>
+                  </View>
+                </View>
 
-            {/* Foul Limit */}
-            <View className="p-4 border-b border-surface-200 dark:border-surface-700">
-              <Text className="text-surface-900 dark:text-white font-medium mb-2">Foul Limit</Text>
-              <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
-                <Picker
-                  selectedValue={foulLimit}
-                  onValueChange={(value) => setFoulLimit(value)}
-                  style={{ color: pickerTextColor }}
-                  dropdownIconColor={pickerIconColor}
-                >
-                  <Picker.Item label="5 fouls" value={5} />
-                  <Picker.Item label="6 fouls" value={6} />
-                </Picker>
-              </View>
-            </View>
+                {/* Foul Limit - Editable */}
+                <View className="p-4 border-b border-surface-200 dark:border-surface-700">
+                  <Text className="text-surface-900 dark:text-white font-medium mb-2">
+                    Foul Limit
+                  </Text>
+                  <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
+                    <Picker
+                      selectedValue={foulLimit}
+                      onValueChange={(value) => setFoulLimit(value)}
+                      style={{ color: pickerTextColor }}
+                      dropdownIconColor={pickerIconColor}
+                    >
+                      <Picker.Item label="5 fouls" value={5} />
+                      <Picker.Item label="6 fouls" value={6} />
+                    </Picker>
+                  </View>
+                </View>
 
-            {/* Timeouts per Team */}
-            <View className="p-4 border-b border-surface-200 dark:border-surface-700">
-              <Text className="text-surface-900 dark:text-white font-medium mb-2">
-                Timeouts per Team
-              </Text>
-              <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
-                <Picker
-                  selectedValue={timeoutsPerTeam}
-                  onValueChange={(value) => setTimeoutsPerTeam(value)}
-                  style={{ color: pickerTextColor }}
-                  dropdownIconColor={pickerIconColor}
-                >
-                  {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-                    <Picker.Item key={n} label={`${n}`} value={n} />
-                  ))}
-                </Picker>
-              </View>
-            </View>
+                {/* Timeouts per Team - Editable */}
+                <View className="p-4 border-b border-surface-200 dark:border-surface-700">
+                  <Text className="text-surface-900 dark:text-white font-medium mb-2">
+                    Timeouts per Team
+                  </Text>
+                  <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
+                    <Picker
+                      selectedValue={timeoutsPerTeam}
+                      onValueChange={(value) => setTimeoutsPerTeam(value)}
+                      style={{ color: pickerTextColor }}
+                      dropdownIconColor={pickerIconColor}
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+                        <Picker.Item key={n} label={`${n}`} value={n} />
+                      ))}
+                    </Picker>
+                  </View>
+                </View>
 
-            {/* Overtime Length */}
-            <View className="p-4 border-b border-surface-200 dark:border-surface-700">
-              <Text className="text-surface-900 dark:text-white font-medium mb-2">
-                Overtime Length
-              </Text>
-              <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
-                <Picker
-                  selectedValue={overtimeMinutes}
-                  onValueChange={(value) => setOvertimeMinutes(value)}
-                  style={{ color: pickerTextColor }}
-                  dropdownIconColor={pickerIconColor}
-                >
-                  <Picker.Item label="3 minutes" value={3} />
-                  <Picker.Item label="4 minutes" value={4} />
-                  <Picker.Item label="5 minutes" value={5} />
-                </Picker>
-              </View>
-            </View>
+                {/* Overtime Length - Editable */}
+                <View className="p-4 border-b border-surface-200 dark:border-surface-700">
+                  <Text className="text-surface-900 dark:text-white font-medium mb-2">
+                    Overtime Length
+                  </Text>
+                  <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
+                    <Picker
+                      selectedValue={overtimeMinutes}
+                      onValueChange={(value) => setOvertimeMinutes(value)}
+                      style={{ color: pickerTextColor }}
+                      dropdownIconColor={pickerIconColor}
+                    >
+                      <Picker.Item label="3 minutes" value={3} />
+                      <Picker.Item label="4 minutes" value={4} />
+                      <Picker.Item label="5 minutes" value={5} />
+                    </Picker>
+                  </View>
+                </View>
 
-            {/* Bonus Mode */}
-            <View className="p-4">
-              <Text className="text-surface-900 dark:text-white font-medium mb-2">Bonus Mode</Text>
-              <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
-                <Picker
-                  selectedValue={bonusMode}
-                  onValueChange={(value) => setBonusMode(value)}
-                  style={{ color: pickerTextColor }}
-                  dropdownIconColor={pickerIconColor}
-                >
-                  <Picker.Item label="College (7th foul)" value="college" />
-                  <Picker.Item label="NBA (5th foul)" value="nba" />
-                </Picker>
-              </View>
-            </View>
+                {/* Bonus Mode - Editable */}
+                <View className="p-4">
+                  <Text className="text-surface-900 dark:text-white font-medium mb-2">
+                    Bonus Mode
+                  </Text>
+                  <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
+                    <Picker
+                      selectedValue={bonusMode}
+                      onValueChange={(value) => setBonusMode(value)}
+                      style={{ color: pickerTextColor }}
+                      dropdownIconColor={pickerIconColor}
+                    >
+                      <Picker.Item label="College (7th foul)" value="college" />
+                      <Picker.Item label="NBA (5th foul)" value="nba" />
+                    </Picker>
+                  </View>
+                </View>
+              </>
+            ) : (
+              <>
+                {/* View-only displays */}
+                <ReadOnlyValue label="Quarter Length" value={`${quarterMinutes} minutes`} />
+                <ReadOnlyValue label="Foul Limit" value={`${foulLimit} fouls`} />
+                <ReadOnlyValue label="Timeouts per Team" value={`${timeoutsPerTeam}`} />
+                <ReadOnlyValue label="Overtime Length" value={`${overtimeMinutes} minutes`} />
+                <View className="p-4">
+                  <Text className="text-surface-500 dark:text-surface-400 text-xs mb-1">
+                    Bonus Mode
+                  </Text>
+                  <Text className="text-surface-900 dark:text-white font-medium text-base">
+                    {bonusMode === "college" ? "College (7th foul)" : "NBA (5th foul)"}
+                  </Text>
+                </View>
+              </>
+            )}
           </View>
         </View>
 
@@ -222,64 +270,92 @@ export default function LeagueSettingsScreen() {
             League Rules
           </Text>
           <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
-            {/* Players per Roster */}
-            <View className="p-4 border-b border-surface-200 dark:border-surface-700">
-              <Text className="text-surface-900 dark:text-white font-medium mb-2">
-                Players per Roster
-              </Text>
-              <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
-                <Picker
-                  selectedValue={playersPerRoster}
-                  onValueChange={(value) => setPlayersPerRoster(value)}
-                  style={{ color: pickerTextColor }}
-                  dropdownIconColor={pickerIconColor}
-                >
-                  {[8, 10, 12, 13, 15, 17, 20].map((n) => (
-                    <Picker.Item key={n} label={`${n} players`} value={n} />
-                  ))}
-                </Picker>
-              </View>
-            </View>
+            {canEdit ? (
+              <>
+                {/* Players per Roster - Editable */}
+                <View className="p-4 border-b border-surface-200 dark:border-surface-700">
+                  <Text className="text-surface-900 dark:text-white font-medium mb-2">
+                    Players per Roster
+                  </Text>
+                  <View className="bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden">
+                    <Picker
+                      selectedValue={playersPerRoster}
+                      onValueChange={(value) => setPlayersPerRoster(value)}
+                      style={{ color: pickerTextColor }}
+                      dropdownIconColor={pickerIconColor}
+                    >
+                      {[8, 10, 12, 13, 15, 17, 20].map((n) => (
+                        <Picker.Item key={n} label={`${n} players`} value={n} />
+                      ))}
+                    </Picker>
+                  </View>
+                </View>
 
-            {/* Track Advanced Stats */}
-            <View className="flex-row items-center justify-between p-4">
-              <View className="flex-1 mr-4">
-                <Text className="text-surface-900 dark:text-white font-medium">
-                  Track Advanced Stats
-                </Text>
-                <Text className="text-surface-600 dark:text-surface-400 text-sm">
-                  Plus/minus, efficiency rating, net rating
-                </Text>
-              </View>
-              <Switch
-                value={trackAdvancedStats}
-                onValueChange={setTrackAdvancedStats}
-                trackColor={{ false: "#374151", true: "#F97316" }}
-                thumbColor={trackAdvancedStats ? "#FFFFFF" : "#9CA3AF"}
-                accessibilityRole="switch"
-                accessibilityLabel="Track advanced stats"
-                accessibilityState={{ checked: trackAdvancedStats }}
-              />
-            </View>
+                {/* Track Advanced Stats - Editable */}
+                <View className="flex-row items-center justify-between p-4">
+                  <View className="flex-1 mr-4">
+                    <Text className="text-surface-900 dark:text-white font-medium">
+                      Track Advanced Stats
+                    </Text>
+                    <Text className="text-surface-600 dark:text-surface-400 text-sm">
+                      Plus/minus, efficiency rating, net rating
+                    </Text>
+                  </View>
+                  <Switch
+                    value={trackAdvancedStats}
+                    onValueChange={setTrackAdvancedStats}
+                    trackColor={{ false: "#374151", true: "#F97316" }}
+                    thumbColor={trackAdvancedStats ? "#FFFFFF" : "#9CA3AF"}
+                    accessibilityRole="switch"
+                    accessibilityLabel="Track advanced stats"
+                    accessibilityState={{ checked: trackAdvancedStats }}
+                  />
+                </View>
+              </>
+            ) : (
+              <>
+                {/* View-only displays */}
+                <ReadOnlyValue label="Players per Roster" value={`${playersPerRoster} players`} />
+                <View className="flex-row items-center justify-between p-4">
+                  <View className="flex-1 mr-4">
+                    <Text className="text-surface-500 dark:text-surface-400 text-xs mb-1">
+                      Track Advanced Stats
+                    </Text>
+                    <Text className="text-surface-900 dark:text-white font-medium text-base">
+                      {trackAdvancedStats ? "Enabled" : "Disabled"}
+                    </Text>
+                  </View>
+                  <View
+                    className={`w-4 h-4 rounded-full ${
+                      trackAdvancedStats ? "bg-emerald-500" : "bg-surface-300 dark:bg-surface-600"
+                    }`}
+                  />
+                </View>
+              </>
+            )}
           </View>
         </View>
 
-        {/* Save Button */}
-        <TouchableOpacity
-          className={`rounded-xl items-center mb-8 min-h-[48px] justify-center ${
-            isSaving ? "bg-surface-300 dark:bg-surface-600" : "bg-primary-500 active:bg-primary-600"
-          }`}
-          style={{ paddingVertical: 16 }}
-          onPress={handleSave}
-          disabled={isSaving}
-          accessibilityRole="button"
-          accessibilityLabel={isSaving ? "Saving settings" : "Save settings"}
-          accessibilityState={{ disabled: isSaving }}
-        >
-          <Text className="text-white font-bold text-lg">
-            {isSaving ? "Saving..." : "Save Settings"}
-          </Text>
-        </TouchableOpacity>
+        {/* Save Button - Only show for admins */}
+        {canEdit && (
+          <TouchableOpacity
+            className={`rounded-xl items-center mb-8 min-h-[48px] justify-center ${
+              isSaving
+                ? "bg-surface-300 dark:bg-surface-600"
+                : "bg-primary-500 active:bg-primary-600"
+            }`}
+            style={{ paddingVertical: 16 }}
+            onPress={handleSave}
+            disabled={isSaving}
+            accessibilityRole="button"
+            accessibilityLabel={isSaving ? "Saving settings" : "Save settings"}
+            accessibilityState={{ disabled: isSaving }}
+          >
+            <Text className="text-white font-bold text-lg">
+              {isSaving ? "Saving..." : "Save Settings"}
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );
