@@ -298,6 +298,15 @@ export const getTeamsStats = query({
         const gamesPlayed = wins + losses;
         const aggregated = aggregateStats(allPlayerStats);
 
+        // Calculate points allowed (opponent scores)
+        let totalPointsAllowed = 0;
+        for (const game of homeGames) {
+          totalPointsAllowed += game.awayScore;
+        }
+        for (const game of awayGames) {
+          totalPointsAllowed += game.homeScore;
+        }
+
         // Get team rebounds from teamStats (unattributed rebounds)
         const teamStatRecords = await ctx.db
           .query("teamStats")
@@ -330,6 +339,8 @@ export const getTeamsStats = query({
           winPercentage: gamesPlayed > 0 ? Math.round((wins / gamesPlayed) * 1000) / 10 : 0,
           avgPoints:
             gamesPlayed > 0 ? Math.round((aggregated.totalPoints / gamesPlayed) * 10) / 10 : 0,
+          avgPointsAllowed:
+            gamesPlayed > 0 ? Math.round((totalPointsAllowed / gamesPlayed) * 10) / 10 : 0,
           avgRebounds:
             gamesPlayed > 0 ? Math.round((totalReboundsWithTeam / gamesPlayed) * 10) / 10 : 0,
           avgOffensiveRebounds:

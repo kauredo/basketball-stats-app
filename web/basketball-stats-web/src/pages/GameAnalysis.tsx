@@ -4,8 +4,18 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import type { Id } from "../../../../convex/_generated/dataModel";
-import { TrophyIcon, ChartBarIcon, TableCellsIcon, PlayIcon } from "@heroicons/react/24/outline";
+import {
+  TrophyIcon,
+  ChartBarIcon,
+  TableCellsIcon,
+  PlayIcon,
+  PresentationChartBarIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/outline";
 import Breadcrumb from "../components/Breadcrumb";
+import { QuarterBreakdown } from "../components/livegame/stats/QuarterBreakdown";
+import { AdvancedStats } from "../components/livegame/stats/AdvancedStats";
+import { GameEventCard } from "../components/livegame/playbyplay/GameEventCard";
 import {
   BarChart,
   Bar,
@@ -17,7 +27,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-type TabType = "boxscore" | "charts" | "plays";
+type TabType = "boxscore" | "stats" | "charts" | "plays";
 
 const GameAnalysis: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -261,42 +271,49 @@ const GameAnalysis: React.FC = () => {
     );
   };
 
-  const getEventIcon = (eventType: string) => {
-    switch (eventType) {
-      case "shot_made":
-        return "🏀";
-      case "shot_missed":
-        return "❌";
-      case "rebound":
-        return "🔄";
-      case "assist":
-        return "🎯";
-      case "steal":
-        return "🔥";
-      case "block":
-        return "🛡️";
-      case "turnover":
-        return "💫";
-      case "foul":
-        return "⚠️";
-      case "free_throw_made":
-        return "✅";
-      case "free_throw_missed":
-        return "⭕";
-      case "timeout":
-        return "⏸️";
-      case "substitution":
-        return "🔁";
-      default:
-        return "📋";
-    }
-  };
-
   const tabs = [
     { id: "boxscore" as TabType, label: "Box Score", icon: TableCellsIcon },
+    { id: "stats" as TabType, label: "Team Stats", icon: PresentationChartBarIcon },
     { id: "charts" as TabType, label: "Charts", icon: ChartBarIcon },
     { id: "plays" as TabType, label: "Play-by-Play", icon: PlayIcon },
   ];
+
+  // Prepare player stats for AdvancedStats component
+  const preparePlayerStats = (players: any[], teamId: Id<"teams">, isHomeTeam: boolean) => {
+    return players.map((p: any) => ({
+      id: p.player?.id || p.playerId,
+      playerId: p.player?.id || p.playerId,
+      teamId,
+      player: p.player || { id: p.playerId, name: "Unknown", number: 0 },
+      points: p.points || 0,
+      rebounds: p.rebounds || 0,
+      offensiveRebounds: p.offensiveRebounds || 0,
+      defensiveRebounds: p.defensiveRebounds || 0,
+      assists: p.assists || 0,
+      steals: p.steals || 0,
+      blocks: p.blocks || 0,
+      turnovers: p.turnovers || 0,
+      fouls: p.fouls || 0,
+      fouledOut: p.fouledOut || false,
+      isOnCourt: p.isOnCourt || false,
+      isHomeTeam,
+      fieldGoalsMade: p.fieldGoalsMade || 0,
+      fieldGoalsAttempted: p.fieldGoalsAttempted || 0,
+      threePointersMade: p.threePointersMade || 0,
+      threePointersAttempted: p.threePointersAttempted || 0,
+      freeThrowsMade: p.freeThrowsMade || 0,
+      freeThrowsAttempted: p.freeThrowsAttempted || 0,
+      minutesPlayed: p.minutesPlayed || 0,
+      plusMinus: p.plusMinus || 0,
+    }));
+  };
+
+  const homePlayerStats = homeTeam
+    ? preparePlayerStats(homeTeam.players, homeTeam.team?.id as Id<"teams">, true)
+    : [];
+  const awayPlayerStats = awayTeam
+    ? preparePlayerStats(awayTeam.players, awayTeam.team?.id as Id<"teams">, false)
+    : [];
 
   return (
     <div className="space-y-6">
@@ -358,6 +375,16 @@ const GameAnalysis: React.FC = () => {
         </div>
       </div>
 
+      {/* Quarter Breakdown */}
+      <QuarterBreakdown
+        homeTeamName={homeTeam?.team?.name || "Home"}
+        awayTeamName={awayTeam?.team?.name || "Away"}
+        scoreByPeriod={(game.gameSettings as any)?.scoreByPeriod}
+        currentQuarter={game.currentQuarter || 4}
+        homeScore={game.homeScore}
+        awayScore={game.awayScore}
+      />
+
       {/* Tabs */}
       <div className="border-b border-surface-200 dark:border-surface-700">
         <nav className="flex gap-8">
@@ -386,6 +413,125 @@ const GameAnalysis: React.FC = () => {
         </div>
       )}
 
+      {activeTab === "stats" && (
+        <div className="space-y-6">
+          {/* Team Comparison */}
+          <div className="surface-card overflow-hidden">
+            <div className="px-4 py-3 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50">
+              <h3 className="font-bold text-surface-900 dark:text-white">Team Comparison</h3>
+            </div>
+            <div className="divide-y divide-surface-200 dark:divide-surface-700">
+              {/* Header */}
+              <div className="flex items-center py-3 px-4">
+                <span className="flex-1 text-right text-sm font-bold text-primary-500">
+                  {homeTeam?.team?.name}
+                </span>
+                <span className="w-24 text-center text-xs text-surface-500 dark:text-surface-400 font-medium">
+                  STAT
+                </span>
+                <span className="flex-1 text-left text-sm font-bold text-blue-500">
+                  {awayTeam?.team?.name}
+                </span>
+              </div>
+              {/* Stats rows */}
+              {[
+                {
+                  label: "Points",
+                  home: homeTotals?.points || 0,
+                  away: awayTotals?.points || 0,
+                  higher: true,
+                },
+                {
+                  label: "Rebounds",
+                  home: homeTotals?.rebounds || 0,
+                  away: awayTotals?.rebounds || 0,
+                  higher: true,
+                },
+                {
+                  label: "Assists",
+                  home: homeTotals?.assists || 0,
+                  away: awayTotals?.assists || 0,
+                  higher: true,
+                },
+                {
+                  label: "Steals",
+                  home: homeTotals?.steals || 0,
+                  away: awayTotals?.steals || 0,
+                  higher: true,
+                },
+                {
+                  label: "Blocks",
+                  home: homeTotals?.blocks || 0,
+                  away: awayTotals?.blocks || 0,
+                  higher: true,
+                },
+                {
+                  label: "Turnovers",
+                  home: homeTotals?.turnovers || 0,
+                  away: awayTotals?.turnovers || 0,
+                  higher: false,
+                },
+              ].map((stat) => {
+                const homeWins = stat.higher ? stat.home > stat.away : stat.home < stat.away;
+                const awayWins = stat.higher ? stat.away > stat.home : stat.away < stat.home;
+                return (
+                  <div key={stat.label} className="flex items-center py-3 px-4">
+                    <span
+                      className={`flex-1 text-right text-base font-semibold tabular-nums ${
+                        homeWins ? "text-green-500" : "text-surface-900 dark:text-white"
+                      }`}
+                    >
+                      {stat.home}
+                    </span>
+                    <span className="w-24 text-center text-sm text-surface-600 dark:text-surface-400">
+                      {stat.label}
+                    </span>
+                    <span
+                      className={`flex-1 text-left text-base font-semibold tabular-nums ${
+                        awayWins ? "text-green-500" : "text-surface-900 dark:text-white"
+                      }`}
+                    >
+                      {stat.away}
+                    </span>
+                  </div>
+                );
+              })}
+              {/* Shooting percentages */}
+              <div className="flex items-center py-3 px-4">
+                <span className="flex-1 text-right text-base font-semibold tabular-nums text-surface-900 dark:text-white">
+                  {homeShootingStats.pct}%
+                </span>
+                <span className="w-24 text-center text-sm text-surface-600 dark:text-surface-400">
+                  FG%
+                </span>
+                <span className="flex-1 text-left text-base font-semibold tabular-nums text-surface-900 dark:text-white">
+                  {awayShootingStats.pct}%
+                </span>
+              </div>
+              <div className="flex items-center py-3 px-4">
+                <span className="flex-1 text-right text-base font-semibold tabular-nums text-surface-900 dark:text-white">
+                  {homeShootingStats.threesPct}%
+                </span>
+                <span className="w-24 text-center text-sm text-surface-600 dark:text-surface-400">
+                  3P%
+                </span>
+                <span className="flex-1 text-left text-base font-semibold tabular-nums text-surface-900 dark:text-white">
+                  {awayShootingStats.threesPct}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Advanced Stats */}
+          <AdvancedStats
+            homeStats={homePlayerStats}
+            awayStats={awayPlayerStats}
+            homeTeamName={homeTeam?.team?.name || "Home"}
+            awayTeamName={awayTeam?.team?.name || "Away"}
+          />
+        </div>
+      )}
+
       {activeTab === "charts" && (
         <div className="space-y-6">
           {/* Team Comparison Chart */}
@@ -405,11 +551,12 @@ const GameAnalysis: React.FC = () => {
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "var(--color-surface-800)",
-                    border: "1px solid var(--color-surface-700)",
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #334155",
                     borderRadius: "12px",
-                    color: "white",
                   }}
+                  labelStyle={{ color: "#f1f5f9", fontWeight: 600, marginBottom: 4 }}
+                  cursor={{ fill: "rgba(255,255,255,0.1)" }}
                 />
                 <Legend />
                 <Bar
@@ -443,11 +590,12 @@ const GameAnalysis: React.FC = () => {
                     typeof value === "number" ? `${value.toFixed(1)}%` : value
                   }
                   contentStyle={{
-                    backgroundColor: "var(--color-surface-800)",
-                    border: "1px solid var(--color-surface-700)",
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #334155",
                     borderRadius: "12px",
-                    color: "white",
                   }}
+                  labelStyle={{ color: "#f1f5f9", fontWeight: 600, marginBottom: 4 }}
+                  cursor={{ fill: "rgba(255,255,255,0.1)" }}
                 />
                 <Legend />
                 <Bar
@@ -562,38 +710,64 @@ const GameAnalysis: React.FC = () => {
           </div>
 
           {/* Events List */}
-          <div className="divide-y divide-surface-200 dark:divide-surface-700 max-h-96 overflow-y-auto">
+          <div className="max-h-[500px] overflow-y-auto">
             {events.length === 0 ? (
-              <div className="px-4 py-8 text-center text-surface-500 dark:text-surface-400">
-                No play-by-play data available for this game.
+              <div className="flex flex-col items-center justify-center py-12 px-6">
+                <div className="w-12 h-12 rounded-full bg-surface-200 dark:bg-surface-700 flex items-center justify-center mb-3">
+                  <ClipboardDocumentListIcon className="w-6 h-6 text-surface-400" />
+                </div>
+                <p className="text-surface-900 dark:text-white text-sm font-semibold mb-1">
+                  No events recorded
+                </p>
+                <p className="text-surface-500 dark:text-surface-400 text-xs text-center">
+                  Play-by-play data will appear here
+                </p>
               </div>
             ) : (
               events.map((event: any) => (
-                <div
-                  key={event.id}
-                  className="px-4 py-3 hover:bg-surface-50 dark:hover:bg-surface-700/50 flex items-start gap-3 transition-colors"
-                >
-                  <span className="text-xl">{getEventIcon(event.eventType)}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-surface-900 dark:text-white">
-                      {event.description || event.eventType.replace(/_/g, " ")}
-                    </p>
-                    <p className="text-xs text-surface-500 dark:text-surface-400">
-                      {event.player?.name && (
-                        <span className="font-medium">
-                          #{event.player.number} {event.player.name}
-                        </span>
-                      )}
-                      {event.team?.name && (
-                        <span className="ml-2 text-surface-400">({event.team.name})</span>
-                      )}
-                    </p>
-                  </div>
-                  <div className="text-right text-xs text-surface-500 dark:text-surface-400 tabular-nums">
-                    <p>Q{event.quarter}</p>
-                    <p>{event.gameTimeDisplay}</p>
-                  </div>
-                </div>
+                <GameEventCard
+                  key={event.id || event._id}
+                  event={{
+                    _id: event.id || event._id,
+                    quarter: event.quarter,
+                    timeRemaining: event.gameTime || event.timeRemaining || 0,
+                    eventType: event.eventType,
+                    description: event.description || event.eventType?.replace(/_/g, " "),
+                    playerId: event.player?.id || event.playerId,
+                    teamId: event.team?.id || event.teamId,
+                    details: {
+                      made: event.details?.made,
+                      points: event.details?.points || event.pointsScored,
+                      shotType: event.details?.shotType,
+                      foulType: event.details?.foulType,
+                      homeScore: event.details?.homeScore,
+                      awayScore: event.details?.awayScore,
+                      isHomeTeam: event.details?.isHomeTeam,
+                    },
+                  }}
+                  playerStats={[
+                    ...(homeTeam?.players?.map((p: any) => ({
+                      playerId: p.player?.id || p.playerId,
+                      points: p.points || 0,
+                      rebounds: p.rebounds || 0,
+                      assists: p.assists || 0,
+                      steals: p.steals || 0,
+                      blocks: p.blocks || 0,
+                      turnovers: p.turnovers || 0,
+                      fouls: p.fouls || 0,
+                    })) || []),
+                    ...(awayTeam?.players?.map((p: any) => ({
+                      playerId: p.player?.id || p.playerId,
+                      points: p.points || 0,
+                      rebounds: p.rebounds || 0,
+                      assists: p.assists || 0,
+                      steals: p.steals || 0,
+                      blocks: p.blocks || 0,
+                      turnovers: p.turnovers || 0,
+                      fouls: p.fouls || 0,
+                    })) || []),
+                  ]}
+                />
               ))
             )}
           </div>

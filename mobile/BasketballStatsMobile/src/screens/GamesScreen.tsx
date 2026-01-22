@@ -126,9 +126,7 @@ export default function GamesScreen() {
                 {game.status === "paused" ? "Paused" : "Live"}
               </Text>
             </View>
-            <Text className="text-surface-400 text-sm font-medium">
-              Q{game.currentQuarter}
-            </Text>
+            <Text className="text-surface-400 text-sm font-medium">Q{game.currentQuarter}</Text>
             <Text className="text-white font-mono text-xl font-semibold">
               {formatTime(game.timeRemainingSeconds)}
             </Text>
@@ -265,16 +263,16 @@ export default function GamesScreen() {
 
   const renderSectionHeader = ({ section }: { section: GameSection }) => (
     <View className="flex-row items-center mb-3 mt-4">
-      {section.title === "Live Now" && (
-        <View className="w-2 h-2 bg-red-500 rounded-full mr-2" />
+      {section.title === "Live Now" && <View className="w-2 h-2 bg-red-500 rounded-full mr-2" />}
+      {section.title === "Upcoming" && (
+        <Icon name="calendar" size={14} color="#F97316" style={{ marginRight: 8 }} />
       )}
-      {section.title === "Upcoming" && <Icon name="calendar" size={14} color="#F97316" style={{ marginRight: 8 }} />}
-      {section.title === "Completed" && <Icon name="check" size={14} color="#10B981" style={{ marginRight: 8 }} />}
+      {section.title === "Completed" && (
+        <Icon name="check" size={14} color="#10B981" style={{ marginRight: 8 }} />
+      )}
       <Text
         className={`text-sm font-bold uppercase tracking-wider ${
-          section.title === "Live Now"
-            ? "text-red-500"
-            : "text-surface-500 dark:text-surface-400"
+          section.title === "Live Now" ? "text-red-500" : "text-surface-500 dark:text-surface-400"
         }`}
       >
         {section.title}

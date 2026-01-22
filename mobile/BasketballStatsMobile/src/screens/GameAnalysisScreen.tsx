@@ -5,8 +5,10 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
-import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
+import { QuarterBreakdown } from "../components/livegame/QuarterBreakdown";
+import { AdvancedStats } from "../components/livegame/AdvancedStats";
+import PlayByPlayTab from "../components/livegame/PlayByPlayTab";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 
 type GameAnalysisRouteProp = RouteProp<RootStackParamList, "GameAnalysis">;
@@ -47,43 +49,80 @@ function StatRow({ label, homeValue, awayValue, homeWins }: StatRowProps) {
 interface PlayerStatRowProps {
   name: string;
   number: number;
+  minutesPlayed: number;
   points: number;
   rebounds: number;
   assists: number;
   steals: number;
   blocks: number;
+  turnovers: number;
+  fouls: number;
   fgm: number;
   fga: number;
+  threePm: number;
+  threePa: number;
+  ftm: number;
+  fta: number;
 }
 
 function PlayerStatRow({
   name,
   number,
+  minutesPlayed,
   points,
   rebounds,
   assists,
   steals,
   blocks,
+  turnovers,
+  fouls,
   fgm,
   fga,
+  threePm,
+  threePa,
+  ftm,
+  fta,
 }: PlayerStatRowProps) {
-  const fgPct = fga > 0 ? ((fgm / fga) * 100).toFixed(0) : "0";
-
   return (
-    <View className="flex-row items-center py-3 border-b border-surface-200 dark:border-surface-700">
-      <View className="flex-row items-center flex-1">
-        <View className="w-8 h-8 bg-surface-200 dark:bg-surface-700 rounded-full justify-center items-center mr-2">
-          <Text className="text-surface-700 dark:text-surface-300 text-xs font-bold">{number}</Text>
-        </View>
-        <Text className="text-surface-900 dark:text-white text-sm font-medium" numberOfLines={1}>
+    <View className="flex-row items-center py-2.5 border-b border-surface-200 dark:border-surface-700">
+      <View className="w-28 flex-row items-center pr-2">
+        <Text className="text-surface-500 dark:text-surface-400 text-xs mr-1">#{number}</Text>
+        <Text className="text-surface-900 dark:text-white text-xs font-medium" numberOfLines={1}>
           {name}
         </Text>
       </View>
-      <Text className="w-10 text-center text-surface-900 dark:text-white font-bold">{points}</Text>
-      <Text className="w-10 text-center text-surface-600 dark:text-surface-400">{rebounds}</Text>
-      <Text className="w-10 text-center text-surface-600 dark:text-surface-400">{assists}</Text>
-      <Text className="w-16 text-center text-surface-600 dark:text-surface-400">
-        {fgm}/{fga}
+      <Text className="w-9 text-center text-surface-600 dark:text-surface-400 text-xs tabular-nums">
+        {minutesPlayed}
+      </Text>
+      <Text className="w-9 text-center text-surface-900 dark:text-white font-bold text-xs tabular-nums">
+        {points}
+      </Text>
+      <Text className="w-9 text-center text-surface-600 dark:text-surface-400 text-xs tabular-nums">
+        {rebounds}
+      </Text>
+      <Text className="w-9 text-center text-surface-600 dark:text-surface-400 text-xs tabular-nums">
+        {assists}
+      </Text>
+      <Text className="w-9 text-center text-surface-600 dark:text-surface-400 text-xs tabular-nums">
+        {steals}
+      </Text>
+      <Text className="w-9 text-center text-surface-600 dark:text-surface-400 text-xs tabular-nums">
+        {blocks}
+      </Text>
+      <Text className="w-9 text-center text-surface-600 dark:text-surface-400 text-xs tabular-nums">
+        {turnovers}
+      </Text>
+      <Text className="w-9 text-center text-surface-600 dark:text-surface-400 text-xs tabular-nums">
+        {fouls}
+      </Text>
+      <Text className="w-14 text-center text-surface-600 dark:text-surface-400 text-xs tabular-nums">
+        {fgm}-{fga}
+      </Text>
+      <Text className="w-12 text-center text-surface-600 dark:text-surface-400 text-xs tabular-nums">
+        {threePm}-{threePa}
+      </Text>
+      <Text className="w-12 text-center text-surface-600 dark:text-surface-400 text-xs tabular-nums">
+        {ftm}-{fta}
       </Text>
     </View>
   );
@@ -93,10 +132,8 @@ export default function GameAnalysisScreen() {
   const route = useRoute<GameAnalysisRouteProp>();
   const { gameId } = route.params;
   const { token } = useAuth();
-  const { resolvedTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<TabType>("boxscore");
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedQuarter, setSelectedQuarter] = useState<number | undefined>(undefined);
 
   const gameData = useQuery(
     api.games.get,
@@ -110,7 +147,7 @@ export default function GameAnalysisScreen() {
 
   const gameEventsData = useQuery(
     api.games.getGameEvents,
-    token && gameId ? { token, gameId: gameId as Id<"games">, quarter: selectedQuarter } : "skip"
+    token && gameId ? { token, gameId: gameId as Id<"games"> } : "skip"
   );
 
   const onRefresh = () => {
@@ -129,9 +166,14 @@ export default function GameAnalysisScreen() {
   if (!gameData?.game) {
     return (
       <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950 p-8">
-        <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-surface-900 dark:text-white text-xl font-bold mt-4">
+        <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
+          <Icon name="basketball" size={32} color="#F97316" />
+        </View>
+        <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
           Game Not Found
+        </Text>
+        <Text className="text-surface-600 dark:text-surface-400 text-sm">
+          This game may have been deleted
         </Text>
       </View>
     );
@@ -189,58 +231,108 @@ export default function GameAnalysisScreen() {
     { id: "plays" as TabType, label: "Plays" },
   ];
 
+  // Sort players by points (highest first)
+  const sortPlayers = (players: any[]) => {
+    return [...players].sort((a, b) => (b.points || 0) - (a.points || 0));
+  };
+
   const renderBoxScore = (team: any, isHome: boolean) => {
     if (!team) return null;
+
+    const sortedPlayers = sortPlayers(team.players);
+    const isWinner = isHome ? isHomeWinner : isAwayWinner;
 
     return (
       <View className="mb-6">
         <View
-          className={`px-4 py-3 rounded-t-xl ${
+          className={`px-4 py-3 rounded-t-xl flex-row items-center justify-between ${
             isHome ? "bg-orange-100 dark:bg-orange-900/30" : "bg-blue-100 dark:bg-blue-900/30"
           }`}
         >
-          <Text className="text-surface-900 dark:text-white font-bold text-base">
-            {team.team?.name}
+          <View className="flex-row items-center">
+            <Text className="text-surface-900 dark:text-white font-bold text-base">
+              {team.team?.name}
+            </Text>
+            {isWinner && game.status === "completed" && (
+              <View className="ml-2">
+                <Icon name="trophy" size={16} color="#EAB308" />
+              </View>
+            )}
+          </View>
+          <Text className={`text-xl font-bold ${isHome ? "text-primary-500" : "text-blue-500"}`}>
+            {isHome ? game.homeScore : game.awayScore}
           </Text>
         </View>
 
-        <View className="bg-white dark:bg-surface-800 rounded-b-xl border border-surface-200 dark:border-surface-700 border-t-0">
-          {/* Header */}
-          <View className="flex-row items-center py-2 px-3 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-750">
-            <Text className="flex-1 text-xs text-surface-500 dark:text-surface-500 font-semibold">
-              PLAYER
-            </Text>
-            <Text className="w-10 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
-              PTS
-            </Text>
-            <Text className="w-10 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
-              REB
-            </Text>
-            <Text className="w-10 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
-              AST
-            </Text>
-            <Text className="w-16 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
-              FG
-            </Text>
-          </View>
+        <View className="bg-surface-100 dark:bg-surface-800/50 rounded-b-xl overflow-hidden">
+          <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+            <View>
+              {/* Header */}
+              <View className="flex-row items-center py-2 px-3 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800">
+                <Text className="w-28 text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  PLAYER
+                </Text>
+                <Text className="w-9 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  MIN
+                </Text>
+                <Text className="w-9 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  PTS
+                </Text>
+                <Text className="w-9 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  REB
+                </Text>
+                <Text className="w-9 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  AST
+                </Text>
+                <Text className="w-9 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  STL
+                </Text>
+                <Text className="w-9 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  BLK
+                </Text>
+                <Text className="w-9 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  TO
+                </Text>
+                <Text className="w-9 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  PF
+                </Text>
+                <Text className="w-14 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  FG
+                </Text>
+                <Text className="w-12 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  3PT
+                </Text>
+                <Text className="w-12 text-center text-xs text-surface-500 dark:text-surface-500 font-semibold">
+                  FT
+                </Text>
+              </View>
 
-          {/* Players */}
-          <View className="px-3">
-            {team.players.map((player: any, index: number) => (
-              <PlayerStatRow
-                key={player.playerId || index}
-                name={player.name || "Unknown"}
-                number={player.number || 0}
-                points={player.points || 0}
-                rebounds={player.rebounds || 0}
-                assists={player.assists || 0}
-                steals={player.steals || 0}
-                blocks={player.blocks || 0}
-                fgm={player.fieldGoalsMade || 0}
-                fga={player.fieldGoalsAttempted || 0}
-              />
-            ))}
-          </View>
+              {/* Players */}
+              <View className="px-3">
+                {sortedPlayers.map((player: any, index: number) => (
+                  <PlayerStatRow
+                    key={player.playerId || index}
+                    name={player.name || "Unknown"}
+                    number={player.number || 0}
+                    minutesPlayed={player.minutesPlayed || 0}
+                    points={player.points || 0}
+                    rebounds={player.rebounds || 0}
+                    assists={player.assists || 0}
+                    steals={player.steals || 0}
+                    blocks={player.blocks || 0}
+                    turnovers={player.turnovers || 0}
+                    fouls={player.fouls || 0}
+                    fgm={player.fieldGoalsMade || 0}
+                    fga={player.fieldGoalsAttempted || 0}
+                    threePm={player.threePointersMade || 0}
+                    threePa={player.threePointersAttempted || 0}
+                    ftm={player.freeThrowsMade || 0}
+                    fta={player.freeThrowsAttempted || 0}
+                  />
+                ))}
+              </View>
+            </View>
+          </ScrollView>
         </View>
       </View>
     );
@@ -249,7 +341,7 @@ export default function GameAnalysisScreen() {
   return (
     <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       {/* Score Header */}
-      <View className="bg-white dark:bg-surface-800 p-4 border-b border-surface-200 dark:border-surface-700">
+      <View className="bg-surface-100 dark:bg-surface-800/50 p-4 mx-4 mt-4 rounded-xl">
         <View className="flex-row items-center justify-between">
           <View className={`flex-1 items-center ${isAwayWinner ? "opacity-60" : ""}`}>
             <Text className="text-surface-600 dark:text-surface-400 text-sm">
@@ -291,8 +383,20 @@ export default function GameAnalysisScreen() {
         </View>
       </View>
 
+      {/* Quarter Breakdown */}
+      <View className="mx-4 mt-4">
+        <QuarterBreakdown
+          homeTeamName={homeTeam?.team?.name || "Home"}
+          awayTeamName={awayTeam?.team?.name || "Away"}
+          scoreByPeriod={(game.gameSettings as any)?.scoreByPeriod}
+          currentQuarter={game.currentQuarter || 4}
+          homeScore={game.homeScore}
+          awayScore={game.awayScore}
+        />
+      </View>
+
       {/* Tabs */}
-      <View className="flex-row bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+      <View className="flex-row bg-surface-100 dark:bg-surface-800/50 mx-4 mt-4 rounded-xl overflow-hidden">
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab.id}
@@ -325,9 +429,10 @@ export default function GameAnalysisScreen() {
 
         {activeTab === "stats" && (
           <View className="p-4">
-            <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+            {/* Team Comparison */}
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl overflow-hidden mb-4">
               {/* Team Headers */}
-              <View className="flex-row items-center py-3 px-4 bg-surface-50 dark:bg-surface-750 border-b border-surface-200 dark:border-surface-700">
+              <View className="flex-row items-center py-3 px-4 border-b border-surface-200 dark:border-surface-700">
                 <Text className="flex-1 text-right text-sm font-bold text-primary-500">
                   {homeTeam?.team?.name}
                 </Text>
@@ -418,100 +523,123 @@ export default function GameAnalysisScreen() {
                 />
               </View>
             </View>
+
+            {/* Advanced Stats */}
+            <AdvancedStats
+              homeStats={
+                homeTeam?.players?.map((p: any) => ({
+                  id: p.playerId,
+                  playerId: p.playerId,
+                  player: { id: p.playerId, name: p.name, number: p.number, position: p.position },
+                  points: p.points || 0,
+                  rebounds: p.rebounds || 0,
+                  assists: p.assists || 0,
+                  steals: p.steals || 0,
+                  blocks: p.blocks || 0,
+                  turnovers: p.turnovers || 0,
+                  fouls: p.fouls || 0,
+                  fieldGoalsMade: p.fieldGoalsMade || 0,
+                  fieldGoalsAttempted: p.fieldGoalsAttempted || 0,
+                  threePointersMade: p.threePointersMade || 0,
+                  threePointersAttempted: p.threePointersAttempted || 0,
+                  freeThrowsMade: p.freeThrowsMade || 0,
+                  freeThrowsAttempted: p.freeThrowsAttempted || 0,
+                  minutesPlayed: p.minutesPlayed || 0,
+                  plusMinus: p.plusMinus || 0,
+                })) || []
+              }
+              awayStats={
+                awayTeam?.players?.map((p: any) => ({
+                  id: p.playerId,
+                  playerId: p.playerId,
+                  player: { id: p.playerId, name: p.name, number: p.number, position: p.position },
+                  points: p.points || 0,
+                  rebounds: p.rebounds || 0,
+                  assists: p.assists || 0,
+                  steals: p.steals || 0,
+                  blocks: p.blocks || 0,
+                  turnovers: p.turnovers || 0,
+                  fouls: p.fouls || 0,
+                  fieldGoalsMade: p.fieldGoalsMade || 0,
+                  fieldGoalsAttempted: p.fieldGoalsAttempted || 0,
+                  threePointersMade: p.threePointersMade || 0,
+                  threePointersAttempted: p.threePointersAttempted || 0,
+                  freeThrowsMade: p.freeThrowsMade || 0,
+                  freeThrowsAttempted: p.freeThrowsAttempted || 0,
+                  minutesPlayed: p.minutesPlayed || 0,
+                  plusMinus: p.plusMinus || 0,
+                })) || []
+              }
+              homeTeamName={homeTeam?.team?.name || "Home"}
+              awayTeamName={awayTeam?.team?.name || "Away"}
+            />
           </View>
         )}
 
         {activeTab === "plays" && (
-          <View className="p-4">
-            {/* Quarter Filter */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
-              <TouchableOpacity
-                className={`px-4 py-2 rounded-full mr-2 ${
-                  selectedQuarter === undefined
-                    ? "bg-primary-500"
-                    : "bg-surface-200 dark:bg-surface-700"
-                }`}
-                onPress={() => setSelectedQuarter(undefined)}
-              >
-                <Text
-                  className={
-                    selectedQuarter === undefined
-                      ? "text-white font-medium"
-                      : "text-surface-700 dark:text-surface-300"
-                  }
-                >
-                  All
-                </Text>
-              </TouchableOpacity>
-              {[1, 2, 3, 4].map((q) => (
-                <TouchableOpacity
-                  key={q}
-                  className={`px-4 py-2 rounded-full mr-2 ${
-                    selectedQuarter === q ? "bg-primary-500" : "bg-surface-200 dark:bg-surface-700"
-                  }`}
-                  onPress={() => setSelectedQuarter(q)}
-                >
-                  <Text
-                    className={
-                      selectedQuarter === q
-                        ? "text-white font-medium"
-                        : "text-surface-700 dark:text-surface-300"
-                    }
-                  >
-                    Q{q}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            {/* Events List */}
-            <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
-              {events.length > 0 ? (
-                events.map((event: any, index: number) => (
-                  <View
-                    key={event._id || index}
-                    className={`p-3 flex-row items-center ${
-                      index < events.length - 1
-                        ? "border-b border-surface-200 dark:border-surface-700"
-                        : ""
-                    }`}
-                  >
-                    <View className="w-12 items-center">
-                      <Text className="text-surface-500 dark:text-surface-500 text-xs">
-                        Q{event.quarter}
-                      </Text>
-                      <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium">
-                        {event.gameTime || "--:--"}
-                      </Text>
-                    </View>
-                    <View className="flex-1 ml-3">
-                      <Text className="text-surface-900 dark:text-white text-sm">
-                        {event.description || event.eventType}
-                      </Text>
-                      {event.playerName && (
-                        <Text className="text-surface-600 dark:text-surface-400 text-xs">
-                          {event.playerName}
-                        </Text>
-                      )}
-                    </View>
-                    {event.pointsScored !== undefined && event.pointsScored > 0 && (
-                      <View className="bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">
-                        <Text className="text-green-600 dark:text-green-400 text-xs font-bold">
-                          +{event.pointsScored}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                ))
-              ) : (
-                <View className="p-8 items-center">
-                  <Icon name="list" size={32} color="#9CA3AF" />
-                  <Text className="text-surface-600 dark:text-surface-400 mt-2">
-                    No plays recorded
-                  </Text>
-                </View>
-              )}
-            </View>
+          <View className="flex-1 p-4">
+            <PlayByPlayTab
+              events={events.map((event: any) => ({
+                id: event._id,
+                eventType: event.eventType,
+                quarter: event.quarter,
+                gameTime: event.gameTime || 0,
+                gameTimeDisplay: event.gameTimeDisplay || event.gameTime || "--:--",
+                timestamp: event.timestamp || 0,
+                description: event.description || event.eventType?.replace(/_/g, " "),
+                details: {
+                  made: event.details?.made,
+                  points: event.details?.points || event.pointsScored,
+                  shotType: event.details?.shotType,
+                  foulType: event.details?.foulType,
+                  assisted: event.details?.assisted,
+                  homeScore: event.details?.homeScore,
+                  awayScore: event.details?.awayScore,
+                  isHomeTeam: event.details?.isHomeTeam,
+                },
+                player:
+                  event.player ||
+                  (event.playerId
+                    ? {
+                        id: event.playerId,
+                        name: event.playerName || "Unknown",
+                        number: event.playerNumber || 0,
+                      }
+                    : null),
+                team:
+                  event.team ||
+                  (event.teamId
+                    ? {
+                        id: event.teamId,
+                        name: event.teamName || "",
+                      }
+                    : null),
+              }))}
+              isLoading={false}
+              currentQuarter={game.currentQuarter || 4}
+              playerStats={[
+                ...(homeTeam?.players?.map((p: any) => ({
+                  playerId: p.player?.id,
+                  points: p.points || 0,
+                  rebounds: p.rebounds || 0,
+                  assists: p.assists || 0,
+                  steals: p.steals || 0,
+                  blocks: p.blocks || 0,
+                  turnovers: p.turnovers || 0,
+                  fouls: p.fouls || 0,
+                })) || []),
+                ...(awayTeam?.players?.map((p: any) => ({
+                  playerId: p.player?.id,
+                  points: p.points || 0,
+                  rebounds: p.rebounds || 0,
+                  assists: p.assists || 0,
+                  steals: p.steals || 0,
+                  blocks: p.blocks || 0,
+                  turnovers: p.turnovers || 0,
+                  fouls: p.fouls || 0,
+                })) || []),
+              ]}
+            />
           </View>
         )}
       </ScrollView>

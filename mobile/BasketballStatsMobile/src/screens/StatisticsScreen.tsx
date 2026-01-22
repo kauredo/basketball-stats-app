@@ -31,9 +31,7 @@ interface StatCardProps {
 function StatCard({ title, value, subtitle, color = "#EA580C" }: StatCardProps) {
   return (
     <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
-      <Text className="text-surface-500 dark:text-surface-400 text-xs uppercase mb-1">
-        {title}
-      </Text>
+      <Text className="text-surface-500 dark:text-surface-400 text-xs uppercase mb-1">{title}</Text>
       <Text className="text-2xl font-bold text-surface-900 dark:text-white">{value}</Text>
       {subtitle && <Text className="text-surface-500 text-xs mt-0.5">{subtitle}</Text>}
     </View>
@@ -62,7 +60,9 @@ function LeaderItem({ rank, playerName, teamName, value, unit = "" }: LeaderItem
                 : "bg-surface-300 dark:bg-surface-600"
         }`}
       >
-        <Text className={`text-xs font-bold ${rank <= 3 ? "text-white" : "text-surface-600 dark:text-surface-300"}`}>
+        <Text
+          className={`text-xs font-bold ${rank <= 3 ? "text-white" : "text-surface-600 dark:text-surface-300"}`}
+        >
           {rank}
         </Text>
       </View>

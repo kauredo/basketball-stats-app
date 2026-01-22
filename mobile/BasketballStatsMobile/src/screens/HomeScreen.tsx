@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
@@ -109,9 +103,7 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View className="mb-6">
-          <Text className="text-2xl font-bold text-surface-900 dark:text-white">
-            Dashboard
-          </Text>
+          <Text className="text-2xl font-bold text-surface-900 dark:text-white">Dashboard</Text>
           <Text className="text-base text-surface-500 dark:text-surface-400">
             {selectedLeague?.name || "Your games at a glance"}
           </Text>
@@ -146,9 +138,7 @@ export default function HomeScreen() {
                       <Text className="text-base font-semibold text-surface-200 mb-1">
                         {game.awayTeam?.name || "Away"}
                       </Text>
-                      <Text className="text-4xl font-bold text-white">
-                        {game.awayScore}
-                      </Text>
+                      <Text className="text-4xl font-bold text-white">{game.awayScore}</Text>
                     </View>
 
                     {/* Center - Game Info */}
@@ -172,9 +162,7 @@ export default function HomeScreen() {
                       <Text className="text-base font-semibold text-surface-200 mb-1">
                         {game.homeTeam?.name || "Home"}
                       </Text>
-                      <Text className="text-4xl font-bold text-white">
-                        {game.homeScore}
-                      </Text>
+                      <Text className="text-4xl font-bold text-white">{game.homeScore}</Text>
                     </View>
                   </View>
 
@@ -197,9 +185,7 @@ export default function HomeScreen() {
             <Text className="text-3xl font-bold text-surface-900 dark:text-white">
               {liveGames.length}
             </Text>
-            <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
-              Live
-            </Text>
+            <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">Live</Text>
           </View>
           <View className="items-center">
             <Text className="text-3xl font-bold text-surface-900 dark:text-white">
@@ -300,7 +286,12 @@ export default function HomeScreen() {
                       </Text>
                     </View>
 
-                    <Icon name="chevron-right" size={16} color="#94a3b8" style={{ marginLeft: 8 }} />
+                    <Icon
+                      name="chevron-right"
+                      size={16}
+                      color="#94a3b8"
+                      style={{ marginLeft: 8 }}
+                    />
                   </TouchableOpacity>
                 );
               })}

@@ -318,7 +318,9 @@ export default function ProfileScreen() {
 
         {/* Account */}
         <View className="mb-8">
-          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">Account</Text>
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
+            Account
+          </Text>
 
           <TouchableOpacity
             className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 flex-row items-center mb-3"
@@ -469,7 +471,9 @@ export default function ProfileScreen() {
 
         {/* App Info */}
         <View className="mb-8">
-          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">About</Text>
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
+            About
+          </Text>
           <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
             <View className="flex-row items-center">
               <View className="w-10 h-10 bg-primary-500/10 rounded-full items-center justify-center mr-3">

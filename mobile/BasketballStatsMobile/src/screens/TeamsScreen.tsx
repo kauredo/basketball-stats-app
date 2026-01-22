@@ -64,11 +64,7 @@ export default function TeamsScreen() {
             resizeMode="contain"
           />
         ) : (
-          <Icon
-            name="users"
-            size={24}
-            color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
-          />
+          <Icon name="users" size={24} color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"} />
         )}
       </View>
 

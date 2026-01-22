@@ -24,8 +24,6 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  PieChart,
-  Pie,
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
@@ -846,11 +844,12 @@ export default function Statistics() {
                 <YAxis stroke="#a69f96" fontSize={12} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#3d3835",
-                    border: "1px solid #5c5650",
-                    borderRadius: "8px",
-                    color: "#fdfcfb",
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #334155",
+                    borderRadius: "12px",
                   }}
+                  labelStyle={{ color: "#f1f5f9", fontWeight: 600, marginBottom: 4 }}
+                  cursor={{ fill: "rgba(255,255,255,0.1)" }}
                 />
                 <Legend />
                 <Bar dataKey="avgPoints" fill="#EA580C" name="Points" />
@@ -860,46 +859,66 @@ export default function Statistics() {
             </ResponsiveContainer>
           </div>
 
-          {/* Win Percentage Distribution */}
+          {/* Points For vs Against */}
           <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 shadow-soft">
-            <h3 id="win-distribution-heading" className="section-header mb-4">
-              Win Percentage Distribution
+            <h3 id="points-comparison-heading" className="section-header mb-4">
+              Points For vs Against
             </h3>
             <div
               role="img"
-              aria-labelledby="win-distribution-heading"
-              aria-describedby="win-distribution-desc"
+              aria-labelledby="points-comparison-heading"
+              aria-describedby="points-comparison-desc"
             >
-              <p id="win-distribution-desc" className="sr-only">
-                Pie chart showing win percentage distribution across teams
+              <p id="points-comparison-desc" className="sr-only">
+                Bar chart comparing points scored vs points allowed per team
               </p>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={
-                    teamsData.teams?.slice(0, 6).map((team: any, index: number) => ({
-                      name: team.teamName,
-                      value: team.winPercentage || 0,
-                      fill: `hsl(${index * 60}, 70%, 50%)`,
-                    })) || []
-                  }
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${(value ?? 0).toFixed(1)}%`}
-                  outerRadius={80}
-                  dataKey="value"
+              <BarChart
+                data={
+                  teamsData.teams?.slice(0, 8).map((team: any) => ({
+                    name: team.teamName,
+                    scored: team.avgPoints || 0,
+                    allowed: team.avgPointsAllowed || 0,
+                  })) || []
+                }
+                layout="vertical"
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#5c5650" />
+                <XAxis type="number" stroke="#a69f96" fontSize={12} />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  width={100}
+                  stroke="#a69f96"
+                  fontSize={11}
+                  tickLine={false}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#3d3835",
-                    border: "1px solid #5c5650",
-                    borderRadius: "8px",
-                    color: "#fdfcfb",
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #334155",
+                    borderRadius: "12px",
                   }}
+                  labelStyle={{ color: "#f1f5f9", fontWeight: 600, marginBottom: 4 }}
+                  itemStyle={{ color: "#e2e8f0" }}
+                  formatter={(value) => (typeof value === "number" ? value.toFixed(1) : value)}
+                  cursor={{ fill: "rgba(255,255,255,0.1)" }}
                 />
-              </PieChart>
+                <Legend />
+                <Bar
+                  dataKey="scored"
+                  fill="#10B981"
+                  name="Points For (PPG)"
+                  radius={[0, 4, 4, 0]}
+                />
+                <Bar
+                  dataKey="allowed"
+                  fill="#EF4444"
+                  name="Points Against (PPG)"
+                  radius={[0, 4, 4, 0]}
+                />
+              </BarChart>
             </ResponsiveContainer>
           </div>
 
@@ -981,98 +1000,154 @@ export default function Statistics() {
               </div>
             )}
             <ResponsiveContainer width="100%" height={400}>
-              <RadarChart
-                data={(() => {
-                  // Use selected players or default to top 3
-                  const playersToShow =
-                    selectedRadarPlayers.length > 0
-                      ? selectedRadarPlayers
-                          .map((id) => playersData?.players?.find((p: any) => p.playerId === id))
-                          .filter(Boolean)
-                      : playersData?.players?.slice(0, 3) || [];
+              {(() => {
+                // Use selected players or default to top 3
+                const playersToShow =
+                  selectedRadarPlayers.length > 0
+                    ? selectedRadarPlayers
+                        .map((id) => playersData?.players?.find((p: any) => p.playerId === id))
+                        .filter(Boolean)
+                    : playersData?.players?.slice(0, 3) || [];
 
-                  return [
-                    {
-                      metric: "Points",
-                      ...Object.fromEntries(
-                        playersToShow.map((p: any, i: number) => [`player${i}`, p?.avgPoints || 0])
-                      ),
-                    },
-                    {
-                      metric: "Rebounds",
-                      ...Object.fromEntries(
-                        playersToShow.map((p: any, i: number) => [
-                          `player${i}`,
-                          p?.avgRebounds || 0,
-                        ])
-                      ),
-                    },
-                    {
-                      metric: "Assists",
-                      ...Object.fromEntries(
-                        playersToShow.map((p: any, i: number) => [`player${i}`, p?.avgAssists || 0])
-                      ),
-                    },
-                    {
-                      metric: "FG%",
-                      ...Object.fromEntries(
-                        playersToShow.map((p: any, i: number) => [
-                          `player${i}`,
-                          p?.fieldGoalPercentage || 0,
-                        ])
-                      ),
-                    },
-                    {
-                      metric: "FT%",
-                      ...Object.fromEntries(
-                        playersToShow.map((p: any, i: number) => [
-                          `player${i}`,
-                          p?.freeThrowPercentage || 0,
-                        ])
-                      ),
-                    },
-                  ];
-                })()}
-              >
-                <PolarGrid stroke="#5c5650" />
-                {/* @ts-expect-error - recharts types not fully compatible with React 19 */}
-                <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fill: "#a69f96" }} />
-                <PolarRadiusAxis
-                  angle={90}
-                  domain={[0, "dataMax"]}
-                  tick={{ fontSize: 10, fill: "#a69f96" }}
-                />
-                {(() => {
-                  const colors = ["#EA580C", "#3B82F6", "#10B981", "#8B5CF6", "#F59E0B"];
-                  const playersToShow =
-                    selectedRadarPlayers.length > 0
-                      ? selectedRadarPlayers
-                          .map((id) => playersData?.players?.find((p: any) => p.playerId === id))
-                          .filter(Boolean)
-                      : playersData?.players?.slice(0, 3) || [];
+                // Get league-wide max for normalization (so all stats are on 0-100 scale)
+                const allPlayers = playersData?.players || [];
+                const getMax = (key: string) =>
+                  Math.max(...allPlayers.map((p: any) => p[key] || 0), 1);
 
-                  return playersToShow.map((player: any, index: number) => (
-                    <Radar
-                      key={player?.playerId || index}
-                      name={player?.playerName || `Player ${index + 1}`}
-                      dataKey={`player${index}`}
-                      stroke={colors[index % colors.length]}
-                      fill={colors[index % colors.length]}
-                      fillOpacity={0.1}
-                      strokeWidth={2}
+                const maxPoints = getMax("avgPoints");
+                const maxRebounds = getMax("avgRebounds");
+                const maxAssists = getMax("avgAssists");
+                const maxFG = getMax("fieldGoalPercentage");
+                const maxFT = getMax("freeThrowPercentage");
+
+                // Normalize to 0-100 scale based on league max
+                const normalize = (value: number, max: number) =>
+                  max > 0 ? (value / max) * 100 : 0;
+
+                // Build data with both normalized and actual values
+                const radarData = [
+                  {
+                    metric: "Points",
+                    unit: " PPG",
+                    ...Object.fromEntries(
+                      playersToShow.map((p: any, i: number) => [
+                        `player${i}`,
+                        normalize(p?.avgPoints || 0, maxPoints),
+                      ])
+                    ),
+                    ...Object.fromEntries(
+                      playersToShow.map((p: any, i: number) => [
+                        `actual${i}`,
+                        p?.avgPoints?.toFixed(1) || "0.0",
+                      ])
+                    ),
+                  },
+                  {
+                    metric: "Rebounds",
+                    unit: " RPG",
+                    ...Object.fromEntries(
+                      playersToShow.map((p: any, i: number) => [
+                        `player${i}`,
+                        normalize(p?.avgRebounds || 0, maxRebounds),
+                      ])
+                    ),
+                    ...Object.fromEntries(
+                      playersToShow.map((p: any, i: number) => [
+                        `actual${i}`,
+                        p?.avgRebounds?.toFixed(1) || "0.0",
+                      ])
+                    ),
+                  },
+                  {
+                    metric: "Assists",
+                    unit: " APG",
+                    ...Object.fromEntries(
+                      playersToShow.map((p: any, i: number) => [
+                        `player${i}`,
+                        normalize(p?.avgAssists || 0, maxAssists),
+                      ])
+                    ),
+                    ...Object.fromEntries(
+                      playersToShow.map((p: any, i: number) => [
+                        `actual${i}`,
+                        p?.avgAssists?.toFixed(1) || "0.0",
+                      ])
+                    ),
+                  },
+                  {
+                    metric: "FG%",
+                    unit: "%",
+                    ...Object.fromEntries(
+                      playersToShow.map((p: any, i: number) => [
+                        `player${i}`,
+                        normalize(p?.fieldGoalPercentage || 0, maxFG),
+                      ])
+                    ),
+                    ...Object.fromEntries(
+                      playersToShow.map((p: any, i: number) => [
+                        `actual${i}`,
+                        p?.fieldGoalPercentage?.toFixed(1) || "0.0",
+                      ])
+                    ),
+                  },
+                  {
+                    metric: "FT%",
+                    unit: "%",
+                    ...Object.fromEntries(
+                      playersToShow.map((p: any, i: number) => [
+                        `player${i}`,
+                        normalize(p?.freeThrowPercentage || 0, maxFT),
+                      ])
+                    ),
+                    ...Object.fromEntries(
+                      playersToShow.map((p: any, i: number) => [
+                        `actual${i}`,
+                        p?.freeThrowPercentage?.toFixed(1) || "0.0",
+                      ])
+                    ),
+                  },
+                ];
+
+                const colors = ["#EA580C", "#3B82F6", "#10B981", "#8B5CF6", "#F59E0B"];
+
+                return (
+                  <RadarChart data={radarData}>
+                    <PolarGrid stroke="#5c5650" />
+                    {/* @ts-expect-error - recharts types incompatible with React 19 */}
+                    <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fill: "#a69f96" }} />
+                    <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
+                    {playersToShow.map((player: any, index: number) => (
+                      <Radar
+                        key={player?.playerId || index}
+                        name={player?.playerName || `Player ${index + 1}`}
+                        dataKey={`player${index}`}
+                        stroke={colors[index % colors.length]}
+                        fill={colors[index % colors.length]}
+                        fillOpacity={0.1}
+                        strokeWidth={2}
+                      />
+                    ))}
+                    <Legend wrapperStyle={{ color: "#e2e8f0" }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#1e293b",
+                        border: "1px solid #334155",
+                        borderRadius: "12px",
+                      }}
+                      labelStyle={{ color: "#f1f5f9", fontWeight: 600, marginBottom: 4 }}
+                      itemStyle={{ color: "#e2e8f0" }}
+                      formatter={(value, name, props) => {
+                        // Extract player index from dataKey (e.g., "player0" -> 0)
+                        const dataKey = String(props.dataKey || "");
+                        const playerIndex = parseInt(dataKey.replace("player", ""), 10);
+                        const actualValue = props.payload?.[`actual${playerIndex}`];
+                        const unit = props.payload?.unit || "";
+                        return actualValue ? `${actualValue}${unit}` : value;
+                      }}
                     />
-                  ));
-                })()}
-                <Legend wrapperStyle={{ color: "#fdfcfb" }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#3d3835",
-                    border: "1px solid #5c5650",
-                    borderRadius: "8px",
-                    color: "#fdfcfb",
-                  }}
-                />
-              </RadarChart>
+                  </RadarChart>
+                );
+              })()}
             </ResponsiveContainer>
             {selectedRadarPlayers.length === 0 && (
               <p className="text-center text-sm text-surface-500 dark:text-surface-400 mt-2">
@@ -1109,11 +1184,11 @@ export default function Statistics() {
                 <YAxis stroke="#a69f96" fontSize={12} domain={[0, 100]} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#3d3835",
-                    border: "1px solid #5c5650",
-                    borderRadius: "8px",
-                    color: "#fdfcfb",
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #334155",
+                    borderRadius: "12px",
                   }}
+                  labelStyle={{ color: "#f1f5f9", fontWeight: 600, marginBottom: 4 }}
                 />
                 <Legend />
                 <Line

@@ -116,7 +116,9 @@ export default function NotificationsScreen() {
         onPress={() => handleNotificationPress(item)}
         onLongPress={() => handleDelete(item._id)}
         className={`flex-row p-4 mx-4 mb-2 rounded-xl ${
-          !item.read ? "bg-primary-500/10 dark:bg-primary-500/15" : "bg-surface-100 dark:bg-surface-800/50"
+          !item.read
+            ? "bg-primary-500/10 dark:bg-primary-500/15"
+            : "bg-surface-100 dark:bg-surface-800/50"
         }`}
         activeOpacity={0.7}
       >
