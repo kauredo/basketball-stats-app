@@ -31,6 +31,7 @@ import StandingsScreen from "../screens/StandingsScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
 import GameAnalysisScreen from "../screens/GameAnalysisScreen";
 import LeagueSettingsScreen from "../screens/LeagueSettingsScreen";
+import LeagueMembersScreen from "../screens/LeagueMembersScreen";
 
 // Navigation parameter types
 export type RootStackParamList = {
@@ -48,6 +49,7 @@ export type RootStackParamList = {
   Notifications: undefined;
   GameAnalysis: { gameId: string };
   LeagueSettings: undefined;
+  LeagueMembers: undefined;
 };
 
 export type TabParamList = {
@@ -287,6 +289,11 @@ function AppContent() {
             name="LeagueSettings"
             component={LeagueSettingsScreen}
             options={{ title: "League Settings" }}
+          />
+          <Stack.Screen
+            name="LeagueMembers"
+            component={LeagueMembersScreen}
+            options={{ title: "League Members" }}
           />
         </Stack.Navigator>
       )}

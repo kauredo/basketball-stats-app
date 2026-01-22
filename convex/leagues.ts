@@ -796,7 +796,7 @@ export const getStandings = query({
   },
 });
 
-// Get league invite code
+// Get league invite code (accessible to all members)
 export const getInviteCode = query({
   args: {
     token: v.string(),
@@ -806,8 +806,8 @@ export const getInviteCode = query({
     const user = await getUserFromToken(ctx, args.token);
     if (!user) throw new Error("Unauthorized");
 
-    const canManage = await canManageLeague(ctx, user._id, args.leagueId);
-    if (!canManage) throw new Error("Access denied");
+    const hasAccess = await canAccessLeague(ctx, user._id, args.leagueId);
+    if (!hasAccess) throw new Error("Access denied");
 
     const league = await ctx.db.get(args.leagueId);
     if (!league) throw new Error("League not found");
@@ -918,6 +918,118 @@ export const updateSettings = mutation({
     return {
       settings: newSettings,
       message: "Settings updated successfully",
+    };
+  },
+});
+
+// Update member role
+export const updateMemberRole = mutation({
+  args: {
+    token: v.string(),
+    leagueId: v.id("leagues"),
+    membershipId: v.id("leagueMemberships"),
+    newRole: v.union(
+      v.literal("admin"),
+      v.literal("coach"),
+      v.literal("scorekeeper"),
+      v.literal("member"),
+      v.literal("viewer")
+    ),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    // Check if user can manage the league
+    const canManage = await canManageLeague(ctx, user._id, args.leagueId);
+    if (!canManage) throw new Error("Access denied - only admins can manage members");
+
+    // Get the league to check ownership
+    const league = await ctx.db.get(args.leagueId);
+    if (!league) throw new Error("League not found");
+
+    // Get the target membership
+    const membership = await ctx.db.get(args.membershipId);
+    if (!membership) throw new Error("Membership not found");
+    if (membership.leagueId !== args.leagueId) throw new Error("Membership does not belong to this league");
+
+    // Get the target user
+    const targetUser = await ctx.db.get(membership.userId);
+    if (!targetUser) throw new Error("User not found");
+
+    // Cannot modify owner's role
+    if (membership.userId === league.ownerId) {
+      throw new Error("Cannot modify the league owner's role");
+    }
+
+    // Cannot modify your own role
+    if (membership.userId === user._id) {
+      throw new Error("Cannot modify your own role");
+    }
+
+    // Update the role
+    await ctx.db.patch(args.membershipId, { role: args.newRole });
+
+    return {
+      membership: {
+        id: membership._id,
+        role: args.newRole,
+        userId: membership.userId,
+        userName: `${targetUser.firstName} ${targetUser.lastName}`,
+      },
+      message: `Role updated to ${args.newRole}`,
+    };
+  },
+});
+
+// Remove member from league
+export const removeMember = mutation({
+  args: {
+    token: v.string(),
+    leagueId: v.id("leagues"),
+    membershipId: v.id("leagueMemberships"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    // Check if user can manage the league
+    const canManage = await canManageLeague(ctx, user._id, args.leagueId);
+    if (!canManage) throw new Error("Access denied - only admins can remove members");
+
+    // Get the league to check ownership
+    const league = await ctx.db.get(args.leagueId);
+    if (!league) throw new Error("League not found");
+
+    // Get the target membership
+    const membership = await ctx.db.get(args.membershipId);
+    if (!membership) throw new Error("Membership not found");
+    if (membership.leagueId !== args.leagueId) throw new Error("Membership does not belong to this league");
+
+    // Get the target user for the response message
+    const targetUser = await ctx.db.get(membership.userId);
+
+    // Cannot remove owner
+    if (membership.userId === league.ownerId) {
+      throw new Error("Cannot remove the league owner");
+    }
+
+    // Cannot remove yourself (use leave() instead)
+    if (membership.userId === user._id) {
+      throw new Error("Cannot remove yourself - use 'Leave League' instead");
+    }
+
+    // Delete the membership
+    await ctx.db.delete(args.membershipId);
+
+    return {
+      removedUser: targetUser
+        ? {
+            id: targetUser._id,
+            name: `${targetUser.firstName} ${targetUser.lastName}`,
+          }
+        : null,
+      message: "Member removed successfully",
     };
   },
 });

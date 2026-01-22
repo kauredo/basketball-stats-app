@@ -21,6 +21,7 @@ import {
   ComputerDesktopIcon,
   Bars3Icon,
   XMarkIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 
 interface LayoutProps {
@@ -56,6 +57,7 @@ export default function Layout({ children }: LayoutProps) {
 
   const menuItems = [
     { id: "profile", label: "Profile" },
+    { id: "league-settings", label: "League Settings" },
     { id: "leagues", label: "Switch League" },
     { id: "logout", label: "Sign out" },
   ];
@@ -265,9 +267,22 @@ export default function Layout({ children }: LayoutProps) {
                 Profile
               </Link>
               <Link
-                to="/app/leagues"
+                to="/app/league-settings"
                 role="menuitem"
                 tabIndex={focusedIndex === 1 ? 0 : -1}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 hover:text-surface-900 dark:hover:text-surface-50 focus:bg-surface-100 dark:focus:bg-surface-700 focus:outline-none transition-colors"
+                onClick={() => {
+                  setShowUserMenu(false);
+                  onNavClick?.();
+                }}
+              >
+                <Cog6ToothIcon className="h-4 w-4 text-surface-400" aria-hidden="true" />
+                League Settings
+              </Link>
+              <Link
+                to="/app/leagues"
+                role="menuitem"
+                tabIndex={focusedIndex === 2 ? 0 : -1}
                 className="flex items-center gap-3 px-4 py-2.5 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 hover:text-surface-900 dark:hover:text-surface-50 focus:bg-surface-100 dark:focus:bg-surface-700 focus:outline-none transition-colors"
                 onClick={() => {
                   setShowUserMenu(false);
@@ -280,7 +295,7 @@ export default function Layout({ children }: LayoutProps) {
               <div className="my-1 border-t border-surface-200 dark:border-surface-700" />
               <button
                 role="menuitem"
-                tabIndex={focusedIndex === 2 ? 0 : -1}
+                tabIndex={focusedIndex === 3 ? 0 : -1}
                 onClick={handleLogout}
                 className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-status-active hover:bg-status-active/10 focus:bg-status-active/10 focus:outline-none transition-colors"
               >

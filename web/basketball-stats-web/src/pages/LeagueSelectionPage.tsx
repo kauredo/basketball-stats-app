@@ -211,7 +211,7 @@ export default function LeagueSelectionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-50 dark:bg-surface-950">
+    <div className="bg-surface-50 dark:bg-surface-950">
       {/* Minimal Header */}
       <header className="border-b border-surface-200 dark:border-surface-800">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -494,18 +494,6 @@ export default function LeagueSelectionPage() {
             )}
           </div>
         </div>
-
-        {/* Continue Button - Fixed */}
-        {selectedLeague && (
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-surface-50 via-surface-50 to-transparent dark:from-surface-950 dark:via-surface-950 pointer-events-none">
-            <div className="max-w-6xl mx-auto flex justify-end pointer-events-auto">
-              <button className="btn-primary px-8 py-4 text-base shadow-elevated hover:shadow-dramatic group">
-                Continue to {selectedLeague.name}
-                <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-          </div>
-        )}
       </main>
 
       {/* Create League Modal */}

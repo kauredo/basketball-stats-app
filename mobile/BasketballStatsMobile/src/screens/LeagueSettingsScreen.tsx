@@ -16,13 +16,18 @@ import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { useTheme } from "../contexts/ThemeContext";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../navigation/AppNavigator";
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function LeagueSettingsScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
   const { token, selectedLeague } = useAuth();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const [isSaving, setIsSaving] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   // Check if user can edit settings
   const canEdit =
@@ -50,7 +55,31 @@ export default function LeagueSettingsScreen() {
     token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
   );
 
+  // Fetch members for count
+  const membersData = useQuery(
+    api.leagues.getMembers,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
+
+  // Fetch invite code
+  const inviteData = useQuery(
+    api.leagues.getInviteCode,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
+
   const updateSettings = useMutation(api.leagues.updateSettings);
+
+  const handleCopyInviteCode = () => {
+    if (!inviteData?.inviteCode) return;
+    Alert.alert(
+      "Invite Code",
+      inviteData.inviteCode,
+      [{ text: "OK" }],
+      { cancelable: true }
+    );
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
 
   // Update form when settings are loaded
   useEffect(() => {
@@ -333,6 +362,71 @@ export default function LeagueSettingsScreen() {
                 </View>
               </>
             )}
+          </View>
+        </View>
+
+        {/* Members Section */}
+        <View className="mb-6">
+          <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
+            Members
+          </Text>
+          <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
+            <TouchableOpacity
+              className="flex-row items-center justify-between p-4"
+              onPress={() => navigation.navigate("LeagueMembers")}
+              accessibilityRole="button"
+              accessibilityLabel="View league members"
+            >
+              <View className="flex-row items-center flex-1">
+                <View className="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-xl items-center justify-center mr-3">
+                  <Icon name="users" size={20} color="#F97316" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-surface-900 dark:text-white font-medium">
+                    Manage Members
+                  </Text>
+                  <Text className="text-surface-500 dark:text-surface-400 text-sm">
+                    {membersData?.members?.length ?? 0} member
+                    {(membersData?.members?.length ?? 0) !== 1 ? "s" : ""} in this league
+                  </Text>
+                </View>
+              </View>
+              <Icon
+                name="chevron-right"
+                size={20}
+                color={isDark ? "#9CA3AF" : "#6B7280"}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Invite Code Section */}
+        <View className="mb-6">
+          <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
+            Invite Others
+          </Text>
+          <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 p-4">
+            <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">
+              Share this code with others to let them join your league
+            </Text>
+            <View className="flex-row items-center bg-surface-100 dark:bg-surface-700 rounded-lg p-3 mb-3">
+              <Text className="flex-1 text-surface-900 dark:text-white font-mono text-base">
+                {inviteData?.inviteCode ?? "Loading..."}
+              </Text>
+              <TouchableOpacity
+                onPress={handleCopyInviteCode}
+                className="bg-primary-500 rounded-lg px-3 py-2 ml-2"
+                accessibilityRole="button"
+                accessibilityLabel="Copy invite code"
+              >
+                <Text className="text-white text-sm font-medium">
+                  {copiedCode ? "Copied!" : "Copy"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Text className="text-surface-500 dark:text-surface-400 text-xs">
+              New members will join as "Member" role by default
+            </Text>
           </View>
         </View>
 

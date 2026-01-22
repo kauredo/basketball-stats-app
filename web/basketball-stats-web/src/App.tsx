@@ -35,6 +35,7 @@ import PlayerComparison from "./pages/PlayerComparison";
 import ShotCharts from "./pages/ShotCharts";
 import PlayerDetail from "./pages/PlayerDetail";
 import TeamDetail from "./pages/TeamDetail";
+import LeagueSettings from "./pages/LeagueSettings";
 
 function LoadingScreen() {
   return (
@@ -93,6 +94,7 @@ function AuthenticatedApp() {
           <Route path="/shot-charts" element={<ShotCharts />} />
           <Route path="/games/:gameId/analysis" element={<GameAnalysis />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/league-settings" element={<LeagueSettings />} />
           <Route path="/leagues" element={<LeagueSelectionPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
