@@ -1,6 +1,7 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { hashPassword, generateToken, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "./lib/auth";
 
 // Realistic basketball player names
 const FIRST_NAMES = [
@@ -87,10 +88,6 @@ function generateWeight(height: number): number {
   return Math.round(baseWeight + randomBetween(-5, 15));
 }
 
-function hashPassword(password: string): string {
-  // Simple hash for demo purposes - in production use proper bcrypt
-  return `hashed_${password}_${Date.now()}`;
-}
 
 // Generate realistic shot location
 function generateShotLocation(zone: keyof typeof SHOT_ZONES): { x: number; y: number } {
@@ -193,7 +190,7 @@ export const seedDatabase = mutation({
     // Create demo user
     const userId = await ctx.db.insert("users", {
       email: "demo@example.com",
-      passwordHash: hashPassword("demo123"),
+      passwordHash: await hashPassword("demo123"),
       firstName: "Demo",
       lastName: "User",
       role: "admin",
@@ -203,7 +200,7 @@ export const seedDatabase = mutation({
     // Create second user for variety
     const userId2 = await ctx.db.insert("users", {
       email: "coach@example.com",
-      passwordHash: hashPassword("coach123"),
+      passwordHash: await hashPassword("coach123"),
       firstName: "Coach",
       lastName: "Smith",
       role: "user",
@@ -211,13 +208,15 @@ export const seedDatabase = mutation({
     });
 
     // Create a session for the demo user
-    const sessionToken = `demo_token_${Date.now()}`;
+    const sessionToken = generateToken(64);
+    const refreshToken = generateToken(64);
+    const now = Date.now();
     await ctx.db.insert("sessions", {
       userId,
       token: sessionToken,
-      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days
-      refreshToken: `refresh_${Date.now()}`,
-      refreshExpiresAt: Date.now() + 90 * 24 * 60 * 60 * 1000, // 90 days
+      expiresAt: now + ACCESS_TOKEN_EXPIRY,
+      refreshToken,
+      refreshExpiresAt: now + REFRESH_TOKEN_EXPIRY,
     });
 
     // Create league
@@ -620,7 +619,7 @@ export const seedMinimal = mutation({
     // Create demo user
     const userId = await ctx.db.insert("users", {
       email: "demo@example.com",
-      passwordHash: hashPassword("demo123"),
+      passwordHash: await hashPassword("demo123"),
       firstName: "Demo",
       lastName: "User",
       role: "admin",
@@ -628,13 +627,15 @@ export const seedMinimal = mutation({
     });
 
     // Create session
-    const sessionToken = `demo_token_${Date.now()}`;
+    const sessionToken = generateToken(64);
+    const refreshToken = generateToken(64);
+    const now = Date.now();
     await ctx.db.insert("sessions", {
       userId,
       token: sessionToken,
-      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
-      refreshToken: `refresh_${Date.now()}`,
-      refreshExpiresAt: Date.now() + 90 * 24 * 60 * 60 * 1000,
+      expiresAt: now + ACCESS_TOKEN_EXPIRY,
+      refreshToken,
+      refreshExpiresAt: now + REFRESH_TOKEN_EXPIRY,
     });
 
     // Create league
