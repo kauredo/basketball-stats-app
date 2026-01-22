@@ -85,6 +85,7 @@ export const list = query({
           season: league.season,
           status: league.status,
           isPublic: league.isPublic,
+          settings: league.settings,
           owner: owner
             ? {
                 id: owner._id,
@@ -163,6 +164,7 @@ export const get = query({
         season: league.season,
         status: league.status,
         isPublic: league.isPublic,
+        settings: league.settings,
         owner: owner
           ? {
               id: owner._id,
@@ -200,6 +202,69 @@ export const get = query({
   },
 });
 
+// Default settings based on league type
+function getDefaultSettings(leagueType: string) {
+  const defaults: Record<
+    string,
+    {
+      quarterMinutes: number;
+      foulLimit: number;
+      timeoutsPerTeam: number;
+      overtimeMinutes: number;
+      bonusMode: "college" | "nba";
+      playersPerRoster: number;
+      trackAdvancedStats: boolean;
+    }
+  > = {
+    youth: {
+      quarterMinutes: 8,
+      foulLimit: 5,
+      timeoutsPerTeam: 3,
+      overtimeMinutes: 3,
+      bonusMode: "college",
+      playersPerRoster: 10,
+      trackAdvancedStats: false,
+    },
+    high_school: {
+      quarterMinutes: 8,
+      foulLimit: 5,
+      timeoutsPerTeam: 4,
+      overtimeMinutes: 4,
+      bonusMode: "college",
+      playersPerRoster: 12,
+      trackAdvancedStats: true,
+    },
+    college: {
+      quarterMinutes: 10,
+      foulLimit: 5,
+      timeoutsPerTeam: 4,
+      overtimeMinutes: 5,
+      bonusMode: "college",
+      playersPerRoster: 13,
+      trackAdvancedStats: true,
+    },
+    professional: {
+      quarterMinutes: 12,
+      foulLimit: 6,
+      timeoutsPerTeam: 7,
+      overtimeMinutes: 5,
+      bonusMode: "nba",
+      playersPerRoster: 15,
+      trackAdvancedStats: true,
+    },
+    recreational: {
+      quarterMinutes: 10,
+      foulLimit: 5,
+      timeoutsPerTeam: 3,
+      overtimeMinutes: 3,
+      bonusMode: "college",
+      playersPerRoster: 12,
+      trackAdvancedStats: false,
+    },
+  };
+  return defaults[leagueType] || defaults.recreational;
+}
+
 // Create new league
 export const create = mutation({
   args: {
@@ -227,6 +292,9 @@ export const create = mutation({
     // Generate invite code
     const inviteCode = `${args.name.toLowerCase().replace(/\s+/g, "-")}-${generateToken(6)}`;
 
+    // Get default settings based on league type
+    const settings = getDefaultSettings(args.leagueType);
+
     const leagueId = await ctx.db.insert("leagues", {
       name: args.name,
       description: args.description,
@@ -237,6 +305,7 @@ export const create = mutation({
       createdById: user._id,
       ownerId: user._id,
       inviteCode,
+      settings,
     });
 
     // Add owner as admin member
@@ -260,6 +329,7 @@ export const create = mutation({
         status: league!.status,
         isPublic: league!.isPublic,
         inviteCode: league!.inviteCode,
+        settings: league!.settings,
         createdAt: league!._creationTime,
       },
       message: "League created successfully",
@@ -745,6 +815,109 @@ export const getInviteCode = query({
     return {
       inviteCode: league.inviteCode,
       inviteUrl: `https://basketballstats.app/join/${league.inviteCode}`,
+    };
+  },
+});
+
+// Get league settings
+export const getSettings = query({
+  args: {
+    token: v.string(),
+    leagueId: v.id("leagues"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const hasAccess = await canAccessLeague(ctx, user._id, args.leagueId);
+    if (!hasAccess) throw new Error("Access denied");
+
+    const league = await ctx.db.get(args.leagueId);
+    if (!league) throw new Error("League not found");
+
+    // Return settings with defaults filled in
+    const defaults = getDefaultSettings(league.leagueType);
+    const settings = league.settings || {};
+
+    return {
+      settings: {
+        quarterMinutes: settings.quarterMinutes ?? defaults.quarterMinutes,
+        foulLimit: settings.foulLimit ?? defaults.foulLimit,
+        timeoutsPerTeam: settings.timeoutsPerTeam ?? defaults.timeoutsPerTeam,
+        overtimeMinutes: settings.overtimeMinutes ?? defaults.overtimeMinutes,
+        bonusMode: settings.bonusMode ?? defaults.bonusMode,
+        playersPerRoster: settings.playersPerRoster ?? defaults.playersPerRoster,
+        trackAdvancedStats: settings.trackAdvancedStats ?? defaults.trackAdvancedStats,
+      },
+      leagueType: league.leagueType,
+    };
+  },
+});
+
+// Update league settings
+export const updateSettings = mutation({
+  args: {
+    token: v.string(),
+    leagueId: v.id("leagues"),
+    quarterMinutes: v.optional(v.number()),
+    foulLimit: v.optional(v.number()),
+    timeoutsPerTeam: v.optional(v.number()),
+    overtimeMinutes: v.optional(v.number()),
+    bonusMode: v.optional(v.union(v.literal("college"), v.literal("nba"))),
+    playersPerRoster: v.optional(v.number()),
+    trackAdvancedStats: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const canManage = await canManageLeague(ctx, user._id, args.leagueId);
+    if (!canManage) throw new Error("Access denied - only admins can update settings");
+
+    const league = await ctx.db.get(args.leagueId);
+    if (!league) throw new Error("League not found");
+
+    // Validate settings
+    if (args.quarterMinutes !== undefined && ![5, 6, 8, 10, 12].includes(args.quarterMinutes)) {
+      throw new Error("Quarter minutes must be 5, 6, 8, 10, or 12");
+    }
+    if (args.foulLimit !== undefined && ![5, 6].includes(args.foulLimit)) {
+      throw new Error("Foul limit must be 5 or 6");
+    }
+    if (
+      args.timeoutsPerTeam !== undefined &&
+      (args.timeoutsPerTeam < 1 || args.timeoutsPerTeam > 7)
+    ) {
+      throw new Error("Timeouts per team must be between 1 and 7");
+    }
+    if (args.overtimeMinutes !== undefined && ![3, 4, 5].includes(args.overtimeMinutes)) {
+      throw new Error("Overtime minutes must be 3, 4, or 5");
+    }
+    if (
+      args.playersPerRoster !== undefined &&
+      (args.playersPerRoster < 5 || args.playersPerRoster > 20)
+    ) {
+      throw new Error("Players per roster must be between 5 and 20");
+    }
+
+    // Merge with existing settings
+    const existingSettings = league.settings || {};
+    const newSettings = {
+      ...existingSettings,
+      ...(args.quarterMinutes !== undefined && { quarterMinutes: args.quarterMinutes }),
+      ...(args.foulLimit !== undefined && { foulLimit: args.foulLimit }),
+      ...(args.timeoutsPerTeam !== undefined && { timeoutsPerTeam: args.timeoutsPerTeam }),
+      ...(args.overtimeMinutes !== undefined && { overtimeMinutes: args.overtimeMinutes }),
+      ...(args.bonusMode !== undefined && { bonusMode: args.bonusMode }),
+      ...(args.playersPerRoster !== undefined && { playersPerRoster: args.playersPerRoster }),
+      ...(args.trackAdvancedStats !== undefined && { trackAdvancedStats: args.trackAdvancedStats }),
+    };
+
+    await ctx.db.patch(args.leagueId, { settings: newSettings });
+
+    return {
+      settings: newSettings,
+      message: "Settings updated successfully",
     };
   },
 });

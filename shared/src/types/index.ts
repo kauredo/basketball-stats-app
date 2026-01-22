@@ -42,6 +42,16 @@ export interface SignupCredentials {
 // League Types
 // ============================================
 
+export interface LeagueSettings {
+  quarterMinutes?: number;
+  foulLimit?: number;
+  timeoutsPerTeam?: number;
+  overtimeMinutes?: number;
+  bonusMode?: "college" | "nba";
+  playersPerRoster?: number;
+  trackAdvancedStats?: boolean;
+}
+
 export interface League {
   id: string;
   name: string;
@@ -53,6 +63,7 @@ export interface League {
   ownerId: string;
   createdById: string;
   inviteCode?: string;
+  settings?: LeagueSettings;
   teamsCount?: number;
   membersCount?: number;
   gamesCount?: number;
@@ -350,7 +361,7 @@ export type LeagueType = "professional" | "college" | "high_school" | "youth" | 
 
 export type LeagueStatus = "draft" | "active" | "completed" | "archived";
 
-export type LeagueRole = "admin" | "coach" | "scorekeeper" | "member" | "viewer";
+export type LeagueRole = "owner" | "admin" | "coach" | "scorekeeper" | "member" | "viewer";
 
 export type MembershipStatus = "pending" | "active" | "suspended" | "removed";
 

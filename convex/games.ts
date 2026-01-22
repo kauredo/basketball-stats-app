@@ -278,7 +278,12 @@ export const create = mutation({
       throw new Error("Access denied - insufficient permissions");
     }
 
-    const quarterMinutes = args.quarterMinutes || 12;
+    // Get league settings for defaults
+    const league = await ctx.db.get(homeTeam.leagueId);
+    const leagueSettings = league?.settings || {};
+
+    // Use provided quarterMinutes or fall back to league settings or default
+    const quarterMinutes = args.quarterMinutes || leagueSettings.quarterMinutes || 12;
 
     const gameId = await ctx.db.insert("games", {
       homeTeamId: args.homeTeamId,
@@ -290,7 +295,13 @@ export const create = mutation({
       timeRemainingSeconds: quarterMinutes * 60,
       homeScore: 0,
       awayScore: 0,
-      gameSettings: { quarterMinutes },
+      gameSettings: {
+        quarterMinutes,
+        foulLimit: leagueSettings.foulLimit,
+        timeoutsPerTeam: leagueSettings.timeoutsPerTeam,
+        overtimeMinutes: leagueSettings.overtimeMinutes,
+        bonusMode: leagueSettings.bonusMode,
+      },
       userId: user._id,
     });
 
@@ -942,8 +953,13 @@ export const createQuickGame = mutation({
       throw new Error("Access denied - insufficient permissions");
     }
 
-    const quarterMinutes = args.quarterMinutes || 12;
-    const playersPerTeam = args.playersPerTeam || 15;
+    // Get league settings for defaults
+    const league = await ctx.db.get(args.leagueId);
+    const leagueSettings = league?.settings || {};
+
+    // Use provided values or fall back to league settings or defaults
+    const quarterMinutes = args.quarterMinutes || leagueSettings.quarterMinutes || 12;
+    const playersPerTeam = args.playersPerTeam || leagueSettings.playersPerRoster || 15;
 
     // Create temporary home team
     const homeTeamId = await ctx.db.insert("teams", {
@@ -991,6 +1007,10 @@ export const createQuickGame = mutation({
       awayScore: 0,
       gameSettings: {
         quarterMinutes,
+        foulLimit: leagueSettings.foulLimit,
+        timeoutsPerTeam: leagueSettings.timeoutsPerTeam,
+        overtimeMinutes: leagueSettings.overtimeMinutes,
+        bonusMode: leagueSettings.bonusMode,
         isQuickGame: true,
         customHomeTeamName: args.homeTeamName,
         customAwayTeamName: args.awayTeamName,

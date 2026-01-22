@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Switch, Alert, Share } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme, type ThemeMode } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 
 // Column definitions for export
 const playerStatsColumns = [
@@ -100,9 +103,13 @@ const themeModeIcons: Record<ThemeMode, string> = {
 };
 
 export default function SettingsScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { token, selectedLeague } = useAuth();
   const { mode, setMode } = useTheme();
   const [isExporting, setIsExporting] = useState(false);
+
+  // Check if user can manage league settings (admin or owner)
+  const canManageLeague = selectedLeague?.role === "admin" || selectedLeague?.role === "owner";
 
   // Fetch notification preferences from backend
   const notificationPrefs = useQuery(
@@ -293,6 +300,23 @@ export default function SettingsScreen() {
             </View>
           </View>
         </View>
+
+        {/* League Settings - only for admins/owners */}
+        {canManageLeague && selectedLeague && (
+          <View className="mb-6">
+            <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
+              League Management
+            </Text>
+            <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+              <SettingRow
+                icon="settings"
+                title="League Settings"
+                subtitle="Game rules, roster limits, and more"
+                onPress={() => navigation.navigate("LeagueSettings")}
+              />
+            </View>
+          </View>
+        )}
 
         {/* Notification Preferences */}
         <View className="mb-6">

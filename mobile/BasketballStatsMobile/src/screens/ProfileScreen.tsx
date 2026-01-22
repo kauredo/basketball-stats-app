@@ -12,11 +12,14 @@ import {
   Switch,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme, type ThemeMode } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 
 // Theme mode labels and icons
 const themeModeLabels: Record<ThemeMode, string> = {
@@ -32,8 +35,16 @@ const themeModeIcons: Record<ThemeMode, string> = {
 };
 
 export default function ProfileScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, token, selectedLeague, userLeagues, logout, selectLeague, refreshUser } = useAuth();
   const { resolvedTheme, mode, setMode } = useTheme();
+
+  // Check if user can manage league settings (admin or owner)
+  const canManageLeague =
+    selectedLeague?.role === "admin" ||
+    selectedLeague?.role === "owner" ||
+    selectedLeague?.membership?.role === "admin" ||
+    selectedLeague?.membership?.role === "owner";
 
   // Edit profile state
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -246,33 +257,58 @@ export default function ProfileScreen() {
             <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
               Current League
             </Text>
-            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 flex-row justify-between items-center">
-              <View className="flex-1">
-                <Text className="text-base font-bold text-surface-900 dark:text-white mb-1">
-                  {selectedLeague.name}
-                </Text>
-                <Text className="text-sm text-surface-600 dark:text-surface-400 capitalize">
-                  {selectedLeague.leagueType}
-                </Text>
-                <Text className="text-sm text-surface-600 dark:text-surface-400 mt-0.5">
-                  Season: {selectedLeague.season}
-                </Text>
-                {selectedLeague.membership && (
-                  <View className="self-start bg-green-100 dark:bg-green-900 px-2 py-1 rounded-md mt-2">
-                    <Text className="text-green-700 dark:text-green-400 text-xs font-semibold capitalize">
-                      {selectedLeague.membership.role}
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
+              <View className="flex-row justify-between items-start">
+                <View className="flex-1">
+                  <Text className="text-base font-bold text-surface-900 dark:text-white mb-1">
+                    {selectedLeague.name}
+                  </Text>
+                  <Text className="text-sm text-surface-600 dark:text-surface-400 capitalize">
+                    {selectedLeague.leagueType}
+                  </Text>
+                  <Text className="text-sm text-surface-600 dark:text-surface-400 mt-0.5">
+                    Season: {selectedLeague.season}
+                  </Text>
+                  {(selectedLeague.membership || selectedLeague.role) && (
+                    <View className="self-start bg-green-100 dark:bg-green-900 px-2 py-1 rounded-md mt-2">
+                      <Text className="text-green-700 dark:text-green-400 text-xs font-semibold capitalize">
+                        {selectedLeague.membership?.role || selectedLeague.role}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <TouchableOpacity
+                  className="bg-surface-200 dark:bg-surface-700 px-3 py-2 rounded-md"
+                  onPress={handleSwitchLeague}
+                >
+                  <Text className="text-surface-900 dark:text-white text-sm font-semibold">
+                    Switch
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {canManageLeague && (
+                <TouchableOpacity
+                  className="flex-row items-center mt-4 pt-4 border-t border-surface-200 dark:border-surface-700"
+                  onPress={() => navigation.navigate("LeagueSettings")}
+                >
+                  <View className="w-10 h-10 bg-primary-500/10 rounded-full items-center justify-center mr-3">
+                    <Icon name="settings" size={20} color="#F97316" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-base text-surface-900 dark:text-white font-medium">
+                      League Settings
+                    </Text>
+                    <Text className="text-sm text-surface-500 dark:text-surface-400">
+                      Game rules, roster limits, and more
                     </Text>
                   </View>
-                )}
-              </View>
-              <TouchableOpacity
-                className="bg-surface-100 dark:bg-surface-700 px-3 py-2 rounded-md"
-                onPress={handleSwitchLeague}
-              >
-                <Text className="text-surface-900 dark:text-white text-sm font-semibold">
-                  Switch
-                </Text>
-              </TouchableOpacity>
+                  <Icon
+                    name="chevron-right"
+                    size={20}
+                    color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
+                  />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         )}

@@ -52,6 +52,18 @@ export default defineSchema({
     createdById: v.id("users"),
     ownerId: v.id("users"),
     inviteCode: v.optional(v.string()),
+    // League-wide default settings for games
+    settings: v.optional(
+      v.object({
+        quarterMinutes: v.optional(v.number()),
+        foulLimit: v.optional(v.number()),
+        timeoutsPerTeam: v.optional(v.number()),
+        overtimeMinutes: v.optional(v.number()),
+        bonusMode: v.optional(v.union(v.literal("college"), v.literal("nba"))),
+        playersPerRoster: v.optional(v.number()),
+        trackAdvancedStats: v.optional(v.boolean()),
+      })
+    ),
   })
     .index("by_owner", ["ownerId"])
     .index("by_created_by", ["createdById"])
