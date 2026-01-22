@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
@@ -218,7 +219,12 @@ const Teams: React.FC = () => {
     >
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-xl font-bold text-surface-900 dark:text-white">{team.name}</h3>
+          <Link
+            to={`/app/teams/${team.id}`}
+            className="text-xl font-bold text-surface-900 dark:text-white hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
+          >
+            {team.name}
+          </Link>
           {team.city && (
             <p className="text-surface-600 dark:text-surface-400 text-sm mt-1">{team.city}</p>
           )}

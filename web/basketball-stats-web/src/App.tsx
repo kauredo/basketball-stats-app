@@ -34,6 +34,7 @@ import Standings from "./pages/Standings";
 import PlayerComparison from "./pages/PlayerComparison";
 import ShotCharts from "./pages/ShotCharts";
 import PlayerDetail from "./pages/PlayerDetail";
+import TeamDetail from "./pages/TeamDetail";
 
 function LoadingScreen() {
   return (
@@ -83,6 +84,7 @@ function AuthenticatedApp() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/games" element={<Games />} />
           <Route path="/teams" element={<Teams />} />
+          <Route path="/teams/:teamId" element={<TeamDetail />} />
           <Route path="/players" element={<Players />} />
           <Route path="/players/:playerId" element={<PlayerDetail />} />
           <Route path="/statistics" element={<Statistics />} />

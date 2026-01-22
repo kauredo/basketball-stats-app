@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
@@ -33,7 +34,7 @@ interface Player {
   name: string;
   number: number;
   position?: "PG" | "SG" | "SF" | "PF" | "C";
-  status?: string;
+  active?: boolean;
 }
 
 export default function TeamDetailScreen() {
@@ -69,12 +70,35 @@ export default function TeamDetailScreen() {
       : "skip"
   );
 
+  // Fetch team's recent games
+  const gamesData = useQuery(
+    api.games.list,
+    token && selectedLeague
+      ? { token, leagueId: selectedLeague.id, teamId: teamId as Id<"teams">, limit: 5 }
+      : "skip"
+  );
+
+  // Fetch team statistics
+  const teamsStatsData = useQuery(
+    api.statistics.getTeamsStats,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
+
   // Mutations
   const updateTeam = useMutation(api.teams.update);
   const removeTeam = useMutation(api.teams.remove);
 
   const players = playersData?.players || [];
   const team = teamData?.team;
+  const games = gamesData?.games || [];
+
+  // Find this team's stats from the league stats
+  const teamStats = teamsStatsData?.teams?.find((t: any) => t.teamId === teamId);
+
+  // Get win/loss record from team data
+  const wins = team?.wins ?? 0;
+  const losses = team?.losses ?? 0;
+  const winPct = team?.winPercentage?.toFixed(1) ?? "0.0";
 
   // Initialize edit form when team data loads
   React.useEffect(() => {
@@ -110,7 +134,6 @@ export default function TeamDetailScreen() {
         clearLogo: editForm.clearLogo || undefined,
       });
       setShowEditModal(false);
-      // Update the header title
       navigation.setParams({ teamName: editForm.name.trim() });
       Alert.alert("Success", "Team updated successfully");
     } catch (error) {
@@ -153,70 +176,19 @@ export default function TeamDetailScreen() {
   const getPositionColor = (position?: string) => {
     switch (position) {
       case "PG":
-        return "#3B82F6"; // Blue
+        return "#3B82F6";
       case "SG":
-        return "#8B5CF6"; // Purple
+        return "#8B5CF6";
       case "SF":
-        return "#10B981"; // Green
+        return "#10B981";
       case "PF":
-        return "#F59E0B"; // Amber
+        return "#F59E0B";
       case "C":
-        return "#EF4444"; // Red
+        return "#EF4444";
       default:
-        return "#6B7280"; // Gray
+        return "#6B7280";
     }
   };
-
-  const renderPlayer = ({ item: player }: { item: Player }) => (
-    <TouchableOpacity
-      className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-3 flex-row items-center"
-      onPress={() => navigation.navigate("PlayerStats", { playerId: player.id })}
-    >
-      <View className="w-12 h-12 rounded-full bg-surface-200 dark:bg-surface-700 items-center justify-center mr-4">
-        <Text className="text-surface-900 dark:text-white text-lg font-bold">{player.number}</Text>
-      </View>
-
-      <View className="flex-1">
-        <Text className="text-surface-900 dark:text-white text-base font-semibold">
-          {player.name}
-        </Text>
-        <View className="flex-row items-center mt-1">
-          {player.position && (
-            <View
-              className="px-2 py-0.5 rounded mr-2"
-              style={{ backgroundColor: getPositionColor(player.position) + "30" }}
-            >
-              <Text
-                className="text-xs font-semibold"
-                style={{ color: getPositionColor(player.position) }}
-              >
-                {player.position}
-              </Text>
-            </View>
-          )}
-          {player.status && (
-            <Text
-              className={`text-xs font-medium ${
-                player.status === "active"
-                  ? "text-green-500"
-                  : player.status === "injured"
-                    ? "text-red-500"
-                    : "text-surface-500"
-              }`}
-            >
-              {player.status.charAt(0).toUpperCase() + player.status.slice(1)}
-            </Text>
-          )}
-        </View>
-      </View>
-
-      <Icon
-        name="chevron-right"
-        size={20}
-        color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
-      />
-    </TouchableOpacity>
-  );
 
   const statusBarStyle = resolvedTheme === "dark" ? "light" : "dark";
 
@@ -243,34 +215,275 @@ export default function TeamDetailScreen() {
     });
   }, [navigation, teamId, resolvedTheme]);
 
-  if (playersData === undefined) {
+  if (teamData === undefined || playersData === undefined) {
     return (
       <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950">
-        <Text className="text-surface-900 dark:text-white text-base">Loading roster...</Text>
+        <Text className="text-surface-900 dark:text-white text-base">Loading team...</Text>
       </View>
     );
   }
+
+  const renderHeader = () => (
+    <View className="px-4 pt-4">
+      {/* Team Header Card */}
+      <View className="bg-white dark:bg-surface-800 rounded-2xl p-4 mb-4 border border-surface-200 dark:border-surface-700">
+        <View className="flex-row items-center">
+          {team?.logoUrl ? (
+            <Image
+              source={{ uri: team.logoUrl }}
+              className="w-16 h-16 rounded-xl bg-surface-200 dark:bg-surface-700"
+              resizeMode="cover"
+            />
+          ) : (
+            <View className="w-16 h-16 rounded-xl bg-primary-500/10 items-center justify-center">
+              <Icon name="users" size={28} color="#F97316" />
+            </View>
+          )}
+          <View className="flex-1 ml-4">
+            <Text className="text-xl font-bold text-surface-900 dark:text-white">
+              {team?.name || teamName}
+            </Text>
+            {team?.city && (
+              <Text className="text-surface-600 dark:text-surface-400 text-sm">{team.city}</Text>
+            )}
+            {team?.description && (
+              <Text
+                className="text-surface-500 text-xs mt-1"
+                numberOfLines={2}
+              >
+                {team.description}
+              </Text>
+            )}
+          </View>
+        </View>
+      </View>
+
+      {/* Stats Overview */}
+      <View className="flex-row mb-4">
+        {/* Record */}
+        <View className="flex-1 bg-white dark:bg-surface-800 rounded-xl p-3 mr-2 border border-surface-200 dark:border-surface-700">
+          <View className="flex-row items-center mb-1">
+            <Icon name="trophy" size={14} color="#F97316" />
+            <Text className="text-xs text-surface-600 dark:text-surface-400 ml-1">Record</Text>
+          </View>
+          <Text className="text-xl font-bold text-surface-900 dark:text-white">
+            {wins}-{losses}
+          </Text>
+          <Text className="text-xs text-surface-500">{winPct}% Win</Text>
+        </View>
+
+        {/* Players */}
+        <View className="flex-1 bg-white dark:bg-surface-800 rounded-xl p-3 mr-2 border border-surface-200 dark:border-surface-700">
+          <View className="flex-row items-center mb-1">
+            <Icon name="user" size={14} color="#F97316" />
+            <Text className="text-xs text-surface-600 dark:text-surface-400 ml-1">Roster</Text>
+          </View>
+          <Text className="text-xl font-bold text-surface-900 dark:text-white">
+            {players.length}
+          </Text>
+          <Text className="text-xs text-surface-500">Players</Text>
+        </View>
+
+        {/* PPG */}
+        <View className="flex-1 bg-white dark:bg-surface-800 rounded-xl p-3 border border-surface-200 dark:border-surface-700">
+          <View className="flex-row items-center mb-1">
+            <Icon name="stats" size={14} color="#F97316" />
+            <Text className="text-xs text-surface-600 dark:text-surface-400 ml-1">PPG</Text>
+          </View>
+          <Text className="text-xl font-bold text-surface-900 dark:text-white">
+            {teamStats?.avgPoints?.toFixed(1) ?? "0.0"}
+          </Text>
+          <Text className="text-xs text-surface-500">Per Game</Text>
+        </View>
+      </View>
+
+      {/* Team Statistics */}
+      {teamStats && (
+        <View className="bg-white dark:bg-surface-800 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-700">
+          <Text className="text-sm font-semibold text-surface-900 dark:text-white mb-3">
+            Team Statistics
+          </Text>
+          <View className="flex-row flex-wrap">
+            <View className="w-1/3 mb-3">
+              <Text className="text-xs text-surface-500">RPG</Text>
+              <Text className="text-base font-bold text-surface-900 dark:text-white">
+                {teamStats.avgRebounds?.toFixed(1) ?? "0.0"}
+              </Text>
+            </View>
+            <View className="w-1/3 mb-3">
+              <Text className="text-xs text-surface-500">APG</Text>
+              <Text className="text-base font-bold text-surface-900 dark:text-white">
+                {teamStats.avgAssists?.toFixed(1) ?? "0.0"}
+              </Text>
+            </View>
+            <View className="w-1/3 mb-3">
+              <Text className="text-xs text-surface-500">FG%</Text>
+              <Text className="text-base font-bold text-surface-900 dark:text-white">
+                {teamStats.fieldGoalPercentage?.toFixed(1) ?? "0.0"}%
+              </Text>
+            </View>
+            <View className="w-1/3">
+              <Text className="text-xs text-surface-500">3P%</Text>
+              <Text className="text-base font-bold text-surface-900 dark:text-white">
+                {teamStats.threePointPercentage?.toFixed(1) ?? "0.0"}%
+              </Text>
+            </View>
+            <View className="w-1/3">
+              <Text className="text-xs text-surface-500">FT%</Text>
+              <Text className="text-base font-bold text-surface-900 dark:text-white">
+                {teamStats.freeThrowPercentage?.toFixed(1) ?? "0.0"}%
+              </Text>
+            </View>
+            <View className="w-1/3">
+              <Text className="text-xs text-surface-500">SPG</Text>
+              <Text className="text-base font-bold text-surface-900 dark:text-white">
+                {teamStats.avgSteals?.toFixed(1) ?? "0.0"}
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Recent Games */}
+      {games.length > 0 && (
+        <View className="bg-white dark:bg-surface-800 rounded-xl mb-4 border border-surface-200 dark:border-surface-700 overflow-hidden">
+          <View className="flex-row items-center justify-between px-4 py-3 border-b border-surface-200 dark:border-surface-700">
+            <Text className="text-sm font-semibold text-surface-900 dark:text-white">
+              Recent Games
+            </Text>
+            <TouchableOpacity onPress={() => navigation.navigate("Games" as any)}>
+              <Text className="text-xs text-primary-500">View All</Text>
+            </TouchableOpacity>
+          </View>
+          {games.slice(0, 5).map((game: any) => {
+            const isHome = game.homeTeam?.id === teamId;
+            const opponent = isHome ? game.awayTeam : game.homeTeam;
+            const teamScore = isHome ? game.homeScore : game.awayScore;
+            const opponentScore = isHome ? game.awayScore : game.homeScore;
+            const won = teamScore > opponentScore;
+            const isCompleted = game.status === "completed";
+
+            return (
+              <TouchableOpacity
+                key={game.id}
+                className="flex-row items-center px-4 py-3 border-b border-surface-100 dark:border-surface-700"
+                onPress={() => navigation.navigate("GameAnalysis", { gameId: game.id })}
+              >
+                <View
+                  className={`w-8 h-8 rounded-lg items-center justify-center ${
+                    isCompleted
+                      ? won
+                        ? "bg-green-500/10"
+                        : "bg-red-500/10"
+                      : "bg-surface-100 dark:bg-surface-700"
+                  }`}
+                >
+                  <Text
+                    className={`text-sm font-bold ${
+                      isCompleted
+                        ? won
+                          ? "text-green-500"
+                          : "text-red-500"
+                        : "text-surface-500"
+                    }`}
+                  >
+                    {isCompleted ? (won ? "W" : "L") : "-"}
+                  </Text>
+                </View>
+                <View className="flex-1 ml-3">
+                  <Text className="text-sm font-medium text-surface-900 dark:text-white">
+                    {isHome ? "vs" : "@"} {opponent?.name || "Unknown"}
+                  </Text>
+                  <Text className="text-xs text-surface-500">
+                    {game.scheduledAt
+                      ? new Date(game.scheduledAt).toLocaleDateString()
+                      : "No date"}
+                  </Text>
+                </View>
+                {isCompleted && (
+                  <Text className="text-sm font-bold text-surface-900 dark:text-white">
+                    {teamScore}-{opponentScore}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      )}
+
+      {/* Roster Section Header */}
+      <View className="flex-row items-center justify-between mb-2">
+        <Text className="text-sm font-semibold text-surface-900 dark:text-white">Roster</Text>
+        <Text className="text-xs text-surface-500">{players.length} players</Text>
+      </View>
+    </View>
+  );
+
+  const renderPlayer = ({ item: player }: { item: Player }) => (
+    <TouchableOpacity
+      className="mx-4 mb-3 bg-white dark:bg-surface-800 rounded-xl p-4 flex-row items-center border border-surface-200 dark:border-surface-700"
+      onPress={() => navigation.navigate("PlayerStats", { playerId: player.id })}
+    >
+      <View className="w-12 h-12 rounded-full bg-surface-100 dark:bg-surface-700 items-center justify-center mr-4">
+        <Text className="text-surface-900 dark:text-white text-lg font-bold">{player.number}</Text>
+      </View>
+
+      <View className="flex-1">
+        <Text className="text-surface-900 dark:text-white text-base font-semibold">
+          {player.name}
+        </Text>
+        <View className="flex-row items-center mt-1">
+          {player.position && (
+            <View
+              className="px-2 py-0.5 rounded mr-2"
+              style={{ backgroundColor: getPositionColor(player.position) + "20" }}
+            >
+              <Text
+                className="text-xs font-semibold"
+                style={{ color: getPositionColor(player.position) }}
+              >
+                {player.position}
+              </Text>
+            </View>
+          )}
+          <Text
+            className={`text-xs font-medium ${
+              player.active !== false ? "text-green-500" : "text-surface-500"
+            }`}
+          >
+            {player.active !== false ? "Active" : "Inactive"}
+          </Text>
+        </View>
+      </View>
+
+      <Icon
+        name="chevron-right"
+        size={20}
+        color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
+      />
+    </TouchableOpacity>
+  );
 
   return (
     <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       <StatusBar style={statusBarStyle} />
 
-      {/* Players List */}
       <FlatList
         data={players}
         renderItem={renderPlayer}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
+        ListHeaderComponent={renderHeader}
+        contentContainerStyle={{ paddingBottom: 24 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListEmptyComponent={
-          <View className="items-center justify-center py-12">
+          <View className="mx-4 items-center justify-center py-12 bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
             <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
               <Icon name="user" size={32} color="#F97316" />
             </View>
             <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
-              No players found
+              No players yet
             </Text>
-            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center leading-5">
+            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center leading-5 px-8">
               Add players to this team to get started
             </Text>
           </View>
@@ -296,7 +509,7 @@ export default function TeamDetailScreen() {
             </Text>
 
             <TouchableOpacity
-              className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-800/50 rounded-xl mb-3"
+              className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-700/50 rounded-xl mb-3"
               onPress={() => {
                 setShowOptionsMenu(false);
                 setShowEditModal(true);
@@ -356,14 +569,14 @@ export default function TeamDetailScreen() {
 
           {/* Form */}
           <ScrollView className="flex-1 p-4">
-            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
+            <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
               {/* Team Name */}
               <View className="mb-4">
                 <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
                   Team Name *
                 </Text>
                 <TextInput
-                  className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base"
+                  className="bg-surface-50 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base border border-surface-200 dark:border-surface-600"
                   value={editForm.name}
                   onChangeText={(text) => setEditForm((prev) => ({ ...prev, name: text }))}
                   placeholder="Enter team name"
@@ -377,7 +590,7 @@ export default function TeamDetailScreen() {
                   City
                 </Text>
                 <TextInput
-                  className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base"
+                  className="bg-surface-50 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base border border-surface-200 dark:border-surface-600"
                   value={editForm.city}
                   onChangeText={(text) => setEditForm((prev) => ({ ...prev, city: text }))}
                   placeholder="Enter city (optional)"
@@ -412,7 +625,7 @@ export default function TeamDetailScreen() {
                   Description
                 </Text>
                 <TextInput
-                  className="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base"
+                  className="bg-surface-50 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base border border-surface-200 dark:border-surface-600"
                   value={editForm.description}
                   onChangeText={(text) => setEditForm((prev) => ({ ...prev, description: text }))}
                   placeholder="Enter description (optional)"

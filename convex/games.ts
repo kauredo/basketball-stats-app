@@ -428,20 +428,19 @@ export const start = mutation({
     const now = Date.now();
     const shotClockSeconds = game.shotClockSeconds ?? 24;
 
+    // Start game in paused state - user must press play to start clock
+    // This matches real basketball where clock only runs on live play
     await ctx.db.patch(args.gameId, {
-      status: "active",
+      status: "paused",
       startedAt: game.startedAt || now,
-      // Also start shot clock
       shotClockSeconds,
-      shotClockStartedAt: now,
+      // Don't set shotClockStartedAt - clock is paused
     });
 
-    // Schedule the first timer tick
-    await ctx.scheduler.runAfter(1000, internal.games.timerTick, {
-      gameId: args.gameId,
-    });
+    // Don't schedule timerTick - game starts paused
+    // User will call resume() to start the clock
 
-    return { message: "Game started", status: "active" };
+    return { message: "Game ready - press play to start clock", status: "paused" };
   },
 });
 
@@ -842,11 +841,21 @@ export const getBoxScore = query({
               : null,
             points: stat.points,
             rebounds: stat.rebounds,
+            offensiveRebounds: stat.offensiveRebounds,
+            defensiveRebounds: stat.defensiveRebounds,
             assists: stat.assists,
             steals: stat.steals,
             blocks: stat.blocks,
             turnovers: stat.turnovers,
             fouls: stat.fouls,
+            // Individual numeric fields for advanced stats calculations
+            fieldGoalsMade: stat.fieldGoalsMade,
+            fieldGoalsAttempted: stat.fieldGoalsAttempted,
+            threePointersMade: stat.threePointersMade,
+            threePointersAttempted: stat.threePointersAttempted,
+            freeThrowsMade: stat.freeThrowsMade,
+            freeThrowsAttempted: stat.freeThrowsAttempted,
+            // String format for display
             fieldGoals: `${stat.fieldGoalsMade}/${stat.fieldGoalsAttempted}`,
             threePointers: `${stat.threePointersMade}/${stat.threePointersAttempted}`,
             freeThrows: `${stat.freeThrowsMade}/${stat.freeThrowsAttempted}`,

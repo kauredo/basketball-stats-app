@@ -6,8 +6,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   Dimensions,
-  Modal,
-  FlatList,
 } from "react-native";
 import { BarChart } from "react-native-chart-kit";
 import { useQuery } from "convex/react";
@@ -15,16 +13,9 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import { PlayerSelectModal, type PlayerOption } from "../components/PlayerSelectModal";
 
 const screenWidth = Dimensions.get("window").width;
-
-interface PlayerOption {
-  id: Id<"players">;
-  name: string;
-  team: string;
-  number: number;
-  position?: string;
-}
 
 interface StatComparisonProps {
   label: string;
@@ -66,71 +57,6 @@ function StatComparison({
         </Text>
       </View>
     </View>
-  );
-}
-
-interface PlayerSelectModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSelect: (player: PlayerOption) => void;
-  players: PlayerOption[];
-  excludeId?: Id<"players"> | null;
-  title: string;
-}
-
-function PlayerSelectModal({
-  visible,
-  onClose,
-  onSelect,
-  players,
-  excludeId,
-  title,
-}: PlayerSelectModalProps) {
-  const filteredPlayers = excludeId ? players.filter((p) => p.id !== excludeId) : players;
-
-  return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white dark:bg-surface-800 rounded-t-3xl max-h-[70%]">
-          <View className="flex-row justify-between items-center p-4 border-b border-surface-200 dark:border-surface-700">
-            <Text className="text-surface-900 dark:text-white text-lg font-bold">{title}</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Icon name="close" size={24} color="#9CA3AF" />
-            </TouchableOpacity>
-          </View>
-          <FlatList
-            data={filteredPlayers}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                className="p-4 border-b border-surface-200 dark:border-surface-700 flex-row items-center"
-                onPress={() => {
-                  onSelect(item);
-                  onClose();
-                }}
-              >
-                <View className="w-10 h-10 bg-primary-500 rounded-full justify-center items-center mr-3">
-                  <Text className="text-surface-900 dark:text-white font-bold">#{item.number}</Text>
-                </View>
-                <View className="flex-1">
-                  <Text className="text-surface-900 dark:text-white font-medium text-base">
-                    {item.name}
-                  </Text>
-                  <Text className="text-surface-600 dark:text-surface-400 text-sm">
-                    {item.team} • {item.position || "N/A"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              <View className="p-8 items-center">
-                <Text className="text-surface-600 dark:text-surface-400">No players available</Text>
-              </View>
-            }
-          />
-        </View>
-      </View>
-    </Modal>
   );
 }
 
@@ -530,7 +456,8 @@ export default function PlayerComparisonScreen() {
         onClose={() => setShowPlayer1Modal(false)}
         onSelect={setPlayer1}
         players={playerOptions}
-        excludeId={player2?.id}
+        excludeIds={player2 ? [player2.id] : []}
+        selectedId={player1?.id}
         title="Select Player 1"
       />
       <PlayerSelectModal
@@ -538,7 +465,8 @@ export default function PlayerComparisonScreen() {
         onClose={() => setShowPlayer2Modal(false)}
         onSelect={setPlayer2}
         players={playerOptions}
-        excludeId={player1?.id}
+        excludeIds={player1 ? [player1.id] : []}
+        selectedId={player2?.id}
         title="Select Player 2"
       />
     </View>

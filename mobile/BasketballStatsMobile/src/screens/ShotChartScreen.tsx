@@ -5,8 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  Modal,
-  FlatList,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "convex/react";
@@ -15,69 +13,7 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { MiniCourt, type ShotMarker } from "../components/court/MiniCourt";
-
-interface PlayerOption {
-  id: Id<"players">;
-  name: string;
-  team: string;
-  number: number;
-  position?: string;
-}
-
-interface PlayerSelectModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSelect: (player: PlayerOption) => void;
-  players: PlayerOption[];
-  title: string;
-}
-
-function PlayerSelectModal({ visible, onClose, onSelect, players, title }: PlayerSelectModalProps) {
-  return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white dark:bg-surface-800 rounded-t-3xl max-h-[70%]">
-          <View className="flex-row justify-between items-center p-4 border-b border-surface-200 dark:border-surface-700">
-            <Text className="text-surface-900 dark:text-white text-lg font-bold">{title}</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Icon name="close" size={24} color="#9CA3AF" />
-            </TouchableOpacity>
-          </View>
-          <FlatList
-            data={players}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                className="p-4 border-b border-surface-200 dark:border-surface-700 flex-row items-center"
-                onPress={() => {
-                  onSelect(item);
-                  onClose();
-                }}
-              >
-                <View className="w-10 h-10 bg-primary-500 rounded-full justify-center items-center mr-3">
-                  <Text className="text-white font-bold">#{item.number}</Text>
-                </View>
-                <View className="flex-1">
-                  <Text className="text-surface-900 dark:text-white font-medium text-base">
-                    {item.name}
-                  </Text>
-                  <Text className="text-surface-600 dark:text-surface-400 text-sm">
-                    {item.team} • {item.position || "N/A"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              <View className="p-8 items-center">
-                <Text className="text-surface-600 dark:text-surface-400">No players available</Text>
-              </View>
-            }
-          />
-        </View>
-      </View>
-    </Modal>
-  );
-}
+import { PlayerSelectModal, type PlayerOption } from "../components/PlayerSelectModal";
 
 interface StatBoxProps {
   label: string;
@@ -445,6 +381,7 @@ export default function ShotChartScreen() {
         onClose={() => setShowPlayerModal(false)}
         onSelect={setSelectedPlayer}
         players={playerOptions}
+        selectedId={selectedPlayer?.id}
         title="Select Player"
       />
     </View>

@@ -244,7 +244,7 @@ const Standings: React.FC = () => {
                       className="px-4 py-4 whitespace-nowrap text-sm text-surface-900 dark:text-white font-medium"
                       data-stat
                     >
-                      .{team.winPercentage.toFixed(0).padStart(3, "0")}
+                      .{(team.winPercentage * 10).toFixed(0).padStart(3, "0")}
                     </td>
                     <td
                       className="px-4 py-4 whitespace-nowrap text-sm text-surface-600 dark:text-surface-400"

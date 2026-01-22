@@ -50,6 +50,9 @@ const Games: React.FC = () => {
     away: null,
   });
   const [isCreating, setIsCreating] = useState(false);
+  const [scheduleForLater, setScheduleForLater] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
   const [quickGameSettings, setQuickGameSettings] = useState({
     homeTeamName: "",
     awayTeamName: "",
@@ -108,16 +111,33 @@ const Games: React.FC = () => {
       return;
     }
 
+    // Validate scheduled date/time if scheduling for later
+    if (scheduleForLater && (!scheduledDate || !scheduledTime)) {
+      toast.error("Please select a date and time for the scheduled game");
+      return;
+    }
+
     setIsCreating(true);
     try {
+      // Parse scheduled date/time if provided
+      let scheduledAt: number | undefined;
+      if (scheduleForLater && scheduledDate && scheduledTime) {
+        const dateTime = new Date(`${scheduledDate}T${scheduledTime}`);
+        scheduledAt = dateTime.getTime();
+      }
+
       await createGame({
         token,
         homeTeamId: selectedTeams.home as Id<"teams">,
         awayTeamId: selectedTeams.away as Id<"teams">,
+        scheduledAt,
       });
-      toast.success("Game created successfully");
+      toast.success(scheduleForLater ? "Game scheduled successfully" : "Game created successfully");
       setShowCreateModal(false);
       setSelectedTeams({ home: null, away: null });
+      setScheduleForLater(false);
+      setScheduledDate("");
+      setScheduledTime("");
     } catch (error) {
       console.error("Failed to create game:", error);
       const message = getErrorMessage(error, "Failed to create game. Please try again.");
@@ -357,6 +377,9 @@ const Games: React.FC = () => {
                 onClick={() => {
                   setShowCreateModal(false);
                   setSelectedTeams({ home: null, away: null });
+                  setScheduleForLater(false);
+                  setScheduledDate("");
+                  setScheduledTime("");
                 }}
                 className="p-2 rounded-lg text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
               >
@@ -404,6 +427,51 @@ const Games: React.FC = () => {
                   ))}
                 </select>
               </div>
+
+              {/* Schedule Toggle */}
+              <div className="pt-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={scheduleForLater}
+                    onChange={(e) => setScheduleForLater(e.target.checked)}
+                    className="w-5 h-5 rounded border-surface-300 dark:border-surface-600 text-primary-500 focus:ring-primary-500 focus:ring-offset-0"
+                  />
+                  <span className="text-sm font-medium text-surface-700 dark:text-surface-300 flex items-center gap-2">
+                    <CalendarIcon className="w-4 h-4" />
+                    Schedule for later
+                  </span>
+                </label>
+              </div>
+
+              {/* Schedule Date/Time Fields */}
+              {scheduleForLater && (
+                <div className="grid grid-cols-2 gap-3 animate-fade-in">
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      value={scheduledDate}
+                      onChange={(e) => setScheduledDate(e.target.value)}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Time
+                    </label>
+                    <input
+                      type="time"
+                      value={scheduledTime}
+                      onChange={(e) => setScheduledTime(e.target.value)}
+                      className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-3 p-6 border-t border-surface-200 dark:border-surface-700">
@@ -411,6 +479,9 @@ const Games: React.FC = () => {
                 onClick={() => {
                   setShowCreateModal(false);
                   setSelectedTeams({ home: null, away: null });
+                  setScheduleForLater(false);
+                  setScheduledDate("");
+                  setScheduledTime("");
                 }}
                 className="btn-secondary px-4 py-2.5 rounded-xl"
               >
@@ -422,11 +493,18 @@ const Games: React.FC = () => {
                   !selectedTeams.home ||
                   !selectedTeams.away ||
                   selectedTeams.home === selectedTeams.away ||
-                  isCreating
+                  isCreating ||
+                  (scheduleForLater && (!scheduledDate || !scheduledTime))
                 }
                 className="btn-primary px-4 py-2.5 rounded-xl"
               >
-                {isCreating ? "Creating..." : "Create Game"}
+                {isCreating
+                  ? scheduleForLater
+                    ? "Scheduling..."
+                    : "Creating..."
+                  : scheduleForLater
+                    ? "Schedule Game"
+                    : "Create Game"}
               </button>
             </div>
           </div>

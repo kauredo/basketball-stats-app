@@ -129,7 +129,7 @@ function StandingsItem({
         <Text className="text-red-500 font-semibold">{losses}</Text>
       </View>
       <Text className="text-surface-900 dark:text-white font-medium w-12 text-right">
-        .{winPercentage.toFixed(0).padStart(3, "0")}
+        .{(winPercentage * 10).toFixed(0).padStart(3, "0")}
       </Text>
     </View>
   );

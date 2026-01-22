@@ -90,7 +90,7 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
         {/* Win Percentage */}
         <View className="w-16 items-end">
           <Text className="text-surface-900 dark:text-white font-medium text-base">
-            .{team.winPercentage.toFixed(0).padStart(3, "0")}
+            .{(team.winPercentage * 10).toFixed(0).padStart(3, "0")}
           </Text>
         </View>
 

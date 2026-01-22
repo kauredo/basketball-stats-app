@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
-import { UserIcon, ArrowsRightLeftIcon, ChartBarIcon } from "@heroicons/react/24/outline";
+import { UserIcon, ArrowsRightLeftIcon, ChartBarIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import {
   ResponsiveContainer,
   RadarChart,
@@ -19,11 +19,13 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { PlayerSelectorModal } from "../components/PlayerSelectorModal";
 
 interface PlayerOption {
   id: Id<"players">;
   name: string;
   team: string;
+  teamId: Id<"teams">;
   number: number;
   position?: string;
 }
@@ -32,6 +34,8 @@ const PlayerComparison: React.FC = () => {
   const { token, selectedLeague } = useAuth();
   const [player1Id, setPlayer1Id] = useState<Id<"players"> | null>(null);
   const [player2Id, setPlayer2Id] = useState<Id<"players"> | null>(null);
+  const [showPlayer1Modal, setShowPlayer1Modal] = useState(false);
+  const [showPlayer2Modal, setShowPlayer2Modal] = useState(false);
 
   // Fetch all players for selection
   const teamsData = useQuery(
@@ -40,22 +44,30 @@ const PlayerComparison: React.FC = () => {
   );
 
   // Build player options from teams data
-  const playerOptions: PlayerOption[] = [];
-  if (teamsData?.teams) {
-    for (const team of teamsData.teams) {
-      if (team.players) {
-        for (const player of team.players) {
-          playerOptions.push({
-            id: player.id as Id<"players">,
-            name: player.name,
-            team: team.name,
-            number: player.number,
-            position: player.position,
-          });
+  const playerOptions: PlayerOption[] = useMemo(() => {
+    const options: PlayerOption[] = [];
+    if (teamsData?.teams) {
+      for (const team of teamsData.teams) {
+        if (team.players) {
+          for (const player of team.players) {
+            options.push({
+              id: player.id as Id<"players">,
+              name: player.name,
+              team: team.name,
+              teamId: team.id as Id<"teams">,
+              number: player.number,
+              position: player.position,
+            });
+          }
         }
       }
     }
-  }
+    return options;
+  }, [teamsData]);
+
+  // Get selected player info for display
+  const player1Info = playerOptions.find((p) => p.id === player1Id);
+  const player2Info = playerOptions.find((p) => p.id === player2Id);
 
   // Fetch comparison data when both players are selected
   const comparisonData = useQuery(
@@ -110,36 +122,68 @@ const PlayerComparison: React.FC = () => {
     );
   };
 
-  // Prepare radar chart data
-  const radarData = comparisonData
-    ? [
-        {
-          stat: "Points",
-          player1: comparisonData.player1.avgPoints,
-          player2: comparisonData.player2.avgPoints,
-        },
-        {
-          stat: "Rebounds",
-          player1: comparisonData.player1.avgRebounds,
-          player2: comparisonData.player2.avgRebounds,
-        },
-        {
-          stat: "Assists",
-          player1: comparisonData.player1.avgAssists,
-          player2: comparisonData.player2.avgAssists,
-        },
-        {
-          stat: "Steals",
-          player1: comparisonData.player1.avgSteals,
-          player2: comparisonData.player2.avgSteals,
-        },
-        {
-          stat: "Blocks",
-          player1: comparisonData.player1.avgBlocks,
-          player2: comparisonData.player2.avgBlocks,
-        },
-      ]
-    : [];
+  // Prepare normalized radar chart data
+  const radarData = useMemo(() => {
+    if (!comparisonData) return [];
+
+    const p1 = comparisonData.player1;
+    const p2 = comparisonData.player2;
+
+    // Get max of both players for each stat to normalize to 0-100 scale
+    const normalize = (v1: number, v2: number) => {
+      const max = Math.max(v1, v2, 1);
+      return {
+        p1Normalized: (v1 / max) * 100,
+        p2Normalized: (v2 / max) * 100,
+        p1Actual: v1,
+        p2Actual: v2,
+      };
+    };
+
+    const points = normalize(p1.avgPoints, p2.avgPoints);
+    const rebounds = normalize(p1.avgRebounds, p2.avgRebounds);
+    const assists = normalize(p1.avgAssists, p2.avgAssists);
+    const steals = normalize(p1.avgSteals, p2.avgSteals);
+    const blocks = normalize(p1.avgBlocks, p2.avgBlocks);
+
+    return [
+      {
+        stat: "Points",
+        player1: points.p1Normalized,
+        player2: points.p2Normalized,
+        actual1: points.p1Actual,
+        actual2: points.p2Actual,
+      },
+      {
+        stat: "Rebounds",
+        player1: rebounds.p1Normalized,
+        player2: rebounds.p2Normalized,
+        actual1: rebounds.p1Actual,
+        actual2: rebounds.p2Actual,
+      },
+      {
+        stat: "Assists",
+        player1: assists.p1Normalized,
+        player2: assists.p2Normalized,
+        actual1: assists.p1Actual,
+        actual2: assists.p2Actual,
+      },
+      {
+        stat: "Steals",
+        player1: steals.p1Normalized,
+        player2: steals.p2Normalized,
+        actual1: steals.p1Actual,
+        actual2: steals.p2Actual,
+      },
+      {
+        stat: "Blocks",
+        player1: blocks.p1Normalized,
+        player2: blocks.p2Normalized,
+        actual1: blocks.p1Actual,
+        actual2: blocks.p2Actual,
+      },
+    ];
+  }, [comparisonData]);
 
   // Prepare shooting chart data
   const shootingData = comparisonData
@@ -162,6 +206,25 @@ const PlayerComparison: React.FC = () => {
       ]
     : [];
 
+  // Custom tooltip for radar chart showing actual values
+  const CustomRadarTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length > 0) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-surface-800 border border-surface-700 rounded-lg p-3 shadow-lg">
+          <p className="font-medium text-white mb-2">{data.stat}</p>
+          <p className="text-sm text-primary-400">
+            {comparisonData?.player1.playerName}: {data.actual1}
+          </p>
+          <p className="text-sm text-blue-400">
+            {comparisonData?.player2.playerName}: {data.actual2}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -179,18 +242,20 @@ const PlayerComparison: React.FC = () => {
           <label className="block text-sm font-medium text-surface-600 dark:text-surface-400 mb-2">
             Player 1
           </label>
-          <select
-            value={player1Id || ""}
-            onChange={(e) => setPlayer1Id((e.target.value as Id<"players">) || null)}
-            className="w-full px-4 py-3 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+          <button
+            onClick={() => setShowPlayer1Modal(true)}
+            className="w-full px-4 py-3 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-xl text-left flex items-center justify-between hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
           >
-            <option value="">Select a player</option>
-            {playerOptions.map((player) => (
-              <option key={player.id} value={player.id} disabled={player.id === player2Id}>
-                #{player.number} {player.name} ({player.team})
-              </option>
-            ))}
-          </select>
+            {player1Info ? (
+              <span className="text-surface-900 dark:text-white">
+                #{player1Info.number} {player1Info.name}
+                <span className="text-surface-500 ml-2">({player1Info.team})</span>
+              </span>
+            ) : (
+              <span className="text-surface-400">Select a player</span>
+            )}
+            <ChevronDownIcon className="w-5 h-5 text-surface-400" />
+          </button>
         </div>
 
         {/* VS Icon */}
@@ -205,20 +270,42 @@ const PlayerComparison: React.FC = () => {
           <label className="block text-sm font-medium text-surface-600 dark:text-surface-400 mb-2">
             Player 2
           </label>
-          <select
-            value={player2Id || ""}
-            onChange={(e) => setPlayer2Id((e.target.value as Id<"players">) || null)}
-            className="w-full px-4 py-3 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+          <button
+            onClick={() => setShowPlayer2Modal(true)}
+            className="w-full px-4 py-3 bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-xl text-left flex items-center justify-between hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
           >
-            <option value="">Select a player</option>
-            {playerOptions.map((player) => (
-              <option key={player.id} value={player.id} disabled={player.id === player1Id}>
-                #{player.number} {player.name} ({player.team})
-              </option>
-            ))}
-          </select>
+            {player2Info ? (
+              <span className="text-surface-900 dark:text-white">
+                #{player2Info.number} {player2Info.name}
+                <span className="text-surface-500 ml-2">({player2Info.team})</span>
+              </span>
+            ) : (
+              <span className="text-surface-400">Select a player</span>
+            )}
+            <ChevronDownIcon className="w-5 h-5 text-surface-400" />
+          </button>
         </div>
       </div>
+
+      {/* Player Selection Modals */}
+      <PlayerSelectorModal
+        isOpen={showPlayer1Modal}
+        onClose={() => setShowPlayer1Modal(false)}
+        onSelect={setPlayer1Id}
+        players={playerOptions}
+        selectedId={player1Id}
+        excludeIds={player2Id ? [player2Id] : []}
+        title="Select Player 1"
+      />
+      <PlayerSelectorModal
+        isOpen={showPlayer2Modal}
+        onClose={() => setShowPlayer2Modal(false)}
+        onSelect={setPlayer2Id}
+        players={playerOptions}
+        selectedId={player2Id}
+        excludeIds={player1Id ? [player1Id] : []}
+        title="Select Player 2"
+      />
 
       {/* Comparison Results */}
       {comparisonData ? (
@@ -352,6 +439,7 @@ const PlayerComparison: React.FC = () => {
                         borderRadius: "12px",
                         color: "white",
                       }}
+                      formatter={(value: number) => `${value.toFixed(1)}%`}
                     />
                     <Legend />
                     <Bar
@@ -374,16 +462,23 @@ const PlayerComparison: React.FC = () => {
 
           {/* Radar Chart */}
           <div className="surface-card p-6">
-            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-2">
               Overall Comparison
             </h3>
+            <p className="text-sm text-surface-500 dark:text-surface-400 mb-4">
+              Stats normalized to 0-100 scale for comparison. Hover for actual values.
+            </p>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="var(--color-surface-700)" />
                   {/* @ts-expect-error - recharts types not fully compatible with React 19 */}
                   <PolarAngleAxis dataKey="stat" tick={{ fill: "var(--color-surface-500)" }} />
-                  <PolarRadiusAxis tick={{ fill: "var(--color-surface-500)" }} />
+                  <PolarRadiusAxis
+                    domain={[0, 100]}
+                    tick={{ fill: "var(--color-surface-500)" }}
+                    tickCount={5}
+                  />
                   <Radar
                     name={comparisonData.player1.playerName}
                     dataKey="player1"
@@ -399,6 +494,7 @@ const PlayerComparison: React.FC = () => {
                     fillOpacity={0.3}
                   />
                   <Legend />
+                  <Tooltip content={<CustomRadarTooltip />} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
@@ -415,7 +511,7 @@ const PlayerComparison: React.FC = () => {
             Select Players to Compare
           </h3>
           <p className="text-surface-600 dark:text-surface-400">
-            Choose two players from the dropdowns above to see a side-by-side comparison of their
+            Choose two players from the buttons above to see a side-by-side comparison of their
             statistics.
           </p>
         </div>

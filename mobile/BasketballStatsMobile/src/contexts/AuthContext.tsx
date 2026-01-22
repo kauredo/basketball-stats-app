@@ -42,6 +42,7 @@ interface AuthContextType {
   setUserLeagues: (leagues: League[]) => void;
   clearError: () => void;
   refreshUser: () => Promise<void>;
+  handleConvexError: (error: unknown) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -183,6 +184,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clearError = () => setError(null);
 
+  /**
+   * Force logout without calling the server.
+   * Used when we detect an unauthorized error and need to clear credentials immediately.
+   */
+  const forceLogout = async () => {
+    console.warn("Force logout triggered - clearing stored credentials");
+    await SecureStore.deleteItemAsync(TOKEN_KEY);
+    await SecureStore.deleteItemAsync(USER_KEY);
+    await SecureStore.deleteItemAsync(LEAGUE_KEY);
+
+    setToken(null);
+    setUser(null);
+    setSelectedLeague(null);
+    setUserLeagues([]);
+    setIsAuthenticated(false);
+  };
+
+  /**
+   * Handle Convex errors and automatically log out on unauthorized errors.
+   * Call this in catch blocks when making Convex queries/mutations.
+   * @returns true if the error was an unauthorized error and logout was triggered
+   */
+  const handleConvexError = (error: unknown): boolean => {
+    if (error instanceof Error) {
+      const isUnauthorized =
+        error.message?.includes("Unauthorized") ||
+        error.message?.includes("Invalid token") ||
+        error.message?.includes("Token expired");
+
+      if (isUnauthorized) {
+        console.warn("Unauthorized error in async operation, logging out...");
+        forceLogout();
+        return true;
+      }
+    }
+    return false;
+  };
+
   const refreshUser = async () => {
     if (currentUserData?.user) {
       const updatedUser = {
@@ -232,6 +271,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUserLeagues,
         clearError,
         refreshUser,
+        handleConvexError,
       }}
     >
       {children}

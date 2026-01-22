@@ -4,8 +4,9 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { InteractiveCourt } from "../components/livegame/court/InteractiveCourt";
+import { PlayerSelectorModal } from "../components/PlayerSelectorModal";
 import type { ShotLocation } from "../types/livegame";
-import { ChartBarIcon, UserIcon, UsersIcon, FireIcon } from "@heroicons/react/24/outline";
+import { ChartBarIcon, UserIcon, UsersIcon, FireIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 
 interface PlayerOption {
   id: Id<"players">;
@@ -13,6 +14,7 @@ interface PlayerOption {
   team: string;
   teamId: Id<"teams">;
   number: number;
+  position?: string;
 }
 
 interface TeamOption {
@@ -26,6 +28,7 @@ const ShotCharts: React.FC = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<Id<"players"> | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<Id<"teams"> | null>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showPlayerModal, setShowPlayerModal] = useState(false);
 
   // Fetch teams and players
   const teamsData = useQuery(
@@ -48,11 +51,15 @@ const ShotCharts: React.FC = () => {
             team: team.name,
             teamId: team.id as Id<"teams">,
             number: player.number,
+            position: player.position,
           });
         }
       }
     }
   }
+
+  // Get selected player info for display
+  const selectedPlayerInfo = playerOptions.find((p) => p.id === selectedPlayerId);
 
   // Fetch player shot chart data
   const playerShotData = useQuery(
@@ -141,18 +148,20 @@ const ShotCharts: React.FC = () => {
 
           {/* Player/Team Select */}
           {viewMode === "player" ? (
-            <select
-              value={selectedPlayerId || ""}
-              onChange={(e) => setSelectedPlayerId((e.target.value as Id<"players">) || null)}
-              className="flex-1 max-w-xs px-3 py-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+            <button
+              onClick={() => setShowPlayerModal(true)}
+              className="flex-1 max-w-xs px-3 py-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl text-left flex items-center justify-between hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
             >
-              <option value="">Select a player</option>
-              {playerOptions.map((player) => (
-                <option key={player.id} value={player.id}>
-                  #{player.number} {player.name} ({player.team})
-                </option>
-              ))}
-            </select>
+              {selectedPlayerInfo ? (
+                <span className="text-surface-900 dark:text-white truncate">
+                  #{selectedPlayerInfo.number} {selectedPlayerInfo.name}
+                  <span className="text-surface-500 ml-1">({selectedPlayerInfo.team})</span>
+                </span>
+              ) : (
+                <span className="text-surface-400">Select a player</span>
+              )}
+              <ChevronDownIcon className="w-4 h-4 text-surface-400 flex-shrink-0 ml-2" />
+            </button>
           ) : (
             <select
               value={selectedTeamId || ""}
@@ -182,6 +191,16 @@ const ShotCharts: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Player Selection Modal */}
+      <PlayerSelectorModal
+        isOpen={showPlayerModal}
+        onClose={() => setShowPlayerModal(false)}
+        onSelect={setSelectedPlayerId}
+        players={playerOptions}
+        selectedId={selectedPlayerId}
+        title="Select Player"
+      />
 
       {/* Shot Chart and Stats */}
       {(viewMode === "player" && selectedPlayerId) || (viewMode === "team" && selectedTeamId) ? (
