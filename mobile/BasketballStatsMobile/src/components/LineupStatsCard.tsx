@@ -52,9 +52,7 @@ const LineupStatsCard: React.FC<LineupStatsCardProps> = ({
     return [...enrichedLineups].sort((a, b) => b.minutesPlayed - a.minutesPlayed);
   }, [enrichedLineups]);
 
-  const displayedLineups = isExpanded
-    ? sortedLineups
-    : sortedLineups.slice(0, initialRowCount);
+  const displayedLineups = isExpanded ? sortedLineups : sortedLineups.slice(0, initialRowCount);
 
   const hasMore = sortedLineups.length > initialRowCount;
 
@@ -229,11 +227,7 @@ const LineupStatsCard: React.FC<LineupStatsCardProps> = ({
           <Text className="text-sm font-medium text-surface-600 dark:text-surface-400 mr-1">
             {isExpanded ? "Show Less" : `Show ${sortedLineups.length - initialRowCount} More`}
           </Text>
-          <Icon
-            name={isExpanded ? "chevron-up" : "chevron-down"}
-            size={16}
-            color="#7a746c"
-          />
+          <Icon name={isExpanded ? "chevron-up" : "chevron-down"} size={16} color="#7a746c" />
         </TouchableOpacity>
       )}
     </View>

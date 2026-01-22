@@ -1343,3 +1343,70 @@ export const recordFreeThrow = mutation({
     };
   },
 });
+
+// Initialize player stats for a player in an existing game
+// Used when adding players to a team after the game has been created
+export const initializePlayerForGame = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    playerId: v.id("players"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    // Check permission
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    const player = await ctx.db.get(args.playerId);
+    if (!player) throw new Error("Player not found");
+
+    // Check if player belongs to one of the teams in the game
+    if (player.teamId !== game.homeTeamId && player.teamId !== game.awayTeamId) {
+      throw new Error("Player does not belong to a team in this game");
+    }
+
+    // Check if player stats already exist for this game
+    const existingStats = await ctx.db
+      .query("playerStats")
+      .withIndex("by_game_player", (q) => q.eq("gameId", args.gameId).eq("playerId", args.playerId))
+      .first();
+
+    if (existingStats) {
+      // Already exists, return success
+      return { playerStatId: existingStats._id, alreadyExists: true };
+    }
+
+    // Create player stat record
+    const playerStatId = await ctx.db.insert("playerStats", {
+      playerId: player._id,
+      gameId: args.gameId,
+      teamId: player.teamId,
+      points: 0,
+      fieldGoalsMade: 0,
+      fieldGoalsAttempted: 0,
+      threePointersMade: 0,
+      threePointersAttempted: 0,
+      freeThrowsMade: 0,
+      freeThrowsAttempted: 0,
+      rebounds: 0,
+      assists: 0,
+      steals: 0,
+      blocks: 0,
+      turnovers: 0,
+      fouls: 0,
+      minutesPlayed: 0,
+      plusMinus: 0,
+      isOnCourt: false,
+    });
+
+    return { playerStatId, alreadyExists: false };
+  },
+});

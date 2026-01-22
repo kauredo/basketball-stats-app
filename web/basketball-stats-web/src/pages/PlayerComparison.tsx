@@ -3,7 +3,12 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
-import { UserIcon, ArrowsRightLeftIcon, ChartBarIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  UserIcon,
+  ArrowsRightLeftIcon,
+  ChartBarIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 import {
   ResponsiveContainer,
   RadarChart,
@@ -439,7 +444,7 @@ const PlayerComparison: React.FC = () => {
                         borderRadius: "12px",
                         color: "white",
                       }}
-                      formatter={(value: number) => `${value.toFixed(1)}%`}
+                      formatter={(value) => (value != null ? `${Number(value).toFixed(1)}%` : "")}
                     />
                     <Legend />
                     <Bar

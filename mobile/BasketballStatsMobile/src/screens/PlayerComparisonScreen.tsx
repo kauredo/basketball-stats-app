@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-  Dimensions,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Dimensions } from "react-native";
 import { BarChart } from "react-native-chart-kit";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";

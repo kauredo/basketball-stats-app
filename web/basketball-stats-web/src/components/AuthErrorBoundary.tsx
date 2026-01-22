@@ -50,7 +50,9 @@ class AuthErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-screen bg-surface-50 dark:bg-surface-900 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-surface-600 dark:text-surface-400">Session expired. Redirecting to login...</p>
+            <p className="text-surface-600 dark:text-surface-400">
+              Session expired. Redirecting to login...
+            </p>
           </div>
         </div>
       );

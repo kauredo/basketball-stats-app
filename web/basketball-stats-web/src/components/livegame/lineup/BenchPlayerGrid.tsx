@@ -28,8 +28,9 @@ export const BenchPlayerGrid: React.FC<BenchPlayerGridProps> = ({
           key={player.playerId}
           onClick={() => onSelectPlayer(player.playerId)}
           disabled={disabled || !isSwapTarget}
+          title={player.player?.name || ""}
           className={`
-            px-2 py-1 rounded text-xs font-medium transition-all
+            px-2 py-1 rounded text-xs font-medium transition-all flex items-center gap-1
             ${
               isSwapTarget
                 ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700 hover:bg-green-100 dark:hover:bg-green-900/40 cursor-pointer active:scale-95"
@@ -38,7 +39,8 @@ export const BenchPlayerGrid: React.FC<BenchPlayerGridProps> = ({
             ${disabled ? "opacity-50 cursor-not-allowed" : ""}
           `}
         >
-          #{player.player?.number}
+          <span className="font-bold">#{player.player?.number}</span>
+          <span>{player.player?.name?.split(" ").pop() || ""}</span>
         </button>
       ))}
     </div>

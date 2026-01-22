@@ -8,6 +8,8 @@ import {
   FlatList,
   Alert,
   Platform,
+  Switch,
+  TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useMutation, useQuery } from "convex/react";
@@ -27,6 +29,7 @@ interface TeamSelectModalProps {
   visible: boolean;
   onClose: () => void;
   onSelect: (team: Team) => void;
+  onCreateNew: () => void;
   teams: Team[];
   excludeId?: Id<"teams"> | null;
   title: string;
@@ -36,6 +39,7 @@ function TeamSelectModal({
   visible,
   onClose,
   onSelect,
+  onCreateNew,
   teams,
   excludeId,
   title,
@@ -52,6 +56,26 @@ function TeamSelectModal({
               <Icon name="close" size={24} color="#9CA3AF" />
             </TouchableOpacity>
           </View>
+          {/* Create New Team Button */}
+          <TouchableOpacity
+            className="p-4 border-b border-surface-200 dark:border-surface-700 flex-row items-center bg-primary-50 dark:bg-primary-900/20"
+            onPress={() => {
+              onClose();
+              onCreateNew();
+            }}
+          >
+            <View className="w-10 h-10 bg-primary-500 rounded-full justify-center items-center mr-3">
+              <Icon name="plus" size={20} color="#FFFFFF" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-primary-600 dark:text-primary-400 font-medium text-base">
+                Create New Team
+              </Text>
+              <Text className="text-surface-500 dark:text-surface-400 text-sm">
+                Quick setup with default players
+              </Text>
+            </View>
+          </TouchableOpacity>
           <FlatList
             data={filteredTeams}
             keyExtractor={(item) => item.id}
@@ -63,8 +87,8 @@ function TeamSelectModal({
                   onClose();
                 }}
               >
-                <View className="w-10 h-10 bg-primary-500 rounded-full justify-center items-center mr-3">
-                  <Icon name="basketball" size={20} color="#FFFFFF" />
+                <View className="w-10 h-10 bg-surface-300 dark:bg-surface-600 rounded-full justify-center items-center mr-3">
+                  <Icon name="basketball" size={20} color="#6B7280" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-surface-900 dark:text-white font-medium text-base">
@@ -80,10 +104,247 @@ function TeamSelectModal({
             )}
             ListEmptyComponent={
               <View className="p-8 items-center">
-                <Text className="text-surface-600 dark:text-surface-400">No teams available</Text>
+                <Text className="text-surface-600 dark:text-surface-400">No existing teams</Text>
               </View>
             }
           />
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+interface QuickTeamCreateModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onTeamCreated: (team: Team) => void;
+  teamType: "home" | "away";
+}
+
+function QuickTeamCreateModal({
+  visible,
+  onClose,
+  onTeamCreated,
+  teamType,
+}: QuickTeamCreateModalProps) {
+  const { token, selectedLeague } = useAuth();
+  const [teamName, setTeamName] = useState("");
+  const [playerCount, setPlayerCount] = useState(5);
+  const [useDefaultNames, setUseDefaultNames] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const createTeamMutation = useMutation(api.teams.create);
+  const createPlayerMutation = useMutation(api.players.create);
+
+  // Fetch existing teams to check for duplicates
+  const teamsData = useQuery(
+    api.teams.list,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
+  const existingTeams = teamsData?.teams || [];
+
+  // Check for existing or similar team names
+  const normalizedInput = teamName.trim().toLowerCase();
+  const exactMatch = existingTeams.find((t) => t.name.toLowerCase() === normalizedInput);
+  const similarMatch =
+    !exactMatch && normalizedInput.length >= 3
+      ? existingTeams.find(
+          (t) =>
+            t.name.toLowerCase().includes(normalizedInput) ||
+            normalizedInput.includes(t.name.toLowerCase())
+        )
+      : null;
+
+  const handleCreate = async () => {
+    if (!teamName.trim()) {
+      Alert.alert("Error", "Please enter a team name");
+      return;
+    }
+
+    if (!token || !selectedLeague) {
+      Alert.alert("Error", "Not authenticated");
+      return;
+    }
+
+    setIsCreating(true);
+
+    try {
+      // Create the team
+      const result = await createTeamMutation({
+        token,
+        leagueId: selectedLeague.id,
+        name: teamName.trim(),
+      });
+      const newTeam = result.team;
+
+      // Create default players
+      for (let i = 1; i <= playerCount; i++) {
+        await createPlayerMutation({
+          token,
+          teamId: newTeam.id,
+          name: `Player ${i}`,
+          number: i,
+          active: true,
+        });
+      }
+
+      onTeamCreated({
+        id: newTeam.id,
+        name: newTeam.name,
+        city: newTeam.city,
+      });
+
+      // Reset form
+      setTeamName("");
+      setPlayerCount(5);
+      setUseDefaultNames(true);
+      onClose();
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to create team");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent>
+      <View className="flex-1 bg-black/50 justify-end">
+        <View className="bg-white dark:bg-surface-800 rounded-t-3xl">
+          <View className="flex-row justify-between items-center p-4 border-b border-surface-200 dark:border-surface-700">
+            <Text className="text-surface-900 dark:text-white text-lg font-bold">
+              Quick Create {teamType === "home" ? "Home" : "Away"} Team
+            </Text>
+            <TouchableOpacity onPress={onClose}>
+              <Icon name="close" size={24} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
+
+          <View className="p-4">
+            {/* Team Name */}
+            <View className="mb-4">
+              <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
+                Team Name
+              </Text>
+              <TextInput
+                className={`bg-surface-100 dark:bg-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-white text-base ${
+                  exactMatch ? "border-2 border-amber-500" : ""
+                }`}
+                placeholder="Enter team name"
+                placeholderTextColor="#9CA3AF"
+                value={teamName}
+                onChangeText={setTeamName}
+                autoCapitalize="words"
+              />
+
+              {/* Exact match warning */}
+              {exactMatch && (
+                <View className="mt-2 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-xl">
+                  <View className="flex-row items-start">
+                    <Icon name="alert" size={16} color="#F59E0B" />
+                    <View className="ml-2 flex-1">
+                      <Text className="text-amber-700 dark:text-amber-300 text-sm font-medium">
+                        Team &quot;{exactMatch.name}&quot; already exists
+                      </Text>
+                      <TouchableOpacity
+                        className="mt-2 bg-amber-500 rounded-lg py-2 px-3 self-start"
+                        onPress={() => {
+                          onTeamCreated({
+                            id: exactMatch.id,
+                            name: exactMatch.name,
+                            city: exactMatch.city,
+                          });
+                          setTeamName("");
+                          onClose();
+                        }}
+                      >
+                        <Text className="text-white font-medium text-sm">Use Existing Team</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              {/* Similar match warning */}
+              {similarMatch && !exactMatch && (
+                <View className="mt-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl">
+                  <View className="flex-row items-start">
+                    <Icon name="alert" size={16} color="#3B82F6" />
+                    <View className="ml-2 flex-1">
+                      <Text className="text-blue-700 dark:text-blue-300 text-sm">
+                        Similar team exists: &quot;{similarMatch.name}&quot;
+                      </Text>
+                      <TouchableOpacity
+                        className="mt-2 bg-blue-500 rounded-lg py-2 px-3 self-start"
+                        onPress={() => {
+                          onTeamCreated({
+                            id: similarMatch.id,
+                            name: similarMatch.name,
+                            city: similarMatch.city,
+                          });
+                          setTeamName("");
+                          onClose();
+                        }}
+                      >
+                        <Text className="text-white font-medium text-sm">
+                          Use &quot;{similarMatch.name}&quot; Instead
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              )}
+            </View>
+
+            {/* Player Count */}
+            <View className="mb-4">
+              <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
+                Number of Players
+              </Text>
+              <View className="flex-row items-center justify-between bg-surface-100 dark:bg-surface-700 rounded-xl p-3">
+                <TouchableOpacity
+                  className="w-10 h-10 bg-surface-200 dark:bg-surface-600 rounded-full justify-center items-center"
+                  onPress={() => setPlayerCount(Math.max(1, playerCount - 1))}
+                >
+                  <Text className="text-surface-900 dark:text-white text-xl font-bold">-</Text>
+                </TouchableOpacity>
+                <Text className="text-surface-900 dark:text-white text-2xl font-bold">
+                  {playerCount}
+                </Text>
+                <TouchableOpacity
+                  className="w-10 h-10 bg-surface-200 dark:bg-surface-600 rounded-full justify-center items-center"
+                  onPress={() => setPlayerCount(Math.min(15, playerCount + 1))}
+                >
+                  <Text className="text-surface-900 dark:text-white text-xl font-bold">+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Default Names Info */}
+            <View className="mb-6 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl">
+              <View className="flex-row items-center">
+                <Icon name="alert" size={16} color="#3B82F6" />
+                <Text className="text-blue-700 dark:text-blue-300 text-sm ml-2 flex-1">
+                  Players will be created as &quot;Player 1&quot;, &quot;Player 2&quot;, etc. with
+                  jersey numbers 1, 2, 3... You can edit names later.
+                </Text>
+              </View>
+            </View>
+
+            {/* Create Button */}
+            <TouchableOpacity
+              className={`rounded-xl p-4 items-center ${
+                teamName.trim() && !isCreating && !exactMatch
+                  ? "bg-primary-500"
+                  : "bg-surface-300 dark:bg-surface-600"
+              }`}
+              onPress={handleCreate}
+              disabled={!teamName.trim() || isCreating || !!exactMatch}
+            >
+              <Text className="text-white font-bold text-lg">
+                {isCreating ? "Creating..." : `Create Team with ${playerCount} Players`}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
@@ -97,6 +358,9 @@ export default function CreateGameScreen() {
   const [awayTeam, setAwayTeam] = useState<Team | null>(null);
   const [showHomeTeamModal, setShowHomeTeamModal] = useState(false);
   const [showAwayTeamModal, setShowAwayTeamModal] = useState(false);
+  const [showQuickCreateModal, setShowQuickCreateModal] = useState(false);
+  const [quickCreateTeamType, setQuickCreateTeamType] = useState<"home" | "away">("home");
+  const [scheduleForLater, setScheduleForLater] = useState(false);
   const [scheduledDate, setScheduledDate] = useState(new Date());
   const [quarterMinutes, setQuarterMinutes] = useState(12);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -136,7 +400,7 @@ export default function CreateGameScreen() {
         token,
         homeTeamId: homeTeam.id,
         awayTeamId: awayTeam.id,
-        scheduledAt: scheduledDate.getTime(),
+        scheduledAt: scheduleForLater ? scheduledDate.getTime() : undefined,
         quarterMinutes,
       });
 
@@ -272,98 +536,127 @@ export default function CreateGameScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Schedule */}
+        {/* Schedule Toggle */}
         <View className="mb-6">
-          <Text className="text-surface-900 dark:text-white text-lg font-semibold mb-4">
-            Schedule
-          </Text>
-
-          {/* Date */}
-          <View className="bg-white dark:bg-surface-700 rounded-xl p-4 border border-surface-200 dark:border-surface-600 mb-3">
-            <Text className="text-surface-600 dark:text-surface-400 text-xs mb-2">DATE</Text>
-            {Platform.OS === "ios" ? (
-              <DateTimePicker
-                value={scheduledDate}
-                mode="date"
-                display="default"
-                onChange={onDateChange}
-                minimumDate={new Date()}
-                style={{ marginLeft: -10 }}
-              />
-            ) : (
-              <>
-                <TouchableOpacity
-                  className="flex-row items-center justify-between py-2"
-                  onPress={() => setShowDatePicker(true)}
-                >
-                  <View className="flex-row items-center">
-                    <Icon name="timer" size={20} color="#9CA3AF" />
-                    <Text className="text-surface-900 dark:text-white font-medium text-lg ml-3">
-                      {scheduledDate.toLocaleDateString("en-US", {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </Text>
-                  </View>
-                  <Icon name="chevron-right" size={20} color="#9CA3AF" />
-                </TouchableOpacity>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={scheduledDate}
-                    mode="date"
-                    display="default"
-                    onChange={onDateChange}
-                    minimumDate={new Date()}
-                  />
-                )}
-              </>
-            )}
-          </View>
-
-          {/* Time */}
-          <View className="bg-white dark:bg-surface-700 rounded-xl p-4 border border-surface-200 dark:border-surface-600">
-            <Text className="text-surface-600 dark:text-surface-400 text-xs mb-2">TIME</Text>
-            {Platform.OS === "ios" ? (
-              <DateTimePicker
-                value={scheduledDate}
-                mode="time"
-                display="default"
-                onChange={onTimeChange}
-                minuteInterval={5}
-                style={{ marginLeft: -10 }}
-              />
-            ) : (
-              <>
-                <TouchableOpacity
-                  className="flex-row items-center justify-between py-2"
-                  onPress={() => setShowTimePicker(true)}
-                >
-                  <View className="flex-row items-center">
-                    <Icon name="alarm" size={20} color="#9CA3AF" />
-                    <Text className="text-surface-900 dark:text-white font-medium text-lg ml-3">
-                      {scheduledDate.toLocaleTimeString("en-US", {
-                        hour: "numeric",
-                        minute: "2-digit",
-                      })}
-                    </Text>
-                  </View>
-                  <Icon name="chevron-right" size={20} color="#9CA3AF" />
-                </TouchableOpacity>
-                {showTimePicker && (
-                  <DateTimePicker
-                    value={scheduledDate}
-                    mode="time"
-                    display="default"
-                    onChange={onTimeChange}
-                    minuteInterval={5}
-                  />
-                )}
-              </>
-            )}
-          </View>
+          <TouchableOpacity
+            className="bg-white dark:bg-surface-700 rounded-xl p-4 border border-surface-200 dark:border-surface-600 flex-row items-center justify-between"
+            onPress={() => setScheduleForLater(!scheduleForLater)}
+            activeOpacity={0.7}
+          >
+            <View className="flex-row items-center flex-1">
+              <Icon name="calendar" size={20} color="#F97316" />
+              <View className="ml-3 flex-1">
+                <Text className="text-surface-900 dark:text-white font-medium">
+                  Schedule for later
+                </Text>
+                <Text className="text-surface-500 dark:text-surface-400 text-sm">
+                  {scheduleForLater ? "Set a date and time" : "Start the game immediately"}
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={scheduleForLater}
+              onValueChange={setScheduleForLater}
+              trackColor={{ false: "#d1d5db", true: "#fdba74" }}
+              thumbColor={scheduleForLater ? "#F97316" : "#f4f4f5"}
+            />
+          </TouchableOpacity>
         </View>
+
+        {/* Schedule Date/Time (conditional) */}
+        {scheduleForLater && (
+          <View className="mb-6">
+            <Text className="text-surface-900 dark:text-white text-lg font-semibold mb-4">
+              Schedule
+            </Text>
+
+            {/* Date */}
+            <View className="bg-white dark:bg-surface-700 rounded-xl p-4 border border-surface-200 dark:border-surface-600 mb-3">
+              <Text className="text-surface-600 dark:text-surface-400 text-xs mb-2">DATE</Text>
+              {Platform.OS === "ios" ? (
+                <DateTimePicker
+                  value={scheduledDate}
+                  mode="date"
+                  display="default"
+                  onChange={onDateChange}
+                  minimumDate={new Date()}
+                  style={{ marginLeft: -10 }}
+                />
+              ) : (
+                <>
+                  <TouchableOpacity
+                    className="flex-row items-center justify-between py-2"
+                    onPress={() => setShowDatePicker(true)}
+                  >
+                    <View className="flex-row items-center">
+                      <Icon name="timer" size={20} color="#9CA3AF" />
+                      <Text className="text-surface-900 dark:text-white font-medium text-lg ml-3">
+                        {scheduledDate.toLocaleDateString("en-US", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </Text>
+                    </View>
+                    <Icon name="chevron-right" size={20} color="#9CA3AF" />
+                  </TouchableOpacity>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={scheduledDate}
+                      mode="date"
+                      display="default"
+                      onChange={onDateChange}
+                      minimumDate={new Date()}
+                    />
+                  )}
+                </>
+              )}
+            </View>
+
+            {/* Time */}
+            <View className="bg-white dark:bg-surface-700 rounded-xl p-4 border border-surface-200 dark:border-surface-600">
+              <Text className="text-surface-600 dark:text-surface-400 text-xs mb-2">TIME</Text>
+              {Platform.OS === "ios" ? (
+                <DateTimePicker
+                  value={scheduledDate}
+                  mode="time"
+                  display="default"
+                  onChange={onTimeChange}
+                  minuteInterval={5}
+                  style={{ marginLeft: -10 }}
+                />
+              ) : (
+                <>
+                  <TouchableOpacity
+                    className="flex-row items-center justify-between py-2"
+                    onPress={() => setShowTimePicker(true)}
+                  >
+                    <View className="flex-row items-center">
+                      <Icon name="alarm" size={20} color="#9CA3AF" />
+                      <Text className="text-surface-900 dark:text-white font-medium text-lg ml-3">
+                        {scheduledDate.toLocaleTimeString("en-US", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}
+                      </Text>
+                    </View>
+                    <Icon name="chevron-right" size={20} color="#9CA3AF" />
+                  </TouchableOpacity>
+                  {showTimePicker && (
+                    <DateTimePicker
+                      value={scheduledDate}
+                      mode="time"
+                      display="default"
+                      onChange={onTimeChange}
+                      minuteInterval={5}
+                    />
+                  )}
+                </>
+              )}
+            </View>
+          </View>
+        )}
 
         {/* Game Settings */}
         <View className="mb-6">
@@ -406,7 +699,13 @@ export default function CreateGameScreen() {
           disabled={!homeTeam || !awayTeam || isSubmitting}
         >
           <Text className="text-white font-bold text-lg">
-            {isSubmitting ? "Creating..." : "Create Game"}
+            {isSubmitting
+              ? scheduleForLater
+                ? "Scheduling..."
+                : "Creating..."
+              : scheduleForLater
+                ? "Schedule Game"
+                : "Create Game"}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -416,6 +715,10 @@ export default function CreateGameScreen() {
         visible={showHomeTeamModal}
         onClose={() => setShowHomeTeamModal(false)}
         onSelect={setHomeTeam}
+        onCreateNew={() => {
+          setQuickCreateTeamType("home");
+          setShowQuickCreateModal(true);
+        }}
         teams={teams}
         excludeId={awayTeam?.id}
         title="Select Home Team"
@@ -424,9 +727,27 @@ export default function CreateGameScreen() {
         visible={showAwayTeamModal}
         onClose={() => setShowAwayTeamModal(false)}
         onSelect={setAwayTeam}
+        onCreateNew={() => {
+          setQuickCreateTeamType("away");
+          setShowQuickCreateModal(true);
+        }}
         teams={teams}
         excludeId={homeTeam?.id}
         title="Select Away Team"
+      />
+
+      {/* Quick Team Create Modal */}
+      <QuickTeamCreateModal
+        visible={showQuickCreateModal}
+        onClose={() => setShowQuickCreateModal(false)}
+        onTeamCreated={(team) => {
+          if (quickCreateTeamType === "home") {
+            setHomeTeam(team);
+          } else {
+            setAwayTeam(team);
+          }
+        }}
+        teamType={quickCreateTeamType}
       />
     </View>
   );

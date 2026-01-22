@@ -188,9 +188,7 @@ export const PlayerSelectorModal: React.FC<PlayerSelectorModalProps> = ({
                         </div>
 
                         {/* Selected Indicator */}
-                        {isSelected && (
-                          <div className="w-2 h-2 rounded-full bg-primary-500"></div>
-                        )}
+                        {isSelected && <div className="w-2 h-2 rounded-full bg-primary-500"></div>}
                       </button>
                     );
                   })}

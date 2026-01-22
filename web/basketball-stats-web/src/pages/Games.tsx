@@ -14,6 +14,9 @@ import {
   ClockIcon,
   BoltIcon,
   XMarkIcon,
+  UserGroupIcon,
+  InformationCircleIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 
 const statusConfig = {
@@ -58,6 +61,13 @@ const Games: React.FC = () => {
     awayTeamName: "",
     quarterMinutes: 12,
   });
+  const [showQuickTeamModal, setShowQuickTeamModal] = useState(false);
+  const [quickTeamType, setQuickTeamType] = useState<"home" | "away">("home");
+  const [quickTeamSettings, setQuickTeamSettings] = useState({
+    teamName: "",
+    playerCount: 5,
+  });
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false);
 
   const gamesData = useQuery(
     api.games.list,
@@ -71,9 +81,23 @@ const Games: React.FC = () => {
 
   const createGame = useMutation(api.games.create);
   const createQuickGame = useMutation(api.games.createQuickGame);
+  const createTeam = useMutation(api.teams.create);
+  const createPlayer = useMutation(api.players.create);
 
   const games = gamesData?.games || [];
   const teams = teamsData?.teams || [];
+
+  // Check for existing or similar team names in quick create
+  const normalizedQuickTeamName = quickTeamSettings.teamName.trim().toLowerCase();
+  const exactTeamMatch = teams.find((t: any) => t.name.toLowerCase() === normalizedQuickTeamName);
+  const similarTeamMatch =
+    !exactTeamMatch && normalizedQuickTeamName.length >= 3
+      ? teams.find(
+          (t: any) =>
+            t.name.toLowerCase().includes(normalizedQuickTeamName) ||
+            normalizedQuickTeamName.includes(t.name.toLowerCase())
+        )
+      : null;
 
   // Sort games: live first, then scheduled by date, then completed (most recent first)
   const sortedGames = [...games].sort((a, b) => {
@@ -176,6 +200,51 @@ const Games: React.FC = () => {
       toast.error(message);
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleCreateQuickTeam = async () => {
+    if (!quickTeamSettings.teamName.trim() || !token || !selectedLeague) {
+      return;
+    }
+
+    setIsCreatingTeam(true);
+    try {
+      // Create the team
+      const result = await createTeam({
+        token,
+        leagueId: selectedLeague.id,
+        name: quickTeamSettings.teamName.trim(),
+      });
+      const newTeam = result.team;
+
+      // Create default players
+      for (let i = 1; i <= quickTeamSettings.playerCount; i++) {
+        await createPlayer({
+          token,
+          teamId: newTeam.id,
+          name: `Player ${i}`,
+          number: i,
+          active: true,
+        });
+      }
+
+      // Set the team as selected
+      if (quickTeamType === "home") {
+        setSelectedTeams((prev) => ({ ...prev, home: newTeam.id }));
+      } else {
+        setSelectedTeams((prev) => ({ ...prev, away: newTeam.id }));
+      }
+
+      toast.success(`Team "${newTeam.name}" created with ${quickTeamSettings.playerCount} players`);
+      setShowQuickTeamModal(false);
+      setQuickTeamSettings({ teamName: "", playerCount: 5 });
+    } catch (error) {
+      console.error("Failed to create team:", error);
+      const message = getErrorMessage(error, "Failed to create team. Please try again.");
+      toast.error(message);
+    } finally {
+      setIsCreatingTeam(false);
     }
   };
 
@@ -392,40 +461,70 @@ const Games: React.FC = () => {
                 <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
                   Home Team
                 </label>
-                <select
-                  value={selectedTeams.home || ""}
-                  onChange={(e) =>
-                    setSelectedTeams((prev) => ({ ...prev, home: e.target.value || null }))
-                  }
-                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
-                >
-                  <option value="">Select Home Team</option>
-                  {teams.map((team: any) => (
-                    <option key={team.id} value={team.id}>
-                      {team.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <select
+                    value={selectedTeams.home || ""}
+                    onChange={(e) =>
+                      setSelectedTeams((prev) => ({ ...prev, home: e.target.value || null }))
+                    }
+                    className="flex-1 bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
+                  >
+                    <option value="">Select Home Team</option>
+                    {teams.map((team: any) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuickTeamType("home");
+                      setShowQuickTeamModal(true);
+                    }}
+                    className="px-3 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl transition-colors"
+                    title="Create New Team"
+                  >
+                    <PlusIcon className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
                   Away Team
                 </label>
-                <select
-                  value={selectedTeams.away || ""}
-                  onChange={(e) =>
-                    setSelectedTeams((prev) => ({ ...prev, away: e.target.value || null }))
-                  }
-                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
-                >
-                  <option value="">Select Away Team</option>
-                  {teams.map((team: any) => (
-                    <option key={team.id} value={team.id} disabled={team.id === selectedTeams.home}>
-                      {team.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <select
+                    value={selectedTeams.away || ""}
+                    onChange={(e) =>
+                      setSelectedTeams((prev) => ({ ...prev, away: e.target.value || null }))
+                    }
+                    className="flex-1 bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
+                  >
+                    <option value="">Select Away Team</option>
+                    {teams.map((team: any) => (
+                      <option
+                        key={team.id}
+                        value={team.id}
+                        disabled={team.id === selectedTeams.home}
+                      >
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuickTeamType("away");
+                      setShowQuickTeamModal(true);
+                    }}
+                    className="px-3 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl transition-colors"
+                    title="Create New Team"
+                  >
+                    <PlusIcon className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               {/* Schedule Toggle */}
@@ -622,6 +721,181 @@ const Games: React.FC = () => {
                 className="btn-primary px-4 py-2.5 rounded-xl"
               >
                 {isCreating ? "Creating..." : "Start Game"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Team Create Modal */}
+      {showQuickTeamModal && (
+        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md shadow-dramatic border border-surface-200 dark:border-surface-700 animate-scale-in">
+            <div className="flex items-center justify-between p-6 border-b border-surface-200 dark:border-surface-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary-500/10 rounded-xl flex items-center justify-center">
+                  <UserGroupIcon className="w-5 h-5 text-primary-500" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-surface-900 dark:text-surface-50">
+                    Quick Create {quickTeamType === "home" ? "Home" : "Away"} Team
+                  </h3>
+                  <p className="text-sm text-surface-500 dark:text-surface-400">
+                    Create team with default players
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowQuickTeamModal(false);
+                  setQuickTeamSettings({ teamName: "", playerCount: 5 });
+                }}
+                className="p-2 rounded-lg text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                  Team Name
+                </label>
+                <input
+                  type="text"
+                  value={quickTeamSettings.teamName}
+                  onChange={(e) =>
+                    setQuickTeamSettings((prev) => ({ ...prev, teamName: e.target.value }))
+                  }
+                  placeholder="Enter team name"
+                  className={`w-full bg-surface-50 dark:bg-surface-900 border rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow ${
+                    exactTeamMatch
+                      ? "border-amber-500 border-2"
+                      : "border-surface-200 dark:border-surface-700"
+                  }`}
+                />
+
+                {/* Exact match warning */}
+                {exactTeamMatch && (
+                  <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
+                    <div className="flex items-start gap-2">
+                      <ExclamationTriangleIcon className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                          Team &quot;{exactTeamMatch.name}&quot; already exists
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (quickTeamType === "home") {
+                              setSelectedTeams((prev) => ({ ...prev, home: exactTeamMatch.id }));
+                            } else {
+                              setSelectedTeams((prev) => ({ ...prev, away: exactTeamMatch.id }));
+                            }
+                            setShowQuickTeamModal(false);
+                            setQuickTeamSettings({ teamName: "", playerCount: 5 });
+                          }}
+                          className="mt-2 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          Use Existing Team
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Similar match warning */}
+                {similarTeamMatch && !exactTeamMatch && (
+                  <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                    <div className="flex items-start gap-2">
+                      <InformationCircleIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          Similar team exists: &quot;{similarTeamMatch.name}&quot;
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (quickTeamType === "home") {
+                              setSelectedTeams((prev) => ({ ...prev, home: similarTeamMatch.id }));
+                            } else {
+                              setSelectedTeams((prev) => ({ ...prev, away: similarTeamMatch.id }));
+                            }
+                            setShowQuickTeamModal(false);
+                            setQuickTeamSettings({ teamName: "", playerCount: 5 });
+                          }}
+                          className="mt-2 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          Use &quot;{similarTeamMatch.name}&quot; Instead
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                  Number of Players
+                </label>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setQuickTeamSettings((prev) => ({
+                        ...prev,
+                        playerCount: Math.max(1, prev.playerCount - 1),
+                      }))
+                    }
+                    className="w-10 h-10 bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 rounded-xl flex items-center justify-center text-surface-900 dark:text-white font-bold transition-colors"
+                  >
+                    -
+                  </button>
+                  <span className="text-2xl font-bold text-surface-900 dark:text-surface-50 w-12 text-center">
+                    {quickTeamSettings.playerCount}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setQuickTeamSettings((prev) => ({
+                        ...prev,
+                        playerCount: Math.min(15, prev.playerCount + 1),
+                      }))
+                    }
+                    className="w-10 h-10 bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 rounded-xl flex items-center justify-center text-surface-900 dark:text-white font-bold transition-colors"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                <InformationCircleIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Players will be created as &quot;Player 1&quot;, &quot;Player 2&quot;, etc. with
+                  jersey numbers 1, 2, 3... You can edit names later from the Teams page.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 border-t border-surface-200 dark:border-surface-700">
+              <button
+                onClick={() => {
+                  setShowQuickTeamModal(false);
+                  setQuickTeamSettings({ teamName: "", playerCount: 5 });
+                }}
+                className="btn-secondary px-4 py-2.5 rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateQuickTeam}
+                disabled={!quickTeamSettings.teamName.trim() || isCreatingTeam || !!exactTeamMatch}
+                className="btn-primary px-4 py-2.5 rounded-xl"
+              >
+                {isCreatingTeam
+                  ? "Creating..."
+                  : `Create Team with ${quickTeamSettings.playerCount} Players`}
               </button>
             </div>
           </div>

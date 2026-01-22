@@ -149,9 +149,7 @@ export function PlayerSelectModal({
             </Text>
           )}
         </View>
-        {isSelected && (
-          <View className="w-2 h-2 rounded-full bg-primary-500 mr-2" />
-        )}
+        {isSelected && <View className="w-2 h-2 rounded-full bg-primary-500 mr-2" />}
       </TouchableOpacity>
     );
   };

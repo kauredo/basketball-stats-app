@@ -6,7 +6,13 @@ import { useAuth } from "../contexts/AuthContext";
 import { InteractiveCourt } from "../components/livegame/court/InteractiveCourt";
 import { PlayerSelectorModal } from "../components/PlayerSelectorModal";
 import type { ShotLocation } from "../types/livegame";
-import { ChartBarIcon, UserIcon, UsersIcon, FireIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  ChartBarIcon,
+  UserIcon,
+  UsersIcon,
+  FireIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 
 interface PlayerOption {
   id: Id<"players">;

@@ -148,8 +148,8 @@ function TabNavigator() {
 }
 
 function LoadingScreen() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   return (
     <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950">

@@ -1,11 +1,5 @@
 import React, { useState, useMemo } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";

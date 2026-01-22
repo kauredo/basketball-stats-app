@@ -29,7 +29,13 @@ interface LineupStatsTableProps {
   initialRowCount?: number;
 }
 
-type SortField = "minutesPlayed" | "plusMinus" | "netRating" | "offRating" | "defRating" | "gamesPlayed";
+type SortField =
+  | "minutesPlayed"
+  | "plusMinus"
+  | "netRating"
+  | "offRating"
+  | "defRating"
+  | "gamesPlayed";
 type SortDirection = "asc" | "desc";
 
 // Compute additional stats
@@ -81,9 +87,7 @@ const LineupStatsTable: React.FC<LineupStatsTableProps> = ({
     });
   }, [enrichedLineups, sortField, sortDirection]);
 
-  const displayedLineups = isExpanded
-    ? sortedLineups
-    : sortedLineups.slice(0, initialRowCount);
+  const displayedLineups = isExpanded ? sortedLineups : sortedLineups.slice(0, initialRowCount);
 
   const hasMore = sortedLineups.length > initialRowCount;
 
@@ -141,9 +145,7 @@ const LineupStatsTable: React.FC<LineupStatsTableProps> = ({
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-surface-100 to-surface-200 dark:from-surface-700 dark:to-surface-800 flex items-center justify-center mb-4 shadow-soft">
             <UsersIcon className="w-7 h-7 text-surface-400" />
           </div>
-          <p className="text-surface-900 dark:text-white font-semibold mb-1">
-            No lineup data yet
-          </p>
+          <p className="text-surface-900 dark:text-white font-semibold mb-1">No lineup data yet</p>
           <p className="text-surface-500 dark:text-surface-400 text-sm max-w-[240px]">
             Play games with this team to see how different 5-man combinations perform
           </p>

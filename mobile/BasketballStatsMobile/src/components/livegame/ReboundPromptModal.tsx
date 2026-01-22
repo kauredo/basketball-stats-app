@@ -108,11 +108,17 @@ export function ReboundPromptModal({
                   <TouchableOpacity
                     key={player.id}
                     onPress={() => handlePlayerRebound(player.playerId, "offensive")}
-                    className="px-4 py-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg active:bg-orange-100"
+                    className="px-3 py-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg active:bg-orange-100 flex-row items-center"
                     activeOpacity={0.7}
                   >
-                    <Text className="text-surface-900 dark:text-white text-sm font-medium">
+                    <Text className="text-orange-600 dark:text-orange-400 text-xs font-bold mr-1.5">
                       #{player.player?.number}
+                    </Text>
+                    <Text
+                      className="text-surface-900 dark:text-white text-sm font-medium"
+                      numberOfLines={1}
+                    >
+                      {player.player?.name?.split(" ").pop() || ""}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -141,11 +147,17 @@ export function ReboundPromptModal({
                   <TouchableOpacity
                     key={player.id}
                     onPress={() => handlePlayerRebound(player.playerId, "defensive")}
-                    className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg active:bg-blue-100"
+                    className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg active:bg-blue-100 flex-row items-center"
                     activeOpacity={0.7}
                   >
-                    <Text className="text-surface-900 dark:text-white text-sm font-medium">
+                    <Text className="text-blue-600 dark:text-blue-400 text-xs font-bold mr-1.5">
                       #{player.player?.number}
+                    </Text>
+                    <Text
+                      className="text-surface-900 dark:text-white text-sm font-medium"
+                      numberOfLines={1}
+                    >
+                      {player.player?.name?.split(" ").pop() || ""}
                     </Text>
                   </TouchableOpacity>
                 ))}

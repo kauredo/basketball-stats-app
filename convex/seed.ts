@@ -5,17 +5,73 @@ import { hashPassword, generateToken, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY 
 
 // Realistic basketball player names
 const FIRST_NAMES = [
-  "Marcus", "DeShawn", "Jamal", "Tyrone", "Kevin", "Chris", "Anthony", "Michael",
-  "LeBron", "Kobe", "Dwyane", "Carmelo", "Russell", "Stephen", "James", "Paul",
-  "Blake", "Kyrie", "Damian", "Kawhi", "Giannis", "Luka", "Jayson", "Ja",
-  "Zion", "Trae", "Devin", "Brandon", "Tyler", "Malik", "Jalen", "Cade",
+  "Marcus",
+  "DeShawn",
+  "Jamal",
+  "Tyrone",
+  "Kevin",
+  "Chris",
+  "Anthony",
+  "Michael",
+  "LeBron",
+  "Kobe",
+  "Dwyane",
+  "Carmelo",
+  "Russell",
+  "Stephen",
+  "James",
+  "Paul",
+  "Blake",
+  "Kyrie",
+  "Damian",
+  "Kawhi",
+  "Giannis",
+  "Luka",
+  "Jayson",
+  "Ja",
+  "Zion",
+  "Trae",
+  "Devin",
+  "Brandon",
+  "Tyler",
+  "Malik",
+  "Jalen",
+  "Cade",
 ];
 
 const LAST_NAMES = [
-  "Johnson", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor",
-  "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia",
-  "Robinson", "Clark", "Lewis", "Walker", "Hall", "Young", "King", "Wright",
-  "Hill", "Scott", "Green", "Adams", "Baker", "Nelson", "Carter", "Mitchell",
+  "Johnson",
+  "Williams",
+  "Brown",
+  "Davis",
+  "Miller",
+  "Wilson",
+  "Moore",
+  "Taylor",
+  "Anderson",
+  "Thomas",
+  "Jackson",
+  "White",
+  "Harris",
+  "Martin",
+  "Thompson",
+  "Garcia",
+  "Robinson",
+  "Clark",
+  "Lewis",
+  "Walker",
+  "Hall",
+  "Young",
+  "King",
+  "Wright",
+  "Hill",
+  "Scott",
+  "Green",
+  "Adams",
+  "Baker",
+  "Nelson",
+  "Carter",
+  "Mitchell",
 ];
 
 // NBA-style team data
@@ -53,7 +109,7 @@ function randomFloat(min: number, max: number): number {
   return Math.random() * (max - min) + min;
 }
 
-function randomChoice<T>(arr: T[]): T {
+function randomChoice<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
@@ -88,7 +144,6 @@ function generateWeight(height: number): number {
   return Math.round(baseWeight + randomBetween(-5, 15));
 }
 
-
 // Generate realistic shot location
 function generateShotLocation(zone: keyof typeof SHOT_ZONES): { x: number; y: number } {
   const config = SHOT_ZONES[zone];
@@ -119,7 +174,7 @@ function generatePlayerGameStats(isStarter: boolean) {
   // Shooting percentages (realistic ranges)
   const fgPct = randomFloat(0.35, 0.55);
   const threePct = randomFloat(0.28, 0.42);
-  const ftPct = randomFloat(0.65, 0.90);
+  const ftPct = randomFloat(0.65, 0.9);
 
   const fgMade = Math.round(fgAttempted * fgPct);
   const threeMade = Math.round(threeAttempted * threePct);
@@ -561,8 +616,12 @@ export const seedDatabase = mutation({
 
                 // Calculate points for this stint (proportional to time)
                 const stintFraction = stintMinutes / totalMinutes;
-                const stintPointsScored = Math.round(teamScore * stintFraction * randomFloat(0.8, 1.2));
-                const stintPointsAllowed = Math.round(oppScore * stintFraction * randomFloat(0.8, 1.2));
+                const stintPointsScored = Math.round(
+                  teamScore * stintFraction * randomFloat(0.8, 1.2)
+                );
+                const stintPointsAllowed = Math.round(
+                  oppScore * stintFraction * randomFloat(0.8, 1.2)
+                );
                 const stintPlusMinus = stintPointsScored - stintPointsAllowed;
 
                 // Calculate end time
@@ -576,10 +635,10 @@ export const seedDatabase = mutation({
                   players: stintPlayers,
                   startQuarter: currentQuarter,
                   startGameTime: currentGameTime,
-                  startTimestamp: scheduledAt + (stintIdx * 10 * 60 * 1000),
+                  startTimestamp: scheduledAt + stintIdx * 10 * 60 * 1000,
                   endQuarter,
                   endGameTime,
-                  endTimestamp: scheduledAt + ((stintIdx + 1) * 10 * 60 * 1000),
+                  endTimestamp: scheduledAt + (stintIdx + 1) * 10 * 60 * 1000,
                   secondsPlayed: stintSeconds,
                   pointsScored: stintPointsScored,
                   pointsAllowed: stintPointsAllowed,

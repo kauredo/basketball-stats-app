@@ -219,6 +219,7 @@ export default function LiveGameScreen() {
   // Pre-game lineup selection state
   const [homeStarters, setHomeStarters] = useState<Id<"players">[]>([]);
   const [awayStarters, setAwayStarters] = useState<Id<"players">[]>([]);
+  const [isCreatingPlayers, setIsCreatingPlayers] = useState(false);
   const [quarterMinutes, setQuarterMinutes] = useState(12);
 
   // Real-time game data from Convex
@@ -263,6 +264,8 @@ export default function LiveGameScreen() {
   const recordShotMutation = useMutation(api.shots.recordShot);
   const setQuarterMutation = useMutation(api.games.setQuarter);
   const setGameTimeMutation = useMutation(api.games.setGameTime);
+  const createPlayerMutation = useMutation(api.players.create);
+  const initializePlayerForGameMutation = useMutation(api.stats.initializePlayerForGame);
 
   const game = gameData?.game;
   const allStats = liveStats?.stats || [];
@@ -337,6 +340,44 @@ export default function LiveGameScreen() {
       }
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  // Handle creating missing players for a team
+  const handleCreatePlayers = async (teamId: Id<"teams">, count: number) => {
+    if (!token || !gameId) return;
+
+    setIsCreatingPlayers(true);
+    try {
+      // Get current player count to determine starting number
+      const teamPlayers = teamId === game?.homeTeam?.id ? homePlayerStats : awayPlayerStats;
+      const startingNumber = teamPlayers.length + 1;
+
+      for (let i = 0; i < count; i++) {
+        const playerNumber = startingNumber + i;
+        // Create the player
+        const result = await createPlayerMutation({
+          token,
+          teamId,
+          name: `Player ${playerNumber}`,
+          number: playerNumber,
+          active: true,
+        });
+        // Initialize player stats for this game so they appear in the lineup
+        if (result.player?.id) {
+          await initializePlayerForGameMutation({
+            token,
+            gameId,
+            playerId: result.player.id,
+          });
+        }
+      }
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error("Failed to create players:", error);
+      Alert.alert("Error", "Failed to create players");
+    } finally {
+      setIsCreatingPlayers(false);
+    }
   };
 
   // Handle starting the game with selected lineup
@@ -1046,24 +1087,63 @@ export default function LiveGameScreen() {
                 {awayStarters.length}/5 selected
               </Text>
             </View>
-            {awayPlayerStats.map((stat) => (
-              <TouchableOpacity
-                key={stat.id}
-                onPress={() => toggleStarter(stat.playerId, false)}
-                className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
-                  awayStarters.includes(stat.playerId)
-                    ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
-                    : "bg-surface-100 dark:bg-surface-700"
-                }`}
-              >
-                <Text className="text-surface-900 dark:text-white font-medium">
-                  #{stat.player?.number} {stat.player?.name}
-                </Text>
-                {awayStarters.includes(stat.playerId) && (
-                  <Icon name="check" size={20} color="#F97316" />
-                )}
-              </TouchableOpacity>
-            ))}
+
+            {/* Not enough players warning */}
+            {awayPlayerStats.length < 5 && (
+              <View className="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center flex-1">
+                    <Icon name="alert" size={16} color="#F59E0B" />
+                    <Text className="text-amber-700 dark:text-amber-300 text-sm ml-2">
+                      Need {5 - awayPlayerStats.length} more player
+                      {5 - awayPlayerStats.length > 1 ? "s" : ""}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() =>
+                      game.awayTeam?.id &&
+                      handleCreatePlayers(
+                        game.awayTeam.id as Id<"teams">,
+                        5 - awayPlayerStats.length
+                      )
+                    }
+                    disabled={isCreatingPlayers}
+                    className={`px-3 py-1.5 rounded-lg flex-row items-center ${isCreatingPlayers ? "bg-amber-400" : "bg-amber-500"}`}
+                  >
+                    <Icon name="plus" size={14} color="#FFFFFF" />
+                    <Text className="text-white text-sm font-medium ml-1">
+                      {isCreatingPlayers ? "Adding..." : `Add ${5 - awayPlayerStats.length}`}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {awayPlayerStats.length === 0 ? (
+              <View className="py-6 items-center">
+                <Icon name="users" size={32} color="#9CA3AF" />
+                <Text className="text-surface-500 mt-2">No players on this team</Text>
+              </View>
+            ) : (
+              awayPlayerStats.map((stat) => (
+                <TouchableOpacity
+                  key={stat.id}
+                  onPress={() => toggleStarter(stat.playerId, false)}
+                  className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
+                    awayStarters.includes(stat.playerId)
+                      ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
+                      : "bg-surface-100 dark:bg-surface-700"
+                  }`}
+                >
+                  <Text className="text-surface-900 dark:text-white font-medium">
+                    #{stat.player?.number} {stat.player?.name}
+                  </Text>
+                  {awayStarters.includes(stat.playerId) && (
+                    <Icon name="check" size={20} color="#F97316" />
+                  )}
+                </TouchableOpacity>
+              ))
+            )}
           </View>
 
           {/* Home Team Starters */}
@@ -1080,24 +1160,63 @@ export default function LiveGameScreen() {
                 {homeStarters.length}/5 selected
               </Text>
             </View>
-            {homePlayerStats.map((stat) => (
-              <TouchableOpacity
-                key={stat.id}
-                onPress={() => toggleStarter(stat.playerId, true)}
-                className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
-                  homeStarters.includes(stat.playerId)
-                    ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
-                    : "bg-surface-100 dark:bg-surface-700"
-                }`}
-              >
-                <Text className="text-surface-900 dark:text-white font-medium">
-                  #{stat.player?.number} {stat.player?.name}
-                </Text>
-                {homeStarters.includes(stat.playerId) && (
-                  <Icon name="check" size={20} color="#F97316" />
-                )}
-              </TouchableOpacity>
-            ))}
+
+            {/* Not enough players warning */}
+            {homePlayerStats.length < 5 && (
+              <View className="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center flex-1">
+                    <Icon name="alert" size={16} color="#F59E0B" />
+                    <Text className="text-amber-700 dark:text-amber-300 text-sm ml-2">
+                      Need {5 - homePlayerStats.length} more player
+                      {5 - homePlayerStats.length > 1 ? "s" : ""}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() =>
+                      game.homeTeam?.id &&
+                      handleCreatePlayers(
+                        game.homeTeam.id as Id<"teams">,
+                        5 - homePlayerStats.length
+                      )
+                    }
+                    disabled={isCreatingPlayers}
+                    className={`px-3 py-1.5 rounded-lg flex-row items-center ${isCreatingPlayers ? "bg-amber-400" : "bg-amber-500"}`}
+                  >
+                    <Icon name="plus" size={14} color="#FFFFFF" />
+                    <Text className="text-white text-sm font-medium ml-1">
+                      {isCreatingPlayers ? "Adding..." : `Add ${5 - homePlayerStats.length}`}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {homePlayerStats.length === 0 ? (
+              <View className="py-6 items-center">
+                <Icon name="users" size={32} color="#9CA3AF" />
+                <Text className="text-surface-500 mt-2">No players on this team</Text>
+              </View>
+            ) : (
+              homePlayerStats.map((stat) => (
+                <TouchableOpacity
+                  key={stat.id}
+                  onPress={() => toggleStarter(stat.playerId, true)}
+                  className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
+                    homeStarters.includes(stat.playerId)
+                      ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
+                      : "bg-surface-100 dark:bg-surface-700"
+                  }`}
+                >
+                  <Text className="text-surface-900 dark:text-white font-medium">
+                    #{stat.player?.number} {stat.player?.name}
+                  </Text>
+                  {homeStarters.includes(stat.playerId) && (
+                    <Icon name="check" size={20} color="#F97316" />
+                  )}
+                </TouchableOpacity>
+              ))
+            )}
           </View>
 
           {/* Start Game Button */}

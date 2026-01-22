@@ -43,18 +43,17 @@ function computeStats(pair: PairData) {
 
 // Get chemistry rating based on net rating (for visual indicator)
 function getChemistryLevel(netRating: number): { label: string; color: string; bg: string } {
-  if (netRating >= 15) return { label: "Elite", color: "text-green-600 dark:text-green-400", bg: "bg-green-500" };
-  if (netRating >= 5) return { label: "Good", color: "text-green-600 dark:text-green-400", bg: "bg-green-400" };
+  if (netRating >= 15)
+    return { label: "Elite", color: "text-green-600 dark:text-green-400", bg: "bg-green-500" };
+  if (netRating >= 5)
+    return { label: "Good", color: "text-green-600 dark:text-green-400", bg: "bg-green-400" };
   if (netRating >= -5) return { label: "Neutral", color: "text-surface-500", bg: "bg-surface-400" };
-  if (netRating >= -15) return { label: "Poor", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500" };
+  if (netRating >= -15)
+    return { label: "Poor", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500" };
   return { label: "Bad", color: "text-red-600 dark:text-red-400", bg: "bg-red-500" };
 }
 
-const PairStatsGrid: React.FC<PairStatsGridProps> = ({
-  pairs,
-  isLoading,
-  initialRowCount = 5,
-}) => {
+const PairStatsGrid: React.FC<PairStatsGridProps> = ({ pairs, isLoading, initialRowCount = 5 }) => {
   const [sortField, setSortField] = useState<SortField>("minutesTogether");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [isExpanded, setIsExpanded] = useState(false);
@@ -84,9 +83,7 @@ const PairStatsGrid: React.FC<PairStatsGridProps> = ({
     });
   }, [enrichedPairs, sortField, sortDirection]);
 
-  const displayedPairs = isExpanded
-    ? sortedPairs
-    : sortedPairs.slice(0, initialRowCount);
+  const displayedPairs = isExpanded ? sortedPairs : sortedPairs.slice(0, initialRowCount);
 
   const hasMore = sortedPairs.length > initialRowCount;
 
@@ -217,7 +214,9 @@ const PairStatsGrid: React.FC<PairStatsGridProps> = ({
                       {isBestPair && (
                         <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400">
                           <SparklesIcon className="w-3 h-3" />
-                          <span className="text-[10px] font-semibold uppercase tracking-wide">Best</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wide">
+                            Best
+                          </span>
                         </span>
                       )}
                     </div>

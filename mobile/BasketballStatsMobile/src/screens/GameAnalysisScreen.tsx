@@ -311,9 +311,9 @@ export default function GameAnalysisScreen() {
               <View className="px-3">
                 {sortedPlayers.map((player: any, index: number) => (
                   <PlayerStatRow
-                    key={player.playerId || index}
-                    name={player.name || "Unknown"}
-                    number={player.number || 0}
+                    key={player.player?.id || index}
+                    name={player.player?.name || "Unknown"}
+                    number={player.player?.number || 0}
                     minutesPlayed={player.minutesPlayed || 0}
                     points={player.points || 0}
                     rebounds={player.rebounds || 0}
@@ -528,9 +528,9 @@ export default function GameAnalysisScreen() {
             <AdvancedStats
               homeStats={
                 homeTeam?.players?.map((p: any) => ({
-                  id: p.playerId,
-                  playerId: p.playerId,
-                  player: { id: p.playerId, name: p.name, number: p.number, position: p.position },
+                  id: p.player?.id,
+                  playerId: p.player?.id,
+                  player: p.player || { id: "", name: "Unknown", number: 0, position: "" },
                   points: p.points || 0,
                   rebounds: p.rebounds || 0,
                   assists: p.assists || 0,
@@ -550,9 +550,9 @@ export default function GameAnalysisScreen() {
               }
               awayStats={
                 awayTeam?.players?.map((p: any) => ({
-                  id: p.playerId,
-                  playerId: p.playerId,
-                  player: { id: p.playerId, name: p.name, number: p.number, position: p.position },
+                  id: p.player?.id,
+                  playerId: p.player?.id,
+                  player: p.player || { id: "", name: "Unknown", number: 0, position: "" },
                   points: p.points || 0,
                   rebounds: p.rebounds || 0,
                   assists: p.assists || 0,

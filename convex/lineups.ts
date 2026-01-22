@@ -75,9 +75,7 @@ export const endLineupStint = internalMutation({
     // Find the active stint for this team
     const activeStints = await ctx.db
       .query("lineupStints")
-      .withIndex("by_game_team", (q) =>
-        q.eq("gameId", args.gameId).eq("teamId", args.teamId)
-      )
+      .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", args.teamId))
       .filter((q) => q.eq(q.field("isActive"), true))
       .collect();
 
@@ -104,7 +102,7 @@ export const endLineupStint = internalMutation({
         const startQuarterTime = stint.startGameTime;
         const endQuarterTime = quarterLength - args.gameTime;
 
-        secondsPlayed = startQuarterTime + (fullQuarters * quarterLength) + endQuarterTime;
+        secondsPlayed = startQuarterTime + fullQuarters * quarterLength + endQuarterTime;
       }
 
       // Ensure non-negative
@@ -140,9 +138,7 @@ export const updateLineupStats = internalMutation({
     // Get all active stints for this game
     const activeStints = await ctx.db
       .query("lineupStints")
-      .withIndex("by_game_active", (q) =>
-        q.eq("gameId", args.gameId).eq("isActive", true)
-      )
+      .withIndex("by_game_active", (q) => q.eq("gameId", args.gameId).eq("isActive", true))
       .collect();
 
     for (const stint of activeStints) {
@@ -175,9 +171,7 @@ export const endAllGameStints = internalMutation({
   handler: async (ctx, args) => {
     const activeStints = await ctx.db
       .query("lineupStints")
-      .withIndex("by_game_active", (q) =>
-        q.eq("gameId", args.gameId).eq("isActive", true)
-      )
+      .withIndex("by_game_active", (q) => q.eq("gameId", args.gameId).eq("isActive", true))
       .collect();
 
     const now = Date.now();
@@ -194,7 +188,7 @@ export const endAllGameStints = internalMutation({
         const startQuarterTime = stint.startGameTime;
         const endQuarterTime = quarterLength - args.gameTime;
 
-        secondsPlayed = startQuarterTime + (fullQuarters * quarterLength) + endQuarterTime;
+        secondsPlayed = startQuarterTime + fullQuarters * quarterLength + endQuarterTime;
       }
 
       secondsPlayed = Math.max(0, secondsPlayed);
@@ -389,8 +383,7 @@ export const getTeamPairStats = query({
         const player2 = await ctx.db.get(pair.player2Id);
 
         const minutesTogether = pair.secondsPlayed / 60;
-        const netRating =
-          minutesTogether > 0 ? (pair.plusMinus / minutesTogether) * 36 : 0;
+        const netRating = minutesTogether > 0 ? (pair.plusMinus / minutesTogether) * 36 : 0;
 
         return {
           player1: player1
@@ -442,9 +435,7 @@ export const getGameLineupStints = query({
     if (args.teamId) {
       stints = await ctx.db
         .query("lineupStints")
-        .withIndex("by_game_team", (q) =>
-          q.eq("gameId", args.gameId).eq("teamId", args.teamId!)
-        )
+        .withIndex("by_game_team", (q) => q.eq("gameId", args.gameId).eq("teamId", args.teamId!))
         .collect();
     } else {
       stints = await ctx.db

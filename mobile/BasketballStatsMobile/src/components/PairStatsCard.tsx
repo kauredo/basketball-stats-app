@@ -41,11 +41,7 @@ function getChemistryDots(netRating: number): { filled: number; color: string } 
   return { filled: 1, color: "#ef4444" };
 }
 
-const PairStatsCard: React.FC<PairStatsCardProps> = ({
-  pairs,
-  isLoading,
-  initialRowCount = 5,
-}) => {
+const PairStatsCard: React.FC<PairStatsCardProps> = ({ pairs, isLoading, initialRowCount = 5 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const enrichedPairs = useMemo(() => {
@@ -60,9 +56,7 @@ const PairStatsCard: React.FC<PairStatsCardProps> = ({
     return [...enrichedPairs].sort((a, b) => b.minutesTogether - a.minutesTogether);
   }, [enrichedPairs]);
 
-  const displayedPairs = isExpanded
-    ? sortedPairs
-    : sortedPairs.slice(0, initialRowCount);
+  const displayedPairs = isExpanded ? sortedPairs : sortedPairs.slice(0, initialRowCount);
 
   const hasMore = sortedPairs.length > initialRowCount;
 
@@ -107,7 +101,6 @@ const PairStatsCard: React.FC<PairStatsCardProps> = ({
         <Text className="text-xs text-surface-500">{pairs.length} pairs</Text>
       </View>
 
-
       {/* Pair Rows */}
       <View>
         {displayedPairs.map((pair, index) => {
@@ -131,14 +124,18 @@ const PairStatsCard: React.FC<PairStatsCardProps> = ({
 
                 <View className="flex-row items-center flex-wrap flex-1">
                   <View className="flex-row items-center bg-surface-100 dark:bg-surface-700 px-1.5 py-0.5 rounded">
-                    <Text className="text-[10px] text-surface-400 mr-0.5">{pair.player1.number}</Text>
+                    <Text className="text-[10px] text-surface-400 mr-0.5">
+                      {pair.player1.number}
+                    </Text>
                     <Text className="text-[10px] font-medium text-surface-700 dark:text-surface-300">
                       {pair.player1.name.split(" ").pop()}
                     </Text>
                   </View>
                   <Text className="text-[10px] text-surface-400 mx-1">+</Text>
                   <View className="flex-row items-center bg-surface-100 dark:bg-surface-700 px-1.5 py-0.5 rounded">
-                    <Text className="text-[10px] text-surface-400 mr-0.5">{pair.player2.number}</Text>
+                    <Text className="text-[10px] text-surface-400 mr-0.5">
+                      {pair.player2.number}
+                    </Text>
                     <Text className="text-[10px] font-medium text-surface-700 dark:text-surface-300">
                       {pair.player2.name.split(" ").pop()}
                     </Text>
@@ -227,11 +224,7 @@ const PairStatsCard: React.FC<PairStatsCardProps> = ({
           <Text className="text-sm font-medium text-surface-600 dark:text-surface-400 mr-1">
             {isExpanded ? "Show Less" : `Show ${sortedPairs.length - initialRowCount} More`}
           </Text>
-          <Icon
-            name={isExpanded ? "chevron-up" : "chevron-down"}
-            size={16}
-            color="#7a746c"
-          />
+          <Icon name={isExpanded ? "chevron-up" : "chevron-down"} size={16} color="#7a746c" />
         </TouchableOpacity>
       )}
     </View>

@@ -42,6 +42,7 @@ import type {
 
 // Import hooks
 import { useFeedback } from "../hooks/livegame/useFeedback";
+import { useToast } from "../contexts/ToastContext";
 import { useGameClock } from "../hooks/livegame/useGameClock";
 import { useShotClock } from "../hooks/livegame/useShotClock";
 
@@ -69,6 +70,7 @@ const LiveGameNew: React.FC = () => {
   const [selectedHomeStarters, setSelectedHomeStarters] = useState<Id<"players">[]>([]);
   const [selectedAwayStarters, setSelectedAwayStarters] = useState<Id<"players">[]>([]);
   const [isStartingGame, setIsStartingGame] = useState(false);
+  const [isCreatingPlayers, setIsCreatingPlayers] = useState(false);
   const [showGameClockEdit, setShowGameClockEdit] = useState(false);
   const [showShotClockEdit, setShowShotClockEdit] = useState(false);
 
@@ -112,9 +114,12 @@ const LiveGameNew: React.FC = () => {
   const recordShotMutation = useMutation(api.shots.recordShot);
   const updateGameSettingsMutation = useMutation(api.games.updateGameSettings);
   const setGameTimeMutation = useMutation(api.games.setGameTime);
+  const createPlayerMutation = useMutation(api.players.create);
+  const initializePlayerForGameMutation = useMutation(api.stats.initializePlayerForGame);
 
   // Hooks
   const feedback = useFeedback();
+  const toast = useToast();
 
   // Derived data
   const game = gameData?.game;
@@ -646,6 +651,56 @@ const LiveGameNew: React.FC = () => {
     }
   };
 
+  // Handler for creating missing players
+  const handleCreatePlayers = useCallback(
+    async (teamId: Id<"teams">, count: number) => {
+      if (!token || !gameId) return;
+
+      setIsCreatingPlayers(true);
+      try {
+        // Get current player count to determine starting number
+        const teamPlayers = teamId === game?.homeTeam?.id ? homeStats : awayStats;
+        const startingNumber = teamPlayers.length + 1;
+
+        for (let i = 0; i < count; i++) {
+          const playerNumber = startingNumber + i;
+          // Create the player
+          const result = await createPlayerMutation({
+            token,
+            teamId,
+            name: `Player ${playerNumber}`,
+            number: playerNumber,
+            active: true,
+          });
+          // Initialize player stats for this game so they appear in the lineup
+          if (result.player?.id) {
+            await initializePlayerForGameMutation({
+              token,
+              gameId: gameId as Id<"games">,
+              playerId: result.player.id,
+            });
+          }
+        }
+        toast.success(`Created ${count} player${count > 1 ? "s" : ""}`);
+      } catch (error) {
+        console.error("Failed to create players:", error);
+        toast.error("Failed to create players");
+      } finally {
+        setIsCreatingPlayers(false);
+      }
+    },
+    [
+      token,
+      gameId,
+      game,
+      homeStats,
+      awayStats,
+      createPlayerMutation,
+      initializePlayerForGameMutation,
+      toast,
+    ]
+  );
+
   // Handler for starting lineup changes
   const handleStartersChange = useCallback(
     async (homeStarters: Id<"players">[], awayStarters: Id<"players">[]) => {
@@ -795,13 +850,17 @@ const LiveGameNew: React.FC = () => {
             <StartingLineupSelector
               homeTeamName={game.homeTeam?.name || "Home"}
               awayTeamName={game.awayTeam?.name || "Away"}
+              homeTeamId={game.homeTeam?.id as Id<"teams">}
+              awayTeamId={game.awayTeam?.id as Id<"teams">}
               homeStats={homeStats}
               awayStats={awayStats}
               initialHomeStarters={selectedHomeStarters}
               initialAwayStarters={selectedAwayStarters}
               onStartersChange={handleStartersChange}
               onStartGame={handleStartGameWithStarters}
+              onCreatePlayers={handleCreatePlayers}
               isStarting={isStartingGame}
+              isCreatingPlayers={isCreatingPlayers}
             />
           </div>
         </div>

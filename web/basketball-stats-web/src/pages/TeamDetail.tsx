@@ -184,8 +184,12 @@ const TeamDetail: React.FC = () => {
         <div className="w-16 h-16 rounded-2xl bg-surface-100 dark:bg-surface-800 flex items-center justify-center mb-4">
           <UsersIcon className="w-8 h-8 text-surface-400" />
         </div>
-        <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-2">Team not found</h3>
-        <p className="text-surface-500 text-sm mb-4">This team may have been deleted or doesn't exist.</p>
+        <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-2">
+          Team not found
+        </h3>
+        <p className="text-surface-500 text-sm mb-4">
+          This team may have been deleted or doesn&apos;t exist.
+        </p>
         <button
           onClick={() => navigate("/app/teams")}
           className="btn-secondary px-4 py-2 rounded-xl"
@@ -368,7 +372,9 @@ const TeamDetail: React.FC = () => {
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-surface-100 to-surface-200 dark:from-surface-700 dark:to-surface-800 flex items-center justify-center mb-4 shadow-soft">
                   <UserIcon className="w-7 h-7 text-surface-400" />
                 </div>
-                <p className="text-surface-900 dark:text-white font-semibold mb-1">No players yet</p>
+                <p className="text-surface-900 dark:text-white font-semibold mb-1">
+                  No players yet
+                </p>
                 <p className="text-surface-500 text-sm text-center max-w-xs">
                   Add players to this team to start tracking their stats
                 </p>
@@ -590,7 +596,9 @@ const TeamDetail: React.FC = () => {
                 </label>
                 <textarea
                   value={editForm.description}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({ ...prev, description: e.target.value }))
+                  }
                   rows={3}
                   className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow resize-none"
                   placeholder="Enter description (optional)"
@@ -632,8 +640,11 @@ const TeamDetail: React.FC = () => {
                 Delete Team?
               </h3>
               <p className="text-surface-500 text-sm leading-relaxed">
-                Are you sure you want to delete <span className="font-medium text-surface-700 dark:text-surface-300">"{team.name}"</span>?
-                This action cannot be undone and will remove all associated player data.
+                Are you sure you want to delete{" "}
+                <span className="font-medium text-surface-700 dark:text-surface-300">
+                  &quot;{team.name}&quot;
+                </span>
+                ? This action cannot be undone and will remove all associated player data.
               </p>
             </div>
 
