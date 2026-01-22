@@ -50,7 +50,7 @@ function gameEfficiencyRating(stat: PlayerStat): number {
 
 /**
  * Advanced stats display with collapsible section.
- * Shows TS%, eFG%, and GER for players with significant activity.
+ * Shows TS%, eFG%, and GER for all players.
  */
 export const AdvancedStats: React.FC<AdvancedStatsProps> = ({
   homeStats,
@@ -60,16 +60,9 @@ export const AdvancedStats: React.FC<AdvancedStatsProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Get players with any stats (points, FGA, or key stats)
-  const getQualifiedPlayers = (stats: PlayerStat[]) =>
-    stats
-      .filter(
-        (s) => s.points > 0 || (s.fieldGoalsAttempted || 0) > 0 || s.rebounds > 0 || s.assists > 0
-      )
-      .sort((a, b) => b.points - a.points);
-
-  const qualifiedHome = getQualifiedPlayers(homeStats);
-  const qualifiedAway = getQualifiedPlayers(awayStats);
+  // Sort players by points (highest first)
+  const sortedHome = [...homeStats].sort((a, b) => b.points - a.points);
+  const sortedAway = [...awayStats].sort((a, b) => b.points - a.points);
 
   const getStatColorClass = (value: number, goodThreshold: number, badThreshold: number) => {
     if (value >= goodThreshold) return "text-green-600 dark:text-green-400";
@@ -120,7 +113,7 @@ export const AdvancedStats: React.FC<AdvancedStatsProps> = ({
     );
   };
 
-  const hasData = qualifiedHome.length > 0 || qualifiedAway.length > 0;
+  const hasData = sortedHome.length > 0 || sortedAway.length > 0;
 
   return (
     <div className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
@@ -156,7 +149,7 @@ export const AdvancedStats: React.FC<AdvancedStatsProps> = ({
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-3">
               {/* Away Team */}
-              {qualifiedAway.length > 0 && (
+              {sortedAway.length > 0 && (
                 <div>
                   <h4 className="text-xs font-medium text-surface-600 dark:text-surface-400 mb-2">
                     {awayTeamName}
@@ -178,13 +171,13 @@ export const AdvancedStats: React.FC<AdvancedStatsProps> = ({
                         </th>
                       </tr>
                     </thead>
-                    <tbody>{qualifiedAway.map(renderPlayerRow)}</tbody>
+                    <tbody>{sortedAway.map(renderPlayerRow)}</tbody>
                   </table>
                 </div>
               )}
 
               {/* Home Team */}
-              {qualifiedHome.length > 0 && (
+              {sortedHome.length > 0 && (
                 <div>
                   <h4 className="text-xs font-medium text-surface-600 dark:text-surface-400 mb-2">
                     {homeTeamName}
@@ -206,7 +199,7 @@ export const AdvancedStats: React.FC<AdvancedStatsProps> = ({
                         </th>
                       </tr>
                     </thead>
-                    <tbody>{qualifiedHome.map(renderPlayerRow)}</tbody>
+                    <tbody>{sortedHome.map(renderPlayerRow)}</tbody>
                   </table>
                 </div>
               )}

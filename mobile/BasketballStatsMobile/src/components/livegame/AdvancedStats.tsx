@@ -77,7 +77,7 @@ function gameEfficiencyRating(stat: PlayerStat): number {
 
 /**
  * Advanced stats display.
- * Shows TS%, eFG%, and GER for players with significant activity.
+ * Shows TS%, eFG%, and GER for all players.
  */
 export function AdvancedStats({
   homeStats,
@@ -86,14 +86,9 @@ export function AdvancedStats({
   awayTeamName,
 }: AdvancedStatsProps) {
 
-  // Get players with any stats (points, FGA, or key stats)
-  const getQualifiedPlayers = (stats: PlayerStat[]) =>
-    stats
-      .filter((s) => s.points > 0 || s.fieldGoalsAttempted > 0 || s.rebounds > 0 || s.assists > 0)
-      .sort((a, b) => b.points - a.points);
-
-  const qualifiedHome = getQualifiedPlayers(homeStats);
-  const qualifiedAway = getQualifiedPlayers(awayStats);
+  // Sort players by points (highest first)
+  const sortedHome = [...homeStats].sort((a, b) => b.points - a.points);
+  const sortedAway = [...awayStats].sort((a, b) => b.points - a.points);
 
   const getStatColorClass = (value: number, goodThreshold: number, badThreshold: number) => {
     if (value >= goodThreshold) return "text-green-600 dark:text-green-400";
@@ -144,7 +139,7 @@ export function AdvancedStats({
     );
   };
 
-  const hasData = qualifiedHome.length > 0 || qualifiedAway.length > 0;
+  const hasData = sortedHome.length > 0 || sortedAway.length > 0;
 
   return (
     <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden mt-4">
@@ -191,22 +186,22 @@ export function AdvancedStats({
             </View>
 
             {/* Away Team */}
-            {qualifiedAway.length > 0 && (
+            {sortedAway.length > 0 && (
               <>
                 <Text className="text-xs text-surface-600 dark:text-surface-400 mt-2 mb-1 font-medium">
                   {awayTeamName}
                 </Text>
-                {qualifiedAway.map(renderPlayerRow)}
+                {sortedAway.map(renderPlayerRow)}
               </>
             )}
 
             {/* Home Team */}
-            {qualifiedHome.length > 0 && (
+            {sortedHome.length > 0 && (
               <>
                 <Text className="text-xs text-surface-600 dark:text-surface-400 mt-3 mb-1 font-medium">
                   {homeTeamName}
                 </Text>
-                {qualifiedHome.map(renderPlayerRow)}
+                {sortedHome.map(renderPlayerRow)}
               </>
             )}
           </>
