@@ -1,10 +1,16 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import { useQuery } from "convex/react";
-import { getStatusColor } from "@basketball-stats/shared";
+import { LinearGradient } from "expo-linear-gradient";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
@@ -41,15 +47,15 @@ export default function HomeScreen() {
 
   const games = gamesData?.games || [];
 
-  // Separate live and recent games
+  // Separate games by status
   const liveGames = games.filter(
     (game: Game) => game.status === "active" || game.status === "paused"
   );
-  const recentGames = games.filter((game: Game) => game.status === "completed").slice(0, 5);
+  const recentGames = games.filter((game: Game) => game.status === "completed").slice(0, 4);
+  const upcomingGames = games.filter((game: Game) => game.status === "scheduled").slice(0, 3);
 
   const onRefresh = () => {
     setRefreshing(true);
-    // Data auto-refreshes with Convex
     setTimeout(() => setRefreshing(false), 500);
   };
 
@@ -59,122 +65,32 @@ export default function HomeScreen() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "active":
-        return "Live";
-      case "paused":
-        return "Paused";
-      case "completed":
-        return "Final";
-      case "scheduled":
-        return "Scheduled";
-      default:
-        return status;
-    }
+  const handleLiveGamePress = (game: Game) => {
+    navigation.navigate("LiveGame", { gameId: game.id });
   };
 
-  const handleGamePress = (game: Game) => {
-    if (game.status === "active" || game.status === "paused") {
-      navigation.navigate("LiveGame", { gameId: game.id });
-    }
-  };
-
-  const getWinner = (game: Game) => {
-    if (game.status !== "completed") return null;
-    if (game.homeScore > game.awayScore) return "home";
-    if (game.awayScore > game.homeScore) return "away";
-    return "tie";
-  };
-
-  const renderGameCard = (game: Game, isLive = false) => {
-    const isGameLive = game.status === "active" || game.status === "paused";
-    const winner = getWinner(game);
-
-    return (
-      <TouchableOpacity
-        key={game.id}
-        className={`bg-white dark:bg-surface-800 rounded-xl p-4 mb-3 border ${
-          isLive
-            ? "border-primary-500 border-2 shadow-lg"
-            : "border-surface-200 dark:border-surface-700"
-        }`}
-        onPress={() => handleGamePress(game)}
-        disabled={!isLive}
-      >
-        <View className="mb-3">
-          <View className="items-center">
-            <View className="flex-row justify-between items-center w-full py-1">
-              <Text
-                className={`text-surface-900 dark:text-white text-base font-semibold flex-1 ${
-                  winner === "away" && game.status === "completed" ? "text-status-completed" : ""
-                }`}
-              >
-                {game.awayTeam?.name || "Away Team"}
-              </Text>
-              <Text
-                className={`text-surface-900 dark:text-white text-lg font-bold min-w-[30px] text-right ${
-                  winner === "away" && game.status === "completed" ? "text-status-completed" : ""
-                }`}
-              >
-                {game.awayScore}
-              </Text>
-            </View>
-            <Text className="text-surface-600 dark:text-surface-400 text-xs my-1">@</Text>
-            <View className="flex-row justify-between items-center w-full py-1">
-              <Text
-                className={`text-surface-900 dark:text-white text-base font-semibold flex-1 ${
-                  winner === "home" && game.status === "completed" ? "text-status-completed" : ""
-                }`}
-              >
-                {game.homeTeam?.name || "Home Team"}
-              </Text>
-              <Text
-                className={`text-surface-900 dark:text-white text-lg font-bold min-w-[30px] text-right ${
-                  winner === "home" && game.status === "completed" ? "text-status-completed" : ""
-                }`}
-              >
-                {game.homeScore}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        <View className="flex-row justify-between items-center">
-          <View
-            className="px-2 py-1 rounded-xl"
-            style={{ backgroundColor: getStatusColor(game.status) }}
-          >
-            <Text className="text-white text-xs font-semibold">{getStatusLabel(game.status)}</Text>
-          </View>
-
-          {isGameLive && (
-            <Text className="text-surface-600 dark:text-surface-400 text-xs">
-              Q{game.currentQuarter} • {formatTime(game.timeRemainingSeconds)}
-            </Text>
-          )}
-
-          {game.status === "completed" && game.endedAt && (
-            <Text className="text-surface-600 dark:text-surface-400 text-xs">
-              Final • {new Date(game.endedAt).toLocaleDateString()}
-            </Text>
-          )}
-
-          {game.status === "scheduled" && game.scheduledAt && (
-            <Text className="text-surface-600 dark:text-surface-400 text-xs">
-              {new Date(game.scheduledAt).toLocaleDateString()}
-            </Text>
-          )}
-        </View>
-      </TouchableOpacity>
-    );
+  const handleCompletedGamePress = (game: Game) => {
+    navigation.navigate("GameAnalysis", { gameId: game.id });
   };
 
   if (gamesData === undefined) {
     return (
       <View className="flex-1 bg-surface-50 dark:bg-surface-950">
         <ScrollView className="p-4">
-          <SkeletonCard style={{ marginBottom: 16 }} />
+          {/* Header skeleton */}
+          <View className="mb-6">
+            <View className="h-8 w-32 bg-surface-200 dark:bg-surface-800 rounded-lg mb-2" />
+            <View className="h-5 w-48 bg-surface-200 dark:bg-surface-800 rounded" />
+          </View>
+          {/* Stats skeleton */}
+          <View className="flex-row justify-between mb-6">
+            {[...Array(4)].map((_, i) => (
+              <View key={i} className="items-center">
+                <View className="h-10 w-10 bg-surface-200 dark:bg-surface-800 rounded mb-1" />
+                <View className="h-3 w-14 bg-surface-200 dark:bg-surface-800 rounded" />
+              </View>
+            ))}
+          </View>
           <SkeletonGameCard style={{ marginBottom: 12 }} />
           <SkeletonGameCard style={{ marginBottom: 12 }} />
           <SkeletonGameCard style={{ marginBottom: 12 }} />
@@ -187,107 +103,309 @@ export default function HomeScreen() {
     <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       <StatusBar style="light" />
       <ScrollView
-        className="p-4"
+        className="flex-1"
+        contentContainerStyle={{ padding: 16 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {/* Quick Actions */}
+        {/* Header */}
         <View className="mb-6">
-          <Text className="text-surface-900 dark:text-white text-lg font-bold mb-3">
-            Quick Actions
+          <Text className="text-2xl font-bold text-surface-900 dark:text-white">
+            Dashboard
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-1">
-            <TouchableOpacity
-              className="bg-primary-500 rounded-xl p-4 mr-3 items-center justify-center min-w-[100px]"
-              onPress={() => navigation.navigate("CreateGame")}
-            >
-              <Icon name="basketball" size={24} color="#FFFFFF" />
-              <Text className="text-white text-sm font-bold mt-2">New Game</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="bg-blue-600 rounded-xl p-4 mr-3 items-center justify-center min-w-[100px]"
-              onPress={() => navigation.navigate("CreateTeam")}
-            >
-              <Icon name="users" size={24} color="#FFFFFF" />
-              <Text className="text-white text-sm font-bold mt-2">New Team</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="bg-green-600 rounded-xl p-4 mr-3 items-center justify-center min-w-[100px]"
-              onPress={() => navigation.navigate("CreatePlayer")}
-            >
-              <Icon name="user" size={24} color="#FFFFFF" />
-              <Text className="text-white text-sm font-bold mt-2">Add Player</Text>
-            </TouchableOpacity>
-          </ScrollView>
+          <Text className="text-base text-surface-500 dark:text-surface-400">
+            {selectedLeague?.name || "Your games at a glance"}
+          </Text>
         </View>
 
-        {/* Analytics & Tools */}
-        <View className="mb-6">
-          <Text className="text-surface-900 dark:text-white text-lg font-bold mb-3">
-            Analytics & Tools
-          </Text>
-          <View className="flex-row flex-wrap justify-between">
-            <TouchableOpacity
-              className="w-[48%] bg-white dark:bg-surface-800 rounded-xl p-4 mb-3 flex-row items-center border border-surface-200 dark:border-surface-700"
-              onPress={() => navigation.navigate("PlayerComparison")}
-            >
-              <Icon name="users" size={20} color="#F97316" />
-              <Text className="text-surface-900 dark:text-white text-sm font-medium ml-3">
-                Compare Players
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="w-[48%] bg-white dark:bg-surface-800 rounded-xl p-4 mb-3 flex-row items-center border border-surface-200 dark:border-surface-700"
-              onPress={() => navigation.navigate("ShotChart")}
-            >
-              <Icon name="stats" size={20} color="#3B82F6" />
-              <Text className="text-surface-900 dark:text-white text-sm font-medium ml-3">
-                Shot Charts
-              </Text>
-            </TouchableOpacity>
-
-            <View className="w-[48%] bg-surface-100 dark:bg-surface-700 rounded-xl p-4 mb-3 flex-row items-center border border-surface-200 dark:border-surface-600 opacity-70">
-              <Icon name="stats" size={20} color="#8B5CF6" />
-              <Text className="text-surface-600 dark:text-surface-400 text-sm font-medium ml-3">
-                More via tabs
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Live Games Section */}
+        {/* Live Games - Dramatic treatment */}
         {liveGames.length > 0 && (
           <View className="mb-6">
             <View className="flex-row items-center mb-3">
-              <View className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse" />
-              <Text className="text-surface-900 dark:text-white text-lg font-bold">Live Games</Text>
-            </View>
-            {liveGames.map((game: Game) => renderGameCard(game, true))}
-          </View>
-        )}
-
-        {/* Recent Games Section */}
-        {recentGames.length > 0 && (
-          <View className="mb-6">
-            <View className="flex-row items-center mb-3">
-              <Icon name="stats" size={16} color="#10B981" className="mr-2" />
-              <Text className="text-surface-900 dark:text-white text-lg font-bold">
-                Recent Games
+              <View className="w-2 h-2 bg-red-500 rounded-full mr-2" />
+              <Text className="text-xs font-bold uppercase tracking-wider text-red-500">
+                Live Now
               </Text>
             </View>
-            {recentGames.map((game: Game) => renderGameCard(game, false))}
+
+            {liveGames.map((game: Game) => (
+              <TouchableOpacity
+                key={game.id}
+                onPress={() => handleLiveGamePress(game)}
+                activeOpacity={0.8}
+                className="mb-3"
+              >
+                <LinearGradient
+                  colors={["#1e293b", "#0f172a"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  className="rounded-2xl p-5 overflow-hidden"
+                >
+                  <View className="flex-row items-center justify-between">
+                    {/* Away Team */}
+                    <View className="flex-1 items-center">
+                      <Text className="text-base font-semibold text-surface-200 mb-1">
+                        {game.awayTeam?.name || "Away"}
+                      </Text>
+                      <Text className="text-4xl font-bold text-white">
+                        {game.awayScore}
+                      </Text>
+                    </View>
+
+                    {/* Center - Game Info */}
+                    <View className="px-4 items-center">
+                      <View className="flex-row items-center px-3 py-1 rounded-full bg-red-500/20 mb-2">
+                        <View className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2" />
+                        <Text className="text-xs font-bold uppercase text-red-500">
+                          {game.status === "paused" ? "Paused" : "Live"}
+                        </Text>
+                      </View>
+                      <Text className="text-surface-400 text-sm font-medium">
+                        Q{game.currentQuarter}
+                      </Text>
+                      <Text className="text-white font-mono text-xl font-semibold">
+                        {formatTime(game.timeRemainingSeconds)}
+                      </Text>
+                    </View>
+
+                    {/* Home Team */}
+                    <View className="flex-1 items-center">
+                      <Text className="text-base font-semibold text-surface-200 mb-1">
+                        {game.homeTeam?.name || "Home"}
+                      </Text>
+                      <Text className="text-4xl font-bold text-white">
+                        {game.homeScore}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Action hint */}
+                  <View className="flex-row items-center justify-end mt-3">
+                    <Text className="text-xs font-medium text-surface-400 mr-1">
+                      Open Scorebook
+                    </Text>
+                    <Icon name="chevron-right" size={12} color="#94a3b8" />
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
 
-        {/* Empty State */}
-        {liveGames.length === 0 && recentGames.length === 0 && (
+        {/* Quick Stats */}
+        <View className="flex-row justify-between mb-6 px-2">
+          <View className="items-center">
+            <Text className="text-3xl font-bold text-surface-900 dark:text-white">
+              {liveGames.length}
+            </Text>
+            <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
+              Live
+            </Text>
+          </View>
+          <View className="items-center">
+            <Text className="text-3xl font-bold text-surface-900 dark:text-white">
+              {recentGames.length}
+            </Text>
+            <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
+              Completed
+            </Text>
+          </View>
+          <View className="items-center">
+            <Text className="text-3xl font-bold text-surface-900 dark:text-white">
+              {upcomingGames.length}
+            </Text>
+            <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
+              Upcoming
+            </Text>
+          </View>
+          <View className="items-center">
+            <Text className="text-3xl font-bold text-surface-900 dark:text-white">
+              {games.length}
+            </Text>
+            <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
+              Total
+            </Text>
+          </View>
+        </View>
+
+        {/* Recent Results */}
+        {recentGames.length > 0 && (
+          <View className="mb-6">
+            <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
+              Recent Results
+            </Text>
+
+            <View className="space-y-2">
+              {recentGames.map((game: Game) => {
+                const homeWon = game.homeScore > game.awayScore;
+                const awayWon = game.awayScore > game.homeScore;
+
+                return (
+                  <TouchableOpacity
+                    key={game.id}
+                    onPress={() => handleCompletedGamePress(game)}
+                    className="flex-row items-center p-4 rounded-xl bg-surface-100 dark:bg-surface-800/50 mb-2"
+                    activeOpacity={0.7}
+                  >
+                    {/* Teams and Scores */}
+                    <View className="flex-1 flex-row items-center">
+                      <Text
+                        className={`flex-1 text-right ${
+                          awayWon
+                            ? "font-semibold text-surface-900 dark:text-white"
+                            : "text-surface-500 dark:text-surface-400"
+                        }`}
+                        numberOfLines={1}
+                      >
+                        {game.awayTeam?.name || "Away"}
+                      </Text>
+
+                      <View className="flex-row items-center mx-3">
+                        <Text
+                          className={`text-lg font-mono ${
+                            awayWon
+                              ? "font-bold text-surface-900 dark:text-white"
+                              : "text-surface-500 dark:text-surface-400"
+                          }`}
+                        >
+                          {game.awayScore}
+                        </Text>
+                        <Text className="text-surface-300 dark:text-surface-600 mx-1">-</Text>
+                        <Text
+                          className={`text-lg font-mono ${
+                            homeWon
+                              ? "font-bold text-surface-900 dark:text-white"
+                              : "text-surface-500 dark:text-surface-400"
+                          }`}
+                        >
+                          {game.homeScore}
+                        </Text>
+                      </View>
+
+                      <Text
+                        className={`flex-1 ${
+                          homeWon
+                            ? "font-semibold text-surface-900 dark:text-white"
+                            : "text-surface-500 dark:text-surface-400"
+                        }`}
+                        numberOfLines={1}
+                      >
+                        {game.homeTeam?.name || "Home"}
+                      </Text>
+                    </View>
+
+                    {/* Final badge */}
+                    <View className="px-2 py-0.5 rounded bg-surface-200 dark:bg-surface-700 ml-3">
+                      <Text className="text-xs font-medium text-surface-600 dark:text-surface-300">
+                        Final
+                      </Text>
+                    </View>
+
+                    <Icon name="chevron-right" size={16} color="#94a3b8" style={{ marginLeft: 8 }} />
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
+        {/* Upcoming Games */}
+        {upcomingGames.length > 0 && (
+          <View className="mb-6">
+            <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
+              Coming Up
+            </Text>
+
+            <View className="space-y-3">
+              {upcomingGames.map((game: Game) => (
+                <View
+                  key={game.id}
+                  className="p-4 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800/30"
+                >
+                  <View className="flex-row items-center mb-3">
+                    <Icon name="calendar" size={14} color="#F97316" />
+                    <Text className="text-sm font-medium text-surface-600 dark:text-surface-300 ml-2">
+                      {game.scheduledAt
+                        ? new Date(game.scheduledAt).toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          })
+                        : "TBD"}
+                    </Text>
+                  </View>
+                  <View>
+                    <View className="flex-row justify-between items-center">
+                      <Text className="font-medium text-surface-900 dark:text-surface-100">
+                        {game.awayTeam?.name || "Away"}
+                      </Text>
+                      <Text className="text-xs text-surface-400">@</Text>
+                    </View>
+                    <View className="flex-row justify-between items-center mt-1">
+                      <Text className="font-medium text-surface-900 dark:text-surface-100">
+                        {game.homeTeam?.name || "Home"}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Empty State for Upcoming Games */}
+        {upcomingGames.length === 0 && games.length > 0 && (
+          <View className="mb-6">
+            <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
+              Coming Up
+            </Text>
+            <View className="py-6 items-center border border-dashed border-surface-200 dark:border-surface-700 rounded-xl">
+              <Icon name="calendar" size={24} color="#6b7280" />
+              <Text className="text-sm text-surface-500 dark:text-surface-400 mt-2">
+                No upcoming games
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Quick Actions */}
+        <View className="mb-6">
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
+            Quick Actions
+          </Text>
+          <View className="flex-row">
+            <TouchableOpacity
+              className="flex-1 bg-primary-500 rounded-xl p-3 mr-2 items-center"
+              onPress={() => navigation.navigate("CreateGame")}
+            >
+              <Icon name="basketball" size={20} color="#FFFFFF" />
+              <Text className="text-white text-xs font-semibold mt-1">New Game</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-1 bg-blue-600 rounded-xl p-3 mr-2 items-center"
+              onPress={() => navigation.navigate("CreateTeam")}
+            >
+              <Icon name="users" size={20} color="#FFFFFF" />
+              <Text className="text-white text-xs font-semibold mt-1">New Team</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-1 bg-green-600 rounded-xl p-3 items-center"
+              onPress={() => navigation.navigate("CreatePlayer")}
+            >
+              <Icon name="user" size={20} color="#FFFFFF" />
+              <Text className="text-white text-xs font-semibold mt-1">Add Player</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Empty State - When no games at all */}
+        {games.length === 0 && (
           <EmptyState
             icon="basketball"
             title="No games yet"
-            description="Create your first game to start tracking basketball statistics"
-            actionLabel="Create Game"
+            description="Create your first game to start tracking stats and building your season history."
+            actionLabel="Create your first game"
             onAction={() => navigation.navigate("CreateGame")}
           />
         )}

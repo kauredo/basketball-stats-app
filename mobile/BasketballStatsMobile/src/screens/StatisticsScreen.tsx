@@ -30,20 +30,12 @@ interface StatCardProps {
 
 function StatCard({ title, value, subtitle, color = "#EA580C" }: StatCardProps) {
   return (
-    <View className="bg-white dark:bg-surface-800 rounded-xl p-4 flex-row items-center border border-surface-200 dark:border-surface-700">
-      <View
-        className="w-10 h-10 rounded-full justify-center items-center mr-3"
-        style={{ backgroundColor: color }}
-      >
-        <Icon name="stats" size={16} color="#FFFFFF" />
-      </View>
-      <View className="flex-1">
-        <Text className="text-surface-600 dark:text-surface-400 text-xs font-medium mb-0.5">
-          {title}
-        </Text>
-        <Text className="text-surface-900 dark:text-white text-xl font-bold mb-0.5">{value}</Text>
-        {subtitle && <Text className="text-surface-500 text-xs">{subtitle}</Text>}
-      </View>
+    <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
+      <Text className="text-surface-500 dark:text-surface-400 text-xs uppercase mb-1">
+        {title}
+      </Text>
+      <Text className="text-2xl font-bold text-surface-900 dark:text-white">{value}</Text>
+      {subtitle && <Text className="text-surface-500 text-xs mt-0.5">{subtitle}</Text>}
     </View>
   );
 }
@@ -58,17 +50,29 @@ interface LeaderItemProps {
 
 function LeaderItem({ rank, playerName, teamName, value, unit = "" }: LeaderItemProps) {
   return (
-    <View className="flex-row items-center bg-white dark:bg-surface-800 p-3 rounded-lg mb-2 border border-surface-200 dark:border-surface-700">
-      <View className="w-7 h-7 rounded-full bg-primary-500 justify-center items-center mr-3">
-        <Text className="text-white text-xs font-bold">{rank}</Text>
+    <View className="flex-row items-center bg-surface-100 dark:bg-surface-800/50 p-4 rounded-xl mb-2">
+      <View
+        className={`w-8 h-8 rounded-full justify-center items-center mr-3 ${
+          rank === 1
+            ? "bg-amber-500"
+            : rank === 2
+              ? "bg-surface-400"
+              : rank === 3
+                ? "bg-amber-700"
+                : "bg-surface-300 dark:bg-surface-600"
+        }`}
+      >
+        <Text className={`text-xs font-bold ${rank <= 3 ? "text-white" : "text-surface-600 dark:text-surface-300"}`}>
+          {rank}
+        </Text>
       </View>
       <View className="flex-1">
-        <Text className="text-surface-900 dark:text-white text-sm font-medium">{playerName}</Text>
+        <Text className="text-surface-900 dark:text-white text-sm font-semibold">{playerName}</Text>
         {teamName && (
           <Text className="text-surface-500 dark:text-surface-400 text-xs">{teamName}</Text>
         )}
       </View>
-      <Text className="text-surface-900 dark:text-white text-base font-semibold">
+      <Text className="text-primary-500 text-lg font-bold">
         {value.toFixed(1)}
         {unit}
       </Text>
@@ -96,11 +100,15 @@ function StandingsItem({
   avgPoints,
 }: StandingsItemProps) {
   return (
-    <View className="flex-row items-center bg-white dark:bg-surface-800 p-3 rounded-lg mb-2 border border-surface-200 dark:border-surface-700">
-      <View className="w-7 h-7 rounded-full bg-surface-200 dark:bg-surface-700 justify-center items-center mr-3">
-        <Text className="text-surface-600 dark:text-surface-400 text-xs font-bold">{rank}</Text>
+    <View className="flex-row items-center bg-surface-100 dark:bg-surface-800/50 p-4 rounded-xl mb-2">
+      <View className="w-8">
+        {rank === 1 ? (
+          <Icon name="trophy" size={16} color="#EAB308" />
+        ) : (
+          <Text className="text-surface-600 dark:text-surface-400 font-semibold">{rank}</Text>
+        )}
       </View>
-      <View className="w-10 h-10 rounded-lg bg-surface-100 dark:bg-surface-700 justify-center items-center mr-3">
+      <View className="w-10 h-10 rounded-lg bg-white dark:bg-surface-700 justify-center items-center mr-3">
         {logoUrl ? (
           <Image source={{ uri: logoUrl }} className="w-8 h-8 rounded" resizeMode="contain" />
         ) : (
@@ -108,21 +116,21 @@ function StandingsItem({
         )}
       </View>
       <View className="flex-1">
-        <Text className="text-surface-900 dark:text-white text-sm font-medium">{teamName}</Text>
+        <Text className="text-surface-900 dark:text-white text-sm font-semibold">{teamName}</Text>
         {avgPoints !== undefined && avgPoints > 0 && (
           <Text className="text-surface-500 dark:text-surface-400 text-xs">
             {avgPoints.toFixed(1)} PPG
           </Text>
         )}
       </View>
-      <View className="items-end">
-        <Text className="text-surface-900 dark:text-white text-base font-semibold">
-          {wins}-{losses}
-        </Text>
-        <Text className="text-surface-500 dark:text-surface-400 text-xs">
-          .{winPercentage.toFixed(0).padStart(3, "0")}
-        </Text>
+      <View className="flex-row items-center mr-3">
+        <Text className="text-green-500 font-semibold">{wins}</Text>
+        <Text className="text-surface-400 mx-1">-</Text>
+        <Text className="text-red-500 font-semibold">{losses}</Text>
       </View>
+      <Text className="text-surface-900 dark:text-white font-medium w-12 text-right">
+        .{winPercentage.toFixed(0).padStart(3, "0")}
+      </Text>
     </View>
   );
 }
@@ -160,11 +168,13 @@ export default function StatisticsScreen() {
   if (!selectedLeague) {
     return (
       <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950 p-8">
-        <Icon name="basketball" size={64} color="#6B7280" className="mb-4" />
-        <Text className="text-surface-900 dark:text-white text-2xl font-bold mb-2">
+        <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
+          <Icon name="basketball" size={32} color="#F97316" />
+        </View>
+        <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
           No League Selected
         </Text>
-        <Text className="text-surface-600 dark:text-surface-400 text-base text-center">
+        <Text className="text-surface-600 dark:text-surface-400 text-sm text-center">
           Please select a league to view statistics.
         </Text>
       </View>
@@ -262,9 +272,53 @@ export default function StatisticsScreen() {
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <View className="p-4">
+            {/* Analytics & Tools */}
+            <View className="mb-6">
+              <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
+                Analytics & Tools
+              </Text>
+              <View className="flex-row">
+                <TouchableOpacity
+                  className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mr-2 flex-row items-center"
+                  onPress={() => navigation.navigate("PlayerComparison")}
+                >
+                  <View className="w-10 h-10 rounded-full bg-primary-500/10 justify-center items-center mr-3">
+                    <Icon name="users" size={18} color="#F97316" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-surface-900 dark:text-white text-sm font-semibold">
+                      Compare Players
+                    </Text>
+                    <Text className="text-surface-500 dark:text-surface-400 text-xs">
+                      Side by side stats
+                    </Text>
+                  </View>
+                  <Icon name="chevron-right" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 flex-row items-center"
+                  onPress={() => navigation.navigate("ShotChart")}
+                >
+                  <View className="w-10 h-10 rounded-full bg-blue-500/10 justify-center items-center mr-3">
+                    <Icon name="target" size={18} color="#3B82F6" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-surface-900 dark:text-white text-sm font-semibold">
+                      Shot Charts
+                    </Text>
+                    <Text className="text-surface-500 dark:text-surface-400 text-xs">
+                      Visual shot maps
+                    </Text>
+                  </View>
+                  <Icon name="chevron-right" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
             {/* League Stats Overview */}
             <View className="mb-6">
-              <Text className="text-surface-900 dark:text-white text-xl font-bold mb-4">
+              <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
                 League Overview
               </Text>
               <View className="flex-row flex-wrap justify-between">
@@ -315,33 +369,68 @@ export default function StatisticsScreen() {
             {/* Recent Games */}
             {recentGames.length > 0 && (
               <View className="mb-6">
-                <Text className="text-surface-900 dark:text-white text-xl font-bold mb-4">
+                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
                   Recent Games
                 </Text>
-                {recentGames.slice(0, 5).map((game: any, index: number) => (
-                  <View
-                    key={game.id || index}
-                    className="bg-white dark:bg-surface-800 p-4 rounded-lg mb-2 flex-row justify-between items-center border border-surface-200 dark:border-surface-700"
-                  >
-                    <View className="flex-1">
-                      <Text className="text-surface-900 dark:text-white text-sm font-medium">
-                        {game.homeTeam || "Home"}
-                      </Text>
-                      <Text className="text-surface-500 dark:text-surface-400 text-xs">vs</Text>
-                      <Text className="text-surface-900 dark:text-white text-sm font-medium">
-                        {game.awayTeam || "Away"}
-                      </Text>
+                {recentGames.slice(0, 5).map((game: any, index: number) => {
+                  const homeWon = game.homeScore > game.awayScore;
+                  const awayWon = game.awayScore > game.homeScore;
+                  return (
+                    <View
+                      key={game.id || index}
+                      className="bg-surface-100 dark:bg-surface-800/50 p-4 rounded-xl mb-2 flex-row items-center"
+                    >
+                      <View className="flex-1 flex-row items-center">
+                        <Text
+                          className={`flex-1 text-right ${
+                            awayWon
+                              ? "font-semibold text-surface-900 dark:text-white"
+                              : "text-surface-500 dark:text-surface-400"
+                          }`}
+                          numberOfLines={1}
+                        >
+                          {game.awayTeam || "Away"}
+                        </Text>
+                        <View className="flex-row items-center mx-3">
+                          <Text
+                            className={`text-lg font-mono ${
+                              awayWon
+                                ? "font-bold text-surface-900 dark:text-white"
+                                : "text-surface-500 dark:text-surface-400"
+                            }`}
+                          >
+                            {game.awayScore}
+                          </Text>
+                          <Text className="text-surface-300 dark:text-surface-600 mx-1">-</Text>
+                          <Text
+                            className={`text-lg font-mono ${
+                              homeWon
+                                ? "font-bold text-surface-900 dark:text-white"
+                                : "text-surface-500 dark:text-surface-400"
+                            }`}
+                          >
+                            {game.homeScore}
+                          </Text>
+                        </View>
+                        <Text
+                          className={`flex-1 ${
+                            homeWon
+                              ? "font-semibold text-surface-900 dark:text-white"
+                              : "text-surface-500 dark:text-surface-400"
+                          }`}
+                          numberOfLines={1}
+                        >
+                          {game.homeTeam || "Home"}
+                        </Text>
+                      </View>
+                      <View className="px-2 py-0.5 rounded bg-surface-200 dark:bg-surface-700 ml-3">
+                        <Text className="text-xs font-medium text-surface-600 dark:text-surface-300">
+                          Final
+                        </Text>
+                      </View>
                     </View>
-                    <View className="items-end">
-                      <Text className="text-surface-900 dark:text-white text-lg font-bold">
-                        {game.homeScore} - {game.awayScore}
-                      </Text>
-                      <Text className="text-surface-500 dark:text-surface-400 text-xs">
-                        {game.totalPoints} total pts
-                      </Text>
-                    </View>
-                  </View>
-                ))}
+                  );
+                })}
               </View>
             )}
           </View>
@@ -352,9 +441,12 @@ export default function StatisticsScreen() {
           <View className="p-4">
             {/* Scoring Leaders */}
             <View className="mb-6">
-              <Text className="text-surface-900 dark:text-white text-xl font-bold mb-4">
-                Scoring Leaders
-              </Text>
+              <View className="flex-row items-center mb-3">
+                <Icon name="target" size={14} color="#F97316" style={{ marginRight: 8 }} />
+                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+                  Scoring Leaders
+                </Text>
+              </View>
               {(leaders.scoring || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
                   key={index}
@@ -374,9 +466,12 @@ export default function StatisticsScreen() {
 
             {/* Rebounding Leaders */}
             <View className="mb-6">
-              <Text className="text-surface-900 dark:text-white text-xl font-bold mb-4">
-                Rebounding Leaders
-              </Text>
+              <View className="flex-row items-center mb-3">
+                <Icon name="basketball" size={14} color="#F97316" style={{ marginRight: 8 }} />
+                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+                  Rebounding Leaders
+                </Text>
+              </View>
               {(leaders.rebounding || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
                   key={index}
@@ -396,9 +491,12 @@ export default function StatisticsScreen() {
 
             {/* Assists Leaders */}
             <View className="mb-6">
-              <Text className="text-surface-900 dark:text-white text-xl font-bold mb-4">
-                Assists Leaders
-              </Text>
+              <View className="flex-row items-center mb-3">
+                <Icon name="users" size={14} color="#F97316" style={{ marginRight: 8 }} />
+                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+                  Assists Leaders
+                </Text>
+              </View>
               {(leaders.assists || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
                   key={index}
@@ -418,9 +516,12 @@ export default function StatisticsScreen() {
 
             {/* Shooting Leaders */}
             <View className="mb-6">
-              <Text className="text-surface-900 dark:text-white text-xl font-bold mb-4">
-                Shooting Leaders
-              </Text>
+              <View className="flex-row items-center mb-3">
+                <Icon name="stats" size={14} color="#F97316" style={{ marginRight: 8 }} />
+                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+                  Shooting Leaders
+                </Text>
+              </View>
               {(leaders.shooting || []).slice(0, 5).map((leader: any, index: number) => (
                 <LeaderItem
                   key={index}
@@ -444,16 +545,15 @@ export default function StatisticsScreen() {
         {activeTab === "standings" && (
           <View className="p-4">
             <View className="mb-6">
-              <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-surface-900 dark:text-white text-xl font-bold">
-                  League Standings
-                </Text>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("Standings")}
-                  className="bg-primary-500 px-4 py-2 rounded-lg flex-row items-center"
-                >
-                  <Text className="text-white font-medium text-sm mr-1">View Full</Text>
-                  <Icon name="chevron-right" size={14} color="#FFFFFF" />
+              <View className="flex-row justify-between items-center mb-3">
+                <View className="flex-row items-center">
+                  <Icon name="trophy" size={14} color="#F97316" style={{ marginRight: 8 }} />
+                  <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+                    League Standings
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => navigation.navigate("Standings")}>
+                  <Text className="text-sm font-medium text-primary-500">Full View</Text>
                 </TouchableOpacity>
               </View>
               {standings.slice(0, 5).map((team: any, index: number) => (
@@ -493,7 +593,7 @@ export default function StatisticsScreen() {
             {/* Team Performance Chart */}
             {standings.length > 0 && (
               <View className="mb-6">
-                <Text className="text-surface-900 dark:text-white text-xl font-bold mb-4">
+                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
                   Team Performance
                 </Text>
                 <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-4 mb-4 items-center">
@@ -547,7 +647,7 @@ export default function StatisticsScreen() {
             {/* Win Distribution Pie Chart */}
             {standings.length > 0 && (
               <View className="mb-6">
-                <Text className="text-surface-900 dark:text-white text-xl font-bold mb-4">
+                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
                   Win Distribution
                 </Text>
                 <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-4 mb-4 items-center">
@@ -589,7 +689,7 @@ export default function StatisticsScreen() {
             {/* Recent Games Trend */}
             {recentGames.length > 0 && (
               <View className="mb-6">
-                <Text className="text-surface-900 dark:text-white text-xl font-bold mb-4">
+                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
                   Scoring Trends
                 </Text>
                 <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-4 mb-4 items-center">

@@ -40,6 +40,8 @@ export type IconName =
   | "undo"
   | "alarm"
   | "timer"
+  // Time & Calendar
+  | "calendar"
   // Arrows & Directions
   | "arrow-left"
   | "arrow-right"
@@ -107,6 +109,9 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   undo: { library: "ionicons", name: "arrow-undo" },
   alarm: { library: "ionicons", name: "alarm" },
   timer: { library: "ionicons", name: "timer" },
+
+  // Time & Calendar
+  calendar: { library: "ionicons", name: "calendar" },
 
   // Arrows & Directions
   "arrow-left": { library: "ionicons", name: "arrow-back" },

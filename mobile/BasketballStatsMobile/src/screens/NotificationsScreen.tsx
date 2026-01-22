@@ -115,8 +115,8 @@ export default function NotificationsScreen() {
       <TouchableOpacity
         onPress={() => handleNotificationPress(item)}
         onLongPress={() => handleDelete(item._id)}
-        className={`flex-row p-4 border-b border-surface-200 dark:border-surface-700 ${
-          !item.read ? "bg-primary-500/5 dark:bg-primary-500/10" : "bg-white dark:bg-surface-800"
+        className={`flex-row p-4 mx-4 mb-2 rounded-xl ${
+          !item.read ? "bg-primary-500/10 dark:bg-primary-500/15" : "bg-surface-100 dark:bg-surface-800/50"
         }`}
         activeOpacity={0.7}
       >
@@ -171,13 +171,13 @@ export default function NotificationsScreen() {
 
   const renderEmptyState = () => (
     <View className="flex-1 items-center justify-center p-8">
-      <View className="w-20 h-20 rounded-full bg-surface-200 dark:bg-surface-700 items-center justify-center mb-4">
-        <FontAwesome5 name="bell" size={32} color="#9CA3AF" />
+      <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
+        <FontAwesome5 name="bell" size={32} color="#F97316" />
       </View>
-      <Text className="text-surface-900 dark:text-white text-xl font-bold mb-2">
+      <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
         No Notifications
       </Text>
-      <Text className="text-surface-600 dark:text-surface-400 text-center">
+      <Text className="text-surface-600 dark:text-surface-400 text-center text-sm">
         You&apos;ll see game updates and announcements here when they arrive.
       </Text>
     </View>
@@ -187,7 +187,7 @@ export default function NotificationsScreen() {
     <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       {/* Header Actions */}
       {notifications.length > 0 && unreadCount > 0 && (
-        <View className="bg-white dark:bg-surface-800 px-4 py-3 border-b border-surface-200 dark:border-surface-700 flex-row justify-between items-center">
+        <View className="px-4 py-3 flex-row justify-between items-center">
           <Text className="text-surface-600 dark:text-surface-400 text-sm">
             {unreadCount} unread notification{unreadCount !== 1 ? "s" : ""}
           </Text>
@@ -204,12 +204,12 @@ export default function NotificationsScreen() {
         renderItem={renderNotification}
         ListEmptyComponent={renderEmptyState}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        contentContainerStyle={notifications.length === 0 ? { flex: 1 } : undefined}
+        contentContainerStyle={notifications.length === 0 ? { flex: 1 } : { paddingTop: 8 }}
       />
 
       {/* Help Text */}
       {notifications.length > 0 && (
-        <View className="bg-surface-100 dark:bg-surface-800 px-4 py-3 border-t border-surface-200 dark:border-surface-700">
+        <View className="px-4 py-3">
           <Text className="text-surface-500 dark:text-surface-500 text-xs text-center">
             Long press a notification to delete it
           </Text>

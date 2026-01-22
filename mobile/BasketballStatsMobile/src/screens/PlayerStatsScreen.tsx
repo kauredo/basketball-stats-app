@@ -228,9 +228,9 @@ export default function PlayerStatsScreen() {
   const renderStatCard = (category: StatCategory) => (
     <View
       key={category.title}
-      className="bg-white dark:bg-surface-800 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-700"
+      className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-4"
     >
-      <Text className="text-surface-900 dark:text-white text-base font-bold mb-3">
+      <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
         {category.title}
       </Text>
       <View className="flex-row flex-wrap justify-between">
@@ -265,13 +265,13 @@ export default function PlayerStatsScreen() {
 
     return (
       <View className="mt-2">
-        <Text className="text-surface-900 dark:text-white text-lg font-bold mb-3">
+        <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
           Recent Games
         </Text>
         {recentGames.slice(0, 5).map((game: any, index: number) => (
           <View
             key={game.gameId || index}
-            className="bg-white dark:bg-surface-800 rounded-lg p-3 mb-2 border border-surface-200 dark:border-surface-700"
+            className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-2"
           >
             <View className="flex-row justify-between items-center mb-2">
               <Text className="text-surface-600 dark:text-surface-400 text-xs">

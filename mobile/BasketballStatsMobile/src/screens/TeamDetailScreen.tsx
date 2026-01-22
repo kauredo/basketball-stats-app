@@ -169,7 +169,7 @@ export default function TeamDetailScreen() {
 
   const renderPlayer = ({ item: player }: { item: Player }) => (
     <TouchableOpacity
-      className="bg-white dark:bg-surface-800 rounded-xl p-4 mb-3 border border-surface-200 dark:border-surface-700 flex-row items-center"
+      className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-3 flex-row items-center"
       onPress={() => navigation.navigate("PlayerStats", { playerId: player.id })}
     >
       <View className="w-12 h-12 rounded-full bg-surface-200 dark:bg-surface-700 items-center justify-center mr-4">
@@ -263,8 +263,10 @@ export default function TeamDetailScreen() {
         contentContainerStyle={{ padding: 16 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListEmptyComponent={
-          <View className="items-center justify-center pt-15">
-            <Icon name="user" size={48} color="#6B7280" className="mb-4" />
+          <View className="items-center justify-center py-12">
+            <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
+              <Icon name="user" size={32} color="#F97316" />
+            </View>
             <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
               No players found
             </Text>
@@ -294,7 +296,7 @@ export default function TeamDetailScreen() {
             </Text>
 
             <TouchableOpacity
-              className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-700 rounded-xl mb-3"
+              className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-800/50 rounded-xl mb-3"
               onPress={() => {
                 setShowOptionsMenu(false);
                 setShowEditModal(true);
@@ -305,7 +307,7 @@ export default function TeamDetailScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="flex-row items-center p-4 bg-red-100 dark:bg-red-900/30 rounded-xl"
+              className="flex-row items-center p-4 bg-red-500/10 rounded-xl"
               onPress={() => {
                 setShowOptionsMenu(false);
                 handleDeleteTeam();
@@ -354,7 +356,7 @@ export default function TeamDetailScreen() {
 
           {/* Form */}
           <ScrollView className="flex-1 p-4">
-            <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
               {/* Team Name */}
               <View className="mb-4">
                 <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">

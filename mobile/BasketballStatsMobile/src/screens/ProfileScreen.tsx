@@ -243,10 +243,10 @@ export default function ProfileScreen() {
         {/* Current League */}
         {selectedLeague && (
           <View className="mb-8">
-            <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">
+            <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
               Current League
             </Text>
-            <View className="bg-white dark:bg-surface-800 rounded-xl p-4 flex-row justify-between items-center border border-surface-200 dark:border-surface-700">
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 flex-row justify-between items-center">
               <View className="flex-1">
                 <Text className="text-base font-bold text-surface-900 dark:text-white mb-1">
                   {selectedLeague.name}
@@ -279,34 +279,34 @@ export default function ProfileScreen() {
 
         {/* League Stats */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
             My Leagues
           </Text>
           <View className="flex-row flex-wrap gap-3">
-            <View className="bg-white dark:bg-surface-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-surface-200 dark:border-surface-700">
-              <Text className="text-2xl font-bold text-red-500 mb-1">{leagues.length}</Text>
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 items-center flex-1 min-w-[45%]">
+              <Text className="text-2xl font-bold text-primary-500 mb-1">{leagues.length}</Text>
               <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">
                 Total Leagues
               </Text>
             </View>
-            <View className="bg-white dark:bg-surface-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-surface-200 dark:border-surface-700">
-              <Text className="text-2xl font-bold text-red-500 mb-1">
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 items-center flex-1 min-w-[45%]">
+              <Text className="text-2xl font-bold text-primary-500 mb-1">
                 {leagues.filter((l: any) => l.membership?.role === "admin").length}
               </Text>
               <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">
                 As Admin
               </Text>
             </View>
-            <View className="bg-white dark:bg-surface-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-surface-200 dark:border-surface-700">
-              <Text className="text-2xl font-bold text-red-500 mb-1">
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 items-center flex-1 min-w-[45%]">
+              <Text className="text-2xl font-bold text-primary-500 mb-1">
                 {leagues.filter((l: any) => l.membership?.role === "coach").length}
               </Text>
               <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">
                 As Coach
               </Text>
             </View>
-            <View className="bg-white dark:bg-surface-800 rounded-lg p-4 items-center flex-1 min-w-[45%] border border-surface-200 dark:border-surface-700">
-              <Text className="text-2xl font-bold text-red-500 mb-1">
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 items-center flex-1 min-w-[45%]">
+              <Text className="text-2xl font-bold text-primary-500 mb-1">
                 {leagues.filter((l: any) => l.status === "active").length}
               </Text>
               <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">
@@ -318,13 +318,13 @@ export default function ProfileScreen() {
 
         {/* Account */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">Account</Text>
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">Account</Text>
 
           <TouchableOpacity
-            className="bg-white dark:bg-surface-800 rounded-lg p-4 flex-row items-center mb-2 border border-surface-200 dark:border-surface-700"
+            className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 flex-row items-center mb-3"
             onPress={handleOpenEditProfile}
           >
-            <View className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center mr-3">
+            <View className="w-10 h-10 bg-blue-500/10 rounded-full items-center justify-center mr-3">
               <Icon name="user" size={20} color="#3B82F6" />
             </View>
             <View className="flex-1">
@@ -343,10 +343,10 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="bg-white dark:bg-surface-800 rounded-lg p-4 flex-row items-center mb-2 border border-surface-200 dark:border-surface-700"
+            className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 flex-row items-center"
             onPress={handleOpenChangePassword}
           >
-            <View className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full items-center justify-center mr-3">
+            <View className="w-10 h-10 bg-amber-500/10 rounded-full items-center justify-center mr-3">
               <Icon name="settings" size={20} color="#F59E0B" />
             </View>
             <View className="flex-1">
@@ -367,10 +367,10 @@ export default function ProfileScreen() {
 
         {/* Appearance */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
             Appearance
           </Text>
-          <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+          <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
             <Text className="text-surface-700 dark:text-surface-300 font-medium mb-3">Theme</Text>
             <View className="flex-row gap-2">
               {(["system", "light", "dark"] as ThemeMode[]).map((themeMode) => (
@@ -401,12 +401,12 @@ export default function ProfileScreen() {
 
         {/* Notifications */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
             Notifications
           </Text>
-          <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
-            <View className="flex-row items-center p-4 border-b border-surface-200 dark:border-surface-700">
-              <View className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full items-center justify-center mr-3">
+          <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl overflow-hidden">
+            <View className="flex-row items-center p-4">
+              <View className="w-10 h-10 bg-primary-500/10 rounded-full items-center justify-center mr-3">
                 <Icon name="basketball" size={20} color="#F97316" />
               </View>
               <View className="flex-1">
@@ -425,8 +425,8 @@ export default function ProfileScreen() {
               />
             </View>
 
-            <View className="flex-row items-center p-4 border-b border-surface-200 dark:border-surface-700">
-              <View className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center mr-3">
+            <View className="flex-row items-center p-4 border-t border-surface-200 dark:border-surface-700">
+              <View className="w-10 h-10 bg-blue-500/10 rounded-full items-center justify-center mr-3">
                 <Icon name="stats" size={20} color="#3B82F6" />
               </View>
               <View className="flex-1">
@@ -445,8 +445,8 @@ export default function ProfileScreen() {
               />
             </View>
 
-            <View className="flex-row items-center p-4">
-              <View className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full items-center justify-center mr-3">
+            <View className="flex-row items-center p-4 border-t border-surface-200 dark:border-surface-700">
+              <View className="w-10 h-10 bg-purple-500/10 rounded-full items-center justify-center mr-3">
                 <Icon name="basketball" size={20} color="#8B5CF6" />
               </View>
               <View className="flex-1">
@@ -469,10 +469,10 @@ export default function ProfileScreen() {
 
         {/* App Info */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-surface-900 dark:text-white mb-4">About</Text>
-          <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">About</Text>
+          <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
             <View className="flex-row items-center">
-              <View className="w-10 h-10 bg-primary-500/20 rounded-full items-center justify-center mr-3">
+              <View className="w-10 h-10 bg-primary-500/10 rounded-full items-center justify-center mr-3">
                 <Icon name="basketball" size={20} color="#F97316" />
               </View>
               <View>

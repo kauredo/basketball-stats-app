@@ -172,12 +172,14 @@ export default function PlayerComparisonScreen() {
 
   if (!selectedLeague) {
     return (
-      <View className="flex-1 justify-center items-center bg-white dark:bg-surface-800 p-8">
-        <Icon name="basketball" size={64} color="#6B7280" />
-        <Text className="text-surface-900 dark:text-white text-2xl font-bold mb-2 mt-4">
+      <View className="flex-1 justify-center items-center bg-surface-50 dark:bg-surface-950 p-8">
+        <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
+          <Icon name="users" size={32} color="#F97316" />
+        </View>
+        <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
           No League Selected
         </Text>
-        <Text className="text-surface-600 dark:text-surface-400 text-base text-center">
+        <Text className="text-surface-600 dark:text-surface-400 text-sm text-center">
           Please select a league to compare players.
         </Text>
       </View>
@@ -216,7 +218,7 @@ export default function PlayerComparisonScreen() {
     : null;
 
   return (
-    <View className="flex-1 bg-white dark:bg-surface-800">
+    <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       <ScrollView
         className="flex-1"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -226,7 +228,7 @@ export default function PlayerComparisonScreen() {
           <View className="flex-row items-center justify-between mb-6">
             {/* Player 1 Selector */}
             <TouchableOpacity
-              className="flex-1 bg-surface-100 dark:bg-surface-700 rounded-xl p-4 border border-orange-600 mr-2"
+              className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 border-2 border-orange-500 mr-2"
               onPress={() => setShowPlayer1Modal(true)}
             >
               {player1 ? (
@@ -263,7 +265,7 @@ export default function PlayerComparisonScreen() {
 
             {/* Player 2 Selector */}
             <TouchableOpacity
-              className="flex-1 bg-surface-100 dark:bg-surface-700 rounded-xl p-4 border border-blue-600 ml-2"
+              className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 border-2 border-blue-500 ml-2"
               onPress={() => setShowPlayer2Modal(true)}
             >
               {player2 ? (
@@ -299,7 +301,7 @@ export default function PlayerComparisonScreen() {
             <View>
               {/* Player Info Cards */}
               <View className="flex-row mb-4">
-                <View className="flex-1 bg-surface-100 dark:bg-surface-700 rounded-lg p-3 mr-2 border-l-4 border-orange-500">
+                <View className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mr-2 border-l-4 border-orange-500">
                   <Text className="text-orange-500 font-bold text-base">
                     {comparisonData.player1.playerName}
                   </Text>
@@ -310,7 +312,7 @@ export default function PlayerComparisonScreen() {
                     {comparisonData.player1.gamesPlayed} games played
                   </Text>
                 </View>
-                <View className="flex-1 bg-surface-100 dark:bg-surface-700 rounded-lg p-3 ml-2 border-l-4 border-blue-500">
+                <View className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 ml-2 border-l-4 border-blue-500">
                   <Text className="text-blue-500 font-bold text-base">
                     {comparisonData.player2.playerName}
                   </Text>
@@ -324,10 +326,10 @@ export default function PlayerComparisonScreen() {
               </View>
 
               {/* Per Game Averages */}
-              <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-600">
+              <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-4">
                 <View className="flex-row items-center mb-4">
-                  <Icon name="stats" size={20} color="#F97316" />
-                  <Text className="text-surface-900 dark:text-white text-lg font-semibold ml-2">
+                  <Icon name="stats" size={16} color="#F97316" />
+                  <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 ml-2">
                     Per Game Averages
                   </Text>
                 </View>
@@ -387,8 +389,8 @@ export default function PlayerComparisonScreen() {
               </View>
 
               {/* Shooting Percentages */}
-              <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-600">
-                <Text className="text-surface-900 dark:text-white text-lg font-semibold mb-4">
+              <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-4">
+                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-4">
                   Shooting Percentages
                 </Text>
 
@@ -430,8 +432,8 @@ export default function PlayerComparisonScreen() {
 
               {/* Shooting Chart */}
               {shootingData && shootingData2 && (
-                <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-4 border border-surface-200 dark:border-surface-600">
-                  <Text className="text-surface-900 dark:text-white text-lg font-semibold mb-4">
+                <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
+                  <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-4">
                     Shooting Chart
                   </Text>
 
@@ -506,12 +508,14 @@ export default function PlayerComparisonScreen() {
               </Text>
             </View>
           ) : (
-            <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-8 items-center border border-surface-200 dark:border-surface-600">
-              <Icon name="user" size={48} color="#6B7280" />
-              <Text className="text-surface-900 dark:text-white text-lg font-medium mt-4 mb-2">
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-8 items-center">
+              <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
+                <Icon name="users" size={32} color="#F97316" />
+              </View>
+              <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
                 Select Players to Compare
               </Text>
-              <Text className="text-surface-600 dark:text-surface-400 text-center">
+              <Text className="text-surface-600 dark:text-surface-400 text-sm text-center">
                 Tap on the player cards above to select two players and see a side-by-side
                 comparison of their statistics.
               </Text>

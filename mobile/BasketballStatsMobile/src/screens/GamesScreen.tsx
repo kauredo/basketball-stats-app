@@ -1,13 +1,21 @@
 import React from "react";
-import { View, Text, FlatList, TouchableOpacity, RefreshControl, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  SectionList,
+  TouchableOpacity,
+  RefreshControl,
+  ScrollView,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import { useQuery } from "convex/react";
-import { getStatusColor } from "@basketball-stats/shared";
+import { LinearGradient } from "expo-linear-gradient";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import { SkeletonGameCard } from "../components/Skeleton";
@@ -28,9 +36,15 @@ interface Game {
   endedAt?: number;
 }
 
+interface GameSection {
+  title: string;
+  data: Game[];
+}
+
 export default function GamesScreen() {
   const navigation = useNavigation<GamesScreenNavigationProp>();
   const { token, selectedLeague } = useAuth();
+  const { resolvedTheme } = useTheme();
   const [refreshing, setRefreshing] = React.useState(false);
 
   const gamesData = useQuery(
@@ -40,16 +54,31 @@ export default function GamesScreen() {
 
   const games = gamesData?.games || [];
 
-  // Sort games by date, most recent first
-  const sortedGames = [...games].sort((a: Game, b: Game) => {
-    const dateA = a.scheduledAt || a.startedAt || 0;
-    const dateB = b.scheduledAt || b.startedAt || 0;
-    return dateB - dateA;
-  });
+  // Group games by status
+  const liveGames = games.filter(
+    (game: Game) => game.status === "active" || game.status === "paused"
+  );
+  const upcomingGames = games
+    .filter((game: Game) => game.status === "scheduled")
+    .sort((a: Game, b: Game) => (a.scheduledAt || 0) - (b.scheduledAt || 0));
+  const completedGames = games
+    .filter((game: Game) => game.status === "completed")
+    .sort((a: Game, b: Game) => (b.endedAt || 0) - (a.endedAt || 0));
+
+  // Create sections
+  const sections: GameSection[] = [];
+  if (liveGames.length > 0) {
+    sections.push({ title: "Live Now", data: liveGames });
+  }
+  if (upcomingGames.length > 0) {
+    sections.push({ title: "Upcoming", data: upcomingGames });
+  }
+  if (completedGames.length > 0) {
+    sections.push({ title: "Completed", data: completedGames });
+  }
 
   const onRefresh = () => {
     setRefreshing(true);
-    // Data auto-refreshes with Convex
     setTimeout(() => setRefreshing(false), 500);
   };
 
@@ -57,21 +86,6 @@ export default function GamesScreen() {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "active":
-        return "Live";
-      case "paused":
-        return "Paused";
-      case "completed":
-        return "Final";
-      case "scheduled":
-        return "Scheduled";
-      default:
-        return status;
-    }
   };
 
   const handleGamePress = (game: Game) => {
@@ -82,118 +96,196 @@ export default function GamesScreen() {
     }
   };
 
-  const getWinner = (game: Game) => {
-    if (game.status !== "completed") return null;
-    if (game.homeScore > game.awayScore) return "home";
-    if (game.awayScore > game.homeScore) return "away";
-    return "tie";
-  };
-
-  const getPointDifferential = (game: Game) => {
-    return Math.abs(game.homeScore - game.awayScore);
-  };
-
-  const renderGame = ({ item: game }: { item: Game }) => {
-    const isGameLive = game.status === "active" || game.status === "paused";
-    const isGameCompleted = game.status === "completed";
-    const winner = getWinner(game);
-    const canPress = isGameLive || isGameCompleted;
-
-    return (
-      <TouchableOpacity
-        className={`bg-white dark:bg-surface-800 rounded-xl p-4 mb-3 border ${
-          isGameLive
-            ? "border-primary-500 border-2 shadow-lg"
-            : "border-surface-200 dark:border-surface-700"
-        }`}
-        onPress={() => handleGamePress(game)}
-        disabled={!canPress}
+  const renderLiveGame = (game: Game) => (
+    <TouchableOpacity
+      key={game.id}
+      onPress={() => handleGamePress(game)}
+      activeOpacity={0.8}
+      className="mb-3"
+    >
+      <LinearGradient
+        colors={["#1e293b", "#0f172a"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="rounded-2xl p-5 overflow-hidden"
       >
-        <View className="flex-row justify-between items-center mb-3">
-          <View className="flex-row items-center">
-            <View
-              className="px-2 py-1 rounded-xl mr-2"
-              style={{ backgroundColor: getStatusColor(game.status) }}
-            >
-              <Text className="text-white text-xs font-semibold">
-                {getStatusLabel(game.status)}
-              </Text>
-            </View>
-            {isGameLive && <View className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />}
+        <View className="flex-row items-center justify-between">
+          {/* Away Team */}
+          <View className="flex-1 items-center">
+            <Text className="text-base font-semibold text-surface-200 mb-1">
+              {game.awayTeam?.name || "Away"}
+            </Text>
+            <Text className="text-4xl font-bold text-white">{game.awayScore}</Text>
           </View>
 
-          <View className="items-end">
-            {isGameLive && (
-              <Text className="text-surface-600 dark:text-surface-400 text-xs">
-                Q{game.currentQuarter} • {formatTime(game.timeRemainingSeconds)}
+          {/* Center - Game Info */}
+          <View className="px-4 items-center">
+            <View className="flex-row items-center px-3 py-1 rounded-full bg-red-500/20 mb-2">
+              <View className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2" />
+              <Text className="text-xs font-bold uppercase text-red-500">
+                {game.status === "paused" ? "Paused" : "Live"}
               </Text>
-            )}
+            </View>
+            <Text className="text-surface-400 text-sm font-medium">
+              Q{game.currentQuarter}
+            </Text>
+            <Text className="text-white font-mono text-xl font-semibold">
+              {formatTime(game.timeRemainingSeconds)}
+            </Text>
+          </View>
 
-            {game.status === "completed" && game.endedAt && (
-              <Text className="text-surface-600 dark:text-surface-400 text-xs">
-                {new Date(game.endedAt).toLocaleDateString()}
-              </Text>
-            )}
-
-            {game.status === "scheduled" && game.scheduledAt && (
-              <Text className="text-surface-600 dark:text-surface-400 text-xs">
-                {new Date(game.scheduledAt).toLocaleDateString()}
-              </Text>
-            )}
+          {/* Home Team */}
+          <View className="flex-1 items-center">
+            <Text className="text-base font-semibold text-surface-200 mb-1">
+              {game.homeTeam?.name || "Home"}
+            </Text>
+            <Text className="text-4xl font-bold text-white">{game.homeScore}</Text>
           </View>
         </View>
 
-        <View className="items-center">
-          <View className="flex-row justify-between items-center w-full py-1">
+        {/* Action hint */}
+        <View className="flex-row items-center justify-end mt-3">
+          <Text className="text-xs font-medium text-surface-400 mr-1">Open Scorebook</Text>
+          <Icon name="chevron-right" size={12} color="#94a3b8" />
+        </View>
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+
+  const renderCompletedGame = (game: Game) => {
+    const homeWon = game.homeScore > game.awayScore;
+    const awayWon = game.awayScore > game.homeScore;
+
+    return (
+      <TouchableOpacity
+        key={game.id}
+        onPress={() => handleGamePress(game)}
+        className="flex-row items-center p-4 rounded-xl bg-surface-100 dark:bg-surface-800/50 mb-2"
+        activeOpacity={0.7}
+      >
+        {/* Teams and Scores */}
+        <View className="flex-1 flex-row items-center">
+          <Text
+            className={`flex-1 text-right ${
+              awayWon
+                ? "font-semibold text-surface-900 dark:text-white"
+                : "text-surface-500 dark:text-surface-400"
+            }`}
+            numberOfLines={1}
+          >
+            {game.awayTeam?.name || "Away"}
+          </Text>
+
+          <View className="flex-row items-center mx-3">
             <Text
-              className={`text-surface-900 dark:text-white text-base font-semibold flex-1 ${
-                winner === "away" && game.status === "completed" ? "text-green-400" : ""
-              }`}
-            >
-              {game.awayTeam?.name || "Away Team"}
-            </Text>
-            <Text
-              className={`text-surface-900 dark:text-white text-lg font-bold min-w-[30px] text-right ${
-                winner === "away" && game.status === "completed" ? "text-green-400" : ""
+              className={`text-lg font-mono ${
+                awayWon
+                  ? "font-bold text-surface-900 dark:text-white"
+                  : "text-surface-500 dark:text-surface-400"
               }`}
             >
               {game.awayScore}
             </Text>
-          </View>
-
-          <Text className="text-surface-600 dark:text-surface-400 text-xs my-1">@</Text>
-
-          <View className="flex-row justify-between items-center w-full py-1">
+            <Text className="text-surface-300 dark:text-surface-600 mx-1">-</Text>
             <Text
-              className={`text-surface-900 dark:text-white text-base font-semibold flex-1 ${
-                winner === "home" && game.status === "completed" ? "text-green-400" : ""
-              }`}
-            >
-              {game.homeTeam?.name || "Home Team"}
-            </Text>
-            <Text
-              className={`text-surface-900 dark:text-white text-lg font-bold min-w-[30px] text-right ${
-                winner === "home" && game.status === "completed" ? "text-green-400" : ""
+              className={`text-lg font-mono ${
+                homeWon
+                  ? "font-bold text-surface-900 dark:text-white"
+                  : "text-surface-500 dark:text-surface-400"
               }`}
             >
               {game.homeScore}
             </Text>
           </View>
+
+          <Text
+            className={`flex-1 ${
+              homeWon
+                ? "font-semibold text-surface-900 dark:text-white"
+                : "text-surface-500 dark:text-surface-400"
+            }`}
+            numberOfLines={1}
+          >
+            {game.homeTeam?.name || "Home"}
+          </Text>
         </View>
 
-        {game.status === "completed" && (
-          <View className="flex-row justify-between mt-2 pt-2 border-t border-surface-200 dark:border-surface-700">
-            <Text className="text-surface-600 dark:text-surface-400 text-xs">Final</Text>
-            {winner !== "tie" && (
-              <Text className="text-surface-600 dark:text-surface-400 text-xs">
-                Margin: {getPointDifferential(game)}
-              </Text>
-            )}
-          </View>
-        )}
+        {/* Final badge */}
+        <View className="px-2 py-0.5 rounded bg-surface-200 dark:bg-surface-700 ml-3">
+          <Text className="text-xs font-medium text-surface-600 dark:text-surface-300">Final</Text>
+        </View>
+
+        <Icon name="chevron-right" size={16} color="#94a3b8" style={{ marginLeft: 8 }} />
       </TouchableOpacity>
     );
   };
+
+  const renderUpcomingGame = (game: Game) => (
+    <View
+      key={game.id}
+      className="p-4 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800/30 mb-2"
+    >
+      <View className="flex-row items-center mb-3">
+        <Icon name="calendar" size={14} color="#F97316" />
+        <Text className="text-sm font-medium text-surface-600 dark:text-surface-300 ml-2">
+          {game.scheduledAt
+            ? new Date(game.scheduledAt).toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              })
+            : "TBD"}
+        </Text>
+      </View>
+      <View>
+        <View className="flex-row justify-between items-center">
+          <Text className="font-medium text-surface-900 dark:text-surface-100">
+            {game.awayTeam?.name || "Away"}
+          </Text>
+          <Text className="text-xs text-surface-400">@</Text>
+        </View>
+        <View className="flex-row justify-between items-center mt-1">
+          <Text className="font-medium text-surface-900 dark:text-surface-100">
+            {game.homeTeam?.name || "Home"}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+
+  const renderGame = ({ item: game, section }: { item: Game; section: GameSection }) => {
+    if (section.title === "Live Now") {
+      return renderLiveGame(game);
+    } else if (section.title === "Completed") {
+      return renderCompletedGame(game);
+    } else {
+      return renderUpcomingGame(game);
+    }
+  };
+
+  const renderSectionHeader = ({ section }: { section: GameSection }) => (
+    <View className="flex-row items-center mb-3 mt-4">
+      {section.title === "Live Now" && (
+        <View className="w-2 h-2 bg-red-500 rounded-full mr-2" />
+      )}
+      {section.title === "Upcoming" && <Icon name="calendar" size={14} color="#F97316" style={{ marginRight: 8 }} />}
+      {section.title === "Completed" && <Icon name="check" size={14} color="#10B981" style={{ marginRight: 8 }} />}
+      <Text
+        className={`text-sm font-bold uppercase tracking-wider ${
+          section.title === "Live Now"
+            ? "text-red-500"
+            : "text-surface-500 dark:text-surface-400"
+        }`}
+      >
+        {section.title}
+      </Text>
+      <Text className="text-xs text-surface-400 dark:text-surface-500 ml-2">
+        ({section.data.length})
+      </Text>
+    </View>
+  );
+
+  const statusBarStyle = resolvedTheme === "dark" ? "light" : "dark";
 
   if (gamesData === undefined) {
     return (
@@ -210,21 +302,25 @@ export default function GamesScreen() {
 
   return (
     <View className="flex-1 bg-surface-50 dark:bg-surface-950">
-      <StatusBar style="light" />
-      <FlatList
-        data={sortedGames}
+      <StatusBar style={statusBarStyle} />
+      <SectionList
+        sections={sections}
         renderItem={renderGame}
+        renderSectionHeader={renderSectionHeader}
         keyExtractor={(item) => item.id}
-        className="p-4"
+        contentContainerStyle={{ padding: 16 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        stickySectionHeadersEnabled={false}
         ListEmptyComponent={
-          <View className="items-center justify-center pt-15">
-            <Icon name="basketball" size={48} color="#6B7280" className="mb-4" />
+          <View className="items-center justify-center pt-20">
+            <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
+              <Icon name="basketball" size={32} color="#F97316" />
+            </View>
             <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
-              No games found
+              No games yet
             </Text>
-            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center leading-5">
-              Games will appear here once they&apos;re scheduled
+            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center leading-5 px-8">
+              Games will appear here once they&apos;re scheduled or started
             </Text>
           </View>
         }

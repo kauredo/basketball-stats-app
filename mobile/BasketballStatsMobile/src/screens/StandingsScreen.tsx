@@ -46,7 +46,7 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
   return (
     <TouchableOpacity
       onPress={() => setExpanded(!expanded)}
-      className={`bg-white dark:bg-surface-800 px-4 py-3 ${
+      className={`bg-surface-100 dark:bg-surface-800/50 px-4 py-3 ${
         isFirst ? "rounded-t-xl" : ""
       } ${isLast && !expanded ? "rounded-b-xl" : ""} ${
         team.rank <= 4
@@ -315,8 +315,8 @@ export default function StandingsScreen() {
       >
         {/* Header Stats */}
         <View className="flex-row p-4 gap-3">
-          <View className="flex-1 bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-            <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">League</Text>
+          <View className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
+            <Text className="text-surface-500 dark:text-surface-400 text-xs uppercase">League</Text>
             <Text
               className="text-surface-900 dark:text-white font-bold text-base mt-1"
               numberOfLines={1}
@@ -324,8 +324,8 @@ export default function StandingsScreen() {
               {standingsData?.league?.name || selectedLeague.name}
             </Text>
           </View>
-          <View className="flex-1 bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-            <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase">
+          <View className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
+            <Text className="text-surface-500 dark:text-surface-400 text-xs uppercase">
               Total Games
             </Text>
             <Text className="text-surface-900 dark:text-white font-bold text-2xl mt-1">
@@ -393,8 +393,8 @@ export default function StandingsScreen() {
             </View>
 
             {/* Legend */}
-            <View className="mt-4 bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-              <Text className="text-surface-500 dark:text-surface-500 text-xs uppercase font-semibold mb-3">
+            <View className="mt-4 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
+              <Text className="text-surface-500 dark:text-surface-400 text-xs uppercase font-semibold mb-3">
                 Legend
               </Text>
               <View className="flex-row flex-wrap gap-x-4 gap-y-2">
@@ -418,11 +418,13 @@ export default function StandingsScreen() {
           </View>
         ) : (
           <View className="px-4 py-12 items-center">
-            <Icon name="basketball" size={48} color="#6B7280" />
-            <Text className="text-surface-900 dark:text-white text-lg font-semibold mt-4">
+            <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
+              <Icon name="trophy" size={32} color="#F97316" />
+            </View>
+            <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
               No Standings Yet
             </Text>
-            <Text className="text-surface-600 dark:text-surface-400 text-center mt-2">
+            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center">
               Complete some games to see the league standings here.
             </Text>
           </View>

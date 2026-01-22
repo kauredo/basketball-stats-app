@@ -46,27 +46,27 @@ export default function TeamsScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    // Data auto-refreshes with Convex
     setTimeout(() => setRefreshing(false), 500);
   };
 
   const renderTeam = ({ item: team }: { item: Team }) => (
     <TouchableOpacity
-      className="bg-white dark:bg-surface-800 rounded-xl p-4 mb-3 border border-surface-200 dark:border-surface-700 flex-row"
+      className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-2 flex-row items-center"
       onPress={() => navigation.navigate("TeamDetail", { teamId: team.id, teamName: team.name })}
+      activeOpacity={0.7}
     >
       {/* Team Logo */}
-      <View className="w-14 h-14 rounded-lg bg-surface-100 dark:bg-surface-700 items-center justify-center mr-4">
+      <View className="w-12 h-12 rounded-xl bg-white dark:bg-surface-700 items-center justify-center mr-4 border border-surface-200 dark:border-surface-600">
         {team.logoUrl ? (
           <Image
             source={{ uri: team.logoUrl }}
-            className="w-12 h-12 rounded-lg"
+            className="w-10 h-10 rounded-lg"
             resizeMode="contain"
           />
         ) : (
           <Icon
-            name="basketball"
-            size={28}
+            name="users"
+            size={24}
             color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
           />
         )}
@@ -74,33 +74,31 @@ export default function TeamsScreen() {
 
       {/* Team Info */}
       <View className="flex-1">
-        <Text className="text-surface-900 dark:text-white text-lg font-bold">{team.name}</Text>
-        {team.city && (
-          <Text className="text-surface-600 dark:text-surface-400 text-sm mt-0.5">{team.city}</Text>
-        )}
-        <Text className="text-green-500 text-sm font-medium mt-1">
-          {team.activePlayersCount || 0} Active Players
+        <Text className="text-surface-900 dark:text-white text-base font-semibold">
+          {team.name}
         </Text>
-        {team.description && (
-          <Text
-            className="text-surface-500 dark:text-surface-400 text-xs mt-1 leading-4"
-            numberOfLines={1}
-          >
-            {team.description}
-          </Text>
+        {team.city && (
+          <Text className="text-surface-500 dark:text-surface-400 text-sm">{team.city}</Text>
         )}
       </View>
 
-      {/* Chevron */}
-      <View className="justify-center">
-        <Icon
-          name="chevron-right"
-          size={20}
-          color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
-        />
+      {/* Player count & chevron */}
+      <View className="items-end mr-2">
+        <Text className="text-surface-900 dark:text-white text-lg font-bold">
+          {team.activePlayersCount || 0}
+        </Text>
+        <Text className="text-surface-500 dark:text-surface-400 text-xs">players</Text>
       </View>
+
+      <Icon
+        name="chevron-right"
+        size={18}
+        color={resolvedTheme === "dark" ? "#6B7280" : "#9CA3AF"}
+      />
     </TouchableOpacity>
   );
+
+  const statusBarStyle = resolvedTheme === "dark" ? "light" : "dark";
 
   if (teamsData === undefined) {
     return (
@@ -115,8 +113,6 @@ export default function TeamsScreen() {
     );
   }
 
-  const statusBarStyle = resolvedTheme === "dark" ? "light" : "dark";
-
   return (
     <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       <StatusBar style={statusBarStyle} />
@@ -126,14 +122,29 @@ export default function TeamsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        ListHeaderComponent={
+          teams.length > 0 ? (
+            <View className="flex-row items-center mb-3">
+              <Icon name="users" size={14} color="#F97316" style={{ marginRight: 8 }} />
+              <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+                All Teams
+              </Text>
+              <Text className="text-xs text-surface-400 dark:text-surface-500 ml-2">
+                ({teams.length})
+              </Text>
+            </View>
+          ) : null
+        }
         ListEmptyComponent={
-          <View className="items-center justify-center pt-15">
-            <Icon name="basketball" size={48} color="#6B7280" className="mb-4" />
+          <View className="items-center justify-center pt-20">
+            <View className="w-16 h-16 rounded-2xl bg-primary-500/10 items-center justify-center mb-4">
+              <Icon name="users" size={32} color="#F97316" />
+            </View>
             <Text className="text-surface-900 dark:text-white text-lg font-bold mb-2">
-              No teams found
+              No teams yet
             </Text>
-            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center leading-5">
-              Teams will appear here once they&apos;re added
+            <Text className="text-surface-600 dark:text-surface-400 text-sm text-center leading-5 px-8">
+              Teams will appear here once they&apos;re added to the league
             </Text>
           </View>
         }
