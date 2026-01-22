@@ -52,7 +52,6 @@ export function AdvancedStats({
   homeTeamName,
   awayTeamName,
 }: AdvancedStatsProps) {
-
   // Sort players by points (highest first)
   const sortedHome = [...homeStats].sort((a, b) => b.points - a.points);
   const sortedAway = [...awayStats].sort((a, b) => b.points - a.points);
@@ -76,12 +75,16 @@ export function AdvancedStats({
           </Text>
         </View>
         <View className="w-14 items-center">
-          <Text className={`text-xs font-medium ${getStatColorClass(ts, STAT_THRESHOLDS.trueShootingPercentage.good, STAT_THRESHOLDS.trueShootingPercentage.bad)}`}>
+          <Text
+            className={`text-xs font-medium ${getStatColorClass(ts, STAT_THRESHOLDS.trueShootingPercentage.good, STAT_THRESHOLDS.trueShootingPercentage.bad)}`}
+          >
             {ts.toFixed(1)}%
           </Text>
         </View>
         <View className="w-14 items-center">
-          <Text className={`text-xs font-medium ${getStatColorClass(efg, STAT_THRESHOLDS.effectiveFieldGoalPercentage.good, STAT_THRESHOLDS.effectiveFieldGoalPercentage.bad)}`}>
+          <Text
+            className={`text-xs font-medium ${getStatColorClass(efg, STAT_THRESHOLDS.effectiveFieldGoalPercentage.good, STAT_THRESHOLDS.effectiveFieldGoalPercentage.bad)}`}
+          >
             {efg.toFixed(1)}%
           </Text>
         </View>
@@ -105,9 +108,7 @@ export function AdvancedStats({
           Advanced Stats
         </Text>
         {!hasData && (
-          <Text className="text-xs text-surface-400 dark:text-surface-500 ml-2">
-            (no data yet)
-          </Text>
+          <Text className="text-xs text-surface-400 dark:text-surface-500 ml-2">(no data yet)</Text>
         )}
       </View>
 

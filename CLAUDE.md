@@ -173,6 +173,7 @@ import type { Player, Game, PlayerStat } from "@basketball-stats/shared";
 The apps handle entity creation (games, teams, players) differently based on platform conventions:
 
 **Web: Inline Modals**
+
 - Uses overlay modals that appear on top of the current page
 - Found in `Games.tsx`, `Teams.tsx` pages
 - State managed with `useState` hooks (e.g., `showCreateModal`)
@@ -180,17 +181,20 @@ The apps handle entity creation (games, teams, players) differently based on pla
 - Pattern: `{showCreateModal && <ModalComponent />}`
 
 **Mobile: Dedicated Screens**
+
 - Uses full-screen forms with navigation stack
 - Located at `screens/CreateGameScreen.tsx`, `CreateTeamScreen.tsx`, `CreatePlayerScreen.tsx`
 - Navigation via React Navigation (push to stack)
 - Pattern: `navigation.navigate('CreateGame', { params })`
 
 **Why the difference:**
+
 - Web modals keep context visible (see the list behind the form)
 - Mobile screens maximize input space on smaller displays
 - Both achieve the same outcome with platform-appropriate UX
 
 **When adding new creation flows:**
+
 1. Web: Add a modal state to the relevant page, render modal inline
 2. Mobile: Create a new screen, add to navigation stack in `AppNavigator.tsx`
 3. Both: Use the same Convex mutation for the actual creation

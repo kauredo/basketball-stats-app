@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import type { Id } from "../../../../../convex/_generated/dataModel";
-import Icon from "../Icon";
+import Icon, { IconName } from "../Icon";
 
 interface GameEvent {
   id: Id<"gameEvents">;
@@ -11,7 +11,16 @@ interface GameEvent {
   gameTimeDisplay: string;
   timestamp: number;
   description: string;
-  details?: any;
+  details?: {
+    made?: boolean;
+    points?: number;
+    shotType?: string;
+    foulType?: string;
+    assisted?: boolean;
+    homeScore?: number;
+    awayScore?: number;
+    isHomeTeam?: boolean;
+  };
   player?: {
     id: Id<"players">;
     name: string;
@@ -23,81 +32,80 @@ interface GameEvent {
   } | null;
 }
 
+interface PlayerStat {
+  playerId: Id<"players">;
+  points: number;
+  rebounds: number;
+  assists: number;
+  steals: number;
+  blocks: number;
+  turnovers: number;
+  fouls: number;
+}
+
 interface PlayByPlayTabProps {
   events: GameEvent[] | undefined;
   isLoading: boolean;
   currentQuarter: number;
+  playerStats?: PlayerStat[];
   onRefresh?: () => void;
 }
 
-// Map event types to icon names
-const EVENT_ICONS: Record<string, string> = {
-  shot: "basketball",
-  freethrow: "basketball",
-  foul: "close",
-  timeout: "timer",
-  rebound: "stats",
-  steal: "play",
-  block: "stop",
-  turnover: "close",
-  overtime_start: "timer",
-  substitution: "users",
-  note: "list",
-  quarter_end: "timer",
+// Event configuration with icons and colors
+const EVENT_CONFIG: Record<string, { icon: IconName; color: string }> = {
+  shot: { icon: "basketball", color: "#22C55E" },
+  freethrow: { icon: "basketball", color: "#3B82F6" },
+  foul: { icon: "alert", color: "#EF4444" },
+  timeout: { icon: "timer", color: "#F59E0B" },
+  rebound: { icon: "stats", color: "#8B5CF6" },
+  steal: { icon: "play", color: "#06B6D4" },
+  block: { icon: "stop", color: "#06B6D4" },
+  turnover: { icon: "close", color: "#EF4444" },
+  overtime_start: { icon: "timer", color: "#F97316" },
+  substitution: { icon: "users", color: "#6B7280" },
+  note: { icon: "list", color: "#6B7280" },
+  quarter_end: { icon: "timer", color: "#6B7280" },
 };
 
-const QUARTER_FILTERS = [
-  { key: "all", label: "All" },
-  { key: "1", label: "Q1" },
-  { key: "2", label: "Q2" },
-  { key: "3", label: "Q3" },
-  { key: "4", label: "Q4" },
-  { key: "ot", label: "OT" },
-];
+const DEFAULT_CONFIG = { icon: "list" as IconName, color: "#6B7280" };
+
+// Generate dynamic quarter filters based on current quarter (supports OT)
+const getQuarterFilters = (currentQuarter: number) => {
+  const filters = [
+    { key: "all", label: "All" },
+    { key: "1", label: "Q1" },
+    { key: "2", label: "Q2" },
+    { key: "3", label: "Q3" },
+    { key: "4", label: "Q4" },
+  ];
+
+  // Add dynamic OT tabs if we're in overtime
+  const numPeriods = Math.max(4, currentQuarter);
+  for (let i = 5; i <= numPeriods; i++) {
+    filters.push({ key: String(i), label: `OT${i - 4}` });
+  }
+
+  return filters;
+};
 
 export default function PlayByPlayTab({
   events,
   isLoading,
-  currentQuarter: _currentQuarter,
+  currentQuarter,
+  playerStats = [],
   onRefresh,
 }: PlayByPlayTabProps) {
   const [selectedQuarter, setSelectedQuarter] = useState<string>("all");
+  const quarterFilters = getQuarterFilters(currentQuarter);
 
   const filteredEvents = events?.filter((event) => {
     if (selectedQuarter === "all") return true;
-    if (selectedQuarter === "ot") return event.quarter > 4;
     return event.quarter === parseInt(selectedQuarter);
   });
 
   const formatQuarter = (quarter: number): string => {
     if (quarter <= 4) return `Q${quarter}`;
     return `OT${quarter - 4}`;
-  };
-
-  const getEventIcon = (eventType: string): string => {
-    return EVENT_ICONS[eventType] || "list";
-  };
-
-  const getEventColor = (eventType: string): string => {
-    switch (eventType) {
-      case "shot":
-        return "#22C55E";
-      case "freethrow":
-        return "#3B82F6";
-      case "foul":
-        return "#EF4444";
-      case "timeout":
-        return "#F59E0B";
-      case "turnover":
-        return "#EF4444";
-      case "steal":
-      case "block":
-        return "#06B6D4";
-      case "rebound":
-        return "#8B5CF6";
-      default:
-        return "#6B7280";
-    }
   };
 
   // Group events by quarter for section headers
@@ -118,94 +126,122 @@ export default function PlayByPlayTab({
     groupedEvents.push(currentGroup);
   }
 
-  const getEventDetails = (event: GameEvent): string | null => {
-    if (!event.details) return null;
-    const { made, points, shotType, foulType, assisted } = event.details;
-    const parts: string[] = [];
+  // Get cumulative stat for player based on event type
+  const getPlayerStatLine = (event: GameEvent): string | null => {
+    if (!event.player) return null;
 
-    if (event.eventType === "shot" || event.eventType === "freethrow") {
-      if (made !== undefined) {
-        parts.push(made ? "Made" : "Missed");
-      }
-      if (shotType) {
-        parts.push(shotType === "3pt" ? "3PT" : shotType === "2pt" ? "2PT" : "FT");
-      }
-      if (points !== undefined && made) {
-        parts.push(`+${points} pts`);
-      }
-      if (assisted) {
-        parts.push("Assisted");
-      }
-    } else if (event.eventType === "foul" && foulType) {
-      parts.push(foulType.charAt(0).toUpperCase() + foulType.slice(1));
+    const stat = playerStats.find((s) => s.playerId === event.player?.id);
+    if (!stat) return null;
+
+    switch (event.eventType) {
+      case "shot":
+      case "freethrow":
+        return `${stat.points} points`;
+      case "foul":
+        return `${stat.fouls} fouls`;
+      case "rebound":
+        return `${stat.rebounds} rebounds`;
+      case "assist":
+        return `${stat.assists} assists`;
+      case "steal":
+        return `${stat.steals} steals`;
+      case "block":
+        return `${stat.blocks} blocks`;
+      case "turnover":
+        return `${stat.turnovers} turnovers`;
+      default:
+        return null;
     }
+  };
 
-    return parts.length > 0 ? parts.join(" • ") : null;
+  // Format score display with scorer's team bold
+  const getScoreDisplay = (event: GameEvent): { home: string; away: string } | null => {
+    const details = event.details;
+    if (!details || details.homeScore === undefined || details.awayScore === undefined) {
+      return null;
+    }
+    // Only show score for scoring events
+    if (details.points === undefined || details.points <= 0) {
+      return null;
+    }
+    return {
+      home: String(details.homeScore),
+      away: String(details.awayScore),
+    };
   };
 
   const renderEvent = (event: GameEvent) => {
-    const details = getEventDetails(event);
-    const iconColor = getEventColor(event.eventType);
+    const config = EVENT_CONFIG[event.eventType] || DEFAULT_CONFIG;
+    const statLine = getPlayerStatLine(event);
+    const scoreDisplay = getScoreDisplay(event);
+    const isHomeTeam = event.details?.isHomeTeam ?? false;
+
+    // Team colors: orange for home, blue for away
+    const teamBorderColor = isHomeTeam ? "#f97316" : "#3b82f6";
 
     return (
       <View
         key={event.id}
-        className="flex-row px-3 py-2 border-b border-surface-200 dark:border-surface-700"
+        className="flex-row items-start border-b border-surface-200 dark:border-surface-700"
       >
+        {/* Colored left border for team indicator */}
+        <View className="w-1 self-stretch" style={{ backgroundColor: teamBorderColor }} />
+
         {/* Time Column */}
-        <View className="w-12 items-center">
+        <View className="w-12 items-center flex-shrink-0 py-2.5 pl-2">
           <Text className="text-surface-500 dark:text-surface-500 text-[10px] font-medium">
             {formatQuarter(event.quarter)}
           </Text>
-          <Text className="text-surface-700 dark:text-surface-300 text-xs font-semibold">
+          <Text className="text-surface-700 dark:text-surface-300 text-xs font-semibold font-mono">
             {event.gameTimeDisplay}
           </Text>
         </View>
 
         {/* Icon Column */}
         <View
-          className="w-7 h-7 rounded-full justify-center items-center mx-2"
-          style={{ backgroundColor: iconColor + "20" }}
+          className="w-7 h-7 rounded-full justify-center items-center mx-2 flex-shrink-0 mt-2"
+          style={{ backgroundColor: config.color + "20" }}
         >
-          <Icon name={getEventIcon(event.eventType) as any} size={14} color={iconColor} />
+          <Icon name={config.icon} size={14} color={config.color} />
         </View>
 
-        {/* Description Column */}
-        <View className="flex-1 justify-center">
-          <Text className="text-surface-900 dark:text-white text-sm">{event.description}</Text>
-          {/* Player Info */}
-          {event.player && (
-            <Text className="text-surface-600 dark:text-surface-400 text-xs font-medium mt-0.5">
-              #{event.player.number} {event.player.name}
-            </Text>
-          )}
-          {/* Event Details (made/missed, points, etc.) */}
-          {details && (
-            <Text className="text-primary-500 text-[11px] font-semibold mt-0.5">{details}</Text>
-          )}
-          {/* Team Name */}
-          {event.team && (
-            <Text className="text-surface-500 dark:text-surface-500 text-[11px] mt-0.5">
-              {event.team.name}
-            </Text>
-          )}
+        {/* Content Column */}
+        <View className="flex-1 justify-center py-2.5 pr-3">
+          <Text className="text-surface-900 dark:text-white text-sm leading-snug">
+            {event.description}
+          </Text>
+          {/* Show cumulative stat total and score */}
+          <View className="flex-row items-center mt-0.5 flex-wrap">
+            {statLine && (
+              <Text className="text-surface-500 dark:text-surface-400 text-xs font-medium">
+                {statLine}
+              </Text>
+            )}
+            {scoreDisplay && (
+              <Text className="text-surface-500 dark:text-surface-400 text-xs ml-2">
+                (
+                <Text
+                  className={isHomeTeam ? "font-bold text-surface-700 dark:text-surface-200" : ""}
+                >
+                  {scoreDisplay.home}
+                </Text>
+                {" - "}
+                <Text
+                  className={!isHomeTeam ? "font-bold text-surface-700 dark:text-surface-200" : ""}
+                >
+                  {scoreDisplay.away}
+                </Text>
+                )
+              </Text>
+            )}
+          </View>
         </View>
       </View>
     );
   };
 
-  const renderQuarterHeader = (quarter: number) => (
-    <View className="flex-row items-center py-2 px-3">
-      <View className="flex-1 h-px bg-surface-300 dark:bg-surface-600" />
-      <Text className="text-surface-500 dark:text-surface-400 text-[11px] font-semibold mx-2">
-        {formatQuarter(quarter)}
-      </Text>
-      <View className="flex-1 h-px bg-surface-300 dark:bg-surface-600" />
-    </View>
-  );
-
   const renderEmptyState = () => (
-    <View className="items-center py-8 px-6">
+    <View className="items-center py-8 px-6 flex-1 justify-center">
       <View className="w-12 h-12 rounded-full bg-surface-200 dark:bg-surface-700 justify-center items-center mb-3">
         <Icon name="list" size={24} color="#6B7280" />
       </View>
@@ -218,11 +254,14 @@ export default function PlayByPlayTab({
     </View>
   );
 
+  // Flatten events for simple list rendering
+  const flattenedEvents = groupedEvents.flatMap((group) => group.events);
+
   return (
-    <View className="flex-1 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
-      {/* Quarter Filter */}
-      <View className="flex-row items-center border-b border-surface-200 dark:border-surface-700 px-3 py-1.5">
-        {QUARTER_FILTERS.map((item) => (
+    <View className="flex-1 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+      {/* Quarter Filter - Dynamic OT tabs based on current quarter */}
+      <View className="flex-row items-center border-b border-surface-200 dark:border-surface-700 px-3 py-2">
+        {quarterFilters.map((item) => (
           <TouchableOpacity
             key={item.key}
             className={`px-3 py-1.5 rounded-full mr-2 ${
@@ -243,21 +282,16 @@ export default function PlayByPlayTab({
         ))}
       </View>
 
-      {/* Events List */}
+      {/* Events List - Clean flat list without quarter dividers */}
       <FlatList
-        data={groupedEvents}
-        keyExtractor={(item) => item.quarter.toString()}
+        data={flattenedEvents}
+        keyExtractor={(item) => item.id}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
           <RefreshControl refreshing={isLoading} onRefresh={onRefresh} tintColor="#F97316" />
         }
-        renderItem={({ item: group }) => (
-          <View>
-            {renderQuarterHeader(group.quarter)}
-            {group.events.map((event) => renderEvent(event))}
-          </View>
-        )}
-        contentContainerStyle={{ paddingBottom: 16, flexGrow: 1 }}
+        renderItem={({ item: event }) => renderEvent(event)}
+        contentContainerStyle={{ flexGrow: 1 }}
       />
     </View>
   );

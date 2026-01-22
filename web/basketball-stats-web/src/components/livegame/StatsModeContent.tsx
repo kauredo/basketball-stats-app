@@ -1,5 +1,5 @@
 import React from "react";
-import { PlayerStat } from "../../types/livegame";
+import { PlayerStat, ScoreByPeriod } from "../../types/livegame";
 import { TeamBoxScore } from "./stats/TeamBoxScore";
 import { QuarterBreakdown } from "./stats/QuarterBreakdown";
 import { AdvancedStats } from "./stats/AdvancedStats";
@@ -11,8 +11,9 @@ interface StatsModeContentProps {
   awayStats: PlayerStat[];
   foulLimit: number;
   currentQuarter: number;
-  homeScoresByQuarter?: number[];
-  awayScoresByQuarter?: number[];
+  scoreByPeriod?: ScoreByPeriod;
+  homeScore: number;
+  awayScore: number;
 }
 
 /**
@@ -26,8 +27,9 @@ export const StatsModeContent: React.FC<StatsModeContentProps> = ({
   awayStats,
   foulLimit,
   currentQuarter,
-  homeScoresByQuarter = [],
-  awayScoresByQuarter = [],
+  scoreByPeriod,
+  homeScore,
+  awayScore,
 }) => {
   return (
     <div className="h-full overflow-auto space-y-3">
@@ -35,9 +37,10 @@ export const StatsModeContent: React.FC<StatsModeContentProps> = ({
       <QuarterBreakdown
         homeTeamName={homeTeamName}
         awayTeamName={awayTeamName}
-        homeScoresByQuarter={homeScoresByQuarter}
-        awayScoresByQuarter={awayScoresByQuarter}
+        scoreByPeriod={scoreByPeriod}
         currentQuarter={currentQuarter}
+        homeScore={homeScore}
+        awayScore={awayScore}
       />
 
       {/* Team Box Scores */}

@@ -874,8 +874,9 @@ const LiveGameNew: React.FC = () => {
           awayStats={awayStats}
           foulLimit={foulLimit}
           currentQuarter={game.currentQuarter}
-          homeScoresByQuarter={gameSettings.scoreByPeriod?.home || []}
-          awayScoresByQuarter={gameSettings.scoreByPeriod?.away || []}
+          scoreByPeriod={gameSettings.scoreByPeriod}
+          homeScore={game.homeScore}
+          awayScore={game.awayScore}
         />
       )}
 
@@ -883,13 +884,13 @@ const LiveGameNew: React.FC = () => {
       {activeMode === "plays" && (
         <PlaysModeContent
           events={formattedEvents}
-          homeTeamId={game.homeTeam?.id as Id<"teams">}
           currentQuarter={game.currentQuarter}
+          playerStats={stats}
         />
       )}
 
       {/* Lineups Mode */}
-      {activeMode === "lineups" && (
+      {activeMode === "subs" && (
         <LineupsModeContent
           homeTeamName={game.homeTeam?.name || "Home"}
           awayTeamName={game.awayTeam?.name || "Away"}

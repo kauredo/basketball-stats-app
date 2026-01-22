@@ -50,12 +50,16 @@ export const AdvancedStats: React.FC<AdvancedStatsProps> = ({
           </span>
         </td>
         <td className="py-2 text-center">
-          <span className={`text-xs font-medium ${getStatColorClass(ts, STAT_THRESHOLDS.trueShootingPercentage.good, STAT_THRESHOLDS.trueShootingPercentage.bad)}`}>
+          <span
+            className={`text-xs font-medium ${getStatColorClass(ts, STAT_THRESHOLDS.trueShootingPercentage.good, STAT_THRESHOLDS.trueShootingPercentage.bad)}`}
+          >
             {ts.toFixed(1)}%
           </span>
         </td>
         <td className="py-2 text-center">
-          <span className={`text-xs font-medium ${getStatColorClass(efg, STAT_THRESHOLDS.effectiveFieldGoalPercentage.good, STAT_THRESHOLDS.effectiveFieldGoalPercentage.bad)}`}>
+          <span
+            className={`text-xs font-medium ${getStatColorClass(efg, STAT_THRESHOLDS.effectiveFieldGoalPercentage.good, STAT_THRESHOLDS.effectiveFieldGoalPercentage.bad)}`}
+          >
             {efg.toFixed(1)}%
           </span>
         </td>

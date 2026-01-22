@@ -22,17 +22,18 @@ interface Tab {
   iconSolid: React.ComponentType<{ className?: string }>;
 }
 
+// Tab order matches mobile: Court → Clock → Stats → Subs → Plays
 const TABS: Tab[] = [
   { key: "court", label: "Court", icon: ChartBarIcon, iconSolid: ChartBarIconSolid },
+  { key: "clock", label: "Clock", icon: ClockIcon, iconSolid: ClockIconSolid },
   { key: "stats", label: "Stats", icon: UserGroupIcon, iconSolid: UserGroupIconSolid },
+  { key: "subs", label: "Subs", icon: UsersIcon, iconSolid: UsersIconSolid },
   {
     key: "plays",
     label: "Plays",
     icon: ClipboardDocumentListIcon,
     iconSolid: ClipboardDocumentListIconSolid,
   },
-  { key: "lineups", label: "Lineups", icon: UsersIcon, iconSolid: UsersIconSolid },
-  { key: "clock", label: "Clock", icon: ClockIcon, iconSolid: ClockIconSolid },
 ];
 
 interface ModeTabNavigationProps {

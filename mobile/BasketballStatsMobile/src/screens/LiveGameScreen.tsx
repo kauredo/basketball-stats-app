@@ -38,6 +38,7 @@ import TimeEditModal from "../components/livegame/TimeEditModal";
 import QuarterBreakdown from "../components/livegame/QuarterBreakdown";
 import TeamBoxScore from "../components/livegame/TeamBoxScore";
 import AdvancedStats from "../components/livegame/AdvancedStats";
+import SubstitutionPanel from "../components/livegame/SubstitutionPanel";
 import useSoundFeedback from "../hooks/useSoundFeedback";
 import useShotClock from "../hooks/useShotClock";
 
@@ -903,6 +904,36 @@ export default function LiveGameScreen() {
     } catch (error: any) {
       console.error("Failed to substitute:", error);
       Alert.alert("Error", error.message || "Failed to substitute player");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  };
+
+  // Swap two players (one out, one in)
+  const handleSwap = async (playerOut: Id<"players">, playerIn: Id<"players">) => {
+    if (!token) return;
+
+    try {
+      // Sub out the court player, sub in the bench player
+      await substituteMutation({ token, gameId, playerId: playerOut, isOnCourt: false });
+      await substituteMutation({ token, gameId, playerId: playerIn, isOnCourt: true });
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (error: any) {
+      console.error("Failed to swap players:", error);
+      Alert.alert("Error", error.message || "Failed to swap players");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  };
+
+  // Add a player to court (for empty slots)
+  const handleSubIn = async (playerId: Id<"players">) => {
+    if (!token) return;
+
+    try {
+      await substituteMutation({ token, gameId, playerId, isOnCourt: true });
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (error: any) {
+      console.error("Failed to sub in player:", error);
+      Alert.alert("Error", error.message || "Failed to add player to court");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
@@ -1783,120 +1814,28 @@ export default function LiveGameScreen() {
           )}
 
           {activeTab === "subs" && (
-            <View className="pb-6">
-              {/* Away Team Subs */}
-              <View className="bg-white dark:bg-surface-800 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-700">
-                <Text className="text-surface-900 dark:text-white font-semibold mb-3">
-                  {game.awayTeam?.name || "Away"}
-                </Text>
-                {awayPlayerStats.map((playerStat: PlayerStat) => {
-                  const player = playerStat.player;
-                  if (!player) return null;
+            <View className="pb-6 gap-4">
+              {/* Away Team - Position-based substitution panel */}
+              <SubstitutionPanel
+                teamName={game.awayTeam?.name || "Away"}
+                players={awayPlayerStats}
+                foulLimit={liveStats?.game?.foulLimit || 5}
+                onSwap={handleSwap}
+                onSubIn={handleSubIn}
+                disabled={game.status !== "active" && game.status !== "paused"}
+                isHomeTeam={false}
+              />
 
-                  return (
-                    <TouchableOpacity
-                      key={playerStat.id}
-                      className={`flex-row items-center py-3 px-3 mb-2 rounded-lg ${
-                        playerStat.isOnCourt
-                          ? "bg-green-900/30 border border-green-700"
-                          : playerStat.fouledOut
-                            ? "bg-red-900/30 border border-red-700"
-                            : "bg-surface-100 dark:bg-surface-700"
-                      }`}
-                      onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
-                      disabled={playerStat.fouledOut}
-                    >
-                      <View className="w-10 h-10 bg-surface-200 dark:bg-surface-600 rounded-full justify-center items-center mr-3">
-                        <Text className="text-surface-900 dark:text-white font-bold">
-                          #{player.number}
-                        </Text>
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-surface-900 dark:text-white font-medium">
-                          {player.name}
-                        </Text>
-                        <Text className="text-surface-600 dark:text-surface-400 text-xs">
-                          {playerStat.fouledOut ? "FOULED OUT" : player.position || "N/A"}
-                        </Text>
-                      </View>
-                      <View
-                        className={`px-4 py-2 rounded-lg ${
-                          playerStat.fouledOut
-                            ? "bg-surface-600"
-                            : playerStat.isOnCourt
-                              ? "bg-red-600"
-                              : "bg-green-600"
-                        }`}
-                      >
-                        <Text className="text-white font-semibold text-sm">
-                          {playerStat.fouledOut
-                            ? "Out"
-                            : playerStat.isOnCourt
-                              ? "Sub Out"
-                              : "Sub In"}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-
-              {/* Home Team Subs */}
-              <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-                <Text className="text-surface-900 dark:text-white font-semibold mb-3">
-                  {game.homeTeam?.name || "Home"}
-                </Text>
-                {homePlayerStats.map((playerStat: PlayerStat) => {
-                  const player = playerStat.player;
-                  if (!player) return null;
-
-                  return (
-                    <TouchableOpacity
-                      key={playerStat.id}
-                      className={`flex-row items-center py-3 px-3 mb-2 rounded-lg ${
-                        playerStat.isOnCourt
-                          ? "bg-green-900/30 border border-green-700"
-                          : playerStat.fouledOut
-                            ? "bg-red-900/30 border border-red-700"
-                            : "bg-surface-100 dark:bg-surface-700"
-                      }`}
-                      onPress={() => handleSubstitute(playerStat.playerId, playerStat.isOnCourt)}
-                      disabled={playerStat.fouledOut}
-                    >
-                      <View className="w-10 h-10 bg-surface-200 dark:bg-surface-600 rounded-full justify-center items-center mr-3">
-                        <Text className="text-surface-900 dark:text-white font-bold">
-                          #{player.number}
-                        </Text>
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-surface-900 dark:text-white font-medium">
-                          {player.name}
-                        </Text>
-                        <Text className="text-surface-600 dark:text-surface-400 text-xs">
-                          {playerStat.fouledOut ? "FOULED OUT" : player.position || "N/A"}
-                        </Text>
-                      </View>
-                      <View
-                        className={`px-4 py-2 rounded-lg ${
-                          playerStat.fouledOut
-                            ? "bg-surface-600"
-                            : playerStat.isOnCourt
-                              ? "bg-red-600"
-                              : "bg-green-600"
-                        }`}
-                      >
-                        <Text className="text-white font-semibold text-sm">
-                          {playerStat.fouledOut
-                            ? "Out"
-                            : playerStat.isOnCourt
-                              ? "Sub Out"
-                              : "Sub In"}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+              {/* Home Team - Position-based substitution panel */}
+              <SubstitutionPanel
+                teamName={game.homeTeam?.name || "Home"}
+                players={homePlayerStats}
+                foulLimit={liveStats?.game?.foulLimit || 5}
+                onSwap={handleSwap}
+                onSubIn={handleSubIn}
+                disabled={game.status !== "active" && game.status !== "paused"}
+                isHomeTeam={true}
+              />
             </View>
           )}
         </ScrollView>
@@ -1909,6 +1848,7 @@ export default function LiveGameScreen() {
             events={gameEvents?.events}
             isLoading={gameEvents === undefined}
             currentQuarter={game.currentQuarter}
+            playerStats={allStats}
           />
         </View>
       )}

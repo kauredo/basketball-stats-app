@@ -33,7 +33,7 @@ export type TurnoverType =
   | "shot_clock_violation"
   | "other";
 
-export type GameMode = "court" | "stats" | "plays" | "lineups" | "clock";
+export type GameMode = "court" | "clock" | "stats" | "subs" | "plays";
 
 export type GameStatus = "scheduled" | "active" | "paused" | "completed";
 
@@ -289,14 +289,19 @@ export interface PlayByPlayEvent {
 // Game Settings
 // ============================================================================
 
+// Score by period stored as object with period keys (q1, q2, q3, q4, ot1, ot2, etc.)
+export interface ScoreByPeriod {
+  [periodKey: string]: {
+    home: number;
+    away: number;
+  };
+}
+
 export interface GameSettings {
   quarterMinutes: number;
   foulLimit: 5 | 6;
   timeoutsPerTeam: number;
-  scoreByPeriod?: {
-    home: number[];
-    away: number[];
-  };
+  scoreByPeriod?: ScoreByPeriod;
 }
 
 // ============================================================================

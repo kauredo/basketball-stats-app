@@ -231,24 +231,25 @@ export const recordStat = mutation({
     }
 
     // Log game event for play-by-play
+    // Format: "#Number Name - Action" for consistency
     const eventDescriptions: Record<string, string> = {
       shot2: args.made
-        ? `#${player.number} ${player.name} 2PT Made`
-        : `#${player.number} ${player.name} 2PT Missed`,
+        ? `#${player.number} ${player.name} - 2PT Made`
+        : `#${player.number} ${player.name} - 2PT Missed`,
       shot3: args.made
-        ? `#${player.number} ${player.name} 3PT Made`
-        : `#${player.number} ${player.name} 3PT Missed`,
+        ? `#${player.number} ${player.name} - 3PT Made`
+        : `#${player.number} ${player.name} - 3PT Missed`,
       freethrow: args.made
-        ? `#${player.number} ${player.name} FT Made`
-        : `#${player.number} ${player.name} FT Missed`,
-      rebound: `#${player.number} ${player.name} Rebound`,
-      offensiveRebound: `#${player.number} ${player.name} Offensive Rebound`,
-      defensiveRebound: `#${player.number} ${player.name} Defensive Rebound`,
-      assist: `#${player.number} ${player.name} Assist`,
-      steal: `#${player.number} ${player.name} Steal`,
-      block: `#${player.number} ${player.name} Block`,
-      turnover: `#${player.number} ${player.name} Turnover`,
-      foul: `#${player.number} ${player.name} Foul`,
+        ? `#${player.number} ${player.name} - FT Made`
+        : `#${player.number} ${player.name} - FT Missed`,
+      rebound: `#${player.number} ${player.name} - Rebound`,
+      offensiveRebound: `#${player.number} ${player.name} - Offensive Rebound`,
+      defensiveRebound: `#${player.number} ${player.name} - Defensive Rebound`,
+      assist: `#${player.number} ${player.name} - Assist`,
+      steal: `#${player.number} ${player.name} - Steal`,
+      block: `#${player.number} ${player.name} - Block`,
+      turnover: `#${player.number} ${player.name} - Turnover`,
+      foul: `#${player.number} ${player.name} - Foul`,
     };
 
     const eventTypes: Record<string, string> = {
@@ -265,6 +266,12 @@ export const recordStat = mutation({
       foul: "foul",
     };
 
+    // Calculate current score for the event (after this action)
+    const currentHomeScore =
+      pointsScored > 0 && isHomeTeam ? game.homeScore + pointsScored : game.homeScore;
+    const currentAwayScore =
+      pointsScored > 0 && !isHomeTeam ? game.awayScore + pointsScored : game.awayScore;
+
     await ctx.db.insert("gameEvents", {
       gameId: args.gameId,
       eventType: eventTypes[args.statType] || args.statType,
@@ -277,9 +284,12 @@ export const recordStat = mutation({
         statType: args.statType,
         made: args.made,
         points: pointsScored,
+        homeScore: currentHomeScore,
+        awayScore: currentAwayScore,
+        isHomeTeam,
       },
       description:
-        eventDescriptions[args.statType] || `#${player.number} ${player.name} ${args.statType}`,
+        eventDescriptions[args.statType] || `#${player.number} ${player.name} - ${args.statType}`,
     });
 
     // Get updated game for response
@@ -1091,6 +1101,8 @@ export const recordFoulWithContext = mutation({
       flagrant2: "Flagrant 2",
     }[args.foulType];
 
+    const isHomeTeam = player.teamId === game.homeTeamId;
+
     await ctx.db.insert("gameEvents", {
       gameId: args.gameId,
       eventType: "foul",
@@ -1107,6 +1119,7 @@ export const recordFoulWithContext = mutation({
         freeThrowsAwarded,
         playerFoulCount: newFoulCount,
         playerFouledOut,
+        isHomeTeam,
       },
       description: `#${player.number} ${player.name} - ${foulTypeLabel}${playerFouledOut ? " (FOULED OUT)" : ""}`,
     });
@@ -1217,6 +1230,10 @@ export const recordFreeThrow = mutation({
       });
     }
 
+    // Calculate current score for the event (after this action)
+    const currentHomeScore = args.made && isHomeTeam ? game.homeScore + 1 : game.homeScore;
+    const currentAwayScore = args.made && !isHomeTeam ? game.awayScore + 1 : game.awayScore;
+
     // Log the event
     await ctx.db.insert("gameEvents", {
       gameId: args.gameId,
@@ -1231,8 +1248,12 @@ export const recordFreeThrow = mutation({
         attemptNumber: args.attemptNumber,
         totalAttempts: args.totalAttempts,
         isOneAndOne: args.isOneAndOne,
+        points: args.made ? 1 : 0,
+        homeScore: currentHomeScore,
+        awayScore: currentAwayScore,
+        isHomeTeam,
       },
-      description: `#${player.number} ${player.name} FT ${args.made ? "Made" : "Missed"} (${args.attemptNumber}/${args.totalAttempts})`,
+      description: `#${player.number} ${player.name} - FT ${args.made ? "Made" : "Missed"} (${args.attemptNumber}/${args.totalAttempts})`,
     });
 
     // Determine if sequence continues
