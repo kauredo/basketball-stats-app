@@ -630,7 +630,8 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
         <ModalHeader title="Resume Game" subtitle="This game has ended" />
         <ModalBody padding="lg" scrollable={false}>
           <p className="text-surface-600 dark:text-surface-400 text-center">
-            Do you want to resume this game? It will be set to paused so you can review before continuing.
+            Do you want to resume this game? It will be set to paused so you can review before
+            continuing.
           </p>
         </ModalBody>
         <ModalFooter align="between">

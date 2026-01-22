@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Text, StyleSheet } from "react-native";
+import { Text } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -57,22 +57,8 @@ export default function BonusIndicator({
   const backgroundColor = inDoubleBonus ? "#EF4444" : "#F59E0B";
 
   return (
-    <Animated.View style={[styles.container, { backgroundColor }, animatedStyle]}>
-      <Text style={styles.text}>{label}</Text>
+    <Animated.View className="px-1.5 py-0.5 rounded" style={[{ backgroundColor }, animatedStyle]}>
+      <Text className="text-white text-[9px] font-bold tracking-wide">{label}</Text>
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  text: {
-    color: "#FFFFFF",
-    fontSize: 9,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-  },
-});

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, useColorScheme, type ViewStyle } from "react-native";
+import { View, Text, Image, useColorScheme, type ViewStyle } from "react-native";
 import { COLORS } from "@basketball-stats/shared";
 
 interface PlayerAvatarProps {
@@ -58,53 +58,48 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
   const backgroundColor = getBackgroundColor(number);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const indicatorBorderColor = isDark ? "#3d3835" : "#fdfcfb";
-  const offCourtColor = isDark ? "#7a746c" : "#a69f96";
 
   return (
-    <View style={[styles.container, style]}>
+    <View className="relative" style={style}>
       <View
-        style={[
-          styles.avatar,
-          {
-            width: config.width,
-            height: config.height,
-            borderRadius: config.width / 2,
-            backgroundColor: imageUrl ? "transparent" : backgroundColor,
-          },
-        ]}
+        className="justify-center items-center overflow-hidden"
+        style={{
+          width: config.width,
+          height: config.height,
+          borderRadius: config.width / 2,
+          backgroundColor: imageUrl ? "transparent" : backgroundColor,
+        }}
       >
         {imageUrl ? (
           <Image
             source={{ uri: imageUrl }}
-            style={[
-              styles.image,
-              {
-                width: config.width,
-                height: config.height,
-                borderRadius: config.width / 2,
-              },
-            ]}
+            style={{
+              width: config.width,
+              height: config.height,
+              borderRadius: config.width / 2,
+            }}
+            resizeMode="cover"
           />
         ) : showNumber && number !== undefined ? (
-          <Text style={[styles.number, { fontSize: config.numberSize }]}>#{number}</Text>
+          <Text className="text-white font-bold" style={{ fontSize: config.numberSize }}>
+            #{number}
+          </Text>
         ) : (
-          <Text style={[styles.initials, { fontSize: config.fontSize }]}>{getInitials(name)}</Text>
+          <Text className="text-white font-semibold" style={{ fontSize: config.fontSize }}>
+            {getInitials(name)}
+          </Text>
         )}
       </View>
 
       {isOnCourt !== undefined && (
         <View
-          style={[
-            styles.indicator,
-            {
-              width: config.indicatorSize,
-              height: config.indicatorSize,
-              borderRadius: config.indicatorSize / 2,
-              backgroundColor: isOnCourt ? COLORS.accent.success : offCourtColor,
-              borderColor: indicatorBorderColor,
-            },
-          ]}
+          className="absolute -bottom-0.5 -right-0.5 border-2 border-white dark:border-surface-800"
+          style={{
+            width: config.indicatorSize,
+            height: config.indicatorSize,
+            borderRadius: config.indicatorSize / 2,
+            backgroundColor: isOnCourt ? COLORS.accent.success : isDark ? "#7a746c" : "#a69f96",
+          }}
         />
       )}
     </View>
@@ -135,15 +130,8 @@ export const PlayerAvatarWithDetails: React.FC<PlayerAvatarWithDetailsProps> = (
   style,
   containerStyle,
 }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-  const nameColor = isDark ? "#fdfcfb" : "#252220";
-  const numberSmallColor = isDark ? "#a69f96" : "#7a746c";
-  const subtitleColor = isDark ? "#a69f96" : "#7a746c";
-  const statsColor = isDark ? "#7a746c" : "#a69f96";
-
   return (
-    <View style={[styles.detailsContainer, containerStyle]}>
+    <View className="flex-row items-center" style={containerStyle}>
       <PlayerAvatar
         name={name}
         number={number}
@@ -152,20 +140,22 @@ export const PlayerAvatarWithDetails: React.FC<PlayerAvatarWithDetailsProps> = (
         isOnCourt={isOnCourt}
         style={style}
       />
-      <View style={styles.details}>
-        <View style={styles.nameRow}>
-          <Text style={[styles.name, { color: nameColor }]}>{name || "Unknown"}</Text>
+      <View className="flex-1 ml-3">
+        <View className="flex-row items-center">
+          <Text className="text-surface-900 dark:text-white font-medium text-sm">
+            {name || "Unknown"}
+          </Text>
           {number !== undefined && (
-            <Text style={[styles.numberSmall, { color: numberSmallColor }]}>#{number}</Text>
+            <Text className="text-surface-500 dark:text-surface-400 text-xs ml-1">#{number}</Text>
           )}
         </View>
         {(position || team) && (
-          <Text style={[styles.subtitle, { color: subtitleColor }]}>
+          <Text className="text-surface-500 dark:text-surface-400 text-xs mt-0.5">
             {[position, team].filter(Boolean).join(" • ")}
           </Text>
         )}
         {stats && (
-          <Text style={[styles.stats, { color: statsColor }]}>
+          <Text className="text-surface-400 dark:text-surface-500 text-[10px] mt-1">
             {stats.points !== undefined && `PTS: ${stats.points}  `}
             {stats.rebounds !== undefined && `REB: ${stats.rebounds}  `}
             {stats.assists !== undefined && `AST: ${stats.assists}`}
@@ -192,23 +182,17 @@ export const PlayerAvatarRow: React.FC<{
   const overflow = players.length - maxDisplay;
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const avatarRowItemBorderColor = isDark ? "#3d3835" : "#fdfcfb";
-  const overflowBadgeBg = isDark ? "#5c5650" : "#f3f0ed";
-  const overflowBadgeBorderColor = isDark ? "#3d3835" : "#fdfcfb";
 
   return (
-    <View style={[styles.avatarRow, style]}>
+    <View className="flex-row items-center" style={style}>
       {displayPlayers.map((player, index) => (
         <View
           key={index}
-          style={[
-            styles.avatarRowItem,
-            {
-              marginLeft: index > 0 ? -8 : 0,
-              zIndex: displayPlayers.length - index,
-              borderColor: avatarRowItemBorderColor,
-            },
-          ]}
+          className="border-2 border-white dark:border-surface-800 rounded-full"
+          style={{
+            marginLeft: index > 0 ? -8 : 0,
+            zIndex: displayPlayers.length - index,
+          }}
         >
           <PlayerAvatar
             name={player.name}
@@ -221,98 +205,16 @@ export const PlayerAvatarRow: React.FC<{
       ))}
       {overflow > 0 && (
         <View
-          style={[
-            styles.overflowBadge,
-            {
-              marginLeft: -8,
-              backgroundColor: overflowBadgeBg,
-              borderColor: overflowBadgeBorderColor,
-            },
-          ]}
+          className="w-8 h-8 rounded-full justify-center items-center border-2 border-white dark:border-surface-800 bg-surface-200 dark:bg-surface-700"
+          style={{ marginLeft: -8 }}
         >
-          <Text style={styles.overflowText}>+{overflow}</Text>
+          <Text className="text-surface-600 dark:text-surface-300 text-[10px] font-semibold">
+            +{overflow}
+          </Text>
         </View>
       )}
     </View>
   );
 };
-
-// Static styles that don't depend on theme
-const styles = StyleSheet.create({
-  container: {
-    position: "relative",
-  },
-  avatar: {
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-  },
-  image: {
-    resizeMode: "cover",
-  },
-  number: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-  },
-  initials: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  indicator: {
-    position: "absolute",
-    bottom: -2,
-    right: -2,
-    borderWidth: 2,
-  },
-  detailsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  details: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  name: {
-    fontWeight: "500",
-    fontSize: 14,
-  },
-  numberSmall: {
-    fontSize: 12,
-    marginLeft: 4,
-  },
-  subtitle: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  stats: {
-    fontSize: 10,
-    marginTop: 4,
-  },
-  avatarRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  avatarRowItem: {
-    borderWidth: 2,
-    borderRadius: 100,
-  },
-  overflowBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-  },
-  overflowText: {
-    color: "#FFFFFF",
-    fontSize: 10,
-    fontWeight: "600",
-  },
-});
 
 export default PlayerAvatar;

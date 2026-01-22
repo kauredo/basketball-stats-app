@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { BaseModal, ModalHeader, ModalBody, ModalFooter, ModalCancelButton } from "../../ui/BaseModal";
+import {
+  BaseModal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalCancelButton,
+} from "../../ui/BaseModal";
 
 interface TimeEditModalProps {
   isOpen: boolean;

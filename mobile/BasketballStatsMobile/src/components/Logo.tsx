@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image, Text, StyleSheet, useColorScheme, type ViewStyle } from "react-native";
+import { View, Image, Text, useColorScheme, type ViewStyle } from "react-native";
 
 interface LogoProps {
   variant?: "light" | "dark" | "auto";
@@ -51,10 +51,12 @@ const Logo: React.FC<LogoProps> = ({
   const effectiveTextColor = textColor ?? (isDark ? "#fdfcfb" : "#252220");
 
   return (
-    <View style={[styles.container, style]}>
+    <View className="flex-row items-center" style={style}>
       <Image source={logoSource} style={{ width, height }} resizeMode="contain" />
       {showText && (
-        <Text style={[styles.text, { fontSize, color: effectiveTextColor }]}>Basketball Stats</Text>
+        <Text className="ml-2 font-bold" style={{ fontSize, color: effectiveTextColor }}>
+          Basketball Stats
+        </Text>
       )}
     </View>
   );
@@ -71,17 +73,5 @@ export const LogoIcon: React.FC<Omit<LogoProps, "showText">> = ({
     <Logo variant={variant} size={size} style={style} showText={false} textColor={textColor} />
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  text: {
-    marginLeft: 8,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-});
 
 export default Logo;

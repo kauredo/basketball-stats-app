@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 
 interface TimeoutDotsProps {
@@ -32,25 +32,22 @@ export default function TimeoutDots({
       onPress={handlePress}
       disabled={disabled || remaining === 0}
       activeOpacity={0.7}
-      style={styles.container}
+      className="p-1"
     >
-      <View style={[styles.dotsContainer, { gap: spacing }]}>
+      <View className="flex-row items-center" style={{ gap: spacing }}>
         {Array.from({ length: total }).map((_, index) => {
           const isUsed = index >= remaining;
           return (
             <View
               key={index}
-              style={[
-                styles.dot,
-                {
-                  width: dotSize,
-                  height: dotSize,
-                  borderRadius: dotSize / 2,
-                  backgroundColor: isUsed ? "transparent" : "#F97316",
-                  borderWidth: 1,
-                  borderColor: isUsed ? "#6B7280" : "#F97316",
-                },
-              ]}
+              style={{
+                width: dotSize,
+                height: dotSize,
+                borderRadius: dotSize / 2,
+                backgroundColor: isUsed ? "transparent" : "#F97316",
+                borderWidth: 1,
+                borderColor: isUsed ? "#6B7280" : "#F97316",
+              }}
             />
           );
         })}
@@ -59,15 +56,4 @@ export default function TimeoutDots({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 4,
-  },
-  dotsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  dot: {
-    // Base styles set inline based on props
-  },
-});
+export { TimeoutDots };

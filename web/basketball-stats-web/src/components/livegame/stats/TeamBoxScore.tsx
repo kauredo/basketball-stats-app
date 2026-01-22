@@ -225,7 +225,9 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
                 <td className="text-center px-1.5 py-1.5 text-surface-600 dark:text-surface-400">
                   {player.freeThrowsMade || 0}/{player.freeThrowsAttempted || 0}
                 </td>
-                <td className={`text-center px-1.5 py-1.5 font-medium ${getPlusMinusClass(player.plusMinus || 0)}`}>
+                <td
+                  className={`text-center px-1.5 py-1.5 font-medium ${getPlusMinusClass(player.plusMinus || 0)}`}
+                >
                   {formatPlusMinus(player.plusMinus || 0)}
                 </td>
               </tr>
@@ -268,7 +270,9 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
               <td className="text-center px-1.5 py-1.5 text-surface-600 dark:text-surface-400">
                 {totals.ftm}/{totals.fta}
               </td>
-              <td className={`text-center px-1.5 py-1.5 font-medium ${getPlusMinusClass(totals.plusMinus)}`}>
+              <td
+                className={`text-center px-1.5 py-1.5 font-medium ${getPlusMinusClass(totals.plusMinus)}`}
+              >
                 {formatPlusMinus(totals.plusMinus)}
               </td>
             </tr>

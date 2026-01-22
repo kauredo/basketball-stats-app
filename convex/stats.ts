@@ -205,7 +205,8 @@ export const recordStat = mutation({
           const statPlayer = await ctx.db.get(stat.playerId);
           if (statPlayer) {
             const isStatPlayerHomeTeam = statPlayer.teamId === game.homeTeamId;
-            const plusMinusDelta = isStatPlayerHomeTeam === isHomeTeam ? pointsScored : -pointsScored;
+            const plusMinusDelta =
+              isStatPlayerHomeTeam === isHomeTeam ? pointsScored : -pointsScored;
             await ctx.db.patch(stat._id, {
               plusMinus: stat.plusMinus + plusMinusDelta,
             });
@@ -488,7 +489,8 @@ export const undoStat = mutation({
           if (statPlayer) {
             const isStatPlayerHomeTeam = statPlayer.teamId === game.homeTeamId;
             // Opposite of what we did when scoring
-            const plusMinusDelta = isStatPlayerHomeTeam === isHomeTeam ? -pointsRemoved : pointsRemoved;
+            const plusMinusDelta =
+              isStatPlayerHomeTeam === isHomeTeam ? -pointsRemoved : pointsRemoved;
             await ctx.db.patch(stat._id, {
               plusMinus: stat.plusMinus + plusMinusDelta,
             });

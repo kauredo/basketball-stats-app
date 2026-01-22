@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView, useWindowDimensions, StyleSheet } from "react-native";
+import { View, Text, ScrollView, useWindowDimensions } from "react-native";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 
 interface PlayerStat {
@@ -40,6 +40,7 @@ interface TeamBoxScoreProps {
 /**
  * Compact box score table for a single team.
  * Responsive - wider columns in landscape mode.
+ * Uses NativeWind for theming (light/dark mode support).
  */
 export function TeamBoxScore({
   teamName,
@@ -99,16 +100,16 @@ export function TeamBoxScore({
     return "0";
   };
 
-  const getPlusMinusColor = (value: number) => {
-    if (value > 0) return styles.textGreen;
-    if (value < 0) return styles.textRed;
-    return styles.textMuted;
+  const getPlusMinusClass = (value: number) => {
+    if (value > 0) return "text-green-500";
+    if (value < 0) return "text-red-500";
+    return "text-surface-500 dark:text-surface-400";
   };
 
-  const getFoulStyle = (fouls: number) => {
-    if (fouls >= foulLimit) return styles.textRedBold;
-    if (fouls >= foulLimit - 1) return styles.textYellow;
-    return styles.textSecondary;
+  const getFoulClass = (fouls: number) => {
+    if (fouls >= foulLimit) return "text-red-600 font-bold";
+    if (fouls >= foulLimit - 1) return "text-yellow-500";
+    return "text-surface-700 dark:text-surface-300";
   };
 
   // Dynamic column widths based on orientation
@@ -121,63 +122,85 @@ export function TeamBoxScore({
   };
 
   // Calculate total table width
-  const tableWidth =
-    cols.player + cols.pts + cols.stat * 6 + cols.shooting * 3 + cols.plusMinus;
+  const tableWidth = cols.player + cols.pts + cols.stat * 6 + cols.shooting * 3 + cols.plusMinus;
 
   return (
-    <View style={styles.container}>
+    <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden mb-4">
       {/* Header */}
-      <View style={[styles.header, isHomeTeam && styles.headerHome]}>
-        <Text style={styles.headerText}>{teamName}</Text>
+      <View
+        className={`px-3 py-2 ${isHomeTeam ? "bg-primary-50 dark:bg-primary-900/20" : "bg-surface-50 dark:bg-surface-700/50"}`}
+      >
+        <Text className="font-semibold text-surface-900 dark:text-white text-sm">{teamName}</Text>
       </View>
 
       {/* Table */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={isLandscape}
-        contentContainerStyle={[
-          styles.tableContainer,
-          isLandscape && { minWidth: width - 32 },
-        ]}
+        contentContainerStyle={isLandscape ? { minWidth: width - 32 } : undefined}
       >
         <View style={{ width: Math.max(tableWidth, isLandscape ? width - 32 : 0) }}>
           {/* Header Row */}
-          <View style={styles.headerRow}>
-            <View style={[styles.cell, { width: cols.player }]}>
-              <Text style={styles.headerCell}>Player</Text>
+          <View className="flex-row bg-surface-50 dark:bg-surface-700/50 border-b border-surface-200 dark:border-surface-600">
+            <View style={{ width: cols.player }} className="px-2 py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                Player
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.pts }]}>
-              <Text style={styles.headerCell}>PTS</Text>
+            <View style={{ width: cols.pts }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                PTS
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.headerCell}>REB</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                REB
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.headerCell}>AST</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                AST
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.headerCell}>STL</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                STL
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.headerCell}>BLK</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                BLK
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.headerCell}>TO</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                TO
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.headerCell}>PF</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                PF
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.shooting }]}>
-              <Text style={styles.headerCell}>FG</Text>
+            <View style={{ width: cols.shooting }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                FG
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.shooting }]}>
-              <Text style={styles.headerCell}>3P</Text>
+            <View style={{ width: cols.shooting }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                3P
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.shooting }]}>
-              <Text style={styles.headerCell}>FT</Text>
+            <View style={{ width: cols.shooting }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                FT
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.plusMinus }]}>
-              <Text style={styles.headerCell}>+/-</Text>
+            <View style={{ width: cols.plusMinus }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 uppercase">
+                +/-
+              </Text>
             </View>
           </View>
 
@@ -185,113 +208,147 @@ export function TeamBoxScore({
           {sortedPlayers.map((player) => (
             <View
               key={player.playerId}
-              style={[
-                styles.row,
-                player.fouledOut && styles.rowFouledOut,
-                player.isOnCourt && !player.fouledOut && styles.rowOnCourt,
-              ]}
+              className={`flex-row border-b border-surface-100 dark:border-surface-700 ${
+                player.fouledOut
+                  ? "bg-red-50 dark:bg-red-900/10"
+                  : player.isOnCourt
+                    ? "bg-green-50/50 dark:bg-green-900/10"
+                    : ""
+              }`}
             >
-              <View style={[styles.cell, styles.playerCell, { width: cols.player }]}>
-                {player.isOnCourt && !player.fouledOut && <View style={styles.onCourtDot} />}
+              <View style={{ width: cols.player }} className="flex-row items-center px-2 py-1.5">
+                {player.isOnCourt && !player.fouledOut && (
+                  <View className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1" />
+                )}
                 <Text
-                  style={[styles.playerNumber, player.fouledOut && styles.textStrikethrough]}
+                  className={`text-xs font-medium ${player.fouledOut ? "line-through text-surface-400" : "text-surface-900 dark:text-white"}`}
                   numberOfLines={1}
                 >
                   #{player.player?.number}
                 </Text>
-                <Text style={styles.playerName} numberOfLines={1}>
+                <Text
+                  className="text-xs text-surface-500 dark:text-surface-400 ml-1 flex-1"
+                  numberOfLines={1}
+                >
                   {isLandscape ? player.player?.name : player.player?.name?.split(" ").pop()}
                 </Text>
               </View>
-              <View style={[styles.cell, styles.cellCenter, { width: cols.pts }]}>
-                <Text style={styles.textBold}>{player.points}</Text>
-              </View>
-              <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-                <Text style={styles.textSecondary}>{player.rebounds}</Text>
-              </View>
-              <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-                <Text style={styles.textSecondary}>{player.assists}</Text>
-              </View>
-              <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-                <Text style={styles.textSecondary}>{player.steals}</Text>
-              </View>
-              <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-                <Text style={styles.textSecondary}>{player.blocks}</Text>
-              </View>
-              <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-                <Text style={styles.textSecondary}>{player.turnovers}</Text>
-              </View>
-              <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-                <Text style={[styles.textSecondary, getFoulStyle(player.fouls)]}>
-                  {player.fouls}
+              <View style={{ width: cols.pts }} className="items-center justify-center py-1.5">
+                <Text className="text-xs font-semibold text-surface-900 dark:text-white">
+                  {player.points}
                 </Text>
               </View>
-              <View style={[styles.cell, styles.cellCenter, { width: cols.shooting }]}>
-                <Text style={styles.textMuted}>
-                  {player.fieldGoalsMade}/{player.fieldGoalsAttempted}
+              <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+                <Text className="text-xs text-surface-700 dark:text-surface-300">
+                  {player.rebounds}
                 </Text>
               </View>
-              <View style={[styles.cell, styles.cellCenter, { width: cols.shooting }]}>
-                <Text style={styles.textMuted}>
-                  {player.threePointersMade}/{player.threePointersAttempted}
+              <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+                <Text className="text-xs text-surface-700 dark:text-surface-300">
+                  {player.assists}
                 </Text>
               </View>
-              <View style={[styles.cell, styles.cellCenter, { width: cols.shooting }]}>
-                <Text style={styles.textMuted}>
-                  {player.freeThrowsMade}/{player.freeThrowsAttempted}
+              <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+                <Text className="text-xs text-surface-700 dark:text-surface-300">
+                  {player.steals}
                 </Text>
               </View>
-              <View style={[styles.cell, styles.cellCenter, { width: cols.plusMinus }]}>
-                <Text style={[styles.textSecondary, getPlusMinusColor(player.plusMinus)]}>
-                  {formatPlusMinus(player.plusMinus)}
+              <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+                <Text className="text-xs text-surface-700 dark:text-surface-300">
+                  {player.blocks}
+                </Text>
+              </View>
+              <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+                <Text className="text-xs text-surface-700 dark:text-surface-300">
+                  {player.turnovers}
+                </Text>
+              </View>
+              <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+                <Text className={`text-xs ${getFoulClass(player.fouls)}`}>{player.fouls}</Text>
+              </View>
+              <View style={{ width: cols.shooting }} className="items-center justify-center py-1.5">
+                <Text className="text-xs text-surface-600 dark:text-surface-400">
+                  {player.fieldGoalsMade || 0}/{player.fieldGoalsAttempted || 0}
+                </Text>
+              </View>
+              <View style={{ width: cols.shooting }} className="items-center justify-center py-1.5">
+                <Text className="text-xs text-surface-600 dark:text-surface-400">
+                  {player.threePointersMade || 0}/{player.threePointersAttempted || 0}
+                </Text>
+              </View>
+              <View style={{ width: cols.shooting }} className="items-center justify-center py-1.5">
+                <Text className="text-xs text-surface-600 dark:text-surface-400">
+                  {player.freeThrowsMade || 0}/{player.freeThrowsAttempted || 0}
+                </Text>
+              </View>
+              <View
+                style={{ width: cols.plusMinus }}
+                className="items-center justify-center py-1.5"
+              >
+                <Text className={`text-xs font-medium ${getPlusMinusClass(player.plusMinus || 0)}`}>
+                  {formatPlusMinus(player.plusMinus || 0)}
                 </Text>
               </View>
             </View>
           ))}
 
           {/* Totals Row */}
-          <View style={styles.totalsRow}>
-            <View style={[styles.cell, { width: cols.player }]}>
-              <Text style={styles.totalsLabel}>TOTAL</Text>
+          <View className="flex-row bg-surface-100 dark:bg-surface-700 border-t-2 border-surface-300 dark:border-surface-600">
+            <View style={{ width: cols.player }} className="px-2 py-1.5">
+              <Text className="text-xs font-bold text-surface-900 dark:text-white">TOTAL</Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.pts }]}>
-              <Text style={styles.totalsBold}>{totals.points}</Text>
+            <View style={{ width: cols.pts }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-bold text-surface-900 dark:text-white">
+                {totals.points}
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.totalsText}>{totals.rebounds}</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-semibold text-surface-700 dark:text-surface-300">
+                {totals.rebounds}
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.totalsText}>{totals.assists}</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-semibold text-surface-700 dark:text-surface-300">
+                {totals.assists}
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.totalsText}>{totals.steals}</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-semibold text-surface-700 dark:text-surface-300">
+                {totals.steals}
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.totalsText}>{totals.blocks}</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-semibold text-surface-700 dark:text-surface-300">
+                {totals.blocks}
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.totalsText}>{totals.turnovers}</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-semibold text-surface-700 dark:text-surface-300">
+                {totals.turnovers}
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.stat }]}>
-              <Text style={styles.totalsText}>{totals.fouls}</Text>
+            <View style={{ width: cols.stat }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-semibold text-surface-700 dark:text-surface-300">
+                {totals.fouls}
+              </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.shooting }]}>
-              <Text style={styles.totalsMuted}>
+            <View style={{ width: cols.shooting }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-semibold text-surface-600 dark:text-surface-400">
                 {totals.fgm}/{totals.fga}
               </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.shooting }]}>
-              <Text style={styles.totalsMuted}>
+            <View style={{ width: cols.shooting }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-semibold text-surface-600 dark:text-surface-400">
                 {totals.tpm}/{totals.tpa}
               </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.shooting }]}>
-              <Text style={styles.totalsMuted}>
+            <View style={{ width: cols.shooting }} className="items-center justify-center py-1.5">
+              <Text className="text-xs font-semibold text-surface-600 dark:text-surface-400">
                 {totals.ftm}/{totals.fta}
               </Text>
             </View>
-            <View style={[styles.cell, styles.cellCenter, { width: cols.plusMinus }]}>
-              <Text style={[styles.totalsText, getPlusMinusColor(totals.plusMinus)]}>
+            <View style={{ width: cols.plusMinus }} className="items-center justify-center py-1.5">
+              <Text className={`text-xs font-semibold ${getPlusMinusClass(totals.plusMinus)}`}>
                 {formatPlusMinus(totals.plusMinus)}
               </Text>
             </View>
@@ -301,143 +358,5 @@ export function TeamBoxScore({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#1F2937",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#374151",
-    overflow: "hidden",
-    marginBottom: 16,
-  },
-  header: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: "#374151",
-  },
-  headerHome: {
-    backgroundColor: "rgba(249, 115, 22, 0.2)",
-  },
-  headerText: {
-    fontWeight: "600",
-    color: "#FFFFFF",
-    fontSize: 14,
-  },
-  tableContainer: {
-    flexGrow: 1,
-  },
-  headerRow: {
-    flexDirection: "row",
-    backgroundColor: "#374151",
-    borderBottomWidth: 1,
-    borderBottomColor: "#4B5563",
-  },
-  row: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#374151",
-  },
-  rowOnCourt: {
-    backgroundColor: "rgba(34, 197, 94, 0.1)",
-  },
-  rowFouledOut: {
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
-  },
-  totalsRow: {
-    flexDirection: "row",
-    backgroundColor: "#374151",
-    borderTopWidth: 2,
-    borderTopColor: "#4B5563",
-  },
-  cell: {
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-  },
-  cellCenter: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  playerCell: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 8,
-  },
-  headerCell: {
-    fontSize: 10,
-    fontWeight: "500",
-    color: "#9CA3AF",
-    textTransform: "uppercase",
-  },
-  onCourtDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#22C55E",
-    marginRight: 4,
-  },
-  playerNumber: {
-    fontSize: 11,
-    fontWeight: "500",
-    color: "#FFFFFF",
-  },
-  playerName: {
-    fontSize: 11,
-    color: "#9CA3AF",
-    marginLeft: 4,
-    flex: 1,
-  },
-  textBold: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-  textSecondary: {
-    fontSize: 11,
-    color: "#D1D5DB",
-  },
-  textMuted: {
-    fontSize: 10,
-    color: "#9CA3AF",
-  },
-  textGreen: {
-    color: "#4ADE80",
-  },
-  textRed: {
-    color: "#F87171",
-  },
-  textYellow: {
-    color: "#FBBF24",
-  },
-  textRedBold: {
-    color: "#EF4444",
-    fontWeight: "700",
-  },
-  textStrikethrough: {
-    textDecorationLine: "line-through",
-    color: "#6B7280",
-  },
-  totalsLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    paddingLeft: 8,
-  },
-  totalsBold: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  totalsText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#D1D5DB",
-  },
-  totalsMuted: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#9CA3AF",
-  },
-});
 
 export default TeamBoxScore;

@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Alert,
   SafeAreaView,
-  StyleSheet,
   useWindowDimensions,
 } from "react-native";
 import { useRoute, type RouteProp } from "@react-navigation/native";
@@ -111,7 +110,7 @@ function StatButton({
   const isCompact = size === "compact";
 
   return (
-    <Animated.View style={[animatedStyle, { flex: 1, marginHorizontal: isCompact ? 2 : 4 }]}>
+    <Animated.View className={`flex-1 ${isCompact ? "mx-0.5" : "mx-1"}`} style={animatedStyle}>
       <TouchableOpacity
         onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -120,18 +119,19 @@ function StatButton({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled}
-        style={[
-          styles.statButton,
-          {
-            backgroundColor: disabled ? "#374151" : color,
-            height: buttonHeight,
-            opacity: disabled ? 0.5 : 1,
-          },
-        ]}
+        className="rounded-xl justify-center items-center"
+        style={{
+          backgroundColor: disabled ? "#374151" : color,
+          height: buttonHeight,
+          opacity: disabled ? 0.5 : 1,
+          minWidth: TOUCH_TARGETS.minimum,
+        }}
         activeOpacity={0.8}
       >
-        <Text style={[styles.statButtonLabel, isCompact && { fontSize: 11 }]}>{label}</Text>
-        {!isCompact && <Text style={styles.statButtonShortLabel}>{shortLabel}</Text>}
+        <Text className={`text-white font-bold ${isCompact ? "text-[11px]" : "text-sm"}`}>
+          {label}
+        </Text>
+        {!isCompact && <Text className="text-white/70 text-[10px] mt-0.5">{shortLabel}</Text>}
       </TouchableOpacity>
     </Animated.View>
   );
@@ -2036,26 +2036,3 @@ export default function LiveGameScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  statButtonContainer: {
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  statButton: {
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    minWidth: TOUCH_TARGETS.minimum,
-  },
-  statButtonLabel: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  statButtonShortLabel: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 10,
-    marginTop: 2,
-  },
-});

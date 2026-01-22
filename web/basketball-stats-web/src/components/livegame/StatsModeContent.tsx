@@ -2,6 +2,7 @@ import React from "react";
 import { PlayerStat } from "../../types/livegame";
 import { TeamBoxScore } from "./stats/TeamBoxScore";
 import { QuarterBreakdown } from "./stats/QuarterBreakdown";
+import { AdvancedStats } from "./stats/AdvancedStats";
 
 interface StatsModeContentProps {
   homeTeamName: string;
@@ -52,6 +53,14 @@ export const StatsModeContent: React.FC<StatsModeContentProps> = ({
           isHomeTeam
         />
       </div>
+
+      {/* Advanced Stats */}
+      <AdvancedStats
+        homeStats={homeStats}
+        awayStats={awayStats}
+        homeTeamName={homeTeamName}
+        awayTeamName={awayTeamName}
+      />
     </div>
   );
 };

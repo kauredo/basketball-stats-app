@@ -41,7 +41,19 @@
     "prefer-const": "warn",
     "no-debugger": "error",
     "no-duplicate-imports": "error",
-    "no-console": ["warn", { "allow": ["warn", "error"] }]
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "paths": [
+          {
+            "name": "react-native",
+            "importNames": ["StyleSheet"],
+            "message": "Prefer NativeWind className for styling. Use StyleSheet only for dynamic layouts."
+          }
+        ]
+      }
+    ]
   },
   "ignorePatterns": ["node_modules", ".expo", "dist"]
 }

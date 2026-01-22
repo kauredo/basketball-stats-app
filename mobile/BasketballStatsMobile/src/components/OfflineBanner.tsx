@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Platform, StatusBar } from "react-native";
+import { View, Text, Platform, StatusBar } from "react-native";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import Icon from "./Icon";
 
@@ -13,56 +13,30 @@ export function OfflineBanner() {
 
   return (
     <View
-      style={[
-        styles.container,
-        {
-          paddingTop: STATUSBAR_HEIGHT,
-          backgroundColor: isOnline ? "#16a34a" : "#d97706",
-        },
-      ]}
+      className="absolute top-0 left-0 right-0 z-[100] pb-2"
+      style={{
+        paddingTop: STATUSBAR_HEIGHT,
+        backgroundColor: isOnline ? "#16a34a" : "#d97706",
+      }}
     >
-      <View style={styles.content}>
+      <View className="flex-row items-center justify-center gap-2 px-4">
         {isOnline ? (
           <>
             <Icon name="check" size={16} color="#FFFFFF" />
-            <Text style={styles.text}>Back online - Data syncing...</Text>
+            <Text className="text-white text-sm font-medium">Back online - Data syncing...</Text>
           </>
         ) : (
           <>
             <Icon name="alert" size={16} color="#FFFFFF" />
-            <Text style={styles.text}>You&apos;re offline - Viewing cached data</Text>
-            <Icon name="wifi" size={16} color="#FFFFFF" style={styles.pulsingIcon} />
+            <Text className="text-white text-sm font-medium">
+              You&apos;re offline - Viewing cached data
+            </Text>
+            <Icon name="wifi" size={16} color="#FFFFFF" style={{ marginLeft: 8 }} />
           </>
         )}
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 100,
-    paddingBottom: 8,
-  },
-  content: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingHorizontal: 16,
-  },
-  text: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  pulsingIcon: {
-    marginLeft: 8,
-  },
-});
 
 export default OfflineBanner;

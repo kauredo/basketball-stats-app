@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, Modal, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
 import type { Id } from "../../../../../convex/_generated/dataModel";
@@ -160,11 +160,11 @@ export default function FoulTypeModal({
 
   return (
     <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
-      <View style={styles.overlay}>
-        <View style={styles.container}>
+      <View className="flex-1 bg-black/70 justify-center items-center px-4 py-2">
+        <View className="bg-surface-800 rounded-3xl max-h-[96%] w-full max-w-[500px] pb-4 overflow-hidden">
           {/* Header with Player Info */}
-          <View style={styles.header}>
-            <View style={styles.headerLeft}>
+          <View className="flex-row justify-between items-center p-3 bg-surface-900 border-b border-surface-700">
+            <View className="flex-row items-center flex-1 gap-2.5">
               {step !== "foulType" && (
                 <TouchableOpacity
                   onPress={() => {
@@ -172,87 +172,94 @@ export default function FoulTypeModal({
                     else if (step === "andOne") setStep("shotType");
                     else if (step === "fouledPlayer") setStep("andOne");
                   }}
-                  style={styles.backButton}
+                  className="p-2 -ml-2"
                 >
                   <Icon name="arrow-left" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
               )}
-              <View style={styles.playerNumber}>
-                <Text style={styles.playerNumberText}>#{player.number}</Text>
+              <View className="w-10 h-10 rounded-full bg-primary-500 justify-center items-center">
+                <Text className="text-white font-bold text-sm">#{player.number}</Text>
               </View>
-              <View style={styles.playerDetails}>
-                <Text style={styles.playerName}>{player.name}</Text>
-                <Text style={[styles.playerFouls, isFoulLimitReached && styles.foulWarning]}>
+              <View className="flex-1">
+                <Text className="text-white text-[15px] font-semibold">{player.name}</Text>
+                <Text
+                  className={`text-xs mt-0.5 ${isFoulLimitReached ? "text-red-500 font-semibold" : "text-surface-400"}`}
+                >
                   {player.fouls} fouls{isFoulLimitReached && " • FOUL TROUBLE"}
                 </Text>
               </View>
             </View>
-            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+            <TouchableOpacity onPress={handleClose} className="p-2 -mr-1">
               <Icon name="close" size={24} color="#9CA3AF" />
             </TouchableOpacity>
           </View>
 
           {/* Step Content */}
-          <ScrollView style={styles.content}>
+          <ScrollView className="p-4">
             {step === "foulType" && (
-              <View style={styles.grid}>
+              <View className="flex-row flex-wrap gap-3">
                 {foulTypes.map((foul) => (
                   <TouchableOpacity
                     key={foul.type}
-                    style={[styles.foulButton, { borderColor: foul.color }]}
+                    className="w-[47%] bg-surface-900 border-2 rounded-xl py-3 px-4 items-center"
+                    style={{ borderColor: foul.color }}
                     onPress={() => handleFoulTypeSelect(foul.type)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.foulButtonLabel, { color: foul.color }]}>
+                    <Text className="text-base font-bold" style={{ color: foul.color }}>
                       {foul.label}
                     </Text>
-                    <Text style={styles.foulButtonDescription}>{foul.description}</Text>
+                    <Text className="text-surface-400 text-[11px] mt-1 text-center">
+                      {foul.description}
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
             )}
 
             {step === "shotType" && (
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>What type of shot?</Text>
-                <View style={styles.optionRow}>
+              <View className="items-center">
+                <Text className="text-white text-base font-semibold mb-4">What type of shot?</Text>
+                <View className="flex-row gap-3 w-full">
                   <TouchableOpacity
-                    style={styles.optionButton}
+                    className="flex-1 bg-surface-700 rounded-xl p-5 items-center"
                     onPress={() => handleShotTypeSelect("2pt")}
                   >
-                    <Text style={styles.optionButtonText}>2-Point</Text>
-                    <Text style={styles.optionButtonSubtext}>2 FTs</Text>
+                    <Text className="text-white text-base font-bold">2-Point</Text>
+                    <Text className="text-white/70 text-xs mt-1">2 FTs</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={styles.optionButton}
+                    className="flex-1 bg-surface-700 rounded-xl p-5 items-center"
                     onPress={() => handleShotTypeSelect("3pt")}
                   >
-                    <Text style={styles.optionButtonText}>3-Point</Text>
-                    <Text style={styles.optionButtonSubtext}>3 FTs</Text>
+                    <Text className="text-white text-base font-bold">3-Point</Text>
+                    <Text className="text-white/70 text-xs mt-1">3 FTs</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             )}
 
             {step === "andOne" && (
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Was the shot made? (And-1)</Text>
-                <View style={styles.optionRow}>
+              <View className="items-center">
+                <Text className="text-white text-base font-semibold mb-4">
+                  Was the shot made? (And-1)
+                </Text>
+                <View className="flex-row gap-3 w-full">
                   <TouchableOpacity
-                    style={[styles.optionButton, styles.yesButton]}
+                    className="flex-1 bg-green-800 rounded-xl p-5 items-center"
                     onPress={() => handleAndOneSelect(true)}
                   >
-                    <Text style={styles.optionButtonText}>Yes (And-1)</Text>
-                    <Text style={styles.optionButtonSubtext}>
+                    <Text className="text-white text-base font-bold">Yes (And-1)</Text>
+                    <Text className="text-white/70 text-xs mt-1">
                       {shotType === "2pt" ? "+2 PTS + 1 FT" : "+3 PTS + 1 FT"}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.optionButton, styles.noButton]}
+                    className="flex-1 bg-red-900 rounded-xl p-5 items-center"
                     onPress={() => handleAndOneSelect(false)}
                   >
-                    <Text style={styles.optionButtonText}>No (Missed)</Text>
-                    <Text style={styles.optionButtonSubtext}>
+                    <Text className="text-white text-base font-bold">No (Missed)</Text>
+                    <Text className="text-white/70 text-xs mt-1">
                       {shotType === "2pt" ? "2 FTs" : "3 FTs"}
                     </Text>
                   </TouchableOpacity>
@@ -261,19 +268,21 @@ export default function FoulTypeModal({
             )}
 
             {step === "fouledPlayer" && (
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Who was fouled?</Text>
-                <View style={styles.playerList}>
+              <View className="items-center">
+                <Text className="text-white text-base font-semibold mb-4">Who was fouled?</Text>
+                <View className="w-full">
                   {opposingPlayers.map((p) => (
                     <TouchableOpacity
                       key={p.playerId}
-                      style={styles.playerListItem}
+                      className="flex-row items-center bg-surface-900 p-3 rounded-lg mb-2"
                       onPress={() => handleFouledPlayerSelect(p.playerId)}
                     >
-                      <View style={styles.playerListNumber}>
-                        <Text style={styles.playerListNumberText}>#{p.player?.number}</Text>
+                      <View className="w-10 h-10 rounded-full bg-surface-700 justify-center items-center mr-3">
+                        <Text className="text-white font-semibold text-sm">
+                          #{p.player?.number}
+                        </Text>
                       </View>
-                      <Text style={styles.playerListName}>{p.player?.name}</Text>
+                      <Text className="flex-1 text-white text-[15px]">{p.player?.name}</Text>
                       <Icon name="chevron-right" size={20} color="#6B7280" />
                     </TouchableOpacity>
                   ))}
@@ -283,188 +292,11 @@ export default function FoulTypeModal({
           </ScrollView>
 
           {/* Cancel Button */}
-          <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+          <TouchableOpacity className="mx-4 mt-2 p-4 items-center" onPress={handleClose}>
+            <Text className="text-surface-400 text-base">Cancel</Text>
           </TouchableOpacity>
         </View>
       </View>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  container: {
-    backgroundColor: "#1F2937",
-    borderRadius: 24,
-    maxHeight: "96%",
-    width: "100%",
-    maxWidth: 500,
-    paddingBottom: 16,
-    overflow: "hidden",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 12,
-    backgroundColor: "#111827",
-    borderBottomWidth: 1,
-    borderBottomColor: "#374151",
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    gap: 10,
-  },
-  backButton: {
-    padding: 8,
-    marginLeft: -8,
-  },
-  closeButton: {
-    padding: 8,
-    marginRight: -4,
-  },
-  playerNumber: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F97316",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  playerNumberText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 14,
-  },
-  playerDetails: {
-    flex: 1,
-  },
-  playerName: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  playerFouls: {
-    color: "#9CA3AF",
-    fontSize: 12,
-    marginTop: 1,
-  },
-  foulWarning: {
-    color: "#EF4444",
-    fontWeight: "600",
-  },
-  content: {
-    padding: 16,
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  foulButton: {
-    width: "47%",
-    backgroundColor: "#111827",
-    borderWidth: 2,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: "center",
-  },
-  foulButtonLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  foulButtonDescription: {
-    color: "#9CA3AF",
-    fontSize: 11,
-    marginTop: 4,
-    textAlign: "center",
-  },
-  stepContent: {
-    alignItems: "center",
-  },
-  stepTitle: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 16,
-  },
-  optionRow: {
-    flexDirection: "row",
-    gap: 12,
-    width: "100%",
-  },
-  optionButton: {
-    flex: 1,
-    backgroundColor: "#374151",
-    borderRadius: 12,
-    padding: 20,
-    alignItems: "center",
-  },
-  yesButton: {
-    backgroundColor: "#166534",
-  },
-  noButton: {
-    backgroundColor: "#991B1B",
-  },
-  optionButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  optionButtonSubtext: {
-    color: "rgba(255, 255, 255, 0.7)",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  playerList: {
-    width: "100%",
-  },
-  playerListItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#111827",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  playerListNumber: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#374151",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  playerListNumberText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  playerListName: {
-    flex: 1,
-    color: "#FFFFFF",
-    fontSize: 15,
-  },
-  cancelButton: {
-    marginHorizontal: 16,
-    marginTop: 8,
-    padding: 16,
-    alignItems: "center",
-  },
-  cancelButtonText: {
-    color: "#9CA3AF",
-    fontSize: 16,
-  },
-});

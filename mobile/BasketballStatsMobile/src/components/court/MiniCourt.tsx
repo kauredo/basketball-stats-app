@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { StyleSheet, useColorScheme, useWindowDimensions } from "react-native";
+import { useColorScheme, useWindowDimensions } from "react-native";
 import Svg, { Rect, Circle, Path, G, Line } from "react-native-svg";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, { runOnJS } from "react-native-reanimated";
@@ -135,21 +135,14 @@ export function MiniCourt({
       ? shots.slice(-(maxShots ?? defaultMaxShots))
       : shots.slice(-(maxShots ?? defaultMaxShots));
 
-  const _isInteractive = !!onCourtTap && !disabled;
-
   return (
     <GestureDetector gesture={tapGesture}>
       <Animated.View
-        style={[
-          {
-            width: courtWidth,
-            height: courtHeight,
-            borderRadius: 12,
-            overflow: "hidden",
-            alignSelf: "center",
-          },
-          disabled && styles.courtDisabled,
-        ]}
+        className={`self-center rounded-xl overflow-hidden ${disabled ? "opacity-50" : ""}`}
+        style={{
+          width: courtWidth,
+          height: courtHeight,
+        }}
       >
         <Svg
           width="100%"
@@ -294,11 +287,5 @@ export function MiniCourt({
     </GestureDetector>
   );
 }
-
-const styles = StyleSheet.create({
-  courtDisabled: {
-    opacity: 0.5,
-  },
-});
 
 export default MiniCourt;

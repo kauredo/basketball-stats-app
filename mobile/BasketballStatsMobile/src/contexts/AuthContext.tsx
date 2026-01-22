@@ -211,13 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Token exists but validation returned null - token is invalid
       // Clear stored credentials and log out
       console.warn("Stored token is invalid, logging out");
-      SecureStore.deleteItemAsync(TOKEN_KEY);
-      SecureStore.deleteItemAsync(USER_KEY);
-      SecureStore.deleteItemAsync(LEAGUE_KEY);
-      setToken(null);
-      setUser(null);
-      setSelectedLeague(null);
-      setIsAuthenticated(false);
+      logout();
     }
   }, [currentUserData, token, isLoading]);
 

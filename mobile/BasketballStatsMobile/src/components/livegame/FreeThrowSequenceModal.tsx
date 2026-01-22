@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import { View, Text, TouchableOpacity, Modal } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -153,72 +153,78 @@ export default function FreeThrowSequenceModal({
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
-      <View style={styles.overlay}>
+      <View className="flex-1 bg-black/70 justify-center items-center p-6">
         <GestureDetector gesture={swipeGesture}>
-          <Animated.View style={[styles.container, animatedContainerStyle]}>
+          <Animated.View
+            className="bg-surface-800 rounded-3xl p-6 w-full max-w-[360px]"
+            style={animatedContainerStyle}
+          >
             {/* Header */}
-            <View style={styles.header}>
-              <Text style={styles.title}>FREE THROWS</Text>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <View className="flex-row justify-between items-center mb-4">
+              <Text className="text-white text-lg font-bold tracking-wide">FREE THROWS</Text>
+              <TouchableOpacity onPress={onClose} className="p-1">
                 <Icon name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
 
             {/* Player Info */}
-            <View style={styles.playerSection}>
-              <View style={styles.playerAvatar}>
-                <Text style={styles.playerNumber}>#{sequence.playerNumber}</Text>
+            <View className="items-center mb-6">
+              <View className="w-16 h-16 rounded-full bg-primary-500 justify-center items-center mb-2">
+                <Text className="text-white text-xl font-bold">#{sequence.playerNumber}</Text>
               </View>
-              <Text style={styles.playerName}>{sequence.playerName}</Text>
+              <Text className="text-white text-lg font-semibold">{sequence.playerName}</Text>
             </View>
 
             {/* Progress Indicator */}
-            <View style={styles.progressSection}>
-              <Text style={styles.attemptText}>
+            <View className="items-center mb-8">
+              <Text className="text-surface-400 text-sm mb-3">
                 Attempt {currentAttempt} of {sequence.totalAttempts}
                 {sequence.isOneAndOne && " (1-and-1)"}
               </Text>
-              <View style={styles.progressDots}>
+              <View className="flex-row gap-3">
                 {results.map((result, index) => (
                   <View
                     key={index}
-                    style={[
-                      styles.progressDot,
-                      result === true && styles.progressDotMade,
-                      result === false && styles.progressDotMissed,
-                      index === currentAttempt - 1 && styles.progressDotCurrent,
-                    ]}
+                    className={`w-7 h-7 rounded-full justify-center items-center border-2 ${
+                      result === true
+                        ? "bg-green-500 border-green-500"
+                        : result === false
+                          ? "bg-red-500 border-red-500"
+                          : index === currentAttempt - 1
+                            ? "bg-surface-700 border-primary-500 border-[3px]"
+                            : "bg-surface-700 border-surface-600"
+                    }`}
                   >
                     {result === true && <Icon name="check" size={12} color="#FFFFFF" />}
-                    {result === false && <Text style={styles.missedX}>X</Text>}
+                    {result === false && <Text className="text-white text-xs font-bold">X</Text>}
                   </View>
                 ))}
               </View>
             </View>
 
             {/* Action Buttons */}
-            <View style={styles.buttonSection}>
-              <Animated.View style={[styles.buttonWrapper, madeButtonAnimatedStyle]}>
+            <View className="flex-row gap-4 mb-4">
+              <Animated.View className="flex-1" style={madeButtonAnimatedStyle}>
                 <TouchableOpacity
-                  style={[styles.button, styles.madeButton]}
+                  className="h-20 rounded-2xl justify-center items-center bg-green-500"
                   onPress={() => handleResult(true)}
                   disabled={isProcessing}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.buttonText}>MADE</Text>
-                  <Text style={styles.buttonSubtext}>+1 PT</Text>
+                  <Text className="text-white text-lg font-bold">MADE</Text>
+                  <Text className="text-white/80 text-sm mt-0.5">+1 PT</Text>
                 </TouchableOpacity>
               </Animated.View>
 
-              <Animated.View style={[styles.buttonWrapper, missedButtonAnimatedStyle]}>
+              <Animated.View className="flex-1" style={missedButtonAnimatedStyle}>
                 <TouchableOpacity
-                  style={[styles.button, styles.missedButton]}
+                  className="h-20 rounded-2xl justify-center items-center bg-red-500"
                   onPress={() => handleResult(false)}
                   disabled={isProcessing}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.buttonText}>MISSED</Text>
-                  <View style={styles.missedIcon}>
+                  <Text className="text-white text-lg font-bold">MISSED</Text>
+                  <View className="mt-1">
                     <Icon name="x" size={24} color="#FFFFFF" />
                   </View>
                 </TouchableOpacity>
@@ -226,157 +232,17 @@ export default function FreeThrowSequenceModal({
             </View>
 
             {/* Cancel Option */}
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelText}>Cancel Free Throws</Text>
+            <TouchableOpacity className="items-center py-3" onPress={onClose}>
+              <Text className="text-surface-400 text-sm">Cancel Free Throws</Text>
             </TouchableOpacity>
 
             {/* Swipe Hint */}
-            <Text style={styles.swipeHint}>Swipe left to dismiss</Text>
+            <Text className="text-surface-500 text-[11px] text-center mt-2">
+              Swipe left to dismiss
+            </Text>
           </Animated.View>
         </GestureDetector>
       </View>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-  container: {
-    backgroundColor: "#1F2937",
-    borderRadius: 24,
-    padding: 24,
-    width: "100%",
-    maxWidth: 360,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  title: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "700",
-    letterSpacing: 1,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  playerSection: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  playerAvatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "#F97316",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  playerNumber: {
-    color: "#FFFFFF",
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  playerName: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  progressSection: {
-    alignItems: "center",
-    marginBottom: 32,
-  },
-  attemptText: {
-    color: "#9CA3AF",
-    fontSize: 14,
-    marginBottom: 12,
-  },
-  progressDots: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  progressDot: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#374151",
-    borderWidth: 2,
-    borderColor: "#4B5563",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  progressDotCurrent: {
-    borderColor: "#F97316",
-    borderWidth: 3,
-  },
-  progressDotMade: {
-    backgroundColor: "#22C55E",
-    borderColor: "#22C55E",
-  },
-  progressDotMissed: {
-    backgroundColor: "#EF4444",
-    borderColor: "#EF4444",
-  },
-  missedX: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  buttonSection: {
-    flexDirection: "row",
-    gap: 16,
-    marginBottom: 16,
-  },
-  buttonWrapper: {
-    flex: 1,
-  },
-  button: {
-    height: 80,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  madeButton: {
-    backgroundColor: "#22C55E",
-  },
-  missedButton: {
-    backgroundColor: "#EF4444",
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  buttonSubtext: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontSize: 14,
-    marginTop: 2,
-  },
-  missedIcon: {
-    marginTop: 4,
-  },
-  cancelButton: {
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  cancelText: {
-    color: "#9CA3AF",
-    fontSize: 14,
-  },
-  swipeHint: {
-    color: "#6B7280",
-    fontSize: 11,
-    textAlign: "center",
-    marginTop: 8,
-  },
-});

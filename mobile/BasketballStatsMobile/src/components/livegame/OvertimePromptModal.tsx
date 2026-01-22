@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import { View, Text, TouchableOpacity, Modal } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -85,162 +85,78 @@ export default function OvertimePromptModal({
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
-      <View style={styles.overlay}>
-        <View style={styles.container}>
+      <View className="flex-1 bg-black/80 justify-center items-center p-6">
+        <View className="bg-surface-800 rounded-3xl p-8 w-full max-w-[340px] items-center border-2 border-amber-500">
           {/* Close Button */}
-          <TouchableOpacity style={styles.closeButton} onPress={onDismiss}>
+          <TouchableOpacity className="absolute top-4 right-4 p-1" onPress={onDismiss}>
             <Icon name="close" size={24} color="#9CA3AF" />
           </TouchableOpacity>
 
           {/* Icon */}
-          <Animated.View style={[styles.iconContainer, iconAnimatedStyle]}>
+          <Animated.View
+            className="w-20 h-20 rounded-full bg-amber-500/20 justify-center items-center mb-4"
+            style={iconAnimatedStyle}
+          >
             <Icon name="trophy" size={40} color="#F59E0B" />
           </Animated.View>
 
           {/* Title */}
-          <Text style={styles.title}>GAME TIED</Text>
+          <Text className="text-amber-500 text-[28px] font-extrabold tracking-widest mb-2">
+            GAME TIED
+          </Text>
 
           {/* Score Display */}
-          <Animated.View style={[styles.scoreContainer, scoreAnimatedStyle]}>
-            <Text style={styles.score}>{awayScore}</Text>
-            <Text style={styles.scoreDivider}>-</Text>
-            <Text style={styles.score}>{homeScore}</Text>
+          <Animated.View className="flex-row items-center mb-2" style={scoreAnimatedStyle}>
+            <Text
+              className="text-white text-5xl font-bold"
+              style={{ fontVariant: ["tabular-nums"] }}
+            >
+              {awayScore}
+            </Text>
+            <Text className="text-surface-400 text-[32px] mx-4">-</Text>
+            <Text
+              className="text-white text-5xl font-bold"
+              style={{ fontVariant: ["tabular-nums"] }}
+            >
+              {homeScore}
+            </Text>
           </Animated.View>
 
           {/* Subtitle */}
-          <Text style={styles.subtitle}>
+          <Text className="text-surface-400 text-sm mb-8">
             {currentQuarter === 4 ? "End of Regulation" : `End of ${getOvertimeLabel()}`}
           </Text>
 
           {/* Start Overtime Button */}
           <TouchableOpacity
-            style={styles.overtimeButton}
+            className="bg-primary-500 w-full rounded-2xl py-[18px] items-center mb-3"
             onPress={handleStartOvertime}
             activeOpacity={0.8}
           >
-            <View style={styles.overtimeButtonContent}>
+            <View className="flex-row items-center gap-2">
               <Icon name="play" size={20} color="#FFFFFF" />
-              <Text style={styles.overtimeButtonText}>
+              <Text className="text-white text-lg font-bold tracking-wide">
                 START {currentQuarter >= 4 ? "OVERTIME" : `OT${currentQuarter - 3 + 1}`}
               </Text>
             </View>
-            <Text style={styles.overtimeButtonSubtext}>5 minute period</Text>
+            <Text className="text-white/70 text-xs mt-1">5 minute period</Text>
           </TouchableOpacity>
 
           {/* End as Tie Button */}
-          <TouchableOpacity style={styles.tieButton} onPress={handleEndAsTie} activeOpacity={0.8}>
-            <Text style={styles.tieButtonText}>End as Tie</Text>
+          <TouchableOpacity
+            className="bg-surface-700 w-full rounded-2xl py-4 items-center mb-4"
+            onPress={handleEndAsTie}
+            activeOpacity={0.8}
+          >
+            <Text className="text-white text-base font-semibold">End as Tie</Text>
           </TouchableOpacity>
 
           {/* Info Text */}
-          <Text style={styles.infoText}>Team fouls will reset for overtime</Text>
+          <Text className="text-surface-500 text-xs text-center">
+            Team fouls will reset for overtime
+          </Text>
         </View>
       </View>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-  container: {
-    backgroundColor: "#1F2937",
-    borderRadius: 24,
-    padding: 32,
-    width: "100%",
-    maxWidth: 340,
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#F59E0B",
-  },
-  closeButton: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    padding: 4,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(245, 158, 11, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  title: {
-    color: "#F59E0B",
-    fontSize: 28,
-    fontWeight: "800",
-    letterSpacing: 2,
-    marginBottom: 8,
-  },
-  scoreContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  score: {
-    color: "#FFFFFF",
-    fontSize: 48,
-    fontWeight: "700",
-    fontVariant: ["tabular-nums"],
-  },
-  scoreDivider: {
-    color: "#9CA3AF",
-    fontSize: 32,
-    marginHorizontal: 16,
-  },
-  subtitle: {
-    color: "#9CA3AF",
-    fontSize: 14,
-    marginBottom: 32,
-  },
-  overtimeButton: {
-    backgroundColor: "#F97316",
-    width: "100%",
-    borderRadius: 16,
-    paddingVertical: 18,
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  overtimeButtonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  overtimeButtonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "700",
-    letterSpacing: 1,
-  },
-  overtimeButtonSubtext: {
-    color: "rgba(255, 255, 255, 0.7)",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  tieButton: {
-    backgroundColor: "#374151",
-    width: "100%",
-    borderRadius: 16,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  tieButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  infoText: {
-    color: "#6B7280",
-    fontSize: 12,
-    textAlign: "center",
-  },
-});

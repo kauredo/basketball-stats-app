@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  TouchableOpacity,
-  Text,
-  View,
-  StyleSheet,
-  useColorScheme,
-  type ViewStyle,
-} from "react-native";
+import { TouchableOpacity, Text, View, useColorScheme, type ViewStyle } from "react-native";
 import * as Haptics from "expo-haptics";
 import Animated, {
   useAnimatedStyle,
@@ -96,9 +89,9 @@ const StatButton: React.FC<StatButtonProps> = ({
       onPressOut={handlePressOut}
       disabled={disabled}
       activeOpacity={0.8}
+      className="flex-1 rounded-xl justify-center items-center mx-1"
       style={[
         animatedStyle,
-        styles.button,
         {
           ...buttonStyle,
           height: buttonHeight,
@@ -108,8 +101,8 @@ const StatButton: React.FC<StatButtonProps> = ({
         style,
       ]}
     >
-      <Text style={styles.label}>{label}</Text>
-      {shortLabel && <Text style={styles.shortLabel}>{shortLabel}</Text>}
+      <Text className="text-white text-sm font-bold">{label}</Text>
+      {shortLabel && <Text className="text-white/70 text-xs mt-0.5">{shortLabel}</Text>}
     </AnimatedTouchable>
   );
 };
@@ -166,30 +159,10 @@ export const NegativeButton: React.FC<{
 export const StatButtonRow: React.FC<{
   children: React.ReactNode;
   style?: ViewStyle;
-}> = ({ children, style }) => <View style={[styles.row, style]}>{children}</View>;
-
-const styles = StyleSheet.create({
-  button: {
-    flex: 1,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 4,
-  },
-  label: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  shortLabel: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 10,
-    marginTop: 2,
-  },
-  row: {
-    flexDirection: "row",
-    marginBottom: 8,
-  },
-});
+}> = ({ children, style }) => (
+  <View className="flex-row mb-2" style={style}>
+    {children}
+  </View>
+);
 
 export default StatButton;

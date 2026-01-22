@@ -4,10 +4,10 @@ import {
   Text,
   TouchableOpacity,
   Dimensions,
-  StyleSheet,
   Modal,
   Pressable,
-  useColorScheme,
+  // eslint-disable-next-line no-restricted-imports
+  StyleSheet,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -40,20 +40,11 @@ export default function BottomSheet({
   showHandle = true,
   enableSwipeToDismiss = true,
 }: BottomSheetProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
   const translateY = useSharedValue(maxHeight);
   const opacity = useSharedValue(0);
   const context = useSharedValue({ y: 0 });
 
   const springConfig = { damping: 20, stiffness: 200 };
-
-  // Theme-aware colors using design system tokens
-  const sheetBg = isDark ? "#3d3835" : "#fdfcfb";
-  const handleBg = isDark ? "#5c5650" : "#d4cdc5";
-  const borderColor = isDark ? "#5c5650" : "#e8e4df";
-  const titleColor = isDark ? "#fdfcfb" : "#252220";
-  const closeIconColor = isDark ? "#a69f96" : "#7a746c";
 
   useEffect(() => {
     if (visible) {
@@ -102,27 +93,33 @@ export default function BottomSheet({
 
   return (
     <Modal visible={visible} transparent animationType="none">
-      <View style={styles.container}>
+      <View className="flex-1 justify-end">
         <Animated.View style={[styles.backdrop, animatedBackdropStyle]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={handleClose} />
         </Animated.View>
 
         <GestureDetector gesture={gesture}>
           <Animated.View
-            style={[styles.sheet, { maxHeight, backgroundColor: sheetBg }, animatedSheetStyle]}
+            className="bg-white dark:bg-surface-800 rounded-t-3xl pb-[34px]"
+            style={[{ maxHeight }, animatedSheetStyle]}
           >
-            {showHandle && <View style={[styles.handle, { backgroundColor: handleBg }]} />}
+            {showHandle && (
+              <View className="w-10 h-1 bg-surface-300 dark:bg-surface-600 rounded-full self-center mt-3 mb-2" />
+            )}
 
             {title && (
-              <View style={[styles.header, { borderBottomColor: borderColor }]}>
-                <Text style={[styles.title, { color: titleColor }]}>{title}</Text>
-                <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-                  <Icon name="close" size={24} color={closeIconColor} />
+              <View className="flex-row justify-between items-center px-4 py-3 border-b border-surface-200 dark:border-surface-700">
+                <Text className="text-lg font-bold text-surface-900 dark:text-white">{title}</Text>
+                <TouchableOpacity
+                  onPress={handleClose}
+                  className="p-2 min-w-[44px] min-h-[44px] items-center justify-center"
+                >
+                  <Icon name="close" size={24} color="#7a746c" />
                 </TouchableOpacity>
               </View>
             )}
 
-            <View style={styles.content}>{children}</View>
+            <View className="flex-1">{children}</View>
           </Animated.View>
         </GestureDetector>
       </View>
@@ -131,47 +128,8 @@ export default function BottomSheet({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  sheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingBottom: 34, // Safe area padding
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: "center",
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  closeButton: {
-    padding: 8, // Increased for better touch target (was 4)
-    minWidth: 44,
-    minHeight: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  content: {
-    flex: 1,
   },
 });

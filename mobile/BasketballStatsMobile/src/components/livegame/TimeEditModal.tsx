@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Modal,
   TextInput,
   KeyboardAvoidingView,
@@ -140,50 +139,57 @@ export default function TimeEditModal({
 
   if (!visible) return null;
 
+  const isPresetActive = (preset: number) =>
+    parseInt(primaryValue) === preset && parseInt(secondaryValue) === 0;
+
   return (
     <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.overlay}
+        className="flex-1 bg-black/70 justify-center items-center px-4 py-2"
       >
-        <View style={styles.container}>
+        <View className="bg-surface-800 rounded-3xl w-full max-w-[400px] pb-6 overflow-hidden">
           {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>{title}</Text>
+          <View className="flex-row justify-between items-center p-4 border-b border-surface-700">
+            <Text className="text-lg font-bold text-white">{title}</Text>
             <TouchableOpacity onPress={onClose}>
               <Icon name="close" size={24} color="#9CA3AF" />
             </TouchableOpacity>
           </View>
 
           {/* Time Input */}
-          <View style={styles.content}>
-            <View style={styles.inputRow}>
-              <View style={styles.inputGroup}>
+          <View className="p-6 items-center">
+            <View className="flex-row items-center justify-center gap-2">
+              <View className="items-center">
                 <TextInput
                   ref={primaryRef}
-                  style={styles.input}
+                  className="w-20 h-16 bg-surface-700 rounded-xl text-[32px] font-bold text-white text-center"
+                  style={{ fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace" }}
                   value={primaryValue}
                   onChangeText={handlePrimaryChange}
                   keyboardType="number-pad"
                   maxLength={2}
                   selectTextOnFocus
                 />
-                <Text style={styles.inputLabel}>
+                <Text className="text-[10px] text-surface-400 mt-1">
                   {mode === "game" ? "MIN" : "SEC"}
                 </Text>
               </View>
-              <Text style={styles.separator}>{mode === "game" ? ":" : "."}</Text>
-              <View style={styles.inputGroup}>
+              <Text className="text-[32px] font-bold text-surface-500 mb-5">
+                {mode === "game" ? ":" : "."}
+              </Text>
+              <View className="items-center">
                 <TextInput
                   ref={secondaryRef}
-                  style={[styles.input, mode === "shot" && styles.inputSmall]}
+                  className={`h-16 bg-surface-700 rounded-xl text-[32px] font-bold text-white text-center ${mode === "shot" ? "w-14" : "w-20"}`}
+                  style={{ fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace" }}
                   value={secondaryValue}
                   onChangeText={handleSecondaryChange}
                   keyboardType="number-pad"
                   maxLength={mode === "game" ? 2 : 1}
                   selectTextOnFocus
                 />
-                <Text style={styles.inputLabel}>
+                <Text className="text-[10px] text-surface-400 mt-1">
                   {mode === "game" ? "SEC" : "TENTHS"}
                 </Text>
               </View>
@@ -191,25 +197,15 @@ export default function TimeEditModal({
 
             {/* Quick presets for shot clock */}
             {mode === "shot" && (
-              <View style={styles.presetsRow}>
+              <View className="flex-row gap-3 mt-6">
                 {shotClockPresets.map((preset) => (
                   <TouchableOpacity
                     key={preset}
-                    style={[
-                      styles.presetButton,
-                      parseInt(primaryValue) === preset &&
-                        parseInt(secondaryValue) === 0 &&
-                        styles.presetButtonActive,
-                    ]}
+                    className={`px-5 py-3 rounded-lg ${isPresetActive(preset) ? "bg-primary-500" : "bg-surface-700"}`}
                     onPress={() => handlePreset(preset)}
                   >
                     <Text
-                      style={[
-                        styles.presetButtonText,
-                        parseInt(primaryValue) === preset &&
-                          parseInt(secondaryValue) === 0 &&
-                          styles.presetButtonTextActive,
-                      ]}
+                      className={`text-base font-bold ${isPresetActive(preset) ? "text-white" : "text-surface-300"}`}
                     >
                       {preset}
                     </Text>
@@ -219,16 +215,22 @@ export default function TimeEditModal({
             )}
 
             {/* Current time display */}
-            <Text style={styles.currentTime}>Current: {formatCurrentTime()}</Text>
+            <Text className="text-sm text-surface-500 mt-4">Current: {formatCurrentTime()}</Text>
           </View>
 
           {/* Actions */}
-          <View style={styles.actions}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+          <View className="flex-row px-4 gap-3">
+            <TouchableOpacity
+              className="flex-1 p-4 items-center rounded-xl bg-surface-700"
+              onPress={onClose}
+            >
+              <Text className="text-base font-semibold text-surface-400">Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-              <Text style={styles.saveButtonText}>Set Time</Text>
+            <TouchableOpacity
+              className="flex-1 p-4 items-center rounded-xl bg-primary-500"
+              onPress={handleSave}
+            >
+              <Text className="text-base font-semibold text-white">Set Time</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -236,129 +238,3 @@ export default function TimeEditModal({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  container: {
-    backgroundColor: "#1F2937",
-    borderRadius: 24,
-    width: "100%",
-    maxWidth: 400,
-    paddingBottom: 24,
-    overflow: "hidden",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#374151",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  content: {
-    padding: 24,
-    alignItems: "center",
-  },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  inputGroup: {
-    alignItems: "center",
-  },
-  input: {
-    width: 80,
-    height: 64,
-    backgroundColor: "#374151",
-    borderRadius: 12,
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    textAlign: "center",
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-  },
-  inputSmall: {
-    width: 56,
-  },
-  inputLabel: {
-    fontSize: 10,
-    color: "#9CA3AF",
-    marginTop: 4,
-  },
-  separator: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#6B7280",
-    marginBottom: 20,
-  },
-  presetsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 24,
-  },
-  presetButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: "#374151",
-    borderRadius: 8,
-  },
-  presetButtonActive: {
-    backgroundColor: "#F97316",
-  },
-  presetButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#D1D5DB",
-  },
-  presetButtonTextActive: {
-    color: "#FFFFFF",
-  },
-  currentTime: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginTop: 16,
-  },
-  actions: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    gap: 12,
-  },
-  cancelButton: {
-    flex: 1,
-    padding: 16,
-    alignItems: "center",
-    borderRadius: 12,
-    backgroundColor: "#374151",
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#9CA3AF",
-  },
-  saveButton: {
-    flex: 1,
-    padding: 16,
-    alignItems: "center",
-    borderRadius: 12,
-    backgroundColor: "#F97316",
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-});

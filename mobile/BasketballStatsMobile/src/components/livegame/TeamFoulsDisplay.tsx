@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text } from "react-native";
 
 interface TeamFoulsDisplayProps {
   foulsThisQuarter: number;
@@ -18,32 +18,21 @@ export default function TeamFoulsDisplay({
   const numberFontSize = size === "small" ? 12 : 14;
 
   return (
-    <View style={styles.container}>
-      <Text style={[styles.label, { fontSize }]}>TF:</Text>
-      <Text style={[styles.number, { fontSize: numberFontSize }]}>{foulsThisQuarter}</Text>
+    <View className="flex-row items-center gap-0.5">
+      <Text className="text-surface-400 dark:text-surface-400 font-medium" style={{ fontSize }}>
+        TF:
+      </Text>
+      <Text
+        className="text-surface-900 dark:text-white font-bold"
+        style={{ fontSize: numberFontSize }}
+      >
+        {foulsThisQuarter}
+      </Text>
       {showTotal && totalFouls > 0 && (
-        <Text style={[styles.total, { fontSize: fontSize - 2 }]}>({totalFouls})</Text>
+        <Text className="text-surface-500 dark:text-surface-500" style={{ fontSize: fontSize - 2 }}>
+          ({totalFouls})
+        </Text>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
-  },
-  label: {
-    color: "#9CA3AF",
-    fontWeight: "500",
-  },
-  number: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-  },
-  total: {
-    color: "#6B7280",
-    fontWeight: "400",
-  },
-});
