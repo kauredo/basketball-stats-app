@@ -1,51 +1,18 @@
 import React, { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon, ChartBarIcon } from "@heroicons/react/24/outline";
-import { PlayerStat } from "../../../types/livegame";
+import {
+  BasketballUtils,
+  getStatColorClass,
+  getGERColorClass,
+  STAT_THRESHOLDS,
+} from "@basketball-stats/shared";
+import type { PlayerStat } from "../../../types/livegame";
 
 interface AdvancedStatsProps {
   homeStats: PlayerStat[];
   awayStats: PlayerStat[];
   homeTeamName: string;
   awayTeamName: string;
-}
-
-/**
- * Calculate True Shooting Percentage
- * TS% = Points / (2 * (FGA + 0.44 * FTA))
- */
-function trueShootingPercentage(stat: PlayerStat): number {
-  const fga = stat.fieldGoalsAttempted || 0;
-  const fta = stat.freeThrowsAttempted || 0;
-  const trueShootingAttempts = fga + 0.44 * fta;
-  if (trueShootingAttempts === 0) return 0;
-  return Math.round((stat.points / (2 * trueShootingAttempts)) * 100 * 10) / 10;
-}
-
-/**
- * Calculate Effective Field Goal Percentage
- * eFG% = (FGM + 0.5 * 3PM) / FGA
- */
-function effectiveFieldGoalPercentage(stat: PlayerStat): number {
-  const fga = stat.fieldGoalsAttempted || 0;
-  const fgm = stat.fieldGoalsMade || 0;
-  const tpm = stat.threePointersMade || 0;
-  if (fga === 0) return 0;
-  const effectiveFGM = fgm + 0.5 * tpm;
-  return Math.round((effectiveFGM / fga) * 100 * 10) / 10;
-}
-
-/**
- * Calculate Player Efficiency Rating (simplified, game-only)
- * Uses total stats (not per-minute) for in-game context
- */
-function gameEfficiencyRating(stat: PlayerStat): number {
-  const positive = stat.points + stat.rebounds + stat.assists + stat.steals + stat.blocks;
-  const fga = stat.fieldGoalsAttempted || 0;
-  const fgm = stat.fieldGoalsMade || 0;
-  const fta = stat.freeThrowsAttempted || 0;
-  const ftm = stat.freeThrowsMade || 0;
-  const negative = fga - fgm + (fta - ftm) + stat.turnovers + stat.fouls;
-  return positive - negative;
 }
 
 /**
@@ -64,22 +31,10 @@ export const AdvancedStats: React.FC<AdvancedStatsProps> = ({
   const sortedHome = [...homeStats].sort((a, b) => b.points - a.points);
   const sortedAway = [...awayStats].sort((a, b) => b.points - a.points);
 
-  const getStatColorClass = (value: number, goodThreshold: number, badThreshold: number) => {
-    if (value >= goodThreshold) return "text-green-600 dark:text-green-400";
-    if (value <= badThreshold) return "text-red-600 dark:text-red-400";
-    return "text-surface-700 dark:text-surface-300";
-  };
-
-  const getGERColorClass = (value: number) => {
-    if (value > 10) return "text-green-600 dark:text-green-400";
-    if (value < 0) return "text-red-600 dark:text-red-400";
-    return "text-surface-700 dark:text-surface-300";
-  };
-
   const renderPlayerRow = (stat: PlayerStat) => {
-    const ts = trueShootingPercentage(stat);
-    const efg = effectiveFieldGoalPercentage(stat);
-    const ger = gameEfficiencyRating(stat);
+    const ts = BasketballUtils.trueShootingPercentage(stat);
+    const efg = BasketballUtils.effectiveFieldGoalPercentage(stat);
+    const ger = BasketballUtils.gameEfficiencyRating(stat);
 
     return (
       <tr
@@ -95,12 +50,12 @@ export const AdvancedStats: React.FC<AdvancedStatsProps> = ({
           </span>
         </td>
         <td className="py-2 text-center">
-          <span className={`text-xs font-medium ${getStatColorClass(ts, 55, 45)}`}>
+          <span className={`text-xs font-medium ${getStatColorClass(ts, STAT_THRESHOLDS.trueShootingPercentage.good, STAT_THRESHOLDS.trueShootingPercentage.bad)}`}>
             {ts.toFixed(1)}%
           </span>
         </td>
         <td className="py-2 text-center">
-          <span className={`text-xs font-medium ${getStatColorClass(efg, 50, 40)}`}>
+          <span className={`text-xs font-medium ${getStatColorClass(efg, STAT_THRESHOLDS.effectiveFieldGoalPercentage.good, STAT_THRESHOLDS.effectiveFieldGoalPercentage.bad)}`}>
             {efg.toFixed(1)}%
           </span>
         </td>

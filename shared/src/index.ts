@@ -6,6 +6,7 @@ export * from "./components";
 
 // Utils - basketball calculations and helpers
 export { BasketballUtils } from "./utils/basketball";
+export type { StatInput } from "./utils/basketball";
 
 // Constants - basketball-related constants
 export * from "./constants/basketball";

@@ -440,6 +440,44 @@ export const NAV_COLORS = {
 } as const;
 
 /**
+ * Stat color thresholds for advanced statistics display
+ * Used for color-coding performance metrics
+ */
+export const STAT_THRESHOLDS = {
+  trueShootingPercentage: { good: 55, bad: 45 },
+  effectiveFieldGoalPercentage: { good: 50, bad: 40 },
+  gameEfficiencyRating: { good: 10, bad: 0 },
+} as const;
+
+/**
+ * Get color class for stat values based on thresholds
+ * Returns Tailwind class names for consistent styling
+ */
+export function getStatColorClass(
+  value: number,
+  goodThreshold: number,
+  badThreshold: number
+): string {
+  if (value >= goodThreshold) return "text-green-600 dark:text-green-400";
+  if (value <= badThreshold) return "text-red-600 dark:text-red-400";
+  return "text-surface-700 dark:text-surface-300";
+}
+
+/**
+ * Get color class specifically for Game Efficiency Rating
+ * GER uses different thresholds (positive/negative based)
+ */
+export function getGERColorClass(value: number): string {
+  if (value > STAT_THRESHOLDS.gameEfficiencyRating.good) {
+    return "text-green-600 dark:text-green-400";
+  }
+  if (value < STAT_THRESHOLDS.gameEfficiencyRating.bad) {
+    return "text-red-600 dark:text-red-400";
+  }
+  return "text-surface-700 dark:text-surface-300";
+}
+
+/**
  * Theme-aware color utilities
  * Provides consistent color selection based on theme mode
  */
@@ -483,9 +521,12 @@ export default {
   STAT_BUTTON_CONFIG,
   SHOT_ZONES,
   NAV_COLORS,
+  STAT_THRESHOLDS,
   getHeatmapColor,
   courtToSvgCoords,
   svgToCourtCoords,
   getShotZone,
   getThemedColors,
+  getStatColorClass,
+  getGERColorClass,
 };

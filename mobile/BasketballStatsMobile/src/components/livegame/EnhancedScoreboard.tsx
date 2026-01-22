@@ -203,7 +203,6 @@ export default function EnhancedScoreboard({
     };
   };
 
-  console.log(game.status);
   const isGameActive = game.status === "active";
   const isGamePaused = game.status === "paused";
   const canStart = game.status === "scheduled";
@@ -211,6 +210,10 @@ export default function EnhancedScoreboard({
   const canResume = game.status === "paused";
   const canEndPeriod = game.status === "active" || game.status === "paused";
   const canReactivate = game.status === "completed";
+
+  // Score differential for winning indicator
+  const homeWinning = game.homeScore > game.awayScore;
+  const awayWinning = game.awayScore > game.homeScore;
 
   const handleReactivateGame = () => {
     Alert.alert("Resume Game", "This game has ended. Do you want to resume it?", [
@@ -281,7 +284,7 @@ export default function EnhancedScoreboard({
               {game.awayTeam?.name || "Away"}
             </Text>
             <Animated.Text
-              className="text-surface-900 dark:text-white text-2xl font-bold"
+              className={`text-2xl font-bold ${awayWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
               style={awayScoreStyle}
             >
               {game.awayScore}
@@ -368,7 +371,7 @@ export default function EnhancedScoreboard({
               </View>
             )}
             <Animated.Text
-              className="text-surface-900 dark:text-white text-2xl font-bold"
+              className={`text-2xl font-bold ${homeWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
               style={homeScoreStyle}
             >
               {game.homeScore}
@@ -513,7 +516,7 @@ export default function EnhancedScoreboard({
             {game.awayTeam?.name || "Away"}
           </Text>
           <Animated.Text
-            className="text-surface-900 dark:text-white text-4xl font-bold"
+            className={`text-4xl font-bold ${awayWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
             style={awayScoreStyle}
           >
             {game.awayScore}
@@ -607,7 +610,7 @@ export default function EnhancedScoreboard({
             {game.homeTeam?.name || "Home"}
           </Text>
           <Animated.Text
-            className="text-surface-900 dark:text-white text-4xl font-bold"
+            className={`text-4xl font-bold ${homeWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
             style={homeScoreStyle}
           >
             {game.homeScore}

@@ -1,6 +1,25 @@
 import type { PlayerStat, Game, Position } from "../types";
 import { format, formatDistanceToNow } from "date-fns";
 
+// Minimal interface for stat calculations - allows flexibility for different PlayerStat shapes
+// Uses optional fields with defaults in implementation for maximum compatibility
+export interface StatInput {
+  points: number;
+  rebounds: number;
+  assists: number;
+  steals: number;
+  blocks: number;
+  turnovers: number;
+  fouls: number;
+  fieldGoalsMade?: number;
+  fieldGoalsAttempted?: number;
+  threePointersMade?: number;
+  threePointersAttempted?: number;
+  freeThrowsMade?: number;
+  freeThrowsAttempted?: number;
+  minutesPlayed?: number;
+}
+
 // Basketball calculation utilities
 export class BasketballUtils {
   // Percentage calculations
@@ -9,44 +28,58 @@ export class BasketballUtils {
     return Math.round((made / attempted) * 100 * 10) / 10; // Round to 1 decimal
   }
 
-  static fieldGoalPercentage(stat: PlayerStat): number {
-    return this.calculatePercentage(stat.fieldGoalsMade, stat.fieldGoalsAttempted);
+  static fieldGoalPercentage(stat: StatInput): number {
+    return this.calculatePercentage(stat.fieldGoalsMade || 0, stat.fieldGoalsAttempted || 0);
   }
 
-  static threePointPercentage(stat: PlayerStat): number {
-    return this.calculatePercentage(stat.threePointersMade, stat.threePointersAttempted);
+  static threePointPercentage(stat: StatInput): number {
+    return this.calculatePercentage(stat.threePointersMade || 0, stat.threePointersAttempted || 0);
   }
 
-  static freeThrowPercentage(stat: PlayerStat): number {
-    return this.calculatePercentage(stat.freeThrowsMade, stat.freeThrowsAttempted);
+  static freeThrowPercentage(stat: StatInput): number {
+    return this.calculatePercentage(stat.freeThrowsMade || 0, stat.freeThrowsAttempted || 0);
   }
 
-  static effectiveFieldGoalPercentage(stat: PlayerStat): number {
-    if (stat.fieldGoalsAttempted === 0) return 0;
-    const effectiveFGM = stat.fieldGoalsMade + 0.5 * stat.threePointersMade;
-    return this.calculatePercentage(effectiveFGM, stat.fieldGoalsAttempted);
+  static effectiveFieldGoalPercentage(stat: StatInput): number {
+    const fga = stat.fieldGoalsAttempted || 0;
+    if (fga === 0) return 0;
+    const effectiveFGM = (stat.fieldGoalsMade || 0) + 0.5 * (stat.threePointersMade || 0);
+    return this.calculatePercentage(effectiveFGM, fga);
   }
 
-  static trueShootingPercentage(stat: PlayerStat): number {
-    const trueShootingAttempts = stat.fieldGoalsAttempted + 0.44 * stat.freeThrowsAttempted;
+  static trueShootingPercentage(stat: StatInput): number {
+    const fga = stat.fieldGoalsAttempted || 0;
+    const fta = stat.freeThrowsAttempted || 0;
+    const trueShootingAttempts = fga + 0.44 * fta;
     if (trueShootingAttempts === 0) return 0;
     return Math.round((stat.points / (2 * trueShootingAttempts)) * 100 * 10) / 10;
   }
 
-  // Player efficiency rating (simplified)
-  static playerEfficiencyRating(stat: PlayerStat): number {
-    if (stat.minutesPlayed === 0) return 0;
+  // Player efficiency rating (simplified, per-minute)
+  static playerEfficiencyRating(stat: StatInput): number {
+    const minutesPlayed = stat.minutesPlayed || 0;
+    if (minutesPlayed === 0) return 0;
 
     const positive = stat.points + stat.rebounds + stat.assists + stat.steals + stat.blocks;
-    const negative =
-      stat.fieldGoalsAttempted -
-      stat.fieldGoalsMade +
-      stat.freeThrowsAttempted -
-      stat.freeThrowsMade +
-      stat.turnovers +
-      stat.fouls;
+    const fga = stat.fieldGoalsAttempted || 0;
+    const fgm = stat.fieldGoalsMade || 0;
+    const fta = stat.freeThrowsAttempted || 0;
+    const ftm = stat.freeThrowsMade || 0;
+    const negative = fga - fgm + (fta - ftm) + stat.turnovers + stat.fouls;
 
-    return Math.round(((positive - negative) / stat.minutesPlayed) * 10) / 10;
+    return Math.round(((positive - negative) / minutesPlayed) * 10) / 10;
+  }
+
+  // Game efficiency rating (total stats, not per-minute - for in-game context)
+  static gameEfficiencyRating(stat: StatInput): number {
+    const positive = stat.points + stat.rebounds + stat.assists + stat.steals + stat.blocks;
+    const fga = stat.fieldGoalsAttempted || 0;
+    const fgm = stat.fieldGoalsMade || 0;
+    const fta = stat.freeThrowsAttempted || 0;
+    const ftm = stat.freeThrowsMade || 0;
+    const negative = fga - fgm + (fta - ftm) + stat.turnovers + stat.fouls;
+
+    return positive - negative;
   }
 
   // Game flow utilities
@@ -163,34 +196,37 @@ export class BasketballUtils {
   }
 
   // Stat validation
-  static validateStatEntry(stat: PlayerStat): string[] {
+  static validateStatEntry(stat: StatInput): string[] {
     const errors: string[] = [];
+    const fgm = stat.fieldGoalsMade || 0;
+    const fga = stat.fieldGoalsAttempted || 0;
+    const tpm = stat.threePointersMade || 0;
+    const tpa = stat.threePointersAttempted || 0;
+    const ftm = stat.freeThrowsMade || 0;
+    const fta = stat.freeThrowsAttempted || 0;
 
-    if (stat.fieldGoalsMade > stat.fieldGoalsAttempted) {
+    if (fgm > fga) {
       errors.push("Field goals made cannot exceed attempts");
     }
 
-    if (stat.threePointersMade > stat.threePointersAttempted) {
+    if (tpm > tpa) {
       errors.push("Three-pointers made cannot exceed attempts");
     }
 
-    if (stat.freeThrowsMade > stat.freeThrowsAttempted) {
+    if (ftm > fta) {
       errors.push("Free throws made cannot exceed attempts");
     }
 
-    if (stat.threePointersMade > stat.fieldGoalsMade) {
+    if (tpm > fgm) {
       errors.push("Three-pointers made cannot exceed total field goals made");
     }
 
-    if (stat.threePointersAttempted > stat.fieldGoalsAttempted) {
+    if (tpa > fga) {
       errors.push("Three-pointer attempts cannot exceed total field goal attempts");
     }
 
     // Validate points calculation
-    const calculatedPoints =
-      (stat.fieldGoalsMade - stat.threePointersMade) * 2 +
-      stat.threePointersMade * 3 +
-      stat.freeThrowsMade;
+    const calculatedPoints = (fgm - tpm) * 2 + tpm * 3 + ftm;
 
     if (stat.points !== calculatedPoints) {
       errors.push(`Points mismatch: expected ${calculatedPoints}, got ${stat.points}`);
