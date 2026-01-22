@@ -80,3 +80,90 @@ Both light and dark modes supported, switching based on system preference with m
 - Screen reader support with semantic HTML
 - Color is never the only indicator—always pair with icons, text, or patterns
 - Focus states visible and obvious (orange ring)
+
+---
+
+## Code Structure
+
+This is a **monorepo** with separate mobile (React Native/Expo) and web (React/Vite) applications that share a common backend and code library.
+
+### Directory Layout
+
+```
+basketball-stats-app/
+├── mobile/BasketballStatsMobile/   # React Native app (Expo)
+│   └── src/
+│       ├── components/             # Mobile-specific UI components
+│       ├── screens/                # Screen components (pages)
+│       ├── contexts/               # React contexts
+│       ├── hooks/                  # Custom hooks
+│       ├── navigation/             # Navigation configuration
+│       └── utils/                  # Mobile-specific utilities
+│
+├── web/basketball-stats-web/       # React web app (Vite)
+│   └── src/
+│       ├── components/             # Web-specific UI components
+│       ├── pages/                  # Page components
+│       ├── contexts/               # React contexts
+│       ├── hooks/                  # Custom hooks
+│       └── utils/                  # Web-specific utilities
+│
+├── shared/                         # Shared code library (npm package)
+│   └── src/
+│       ├── components/             # Shared component style definitions
+│       ├── constants/              # Basketball rules, theme tokens
+│       ├── types/                  # TypeScript type definitions
+│       └── utils/                  # Basketball calculations, helpers
+│
+└── convex/                         # Backend (Convex)
+    ├── schema.ts                   # Database schema
+    ├── games.ts                    # Game-related functions
+    ├── teams.ts                    # Team management
+    ├── players.ts                  # Player management
+    ├── stats.ts                    # Statistics calculations
+    └── ...                         # Other backend modules
+```
+
+### Adding Features: Cross-Platform Development
+
+**Every new feature must be implemented in both mobile and web apps.**
+
+When adding a feature:
+
+1. **Start with shared code** — Add types, constants, and business logic to `/shared` first
+2. **Implement in both apps** — Build the UI in both `mobile/` and `web/`
+3. **Add backend if needed** — Create/update Convex functions in `/convex`
+
+### What Goes Where
+
+| Code Type                 | Location                     | Notes                                           |
+| ------------------------- | ---------------------------- | ----------------------------------------------- |
+| TypeScript types          | `shared/src/types/`          | All shared interfaces and type definitions      |
+| Constants (rules, limits) | `shared/src/constants/`      | Basketball rules, stat categories, theme tokens |
+| Business logic            | `shared/src/utils/`          | Calculations, formatters, validators            |
+| Backend functions         | `convex/`                    | Database queries, mutations, actions            |
+| Mobile UI                 | `mobile/.../src/components/` | React Native components                         |
+| Web UI                    | `web/.../src/components/`    | React DOM components                            |
+
+### Using the Shared Package
+
+Both apps import from `@shared`:
+
+```typescript
+import { BasketballUtils, CONSTANTS, THEME } from "@shared";
+import type { Player, Game, PlayerStat } from "@shared";
+```
+
+**Maximize shared code usage:**
+
+- All type definitions should live in `shared/src/types/`
+- All basketball calculations (points, percentages, averages) should use `BasketballUtils`
+- All magic numbers should be constants in `shared/src/constants/`
+- If you write logic that could be reused, put it in shared
+
+### Platform-Specific Considerations
+
+- **Mobile** uses React Native components (`View`, `Text`, `TouchableOpacity`)
+- **Web** uses HTML elements with Tailwind CSS (`div`, `span`, `button`)
+- Both apps share the same Convex backend and use similar hooks patterns
+- Styling: Mobile uses NativeWind (Tailwind for RN), Web uses Tailwind CSS
