@@ -36,6 +36,9 @@ import AssistPromptModal from "../components/livegame/AssistPromptModal";
 import ReboundPromptModal from "../components/livegame/ReboundPromptModal";
 import QuickStatModal, { type QuickStatType } from "../components/livegame/QuickStatModal";
 import TimeEditModal from "../components/livegame/TimeEditModal";
+import QuarterBreakdown from "../components/livegame/QuarterBreakdown";
+import TeamBoxScore from "../components/livegame/TeamBoxScore";
+import AdvancedStats from "../components/livegame/AdvancedStats";
 import useSoundFeedback from "../hooks/useSoundFeedback";
 import useShotClock from "../hooks/useShotClock";
 
@@ -1744,133 +1747,38 @@ export default function LiveGameScreen() {
           )}
           {activeTab === "stats" && (
             <View className="pb-6">
-              {/* Away Team Stats */}
-              <View className="bg-white dark:bg-surface-800 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-700">
-                <Text className="text-surface-900 dark:text-white font-semibold mb-3">
-                  {game.awayTeam?.name || "Away"}
-                </Text>
-                {awayPlayerStats.map((playerStat: PlayerStat) => {
-                  const player = playerStat.player;
-                  if (!player) return null;
+              {/* Quarter Breakdown */}
+              <QuarterBreakdown
+                homeTeamName={game.homeTeam?.name || "Home"}
+                awayTeamName={game.awayTeam?.name || "Away"}
+                scoreByPeriod={(game.gameSettings as any)?.scoreByPeriod}
+                currentQuarter={game.currentQuarter || 1}
+                homeScore={game.homeScore}
+                awayScore={game.awayScore}
+              />
 
-                  return (
-                    <TouchableOpacity
-                      key={playerStat.id}
-                      onPress={() => canRecordStats && handleFoulPress(playerStat.playerId)}
-                      className={`flex-row items-center py-3 border-b border-surface-200 dark:border-surface-700 ${
-                        !playerStat.isOnCourt ? "opacity-50" : ""
-                      }`}
-                      disabled={!canRecordStats}
-                    >
-                      <View className="w-8 mr-2">
-                        <Text className="text-surface-600 dark:text-surface-400 text-xs">
-                          #{player.number}
-                        </Text>
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-surface-900 dark:text-white font-medium">
-                          {player.name}
-                          {playerStat.fouledOut && (
-                            <Text className="text-red-500 text-xs"> (OUT)</Text>
-                          )}
-                        </Text>
-                      </View>
-                      <View className="flex-row">
-                        <View className="w-12 items-center">
-                          <Text className="text-surface-900 dark:text-white font-bold">
-                            {playerStat.points}
-                          </Text>
-                          <Text className="text-surface-500 text-xs">PTS</Text>
-                        </View>
-                        <View className="w-10 items-center">
-                          <Text className="text-surface-900 dark:text-white">
-                            {playerStat.rebounds}
-                          </Text>
-                          <Text className="text-surface-500 text-xs">REB</Text>
-                        </View>
-                        <View className="w-10 items-center">
-                          <Text className="text-surface-900 dark:text-white">
-                            {playerStat.assists}
-                          </Text>
-                          <Text className="text-surface-500 text-xs">AST</Text>
-                        </View>
-                        <View className="w-8 items-center">
-                          <Text
-                            className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-surface-900 dark:text-white"}`}
-                          >
-                            {playerStat.fouls}
-                          </Text>
-                          <Text className="text-surface-500 text-xs">PF</Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+              {/* Away Team Box Score */}
+              <TeamBoxScore
+                teamName={game.awayTeam?.name || "Away"}
+                players={awayPlayerStats}
+                foulLimit={liveStats?.game?.foulLimit || 5}
+              />
 
-              {/* Home Team Stats */}
-              <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-                <Text className="text-surface-900 dark:text-white font-semibold mb-3">
-                  {game.homeTeam?.name || "Home"}
-                </Text>
-                {homePlayerStats.map((playerStat: PlayerStat) => {
-                  const player = playerStat.player;
-                  if (!player) return null;
+              {/* Home Team Box Score */}
+              <TeamBoxScore
+                teamName={game.homeTeam?.name || "Home"}
+                players={homePlayerStats}
+                foulLimit={liveStats?.game?.foulLimit || 5}
+                isHomeTeam
+              />
 
-                  return (
-                    <TouchableOpacity
-                      key={playerStat.id}
-                      onPress={() => canRecordStats && handleFoulPress(playerStat.playerId)}
-                      className={`flex-row items-center py-3 border-b border-surface-200 dark:border-surface-700 ${
-                        !playerStat.isOnCourt ? "opacity-50" : ""
-                      }`}
-                      disabled={!canRecordStats}
-                    >
-                      <View className="w-8 mr-2">
-                        <Text className="text-surface-600 dark:text-surface-400 text-xs">
-                          #{player.number}
-                        </Text>
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-surface-900 dark:text-white font-medium">
-                          {player.name}
-                          {playerStat.fouledOut && (
-                            <Text className="text-red-500 text-xs"> (OUT)</Text>
-                          )}
-                        </Text>
-                      </View>
-                      <View className="flex-row">
-                        <View className="w-12 items-center">
-                          <Text className="text-surface-900 dark:text-white font-bold">
-                            {playerStat.points}
-                          </Text>
-                          <Text className="text-surface-500 text-xs">PTS</Text>
-                        </View>
-                        <View className="w-10 items-center">
-                          <Text className="text-surface-900 dark:text-white">
-                            {playerStat.rebounds}
-                          </Text>
-                          <Text className="text-surface-500 text-xs">REB</Text>
-                        </View>
-                        <View className="w-10 items-center">
-                          <Text className="text-surface-900 dark:text-white">
-                            {playerStat.assists}
-                          </Text>
-                          <Text className="text-surface-500 text-xs">AST</Text>
-                        </View>
-                        <View className="w-8 items-center">
-                          <Text
-                            className={`${playerStat.fouls >= 4 ? "text-red-500" : "text-surface-900 dark:text-white"}`}
-                          >
-                            {playerStat.fouls}
-                          </Text>
-                          <Text className="text-surface-500 text-xs">PF</Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+              {/* Advanced Stats */}
+              <AdvancedStats
+                homeStats={homePlayerStats}
+                awayStats={awayPlayerStats}
+                homeTeamName={game.homeTeam?.name || "Home"}
+                awayTeamName={game.awayTeam?.name || "Away"}
+              />
             </View>
           )}
 

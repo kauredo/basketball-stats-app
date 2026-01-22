@@ -184,10 +184,49 @@ export const recordStat = mutation({
 
     // Update game score if points were scored
     if (pointsScored > 0) {
-      const scoreUpdate = isHomeTeam
-        ? { homeScore: game.homeScore + pointsScored }
-        : { awayScore: game.awayScore + pointsScored };
-      await ctx.db.patch(args.gameId, scoreUpdate);
+      const newHomeScore = isHomeTeam ? game.homeScore + pointsScored : game.homeScore;
+      const newAwayScore = isHomeTeam ? game.awayScore : game.awayScore + pointsScored;
+
+      // Update game score
+      await ctx.db.patch(args.gameId, {
+        homeScore: newHomeScore,
+        awayScore: newAwayScore,
+      });
+
+      // Update plus/minus for all on-court players
+      // Scoring team players get +points, opposing team players get -points
+      const allPlayerStats = await ctx.db
+        .query("playerStats")
+        .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+        .collect();
+
+      for (const stat of allPlayerStats) {
+        if (stat.isOnCourt) {
+          const statPlayer = await ctx.db.get(stat.playerId);
+          if (statPlayer) {
+            const isStatPlayerHomeTeam = statPlayer.teamId === game.homeTeamId;
+            const plusMinusDelta = isStatPlayerHomeTeam === isHomeTeam ? pointsScored : -pointsScored;
+            await ctx.db.patch(stat._id, {
+              plusMinus: stat.plusMinus + plusMinusDelta,
+            });
+          }
+        }
+      }
+
+      // Update scoreByPeriod in gameSettings
+      const gameSettings = (game.gameSettings as any) || {};
+      const scoreByPeriod = gameSettings.scoreByPeriod || {};
+      const currentQ = game.currentQuarter;
+      const periodKey = currentQ <= 4 ? `q${currentQ}` : `ot${currentQ - 4}`;
+
+      scoreByPeriod[periodKey] = {
+        home: newHomeScore,
+        away: newAwayScore,
+      };
+
+      await ctx.db.patch(args.gameId, {
+        gameSettings: { ...gameSettings, scoreByPeriod },
+      });
     }
 
     // Log game event for play-by-play
@@ -424,10 +463,53 @@ export const undoStat = mutation({
 
     // Update game score if points were removed
     if (pointsRemoved > 0) {
-      const scoreUpdate = isHomeTeam
-        ? { homeScore: Math.max(0, game.homeScore - pointsRemoved) }
-        : { awayScore: Math.max(0, game.awayScore - pointsRemoved) };
-      await ctx.db.patch(args.gameId, scoreUpdate);
+      const newHomeScore = isHomeTeam
+        ? Math.max(0, game.homeScore - pointsRemoved)
+        : game.homeScore;
+      const newAwayScore = isHomeTeam
+        ? game.awayScore
+        : Math.max(0, game.awayScore - pointsRemoved);
+
+      await ctx.db.patch(args.gameId, {
+        homeScore: newHomeScore,
+        awayScore: newAwayScore,
+      });
+
+      // Undo plus/minus for all on-court players
+      // Scoring team players get -points (undo), opposing team players get +points (undo)
+      const allPlayerStats = await ctx.db
+        .query("playerStats")
+        .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+        .collect();
+
+      for (const stat of allPlayerStats) {
+        if (stat.isOnCourt) {
+          const statPlayer = await ctx.db.get(stat.playerId);
+          if (statPlayer) {
+            const isStatPlayerHomeTeam = statPlayer.teamId === game.homeTeamId;
+            // Opposite of what we did when scoring
+            const plusMinusDelta = isStatPlayerHomeTeam === isHomeTeam ? -pointsRemoved : pointsRemoved;
+            await ctx.db.patch(stat._id, {
+              plusMinus: stat.plusMinus + plusMinusDelta,
+            });
+          }
+        }
+      }
+
+      // Update scoreByPeriod in gameSettings
+      const gameSettings = (game.gameSettings as any) || {};
+      const scoreByPeriod = gameSettings.scoreByPeriod || {};
+      const currentQ = game.currentQuarter;
+      const periodKey = currentQ <= 4 ? `q${currentQ}` : `ot${currentQ - 4}`;
+
+      scoreByPeriod[periodKey] = {
+        home: newHomeScore,
+        away: newAwayScore,
+      };
+
+      await ctx.db.patch(args.gameId, {
+        gameSettings: { ...gameSettings, scoreByPeriod },
+      });
     }
 
     const updatedGame = await ctx.db.get(args.gameId);
@@ -1090,10 +1172,47 @@ export const recordFreeThrow = mutation({
 
     // Update game score if made
     if (args.made) {
-      const scoreUpdate = isHomeTeam
-        ? { homeScore: game.homeScore + 1 }
-        : { awayScore: game.awayScore + 1 };
-      await ctx.db.patch(args.gameId, scoreUpdate);
+      const newHomeScore = isHomeTeam ? game.homeScore + 1 : game.homeScore;
+      const newAwayScore = isHomeTeam ? game.awayScore : game.awayScore + 1;
+
+      await ctx.db.patch(args.gameId, {
+        homeScore: newHomeScore,
+        awayScore: newAwayScore,
+      });
+
+      // Update plus/minus for all on-court players
+      const allPlayerStats = await ctx.db
+        .query("playerStats")
+        .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+        .collect();
+
+      for (const stat of allPlayerStats) {
+        if (stat.isOnCourt) {
+          const statPlayer = await ctx.db.get(stat.playerId);
+          if (statPlayer) {
+            const isStatPlayerHomeTeam = statPlayer.teamId === game.homeTeamId;
+            const plusMinusDelta = isStatPlayerHomeTeam === isHomeTeam ? 1 : -1;
+            await ctx.db.patch(stat._id, {
+              plusMinus: stat.plusMinus + plusMinusDelta,
+            });
+          }
+        }
+      }
+
+      // Update scoreByPeriod in gameSettings
+      const gameSettings = (game.gameSettings as any) || {};
+      const scoreByPeriod = gameSettings.scoreByPeriod || {};
+      const currentQ = game.currentQuarter;
+      const periodKey = currentQ <= 4 ? `q${currentQ}` : `ot${currentQ - 4}`;
+
+      scoreByPeriod[periodKey] = {
+        home: newHomeScore,
+        away: newAwayScore,
+      };
+
+      await ctx.db.patch(args.gameId, {
+        gameSettings: { ...gameSettings, scoreByPeriod },
+      });
     }
 
     // Log the event

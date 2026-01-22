@@ -41,6 +41,7 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
       tpa: acc.tpa + (p.threePointersAttempted || 0),
       ftm: acc.ftm + (p.freeThrowsMade || 0),
       fta: acc.fta + (p.freeThrowsAttempted || 0),
+      plusMinus: acc.plusMinus + (p.plusMinus || 0),
     }),
     {
       points: 0,
@@ -56,8 +57,21 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
       tpa: 0,
       ftm: 0,
       fta: 0,
+      plusMinus: 0,
     }
   );
+
+  const formatPlusMinus = (value: number) => {
+    if (value > 0) return `+${value}`;
+    if (value < 0) return `${value}`;
+    return "0";
+  };
+
+  const getPlusMinusClass = (value: number) => {
+    if (value > 0) return "text-green-600 dark:text-green-400";
+    if (value < 0) return "text-red-600 dark:text-red-400";
+    return "text-surface-500 dark:text-surface-400";
+  };
 
   return (
     <div className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
@@ -138,6 +152,13 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
               >
                 FT
               </th>
+              <th
+                scope="col"
+                className="text-center px-1.5 py-1.5 font-medium"
+                aria-label="Plus/Minus"
+              >
+                +/-
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -204,6 +225,9 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
                 <td className="text-center px-1.5 py-1.5 text-surface-600 dark:text-surface-400">
                   {player.freeThrowsMade || 0}/{player.freeThrowsAttempted || 0}
                 </td>
+                <td className={`text-center px-1.5 py-1.5 font-medium ${getPlusMinusClass(player.plusMinus || 0)}`}>
+                  {formatPlusMinus(player.plusMinus || 0)}
+                </td>
               </tr>
             ))}
             {/* Totals Row */}
@@ -243,6 +267,9 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
               </td>
               <td className="text-center px-1.5 py-1.5 text-surface-600 dark:text-surface-400">
                 {totals.ftm}/{totals.fta}
+              </td>
+              <td className={`text-center px-1.5 py-1.5 font-medium ${getPlusMinusClass(totals.plusMinus)}`}>
+                {formatPlusMinus(totals.plusMinus)}
               </td>
             </tr>
           </tbody>
