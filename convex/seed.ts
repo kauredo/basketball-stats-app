@@ -285,6 +285,7 @@ export const seedDatabase = mutation({
       isPublic: true,
       createdById: userId,
       ownerId: userId,
+      inviteCode: `city-basketball-league-${generateToken(6)}`,
     });
 
     // Create league membership for both users
@@ -862,6 +863,7 @@ export const seedMinimal = mutation({
       isPublic: true,
       createdById: userId,
       ownerId: userId,
+      inviteCode: `test-league-${generateToken(6)}`,
     });
 
     await ctx.db.insert("leagueMemberships", {
