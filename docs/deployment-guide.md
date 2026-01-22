@@ -66,7 +66,7 @@ npm run build
 
 Set in your hosting platform:
 
-- `REACT_APP_CONVEX_URL` - Your Convex deployment URL (if not hardcoded)
+- `VITE_CONVEX_URL` - Your Convex deployment URL (if not hardcoded)
 
 ## Mobile Deployment
 
