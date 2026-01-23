@@ -16,9 +16,16 @@ import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
 import PrivacyPage from "./pages/public/PrivacyPage";
 import TermsPage from "./pages/public/TermsPage";
+import PricingPage from "./pages/public/PricingPage";
+import FeaturesPage from "./pages/public/FeaturesPage";
+
+// Dev pages
+import EmailPreviewPage from "./pages/dev/EmailPreviewPage";
 
 // Auth pages
 import AuthPage from "./pages/AuthPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import ConfirmEmailPage from "./pages/auth/ConfirmEmailPage";
 
 // App pages
 import Dashboard from "./pages/Dashboard";
@@ -197,6 +204,22 @@ function AppRoutes() {
           </PublicLayout>
         }
       />
+      <Route
+        path="/pricing"
+        element={
+          <PublicLayout>
+            <PricingPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/features"
+        element={
+          <PublicLayout>
+            <FeaturesPage />
+          </PublicLayout>
+        }
+      />
 
       {/* Auth pages - redirect to /app if already logged in */}
       <Route
@@ -215,6 +238,8 @@ function AppRoutes() {
           </PublicOnlyRoute>
         }
       />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/confirm-email" element={<ConfirmEmailPage />} />
 
       {/* Join league route - handles both authenticated and unauthenticated users */}
       <Route path="/join/:inviteCode" element={<JoinPage />} />
@@ -228,6 +253,9 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* Dev routes - only accessible in development */}
+      <Route path="/dev/emails" element={<EmailPreviewPage />} />
 
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />

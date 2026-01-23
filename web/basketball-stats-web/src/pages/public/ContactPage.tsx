@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { useAction } from "convex/react";
+import { api } from "../../../../../convex/_generated/api";
 import SEOHead from "../../components/seo/SEOHead";
 import Icon from "../../components/Icon";
+
+type SubmitStatus = "idle" | "submitting" | "success" | "error";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -9,12 +13,30 @@ export default function ContactPage() {
     subject: "",
     message: "",
   });
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [status, setStatus] = useState<SubmitStatus>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const sendContactEmail = useAction(api.email.sendContactEmail);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would send the form data to a backend
-    setIsSubmitted(true);
+    setStatus("submitting");
+    setErrorMessage("");
+
+    try {
+      await sendContactEmail({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+      });
+      setStatus("success");
+    } catch (error) {
+      setStatus("error");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to send message. Please try again."
+      );
+    }
   };
 
   const handleChange = (
@@ -24,6 +46,12 @@ export default function ContactPage() {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+  };
+
+  const handleReset = () => {
+    setStatus("idle");
+    setErrorMessage("");
+    setFormData({ name: "", email: "", subject: "", message: "" });
   };
 
   return (
@@ -47,7 +75,7 @@ export default function ContactPage() {
             </p>
           </div>
 
-          {isSubmitted ? (
+          {status === "success" ? (
             <div className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 p-8 text-center">
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Icon name="check" size={32} className="text-green-600" />
@@ -56,13 +84,11 @@ export default function ContactPage() {
                 Message Sent!
               </h2>
               <p className="text-surface-600 dark:text-surface-400 mb-6">
-                Thank you for reaching out. We'll get back to you as soon as possible.
+                Thank you for reaching out. We've sent a confirmation to your email and will get
+                back to you as soon as possible.
               </p>
               <button
-                onClick={() => {
-                  setIsSubmitted(false);
-                  setFormData({ name: "", email: "", subject: "", message: "" });
-                }}
+                onClick={handleReset}
                 className="text-primary-600 hover:text-primary-500 font-medium"
               >
                 Send another message
@@ -70,6 +96,12 @@ export default function ContactPage() {
             </div>
           ) : (
             <div className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 p-6 sm:p-8">
+              {status === "error" && (
+                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-red-700 dark:text-red-400 text-sm">{errorMessage}</p>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
@@ -84,9 +116,10 @@ export default function ContactPage() {
                       id="name"
                       name="name"
                       required
+                      disabled={status === "submitting"}
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
                       placeholder="Your name"
                     />
                   </div>
@@ -102,9 +135,10 @@ export default function ContactPage() {
                       id="email"
                       name="email"
                       required
+                      disabled={status === "submitting"}
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
                       placeholder="you@example.com"
                     />
                   </div>
@@ -121,15 +155,15 @@ export default function ContactPage() {
                     id="subject"
                     name="subject"
                     required
+                    disabled={status === "submitting"}
                     value={formData.subject}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
                   >
                     <option value="">Select a subject</option>
                     <option value="general">General Inquiry</option>
                     <option value="support">Technical Support</option>
                     <option value="feedback">Feedback</option>
-                    <option value="billing">Billing Question</option>
                     <option value="partnership">Partnership Opportunity</option>
                   </select>
                 </div>
@@ -146,19 +180,30 @@ export default function ContactPage() {
                     name="message"
                     required
                     rows={5}
+                    disabled={status === "submitting"}
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 bg-white dark:bg-surface-700 text-surface-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none disabled:opacity-50"
                     placeholder="How can we help you?"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+                  disabled={status === "submitting"}
+                  className="w-full inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send Message
-                  <Icon name="arrow-right" size={20} className="ml-2" />
+                  {status === "submitting" ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send Message
+                      <Icon name="arrow-right" size={20} className="ml-2" />
+                    </>
+                  )}
                 </button>
               </form>
             </div>

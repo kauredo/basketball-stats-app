@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/auth/LoginScreen";
 import SignupScreen from "../screens/auth/SignupScreen";
+import ForgotPasswordScreen from "../screens/auth/ForgotPasswordScreen";
 import LeagueSelectionScreen from "../screens/auth/LeagueSelectionScreen";
 
 export type AuthStackParamList = {
@@ -14,22 +15,21 @@ export type AuthStackParamList = {
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export default function AuthNavigator() {
-  const [currentScreen, setCurrentScreen] = useState<"Login" | "Signup" | "LeagueSelection">(
-    "Login"
-  );
+  const [currentScreen, setCurrentScreen] = useState<
+    "Login" | "Signup" | "LeagueSelection" | "ForgotPassword"
+  >("Login");
 
   const navigateToLogin = () => setCurrentScreen("Login");
   const navigateToSignup = () => setCurrentScreen("Signup");
   const navigateToLeagueSelection = () => setCurrentScreen("LeagueSelection");
-  const navigateToForgotPassword = () => {
-    // For now, just show an alert - you can implement a proper screen later
-    console.log("Navigate to forgot password");
-  };
+  const navigateToForgotPassword = () => setCurrentScreen("ForgotPassword");
 
   const renderCurrentScreen = () => {
     switch (currentScreen) {
       case "Signup":
         return <SignupScreen onNavigateToLogin={navigateToLogin} />;
+      case "ForgotPassword":
+        return <ForgotPasswordScreen onNavigateToLogin={navigateToLogin} />;
       case "LeagueSelection":
         return <LeagueSelectionScreen />;
       case "Login":

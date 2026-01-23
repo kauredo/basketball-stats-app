@@ -6,9 +6,9 @@ import { useTheme } from "../../contexts/ThemeContext";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
+  { href: "/features", label: "Features" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/faq", label: "FAQ" },
-  { href: "/contact", label: "Contact" },
 ];
 
 export default function Header() {

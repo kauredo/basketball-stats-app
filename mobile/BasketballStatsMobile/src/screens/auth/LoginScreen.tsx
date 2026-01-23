@@ -48,10 +48,6 @@ export default function LoginScreen({
   };
 
   const handleForgotPassword = () => {
-    if (!email.trim()) {
-      Alert.alert("Enter Email", "Please enter your email address first");
-      return;
-    }
     onNavigateToForgotPassword();
   };
 

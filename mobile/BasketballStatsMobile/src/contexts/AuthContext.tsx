@@ -38,6 +38,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
   selectLeague: (league: League) => void;
   setUserLeagues: (leagues: League[]) => void;
   clearError: () => void;
@@ -63,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useMutation(api.auth.login);
   const signupMutation = useMutation(api.auth.signup);
   const logoutMutation = useMutation(api.auth.logout);
+  const requestPasswordResetMutation = useMutation(api.auth.requestPasswordReset);
 
   // Query for refreshing user data
   const currentUserData = useQuery(api.auth.getCurrentUser, token ? { token } : "skip");
@@ -177,6 +179,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const forgotPassword = async (email: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await requestPasswordResetMutation({ email });
+    } catch (err: any) {
+      const errorMessage = err.message || "Failed to send reset email";
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const selectLeague = async (league: League) => {
     setSelectedLeague(league);
     await SecureStore.setItemAsync(LEAGUE_KEY, JSON.stringify(league));
@@ -267,6 +284,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         signup,
         logout,
+        forgotPassword,
         selectLeague,
         setUserLeagues,
         clearError,

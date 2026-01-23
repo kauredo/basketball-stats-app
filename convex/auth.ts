@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import {
   hashPassword,
   verifyPassword,
@@ -56,14 +57,6 @@ export const signup = mutation({
     // Generate confirmation token
     const confirmationToken = generateToken(32);
 
-    // TODO: Send confirmation email with Resend
-    // When you have a domain and Resend API key configured:
-    // 1. Install resend: npm install resend
-    // 2. Create a Convex action to send email (actions can make external API calls)
-    // 3. Call the action here with: { to: args.email, confirmationToken, firstName: args.firstName }
-    // 4. Email should contain link: https://yourdomain.com/confirm-email?token={confirmationToken}
-    // For now, users can log in without email confirmation (see login handler)
-
     // Create user
     const userId = await ctx.db.insert("users", {
       email: args.email.toLowerCase(),
@@ -89,6 +82,13 @@ export const signup = mutation({
 
     const user = await ctx.db.get(userId);
     if (!user) throw new Error("Failed to create user");
+
+    // Schedule confirmation email to be sent
+    await ctx.scheduler.runAfter(0, internal.email.internalSendConfirmationEmail, {
+      email: args.email.toLowerCase(),
+      firstName: args.firstName,
+      confirmationToken,
+    });
 
     return {
       user: formatUser(user),
@@ -303,21 +303,12 @@ export const requestPasswordReset = mutation({
       resetPasswordSentAt: Date.now(),
     });
 
-    // TODO: Send password reset email with Resend
-    // When you have a domain and Resend API key configured:
-    // 1. Create a Convex action (e.g., sendPasswordResetEmail) that uses Resend SDK
-    // 2. Call the action with: { to: user.email, resetToken, firstName: user.firstName }
-    // 3. Email should contain link: https://yourdomain.com/reset-password?token={resetToken}
-    // 4. The token expires in 1 hour (RESET_TOKEN_EXPIRY in lib/auth.ts)
-    // Example Resend action:
-    //   import { Resend } from 'resend';
-    //   const resend = new Resend(process.env.RESEND_API_KEY);
-    //   await resend.emails.send({
-    //     from: 'noreply@yourdomain.com',
-    //     to: email,
-    //     subject: 'Reset your password',
-    //     html: `<p>Click <a href="https://yourdomain.com/reset-password?token=${resetToken}">here</a> to reset your password.</p>`
-    //   });
+    // Schedule password reset email to be sent
+    await ctx.scheduler.runAfter(0, internal.email.internalSendPasswordResetEmail, {
+      email: user.email,
+      firstName: user.firstName,
+      resetToken,
+    });
 
     return { message: "If an account exists with this email, a reset link has been sent." };
   },

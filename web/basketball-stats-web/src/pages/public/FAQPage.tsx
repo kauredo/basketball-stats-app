@@ -13,7 +13,7 @@ const faqSchema = {
       name: "What is Basketball Stats?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Basketball Stats is a comprehensive platform for tracking and analyzing basketball game statistics. It allows coaches, players, and enthusiasts to record live game data, manage teams and leagues, and gain insights through advanced analytics.",
+        text: "Basketball Stats is a comprehensive platform for tracking and analyzing basketball game statistics. It allows coaches, players, and enthusiasts to record live game data, manage teams and leagues, and gain insights through advanced analytics like shot charts and player comparisons.",
       },
     },
     {
@@ -21,7 +21,7 @@ const faqSchema = {
       name: "Is Basketball Stats free to use?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes! Basketball Stats offers a free tier that includes core features like game tracking, basic statistics, and team management. We also offer premium plans with advanced analytics, unlimited teams, and priority support for serious coaches and organizations.",
+        text: "Yes! Basketball Stats is currently free to use during our beta period. All core features including game tracking, team management, statistics, and analytics are available at no cost.",
       },
     },
     {
@@ -29,15 +29,15 @@ const faqSchema = {
       name: "Can I track stats during a live game?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Absolutely! Our live game tracking feature is designed for real-time stat recording. You can track points, rebounds, assists, steals, blocks, turnovers, fouls, and more as the game happens.",
+        text: "Absolutely! Our live game tracking feature is designed for real-time stat recording. You can track points, rebounds, assists, steals, blocks, turnovers, fouls, and more as the game happens. The interface is optimized for quick input with large touch targets.",
       },
     },
     {
       "@type": "Question",
-      name: "Does Basketball Stats work on mobile devices?",
+      name: "Is there a mobile app?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes, Basketball Stats is fully responsive and works great on smartphones and tablets. We also have dedicated mobile apps for iOS and Android that offer an optimized experience for courtside stat tracking.",
+        text: "We're actively developing mobile apps for iOS and Android. The web application is fully responsive and works great on mobile browsers in the meantime. Sign up for updates to be notified when our mobile apps launch!",
       },
     },
     {
@@ -45,7 +45,7 @@ const faqSchema = {
       name: "Is my data secure?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "We take data security seriously. All data is encrypted in transit and at rest. We use industry-standard security practices and regularly audit our systems. Your team and player data is private by default and only accessible to authorized users.",
+        text: "We take data security seriously. All data is encrypted in transit using HTTPS and at rest using industry-standard encryption. Your team and player data is private by default and only accessible to authorized members of your league.",
       },
     },
   ],

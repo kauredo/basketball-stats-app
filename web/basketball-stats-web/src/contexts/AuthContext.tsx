@@ -45,6 +45,8 @@ interface AuthContextType {
   signup: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (token: string, password: string, passwordConfirmation: string) => Promise<void>;
+  confirmEmail: (token: string) => Promise<void>;
   selectLeague: (league: League | null) => void;
   clearError: () => void;
   initialize: () => Promise<void>;
@@ -67,6 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signupMutation = useMutation(api.auth.signup);
   const logoutMutation = useMutation(api.auth.logout);
   const requestPasswordResetMutation = useMutation(api.auth.requestPasswordReset);
+  const resetPasswordMutation = useMutation(api.auth.resetPassword);
+  const confirmEmailMutation = useMutation(api.auth.confirmEmail);
 
   const initialize = useCallback(async () => {
     setIsLoading(true);
@@ -186,6 +190,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [requestPasswordResetMutation]
   );
 
+  const resetPassword = useCallback(
+    async (resetToken: string, password: string, passwordConfirmation: string) => {
+      setError(null);
+      try {
+        const result = await resetPasswordMutation({
+          token: resetToken,
+          password,
+          passwordConfirmation,
+        });
+        // Auto-login after password reset
+        setUser({
+          id: result.user.id,
+          email: result.user.email,
+          firstName: result.user.firstName,
+          lastName: result.user.lastName,
+          role: result.user.role,
+        });
+        setToken(result.tokens.accessToken);
+        localStorage.setItem(TOKEN_KEY, result.tokens.accessToken);
+      } catch (err: any) {
+        setError(err.message || "Failed to reset password");
+        throw err;
+      }
+    },
+    [resetPasswordMutation]
+  );
+
+  const confirmEmail = useCallback(
+    async (confirmationToken: string) => {
+      setError(null);
+      try {
+        const result = await confirmEmailMutation({ token: confirmationToken });
+        // Auto-login after email confirmation
+        setUser({
+          id: result.user.id,
+          email: result.user.email,
+          firstName: result.user.firstName,
+          lastName: result.user.lastName,
+          role: result.user.role,
+        });
+        setToken(result.tokens.accessToken);
+        localStorage.setItem(TOKEN_KEY, result.tokens.accessToken);
+      } catch (err: any) {
+        setError(err.message || "Failed to confirm email");
+        throw err;
+      }
+    },
+    [confirmEmailMutation]
+  );
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -201,6 +255,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signup,
     logout,
     forgotPassword,
+    resetPassword,
+    confirmEmail,
     selectLeague,
     clearError,
     initialize,
