@@ -45,7 +45,7 @@ const colors = {
 };
 
 // Logo URL - hosted on the live site for email compatibility
-const logoUrl = "https://www.basketballstatsapp.com/assets/logo.png";
+const logoUrl = "https://www.basketballstatsapp.com/assets/logo-long.png";
 
 // Reusable email header
 function emailHeader(): string {
