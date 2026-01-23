@@ -5,7 +5,7 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-white dark:bg-surface-900">
       {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-primary-100 dark:bg-primary-900/20 blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-primary-50 dark:bg-primary-900/10 blur-3xl" />
       </div>
@@ -27,7 +27,7 @@ export default function Hero() {
           {/* Subheadline */}
           <p className="mt-6 text-lg sm:text-xl text-surface-600 dark:text-surface-400 max-w-2xl mx-auto">
             Record live game stats, analyze player performance, and gain insights to improve your
-            team&apos;s game. Built for coaches, players, and basketball enthusiasts.
+            team's game. Built for coaches, players, and basketball enthusiasts.
           </p>
 
           {/* CTAs */}

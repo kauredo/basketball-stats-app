@@ -41,7 +41,7 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
               Check your email
             </h2>
             <p className="mt-2 text-center text-sm text-surface-600 dark:text-surface-400">
-              We&apos;ve sent a password reset link to {email}
+              We've sent a password reset link to {email}
             </p>
           </div>
 
@@ -73,7 +73,7 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
             Reset your password
           </h2>
           <p className="mt-2 text-center text-sm text-surface-600 dark:text-surface-400">
-            Enter your email address and we&apos;ll send you a link to reset your password.
+            Enter your email address and we'll send you a link to reset your password.
           </p>
         </div>
 

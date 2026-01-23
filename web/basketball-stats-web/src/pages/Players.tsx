@@ -385,7 +385,7 @@ const Players: React.FC = () => {
           <div className="mt-4 flex flex-wrap gap-2">
             {searchTerm && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300">
-                Search: &quot;{searchTerm}&quot;
+                Search: "{searchTerm}"
                 <button
                   onClick={() => setSearchTerm("")}
                   className="ml-2 inline-flex items-center p-0.5 rounded-full text-surface-500 hover:text-surface-700 dark:hover:text-surface-200"

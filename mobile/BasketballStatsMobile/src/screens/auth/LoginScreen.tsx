@@ -167,7 +167,7 @@ export default function LoginScreen({
 
         <View className="flex-row justify-center items-center">
           <Text className="text-surface-600 dark:text-surface-400 text-sm mr-2">
-            Don&apos;t have an account?
+            Don't have an account?
           </Text>
           <TouchableOpacity onPress={onNavigateToSignup} disabled={isLoading}>
             <Text className="text-primary-500 text-sm font-semibold">Sign Up</Text>

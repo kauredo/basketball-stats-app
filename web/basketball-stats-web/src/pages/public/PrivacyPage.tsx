@@ -6,6 +6,8 @@ export default function PrivacyPage() {
       <SEOHead
         title="Privacy Policy"
         description="Learn how Basketball Stats collects, uses, and protects your personal information."
+        keywords="privacy policy, data protection, basketball stats privacy, user data"
+        canonicalUrl="https://basketballstatsapp.com/privacy"
       />
 
       <section className="bg-white dark:bg-surface-900 py-16 sm:py-24">

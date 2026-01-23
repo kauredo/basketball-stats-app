@@ -815,7 +815,7 @@ const Games: React.FC = () => {
                       <ExclamationTriangleIcon className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                       <div className="flex-1">
                         <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                          Team &quot;{exactTeamMatch.name}&quot; already exists
+                          Team "{exactTeamMatch.name}" already exists
                         </p>
                         <button
                           type="button"
@@ -844,7 +844,7 @@ const Games: React.FC = () => {
                       <InformationCircleIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                       <div className="flex-1">
                         <p className="text-sm text-blue-700 dark:text-blue-300">
-                          Similar team exists: &quot;{similarTeamMatch.name}&quot;
+                          Similar team exists: "{similarTeamMatch.name}"
                         </p>
                         <button
                           type="button"
@@ -859,7 +859,7 @@ const Games: React.FC = () => {
                           }}
                           className="mt-2 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
                         >
-                          Use &quot;{similarTeamMatch.name}&quot; Instead
+                          Use "{similarTeamMatch.name}" Instead
                         </button>
                       </div>
                     </div>
@@ -905,8 +905,8 @@ const Games: React.FC = () => {
               <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                 <InformationCircleIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Players will be created as &quot;Player 1&quot;, &quot;Player 2&quot;, etc. with
-                  jersey numbers 1, 2, 3... You can edit names later from the Teams page.
+                  Players will be created as "Player 1", "Player 2", etc. with jersey numbers 1, 2,
+                  3... You can edit names later from the Teams page.
                 </p>
               </div>
             </div>

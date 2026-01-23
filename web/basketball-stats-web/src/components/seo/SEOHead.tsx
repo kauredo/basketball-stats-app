@@ -8,6 +8,8 @@ interface SEOHeadProps {
   ogType?: "website" | "article";
   twitterCard?: "summary" | "summary_large_image";
   canonicalUrl?: string;
+  robots?: string;
+  jsonLd?: Record<string, unknown>;
 }
 
 const DEFAULT_TITLE = "Basketball Stats - Track & Analyze Your Games";
@@ -23,6 +25,8 @@ export default function SEOHead({
   ogType = "website",
   twitterCard = "summary_large_image",
   canonicalUrl,
+  robots,
+  jsonLd,
 }: SEOHeadProps) {
   const fullTitle = title ? `${title} | Basketball Stats` : DEFAULT_TITLE;
 
@@ -31,6 +35,9 @@ export default function SEOHead({
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
+
+      {/* Robots directive */}
+      {robots && <meta name="robots" content={robots} />}
 
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
@@ -47,6 +54,9 @@ export default function SEOHead({
 
       {/* Canonical URL */}
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+
+      {/* JSON-LD Structured Data */}
+      {jsonLd && <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>}
     </Helmet>
   );
 }

@@ -416,7 +416,7 @@ export default function LeagueSettingsScreen() {
               </TouchableOpacity>
             </View>
             <Text className="text-surface-500 dark:text-surface-400 text-xs">
-              New members will join as &quot;Member&quot; role by default
+              New members will join as "Member" role by default
             </Text>
           </View>
         </View>

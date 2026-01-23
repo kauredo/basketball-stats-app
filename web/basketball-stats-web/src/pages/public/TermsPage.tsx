@@ -6,6 +6,8 @@ export default function TermsPage() {
       <SEOHead
         title="Terms of Service"
         description="Read the terms and conditions for using Basketball Stats services."
+        keywords="terms of service, terms and conditions, basketball stats terms, user agreement"
+        canonicalUrl="https://basketballstatsapp.com/terms"
       />
 
       <section className="bg-white dark:bg-surface-900 py-16 sm:py-24">
@@ -119,7 +121,7 @@ export default function TermsPage() {
                 </h2>
                 <p className="text-surface-600 dark:text-surface-400">
                   We reserve the right to modify or replace these terms at any time. If a revision
-                  is material, we will try to provide at least 30 days&apos; notice prior to any new
+                  is material, we will try to provide at least 30 days' notice prior to any new
                   terms taking effect. Continued use of the service after changes constitutes
                   acceptance of the new terms.
                 </p>

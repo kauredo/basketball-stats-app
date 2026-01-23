@@ -21,7 +21,7 @@ export const OfflineBanner: React.FC = () => {
       ) : (
         <>
           <ExclamationTriangleIcon className="w-4 h-4" />
-          <span>You&apos;re offline - Viewing cached data</span>
+          <span>You're offline - Viewing cached data</span>
           <WifiIcon className="w-4 h-4 animate-pulse ml-2" />
         </>
       )}

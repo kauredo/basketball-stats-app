@@ -4,6 +4,53 @@ import FAQAccordion from "../../components/marketing/FAQAccordion";
 import { faqData } from "../../data/faq";
 import Icon from "../../components/Icon";
 
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "What is Basketball Stats?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Basketball Stats is a comprehensive platform for tracking and analyzing basketball game statistics. It allows coaches, players, and enthusiasts to record live game data, manage teams and leagues, and gain insights through advanced analytics.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Is Basketball Stats free to use?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes! Basketball Stats offers a free tier that includes core features like game tracking, basic statistics, and team management. We also offer premium plans with advanced analytics, unlimited teams, and priority support for serious coaches and organizations.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Can I track stats during a live game?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Absolutely! Our live game tracking feature is designed for real-time stat recording. You can track points, rebounds, assists, steals, blocks, turnovers, fouls, and more as the game happens.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Does Basketball Stats work on mobile devices?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, Basketball Stats is fully responsive and works great on smartphones and tablets. We also have dedicated mobile apps for iOS and Android that offer an optimized experience for courtside stat tracking.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Is my data secure?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "We take data security seriously. All data is encrypted in transit and at rest. We use industry-standard security practices and regularly audit our systems. Your team and player data is private by default and only accessible to authorized users.",
+      },
+    },
+  ],
+};
+
 export default function FAQPage() {
   return (
     <>
@@ -11,6 +58,8 @@ export default function FAQPage() {
         title="Frequently Asked Questions"
         description="Find answers to common questions about Basketball Stats, including features, pricing, mobile support, and more."
         keywords="basketball stats FAQ, help, support, questions, basketball app help"
+        canonicalUrl="https://basketballstatsapp.com/faq"
+        jsonLd={faqSchema}
       />
 
       {/* Header */}
@@ -21,8 +70,8 @@ export default function FAQPage() {
               Frequently Asked Questions
             </h1>
             <p className="text-lg text-surface-600 dark:text-surface-400">
-              Everything you need to know about Basketball Stats. Can&apos;t find the answer
-              you&apos;re looking for? Feel free to contact our support team.
+              Everything you need to know about Basketball Stats. Can't find the answer you're
+              looking for? Feel free to contact our support team.
             </p>
           </div>
 
@@ -34,7 +83,7 @@ export default function FAQPage() {
           {/* CTA */}
           <div className="mt-12 text-center">
             <p className="text-surface-600 dark:text-surface-400 mb-4">
-              Still have questions? We&apos;re here to help.
+              Still have questions? We're here to help.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link

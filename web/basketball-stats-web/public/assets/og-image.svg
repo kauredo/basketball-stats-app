@@ -1,0 +1,44 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#111827"/>
+
+  <!-- Decorative circles -->
+  <circle cx="100" cy="530" r="200" fill="#F97316" fill-opacity="0.1"/>
+  <circle cx="1100" cy="100" r="250" fill="#F97316" fill-opacity="0.08"/>
+
+  <!-- Basketball icon -->
+  <g transform="translate(540, 180)">
+    <circle cx="60" cy="60" r="55" stroke="#F97316" stroke-width="4" fill="none"/>
+    <path d="M60 5 L60 115" stroke="#F97316" stroke-width="3"/>
+    <path d="M5 60 L115 60" stroke="#F97316" stroke-width="3"/>
+    <path d="M15 25 Q60 60 15 95" stroke="#F97316" stroke-width="3" fill="none"/>
+    <path d="M105 25 Q60 60 105 95" stroke="#F97316" stroke-width="3" fill="none"/>
+  </g>
+
+  <!-- Title -->
+  <text x="600" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="700" fill="white" text-anchor="middle">
+    Basketball Stats
+  </text>
+
+  <!-- Subtitle -->
+  <text x="600" y="400" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#9CA3AF" text-anchor="middle">
+    Track &amp; Analyze Your Games
+  </text>
+
+  <!-- Feature pills -->
+  <g transform="translate(600, 460)">
+    <rect x="-280" y="0" width="160" height="36" rx="18" fill="#F97316" fill-opacity="0.2"/>
+    <text x="-200" y="24" font-family="system-ui, sans-serif" font-size="14" fill="#F97316" text-anchor="middle">Live Tracking</text>
+
+    <rect x="-90" y="0" width="180" height="36" rx="18" fill="#F97316" fill-opacity="0.2"/>
+    <text x="0" y="24" font-family="system-ui, sans-serif" font-size="14" fill="#F97316" text-anchor="middle">Advanced Analytics</text>
+
+    <rect x="120" y="0" width="160" height="36" rx="18" fill="#F97316" fill-opacity="0.2"/>
+    <text x="200" y="24" font-family="system-ui, sans-serif" font-size="14" fill="#F97316" text-anchor="middle">Team Management</text>
+  </g>
+
+  <!-- URL -->
+  <text x="600" y="580" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#6B7280" text-anchor="middle">
+    basketballstatsapp.com
+  </text>
+</svg>

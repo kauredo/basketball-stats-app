@@ -188,7 +188,7 @@ const TeamDetail: React.FC = () => {
           Team not found
         </h3>
         <p className="text-surface-500 text-sm mb-4">
-          This team may have been deleted or doesn&apos;t exist.
+          This team may have been deleted or doesn't exist.
         </p>
         <button
           onClick={() => navigate("/app/teams")}
@@ -642,7 +642,7 @@ const TeamDetail: React.FC = () => {
               <p className="text-surface-500 text-sm leading-relaxed">
                 Are you sure you want to delete{" "}
                 <span className="font-medium text-surface-700 dark:text-surface-300">
-                  &quot;{team.name}&quot;
+                  "{team.name}"
                 </span>
                 ? This action cannot be undone and will remove all associated player data.
               </p>

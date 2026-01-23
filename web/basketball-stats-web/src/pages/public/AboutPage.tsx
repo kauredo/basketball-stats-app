@@ -8,6 +8,8 @@ export default function AboutPage() {
       <SEOHead
         title="About Us"
         description="Learn about Basketball Stats - the platform built by basketball enthusiasts for coaches, players, and fans who want to track and analyze game statistics."
+        keywords="about basketball stats, basketball tracking app, sports statistics platform, coaching tools"
+        canonicalUrl="https://basketballstatsapp.com/about"
       />
 
       <section className="bg-white dark:bg-surface-900 py-16 sm:py-24">
@@ -31,7 +33,7 @@ export default function AboutPage() {
                 </h2>
                 <p className="text-surface-600 dark:text-surface-400">
                   Basketball Stats was created with a simple mission: to make professional-grade
-                  statistics tracking accessible to everyone. Whether you&apos;re coaching a youth
+                  statistics tracking accessible to everyone. Whether you're coaching a youth
                   league, playing in a recreational league, or managing a competitive team, we
                   believe you deserve the same powerful tools that professional teams use.
                 </p>

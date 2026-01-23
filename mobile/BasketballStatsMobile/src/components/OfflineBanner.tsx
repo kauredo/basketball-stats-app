@@ -29,7 +29,7 @@ export function OfflineBanner() {
           <>
             <Icon name="alert" size={16} color="#FFFFFF" />
             <Text className="text-white text-sm font-medium">
-              You&apos;re offline - Viewing cached data
+              You're offline - Viewing cached data
             </Text>
             <Icon name="wifi" size={16} color="#FFFFFF" style={{ marginLeft: 8 }} />
           </>

@@ -123,7 +123,7 @@ export default function LeagueSettings() {
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700 flex items-start gap-3">
           <InformationCircleIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
           <p className="text-sm text-blue-700 dark:text-blue-300">
-            You&apos;re viewing league settings in read-only mode. Contact a league admin to make
+            You're viewing league settings in read-only mode. Contact a league admin to make
             changes.
           </p>
         </div>

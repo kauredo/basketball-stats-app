@@ -31,6 +31,8 @@ export default function ContactPage() {
       <SEOHead
         title="Contact Us"
         description="Get in touch with the Basketball Stats team. We're here to help with questions, feedback, or support requests."
+        keywords="contact basketball stats, support, help, feedback, customer service"
+        canonicalUrl="https://basketballstatsapp.com/contact"
       />
 
       <section className="bg-white dark:bg-surface-900 py-16 sm:py-24">
@@ -41,7 +43,7 @@ export default function ContactPage() {
               Contact Us
             </h1>
             <p className="text-lg text-surface-600 dark:text-surface-400">
-              Have a question or feedback? We&apos;d love to hear from you.
+              Have a question or feedback? We'd love to hear from you.
             </p>
           </div>
 
@@ -54,7 +56,7 @@ export default function ContactPage() {
                 Message Sent!
               </h2>
               <p className="text-surface-600 dark:text-surface-400 mb-6">
-                Thank you for reaching out. We&apos;ll get back to you as soon as possible.
+                Thank you for reaching out. We'll get back to you as soon as possible.
               </p>
               <button
                 onClick={() => {

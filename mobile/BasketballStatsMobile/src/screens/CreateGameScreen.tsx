@@ -243,7 +243,7 @@ function QuickTeamCreateModal({
                     <Icon name="alert" size={16} color="#F59E0B" />
                     <View className="ml-2 flex-1">
                       <Text className="text-amber-700 dark:text-amber-300 text-sm font-medium">
-                        Team &quot;{exactMatch.name}&quot; already exists
+                        Team "{exactMatch.name}" already exists
                       </Text>
                       <TouchableOpacity
                         className="mt-2 bg-amber-500 rounded-lg py-2 px-3 self-start"
@@ -271,7 +271,7 @@ function QuickTeamCreateModal({
                     <Icon name="alert" size={16} color="#3B82F6" />
                     <View className="ml-2 flex-1">
                       <Text className="text-blue-700 dark:text-blue-300 text-sm">
-                        Similar team exists: &quot;{similarMatch.name}&quot;
+                        Similar team exists: "{similarMatch.name}"
                       </Text>
                       <TouchableOpacity
                         className="mt-2 bg-blue-500 rounded-lg py-2 px-3 self-start"
@@ -286,7 +286,7 @@ function QuickTeamCreateModal({
                         }}
                       >
                         <Text className="text-white font-medium text-sm">
-                          Use &quot;{similarMatch.name}&quot; Instead
+                          Use "{similarMatch.name}" Instead
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -324,8 +324,8 @@ function QuickTeamCreateModal({
               <View className="flex-row items-center">
                 <Icon name="alert" size={16} color="#3B82F6" />
                 <Text className="text-blue-700 dark:text-blue-300 text-sm ml-2 flex-1">
-                  Players will be created as &quot;Player 1&quot;, &quot;Player 2&quot;, etc. with
-                  jersey numbers 1, 2, 3... You can edit names later.
+                  Players will be created as "Player 1", "Player 2", etc. with jersey numbers 1, 2,
+                  3... You can edit names later.
                 </Text>
               </View>
             </View>

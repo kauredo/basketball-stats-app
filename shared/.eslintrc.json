@@ -18,6 +18,7 @@
     ],
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/consistent-type-imports": ["warn", { "prefer": "type-imports" }],
+    "@react/no-unescaped-entities": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],
     "no-var": "error",
     "prefer-const": "warn",

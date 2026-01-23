@@ -180,7 +180,7 @@ export default function NotificationsScreen() {
         No Notifications
       </Text>
       <Text className="text-surface-600 dark:text-surface-400 text-center text-sm">
-        You&apos;ll see game updates and announcements here when they arrive.
+        You'll see game updates and announcements here when they arrive.
       </Text>
     </View>
   );
