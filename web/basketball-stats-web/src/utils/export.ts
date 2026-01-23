@@ -1,35 +1,12 @@
 /**
  * Data Export Utilities
- * Functions for exporting data to CSV and triggering PDF export via print
+ * Web-specific functions for exporting data (DOM-dependent)
  */
 
-/**
- * Convert array of objects to CSV string
- */
-export function toCSV<T extends Record<string, unknown>>(
-  data: T[],
-  columns: { key: keyof T; label: string }[]
-): string {
-  if (data.length === 0) return "";
+import { toCSV } from "@basketball-stats/shared";
 
-  // Header row
-  const header = columns.map((col) => `"${col.label}"`).join(",");
-
-  // Data rows
-  const rows = data.map((item) =>
-    columns
-      .map((col) => {
-        const value = item[col.key];
-        if (value === null || value === undefined) return '""';
-        if (typeof value === "string") return `"${value.replace(/"/g, '""')}"`;
-        if (Array.isArray(value)) return `"${value.join(" ")}"`;
-        return `"${value}"`;
-      })
-      .join(",")
-  );
-
-  return [header, ...rows].join("\n");
-}
+// Re-export toCSV from shared for convenience
+export { toCSV };
 
 /**
  * Download a string as a file

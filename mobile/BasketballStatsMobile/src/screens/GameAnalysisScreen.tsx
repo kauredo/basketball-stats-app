@@ -9,6 +9,7 @@ import Icon from "../components/Icon";
 import { QuarterBreakdown } from "../components/livegame/QuarterBreakdown";
 import { AdvancedStats } from "../components/livegame/AdvancedStats";
 import PlayByPlayTab from "../components/livegame/PlayByPlayTab";
+import { ExportOptionsSheet } from "../components/export/ExportOptionsSheet";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 
 type GameAnalysisRouteProp = RouteProp<RootStackParamList, "GameAnalysis">;
@@ -131,9 +132,10 @@ function PlayerStatRow({
 export default function GameAnalysisScreen() {
   const route = useRoute<GameAnalysisRouteProp>();
   const { gameId } = route.params;
-  const { token } = useAuth();
+  const { token, selectedLeague } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("boxscore");
   const [refreshing, setRefreshing] = useState(false);
+  const [showExportSheet, setShowExportSheet] = useState(false);
 
   const gameData = useQuery(
     api.games.get,
@@ -340,8 +342,19 @@ export default function GameAnalysisScreen() {
 
   return (
     <View className="flex-1 bg-surface-50 dark:bg-surface-950">
+      {/* Export Button */}
+      <View className="flex-row justify-end px-4 pt-4">
+        <TouchableOpacity
+          onPress={() => setShowExportSheet(true)}
+          className="flex-row items-center gap-2 px-4 py-2 bg-primary-500 rounded-xl"
+        >
+          <Icon name="download" size={18} color="#FFFFFF" />
+          <Text className="text-white font-semibold text-sm">Export</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Score Header */}
-      <View className="bg-surface-100 dark:bg-surface-800/50 p-4 mx-4 mt-4 rounded-xl">
+      <View className="bg-surface-100 dark:bg-surface-800/50 p-4 mx-4 mt-2 rounded-xl">
         <View className="flex-row items-center justify-between">
           <View className={`flex-1 items-center ${isAwayWinner ? "opacity-60" : ""}`}>
             <Text className="text-surface-600 dark:text-surface-400 text-sm">
@@ -643,6 +656,16 @@ export default function GameAnalysisScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Export Options Sheet */}
+      <ExportOptionsSheet
+        isOpen={showExportSheet}
+        onClose={() => setShowExportSheet(false)}
+        gameId={gameId}
+        leagueId={selectedLeague?.id}
+        exportType="game-report"
+        title="Export Game Report"
+      />
     </View>
   );
 }

@@ -44,6 +44,7 @@ import PlayerDetail from "./pages/PlayerDetail";
 import TeamDetail from "./pages/TeamDetail";
 import LeagueSettings from "./pages/LeagueSettings";
 import JoinPage from "./pages/JoinPage";
+import ExportPage from "./pages/ExportPage";
 
 function LoadingScreen() {
   return (
@@ -104,6 +105,7 @@ function AuthenticatedApp() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/league-settings" element={<LeagueSettings />} />
           <Route path="/leagues" element={<LeagueSelectionPage />} />
+          <Route path="/export" element={<ExportPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

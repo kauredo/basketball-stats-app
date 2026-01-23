@@ -40,6 +40,7 @@ export type IconName =
   | "undo"
   | "alarm"
   | "timer"
+  | "download"
   // Time & Calendar
   | "calendar"
   // Arrows & Directions
@@ -53,11 +54,19 @@ export type IconName =
   | "close"
   // Theme
   | "moon"
+  | "sun"
   | "sunny"
   // Status
   | "alert"
+  | "info"
   | "wifi"
-  | "wifi-off";
+  | "wifi-off"
+  // Documents & Data
+  | "file-text"
+  | "table"
+  | "chart-bar"
+  | "clipboard-list"
+  | "flame";
 
 interface IconProps {
   name: IconName;
@@ -109,6 +118,7 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   undo: { library: "ionicons", name: "arrow-undo" },
   alarm: { library: "ionicons", name: "alarm" },
   timer: { library: "ionicons", name: "timer" },
+  download: { library: "ionicons", name: "download" },
 
   // Time & Calendar
   calendar: { library: "ionicons", name: "calendar" },
@@ -125,12 +135,21 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
 
   // Theme
   moon: { library: "ionicons", name: "moon" },
+  sun: { library: "ionicons", name: "sunny" },
   sunny: { library: "ionicons", name: "sunny" },
 
   // Status
   alert: { library: "ionicons", name: "alert-circle" },
+  info: { library: "ionicons", name: "information-circle" },
   wifi: { library: "ionicons", name: "wifi" },
   "wifi-off": { library: "ionicons", name: "wifi-outline" },
+
+  // Documents & Data
+  "file-text": { library: "ionicons", name: "document-text" },
+  table: { library: "ionicons", name: "grid" },
+  "chart-bar": { library: "ionicons", name: "bar-chart" },
+  "clipboard-list": { library: "ionicons", name: "clipboard" },
+  flame: { library: "ionicons", name: "flame" },
 };
 
 export default function Icon({ name, size = 24, color = "#7a746c", className, style }: IconProps) {

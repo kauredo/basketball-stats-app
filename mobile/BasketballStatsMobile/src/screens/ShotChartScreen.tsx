@@ -1,5 +1,13 @@
 import React, { useState, useMemo } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+  Linking,
+  Alert,
+} from "react-native";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -8,6 +16,7 @@ import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { MiniCourt, type ShotMarker } from "../components/court/MiniCourt";
 import { PlayerSelectModal, type PlayerOption } from "../components/PlayerSelectModal";
+import { buildExportURL } from "@basketball-stats/shared";
 
 interface StatBoxProps {
   label: string;
@@ -31,6 +40,9 @@ function StatBox({ label, made, attempted, percentage, color }: StatBoxProps) {
   );
 }
 
+// Web app base URL - configure this based on your deployment
+const WEB_APP_BASE_URL = "https://your-app-url.com"; // TODO: Replace with actual URL
+
 export default function ShotChartScreen() {
   const { token, selectedLeague } = useAuth();
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerOption | null>(null);
@@ -39,6 +51,34 @@ export default function ShotChartScreen() {
   const [showMade, setShowMade] = useState(true);
   const [showMissed, setShowMissed] = useState(true);
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    if (!selectedPlayer || !selectedLeague) return;
+
+    try {
+      setIsExporting(true);
+      const exportUrl = buildExportURL(WEB_APP_BASE_URL, {
+        type: "player-shot-chart",
+        format: "pdf",
+        playerId: selectedPlayer.id,
+        leagueId: selectedLeague.id,
+        theme: "light",
+        heatmap: showHeatmap ? "true" : "false",
+      });
+
+      const canOpen = await Linking.canOpenURL(exportUrl);
+      if (canOpen) {
+        await Linking.openURL(exportUrl);
+      } else {
+        Alert.alert("Cannot Open URL", "Unable to open the export page.");
+      }
+    } catch (error) {
+      Alert.alert("Export Failed", "An error occurred while exporting.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Fetch all players for selection using the efficient players.list query
   const playersData = useQuery(
@@ -185,23 +225,35 @@ export default function ShotChartScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* Heatmap Toggle */}
-              <TouchableOpacity
-                className={`py-3 rounded-lg mb-4 flex-row items-center justify-center ${
-                  showHeatmap ? "bg-primary-500" : "bg-surface-100 dark:bg-surface-700"
-                }`}
-                onPress={() => {
-                  setShowHeatmap(!showHeatmap);
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }}
-              >
-                <Icon name="activity" size={18} color={showHeatmap ? "#FFFFFF" : "#9CA3AF"} />
-                <Text
-                  className={`font-medium ml-2 ${showHeatmap ? "text-white" : "text-surface-600 dark:text-surface-400"}`}
+              {/* Heatmap Toggle and Export */}
+              <View className="flex-row gap-2 mb-4">
+                <TouchableOpacity
+                  className={`flex-1 py-3 rounded-lg flex-row items-center justify-center ${
+                    showHeatmap ? "bg-primary-500" : "bg-surface-100 dark:bg-surface-700"
+                  }`}
+                  onPress={() => {
+                    setShowHeatmap(!showHeatmap);
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }}
                 >
-                  {showHeatmap ? "Hide Heatmap" : "Show Heatmap"}
-                </Text>
-              </TouchableOpacity>
+                  <Icon name="activity" size={18} color={showHeatmap ? "#FFFFFF" : "#9CA3AF"} />
+                  <Text
+                    className={`font-medium ml-2 ${showHeatmap ? "text-white" : "text-surface-600 dark:text-surface-400"}`}
+                  >
+                    {showHeatmap ? "Heatmap On" : "Heatmap"}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="py-3 px-4 rounded-lg flex-row items-center justify-center bg-primary-500"
+                  onPress={handleExport}
+                  disabled={isExporting}
+                >
+                  <Icon name="download" size={18} color="#FFFFFF" />
+                  <Text className="font-medium ml-2 text-white">
+                    {isExporting ? "..." : "Export"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
               {/* Shot Chart */}
               <View className="bg-white dark:bg-surface-700 rounded-xl p-4 mb-4 border border-surface-200 dark:border-surface-600 items-center">

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useQuery } from "convex/react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../../../../convex/_generated/api";
@@ -13,7 +13,10 @@ import {
   UsersIcon,
   FireIcon,
   ChevronDownIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
+import { useExport } from "../hooks/useExport";
+import { PrintableShotChart } from "../components/export";
 
 interface PlayerOption {
   id: Id<"players">;
@@ -40,6 +43,10 @@ const ShotCharts: React.FC = () => {
   const [selectedTeamId, setSelectedTeamId] = useState<Id<"teams"> | null>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [showPlayerModal, setShowPlayerModal] = useState(false);
+
+  // Export functionality
+  const courtRef = useRef<HTMLDivElement>(null);
+  const { progress, isExporting, actions } = useExport();
 
   // Fetch teams and players
   const teamsData = useQuery(
@@ -252,11 +259,60 @@ const ShotCharts: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Shot Chart */}
             <div className="lg:col-span-2 surface-card p-6">
-              <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
-                {viewMode === "player"
-                  ? `${playerShotData?.player?.name} — Shot Chart`
-                  : `${teamShotData?.team?.name} — Team Shot Chart`}
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-surface-900 dark:text-white">
+                  {viewMode === "player"
+                    ? `${playerShotData?.player?.name} — Shot Chart`
+                    : `${teamShotData?.team?.name} — Team Shot Chart`}
+                </h3>
+                <button
+                  onClick={() => {
+                    const title =
+                      viewMode === "player"
+                        ? `${playerShotData?.player?.name || "Player"} Shot Chart`
+                        : `${teamShotData?.team?.name || "Team"} Shot Chart`;
+                    const subtitle =
+                      viewMode === "player" ? playerShotData?.player?.team : undefined;
+                    const stats =
+                      viewMode === "player" && playerShotData?.stats
+                        ? {
+                            totalShots: playerShotData.stats.totalShots,
+                            madeShots: playerShotData.stats.madeShots,
+                            percentage: `${playerShotData.stats.overallPercentage}%`,
+                            twoPoint: {
+                              made: playerShotData.stats.twoPoint.made,
+                              attempted: playerShotData.stats.twoPoint.attempted,
+                              percentage: `${playerShotData.stats.twoPoint.percentage}%`,
+                            },
+                            threePoint: {
+                              made: playerShotData.stats.threePoint.made,
+                              attempted: playerShotData.stats.threePoint.attempted,
+                              percentage: `${playerShotData.stats.threePoint.percentage}%`,
+                            },
+                          }
+                        : teamShotData
+                          ? {
+                              totalShots: teamShotData.totalShots || 0,
+                              madeShots: teamShotData.madeShots || 0,
+                              percentage:
+                                teamShotData.totalShots > 0
+                                  ? `${((teamShotData.madeShots / teamShotData.totalShots) * 100).toFixed(1)}%`
+                                  : "0%",
+                            }
+                          : undefined;
+                    actions.exportShotChartPDF(courtRef, { title, subtitle, stats });
+                  }}
+                  disabled={isExporting || transformedShots.length === 0}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    isExporting || transformedShots.length === 0
+                      ? "bg-surface-200 dark:bg-surface-700 text-surface-400 cursor-not-allowed"
+                      : "bg-primary-500 hover:bg-primary-600 text-white"
+                  }`}
+                >
+                  <ArrowDownTrayIcon className="w-4 h-4" />
+                  {isExporting ? "Exporting..." : "Export PDF"}
+                </button>
+              </div>
               <div className="aspect-[300/282] max-w-[600px] mx-auto">
                 <InteractiveCourt
                   allShots={transformedShots}
@@ -419,6 +475,25 @@ const ShotCharts: React.FC = () => {
           by zone — green zones are hot (high percentage), red zones are cold (low percentage).
         </p>
       </div>
+
+      {/* Hidden PrintableShotChart for PDF export */}
+      {transformedShots.length > 0 && (
+        <div className="absolute left-[-9999px] top-0 pointer-events-none">
+          <div ref={courtRef}>
+            <PrintableShotChart
+              shots={transformedShots}
+              theme="light"
+              showHeatMap={showHeatmap}
+              title={
+                viewMode === "player"
+                  ? playerShotData?.player?.name || "Player"
+                  : teamShotData?.team?.name || "Team"
+              }
+              width={300}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

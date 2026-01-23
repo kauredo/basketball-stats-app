@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -11,7 +11,10 @@ import {
   PlayIcon,
   PresentationChartBarIcon,
   ClipboardDocumentListIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
+import { ExportModal } from "../components/export";
+import type { GameExportData } from "../utils/export/types";
 import Breadcrumb from "../components/Breadcrumb";
 import { QuarterBreakdown } from "../components/livegame/stats/QuarterBreakdown";
 import { AdvancedStats } from "../components/livegame/stats/AdvancedStats";
@@ -35,6 +38,7 @@ const GameAnalysis: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>("boxscore");
   const [selectedQuarter, setSelectedQuarter] = useState<number | undefined>(undefined);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const gameData = useQuery(
     api.games.get,
@@ -315,6 +319,110 @@ const GameAnalysis: React.FC = () => {
     ? preparePlayerStats(awayTeam.players, awayTeam.team?.id as Id<"teams">, false)
     : [];
 
+  // Prepare export data
+  const prepareExportData = (): GameExportData | undefined => {
+    if (!homeTeam || !awayTeam) return undefined;
+
+    const transformPlayer = (player: any) => ({
+      id: player.player?.id || player.playerId,
+      name: player.player?.name || "Unknown",
+      number: player.player?.number || 0,
+      position: player.player?.position,
+      minutesPlayed: player.minutesPlayed || 0,
+      points: player.points || 0,
+      rebounds: player.rebounds || 0,
+      assists: player.assists || 0,
+      steals: player.steals || 0,
+      blocks: player.blocks || 0,
+      turnovers: player.turnovers || 0,
+      fouls: player.fouls || 0,
+      fieldGoalsMade: player.fieldGoalsMade || 0,
+      fieldGoalsAttempted: player.fieldGoalsAttempted || 0,
+      threePointersMade: player.threePointersMade || 0,
+      threePointersAttempted: player.threePointersAttempted || 0,
+      freeThrowsMade: player.freeThrowsMade || 0,
+      freeThrowsAttempted: player.freeThrowsAttempted || 0,
+      plusMinus: player.plusMinus || 0,
+    });
+
+    const calculateTotals = (totals: any) => ({
+      points: totals?.points || 0,
+      rebounds: totals?.rebounds || 0,
+      assists: totals?.assists || 0,
+      steals: totals?.steals || 0,
+      blocks: totals?.blocks || 0,
+      turnovers: totals?.turnovers || 0,
+      fouls: 0,
+      fieldGoalsMade: 0,
+      fieldGoalsAttempted: 0,
+      fieldGoalPercentage: parseFloat(homeShootingStats.pct),
+      threePointersMade: homeShootingStats.threesMade,
+      threePointersAttempted: homeShootingStats.threes,
+      threePointPercentage: parseFloat(homeShootingStats.threesPct),
+      freeThrowsMade: 0,
+      freeThrowsAttempted: 0,
+      freeThrowPercentage: 0,
+    });
+
+    return {
+      game: {
+        id: gameId || "",
+        homeTeamName: homeTeam.team?.name || "Home",
+        awayTeamName: awayTeam.team?.name || "Away",
+        homeScore: game.homeScore,
+        awayScore: game.awayScore,
+        status: game.status,
+        currentQuarter: game.currentQuarter || 4,
+        date: game.startedAt ? new Date(game.startedAt).toISOString() : undefined,
+      },
+      homeTeam: {
+        id: homeTeam.team?.id || "",
+        name: homeTeam.team?.name || "Home",
+        city: homeTeam.team?.city,
+        players: homeTeam.players.map(transformPlayer),
+        totals: calculateTotals(homeTotals),
+      },
+      awayTeam: {
+        id: awayTeam.team?.id || "",
+        name: awayTeam.team?.name || "Away",
+        city: awayTeam.team?.city,
+        players: awayTeam.players.map(transformPlayer),
+        totals: calculateTotals(awayTotals),
+      },
+      shots: shots.map((shot: any) => ({
+        id: shot._id || shot.id,
+        playerId: shot.playerId,
+        playerName: shot.player?.name || "Unknown",
+        teamId: shot.teamId,
+        teamName:
+          (shot.teamId === homeTeam.team?.id ? homeTeam.team?.name : awayTeam.team?.name) ||
+          "Unknown",
+        x: shot.x,
+        y: shot.y,
+        shotType: shot.shotType,
+        made: shot.made,
+        zone: shot.shotZone || "unknown",
+        quarter: shot.quarter,
+        timeRemaining: shot.timeRemaining || 0,
+      })),
+      events: events.map((event: any) => ({
+        id: event._id || event.id,
+        quarter: event.quarter,
+        timeRemaining: event.gameTime || event.timeRemaining || 0,
+        eventType: event.eventType,
+        description: event.description || event.eventType?.replace(/_/g, " "),
+        playerId: event.player?.id || event.playerId,
+        playerName: event.player?.name,
+        teamId: event.team?.id || event.teamId,
+        teamName: event.team?.name,
+        homeScore: event.details?.homeScore || 0,
+        awayScore: event.details?.awayScore || 0,
+      })),
+    };
+  };
+
+  const exportData = prepareExportData();
+
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
@@ -326,11 +434,20 @@ const GameAnalysis: React.FC = () => {
       />
 
       {/* Header */}
-      <div>
-        <h1 className="text-display-sm text-surface-900 dark:text-white">Game Analysis</h1>
-        <p className="text-surface-600 dark:text-surface-400">
-          {game.status === "completed" ? "Final" : game.status}
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-display-sm text-surface-900 dark:text-white">Game Analysis</h1>
+          <p className="text-surface-600 dark:text-surface-400">
+            {game.status === "completed" ? "Final" : game.status}
+          </p>
+        </div>
+        <button
+          onClick={() => setShowExportModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors"
+        >
+          <ArrowDownTrayIcon className="w-5 h-5" />
+          Export
+        </button>
       </div>
 
       {/* Score Card */}
@@ -773,6 +890,14 @@ const GameAnalysis: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        gameData={exportData}
+        defaultExportType="game-report"
+      />
     </div>
   );
 };
