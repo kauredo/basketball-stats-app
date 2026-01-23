@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useQuery } from "convex/react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
@@ -30,7 +31,11 @@ interface TeamOption {
 
 const ShotCharts: React.FC = () => {
   const { token, selectedLeague } = useAuth();
-  const [viewMode, setViewMode] = useState<"player" | "team">("player");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [viewMode, setViewMode] = useState<"player" | "team">(() => {
+    // If team param exists, start in team mode
+    return searchParams.get("team") ? "team" : "player";
+  });
   const [selectedPlayerId, setSelectedPlayerId] = useState<Id<"players"> | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<Id<"teams"> | null>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
@@ -63,6 +68,39 @@ const ShotCharts: React.FC = () => {
       }
     }
   }
+
+  // Initialize selection from URL params once data is loaded
+  useEffect(() => {
+    const playerParam = searchParams.get("player");
+    const teamParam = searchParams.get("team");
+
+    if (playerParam && playerOptions.length > 0 && !selectedPlayerId) {
+      // Validate player exists in options
+      const playerExists = playerOptions.some((p) => p.id === playerParam);
+      if (playerExists) {
+        setSelectedPlayerId(playerParam as Id<"players">);
+      }
+    }
+
+    if (teamParam && teamOptions.length > 0 && !selectedTeamId) {
+      // Validate team exists in options
+      const teamExists = teamOptions.some((t) => t.id === teamParam);
+      if (teamExists) {
+        setSelectedTeamId(teamParam as Id<"teams">);
+      }
+    }
+  }, [searchParams, playerOptions, teamOptions, selectedPlayerId, selectedTeamId]);
+
+  // Sync selection changes to URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (viewMode === "player" && selectedPlayerId) {
+      params.set("player", selectedPlayerId);
+    } else if (viewMode === "team" && selectedTeamId) {
+      params.set("team", selectedTeamId);
+    }
+    setSearchParams(params, { replace: true });
+  }, [viewMode, selectedPlayerId, selectedTeamId, setSearchParams]);
 
   // Get selected player info for display
   const selectedPlayerInfo = playerOptions.find((p) => p.id === selectedPlayerId);
