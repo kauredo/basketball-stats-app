@@ -9,8 +9,11 @@ import {
   ArrowTrendingDownIcon,
   ArrowDownTrayIcon,
   PrinterIcon,
+  DocumentArrowDownIcon,
 } from "@heroicons/react/24/outline";
 import { exportToCSV, standingsColumns, printPage } from "../utils/export";
+import { generateSeasonSummaryPDF, downloadPDF } from "../utils/export/pdf-export";
+import { useToast } from "../contexts/ToastContext";
 
 type SortField =
   | "rank"
@@ -35,6 +38,8 @@ const validSortFields: SortField[] = [
 const Standings: React.FC = () => {
   const { token, selectedLeague } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const toast = useToast();
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   // Initialize state from URL params or defaults
   const [sortField, setSortField] = useState<SortField>(() => {
@@ -79,6 +84,46 @@ const Standings: React.FC = () => {
         return 0;
       })
     : [];
+
+  const handleExportSeasonPDF = async () => {
+    if (sortedStandings.length === 0) {
+      toast.info("No standings data to export");
+      return;
+    }
+
+    setIsExportingPDF(true);
+    try {
+      const pdfBlob = await generateSeasonSummaryPDF({
+        league: {
+          name: standingsData?.league?.name || "League",
+          season: standingsData?.league?.season || new Date().getFullYear().toString(),
+        },
+        standings: sortedStandings.map((team) => ({
+          rank: team.rank,
+          teamName: team.teamName,
+          city: team.city,
+          wins: team.wins,
+          losses: team.losses,
+          winPercentage: team.winPercentage,
+          gamesBack: team.gamesBack,
+          pointDiff: team.pointDiff,
+          avgPointsFor: team.avgPointsFor,
+          avgPointsAgainst: team.avgPointsAgainst,
+        })),
+        totalGames: standingsData?.totalGames || 0,
+      });
+
+      const safeLeagueName = (standingsData?.league?.name || "league").replace(/\s+/g, "-");
+      const season = standingsData?.league?.season || new Date().getFullYear().toString();
+      downloadPDF(pdfBlob, `season-summary-${safeLeagueName}-${season}.pdf`);
+      toast.success("Season summary PDF exported successfully");
+    } catch (error) {
+      console.error("Failed to export season PDF:", error);
+      toast.error("Failed to export season summary");
+    } finally {
+      setIsExportingPDF(false);
+    }
+  };
 
   const SortHeader: React.FC<{
     field: SortField;
@@ -134,6 +179,15 @@ const Standings: React.FC = () => {
             >
               <ArrowDownTrayIcon className="w-4 h-4" />
               <span>CSV</span>
+            </button>
+            <button
+              onClick={handleExportSeasonPDF}
+              disabled={sortedStandings.length === 0 || isExportingPDF}
+              className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Export Season Summary PDF"
+            >
+              <DocumentArrowDownIcon className="w-4 h-4" />
+              <span>{isExportingPDF ? "Exporting..." : "Season PDF"}</span>
             </button>
             <button
               onClick={printPage}

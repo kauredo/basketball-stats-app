@@ -15,7 +15,13 @@ export type ExportType =
   | "team-shot-chart"
   | "box-score"
   | "shot-data"
-  | "play-by-play";
+  | "play-by-play"
+  | "player-game-log"
+  | "team-roster"
+  | "game-schedule"
+  | "lineup-stats"
+  | "pair-stats"
+  | "season-summary";
 
 export interface ExportOptions {
   format: ExportFormat;
@@ -311,4 +317,133 @@ export function parseExportURL(url: string): ExportURLParams | null {
   } catch {
     return null;
   }
+}
+
+// ============================================
+// New Export Data Structures
+// ============================================
+
+/**
+ * Player Game Log Export Row
+ * For exporting a player's game-by-game statistics
+ */
+export interface PlayerGameLogExportRow {
+  date: string;
+  opponent: string;
+  homeAway: "Home" | "Away";
+  result: "W" | "L" | "N/A";
+  teamScore: number;
+  opponentScore: number;
+  minutes: number;
+  points: number;
+  rebounds: number;
+  assists: number;
+  steals: number;
+  blocks: number;
+  turnovers: number;
+  fouls: number;
+  fieldGoalsMade: number;
+  fieldGoalsAttempted: number;
+  fieldGoalPercentage: string;
+  threePointersMade: number;
+  threePointersAttempted: number;
+  threePointPercentage: string;
+  freeThrowsMade: number;
+  freeThrowsAttempted: number;
+  freeThrowPercentage: string;
+  plusMinus: number;
+}
+
+/**
+ * Team Roster Export Row
+ * For exporting a team's player roster
+ */
+export interface RosterExportRow {
+  number: number;
+  name: string;
+  position: string;
+  heightCm: number | string;
+  weightKg: number | string;
+  status: "Active" | "Inactive" | "Injured";
+}
+
+/**
+ * Game Schedule/Results Export Row
+ * For exporting a list of games with results
+ */
+export interface GameResultExportRow {
+  date: string;
+  time: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number | string;
+  awayScore: number | string;
+  status: string;
+  result: string;
+}
+
+/**
+ * Lineup Stats Export Row
+ * For exporting 5-man lineup statistics
+ */
+export interface LineupExportRow {
+  rank: number;
+  player1: string;
+  player2: string;
+  player3: string;
+  player4: string;
+  player5: string;
+  minutesPlayed: number;
+  pointsScored: number;
+  pointsAllowed: number;
+  plusMinus: number;
+  netRating: number;
+  gamesPlayed: number;
+}
+
+/**
+ * Pair Stats Export Row
+ * For exporting 2-player pair statistics
+ */
+export interface PairExportRow {
+  rank: number;
+  player1: string;
+  player2: string;
+  minutesTogether: number;
+  plusMinus: number;
+  netRating: number;
+  gamesPlayed: number;
+  chemistry: string;
+}
+
+/**
+ * Season Summary Data
+ * For PDF export of season overview
+ */
+export interface SeasonSummaryData {
+  league: {
+    name: string;
+    season: string;
+    type: string;
+  };
+  standings: Array<{
+    rank: number;
+    teamName: string;
+    wins: number;
+    losses: number;
+    winPercentage: number;
+    gamesBack: number;
+    pointDiff: number;
+  }>;
+  statLeaders: {
+    scoring: Array<{ playerName: string; teamName: string; value: number }>;
+    rebounds: Array<{ playerName: string; teamName: string; value: number }>;
+    assists: Array<{ playerName: string; teamName: string; value: number }>;
+    steals: Array<{ playerName: string; teamName: string; value: number }>;
+    blocks: Array<{ playerName: string; teamName: string; value: number }>;
+    fieldGoalPercentage: Array<{ playerName: string; teamName: string; value: number }>;
+    threePointPercentage: Array<{ playerName: string; teamName: string; value: number }>;
+  };
+  totalGames: number;
+  generatedAt: string;
 }

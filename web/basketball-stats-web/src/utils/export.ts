@@ -8,6 +8,15 @@ import { toCSV } from "@basketball-stats/shared";
 // Re-export toCSV from shared for convenience
 export { toCSV };
 
+// Re-export new CSV export functions from export/ directory
+export {
+  exportPlayerGameLogCSV,
+  exportRosterCSV,
+  exportGameScheduleCSV,
+  exportLineupStatsCSV,
+  exportPairStatsCSV,
+} from "./export/csv-export";
+
 /**
  * Download a string as a file
  */

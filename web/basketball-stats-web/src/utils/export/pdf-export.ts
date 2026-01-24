@@ -630,3 +630,280 @@ function hexToRgb(hex: string): [number, number, number] {
 
   return [r, g, b];
 }
+
+// ============================================
+// Season Summary PDF
+// ============================================
+
+export interface SeasonSummaryInput {
+  league: {
+    name: string;
+    season: string;
+    type?: string;
+  };
+  standings: Array<{
+    rank: number;
+    teamName: string;
+    city?: string;
+    wins: number;
+    losses: number;
+    winPercentage: number;
+    gamesBack: number;
+    pointDiff: number;
+    avgPointsFor?: number;
+    avgPointsAgainst?: number;
+  }>;
+  statLeaders?: {
+    scoring?: Array<{ playerName: string; teamName: string; value: number }>;
+    rebounds?: Array<{ playerName: string; teamName: string; value: number }>;
+    assists?: Array<{ playerName: string; teamName: string; value: number }>;
+    steals?: Array<{ playerName: string; teamName: string; value: number }>;
+    blocks?: Array<{ playerName: string; teamName: string; value: number }>;
+  };
+  totalGames: number;
+}
+
+/**
+ * Generate Season Summary PDF
+ */
+export async function generateSeasonSummaryPDF(
+  data: SeasonSummaryInput,
+  options: {
+    settings?: Partial<PDFSettings>;
+  } = {}
+): Promise<Blob> {
+  const settings: PDFSettings = { ...DEFAULT_PDF_SETTINGS, ...options.settings };
+  const theme = settings.theme;
+
+  const doc = new jsPDF({
+    orientation: settings.orientation,
+    unit: "mm",
+    format: settings.pageSize,
+  });
+
+  const colors = getColors(theme);
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Set page background for dark theme
+  if (theme === "dark") {
+    doc.setFillColor(...hexToRgb(colors.bg));
+    doc.rect(0, 0, A4_WIDTH, A4_HEIGHT, "F");
+  }
+
+  // Header
+  const generatedDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  let y = addHeader(doc, `${data.league.name} - Season Summary`, generatedDate, theme);
+
+  // League Info Section
+  doc.setFillColor(...hexToRgb(colors.card));
+  doc.roundedRect(15, y, pageWidth - 30, 20, 3, 3, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.setTextColor(...hexToRgb(colors.text));
+  doc.text(data.league.name, 25, y + 9);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(...hexToRgb(colors.textSecondary));
+  doc.text(`Season: ${data.league.season}`, 25, y + 16);
+
+  // Total games on right side
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(...hexToRgb(COLORS.primary));
+  doc.text(`${data.totalGames}`, pageWidth - 25, y + 10, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...hexToRgb(colors.textSecondary));
+  doc.text("Total Games", pageWidth - 25, y + 16, { align: "right" });
+
+  y += 30;
+
+  // Standings Table
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...hexToRgb(colors.text));
+  doc.text("STANDINGS", 15, y);
+  y += 8;
+
+  // Table header
+  const standingsColumns = [
+    { label: "#", width: 10 },
+    { label: "Team", width: 55 },
+    { label: "W", width: 15 },
+    { label: "L", width: 15 },
+    { label: "PCT", width: 20 },
+    { label: "GB", width: 15 },
+    { label: "PPG", width: 20 },
+    { label: "OPPG", width: 20 },
+    { label: "DIFF", width: 20 },
+  ];
+
+  // Header background
+  doc.setFillColor(...hexToRgb(theme === "dark" ? "#3d3835" : "#f3f0ed"));
+  doc.rect(15, y, pageWidth - 30, 7, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setTextColor(...hexToRgb(colors.textSecondary));
+
+  let xPos = 17;
+  for (const col of standingsColumns) {
+    doc.text(col.label, xPos, y + 5);
+    xPos += col.width;
+  }
+  y += 9;
+
+  // Table rows
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+
+  for (let i = 0; i < Math.min(data.standings.length, 12); i++) {
+    const team = data.standings[i];
+
+    // Alternate row background
+    if (i % 2 === 1) {
+      doc.setFillColor(...hexToRgb(colors.card));
+      doc.rect(15, y - 1, pageWidth - 30, 7, "F");
+    }
+
+    doc.setTextColor(...hexToRgb(colors.text));
+    xPos = 17;
+
+    // Rank
+    doc.text(team.rank.toString(), xPos, y + 4);
+    xPos += 10;
+
+    // Team name
+    doc.setFont("helvetica", "bold");
+    doc.text(team.teamName.slice(0, 20), xPos, y + 4);
+    doc.setFont("helvetica", "normal");
+    xPos += 55;
+
+    // W
+    doc.setTextColor(...hexToRgb(COLORS.success));
+    doc.text(team.wins.toString(), xPos, y + 4);
+    xPos += 15;
+
+    // L
+    doc.setTextColor(...hexToRgb(COLORS.danger));
+    doc.text(team.losses.toString(), xPos, y + 4);
+    xPos += 15;
+
+    // PCT
+    doc.setTextColor(...hexToRgb(colors.text));
+    doc.text(`.${(team.winPercentage * 10).toFixed(0).padStart(3, "0")}`, xPos, y + 4);
+    xPos += 20;
+
+    // GB
+    doc.setTextColor(...hexToRgb(colors.textSecondary));
+    doc.text(team.gamesBack === 0 ? "-" : team.gamesBack.toFixed(1), xPos, y + 4);
+    xPos += 15;
+
+    // PPG
+    doc.setTextColor(...hexToRgb(colors.text));
+    doc.text(team.avgPointsFor?.toFixed(1) || "-", xPos, y + 4);
+    xPos += 20;
+
+    // OPPG
+    doc.text(team.avgPointsAgainst?.toFixed(1) || "-", xPos, y + 4);
+    xPos += 20;
+
+    // DIFF
+    const diffColor =
+      team.pointDiff > 0
+        ? COLORS.success
+        : team.pointDiff < 0
+          ? COLORS.danger
+          : colors.textSecondary;
+    doc.setTextColor(...hexToRgb(diffColor));
+    doc.text(`${team.pointDiff > 0 ? "+" : ""}${team.pointDiff.toFixed(1)}`, xPos, y + 4);
+
+    y += 7;
+  }
+
+  y += 10;
+
+  // Stat Leaders Section
+  if (data.statLeaders && Object.keys(data.statLeaders).length > 0) {
+    // Check if we need a new page
+    if (y > A4_HEIGHT - 80) {
+      doc.addPage();
+      if (theme === "dark") {
+        doc.setFillColor(...hexToRgb(colors.bg));
+        doc.rect(0, 0, A4_WIDTH, A4_HEIGHT, "F");
+      }
+      y = 20;
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...hexToRgb(colors.text));
+    doc.text("STAT LEADERS", 15, y);
+    y += 10;
+
+    const leaderCategories = [
+      { key: "scoring", label: "Scoring (PPG)", data: data.statLeaders.scoring },
+      { key: "rebounds", label: "Rebounds (RPG)", data: data.statLeaders.rebounds },
+      { key: "assists", label: "Assists (APG)", data: data.statLeaders.assists },
+      { key: "steals", label: "Steals (SPG)", data: data.statLeaders.steals },
+      { key: "blocks", label: "Blocks (BPG)", data: data.statLeaders.blocks },
+    ];
+
+    const cardWidth = (pageWidth - 40) / 2;
+    let cardX = 15;
+    let cardY = y;
+    let cardCount = 0;
+
+    for (const category of leaderCategories) {
+      if (!category.data || category.data.length === 0) continue;
+
+      // Card background
+      doc.setFillColor(...hexToRgb(colors.card));
+      doc.roundedRect(cardX, cardY, cardWidth, 35, 2, 2, "F");
+
+      // Category label
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(...hexToRgb(COLORS.primary));
+      doc.text(category.label, cardX + 5, cardY + 7);
+
+      // Top 3 leaders
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      const top3 = category.data.slice(0, 3);
+      let leaderY = cardY + 14;
+
+      for (let i = 0; i < top3.length; i++) {
+        const leader = top3[i];
+        doc.setTextColor(...hexToRgb(colors.text));
+        doc.text(`${i + 1}. ${leader.playerName}`, cardX + 5, leaderY);
+        doc.setTextColor(...hexToRgb(colors.textSecondary));
+        doc.text(leader.teamName, cardX + 5, leaderY + 4);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...hexToRgb(COLORS.primary));
+        doc.text(leader.value.toFixed(1), cardX + cardWidth - 10, leaderY + 2, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        leaderY += 10;
+      }
+
+      cardCount++;
+      if (cardCount % 2 === 0) {
+        cardX = 15;
+        cardY += 40;
+      } else {
+        cardX = 15 + cardWidth + 10;
+      }
+    }
+  }
+
+  // Footer
+  addFooter(doc, theme);
+
+  return doc.output("blob");
+}

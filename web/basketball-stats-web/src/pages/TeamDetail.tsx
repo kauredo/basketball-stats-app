@@ -22,7 +22,9 @@ import {
   UserGroupIcon,
   ArrowTrendingUpIcon,
   ChevronRightIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
+import { exportRosterCSV, exportLineupStatsCSV, exportPairStatsCSV } from "../utils/export";
 
 interface EditFormState {
   name: string;
@@ -95,6 +97,51 @@ const TeamDetail: React.FC = () => {
   const wins = team?.wins ?? 0;
   const losses = team?.losses ?? 0;
   const winPct = team?.winPercentage?.toFixed(1) ?? "0.0";
+
+  // Export handlers
+  const handleExportRoster = () => {
+    if (!players || players.length === 0) {
+      toast.info("No players to export");
+      return;
+    }
+    try {
+      exportRosterCSV(players, team?.name || "Team");
+      toast.success("Roster exported successfully");
+    } catch (error) {
+      console.error("Failed to export roster:", error);
+      toast.error("Failed to export roster");
+    }
+  };
+
+  const handleExportLineups = () => {
+    const lineups = lineupStatsData?.lineups || [];
+    if (lineups.length === 0) {
+      toast.info("No lineup data to export");
+      return;
+    }
+    try {
+      exportLineupStatsCSV(lineups, team?.name || "Team");
+      toast.success("Lineup stats exported successfully");
+    } catch (error) {
+      console.error("Failed to export lineup stats:", error);
+      toast.error("Failed to export lineup stats");
+    }
+  };
+
+  const handleExportPairs = () => {
+    const pairs = pairStatsData?.pairs || [];
+    if (pairs.length === 0) {
+      toast.info("No pair data to export");
+      return;
+    }
+    try {
+      exportPairStatsCSV(pairs, team?.name || "Team");
+      toast.success("Pair stats exported successfully");
+    } catch (error) {
+      console.error("Failed to export pair stats:", error);
+      toast.error("Failed to export pair stats");
+    }
+  };
 
   const openEditModal = () => {
     if (team) {
@@ -358,13 +405,24 @@ const TeamDetail: React.FC = () => {
                   {players.length}
                 </span>
               </div>
-              <Link
-                to={`/app/teams/${teamId}/players/new`}
-                className="btn-primary px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5"
-              >
-                <PlusIcon className="w-4 h-4" />
-                Add Player
-              </Link>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportRoster}
+                  disabled={players.length === 0}
+                  className="btn-secondary px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Export Roster"
+                >
+                  <ArrowDownTrayIcon className="w-4 h-4" />
+                  Export
+                </button>
+                <Link
+                  to={`/app/teams/${teamId}/players/new`}
+                  className="btn-primary px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  Add Player
+                </Link>
+              </div>
             </div>
 
             {players.length === 0 ? (
@@ -511,14 +569,25 @@ const TeamDetail: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 5-Man Lineups */}
           <div className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
-            <div className="flex items-center gap-2.5 px-6 py-4 border-b border-surface-200 dark:border-surface-700">
-              <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">
-                <UsersIcon className="w-4 h-4 text-primary-500" />
+            <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200 dark:border-surface-700">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">
+                  <UsersIcon className="w-4 h-4 text-primary-500" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-surface-900 dark:text-white">5-Man Lineups</h3>
+                  <p className="text-xs text-surface-500">Best performing combinations</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-surface-900 dark:text-white">5-Man Lineups</h3>
-                <p className="text-xs text-surface-500">Best performing combinations</p>
-              </div>
+              <button
+                onClick={handleExportLineups}
+                disabled={!lineupStatsData?.lineups?.length}
+                className="btn-secondary px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Export Lineup Stats"
+              >
+                <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+                Export
+              </button>
             </div>
             <LineupStatsTable
               lineups={lineupStatsData?.lineups || []}
@@ -528,14 +597,27 @@ const TeamDetail: React.FC = () => {
 
           {/* Player Pairs / Chemistry */}
           <div className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
-            <div className="flex items-center gap-2.5 px-6 py-4 border-b border-surface-200 dark:border-surface-700">
-              <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">
-                <UserGroupIcon className="w-4 h-4 text-primary-500" />
+            <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200 dark:border-surface-700">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center">
+                  <UserGroupIcon className="w-4 h-4 text-primary-500" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-surface-900 dark:text-white">
+                    Player Chemistry
+                  </h3>
+                  <p className="text-xs text-surface-500">Two-player pair performance</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-surface-900 dark:text-white">Player Chemistry</h3>
-                <p className="text-xs text-surface-500">Two-player pair performance</p>
-              </div>
+              <button
+                onClick={handleExportPairs}
+                disabled={!pairStatsData?.pairs?.length}
+                className="btn-secondary px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Export Pair Stats"
+              >
+                <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+                Export
+              </button>
             </div>
             <PairStatsGrid
               pairs={pairStatsData?.pairs || []}

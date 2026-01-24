@@ -25,6 +25,13 @@ export type {
   PDFGenerationOptions,
   ExportShotLocation,
   ExportURLParams,
+  // New export types
+  PlayerGameLogExportRow,
+  RosterExportRow,
+  GameResultExportRow,
+  LineupExportRow,
+  PairExportRow,
+  SeasonSummaryData,
 } from "@basketball-stats/shared";
 
 export { DEFAULT_PDF_SETTINGS, buildExportURL, parseExportURL } from "@basketball-stats/shared";

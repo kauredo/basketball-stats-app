@@ -17,7 +17,9 @@ import {
   UserGroupIcon,
   InformationCircleIcon,
   ExclamationTriangleIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
+import { exportGameScheduleCSV } from "../utils/export";
 
 const statusConfig = {
   scheduled: {
@@ -93,6 +95,20 @@ const Games: React.FC = () => {
 
   const games = gamesData?.games || [];
   const teams = teamsData?.teams || [];
+
+  const handleExportSchedule = () => {
+    if (games.length === 0) {
+      toast.info("No games to export");
+      return;
+    }
+    try {
+      exportGameScheduleCSV(games, selectedLeague?.name);
+      toast.success("Game schedule exported successfully");
+    } catch (error) {
+      console.error("Failed to export game schedule:", error);
+      toast.error("Failed to export game schedule");
+    }
+  };
 
   // Check for existing or similar team names in quick create
   const normalizedQuickTeamName = quickTeamSettings.teamName.trim().toLowerCase();
@@ -386,6 +402,15 @@ const Games: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={handleExportSchedule}
+            disabled={games.length === 0}
+            className="group flex items-center gap-2 px-4 py-2.5 bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 text-sm font-medium rounded-xl border border-surface-200 dark:border-surface-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Export Schedule"
+          >
+            <ArrowDownTrayIcon className="w-4 h-4" />
+            Export
+          </button>
           <button
             onClick={() => setShowQuickGameModal(true)}
             className="group flex items-center gap-2 px-4 py-2.5 bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 text-sm font-medium rounded-xl border border-surface-200 dark:border-surface-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900"

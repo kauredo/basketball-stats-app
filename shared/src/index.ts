@@ -83,6 +83,13 @@ export type {
   EventExportData,
   ExportShotLocation,
   ExportURLParams,
+  // New export types
+  PlayerGameLogExportRow,
+  RosterExportRow,
+  GameResultExportRow,
+  LineupExportRow,
+  PairExportRow,
+  SeasonSummaryData,
 } from "./types";
 
 // Export system utilities

@@ -4,7 +4,9 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
-import { ChartBarIcon, UserIcon, TrophyIcon } from "@heroicons/react/24/outline";
+import { ChartBarIcon, UserIcon, TrophyIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { exportPlayerGameLogCSV } from "../utils/export";
+import { useToast } from "../contexts/ToastContext";
 import Breadcrumb from "../components/Breadcrumb";
 
 interface StatCardProps {
@@ -49,6 +51,7 @@ const PlayerDetail: React.FC = () => {
   const { playerId } = useParams<{ playerId: string }>();
   const navigate = useNavigate();
   const { token, selectedLeague } = useAuth();
+  const toast = useToast();
 
   const playerData = useQuery(
     api.players.get,
@@ -87,6 +90,21 @@ const PlayerDetail: React.FC = () => {
   const player = playerData?.player;
   const stats = playerStats?.stats;
   const recentGames = playerStats?.recentGames || [];
+
+  const handleExportGameLog = () => {
+    if (!recentGames || recentGames.length === 0) {
+      toast.info("No games to export");
+      return;
+    }
+
+    try {
+      exportPlayerGameLogCSV(recentGames, player?.name || "Unknown Player", selectedLeague?.season);
+      toast.success("Game log exported successfully");
+    } catch (error) {
+      console.error("Failed to export game log:", error);
+      toast.error("Failed to export game log");
+    }
+  };
 
   if (!player) {
     return (
@@ -144,6 +162,15 @@ const PlayerDetail: React.FC = () => {
             >
               <TrophyIcon className="w-5 h-5" />
               Compare
+            </button>
+            <button
+              onClick={handleExportGameLog}
+              disabled={recentGames.length === 0}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Export Game Log"
+            >
+              <ArrowDownTrayIcon className="w-5 h-5" />
+              Export
             </button>
           </div>
         </div>
