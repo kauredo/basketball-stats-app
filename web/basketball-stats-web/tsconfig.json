@@ -1,20 +1,12 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    /* Web-specific: Vite handles bundling, we just typecheck */
     "noEmit": true,
-    "jsx": "react-jsx"
+    /* Target ES5 for broader browser support */
+    "target": "ES5",
+    /* Use node resolution for Vite compatibility */
+    "moduleResolution": "node"
   },
   "include": ["src"]
 }

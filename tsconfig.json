@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "files": [],
+  "references": [
+    { "path": "./shared" },
+    { "path": "./web/basketball-stats-web" },
+    { "path": "./mobile/BasketballStatsMobile" },
+    { "path": "./convex" }
+  ]
+}
