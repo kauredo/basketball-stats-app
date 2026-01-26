@@ -195,9 +195,8 @@ const TeamDetail: React.FC = () => {
       const { generateTeamSeasonPDF } = await import("../utils/export/pdf-export");
 
       // Get player stats for this team from the league-wide player stats
-      const teamPlayerStats = playersStatsData?.players?.filter(
-        (ps: { teamId: string }) => ps.teamId === teamId
-      ) || [];
+      const teamPlayerStats =
+        playersStatsData?.players?.filter((ps: { teamId: string }) => ps.teamId === teamId) || [];
 
       // Create a map of player ID to stats for quick lookup
       const playerStatsMap = new Map(
@@ -215,43 +214,47 @@ const TeamDetail: React.FC = () => {
         },
         season,
         players: players.map((p) => {
-          const pStats = playerStatsMap.get(p.id) as {
-            gamesPlayed?: number;
-            avgPoints?: number;
-            avgRebounds?: number;
-            avgAssists?: number;
-            avgSteals?: number;
-            avgBlocks?: number;
-            avgTurnovers?: number;
-            fieldGoalPercentage?: number;
-            threePointPercentage?: number;
-            freeThrowPercentage?: number;
-            trueShootingPercentage?: number;
-            effectiveFieldGoalPercentage?: number;
-            playerEfficiencyRating?: number;
-            assistToTurnoverRatio?: number;
-          } | undefined;
+          const pStats = playerStatsMap.get(p.id) as
+            | {
+                gamesPlayed?: number;
+                avgPoints?: number;
+                avgRebounds?: number;
+                avgAssists?: number;
+                avgSteals?: number;
+                avgBlocks?: number;
+                avgTurnovers?: number;
+                fieldGoalPercentage?: number;
+                threePointPercentage?: number;
+                freeThrowPercentage?: number;
+                trueShootingPercentage?: number;
+                effectiveFieldGoalPercentage?: number;
+                playerEfficiencyRating?: number;
+                assistToTurnoverRatio?: number;
+              }
+            | undefined;
           return {
             id: p.id,
             name: p.name,
             number: p.number,
             position: p.position,
             gamesPlayed: pStats?.gamesPlayed,
-            stats: pStats ? {
-              avgPoints: pStats.avgPoints,
-              avgRebounds: pStats.avgRebounds,
-              avgAssists: pStats.avgAssists,
-              avgSteals: pStats.avgSteals,
-              avgBlocks: pStats.avgBlocks,
-              avgTurnovers: pStats.avgTurnovers,
-              fieldGoalPercentage: pStats.fieldGoalPercentage,
-              threePointPercentage: pStats.threePointPercentage,
-              freeThrowPercentage: pStats.freeThrowPercentage,
-              trueShootingPercentage: pStats.trueShootingPercentage,
-              effectiveFieldGoalPercentage: pStats.effectiveFieldGoalPercentage,
-              playerEfficiencyRating: pStats.playerEfficiencyRating,
-              assistToTurnoverRatio: pStats.assistToTurnoverRatio,
-            } : undefined,
+            stats: pStats
+              ? {
+                  avgPoints: pStats.avgPoints,
+                  avgRebounds: pStats.avgRebounds,
+                  avgAssists: pStats.avgAssists,
+                  avgSteals: pStats.avgSteals,
+                  avgBlocks: pStats.avgBlocks,
+                  avgTurnovers: pStats.avgTurnovers,
+                  fieldGoalPercentage: pStats.fieldGoalPercentage,
+                  threePointPercentage: pStats.threePointPercentage,
+                  freeThrowPercentage: pStats.freeThrowPercentage,
+                  trueShootingPercentage: pStats.trueShootingPercentage,
+                  effectiveFieldGoalPercentage: pStats.effectiveFieldGoalPercentage,
+                  playerEfficiencyRating: pStats.playerEfficiencyRating,
+                  assistToTurnoverRatio: pStats.assistToTurnoverRatio,
+                }
+              : undefined,
           };
         }),
         games: games.map((g) => {
@@ -274,18 +277,22 @@ const TeamDetail: React.FC = () => {
         lineups: lineupStatsData?.lineups || [],
         pairs: pairStatsData?.pairs || [],
         // Transform zone stats for shooting breakdown
-        shootingByZone: teamShotChartData?.zoneStats ? {
-          paint: teamShotChartData.zoneStats.paint || { made: 0, attempted: 0 },
-          midRange: teamShotChartData.zoneStats.midrange || { made: 0, attempted: 0 },
-          threePoint: {
-            made: (teamShotChartData.zoneStats.corner3?.made || 0) +
+        shootingByZone: teamShotChartData?.zoneStats
+          ? {
+              paint: teamShotChartData.zoneStats.paint || { made: 0, attempted: 0 },
+              midRange: teamShotChartData.zoneStats.midrange || { made: 0, attempted: 0 },
+              threePoint: {
+                made:
+                  (teamShotChartData.zoneStats.corner3?.made || 0) +
                   (teamShotChartData.zoneStats.wing3?.made || 0) +
                   (teamShotChartData.zoneStats.top3?.made || 0),
-            attempted: (teamShotChartData.zoneStats.corner3?.attempted || 0) +
-                       (teamShotChartData.zoneStats.wing3?.attempted || 0) +
-                       (teamShotChartData.zoneStats.top3?.attempted || 0),
-          },
-        } : undefined,
+                attempted:
+                  (teamShotChartData.zoneStats.corner3?.attempted || 0) +
+                  (teamShotChartData.zoneStats.wing3?.attempted || 0) +
+                  (teamShotChartData.zoneStats.top3?.attempted || 0),
+              },
+            }
+          : undefined,
         options: {
           sections: options.sections,
           theme: options.theme,

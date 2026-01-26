@@ -363,7 +363,11 @@ export default function GamesScreen() {
                 disabled={isExporting}
                 activeOpacity={0.7}
               >
-                <Icon name="download" size={18} color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"} />
+                <Icon
+                  name="download"
+                  size={18}
+                  color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"}
+                />
                 <Text className="text-surface-600 dark:text-surface-400 text-sm font-medium ml-2">
                   {isExporting ? "Exporting..." : "Export Schedule"}
                 </Text>

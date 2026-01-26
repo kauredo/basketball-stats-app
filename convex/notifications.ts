@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { mutation, query, action } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
+import { mutation, query, internalQuery, internalMutation } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 
 // ============================================
 // Push Subscription Management
@@ -567,10 +567,37 @@ export const notifyLeagueMembers = mutation({
 // Get VAPID public key for client subscription
 export const getVapidPublicKey = query({
   handler: async () => {
-    // TODO: Return VAPID public key from environment variable
-    // return process.env.VAPID_PUBLIC_KEY || null;
-
-    // For now, return a placeholder indicating push is not configured
-    return null;
+    // Return VAPID public key from environment variable
+    // Configure this in your Convex dashboard under Settings > Environment Variables
+    return process.env.VAPID_PUBLIC_KEY || null;
   },
 });
+
+// ============================================
+// Internal Functions for Push Notifications
+// ============================================
+
+// Internal query to get user's push subscriptions
+export const getUserPushSubscriptions = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("pushSubscriptions")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+  },
+});
+
+// Internal mutation to delete a push subscription
+export const deletePushSubscription = internalMutation({
+  args: { subscriptionId: v.id("pushSubscriptions") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.subscriptionId);
+  },
+});
+
+// ============================================
+// Push Notification Actions
+// ============================================
+// Note: sendPushNotification and sendPushToLeagueMembers actions
+// are in convex/pushActions.ts (requires "use node" for web-push)

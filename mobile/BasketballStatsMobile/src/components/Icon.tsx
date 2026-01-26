@@ -28,6 +28,7 @@ export type IconName =
   | "edit"
   | "trash"
   | "check"
+  | "check-circle"
   | "x"
   | "list"
   // Actions
@@ -41,8 +42,12 @@ export type IconName =
   | "alarm"
   | "timer"
   | "download"
+  | "rewind"
+  | "fast-forward"
+  | "repeat"
   // Time & Calendar
   | "calendar"
+  | "clock"
   // Arrows & Directions
   | "arrow-left"
   | "arrow-right"
@@ -58,6 +63,7 @@ export type IconName =
   | "sunny"
   // Status
   | "alert"
+  | "alert-triangle"
   | "info"
   | "wifi"
   | "wifi-off"
@@ -66,7 +72,14 @@ export type IconName =
   | "table"
   | "chart-bar"
   | "clipboard-list"
-  | "flame";
+  | "flame"
+  | "film"
+  // Game events
+  | "shield"
+  | "hand"
+  | "flag"
+  | "disc"
+  | "globe";
 
 interface IconProps {
   name: IconName;
@@ -105,6 +118,7 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   edit: { library: "ionicons", name: "create" },
   trash: { library: "ionicons", name: "trash" },
   check: { library: "ionicons", name: "checkmark" },
+  "check-circle": { library: "ionicons", name: "checkmark-circle" },
   x: { library: "ionicons", name: "close" },
   list: { library: "ionicons", name: "list" },
 
@@ -119,9 +133,13 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   alarm: { library: "ionicons", name: "alarm" },
   timer: { library: "ionicons", name: "timer" },
   download: { library: "ionicons", name: "download" },
+  rewind: { library: "ionicons", name: "play-back" },
+  "fast-forward": { library: "ionicons", name: "play-forward" },
+  repeat: { library: "ionicons", name: "repeat" },
 
   // Time & Calendar
   calendar: { library: "ionicons", name: "calendar" },
+  clock: { library: "ionicons", name: "time" },
 
   // Arrows & Directions
   "arrow-left": { library: "ionicons", name: "arrow-back" },
@@ -140,6 +158,7 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
 
   // Status
   alert: { library: "ionicons", name: "alert-circle" },
+  "alert-triangle": { library: "ionicons", name: "warning" },
   info: { library: "ionicons", name: "information-circle" },
   wifi: { library: "ionicons", name: "wifi" },
   "wifi-off": { library: "ionicons", name: "wifi-outline" },
@@ -150,6 +169,14 @@ const iconMap: Record<IconName, { library: "ionicons" | "material" | "feather"; 
   "chart-bar": { library: "ionicons", name: "bar-chart" },
   "clipboard-list": { library: "ionicons", name: "clipboard" },
   flame: { library: "ionicons", name: "flame" },
+  film: { library: "ionicons", name: "film" },
+
+  // Game events
+  shield: { library: "ionicons", name: "shield" },
+  hand: { library: "ionicons", name: "hand-left" },
+  flag: { library: "ionicons", name: "flag" },
+  disc: { library: "ionicons", name: "ellipse" },
+  globe: { library: "ionicons", name: "globe" },
 };
 
 export default function Icon({ name, size = 24, color = "#7a746c", className, style }: IconProps) {

@@ -705,7 +705,8 @@ async function addShotChartsSection(
         paint: shots.filter((s) => s.zone === "paint" || s.zone === "restricted"),
         midRange: shots.filter((s) => s.zone === "midrange"),
         threePoint: shots.filter(
-          (s) => s.zone === "corner3" || s.zone === "wing3" || s.zone === "top3" || s.shotType === "3pt"
+          (s) =>
+            s.zone === "corner3" || s.zone === "wing3" || s.zone === "top3" || s.shotType === "3pt"
         ),
       };
       return {
@@ -741,9 +742,13 @@ async function addShotChartsSection(
     let xPos = marginLeft + 2;
     doc.text("Zone", xPos, y + 4);
     xPos += colWidths[0];
-    doc.text(gameData.homeTeam.name.slice(0, 12), xPos + colWidths[1] / 2, y + 4, { align: "center" });
+    doc.text(gameData.homeTeam.name.slice(0, 12), xPos + colWidths[1] / 2, y + 4, {
+      align: "center",
+    });
     xPos += colWidths[1];
-    doc.text(gameData.awayTeam.name.slice(0, 12), xPos + colWidths[2] / 2, y + 4, { align: "center" });
+    doc.text(gameData.awayTeam.name.slice(0, 12), xPos + colWidths[2] / 2, y + 4, {
+      align: "center",
+    });
     xPos += colWidths[2];
     doc.text("Difference", xPos + colWidths[3] / 2, y + 4, { align: "center" });
 
@@ -801,12 +806,9 @@ async function addShotChartsSection(
       const diff = homePct - awayPct;
       const diffColor = diff > 0 ? COLORS.success : diff < 0 ? COLORS.danger : colors.textSecondary;
       doc.setTextColor(...hexToRgb(diffColor));
-      doc.text(
-        `${diff > 0 ? "+" : ""}${diff.toFixed(0)}%`,
-        xPos + colWidths[3] / 2,
-        y + 3,
-        { align: "center" }
-      );
+      doc.text(`${diff > 0 ? "+" : ""}${diff.toFixed(0)}%`, xPos + colWidths[3] / 2, y + 3, {
+        align: "center",
+      });
 
       y += 6;
     }
@@ -1867,7 +1869,9 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
   if (sections.advancedStats && data.players.length > 0) {
     // Check if any players have advanced stats
     const playersWithAdvStats = data.players.filter(
-      (p) => p.stats?.trueShootingPercentage !== undefined || p.stats?.playerEfficiencyRating !== undefined
+      (p) =>
+        p.stats?.trueShootingPercentage !== undefined ||
+        p.stats?.playerEfficiencyRating !== undefined
     );
 
     if (playersWithAdvStats.length > 0) {
@@ -2021,18 +2025,14 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
       },
     ];
 
-    const totalAttempts =
-      zones.reduce((sum, z) => sum + z.data.attempted, 0) || 1;
+    const totalAttempts = zones.reduce((sum, z) => sum + z.data.attempted, 0) || 1;
 
     // Create zone cards
     const cardWidth = (pageWidth - 40) / 3;
     let cardX = 15;
 
     for (const zone of zones) {
-      const pct =
-        zone.data.attempted > 0
-          ? (zone.data.made / zone.data.attempted) * 100
-          : 0;
+      const pct = zone.data.attempted > 0 ? (zone.data.made / zone.data.attempted) * 100 : 0;
       const shotShare = (zone.data.attempted / totalAttempts) * 100;
 
       // Card background
@@ -2046,7 +2046,12 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
       doc.text(zone.name, cardX + cardWidth / 2, y + 8, { align: "center" });
 
       // Percentage (large)
-      const pctColor = pct >= zone.benchmark ? COLORS.success : pct < zone.benchmark - 10 ? COLORS.danger : colors.text;
+      const pctColor =
+        pct >= zone.benchmark
+          ? COLORS.success
+          : pct < zone.benchmark - 10
+            ? COLORS.danger
+            : colors.text;
       doc.setFontSize(18);
       doc.setTextColor(...hexToRgb(pctColor));
       doc.text(`${pct.toFixed(1)}%`, cardX + cardWidth / 2, y + 22, { align: "center" });
@@ -2055,21 +2060,15 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7);
       doc.setTextColor(...hexToRgb(colors.textSecondary));
-      doc.text(
-        `${zone.data.made}/${zone.data.attempted}`,
-        cardX + cardWidth / 2,
-        y + 30,
-        { align: "center" }
-      );
+      doc.text(`${zone.data.made}/${zone.data.attempted}`, cardX + cardWidth / 2, y + 30, {
+        align: "center",
+      });
 
       // Shot share
       doc.setFontSize(6);
-      doc.text(
-        `${shotShare.toFixed(0)}% of shots`,
-        cardX + cardWidth / 2,
-        y + 38,
-        { align: "center" }
-      );
+      doc.text(`${shotShare.toFixed(0)}% of shots`, cardX + cardWidth / 2, y + 38, {
+        align: "center",
+      });
 
       cardX += cardWidth + 5;
     }

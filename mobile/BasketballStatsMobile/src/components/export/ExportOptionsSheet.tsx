@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import Icon from "../Icon";
 import { buildExportURL, type ExportFormat, type ExportType } from "@basketball-stats/shared";
+import { WEB_APP_BASE_URL, EXPORT_CONFIG } from "../../constants/config";
 
 interface ExportOption {
   id: string;
@@ -28,10 +29,9 @@ interface ExportOptionsSheetProps {
   leagueId?: string;
   exportType?: ExportType;
   title?: string;
+  /** Number of items being exported (for large dataset warnings) */
+  dataCount?: number;
 }
-
-// Web app base URL - configure this based on your deployment
-const WEB_APP_BASE_URL = "https://your-app-url.com"; // TODO: Replace with actual URL
 
 export function ExportOptionsSheet({
   isOpen,
@@ -42,7 +42,10 @@ export function ExportOptionsSheet({
   leagueId,
   exportType = "game-report",
   title = "Export Data",
+  dataCount,
 }: ExportOptionsSheetProps) {
+  const isLargeDataset =
+    dataCount !== undefined && dataCount > EXPORT_CONFIG.LARGE_DATASET_THRESHOLD;
   const [format, setFormat] = useState<ExportFormat>("pdf");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [includeHeatmap, setIncludeHeatmap] = useState(false);
@@ -319,6 +322,22 @@ export function ExportOptionsSheet({
                 )}
               </View>
             </>
+          )}
+
+          {/* Large Dataset Warning */}
+          {isLargeDataset && (
+            <View className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 flex-row gap-3 mb-4">
+              <Icon name="alert-triangle" size={20} color="#F59E0B" />
+              <View className="flex-1">
+                <Text className="text-amber-800 dark:text-amber-300 text-sm font-medium mb-1">
+                  Large Dataset
+                </Text>
+                <Text className="text-amber-600 dark:text-amber-400 text-xs">
+                  Exporting {dataCount} items may take longer. PDF exports may timeout on very large
+                  datasets - consider using CSV format instead.
+                </Text>
+              </View>
+            </View>
           )}
 
           {/* Info Banner */}

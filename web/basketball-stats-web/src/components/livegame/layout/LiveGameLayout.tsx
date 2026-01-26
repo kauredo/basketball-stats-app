@@ -1,11 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { EnhancedScoreboard } from "./EnhancedScoreboard";
 import { ModeTabNavigation } from "./ModeTabNavigation";
 import { QuickUndoFAB } from "../utility/QuickUndoFAB";
-import { GameMode, TeamStatsData, LastAction, GameStatus } from "../../../types/livegame";
-import { Id } from "../../../../../../convex/_generated/dataModel";
+import type { GameMode, TeamStatsData, LastAction, GameStatus } from "../../../types/livegame";
+import type { Id } from "../../../../../../convex/_generated/dataModel";
 
 // ============================================================================
 // Types

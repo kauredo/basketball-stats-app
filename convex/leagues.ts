@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { getUserFromToken, canAccessLeague, canManageLeague, generateToken } from "./lib/auth";
+import { validateName, validateEntityFields } from "./lib/validation";
 
 // List leagues (user's leagues + public leagues)
 export const list = query({
@@ -183,8 +184,10 @@ export const get = query({
               joinedAt: membership.joinedAt,
               canManageTeams: ["admin", "coach"].includes(membership.role),
               canRecordStats: ["admin", "coach", "scorekeeper"].includes(membership.role),
-              canViewAnalytics: ["admin", "coach"].includes(membership.role),
+              canViewAnalytics: ["admin", "coach", "member"].includes(membership.role),
+              canViewStats: true, // All members including viewer can view stats
               canManageLeague: membership.role === "admin",
+              isViewOnly: membership.role === "viewer",
             }
           : league.ownerId === user._id
             ? {
@@ -193,7 +196,9 @@ export const get = query({
                 canManageTeams: true,
                 canRecordStats: true,
                 canViewAnalytics: true,
+                canViewStats: true,
                 canManageLeague: true,
+                isViewOnly: false,
               }
             : null,
         createdAt: league._creationTime,
@@ -285,6 +290,21 @@ export const create = mutation({
     const user = await getUserFromToken(ctx, args.token);
     if (!user) throw new Error("Unauthorized");
 
+    // Validate input
+    validateName(args.name, "League name");
+    validateEntityFields({ description: args.description, season: args.season });
+
+    // Check for duplicate league name for this owner
+    const existingLeague = await ctx.db
+      .query("leagues")
+      .withIndex("by_owner", (q) => q.eq("ownerId", user._id))
+      .filter((q) => q.eq(q.field("name"), args.name))
+      .first();
+
+    if (existingLeague) {
+      throw new Error("You already have a league with this name");
+    }
+
     // Generate current season if not provided (e.g., "2024-2025")
     const currentYear = new Date().getFullYear();
     const season = args.season || `${currentYear}-${currentYear + 1}`;
@@ -370,6 +390,26 @@ export const update = mutation({
 
     const canManage = await canManageLeague(ctx, user._id, args.leagueId);
     if (!canManage) throw new Error("Access denied");
+
+    // Validate input
+    if (args.name) validateName(args.name, "League name");
+    validateEntityFields({ description: args.description, season: args.season });
+
+    // Check for duplicate name if changing
+    if (args.name) {
+      const league = await ctx.db.get(args.leagueId);
+      if (league && args.name !== league.name) {
+        const existingLeague = await ctx.db
+          .query("leagues")
+          .withIndex("by_owner", (q) => q.eq("ownerId", league.ownerId))
+          .filter((q) => q.eq(q.field("name"), args.name))
+          .first();
+
+        if (existingLeague && existingLeague._id !== args.leagueId) {
+          throw new Error("You already have a league with this name");
+        }
+      }
+    }
 
     const updates: any = {};
     if (args.name !== undefined) updates.name = args.name;
@@ -752,8 +792,10 @@ export const getMembers = query({
           permissions: {
             canManageTeams: ["admin", "coach"].includes(membership.role),
             canRecordStats: ["admin", "coach", "scorekeeper"].includes(membership.role),
-            canViewAnalytics: ["admin", "coach"].includes(membership.role),
+            canViewAnalytics: ["admin", "coach", "member"].includes(membership.role),
+            canViewStats: true,
             canManageLeague: membership.role === "admin",
+            isViewOnly: membership.role === "viewer",
           },
         };
       })

@@ -1023,6 +1023,127 @@ export const comparePlayersStats = query({
   },
 });
 
+// Compare multiple players stats (supports 2-4 players)
+export const compareMultiplePlayersStats = query({
+  args: {
+    token: v.string(),
+    playerIds: v.array(v.id("players")),
+    leagueId: v.id("leagues"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const hasAccess = await canAccessLeague(ctx, user._id, args.leagueId);
+    if (!hasAccess) throw new Error("Access denied");
+
+    if (args.playerIds.length < 2 || args.playerIds.length > 4) {
+      throw new Error("Must compare between 2 and 4 players");
+    }
+
+    // Get completed games in this league
+    const games = await ctx.db
+      .query("games")
+      .withIndex("by_league_status", (q) =>
+        q.eq("leagueId", args.leagueId).eq("status", "completed")
+      )
+      .collect();
+    const gameIds = new Set(games.map((g) => g._id));
+
+    // Get stats for a player
+    const getPlayerStats = async (playerId: Id<"players">) => {
+      const allStats = await ctx.db
+        .query("playerStats")
+        .withIndex("by_player", (q) => q.eq("playerId", playerId))
+        .collect();
+      return allStats.filter((s) => gameIds.has(s.gameId));
+    };
+
+    // Calculate comparison stats for a player
+    const calculatePlayerComparison = async (playerId: Id<"players">) => {
+      const player = await ctx.db.get(playerId);
+      if (!player) throw new Error(`Player ${playerId} not found`);
+
+      const team = await ctx.db.get(player.teamId);
+      const stats = await getPlayerStats(playerId);
+      const gamesPlayed = stats.length;
+
+      if (gamesPlayed === 0) {
+        return {
+          playerId: player._id,
+          playerName: player.name,
+          teamName: team?.name || "Unknown",
+          position: player.position,
+          number: player.number,
+          gamesPlayed: 0,
+          avgPoints: 0,
+          avgRebounds: 0,
+          avgAssists: 0,
+          avgSteals: 0,
+          avgBlocks: 0,
+          avgTurnovers: 0,
+          avgMinutes: 0,
+          fieldGoalPercentage: 0,
+          threePointPercentage: 0,
+          freeThrowPercentage: 0,
+          totalPoints: 0,
+          totalRebounds: 0,
+          totalAssists: 0,
+        };
+      }
+
+      const totals = aggregateStats(stats);
+      const avgPoints = totals.totalPoints / gamesPlayed;
+      const avgRebounds = totals.totalRebounds / gamesPlayed;
+      const avgAssists = totals.totalAssists / gamesPlayed;
+      const avgSteals = totals.totalSteals / gamesPlayed;
+      const avgBlocks = totals.totalBlocks / gamesPlayed;
+      const avgTurnovers = totals.totalTurnovers / gamesPlayed;
+      const avgMinutes = totals.totalMinutes / gamesPlayed;
+
+      const fgPct =
+        totals.totalFieldGoalsAttempted > 0
+          ? (totals.totalFieldGoalsMade / totals.totalFieldGoalsAttempted) * 100
+          : 0;
+      const threePct =
+        totals.totalThreePointersAttempted > 0
+          ? (totals.totalThreePointersMade / totals.totalThreePointersAttempted) * 100
+          : 0;
+      const ftPct =
+        totals.totalFreeThrowsAttempted > 0
+          ? (totals.totalFreeThrowsMade / totals.totalFreeThrowsAttempted) * 100
+          : 0;
+
+      return {
+        playerId: player._id,
+        playerName: player.name,
+        teamName: team?.name || "Unknown",
+        position: player.position,
+        number: player.number,
+        gamesPlayed,
+        avgPoints: Math.round(avgPoints * 10) / 10,
+        avgRebounds: Math.round(avgRebounds * 10) / 10,
+        avgAssists: Math.round(avgAssists * 10) / 10,
+        avgSteals: Math.round(avgSteals * 10) / 10,
+        avgBlocks: Math.round(avgBlocks * 10) / 10,
+        avgTurnovers: Math.round(avgTurnovers * 10) / 10,
+        avgMinutes: Math.round(avgMinutes * 10) / 10,
+        fieldGoalPercentage: Math.round(fgPct * 10) / 10,
+        threePointPercentage: Math.round(threePct * 10) / 10,
+        freeThrowPercentage: Math.round(ftPct * 10) / 10,
+        totalPoints: totals.totalPoints,
+        totalRebounds: totals.totalRebounds,
+        totalAssists: totals.totalAssists,
+      };
+    };
+
+    // Calculate stats for all players
+    const players = await Promise.all(args.playerIds.map(calculatePlayerComparison));
+
+    return { players };
+  },
+});
+
 // Get comprehensive league standings
 export const getStandings = query({
   args: {

@@ -17,6 +17,7 @@ import Icon from "../components/Icon";
 import { MiniCourt, type ShotMarker } from "../components/court/MiniCourt";
 import { PlayerSelectModal, type PlayerOption } from "../components/PlayerSelectModal";
 import { buildExportURL } from "@basketball-stats/shared";
+import { WEB_APP_BASE_URL } from "../constants/config";
 
 interface StatBoxProps {
   label: string;
@@ -39,9 +40,6 @@ function StatBox({ label, made, attempted, percentage, color }: StatBoxProps) {
     </View>
   );
 }
-
-// Web app base URL - configure this based on your deployment
-const WEB_APP_BASE_URL = "https://your-app-url.com"; // TODO: Replace with actual URL
 
 export default function ShotChartScreen() {
   const { token, selectedLeague } = useAuth();

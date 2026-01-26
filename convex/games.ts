@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, internalMutation } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { getUserFromToken, canAccessLeague, getUserLeagueRole } from "./lib/auth";
 
@@ -475,6 +475,24 @@ export const start = mutation({
     // Don't schedule timerTick - game starts paused
     // User will call resume() to start the clock
 
+    // Notify league members that the game has started
+    const homeTeam = await ctx.db.get(game.homeTeamId);
+    const awayTeam = await ctx.db.get(game.awayTeamId);
+    const homeTeamName = homeTeam?.name || "Home Team";
+    const awayTeamName = awayTeam?.name || "Away Team";
+
+    await ctx.runMutation(api.notifications.notifyLeagueMembers, {
+      leagueId: game.leagueId,
+      type: "game_start",
+      title: "Game Starting",
+      body: `${homeTeamName} vs ${awayTeamName} is now starting!`,
+      data: {
+        gameId: args.gameId,
+        homeTeamId: game.homeTeamId,
+        awayTeamId: game.awayTeamId,
+      },
+    });
+
     return { message: "Game ready - press play to start clock", status: "paused" };
   },
 });
@@ -601,6 +619,26 @@ export const end = mutation({
     await ctx.db.patch(args.gameId, {
       status: "completed",
       endedAt: Date.now(),
+    });
+
+    // Notify league members that the game has ended
+    const homeTeam = await ctx.db.get(game.homeTeamId);
+    const awayTeam = await ctx.db.get(game.awayTeamId);
+    const homeTeamName = homeTeam?.name || "Home Team";
+    const awayTeamName = awayTeam?.name || "Away Team";
+
+    await ctx.runMutation(api.notifications.notifyLeagueMembers, {
+      leagueId: game.leagueId,
+      type: "game_end",
+      title: "Game Ended",
+      body: `${homeTeamName} ${game.homeScore} - ${game.awayScore} ${awayTeamName}`,
+      data: {
+        gameId: args.gameId,
+        homeTeamId: game.homeTeamId,
+        awayTeamId: game.awayTeamId,
+        homeScore: game.homeScore,
+        awayScore: game.awayScore,
+      },
     });
 
     return { message: "Game ended", status: "completed" };
@@ -821,6 +859,26 @@ export const timerTick = internalMutation({
           endedAt: Date.now(),
           timeRemainingSeconds: 0,
           gameSettings: newSettings,
+        });
+
+        // Notify league members that the game has ended
+        const homeTeam = await ctx.db.get(game.homeTeamId);
+        const awayTeam = await ctx.db.get(game.awayTeamId);
+        const homeTeamName = homeTeam?.name || "Home Team";
+        const awayTeamName = awayTeam?.name || "Away Team";
+
+        await ctx.runMutation(api.notifications.notifyLeagueMembers, {
+          leagueId: game.leagueId,
+          type: "game_end",
+          title: "Game Ended",
+          body: `${homeTeamName} ${game.homeScore} - ${game.awayScore} ${awayTeamName}`,
+          data: {
+            gameId: args.gameId,
+            homeTeamId: game.homeTeamId,
+            awayTeamId: game.awayTeamId,
+            homeScore: game.homeScore,
+            awayScore: game.awayScore,
+          },
         });
         return;
       }

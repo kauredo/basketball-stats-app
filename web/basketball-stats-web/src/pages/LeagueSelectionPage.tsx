@@ -113,16 +113,10 @@ export default function LeagueSelectionPage() {
     selectLeague({
       id: league.id,
       name: league.name,
-      description: league.description,
-      leagueType: league.leagueType,
       season: league.season,
+      leagueType: league.leagueType,
       status: league.status,
-      isPublic: league.isPublic,
-      teamsCount: league.teamsCount,
-      membersCount: league.membersCount,
-      gamesCount: league.gamesCount,
       role: league.membership?.role || league.role,
-      createdAt: league.createdAt,
     });
   };
 
@@ -144,16 +138,10 @@ export default function LeagueSelectionPage() {
       selectLeague({
         id: result.league.id,
         name: result.league.name,
-        description: result.league.description,
-        leagueType: result.league.leagueType,
         season: result.league.season,
-        isPublic: result.league.isPublic,
-        role: "admin",
-        teamsCount: 0,
-        membersCount: 1,
-        gamesCount: 0,
+        leagueType: result.league.leagueType,
         status: result.league.status,
-        createdAt: result.league.createdAt,
+        role: "admin",
       });
 
       setCreateFormData({

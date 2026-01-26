@@ -44,7 +44,7 @@ interface AdvancedStatsProps {
 
 /**
  * Advanced stats display.
- * Shows TS%, eFG%, and GER for all players.
+ * Shows TS%, eFG%, GER, PER, and A/TO for all players.
  */
 export function AdvancedStats({
   homeStats,
@@ -60,37 +60,49 @@ export function AdvancedStats({
     const ts = BasketballUtils.trueShootingPercentage(stat);
     const efg = BasketballUtils.effectiveFieldGoalPercentage(stat);
     const ger = BasketballUtils.gameEfficiencyRating(stat);
+    const per = BasketballUtils.playerEfficiencyRating(stat);
+    const ato = BasketballUtils.assistToTurnoverRatio(stat);
 
     return (
       <View
         key={stat.playerId}
         className="flex-row items-center py-2 border-b border-surface-100 dark:border-surface-700"
       >
-        <View className="w-24 flex-row items-center">
+        <View className="w-20 flex-row items-center">
           <Text className="text-xs font-medium text-surface-900 dark:text-white">
             #{stat.player?.number}
           </Text>
           <Text className="text-xs text-surface-500 dark:text-surface-400 ml-1" numberOfLines={1}>
-            {stat.player?.name?.split(" ").pop()}
+            {stat.player?.name?.split(" ").pop()?.substring(0, 4)}
           </Text>
         </View>
-        <View className="w-14 items-center">
+        <View className="flex-1 items-center">
           <Text
             className={`text-xs font-medium ${getStatColorClass(ts, STAT_THRESHOLDS.trueShootingPercentage.good, STAT_THRESHOLDS.trueShootingPercentage.bad)}`}
           >
-            {ts.toFixed(1)}%
+            {ts.toFixed(0)}%
           </Text>
         </View>
-        <View className="w-14 items-center">
+        <View className="flex-1 items-center">
           <Text
             className={`text-xs font-medium ${getStatColorClass(efg, STAT_THRESHOLDS.effectiveFieldGoalPercentage.good, STAT_THRESHOLDS.effectiveFieldGoalPercentage.bad)}`}
           >
-            {efg.toFixed(1)}%
+            {efg.toFixed(0)}%
           </Text>
         </View>
-        <View className="w-12 items-center">
+        <View className="flex-1 items-center">
           <Text className={`text-xs font-medium ${getGERColorClass(ger)}`}>
             {ger > 0 ? `+${ger}` : ger}
+          </Text>
+        </View>
+        <View className="flex-1 items-center">
+          <Text className={`text-xs font-medium ${getStatColorClass(per, 1.0, -0.5)}`}>
+            {per.toFixed(1)}
+          </Text>
+        </View>
+        <View className="flex-1 items-center">
+          <Text className={`text-xs font-medium ${getStatColorClass(ato, 2.0, 0.5)}`}>
+            {ato.toFixed(1)}
           </Text>
         </View>
       </View>
@@ -123,20 +135,30 @@ export function AdvancedStats({
           <>
             {/* Legend */}
             <View className="flex-row items-center py-2 border-b border-surface-200 dark:border-surface-600">
-              <View className="w-24" />
-              <View className="w-14 items-center">
+              <View className="w-20" />
+              <View className="flex-1 items-center">
                 <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
                   TS%
                 </Text>
               </View>
-              <View className="w-14 items-center">
+              <View className="flex-1 items-center">
                 <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
                   eFG%
                 </Text>
               </View>
-              <View className="w-12 items-center">
+              <View className="flex-1 items-center">
                 <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
                   GER
+                </Text>
+              </View>
+              <View className="flex-1 items-center">
+                <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
+                  PER
+                </Text>
+              </View>
+              <View className="flex-1 items-center">
+                <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
+                  A/TO
                 </Text>
               </View>
             </View>
@@ -166,13 +188,13 @@ export function AdvancedStats({
         {/* Stat Definitions */}
         <View className="mt-3 pt-2 border-t border-surface-200 dark:border-surface-700">
           <Text className="text-xs text-surface-400 dark:text-surface-500">
-            TS% = True Shooting % (shooting efficiency including FTs)
+            TS% = True Shooting % | eFG% = Effective FG %
           </Text>
           <Text className="text-xs text-surface-400 dark:text-surface-500">
-            eFG% = Effective FG % (accounts for 3PT value)
+            GER = Game Efficiency | PER = Player Efficiency (per minute)
           </Text>
           <Text className="text-xs text-surface-400 dark:text-surface-500">
-            GER = Game Efficiency Rating (positive stats minus negative stats)
+            A/TO = Assist-to-Turnover Ratio
           </Text>
         </View>
       </View>

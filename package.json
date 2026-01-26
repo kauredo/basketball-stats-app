@@ -25,7 +25,8 @@
   },
   "dependencies": {
     "@convex-dev/auth": "^0.0.90",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "web-push": "^3.6.7"
   },
   "overrides": {
     "nativewind": {

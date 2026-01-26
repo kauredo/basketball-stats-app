@@ -33,6 +33,9 @@ import NotificationsScreen from "../screens/NotificationsScreen";
 import GameAnalysisScreen from "../screens/GameAnalysisScreen";
 import LeagueSettingsScreen from "../screens/LeagueSettingsScreen";
 import LeagueMembersScreen from "../screens/LeagueMembersScreen";
+import GameReplayScreen from "../screens/GameReplayScreen";
+import LeaguesScreen from "../screens/LeaguesScreen";
+import CreateLeagueScreen from "../screens/CreateLeagueScreen";
 
 // Navigation parameter types
 export type RootStackParamList = {
@@ -49,6 +52,9 @@ export type RootStackParamList = {
   Standings: undefined;
   Notifications: undefined;
   GameAnalysis: { gameId: string };
+  GameReplay: { gameId: string };
+  Leagues: undefined;
+  CreateLeague: undefined;
   LeagueSettings: undefined;
   LeagueMembers: undefined;
 };
@@ -303,6 +309,21 @@ function AppContent() {
             name="GameAnalysis"
             component={GameAnalysisScreen}
             options={{ title: "Game Analysis" }}
+          />
+          <Stack.Screen
+            name="GameReplay"
+            component={GameReplayScreen}
+            options={{ title: "Game Replay", headerShown: false }}
+          />
+          <Stack.Screen
+            name="Leagues"
+            component={LeaguesScreen}
+            options={{ title: "Leagues", headerShown: false }}
+          />
+          <Stack.Screen
+            name="CreateLeague"
+            component={CreateLeagueScreen}
+            options={{ title: "Create League", headerShown: false }}
           />
           <Stack.Screen
             name="LeagueSettings"

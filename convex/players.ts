@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getUserFromToken, canAccessLeague, canManageLeague } from "./lib/auth";
+import { validateName } from "./lib/validation";
 
 // Helper to resolve image URL from either imageUrl or imageStorageId
 async function resolveImageUrl(
@@ -355,6 +356,9 @@ export const create = mutation({
       throw new Error("Access denied");
     }
 
+    // Validate input
+    validateName(args.name, "Player name");
+
     // Check for duplicate jersey number on team
     const existingPlayer = await ctx.db
       .query("players")
@@ -424,6 +428,9 @@ export const update = mutation({
     if (!canManage && team.userId !== user._id) {
       throw new Error("Access denied");
     }
+
+    // Validate input
+    if (args.name) validateName(args.name, "Player name");
 
     // Check for duplicate jersey number if changing
     if (args.number !== undefined && args.number !== player.number) {

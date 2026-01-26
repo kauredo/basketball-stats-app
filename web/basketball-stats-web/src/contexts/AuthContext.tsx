@@ -34,20 +34,30 @@ interface League extends Omit<
   createdAt: number;
 }
 
+// Minimal type for league selection (used when selecting a league to work with)
+interface LeagueSelection {
+  id: Id<"leagues">;
+  name: string;
+  season?: string;
+  leagueType?: string;
+  status?: string;
+  role?: LeagueRole;
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
   token: string | null;
-  selectedLeague: League | null;
+  selectedLeague: LeagueSelection | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string, passwordConfirmation: string) => Promise<void>;
   confirmEmail: (token: string) => Promise<void>;
-  selectLeague: (league: League | null) => void;
+  selectLeague: (league: LeagueSelection | null) => void;
   clearError: () => void;
   initialize: () => Promise<void>;
 }
@@ -60,7 +70,7 @@ const LEAGUE_KEY = "basketball_selected_league";
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [selectedLeague, setSelectedLeague] = useState<League | null>(null);
+  const [selectedLeague, setSelectedLeague] = useState<LeagueSelection | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -168,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(LEAGUE_KEY);
   }, [token, logoutMutation]);
 
-  const selectLeague = useCallback((league: League | null) => {
+  const selectLeague = useCallback((league: LeagueSelection | null) => {
     setSelectedLeague(league);
     if (league) {
       localStorage.setItem(LEAGUE_KEY, JSON.stringify(league));

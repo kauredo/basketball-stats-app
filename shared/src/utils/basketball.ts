@@ -82,6 +82,16 @@ export class BasketballUtils {
     return positive - negative;
   }
 
+  // Assist-to-turnover ratio
+  static assistToTurnoverRatio(stat: StatInput): number {
+    const turnovers = stat.turnovers || 0;
+    if (turnovers === 0) {
+      // If no turnovers, return assists as the ratio (essentially infinite ratio capped at assists)
+      return stat.assists;
+    }
+    return Math.round((stat.assists / turnovers) * 10) / 10;
+  }
+
   // Game flow utilities
   static formatGameTime(seconds: number): string {
     const minutes = Math.floor(seconds / 60);

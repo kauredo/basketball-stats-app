@@ -22,6 +22,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   Cog6ToothIcon,
+  BuildingOffice2Icon,
 } from "@heroicons/react/24/outline";
 
 interface LayoutProps {
@@ -37,6 +38,7 @@ const navigation = [
   { name: "Games", href: "/app/games", icon: TrophyIcon },
   { name: "Teams", href: "/app/teams", icon: UserGroupIcon },
   { name: "Players", href: "/app/players", icon: UsersIcon },
+  { name: "Leagues", href: "/app/leagues", icon: BuildingOffice2Icon },
 ];
 
 const themeOptions: { mode: ThemeMode; icon: typeof SunIcon; label: string }[] = [

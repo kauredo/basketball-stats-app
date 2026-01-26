@@ -31,6 +31,7 @@ import ConfirmEmailPage from "./pages/auth/ConfirmEmailPage";
 import Dashboard from "./pages/Dashboard";
 import Games from "./pages/Games";
 import Teams from "./pages/Teams";
+import Leagues from "./pages/Leagues";
 import Players from "./pages/Players";
 import Statistics from "./pages/Statistics";
 import LiveGame from "./pages/LiveGameNew";
@@ -95,6 +96,7 @@ function AuthenticatedApp() {
           <Route path="/games" element={<Games />} />
           <Route path="/teams" element={<Teams />} />
           <Route path="/teams/:teamId" element={<TeamDetail />} />
+          <Route path="/leagues" element={<Leagues />} />
           <Route path="/players" element={<Players />} />
           <Route path="/players/:playerId" element={<PlayerDetail />} />
           <Route path="/statistics" element={<Statistics />} />

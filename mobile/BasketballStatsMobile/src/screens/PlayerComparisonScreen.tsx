@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Dimensions } from "react-native";
-import { BarChart } from "react-native-chart-kit";
 import { useQuery } from "convex/react";
+import { BarChart } from "react-native-chart-kit";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
@@ -10,58 +10,76 @@ import { PlayerSelectModal, type PlayerOption } from "../components/PlayerSelect
 
 const screenWidth = Dimensions.get("window").width;
 
-interface StatComparisonProps {
+// Player colors for up to 4 players
+const PLAYER_COLORS = ["#F97316", "#3B82F6", "#10B981", "#8B5CF6"];
+
+interface PlayerStats {
+  playerId: Id<"players">;
+  playerName: string;
+  teamName: string;
+  position: string | null | undefined;
+  number: number | null | undefined;
+  gamesPlayed: number;
+  avgPoints: number;
+  avgRebounds: number;
+  avgAssists: number;
+  avgSteals: number;
+  avgBlocks: number;
+  avgTurnovers: number;
+  avgMinutes: number;
+  fieldGoalPercentage: number;
+  threePointPercentage: number;
+  freeThrowPercentage: number;
+  totalPoints: number;
+  totalRebounds: number;
+  totalAssists: number;
+}
+
+interface StatRowProps {
   label: string;
-  value1: number;
-  value2: number;
+  players: PlayerStats[];
+  statKey: keyof PlayerStats;
   unit?: string;
   higherIsBetter?: boolean;
 }
 
-function StatComparison({
-  label,
-  value1,
-  value2,
-  unit = "",
-  higherIsBetter = true,
-}: StatComparisonProps) {
-  const winner =
-    value1 === value2 ? null : higherIsBetter ? (value1 > value2 ? 1 : 2) : value1 < value2 ? 1 : 2;
+function StatRow({ label, players, statKey, unit = "", higherIsBetter = true }: StatRowProps) {
+  const values = players.map((p) => p[statKey] as number);
+  const maxValue = Math.max(...values);
+  const minValue = Math.min(...values);
+  const bestValue = higherIsBetter ? maxValue : minValue;
 
   return (
-    <View className="flex-row items-center py-3 border-b border-surface-200 dark:border-surface-600">
-      <View className="flex-1 items-end pr-3">
-        <Text
-          className={`text-lg font-bold ${winner === 1 ? "text-green-400" : "text-surface-900 dark:text-white"}`}
-        >
-          {value1}
-          {unit}
-        </Text>
+    <View className="flex-row items-center py-3 border-b border-surface-200 dark:border-surface-700">
+      <View className="w-20">
+        <Text className="text-xs text-surface-500 dark:text-surface-400">{label}</Text>
       </View>
-      <View className="w-24 items-center">
-        <Text className="text-sm text-surface-600 dark:text-surface-400">{label}</Text>
-      </View>
-      <View className="flex-1 items-start pl-3">
-        <Text
-          className={`text-lg font-bold ${winner === 2 ? "text-green-400" : "text-surface-900 dark:text-white"}`}
-        >
-          {value2}
-          {unit}
-        </Text>
-      </View>
+      {players.map((player, idx) => {
+        const value = player[statKey] as number;
+        const isBest = values.filter((v) => v === bestValue).length === 1 && value === bestValue;
+        return (
+          <View key={player.playerId} className="flex-1 items-center">
+            <Text
+              className={`text-sm font-semibold ${isBest ? "text-green-500" : "text-surface-900 dark:text-white"}`}
+            >
+              {value}
+              {unit}
+            </Text>
+          </View>
+        );
+      })}
     </View>
   );
 }
 
 export default function PlayerComparisonScreen() {
   const { token, selectedLeague } = useAuth();
-  const [player1, setPlayer1] = useState<PlayerOption | null>(null);
-  const [player2, setPlayer2] = useState<PlayerOption | null>(null);
-  const [showPlayer1Modal, setShowPlayer1Modal] = useState(false);
-  const [showPlayer2Modal, setShowPlayer2Modal] = useState(false);
+  const [selectedPlayers, setSelectedPlayers] = useState<PlayerOption[]>([]);
+  const [showPlayerModal, setShowPlayerModal] = useState(false);
+  const [editingSlot, setEditingSlot] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch all players for selection using the efficient players.list query
+  // Fetch all players for selection
   const playersData = useQuery(
     api.players.list,
     token && selectedLeague ? { token, leagueId: selectedLeague.id, activeOnly: true } : "skip"
@@ -76,11 +94,15 @@ export default function PlayerComparisonScreen() {
     position: player.position,
   }));
 
-  // Fetch comparison data when both players are selected
+  // Fetch comparison data when at least 2 players are selected
   const comparisonData = useQuery(
-    api.statistics.comparePlayersStats,
-    token && selectedLeague && player1 && player2
-      ? { token, leagueId: selectedLeague.id, player1Id: player1.id, player2Id: player2.id }
+    api.statistics.compareMultiplePlayersStats,
+    token && selectedLeague && selectedPlayers.length >= 2
+      ? {
+          token,
+          leagueId: selectedLeague.id,
+          playerIds: selectedPlayers.map((p) => p.id),
+        }
       : "skip"
   );
 
@@ -88,6 +110,54 @@ export default function PlayerComparisonScreen() {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 500);
   };
+
+  const handleAddPlayer = () => {
+    if (selectedPlayers.length < 4) {
+      setEditingSlot(selectedPlayers.length);
+      setShowPlayerModal(true);
+    }
+  };
+
+  const handleEditPlayer = (index: number) => {
+    setEditingSlot(index);
+    setShowPlayerModal(true);
+  };
+
+  const handleRemovePlayer = (index: number) => {
+    setSelectedPlayers((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSelectPlayer = (player: PlayerOption) => {
+    if (editingSlot !== null) {
+      setSelectedPlayers((prev) => {
+        const newPlayers = [...prev];
+        if (editingSlot < prev.length) {
+          newPlayers[editingSlot] = player;
+        } else {
+          newPlayers.push(player);
+        }
+        return newPlayers;
+      });
+    }
+    setShowPlayerModal(false);
+    setEditingSlot(null);
+  };
+
+  // Prepare chart data for points comparison
+  const getComparisonChartData = () => {
+    if (!comparisonData?.players || comparisonData.players.length < 2) return null;
+
+    return {
+      labels: comparisonData.players.map((p) => p.playerName.split(" ")[0].substring(0, 6)),
+      datasets: [
+        {
+          data: comparisonData.players.map((p) => p.avgPoints),
+        },
+      ],
+    };
+  };
+
+  const chartData = getComparisonChartData();
 
   if (!selectedLeague) {
     return (
@@ -105,37 +175,6 @@ export default function PlayerComparisonScreen() {
     );
   }
 
-  // Prepare shooting chart data
-  const shootingData = comparisonData
-    ? {
-        labels: ["FG%", "3P%", "FT%"],
-        datasets: [
-          {
-            data: [
-              comparisonData.player1.fieldGoalPercentage,
-              comparisonData.player1.threePointPercentage,
-              comparisonData.player1.freeThrowPercentage,
-            ],
-          },
-        ],
-      }
-    : null;
-
-  const shootingData2 = comparisonData
-    ? {
-        labels: ["FG%", "3P%", "FT%"],
-        datasets: [
-          {
-            data: [
-              comparisonData.player2.fieldGoalPercentage,
-              comparisonData.player2.threePointPercentage,
-              comparisonData.player2.freeThrowPercentage,
-            ],
-          },
-        ],
-      }
-    : null;
-
   return (
     <View className="flex-1 bg-surface-50 dark:bg-surface-950">
       <ScrollView
@@ -144,280 +183,162 @@ export default function PlayerComparisonScreen() {
       >
         {/* Player Selection */}
         <View className="p-4">
-          <View className="flex-row items-center justify-between mb-6">
-            {/* Player 1 Selector */}
-            <TouchableOpacity
-              className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 border-2 border-orange-500 mr-2"
-              onPress={() => setShowPlayer1Modal(true)}
-            >
-              {player1 ? (
-                <View className="items-center">
-                  <View className="w-14 h-14 bg-orange-600 rounded-full justify-center items-center mb-2">
-                    <Text className="text-surface-900 dark:text-white font-bold text-lg">
-                      #{player1.number}
-                    </Text>
-                  </View>
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
+            Select Players (2-4)
+          </Text>
+
+          <View className="flex-row flex-wrap gap-2 mb-4">
+            {selectedPlayers.map((player, index) => (
+              <TouchableOpacity
+                key={player.id}
+                className="bg-surface-100 dark:bg-surface-800 rounded-xl p-3 flex-row items-center"
+                style={{ borderLeftWidth: 4, borderLeftColor: PLAYER_COLORS[index] }}
+                onPress={() => handleEditPlayer(index)}
+              >
+                <View
+                  className="w-10 h-10 rounded-full justify-center items-center mr-2"
+                  style={{ backgroundColor: PLAYER_COLORS[index] }}
+                >
+                  <Text className="text-white font-bold text-sm">#{player.number}</Text>
+                </View>
+                <View className="flex-1 mr-2">
                   <Text
-                    className="text-surface-900 dark:text-white font-medium text-center"
+                    className="text-surface-900 dark:text-white font-medium text-sm"
                     numberOfLines={1}
                   >
-                    {player1.name}
+                    {player.name}
                   </Text>
-                  <Text className="text-surface-600 dark:text-surface-400 text-sm text-center">
-                    {player1.team}
-                  </Text>
+                  <Text className="text-surface-500 text-xs">{player.team}</Text>
                 </View>
-              ) : (
-                <View className="items-center py-4">
-                  <Icon name="user" size={32} color="#9CA3AF" />
-                  <Text className="text-surface-600 dark:text-surface-400 mt-2">
-                    Select Player 1
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleRemovePlayer(index)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Icon name="x" size={18} color="#9CA3AF" />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            ))}
 
-            {/* VS Icon */}
-            <View className="w-12 h-12 bg-surface-200 dark:bg-surface-600 rounded-full justify-center items-center mx-2">
-              <Text className="text-surface-900 dark:text-white font-bold">VS</Text>
-            </View>
-
-            {/* Player 2 Selector */}
-            <TouchableOpacity
-              className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 border-2 border-blue-500 ml-2"
-              onPress={() => setShowPlayer2Modal(true)}
-            >
-              {player2 ? (
-                <View className="items-center">
-                  <View className="w-14 h-14 bg-blue-600 rounded-full justify-center items-center mb-2">
-                    <Text className="text-surface-900 dark:text-white font-bold text-lg">
-                      #{player2.number}
-                    </Text>
-                  </View>
-                  <Text
-                    className="text-surface-900 dark:text-white font-medium text-center"
-                    numberOfLines={1}
-                  >
-                    {player2.name}
-                  </Text>
-                  <Text className="text-surface-600 dark:text-surface-400 text-sm text-center">
-                    {player2.team}
-                  </Text>
-                </View>
-              ) : (
-                <View className="items-center py-4">
-                  <Icon name="user" size={32} color="#9CA3AF" />
-                  <Text className="text-surface-600 dark:text-surface-400 mt-2">
-                    Select Player 2
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
+            {selectedPlayers.length < 4 && (
+              <TouchableOpacity
+                className="bg-surface-100 dark:bg-surface-800 rounded-xl p-3 flex-row items-center justify-center min-w-[120px]"
+                onPress={handleAddPlayer}
+              >
+                <Icon name="plus" size={20} color="#F97316" />
+                <Text className="text-primary-500 font-medium ml-2">Add Player</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Comparison Results */}
-          {comparisonData ? (
+          {comparisonData?.players && comparisonData.players.length >= 2 ? (
             <View>
-              {/* Player Info Cards */}
-              <View className="flex-row mb-4">
-                <View className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mr-2 border-l-4 border-orange-500">
-                  <Text className="text-orange-500 font-bold text-base">
-                    {comparisonData.player1.playerName}
-                  </Text>
-                  <Text className="text-surface-600 dark:text-surface-400 text-sm">
-                    {comparisonData.player1.teamName} • {comparisonData.player1.position || "N/A"}
-                  </Text>
-                  <Text className="text-surface-500 text-xs mt-1">
-                    {comparisonData.player1.gamesPlayed} games played
-                  </Text>
-                </View>
-                <View className="flex-1 bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 ml-2 border-l-4 border-blue-500">
-                  <Text className="text-blue-500 font-bold text-base">
-                    {comparisonData.player2.playerName}
-                  </Text>
-                  <Text className="text-surface-600 dark:text-surface-400 text-sm">
-                    {comparisonData.player2.teamName} • {comparisonData.player2.position || "N/A"}
-                  </Text>
-                  <Text className="text-surface-500 text-xs mt-1">
-                    {comparisonData.player2.gamesPlayed} games played
-                  </Text>
+              {/* Player Headers */}
+              <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-4">
+                <View className="flex-row">
+                  <View className="w-20" />
+                  {comparisonData.players.map((player, idx) => (
+                    <View key={player.playerId} className="flex-1 items-center">
+                      <View
+                        className="w-10 h-10 rounded-full justify-center items-center mb-1"
+                        style={{ backgroundColor: PLAYER_COLORS[idx] }}
+                      >
+                        <Text className="text-white font-bold text-xs">#{player.number}</Text>
+                      </View>
+                      <Text
+                        className="text-surface-900 dark:text-white font-medium text-xs text-center"
+                        numberOfLines={1}
+                      >
+                        {player.playerName.split(" ")[0]}
+                      </Text>
+                      <Text className="text-surface-500 text-xs">{player.gamesPlayed}G</Text>
+                    </View>
+                  ))}
                 </View>
               </View>
 
+              {/* Points Chart */}
+              {chartData && (
+                <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-4">
+                  <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-2">
+                    Points Per Game
+                  </Text>
+                  <View className="items-center">
+                    <BarChart
+                      data={chartData}
+                      width={screenWidth - 48}
+                      height={180}
+                      yAxisLabel=""
+                      yAxisSuffix=""
+                      chartConfig={{
+                        backgroundColor: "#374151",
+                        backgroundGradientFrom: "#374151",
+                        backgroundGradientTo: "#374151",
+                        decimalPlaces: 1,
+                        color: (opacity = 1) => `rgba(249, 115, 22, ${opacity})`,
+                        labelColor: () => "#9CA3AF",
+                        propsForLabels: {
+                          fontSize: 10,
+                        },
+                        barPercentage: 0.7,
+                      }}
+                      style={{
+                        borderRadius: 8,
+                      }}
+                      showBarTops={false}
+                      fromZero
+                    />
+                  </View>
+                </View>
+              )}
+
               {/* Per Game Averages */}
               <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-4">
-                <View className="flex-row items-center mb-4">
-                  <Icon name="stats" size={16} color="#F97316" />
-                  <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 ml-2">
-                    Per Game Averages
-                  </Text>
-                </View>
+                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
+                  Per Game Averages
+                </Text>
 
-                <View className="flex-row items-center mb-2 pb-2 border-b border-surface-200 dark:border-surface-600">
-                  <View className="flex-1 items-end pr-3">
-                    <Text className="text-orange-500 font-medium text-xs">
-                      {comparisonData.player1.playerName.split(" ")[0]}
-                    </Text>
-                  </View>
-                  <View className="w-24 items-center">
-                    <Text className="text-surface-500 text-xs">STAT</Text>
-                  </View>
-                  <View className="flex-1 items-start pl-3">
-                    <Text className="text-blue-500 font-medium text-xs">
-                      {comparisonData.player2.playerName.split(" ")[0]}
-                    </Text>
-                  </View>
-                </View>
-
-                <StatComparison
-                  label="Points"
-                  value1={comparisonData.player1.avgPoints}
-                  value2={comparisonData.player2.avgPoints}
-                />
-                <StatComparison
-                  label="Rebounds"
-                  value1={comparisonData.player1.avgRebounds}
-                  value2={comparisonData.player2.avgRebounds}
-                />
-                <StatComparison
-                  label="Assists"
-                  value1={comparisonData.player1.avgAssists}
-                  value2={comparisonData.player2.avgAssists}
-                />
-                <StatComparison
-                  label="Steals"
-                  value1={comparisonData.player1.avgSteals}
-                  value2={comparisonData.player2.avgSteals}
-                />
-                <StatComparison
-                  label="Blocks"
-                  value1={comparisonData.player1.avgBlocks}
-                  value2={comparisonData.player2.avgBlocks}
-                />
-                <StatComparison
+                <StatRow label="Points" players={comparisonData.players} statKey="avgPoints" />
+                <StatRow label="Rebounds" players={comparisonData.players} statKey="avgRebounds" />
+                <StatRow label="Assists" players={comparisonData.players} statKey="avgAssists" />
+                <StatRow label="Steals" players={comparisonData.players} statKey="avgSteals" />
+                <StatRow label="Blocks" players={comparisonData.players} statKey="avgBlocks" />
+                <StatRow
                   label="Turnovers"
-                  value1={comparisonData.player1.avgTurnovers}
-                  value2={comparisonData.player2.avgTurnovers}
+                  players={comparisonData.players}
+                  statKey="avgTurnovers"
                   higherIsBetter={false}
                 />
-                <StatComparison
-                  label="Minutes"
-                  value1={comparisonData.player1.avgMinutes}
-                  value2={comparisonData.player2.avgMinutes}
-                />
+                <StatRow label="Minutes" players={comparisonData.players} statKey="avgMinutes" />
               </View>
 
               {/* Shooting Percentages */}
               <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-4">
-                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-4">
+                <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
                   Shooting Percentages
                 </Text>
 
-                <View className="flex-row items-center mb-2 pb-2 border-b border-surface-200 dark:border-surface-600">
-                  <View className="flex-1 items-end pr-3">
-                    <Text className="text-orange-500 font-medium text-xs">
-                      {comparisonData.player1.playerName.split(" ")[0]}
-                    </Text>
-                  </View>
-                  <View className="w-24 items-center">
-                    <Text className="text-surface-500 text-xs">STAT</Text>
-                  </View>
-                  <View className="flex-1 items-start pl-3">
-                    <Text className="text-blue-500 font-medium text-xs">
-                      {comparisonData.player2.playerName.split(" ")[0]}
-                    </Text>
-                  </View>
-                </View>
-
-                <StatComparison
+                <StatRow
                   label="FG%"
-                  value1={comparisonData.player1.fieldGoalPercentage}
-                  value2={comparisonData.player2.fieldGoalPercentage}
+                  players={comparisonData.players}
+                  statKey="fieldGoalPercentage"
                   unit="%"
                 />
-                <StatComparison
+                <StatRow
                   label="3P%"
-                  value1={comparisonData.player1.threePointPercentage}
-                  value2={comparisonData.player2.threePointPercentage}
+                  players={comparisonData.players}
+                  statKey="threePointPercentage"
                   unit="%"
                 />
-                <StatComparison
+                <StatRow
                   label="FT%"
-                  value1={comparisonData.player1.freeThrowPercentage}
-                  value2={comparisonData.player2.freeThrowPercentage}
+                  players={comparisonData.players}
+                  statKey="freeThrowPercentage"
                   unit="%"
                 />
               </View>
-
-              {/* Shooting Chart */}
-              {shootingData && shootingData2 && (
-                <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
-                  <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-4">
-                    Shooting Chart
-                  </Text>
-
-                  <View className="flex-row">
-                    <View className="flex-1 items-center">
-                      <Text className="text-orange-500 font-medium mb-2">
-                        {comparisonData.player1.playerName.split(" ")[0]}
-                      </Text>
-                      <BarChart
-                        data={shootingData}
-                        width={(screenWidth - 64) / 2}
-                        height={150}
-                        yAxisLabel=""
-                        yAxisSuffix="%"
-                        chartConfig={{
-                          backgroundColor: "#374151",
-                          backgroundGradientFrom: "#374151",
-                          backgroundGradientTo: "#374151",
-                          decimalPlaces: 0,
-                          color: (opacity = 1) => `rgba(249, 115, 22, ${opacity})`,
-                          labelColor: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`,
-                          propsForLabels: {
-                            fontSize: 10,
-                          },
-                        }}
-                        style={{
-                          borderRadius: 8,
-                        }}
-                        showBarTops={false}
-                        fromZero
-                      />
-                    </View>
-                    <View className="flex-1 items-center">
-                      <Text className="text-blue-500 font-medium mb-2">
-                        {comparisonData.player2.playerName.split(" ")[0]}
-                      </Text>
-                      <BarChart
-                        data={shootingData2}
-                        width={(screenWidth - 64) / 2}
-                        height={150}
-                        yAxisLabel=""
-                        yAxisSuffix="%"
-                        chartConfig={{
-                          backgroundColor: "#374151",
-                          backgroundGradientFrom: "#374151",
-                          backgroundGradientTo: "#374151",
-                          decimalPlaces: 0,
-                          color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
-                          labelColor: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`,
-                          propsForLabels: {
-                            fontSize: 10,
-                          },
-                        }}
-                        style={{
-                          borderRadius: 8,
-                        }}
-                        showBarTops={false}
-                        fromZero
-                      />
-                    </View>
-                  </View>
-                </View>
-              )}
             </View>
-          ) : player1 && player2 ? (
+          ) : selectedPlayers.length >= 2 ? (
             <View className="flex-1 justify-center items-center py-12">
               <View className="animate-spin">
                 <Icon name="basketball" size={32} color="#F97316" />
@@ -435,32 +356,34 @@ export default function PlayerComparisonScreen() {
                 Select Players to Compare
               </Text>
               <Text className="text-surface-600 dark:text-surface-400 text-sm text-center">
-                Tap on the player cards above to select two players and see a side-by-side
-                comparison of their statistics.
+                Add 2-4 players to see a side-by-side comparison of their statistics with charts and
+                detailed breakdowns.
               </Text>
             </View>
           )}
         </View>
       </ScrollView>
 
-      {/* Player Selection Modals */}
+      {/* Player Selection Modal */}
       <PlayerSelectModal
-        visible={showPlayer1Modal}
-        onClose={() => setShowPlayer1Modal(false)}
-        onSelect={setPlayer1}
+        visible={showPlayerModal}
+        onClose={() => {
+          setShowPlayerModal(false);
+          setEditingSlot(null);
+        }}
+        onSelect={handleSelectPlayer}
         players={playerOptions}
-        excludeIds={player2 ? [player2.id] : []}
-        selectedId={player1?.id}
-        title="Select Player 1"
-      />
-      <PlayerSelectModal
-        visible={showPlayer2Modal}
-        onClose={() => setShowPlayer2Modal(false)}
-        onSelect={setPlayer2}
-        players={playerOptions}
-        excludeIds={player1 ? [player1.id] : []}
-        selectedId={player2?.id}
-        title="Select Player 2"
+        excludeIds={selectedPlayers.map((p) => p.id)}
+        selectedId={
+          editingSlot !== null && editingSlot < selectedPlayers.length
+            ? selectedPlayers[editingSlot]?.id
+            : undefined
+        }
+        title={
+          editingSlot !== null && editingSlot < selectedPlayers.length
+            ? "Change Player"
+            : "Add Player"
+        }
       />
     </View>
   );

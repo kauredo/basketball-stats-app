@@ -27,19 +27,36 @@ interface League extends Omit<
   } | null;
 }
 
+// Type for league selection (used when selecting a league to work with)
+// Includes all properties that screens might need to access
+interface LeagueSelection {
+  id: Id<"leagues">;
+  name: string;
+  season?: string;
+  leagueType?: string;
+  status?: string;
+  role?: string; // User's role in this league (from membership)
+  membership?: {
+    id?: string;
+    role: string;
+    status?: string;
+    joinedAt?: number;
+  } | null;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
   user: User | null;
   token: string | null;
-  selectedLeague: League | null;
+  selectedLeague: LeagueSelection | null;
   userLeagues: League[];
   login: (email: string, password: string) => Promise<void>;
   signup: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
-  selectLeague: (league: League) => void;
+  selectLeague: (league: LeagueSelection | null) => void;
   setUserLeagues: (leagues: League[]) => void;
   clearError: () => void;
   refreshUser: () => Promise<void>;
@@ -58,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [selectedLeague, setSelectedLeague] = useState<League | null>(null);
+  const [selectedLeague, setSelectedLeague] = useState<LeagueSelection | null>(null);
   const [userLeagues, setUserLeagues] = useState<League[]>([]);
 
   const loginMutation = useMutation(api.auth.login);
@@ -194,9 +211,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const selectLeague = async (league: League) => {
+  const selectLeague = async (league: LeagueSelection | null) => {
     setSelectedLeague(league);
-    await SecureStore.setItemAsync(LEAGUE_KEY, JSON.stringify(league));
+    if (league) {
+      await SecureStore.setItemAsync(LEAGUE_KEY, JSON.stringify(league));
+    } else {
+      await SecureStore.deleteItemAsync(LEAGUE_KEY);
+    }
   };
 
   const clearError = () => setError(null);

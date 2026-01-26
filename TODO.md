@@ -1,6 +1,6 @@
 # Basketball Stats App - TODO
 
-> Last audit: January 20, 2026
+> Last audit: January 26, 2026
 
 ---
 
@@ -14,7 +14,13 @@ _All P0 issues resolved_
 
 ### Backend
 
-- [ ] **Push notifications not wired** - `convex/notifications.ts` has infrastructure but `sendPushNotification()` returns null. Complete implementation.
+- [ ] **Push notifications - VAPID configuration needed** - Infrastructure implemented in `convex/notifications.ts`. To enable:
+  1. Generate VAPID keys: `npx web-push generate-vapid-keys`
+  2. In Convex dashboard → Settings → Environment Variables, add:
+     - `VAPID_PUBLIC_KEY`
+     - `VAPID_PRIVATE_KEY`
+     - `VAPID_SUBJECT` (e.g., `mailto:admin@yourapp.com`)
+  3. Install web-push: `npm install web-push` in convex directory
 
 ---
 
@@ -28,106 +34,130 @@ _All P2 issues resolved_
 
 ### Web
 
-- [ ] **Unused ArrowLeftIcon import** - `LiveGameLayout.tsx:94-102` imports ArrowLeftIcon but uses XMarkIcon. Clean up.
-
-- [ ] **PlayerAvatar alt text could be enhanced** - Use "Profile photo of {name}" instead of just name. `/clarify`
-
-- [ ] **No dark mode persistence verification** - Theme preference may not persist across sessions.
-
-- [ ] **No undo outside live game** - Only live game has undo capability.
-
-- [ ] **Export only player stats** - CSV export doesn't include team stats.
-
-### Mobile
-
-- [ ] **No advanced analytics** - Missing PER, TS%, and other advanced metrics.
-
-- [ ] **No game replay** - Cannot review plays after game.
-
-- [ ] **No multi-player radar charts** - Comparison limited to 2 players.
-
-- [ ] **Shot clock not integrated** - Shot clock is local state, doesn't sync with game clock.
-
-- [ ] **No halftime indicator** - No visual break between Q2 and Q3.
-
-- [ ] **Export may timeout** - Large dataset CSV export may fail.
+- [ ] **No undo outside live game** - Only live game has undo capability. Would require audit logging and backend changes.
 
 ### Backend
 
-- [ ] **No input limits** - Description fields have no character limits.
-
-- [ ] **No duplicate prevention** - Can create duplicate teams/players.
-
-- [ ] **Viewer role unused** - "viewer" role defined but never specifically checked.
+_All P3 backend issues resolved_
 
 ---
 
 ## Feature Parity Checklist
 
-| Feature            | Web | Mobile | Action Needed       |
-| ------------------ | --- | ------ | ------------------- |
-| Dashboard          | ✅  | ✅     | -                   |
-| Games List         | ✅  | ✅     | -                   |
-| Create Game        | ✅  | ✅     | -                   |
-| Live Game          | ✅  | ✅     | -                   |
-| Teams List         | ✅  | ✅     | -                   |
-| Create Team        | ✅  | ✅     | -                   |
-| Edit Team          | ✅  | ✅     | -                   |
-| Delete Team        | ✅  | ✅     | -                   |
-| Players List       | ✅  | ✅     | -                   |
-| Create Player      | ✅  | ✅     | -                   |
-| Edit Player        | ✅  | ✅     | -                   |
-| Delete Player      | ✅  | ✅     | -                   |
-| Player Detail      | ✅  | ✅     | -                   |
-| Statistics         | ✅  | ✅     | -                   |
-| Standings          | ✅  | ✅     | -                   |
-| Shot Charts        | ✅  | ✅     | -                   |
-| Player Comparison  | ✅  | ✅     | -                   |
-| Game Analysis      | ✅  | ✅     | -                   |
-| Notifications Bell | ✅  | ✅     | -                   |
-| Notification Prefs | ✅  | ✅     | -                   |
-| Profile/Settings   | ✅  | ✅     | -                   |
-| League Selection   | ✅  | ✅     | -                   |
-| League Management  | ❌  | ❌     | Implement both      |
-| CSV Export         | ✅  | ✅     | -                   |
-| Print/PDF          | ✅  | ❌     | Consider for mobile |
-| Dark Mode          | ✅  | ✅     | -                   |
-| Haptic Feedback    | ❌  | ✅     | Consider for web    |
-| Sound Feedback     | ❌  | ✅     | Consider for web    |
+| Feature            | Web | Mobile | Action Needed          |
+| ------------------ | --- | ------ | ---------------------- |
+| Dashboard          | ✅  | ✅     | -                      |
+| Games List         | ✅  | ✅     | -                      |
+| Create Game        | ✅  | ✅     | -                      |
+| Live Game          | ✅  | ✅     | -                      |
+| Teams List         | ✅  | ✅     | -                      |
+| Create Team        | ✅  | ✅     | -                      |
+| Edit Team          | ✅  | ✅     | -                      |
+| Delete Team        | ✅  | ✅     | -                      |
+| Players List       | ✅  | ✅     | -                      |
+| Create Player      | ✅  | ✅     | -                      |
+| Edit Player        | ✅  | ✅     | -                      |
+| Delete Player      | ✅  | ✅     | -                      |
+| Player Detail      | ✅  | ✅     | -                      |
+| Statistics         | ✅  | ✅     | -                      |
+| Standings          | ✅  | ✅     | -                      |
+| Shot Charts        | ✅  | ✅     | -                      |
+| Player Comparison  | ✅  | ✅     | -                      |
+| Game Analysis      | ✅  | ✅     | -                      |
+| Game Replay        | ❌  | ✅     | Consider for web       |
+| Notifications Bell | ✅  | ✅     | -                      |
+| Notification Prefs | ✅  | ✅     | -                      |
+| Profile/Settings   | ✅  | ✅     | -                      |
+| League Selection   | ✅  | ✅     | -                      |
+| League Management  | ✅  | ✅     | -                      |
+| CSV Export         | ✅  | ✅     | -                      |
+| Print/PDF          | ✅  | ❌     | Delegated to web       |
+| Dark Mode          | ✅  | ✅     | -                      |
+| Haptic Feedback    | ❌  | ✅     | Consider for web       |
+| Sound Feedback     | ❌  | ✅     | Consider for web       |
+| Advanced Analytics | ✅  | ✅     | PER, A/TO added mobile |
 
 ---
 
-## Recently Completed (January 20, 2026)
+## Recently Completed (January 26, 2026)
 
-### P1/P2 Fixes
+### Phase 1: Quick Fixes
 
-- [x] **Mobile responsive sidebar** - Added hamburger menu, slide-out drawer, overlay backdrop, and escape key handling to Layout.tsx
-- [x] **Theme toggle aria-labels** - Changed from "Light" to "Switch to light theme" for better screen reader clarity
-- [x] **animate-bounce investigation** - Verified Tailwind's bounce uses `transform: translateY()` (GPU-accelerated). No fix needed; issue was incorrectly identified.
+- [x] **Unused ArrowLeftIcon import** - Removed from `LiveGameLayout.tsx`
+- [x] **PlayerAvatar alt text** - Enhanced to "Profile photo of {name} #{number}"
+- [x] **Dark mode persistence** - Verified working via localStorage
 
-### /harden - Accessibility & Edge Cases
+### Phase 2: Backend Hardening
 
-- [x] **Modal focus traps** - Added `useFocusTrap` hook and applied to QuickStatModal, AssistPromptModal, ReboundPromptModal, FoulRecordingModal, ShotRecordingModal
-- [x] **ARIA attributes** - Added `role="dialog"`, `aria-modal`, `aria-labelledby` to all modals
-- [x] **QuarterFilterTabs touch targets** - Increased to `min-h-[44px] min-w-[44px]` with proper ARIA tablist
-- [x] **TeamBoxScore table accessibility** - Added `scope`, `caption`, `aria-label` for stat abbreviations
-- [x] **Skip links** - Added "Skip to main content" to Layout and PublicLayout
-- [x] **Form error announcements** - Added `aria-live="polite"` to LoginForm, SignupForm, ForgotPasswordForm
-- [x] **InteractiveCourt SVG** - Added `role="application"` and descriptive `aria-label`
-- [x] **User menu keyboard nav** - Added arrow key navigation, escape handling, proper ARIA menu attributes
-- [x] **Features grid** - Changed div to article for proper semantics
-- [x] **Mobile haptics fallback** - Wrapped `Haptics.impactAsync` in try-catch
+- [x] **Input validation** - Added `convex/lib/validation.ts` with length limits for name (100), description (2000), notes (5000)
+- [x] **Duplicate league prevention** - Added check for duplicate league names per owner
+- [x] **Viewer role permissions** - Added `canViewStats`, `canViewOnly`, `isViewOnly` to permission calculations
 
-### /normalize - Design System Alignment
+### Phase 3: Export Enhancements
 
-- [x] **Dynamic Tailwind classes** - Replaced `bg-${color}-100` with static STAT_STYLES mapping in QuickStatModal and LiveGame.tsx
-- [x] **Status color tokens** - Replaced hex colors with Tailwind classes (`bg-red-500`, `bg-amber-500`, etc.) in Dashboard.tsx and Games.tsx
-- [x] **Duplicate CSS keyframes** - Removed fadeIn/slideIn duplicates from index.css, consolidated in tailwind.config.js
+- [x] **Mobile export config** - Created `mobile/.../constants/config.ts` with `WEB_APP_BASE_URL`
+- [x] **Large dataset warnings** - Added warning banner for exports > 50 items
+
+### Phase 4: Mobile Features
+
+- [x] **Advanced analytics** - Added PER and A/TO ratio to `AdvancedStats.tsx`
+- [x] **assistToTurnoverRatio** - Added to `shared/src/utils/basketball.ts`
+- [x] **Halftime indicator** - Created `QuarterDisplay.tsx` component with halftime banner
+- [x] **Game Replay** - Created `GameReplayScreen.tsx` with timeline scrubber, shot chart animation, play-by-play
+
+### Phase 5: League Management
+
+- [x] **Web Leagues page** - Created `Leagues.tsx` with card grid, CRUD modals, league selection
+- [x] **Mobile Leagues screens** - Created `LeaguesScreen.tsx` and `CreateLeagueScreen.tsx`
+- [x] **Navigation updates** - Added routes and sidebar links for both platforms
+
+### Phase 6: Push Notifications Infrastructure
+
+- [x] **getVapidPublicKey** - Updated to read from environment variable
+- [x] **sendPushNotification** - Implemented action with web-push integration
+- [x] **Internal functions** - Added `getUserPushSubscriptions`, `deletePushSubscription`
+- [x] **Subscription cleanup** - Auto-removes expired subscriptions (HTTP 410)
+
+### Phase 7: Additional Enhancements
+
+- [x] **Game event notifications** - Wired `notifyLeagueMembers` to game start/end in `convex/games.ts`
+- [x] **Expo push notifications** - Installed expo-notifications, configured app.json, added token registration
+- [x] **Multi-player comparison** - Extended comparison to support 2-4 players with new `compareMultiplePlayersStats` API
 
 ---
 
-## Fix Commands Quick Reference
+## Files Created This Session
 
-| Command    | Remaining | Description           |
-| ---------- | --------- | --------------------- |
-| `/clarify` | 1         | PlayerAvatar alt text |
+| File                                                | Purpose                           |
+| --------------------------------------------------- | --------------------------------- |
+| `convex/lib/validation.ts`                          | Input validation helpers          |
+| `web/.../pages/Leagues.tsx`                         | League management page            |
+| `mobile/.../screens/LeaguesScreen.tsx`              | League list screen                |
+| `mobile/.../screens/CreateLeagueScreen.tsx`         | Create league form                |
+| `mobile/.../screens/GameReplayScreen.tsx`           | Game replay viewer                |
+| `mobile/.../components/livegame/QuarterDisplay.tsx` | Quarter/halftime indicator        |
+| `mobile/.../constants/config.ts`                    | App configuration constants       |
+| `convex/pushActions.ts`                             | Node.js push notification actions |
+
+## Files Modified This Session
+
+| File                                    | Key Changes                                |
+| --------------------------------------- | ------------------------------------------ |
+| `convex/notifications.ts`               | Push notification infrastructure           |
+| `convex/teams.ts`                       | Input validation                           |
+| `convex/players.ts`                     | Input validation                           |
+| `convex/leagues.ts`                     | Validation, duplicates, viewer permissions |
+| `convex/games.ts`                       | Game event notifications (start/end)       |
+| `convex/statistics.ts`                  | Added compareMultiplePlayersStats          |
+| `shared/src/utils/basketball.ts`        | Added assistToTurnoverRatio                |
+| `web/.../App.tsx`                       | Added Leagues route                        |
+| `web/.../components/Layout.tsx`         | Added Leagues nav link                     |
+| `web/.../LiveGameLayout.tsx`            | Removed unused import                      |
+| `web/.../PlayerAvatar.tsx`              | Enhanced alt text                          |
+| `mobile/.../AdvancedStats.tsx`          | Added PER, A/TO columns                    |
+| `mobile/.../AppNavigator.tsx`           | Added new screen routes                    |
+| `mobile/.../ExportOptionsSheet.tsx`     | Large dataset warning                      |
+| `mobile/.../ShotChartScreen.tsx`        | Use shared config                          |
+| `mobile/.../NotificationContext.tsx`    | Expo push notification support             |
+| `mobile/.../PlayerComparisonScreen.tsx` | Multi-player comparison (2-4 players)      |
+| `mobile/.../app.json`                   | Expo notifications config                  |

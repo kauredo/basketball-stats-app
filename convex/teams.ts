@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getUserFromToken, canAccessLeague, canManageLeague } from "./lib/auth";
+import { validateName, validateEntityFields } from "./lib/validation";
 
 // Helper to resolve logo URL from either logoUrl or logoStorageId
 async function resolveLogoUrl(
@@ -225,6 +226,10 @@ export const create = mutation({
     const canManage = await canManageLeague(ctx, user._id, args.leagueId);
     if (!canManage) throw new Error("Access denied - must be league admin or owner");
 
+    // Validate input lengths
+    validateName(args.name, "Team name");
+    validateEntityFields({ description: args.description, city: args.city });
+
     // Check for duplicate team name in league
     const existingTeam = await ctx.db
       .query("teams")
@@ -285,6 +290,10 @@ export const update = mutation({
     if (!canManage && team.userId !== user._id) {
       throw new Error("Access denied");
     }
+
+    // Validate input lengths
+    if (args.name) validateName(args.name, "Team name");
+    validateEntityFields({ description: args.description, city: args.city });
 
     // Check for duplicate name if changing
     if (args.name && args.name !== team.name) {
