@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -19,6 +20,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import { SkeletonGameCard } from "../components/Skeleton";
+import { exportGameScheduleCSV } from "../utils/export";
 
 type GamesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -45,7 +47,8 @@ export default function GamesScreen() {
   const navigation = useNavigation<GamesScreenNavigationProp>();
   const { token, selectedLeague } = useAuth();
   const { resolvedTheme } = useTheme();
-  const [refreshing, setRefreshing] = React.useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const gamesData = useQuery(
     api.games.list,
@@ -80,6 +83,23 @@ export default function GamesScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 500);
+  };
+
+  const handleExportSchedule = async () => {
+    if (games.length === 0) {
+      Alert.alert("No Data", "No games to export");
+      return;
+    }
+    setIsExporting(true);
+    try {
+      await exportGameScheduleCSV(games, selectedLeague?.name);
+      Alert.alert("Success", "Game schedule exported successfully");
+    } catch (error) {
+      console.error("Failed to export schedule:", error);
+      Alert.alert("Error", "Failed to export game schedule. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const formatTime = (seconds: number): string => {
@@ -310,29 +330,46 @@ export default function GamesScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         stickySectionHeadersEnabled={false}
         ListHeaderComponent={
-          <TouchableOpacity
-            className="flex-row items-center justify-between bg-primary-500 rounded-2xl p-4 mb-4"
-            onPress={() => navigation.navigate("CreateGame")}
-            activeOpacity={0.8}
-            style={{
-              shadowColor: "#F97316",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 8,
-            }}
-          >
-            <View className="flex-row items-center">
-              <View className="w-10 h-10 bg-white/20 rounded-xl items-center justify-center mr-3">
-                <Icon name="basketball" size={22} color="#FFFFFF" />
-              </View>
-              <View>
-                <Text className="text-white text-base font-bold">New Game</Text>
-                <Text className="text-white/70 text-xs">Start tracking a game</Text>
-              </View>
+          <View className="mb-4">
+            <View className="flex-row gap-3 mb-3">
+              <TouchableOpacity
+                className="flex-1 flex-row items-center justify-between bg-primary-500 rounded-2xl p-4"
+                onPress={() => navigation.navigate("CreateGame")}
+                activeOpacity={0.8}
+                style={{
+                  shadowColor: "#F97316",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 8,
+                }}
+              >
+                <View className="flex-row items-center">
+                  <View className="w-10 h-10 bg-white/20 rounded-xl items-center justify-center mr-3">
+                    <Icon name="basketball" size={22} color="#FFFFFF" />
+                  </View>
+                  <View>
+                    <Text className="text-white text-base font-bold">New Game</Text>
+                    <Text className="text-white/70 text-xs">Start tracking</Text>
+                  </View>
+                </View>
+                <Icon name="chevron-right" size={20} color="rgba(255,255,255,0.6)" />
+              </TouchableOpacity>
             </View>
-            <Icon name="chevron-right" size={20} color="rgba(255,255,255,0.6)" />
-          </TouchableOpacity>
+            {games.length > 0 && (
+              <TouchableOpacity
+                className="flex-row items-center justify-center bg-surface-100 dark:bg-surface-800 rounded-xl p-3"
+                onPress={handleExportSchedule}
+                disabled={isExporting}
+                activeOpacity={0.7}
+              >
+                <Icon name="download" size={18} color={resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"} />
+                <Text className="text-surface-600 dark:text-surface-400 text-sm font-medium ml-2">
+                  {isExporting ? "Exporting..." : "Export Schedule"}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         }
         ListEmptyComponent={
           <View className="items-center justify-center pt-12">

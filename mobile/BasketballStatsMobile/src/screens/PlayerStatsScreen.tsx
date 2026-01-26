@@ -22,6 +22,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { exportPlayerGameLogCSV } from "../utils/export";
 
 type PlayerStatsRouteProp = RouteProp<RootStackParamList, "PlayerStats">;
 type PlayerStatsNavigationProp = NativeStackNavigationProp<RootStackParamList, "PlayerStats">;
@@ -56,6 +57,7 @@ export default function PlayerStatsScreen() {
   });
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Fetch player data from Convex
   const playerData = useQuery(
@@ -148,6 +150,25 @@ export default function PlayerStatsScreen() {
         },
       ]
     );
+  };
+
+  const handleExportGameLog = async () => {
+    const recentGames = playerStats?.recentGames || [];
+    if (recentGames.length === 0) {
+      Alert.alert("No Data", "No game data to export");
+      return;
+    }
+    setIsExporting(true);
+    setShowOptionsMenu(false);
+    try {
+      const playerName = playerData?.player?.name || "Player";
+      await exportPlayerGameLogCSV(recentGames, playerName, selectedLeague?.season);
+    } catch (error) {
+      console.error("Failed to export game log:", error);
+      Alert.alert("Error", "Failed to export game log. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // Set header right button
@@ -427,6 +448,17 @@ export default function PlayerStatsScreen() {
             >
               <FontAwesome5 name="edit" size={18} color="#3B82F6" />
               <Text className="text-surface-900 dark:text-white font-medium ml-3">Edit Player</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-700 rounded-xl mb-3"
+              onPress={handleExportGameLog}
+              disabled={isExporting || !playerStats?.recentGames?.length}
+            >
+              <FontAwesome5 name="file-export" size={18} color="#10B981" />
+              <Text className="text-surface-900 dark:text-white font-medium ml-3">
+                {isExporting ? "Exporting..." : "Export Game Log"}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity

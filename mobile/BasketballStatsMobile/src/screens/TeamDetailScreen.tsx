@@ -26,6 +26,7 @@ import LineupStatsCard from "../components/LineupStatsCard";
 import PairStatsCard from "../components/PairStatsCard";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { exportRosterCSV, exportLineupStatsCSV, exportPairStatsCSV } from "../utils/export";
 
 type TeamDetailRouteProp = RouteProp<RootStackParamList, "TeamDetail">;
 type TeamDetailNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -57,6 +58,7 @@ export default function TeamDetailScreen() {
   });
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Queries
   const teamData = useQuery(
@@ -184,6 +186,60 @@ export default function TeamDetailScreen() {
         },
       ]
     );
+  };
+
+  // Export handlers
+  const handleExportRoster = async () => {
+    if (players.length === 0) {
+      Alert.alert("No Data", "No players to export");
+      return;
+    }
+    setIsExporting(true);
+    setShowOptionsMenu(false);
+    try {
+      await exportRosterCSV(players, team?.name || teamName);
+    } catch (error) {
+      console.error("Failed to export roster:", error);
+      Alert.alert("Error", "Failed to export roster. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportLineups = async () => {
+    const lineups = lineupStatsData?.lineups || [];
+    if (lineups.length === 0) {
+      Alert.alert("No Data", "No lineup data to export");
+      return;
+    }
+    setIsExporting(true);
+    setShowOptionsMenu(false);
+    try {
+      await exportLineupStatsCSV(lineups, team?.name || teamName);
+    } catch (error) {
+      console.error("Failed to export lineups:", error);
+      Alert.alert("Error", "Failed to export lineup stats. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportPairs = async () => {
+    const pairs = pairStatsData?.pairs || [];
+    if (pairs.length === 0) {
+      Alert.alert("No Data", "No pair data to export");
+      return;
+    }
+    setIsExporting(true);
+    setShowOptionsMenu(false);
+    try {
+      await exportPairStatsCSV(pairs, team?.name || teamName);
+    } catch (error) {
+      console.error("Failed to export pairs:", error);
+      Alert.alert("Error", "Failed to export pair stats. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const getPositionColor = (position?: string) => {
@@ -551,6 +607,45 @@ export default function TeamDetailScreen() {
               <FontAwesome5 name="edit" size={18} color="#3B82F6" />
               <Text className="text-surface-900 dark:text-white font-medium ml-3">Edit Team</Text>
             </TouchableOpacity>
+
+            {/* Export Options */}
+            <View className="border-t border-surface-200 dark:border-surface-700 my-3 pt-3">
+              <Text className="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase mb-2 ml-1">
+                Export Data
+              </Text>
+              <TouchableOpacity
+                className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-700/50 rounded-xl mb-2"
+                onPress={handleExportRoster}
+                disabled={isExporting || players.length === 0}
+              >
+                <FontAwesome5 name="users" size={18} color="#10B981" />
+                <Text className="text-surface-900 dark:text-white font-medium ml-3">
+                  Export Roster
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-700/50 rounded-xl mb-2"
+                onPress={handleExportLineups}
+                disabled={isExporting || !lineupStatsData?.lineups?.length}
+              >
+                <FontAwesome5 name="layer-group" size={18} color="#8B5CF6" />
+                <Text className="text-surface-900 dark:text-white font-medium ml-3">
+                  Export Lineups
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-700/50 rounded-xl mb-3"
+                onPress={handleExportPairs}
+                disabled={isExporting || !pairStatsData?.pairs?.length}
+              >
+                <FontAwesome5 name="handshake" size={18} color="#F59E0B" />
+                <Text className="text-surface-900 dark:text-white font-medium ml-3">
+                  Export Pairs
+                </Text>
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity
               className="flex-row items-center p-4 bg-red-500/10 rounded-xl"

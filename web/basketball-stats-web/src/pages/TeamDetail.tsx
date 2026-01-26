@@ -25,6 +25,11 @@ import {
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import { exportRosterCSV, exportLineupStatsCSV, exportPairStatsCSV } from "../utils/export";
+import {
+  TeamSeasonExportModal,
+  type TeamSeasonExportOptions,
+} from "../components/export/TeamSeasonExportModal";
+import { downloadPDF } from "../utils/export/pdf-export";
 
 interface EditFormState {
   name: string;
@@ -39,6 +44,7 @@ const TeamDetail: React.FC = () => {
   const toast = useToast();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [editForm, setEditForm] = useState<EditFormState>({ name: "", city: "", description: "" });
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -81,6 +87,20 @@ const TeamDetail: React.FC = () => {
   const pairStatsData = useQuery(
     api.lineups.getTeamPairStats,
     token && teamId ? { token, teamId: teamId as Id<"teams">, limit: 20 } : "skip"
+  );
+
+  // Fetch player stats for advanced analytics export
+  const playersStatsData = useQuery(
+    api.statistics.getPlayersStats,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id, perPage: 100 } : "skip"
+  );
+
+  // Fetch team shot chart for zone breakdown
+  const teamShotChartData = useQuery(
+    api.shots.getTeamShotChart,
+    token && selectedLeague && teamId
+      ? { token, leagueId: selectedLeague.id, teamId: teamId as Id<"teams"> }
+      : "skip"
   );
 
   const updateTeam = useMutation(api.teams.update);
@@ -141,6 +161,142 @@ const TeamDetail: React.FC = () => {
       console.error("Failed to export pair stats:", error);
       toast.error("Failed to export pair stats");
     }
+  };
+
+  const handleExportSeason = async (options: TeamSeasonExportOptions) => {
+    if (!team || !teamId) {
+      throw new Error("Team data not available");
+    }
+
+    const teamName = team.name || "Team";
+    const season = selectedLeague?.season || new Date().getFullYear().toString();
+    const dateStr = new Date().toISOString().split("T")[0];
+
+    // Export CSVs if requested
+    if (options.format === "csv" || options.format === "both") {
+      if (options.sections.playerStats && players.length > 0) {
+        exportRosterCSV(players, teamName);
+      }
+      if (options.sections.lineupAnalysis) {
+        const lineups = lineupStatsData?.lineups || [];
+        const pairs = pairStatsData?.pairs || [];
+        if (lineups.length > 0) {
+          exportLineupStatsCSV(lineups, teamName);
+        }
+        if (pairs.length > 0) {
+          exportPairStatsCSV(pairs, teamName);
+        }
+      }
+    }
+
+    // Generate PDF if requested
+    if (options.format === "pdf" || options.format === "both") {
+      // Import dynamically to avoid loading jspdf unnecessarily
+      const { generateTeamSeasonPDF } = await import("../utils/export/pdf-export");
+
+      // Get player stats for this team from the league-wide player stats
+      const teamPlayerStats = playersStatsData?.players?.filter(
+        (ps: { teamId: string }) => ps.teamId === teamId
+      ) || [];
+
+      // Create a map of player ID to stats for quick lookup
+      const playerStatsMap = new Map(
+        teamPlayerStats.map((ps: { playerId: string }) => [ps.playerId, ps])
+      );
+
+      const pdfBlob = await generateTeamSeasonPDF({
+        team: {
+          id: teamId,
+          name: teamName,
+          city: team.city,
+          wins,
+          losses,
+          winPercentage: parseFloat(winPct) / 100,
+        },
+        season,
+        players: players.map((p) => {
+          const pStats = playerStatsMap.get(p.id) as {
+            gamesPlayed?: number;
+            avgPoints?: number;
+            avgRebounds?: number;
+            avgAssists?: number;
+            avgSteals?: number;
+            avgBlocks?: number;
+            avgTurnovers?: number;
+            fieldGoalPercentage?: number;
+            threePointPercentage?: number;
+            freeThrowPercentage?: number;
+            trueShootingPercentage?: number;
+            effectiveFieldGoalPercentage?: number;
+            playerEfficiencyRating?: number;
+            assistToTurnoverRatio?: number;
+          } | undefined;
+          return {
+            id: p.id,
+            name: p.name,
+            number: p.number,
+            position: p.position,
+            gamesPlayed: pStats?.gamesPlayed,
+            stats: pStats ? {
+              avgPoints: pStats.avgPoints,
+              avgRebounds: pStats.avgRebounds,
+              avgAssists: pStats.avgAssists,
+              avgSteals: pStats.avgSteals,
+              avgBlocks: pStats.avgBlocks,
+              avgTurnovers: pStats.avgTurnovers,
+              fieldGoalPercentage: pStats.fieldGoalPercentage,
+              threePointPercentage: pStats.threePointPercentage,
+              freeThrowPercentage: pStats.freeThrowPercentage,
+              trueShootingPercentage: pStats.trueShootingPercentage,
+              effectiveFieldGoalPercentage: pStats.effectiveFieldGoalPercentage,
+              playerEfficiencyRating: pStats.playerEfficiencyRating,
+              assistToTurnoverRatio: pStats.assistToTurnoverRatio,
+            } : undefined,
+          };
+        }),
+        games: games.map((g) => {
+          const isHome = g.homeTeam?.name === team.name;
+          return {
+            id: g.id,
+            date: g.scheduledAt || g.startedAt,
+            opponent: isHome ? g.awayTeam?.name : g.homeTeam?.name,
+            homeGame: isHome,
+            teamScore: isHome ? g.homeScore : g.awayScore,
+            opponentScore: isHome ? g.awayScore : g.homeScore,
+            result:
+              g.status === "completed"
+                ? (isHome ? g.homeScore : g.awayScore) > (isHome ? g.awayScore : g.homeScore)
+                  ? ("W" as const)
+                  : ("L" as const)
+                : ("N/A" as const),
+          };
+        }),
+        lineups: lineupStatsData?.lineups || [],
+        pairs: pairStatsData?.pairs || [],
+        // Transform zone stats for shooting breakdown
+        shootingByZone: teamShotChartData?.zoneStats ? {
+          paint: teamShotChartData.zoneStats.paint || { made: 0, attempted: 0 },
+          midRange: teamShotChartData.zoneStats.midrange || { made: 0, attempted: 0 },
+          threePoint: {
+            made: (teamShotChartData.zoneStats.corner3?.made || 0) +
+                  (teamShotChartData.zoneStats.wing3?.made || 0) +
+                  (teamShotChartData.zoneStats.top3?.made || 0),
+            attempted: (teamShotChartData.zoneStats.corner3?.attempted || 0) +
+                       (teamShotChartData.zoneStats.wing3?.attempted || 0) +
+                       (teamShotChartData.zoneStats.top3?.attempted || 0),
+          },
+        } : undefined,
+        options: {
+          sections: options.sections,
+          theme: options.theme,
+        },
+      });
+
+      const filename = `${teamName.replace(/\s+/g, "-")}-season-${season}-${dateStr}.pdf`;
+      downloadPDF(pdfBlob, filename);
+    }
+
+    toast.success("Season data exported successfully");
   };
 
   const openEditModal = () => {
@@ -284,6 +440,13 @@ const TeamDetail: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+              <button
+                onClick={() => setShowExportModal(true)}
+                className="btn-primary px-3 md:px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
+              >
+                <ArrowDownTrayIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Export Season</span>
+              </button>
               <button
                 onClick={openEditModal}
                 className="btn-secondary px-3 md:px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
@@ -748,6 +911,15 @@ const TeamDetail: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Export Season Modal */}
+      <TeamSeasonExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        teamName={team?.name || "Team"}
+        teamId={teamId || ""}
+        onExport={handleExportSeason}
+      />
     </div>
   );
 };
