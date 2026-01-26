@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -29,7 +29,9 @@ import {
   TeamSeasonExportModal,
   type TeamSeasonExportOptions,
 } from "../components/export/TeamSeasonExportModal";
-import { downloadPDF } from "../utils/export/pdf-export";
+import { downloadPDF, captureCourtAsImage } from "../utils/export/pdf-export";
+import { PrintableShotChart } from "../components/export/PrintableShotChart";
+import type { ShotLocation } from "../types/livegame";
 
 interface EditFormState {
   name: string;
@@ -48,6 +50,10 @@ const TeamDetail: React.FC = () => {
   const [editForm, setEditForm] = useState<EditFormState>({ name: "", city: "", description: "" });
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [exportTheme, setExportTheme] = useState<"light" | "dark">("light");
+
+  // Ref for capturing shot chart image
+  const shotChartRef = useRef<HTMLDivElement>(null);
 
   // Fetch team data
   const teamData = useQuery(
@@ -194,6 +200,23 @@ const TeamDetail: React.FC = () => {
       // Import dynamically to avoid loading jspdf unnecessarily
       const { generateTeamSeasonPDF } = await import("../utils/export/pdf-export");
 
+      // Capture shot chart image if section is enabled and chart is available
+      let shotChartImage: string | undefined;
+      if (options.sections.shotCharts && shotChartRef.current) {
+        try {
+          // Update theme and wait for re-render
+          setExportTheme(options.theme);
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
+          shotChartImage = await captureCourtAsImage(shotChartRef.current, {
+            scale: 2,
+            backgroundColor: options.theme === "dark" ? "#3d3835" : "#fdfcfb",
+          });
+        } catch (error) {
+          console.warn("Failed to capture shot chart:", error);
+        }
+      }
+
       // Get player stats for this team from the league-wide player stats
       const teamPlayerStats =
         playersStatsData?.players?.filter((ps: { teamId: string }) => ps.teamId === teamId) || [];
@@ -293,6 +316,7 @@ const TeamDetail: React.FC = () => {
               },
             }
           : undefined,
+        shotChartImage,
         options: {
           sections: options.sections,
           theme: options.theme,
@@ -927,6 +951,30 @@ const TeamDetail: React.FC = () => {
         teamId={teamId || ""}
         onExport={handleExportSeason}
       />
+
+      {/* Off-screen shot chart for PDF export capture */}
+      <div className="absolute left-[-9999px] top-0 pointer-events-none">
+        <div ref={shotChartRef}>
+          <PrintableShotChart
+            shots={
+              teamShotChartData?.shots?.map(
+                (s: { x: number; y: number; made: boolean; shotType: string }) => ({
+                  x: s.x,
+                  y: s.y,
+                  made: s.made,
+                  is3pt: s.shotType === "3pt",
+                })
+              ) || []
+            }
+            theme={exportTheme}
+            showHeatMap={true}
+            title={`${team?.name || "Team"} Shot Chart`}
+            subtitle={`${selectedLeague?.season || ""} Season`}
+            width={400}
+            height={376}
+          />
+        </div>
+      </div>
     </div>
   );
 };

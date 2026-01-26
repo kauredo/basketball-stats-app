@@ -1425,6 +1425,8 @@ export interface TeamSeasonPDFInput {
     midRange: { made: number; attempted: number };
     threePoint: { made: number; attempted: number };
   };
+  // Pre-captured shot chart image (base64)
+  shotChartImage?: string;
   options: {
     sections: {
       seasonSummary: boolean;
@@ -1993,7 +1995,7 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
   }
 
   // Shot Charts Section (Zone Breakdown)
-  if (sections.shotCharts && data.shootingByZone) {
+  if (sections.shotCharts && (data.shootingByZone || data.shotChartImage)) {
     if (y > A4_HEIGHT - 80) {
       y = addNewPage();
     }
@@ -2004,76 +2006,598 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
     doc.text("TEAM SHOOTING BREAKDOWN", 15, y);
     y += 10;
 
-    const zones = [
-      {
-        name: "Paint / Restricted Area",
-        icon: "🎯",
-        data: data.shootingByZone.paint,
-        benchmark: 60, // Good FG% in paint
-      },
-      {
-        name: "Mid-Range",
-        icon: "📍",
-        data: data.shootingByZone.midRange,
-        benchmark: 42, // Good mid-range %
-      },
-      {
-        name: "Three-Point",
-        icon: "🏀",
-        data: data.shootingByZone.threePoint,
-        benchmark: 36, // Good 3PT%
-      },
+    // Add visual shot chart if provided
+    if (data.shotChartImage) {
+      const chartWidth = 120;
+      const chartHeight = 113; // Maintains court aspect ratio
+      const chartX = (pageWidth - chartWidth) / 2;
+
+      // Add the shot chart image centered
+      doc.addImage(data.shotChartImage, "PNG", chartX, y, chartWidth, chartHeight);
+      y += chartHeight + 10;
+    }
+
+    // Zone breakdown cards (only if zone data is available)
+    if (data.shootingByZone) {
+      const zones = [
+        {
+          name: "Paint / Restricted Area",
+          icon: "🎯",
+          data: data.shootingByZone.paint,
+          benchmark: 60, // Good FG% in paint
+        },
+        {
+          name: "Mid-Range",
+          icon: "📍",
+          data: data.shootingByZone.midRange,
+          benchmark: 42, // Good mid-range %
+        },
+        {
+          name: "Three-Point",
+          icon: "🏀",
+          data: data.shootingByZone.threePoint,
+          benchmark: 36, // Good 3PT%
+        },
+      ];
+
+      const totalAttempts = zones.reduce((sum, z) => sum + z.data.attempted, 0) || 1;
+
+      // Create zone cards
+      const cardWidth = (pageWidth - 40) / 3;
+      let cardX = 15;
+
+      for (const zone of zones) {
+        const pct = zone.data.attempted > 0 ? (zone.data.made / zone.data.attempted) * 100 : 0;
+        const shotShare = (zone.data.attempted / totalAttempts) * 100;
+
+        // Card background
+        doc.setFillColor(...hexToRgb(colors.card));
+        doc.roundedRect(cardX, y, cardWidth, 45, 2, 2, "F");
+
+        // Zone name
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(...hexToRgb(colors.text));
+        doc.text(zone.name, cardX + cardWidth / 2, y + 8, { align: "center" });
+
+        // Percentage (large)
+        const pctColor =
+          pct >= zone.benchmark
+            ? COLORS.success
+            : pct < zone.benchmark - 10
+              ? COLORS.danger
+              : colors.text;
+        doc.setFontSize(18);
+        doc.setTextColor(...hexToRgb(pctColor));
+        doc.text(`${pct.toFixed(1)}%`, cardX + cardWidth / 2, y + 22, { align: "center" });
+
+        // Made/Attempted
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(...hexToRgb(colors.textSecondary));
+        doc.text(`${zone.data.made}/${zone.data.attempted}`, cardX + cardWidth / 2, y + 30, {
+          align: "center",
+        });
+
+        // Shot share
+        doc.setFontSize(6);
+        doc.text(`${shotShare.toFixed(0)}% of shots`, cardX + cardWidth / 2, y + 38, {
+          align: "center",
+        });
+
+        cardX += cardWidth + 5;
+      }
+
+      y += 55;
+    }
+  }
+
+  // Footer
+  addFooter(doc, theme);
+
+  return doc.output("blob");
+}
+
+// ============================================
+// Player Season PDF
+// ============================================
+
+export interface PlayerSeasonPDFInput {
+  player: {
+    id: string;
+    name: string;
+    number: number;
+    position?: string;
+    team?: {
+      id: string;
+      name: string;
+    };
+  };
+  season: string;
+  stats: {
+    gamesPlayed: number;
+    avgPoints: number;
+    avgRebounds: number;
+    avgAssists: number;
+    avgSteals: number;
+    avgBlocks: number;
+    avgTurnovers: number;
+    avgMinutes: number;
+    totalPoints: number;
+    totalRebounds: number;
+    totalAssists: number;
+    totalSteals: number;
+    totalBlocks: number;
+    totalTurnovers: number;
+    totalFouls: number;
+    totalFieldGoalsMade: number;
+    totalFieldGoalsAttempted: number;
+    totalThreePointersMade: number;
+    totalThreePointersAttempted: number;
+    totalFreeThrowsMade: number;
+    totalFreeThrowsAttempted: number;
+    fieldGoalPercentage: number;
+    threePointPercentage: number;
+    freeThrowPercentage: number;
+    // Advanced stats
+    trueShootingPercentage?: number;
+    effectiveFieldGoalPercentage?: number;
+    playerEfficiencyRating?: number;
+  };
+  games: Array<{
+    id: string;
+    date?: number;
+    opponent?: string;
+    points: number;
+    rebounds: number;
+    assists: number;
+    steals: number;
+    blocks: number;
+    fieldGoalsMade: number;
+    fieldGoalsAttempted: number;
+    threePointersMade: number;
+    threePointersAttempted: number;
+    freeThrowsMade: number;
+    freeThrowsAttempted: number;
+    minutes: number;
+  }>;
+  // Pre-captured shot chart image (base64)
+  shotChartImage?: string;
+  // Shot zone stats for text breakdown
+  shootingByZone?: {
+    paint: { made: number; attempted: number };
+    midRange: { made: number; attempted: number };
+    threePoint: { made: number; attempted: number };
+  };
+  options: {
+    sections: {
+      seasonSummary: boolean;
+      shotChart: boolean;
+      gameLog: boolean;
+      advancedStats: boolean;
+    };
+    theme: "light" | "dark";
+  };
+}
+
+/**
+ * Generate Player Season PDF
+ */
+export async function generatePlayerSeasonPDF(data: PlayerSeasonPDFInput): Promise<Blob> {
+  const theme = data.options.theme;
+  const sections = data.options.sections;
+
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4",
+  });
+
+  const colors = getColors(theme);
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Helper to add page with dark theme background
+  const addNewPage = () => {
+    doc.addPage();
+    if (theme === "dark") {
+      doc.setFillColor(...hexToRgb(colors.bg));
+      doc.rect(0, 0, A4_WIDTH, A4_HEIGHT, "F");
+    }
+    return 20;
+  };
+
+  // Set page background
+  if (theme === "dark") {
+    doc.setFillColor(...hexToRgb(colors.bg));
+    doc.rect(0, 0, A4_WIDTH, A4_HEIGHT, "F");
+  }
+
+  // Header
+  const generatedDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  let y = addHeader(doc, `${data.player.name} - Season Report`, generatedDate, theme);
+
+  // Player Info Card
+  if (sections.seasonSummary) {
+    // Player header card
+    doc.setFillColor(...hexToRgb(COLORS.primary));
+    doc.roundedRect(15, y, pageWidth - 30, 40, 3, 3, "F");
+
+    // Player number circle
+    doc.setFillColor(255, 255, 255);
+    doc.circle(35, y + 20, 12, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(...hexToRgb(COLORS.primary));
+    doc.text(`#${data.player.number}`, 35, y + 23, { align: "center" });
+
+    // Player name
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(255, 255, 255);
+    doc.text(data.player.name, 55, y + 16);
+
+    // Position and team
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    const positionText = data.player.position || "N/A";
+    const teamText = data.player.team?.name || "No Team";
+    doc.text(`${positionText} • ${teamText}`, 55, y + 26);
+
+    // Season
+    doc.setFontSize(9);
+    doc.text(`${data.season} Season`, 55, y + 34);
+
+    y += 50;
+
+    // Stats grid
+    const statBoxWidth = (pageWidth - 40) / 4;
+    const stats = data.stats;
+
+    const keyStats = [
+      { label: "PPG", value: stats.avgPoints.toFixed(1), highlight: true },
+      { label: "RPG", value: stats.avgRebounds.toFixed(1), highlight: true },
+      { label: "APG", value: stats.avgAssists.toFixed(1), highlight: true },
+      { label: "GP", value: stats.gamesPlayed.toString(), highlight: false },
     ];
 
-    const totalAttempts = zones.reduce((sum, z) => sum + z.data.attempted, 0) || 1;
-
-    // Create zone cards
-    const cardWidth = (pageWidth - 40) / 3;
-    let cardX = 15;
-
-    for (const zone of zones) {
-      const pct = zone.data.attempted > 0 ? (zone.data.made / zone.data.attempted) * 100 : 0;
-      const shotShare = (zone.data.attempted / totalAttempts) * 100;
-
-      // Card background
+    let statX = 15;
+    for (const stat of keyStats) {
       doc.setFillColor(...hexToRgb(colors.card));
-      doc.roundedRect(cardX, y, cardWidth, 45, 2, 2, "F");
+      doc.roundedRect(statX, y, statBoxWidth, 35, 2, 2, "F");
 
-      // Zone name
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...hexToRgb(colors.textSecondary));
+      doc.text(stat.label, statX + statBoxWidth / 2, y + 10, { align: "center" });
+
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
-      doc.setTextColor(...hexToRgb(colors.text));
-      doc.text(zone.name, cardX + cardWidth / 2, y + 8, { align: "center" });
+      doc.setFontSize(20);
+      doc.setTextColor(...hexToRgb(stat.highlight ? COLORS.primary : colors.text));
+      doc.text(stat.value, statX + statBoxWidth / 2, y + 26, { align: "center" });
 
-      // Percentage (large)
-      const pctColor =
-        pct >= zone.benchmark
-          ? COLORS.success
-          : pct < zone.benchmark - 10
-            ? COLORS.danger
-            : colors.text;
-      doc.setFontSize(18);
-      doc.setTextColor(...hexToRgb(pctColor));
-      doc.text(`${pct.toFixed(1)}%`, cardX + cardWidth / 2, y + 22, { align: "center" });
+      statX += statBoxWidth + 5;
+    }
 
-      // Made/Attempted
+    y += 45;
+
+    // Secondary stats row
+    const secondaryStats = [
+      { label: "FG%", value: `${stats.fieldGoalPercentage.toFixed(1)}%` },
+      { label: "3P%", value: `${stats.threePointPercentage.toFixed(1)}%` },
+      { label: "FT%", value: `${stats.freeThrowPercentage.toFixed(1)}%` },
+      { label: "SPG", value: stats.avgSteals.toFixed(1) },
+      { label: "BPG", value: stats.avgBlocks.toFixed(1) },
+      { label: "MPG", value: stats.avgMinutes.toFixed(1) },
+    ];
+
+    const smallStatWidth = (pageWidth - 40) / 6;
+    statX = 15;
+    for (const stat of secondaryStats) {
+      doc.setFillColor(...hexToRgb(colors.card));
+      doc.roundedRect(statX, y, smallStatWidth, 25, 2, 2, "F");
+
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7);
       doc.setTextColor(...hexToRgb(colors.textSecondary));
-      doc.text(`${zone.data.made}/${zone.data.attempted}`, cardX + cardWidth / 2, y + 30, {
-        align: "center",
-      });
+      doc.text(stat.label, statX + smallStatWidth / 2, y + 8, { align: "center" });
 
-      // Shot share
-      doc.setFontSize(6);
-      doc.text(`${shotShare.toFixed(0)}% of shots`, cardX + cardWidth / 2, y + 38, {
-        align: "center",
-      });
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(...hexToRgb(colors.text));
+      doc.text(stat.value, statX + smallStatWidth / 2, y + 19, { align: "center" });
 
-      cardX += cardWidth + 5;
+      statX += smallStatWidth + 2;
     }
 
-    y += 55;
+    y += 35;
+  }
+
+  // Shot Chart Section
+  if (sections.shotChart && (data.shotChartImage || data.shootingByZone)) {
+    if (y > A4_HEIGHT - 150) {
+      y = addNewPage();
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...hexToRgb(colors.text));
+    doc.text("SHOT CHART", 15, y);
+    y += 8;
+
+    // Add visual shot chart if provided
+    if (data.shotChartImage) {
+      const chartWidth = 130;
+      const chartHeight = 122; // Maintains court aspect ratio
+      const chartX = (pageWidth - chartWidth) / 2;
+
+      doc.addImage(data.shotChartImage, "PNG", chartX, y, chartWidth, chartHeight);
+      y += chartHeight + 8;
+    }
+
+    // Zone breakdown cards
+    if (data.shootingByZone) {
+      const zones = [
+        { name: "Paint", data: data.shootingByZone.paint, benchmark: 60 },
+        { name: "Mid-Range", data: data.shootingByZone.midRange, benchmark: 42 },
+        { name: "3-Point", data: data.shootingByZone.threePoint, benchmark: 36 },
+      ];
+
+      const cardWidth = (pageWidth - 40) / 3;
+      let cardX = 15;
+
+      for (const zone of zones) {
+        const pct = zone.data.attempted > 0 ? (zone.data.made / zone.data.attempted) * 100 : 0;
+
+        doc.setFillColor(...hexToRgb(colors.card));
+        doc.roundedRect(cardX, y, cardWidth, 30, 2, 2, "F");
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(...hexToRgb(colors.text));
+        doc.text(zone.name, cardX + cardWidth / 2, y + 8, { align: "center" });
+
+        const pctColor =
+          pct >= zone.benchmark
+            ? COLORS.success
+            : pct < zone.benchmark - 10
+              ? COLORS.danger
+              : colors.text;
+        doc.setFontSize(14);
+        doc.setTextColor(...hexToRgb(pctColor));
+        doc.text(`${pct.toFixed(1)}%`, cardX + cardWidth / 2, y + 19, { align: "center" });
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(6);
+        doc.setTextColor(...hexToRgb(colors.textSecondary));
+        doc.text(`${zone.data.made}/${zone.data.attempted}`, cardX + cardWidth / 2, y + 26, {
+          align: "center",
+        });
+
+        cardX += cardWidth + 5;
+      }
+
+      y += 40;
+    }
+  }
+
+  // Game Log Section
+  if (sections.gameLog && data.games.length > 0) {
+    if (y > A4_HEIGHT - 80) {
+      y = addNewPage();
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...hexToRgb(colors.text));
+    doc.text("GAME LOG", 15, y);
+    y += 8;
+
+    // Table header
+    const gameColumns = [
+      { label: "Date", width: 28 },
+      { label: "Opponent", width: 35 },
+      { label: "PTS", width: 15 },
+      { label: "REB", width: 15 },
+      { label: "AST", width: 15 },
+      { label: "FG", width: 22 },
+      { label: "3PT", width: 22 },
+      { label: "MIN", width: 15 },
+    ];
+
+    // Header background
+    doc.setFillColor(...hexToRgb(theme === "dark" ? "#3d3835" : "#f3f0ed"));
+    doc.rect(15, y, pageWidth - 30, 7, "F");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6);
+    doc.setTextColor(...hexToRgb(colors.textSecondary));
+
+    let xPos = 17;
+    for (const col of gameColumns) {
+      doc.text(col.label, xPos, y + 5);
+      xPos += col.width;
+    }
+    y += 9;
+
+    // Game rows
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6);
+
+    const gamesToShow = data.games.slice(0, 15);
+    for (let i = 0; i < gamesToShow.length; i++) {
+      const game = gamesToShow[i];
+
+      if (y > A4_HEIGHT - 15) {
+        y = addNewPage();
+      }
+
+      // Alternate row background
+      if (i % 2 === 1) {
+        doc.setFillColor(...hexToRgb(colors.card));
+        doc.rect(15, y - 1, pageWidth - 30, 6, "F");
+      }
+
+      xPos = 17;
+
+      // Date
+      doc.setTextColor(...hexToRgb(colors.text));
+      const dateStr = game.date
+        ? new Date(game.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+        : "N/A";
+      doc.text(dateStr, xPos, y + 3);
+      xPos += 28;
+
+      // Opponent
+      doc.text((game.opponent || "TBD").slice(0, 15), xPos, y + 3);
+      xPos += 35;
+
+      // Points
+      doc.setFont("helvetica", "bold");
+      doc.text(game.points.toString(), xPos + 7.5, y + 3, { align: "center" });
+      doc.setFont("helvetica", "normal");
+      xPos += 15;
+
+      // Rebounds
+      doc.text(game.rebounds.toString(), xPos + 7.5, y + 3, { align: "center" });
+      xPos += 15;
+
+      // Assists
+      doc.text(game.assists.toString(), xPos + 7.5, y + 3, { align: "center" });
+      xPos += 15;
+
+      // FG
+      doc.setTextColor(...hexToRgb(colors.textSecondary));
+      doc.text(`${game.fieldGoalsMade}/${game.fieldGoalsAttempted}`, xPos + 11, y + 3, {
+        align: "center",
+      });
+      xPos += 22;
+
+      // 3PT
+      doc.text(`${game.threePointersMade}/${game.threePointersAttempted}`, xPos + 11, y + 3, {
+        align: "center",
+      });
+      xPos += 22;
+
+      // Minutes
+      doc.text(Math.round(game.minutes).toString(), xPos + 7.5, y + 3, { align: "center" });
+
+      y += 6;
+    }
+
+    if (data.games.length > 15) {
+      y += 2;
+      doc.setFontSize(6);
+      doc.setTextColor(...hexToRgb(colors.textSecondary));
+      doc.text(`... and ${data.games.length - 15} more games`, 17, y + 3);
+      y += 6;
+    }
+
+    y += 10;
+  }
+
+  // Advanced Stats Section
+  if (sections.advancedStats && data.stats.trueShootingPercentage !== undefined) {
+    if (y > A4_HEIGHT - 60) {
+      y = addNewPage();
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...hexToRgb(colors.text));
+    doc.text("ADVANCED ANALYTICS", 15, y);
+    y += 10;
+
+    const advancedStats = [
+      {
+        label: "True Shooting %",
+        value: data.stats.trueShootingPercentage?.toFixed(1) || "N/A",
+        benchmark: 55,
+      },
+      {
+        label: "Effective FG%",
+        value: data.stats.effectiveFieldGoalPercentage?.toFixed(1) || "N/A",
+        benchmark: 50,
+      },
+      {
+        label: "Player Efficiency",
+        value: data.stats.playerEfficiencyRating?.toFixed(1) || "N/A",
+        benchmark: 15,
+      },
+    ];
+
+    const advCardWidth = (pageWidth - 40) / 3;
+    let advX = 15;
+
+    for (const stat of advancedStats) {
+      doc.setFillColor(...hexToRgb(colors.card));
+      doc.roundedRect(advX, y, advCardWidth, 35, 2, 2, "F");
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...hexToRgb(colors.textSecondary));
+      doc.text(stat.label, advX + advCardWidth / 2, y + 10, { align: "center" });
+
+      const numValue = parseFloat(stat.value);
+      const statColor = !isNaN(numValue)
+        ? numValue >= stat.benchmark
+          ? COLORS.success
+          : numValue < stat.benchmark - 10
+            ? COLORS.danger
+            : colors.text
+        : colors.text;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(...hexToRgb(statColor));
+      doc.text(stat.value !== "N/A" ? `${stat.value}%` : stat.value, advX + advCardWidth / 2, y + 26, {
+        align: "center",
+      });
+
+      advX += advCardWidth + 5;
+    }
+
+    y += 45;
+
+    // Career totals section
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...hexToRgb(colors.text));
+    doc.text("Season Totals", 15, y);
+    y += 8;
+
+    const totals = [
+      { label: "Points", value: data.stats.totalPoints },
+      { label: "Rebounds", value: data.stats.totalRebounds },
+      { label: "Assists", value: data.stats.totalAssists },
+      { label: "Steals", value: data.stats.totalSteals },
+      { label: "Blocks", value: data.stats.totalBlocks },
+      { label: "Turnovers", value: data.stats.totalTurnovers },
+    ];
+
+    doc.setFillColor(...hexToRgb(colors.card));
+    doc.roundedRect(15, y, pageWidth - 30, 20, 2, 2, "F");
+
+    const totalWidth = (pageWidth - 40) / totals.length;
+    let totalX = 20;
+
+    for (const total of totals) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6);
+      doc.setTextColor(...hexToRgb(colors.textSecondary));
+      doc.text(total.label, totalX + totalWidth / 2, y + 6, { align: "center" });
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(...hexToRgb(colors.text));
+      doc.text(total.value.toString(), totalX + totalWidth / 2, y + 15, { align: "center" });
+
+      totalX += totalWidth;
+    }
   }
 
   // Footer

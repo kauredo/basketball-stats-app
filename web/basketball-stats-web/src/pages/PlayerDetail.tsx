@@ -1,13 +1,25 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
-import { ChartBarIcon, UserIcon, TrophyIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import {
+  ChartBarIcon,
+  UserIcon,
+  TrophyIcon,
+  ArrowDownTrayIcon,
+  DocumentArrowDownIcon,
+} from "@heroicons/react/24/outline";
 import { exportPlayerGameLogCSV } from "../utils/export";
+import { downloadPDF, captureCourtAsImage } from "../utils/export/pdf-export";
 import { useToast } from "../contexts/ToastContext";
 import Breadcrumb from "../components/Breadcrumb";
+import {
+  PlayerSeasonExportModal,
+  type PlayerSeasonExportOptions,
+} from "../components/export/PlayerSeasonExportModal";
+import { PrintableShotChart } from "../components/export/PrintableShotChart";
 
 interface StatCardProps {
   label: string;
@@ -53,6 +65,11 @@ const PlayerDetail: React.FC = () => {
   const { token, selectedLeague } = useAuth();
   const toast = useToast();
 
+  // Export modal state
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportTheme, setExportTheme] = useState<"light" | "dark">("light");
+  const shotChartRef = useRef<HTMLDivElement>(null);
+
   const playerData = useQuery(
     api.players.get,
     token && playerId ? { token, playerId: playerId as Id<"players"> } : "skip"
@@ -60,6 +77,14 @@ const PlayerDetail: React.FC = () => {
 
   const playerStats = useQuery(
     api.statistics.getPlayerSeasonStats,
+    token && selectedLeague && playerId
+      ? { token, leagueId: selectedLeague.id, playerId: playerId as Id<"players"> }
+      : "skip"
+  );
+
+  // Fetch player shot chart data
+  const playerShotChartData = useQuery(
+    api.shots.getPlayerShotChart,
     token && selectedLeague && playerId
       ? { token, leagueId: selectedLeague.id, playerId: playerId as Id<"players"> }
       : "skip"
@@ -104,6 +129,117 @@ const PlayerDetail: React.FC = () => {
       console.error("Failed to export game log:", error);
       toast.error("Failed to export game log");
     }
+  };
+
+  const handleExportSeason = async (options: PlayerSeasonExportOptions) => {
+    if (!player || !playerId || !stats) {
+      throw new Error("Player data not available");
+    }
+
+    const { generatePlayerSeasonPDF } = await import("../utils/export/pdf-export");
+
+    // Capture shot chart image if section is enabled
+    let shotChartImage: string | undefined;
+    if (options.sections.shotChart && shotChartRef.current) {
+      try {
+        setExportTheme(options.theme);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        shotChartImage = await captureCourtAsImage(shotChartRef.current, {
+          scale: 2,
+          backgroundColor: options.theme === "dark" ? "#3d3835" : "#fdfcfb",
+        });
+      } catch (error) {
+        console.warn("Failed to capture shot chart:", error);
+      }
+    }
+
+    // Transform zone stats
+    const shootingByZone = playerShotChartData?.zoneStats
+      ? {
+          paint: playerShotChartData.zoneStats.paint || { made: 0, attempted: 0 },
+          midRange: playerShotChartData.zoneStats.midrange || { made: 0, attempted: 0 },
+          threePoint: {
+            made:
+              (playerShotChartData.zoneStats.corner3?.made || 0) +
+              (playerShotChartData.zoneStats.wing3?.made || 0) +
+              (playerShotChartData.zoneStats.top3?.made || 0),
+            attempted:
+              (playerShotChartData.zoneStats.corner3?.attempted || 0) +
+              (playerShotChartData.zoneStats.wing3?.attempted || 0) +
+              (playerShotChartData.zoneStats.top3?.attempted || 0),
+          },
+        }
+      : undefined;
+
+    const pdfBlob = await generatePlayerSeasonPDF({
+      player: {
+        id: playerId,
+        name: player.name,
+        number: player.number,
+        position: player.position,
+        team: player.team ? { id: player.team.id || "", name: player.team.name } : undefined,
+      },
+      season: selectedLeague?.season || new Date().getFullYear().toString(),
+      stats: {
+        gamesPlayed: stats.gamesPlayed || 0,
+        avgPoints: stats.avgPoints || 0,
+        avgRebounds: stats.avgRebounds || 0,
+        avgAssists: stats.avgAssists || 0,
+        avgSteals: stats.avgSteals || 0,
+        avgBlocks: stats.avgBlocks || 0,
+        avgTurnovers: stats.avgTurnovers || 0,
+        avgMinutes: stats.avgMinutes || 0,
+        totalPoints: stats.totalPoints || 0,
+        totalRebounds: stats.totalRebounds || 0,
+        totalAssists: stats.totalAssists || 0,
+        totalSteals: stats.totalSteals || 0,
+        totalBlocks: stats.totalBlocks || 0,
+        totalTurnovers: stats.totalTurnovers || 0,
+        totalFouls: stats.totalFouls || 0,
+        totalFieldGoalsMade: stats.totalFieldGoalsMade || 0,
+        totalFieldGoalsAttempted: stats.totalFieldGoalsAttempted || 0,
+        totalThreePointersMade: stats.totalThreePointersMade || 0,
+        totalThreePointersAttempted: stats.totalThreePointersAttempted || 0,
+        totalFreeThrowsMade: stats.totalFreeThrowsMade || 0,
+        totalFreeThrowsAttempted: stats.totalFreeThrowsAttempted || 0,
+        fieldGoalPercentage: stats.fieldGoalPercentage || 0,
+        threePointPercentage: stats.threePointPercentage || 0,
+        freeThrowPercentage: stats.freeThrowPercentage || 0,
+        trueShootingPercentage: stats.trueShootingPercentage,
+        effectiveFieldGoalPercentage: stats.effectiveFieldGoalPercentage,
+        playerEfficiencyRating: stats.playerEfficiencyRating,
+      },
+      games: recentGames.map((g: any) => ({
+        id: g.gameId || "",
+        date: g.gameDate,
+        opponent: g.opponent,
+        points: g.points || 0,
+        rebounds: g.rebounds || 0,
+        assists: g.assists || 0,
+        steals: g.steals || 0,
+        blocks: g.blocks || 0,
+        fieldGoalsMade: g.fieldGoalsMade || 0,
+        fieldGoalsAttempted: g.fieldGoalsAttempted || 0,
+        threePointersMade: g.threePointersMade || 0,
+        threePointersAttempted: g.threePointersAttempted || 0,
+        freeThrowsMade: g.freeThrowsMade || 0,
+        freeThrowsAttempted: g.freeThrowsAttempted || 0,
+        minutes: g.minutes || 0,
+      })),
+      shotChartImage,
+      shootingByZone,
+      options: {
+        sections: options.sections,
+        theme: options.theme,
+      },
+    });
+
+    const dateStr = new Date().toISOString().split("T")[0];
+    const filename = `${player.name.replace(/\s+/g, "-")}-season-${selectedLeague?.season || "report"}-${dateStr}.pdf`;
+    downloadPDF(pdfBlob, filename);
+
+    toast.success("Season report exported successfully");
   };
 
   if (!player) {
@@ -164,13 +300,23 @@ const PlayerDetail: React.FC = () => {
               Compare
             </button>
             <button
+              onClick={() => setShowExportModal(true)}
+              disabled={!stats}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Export Season Report"
+            >
+              <DocumentArrowDownIcon className="w-5 h-5" />
+              <span className="hidden sm:inline">Export Season</span>
+              <span className="sm:hidden">Export</span>
+            </button>
+            <button
               onClick={handleExportGameLog}
               disabled={recentGames.length === 0}
               className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Export Game Log"
+              title="Export Game Log CSV"
             >
               <ArrowDownTrayIcon className="w-5 h-5" />
-              Export
+              <span className="hidden sm:inline">CSV</span>
             </button>
           </div>
         </div>
@@ -307,6 +453,39 @@ const PlayerDetail: React.FC = () => {
             No games played yet this season.
           </div>
         )}
+      </div>
+
+      {/* Export Season Modal */}
+      <PlayerSeasonExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        playerName={player?.name || "Player"}
+        playerId={playerId || ""}
+        onExport={handleExportSeason}
+      />
+
+      {/* Off-screen shot chart for PDF export capture */}
+      <div className="absolute left-[-9999px] top-0 pointer-events-none">
+        <div ref={shotChartRef}>
+          <PrintableShotChart
+            shots={
+              playerShotChartData?.shots?.map(
+                (s: { x: number; y: number; made: boolean; shotType: string }) => ({
+                  x: s.x,
+                  y: s.y,
+                  made: s.made,
+                  is3pt: s.shotType === "3pt",
+                })
+              ) || []
+            }
+            theme={exportTheme}
+            showHeatMap={true}
+            title={`${player?.name || "Player"} Shot Chart`}
+            subtitle={`${selectedLeague?.season || ""} Season`}
+            width={400}
+            height={376}
+          />
+        </div>
       </div>
     </div>
   );

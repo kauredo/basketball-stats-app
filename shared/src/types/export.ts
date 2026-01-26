@@ -13,6 +13,8 @@ export type ExportType =
   | "game-report"
   | "player-shot-chart"
   | "team-shot-chart"
+  | "player-season"
+  | "team-season"
   | "box-score"
   | "shot-data"
   | "play-by-play"
