@@ -20,6 +20,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme, type ThemeMode } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import type { RootStackParamList } from "../navigation/AppNavigator";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 // Theme mode labels and icons
 const themeModeLabels: Record<ThemeMode, string> = {
@@ -119,7 +120,7 @@ export default function ProfileScreen() {
     }
   };
 
-  const leagues = leaguesData?.leagues?.filter((l: any) => l.membership) || userLeagues;
+  const leagues = leaguesData?.leagues?.filter((l) => l.membership) || userLeagues || [];
 
   const handleOpenEditProfile = () => {
     setEditFirstName(user?.firstName || "");
@@ -144,8 +145,8 @@ export default function ProfileScreen() {
       await refreshUser?.();
       setShowEditProfile(false);
       Alert.alert("Success", "Profile updated successfully");
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to update profile");
+    } catch (error) {
+      Alert.alert("Error", getErrorMessage(error, "Failed to update profile"));
     } finally {
       setIsUpdatingProfile(false);
     }
@@ -179,8 +180,8 @@ export default function ProfileScreen() {
       });
       setShowChangePassword(false);
       Alert.alert("Success", "Password changed successfully");
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to change password");
+    } catch (error) {
+      Alert.alert("Error", getErrorMessage(error, "Failed to change password"));
     } finally {
       setIsChangingPassword(false);
     }
@@ -205,13 +206,13 @@ export default function ProfileScreen() {
 
     Alert.alert("Switch League", "Select a different league:", [
       { text: "Cancel", style: "cancel" },
-      ...leagues.map((league: any) => ({
+      ...leagues.map((league) => ({
         text: league.name,
         onPress: () => selectLeague(league),
       })),
       {
         text: "League Selection",
-        onPress: () => selectLeague(null as any),
+        onPress: () => selectLeague(null),
       },
     ]);
   };
@@ -327,7 +328,7 @@ export default function ProfileScreen() {
             </View>
             <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 items-center flex-1 min-w-[45%]">
               <Text className="text-2xl font-bold text-primary-500 mb-1">
-                {leagues.filter((l: any) => l.membership?.role === "admin").length}
+                {leagues.filter((l) => l.membership?.role === "admin").length}
               </Text>
               <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">
                 As Admin
@@ -335,7 +336,7 @@ export default function ProfileScreen() {
             </View>
             <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 items-center flex-1 min-w-[45%]">
               <Text className="text-2xl font-bold text-primary-500 mb-1">
-                {leagues.filter((l: any) => l.membership?.role === "coach").length}
+                {leagues.filter((l) => l.membership?.role === "coach").length}
               </Text>
               <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">
                 As Coach
@@ -343,7 +344,7 @@ export default function ProfileScreen() {
             </View>
             <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 items-center flex-1 min-w-[45%]">
               <Text className="text-2xl font-bold text-primary-500 mb-1">
-                {leagues.filter((l: any) => l.status === "active").length}
+                {leagues.filter((l) => l.status === "active").length}
               </Text>
               <Text className="text-xs text-surface-600 dark:text-surface-400 text-center">
                 Active
@@ -420,6 +421,7 @@ export default function ProfileScreen() {
                   }`}
                 >
                   <Icon
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Icon name type is dynamic
                     name={themeModeIcons[themeMode] as any}
                     size={20}
                     color={mode === themeMode ? "#FFFFFF" : "#9CA3AF"}

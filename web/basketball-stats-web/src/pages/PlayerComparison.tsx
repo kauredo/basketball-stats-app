@@ -230,7 +230,13 @@ const PlayerComparison: React.FC = () => {
     : [];
 
   // Custom tooltip for radar chart showing actual values
-  const CustomRadarTooltip = ({ active, payload }: any) => {
+  const CustomRadarTooltip = ({
+    active,
+    payload,
+  }: {
+    active?: boolean;
+    payload?: Array<{ payload: { stat: string; actual1: number; actual2: number } }>;
+  }) => {
     if (active && payload && payload.length > 0) {
       const data = payload[0].payload;
       return (

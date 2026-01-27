@@ -16,6 +16,7 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import ImagePicker from "../components/ImagePicker";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 export default function CreateTeamScreen() {
   const navigation = useNavigation();
@@ -54,8 +55,8 @@ export default function CreateTeamScreen() {
       Alert.alert("Success", "Team created successfully", [
         { text: "OK", onPress: () => navigation.goBack() },
       ]);
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to create team");
+    } catch (error) {
+      Alert.alert("Error", getErrorMessage(error, "Failed to create team"));
     } finally {
       setIsSubmitting(false);
     }

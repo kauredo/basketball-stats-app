@@ -5,6 +5,7 @@ import { api } from "../../../../../convex/_generated/api";
 import Icon from "../../components/Icon";
 import { LogoIcon } from "../../components/Logo";
 import SEOHead from "../../components/seo/SEOHead";
+import { getErrorMessage, isErrorWithMessage } from "@basketball-stats/shared";
 
 type PageState = "loading" | "success" | "error" | "already-confirmed";
 
@@ -37,15 +38,16 @@ export default function ConfirmEmailPage() {
         }
 
         setPageState("success");
-      } catch (err: any) {
+      } catch (err) {
         console.error("Email confirmation error:", err);
-        if (err.message?.includes("already confirmed")) {
+        const msg = isErrorWithMessage(err) ? err.message : "";
+        if (msg.includes("already confirmed")) {
           setPageState("already-confirmed");
-        } else if (err.message?.includes("Invalid")) {
+        } else if (msg.includes("Invalid")) {
           setError("This confirmation link is invalid or has expired.");
           setPageState("error");
         } else {
-          setError(err.message || "Failed to confirm email. Please try again.");
+          setError(getErrorMessage(err, "Failed to confirm email. Please try again."));
           setPageState("error");
         }
       }

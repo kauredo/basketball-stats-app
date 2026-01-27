@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
+import type { GameSettings, LiveTeamStats, GameStatus } from "@basketball-stats/shared";
 
 // Import all new modular components
 import {
@@ -39,6 +40,26 @@ import type {
   FreeThrowSequence,
   PlayByPlayEvent,
 } from "../types/livegame";
+
+// Local interface for game event items returned from the API
+interface GameEventItem {
+  id?: string;
+  _id?: string;
+  quarter: number;
+  timeRemaining?: number;
+  eventType: string;
+  description: string;
+  points?: number;
+  player?: {
+    id: Id<"players">;
+    name?: string;
+    number?: number;
+  };
+  team?: {
+    id: Id<"teams">;
+    name?: string;
+  };
+}
 
 // Import hooks
 import { useFeedback } from "../hooks/livegame/useFeedback";
@@ -131,30 +152,34 @@ const LiveGameNew: React.FC = () => {
   const awayOnCourt = awayStats.filter((p) => p.isOnCourt && !p.fouledOut);
   const allOnCourtPlayers = [...homeOnCourt, ...awayOnCourt];
 
-  const gameSettings = (game?.gameSettings as any) || {};
+  const gameSettings = (game?.gameSettings ?? {}) as GameSettings;
   const foulLimit = gameSettings.foulLimit || 5;
   const timeoutsPerTeam = gameSettings.timeoutsPerTeam || 4;
 
-  const homeTeamStats: TeamStatsData = (liveStats?.teamStats as any)?.home || {
-    offensiveRebounds: 0,
-    defensiveRebounds: 0,
-    teamFouls: 0,
-    foulsThisQuarter: 0,
-    foulsByQuarter: { q1: 0, q2: 0, q3: 0, q4: 0, ot: 0 },
-    timeoutsRemaining: timeoutsPerTeam,
-    inBonus: false,
-    inDoubleBonus: false,
+  const teamStatsFromLive = liveStats?.teamStats as
+    | { home?: LiveTeamStats; away?: LiveTeamStats }
+    | undefined;
+  const defaultFoulsByQuarter = { q1: 0, q2: 0, q3: 0, q4: 0, ot: 0 };
+  const homeTeamStats: TeamStatsData = {
+    offensiveRebounds: teamStatsFromLive?.home?.offensiveRebounds ?? 0,
+    defensiveRebounds: teamStatsFromLive?.home?.defensiveRebounds ?? 0,
+    teamFouls: teamStatsFromLive?.home?.teamFouls ?? 0,
+    foulsThisQuarter: teamStatsFromLive?.home?.foulsThisQuarter ?? 0,
+    foulsByQuarter: teamStatsFromLive?.home?.foulsByQuarter ?? defaultFoulsByQuarter,
+    timeoutsRemaining: teamStatsFromLive?.home?.timeoutsRemaining ?? timeoutsPerTeam,
+    inBonus: teamStatsFromLive?.home?.inBonus ?? false,
+    inDoubleBonus: teamStatsFromLive?.home?.inDoubleBonus ?? false,
   };
 
-  const awayTeamStats: TeamStatsData = (liveStats?.teamStats as any)?.away || {
-    offensiveRebounds: 0,
-    defensiveRebounds: 0,
-    teamFouls: 0,
-    foulsThisQuarter: 0,
-    foulsByQuarter: { q1: 0, q2: 0, q3: 0, q4: 0, ot: 0 },
-    timeoutsRemaining: timeoutsPerTeam,
-    inBonus: false,
-    inDoubleBonus: false,
+  const awayTeamStats: TeamStatsData = {
+    offensiveRebounds: teamStatsFromLive?.away?.offensiveRebounds ?? 0,
+    defensiveRebounds: teamStatsFromLive?.away?.defensiveRebounds ?? 0,
+    teamFouls: teamStatsFromLive?.away?.teamFouls ?? 0,
+    foulsThisQuarter: teamStatsFromLive?.away?.foulsThisQuarter ?? 0,
+    foulsByQuarter: teamStatsFromLive?.away?.foulsByQuarter ?? defaultFoulsByQuarter,
+    timeoutsRemaining: teamStatsFromLive?.away?.timeoutsRemaining ?? timeoutsPerTeam,
+    inBonus: teamStatsFromLive?.away?.inBonus ?? false,
+    inDoubleBonus: teamStatsFromLive?.away?.inDoubleBonus ?? false,
   };
 
   const isActive = game?.status === "active";
@@ -812,16 +837,18 @@ const LiveGameNew: React.FC = () => {
   }
 
   // Format events for PlaysModeContent
-  const formattedEvents: PlayByPlayEvent[] = (gameEvents?.events || []).map((e: any) => ({
-    _id: e.id || e._id,
-    quarter: e.quarter,
-    timeRemaining: e.timeRemaining || 0,
-    eventType: e.eventType,
-    description: e.description,
-    playerId: e.player?.id,
-    teamId: e.team?.id,
-    points: e.points,
-  }));
+  const formattedEvents: PlayByPlayEvent[] = ((gameEvents?.events || []) as GameEventItem[]).map(
+    (e) => ({
+      _id: e.id || e._id || `event-${e.quarter}-${e.timeRemaining}`,
+      quarter: e.quarter,
+      timeRemaining: e.timeRemaining || 0,
+      eventType: e.eventType,
+      description: e.description,
+      playerId: e.player?.id,
+      teamId: e.team?.id,
+      points: e.points,
+    })
+  );
 
   // Show starting lineup selector for scheduled games
   if (game.status === "scheduled") {
@@ -872,7 +899,7 @@ const LiveGameNew: React.FC = () => {
     <LiveGameLayout
       // Scoreboard props
       game={{
-        status: game.status as any,
+        status: game.status as GameStatus,
         currentQuarter: game.currentQuarter,
         timeRemainingSeconds: game.timeRemainingSeconds,
         homeScore: game.homeScore,

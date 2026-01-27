@@ -6,6 +6,7 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { getErrorMessage } from "../utils/error";
+import type { Position } from "@basketball-stats/shared";
 import ImageUpload from "../components/ImageUpload";
 import {
   UserIcon,
@@ -19,6 +20,33 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 
+// Local interface for player items returned from the API
+interface PlayerItem {
+  id: Id<"players">;
+  name: string;
+  number: number;
+  position?: Position;
+  heightCm?: number;
+  weightKg?: number;
+  active?: boolean;
+  imageUrl?: string;
+  team?: {
+    id: Id<"teams">;
+    name: string;
+  };
+  seasonAverages?: {
+    points?: number;
+    rebounds?: number;
+    assists?: number;
+  };
+}
+
+// Local interface for team items used in filters
+interface TeamItem {
+  id: Id<"teams">;
+  name: string;
+}
+
 const Players: React.FC = () => {
   const { token, selectedLeague } = useAuth();
   const toast = useToast();
@@ -28,7 +56,7 @@ const Players: React.FC = () => {
   const [selectedPosition, setSelectedPosition] = useState<string>("");
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerItem | null>(null);
   const [playerForm, setPlayerForm] = useState({
     name: "",
     number: "",
@@ -73,23 +101,23 @@ const Players: React.FC = () => {
   const setPlayerImage = useMutation(api.players.setPlayerImage);
   const removePlayerImage = useMutation(api.players.removePlayerImage);
 
-  const players = playersData?.players || [];
-  const teams = teamsData?.teams || [];
+  const players = (playersData?.players || []) as PlayerItem[];
+  const teams = (teamsData?.teams || []) as TeamItem[];
 
-  const handleViewStats = (player: any) => {
+  const handleViewStats = (player: PlayerItem) => {
     navigate(`/app/shot-charts?player=${player.id}`);
   };
 
-  const handleViewPlayer = (player: any) => {
+  const handleViewPlayer = (player: PlayerItem) => {
     navigate(`/app/players/${player.id}`);
   };
 
-  const handleEditPlayer = (player: any) => {
+  const handleEditPlayer = (player: PlayerItem) => {
     setSelectedPlayer(player);
     setPlayerForm({
       name: player.name,
       number: player.number.toString(),
-      position: player.position,
+      position: player.position || "PG",
       heightCm: player.heightCm?.toString() || "",
       weightKg: player.weightKg?.toString() || "",
       active: player.active !== false,
@@ -185,7 +213,7 @@ const Players: React.FC = () => {
     C: "Center",
   };
 
-  const filteredPlayers = players.filter((player: any) => {
+  const filteredPlayers = players.filter((player: PlayerItem) => {
     const matchesSearch =
       player.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       player.number.toString().includes(searchTerm);
@@ -195,7 +223,7 @@ const Players: React.FC = () => {
     return matchesSearch && matchesTeam && matchesPosition;
   });
 
-  const renderPlayerCard = (player: any) => (
+  const renderPlayerCard = (player: PlayerItem) => (
     <div
       key={player.id}
       className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 hover:border-surface-300 dark:hover:border-surface-600 transition-colors"
@@ -257,7 +285,7 @@ const Players: React.FC = () => {
         <div className="flex justify-between items-center">
           <span className="text-surface-600 dark:text-surface-400">Position</span>
           <span className="text-surface-800 dark:text-surface-200 font-medium">
-            {positionLabels[player.position] || player.position}
+            {(player.position && positionLabels[player.position]) || player.position || "N/A"}
           </span>
         </div>
 
@@ -357,7 +385,7 @@ const Players: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none"
             >
               <option value="">All Teams</option>
-              {teams.map((team: any) => (
+              {teams.map((team: TeamItem) => (
                 <option key={team.id} value={team.id}>
                   {team.name}
                 </option>
@@ -396,7 +424,7 @@ const Players: React.FC = () => {
             )}
             {selectedTeam && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300">
-                Team: {teams.find((t: any) => t.id === selectedTeam)?.name}
+                Team: {teams.find((t: TeamItem) => t.id === selectedTeam)?.name}
                 <button
                   onClick={() => setSelectedTeam("")}
                   className="ml-2 inline-flex items-center p-0.5 rounded-full text-surface-500 hover:text-surface-700 dark:hover:text-surface-200"
@@ -572,7 +600,7 @@ const Players: React.FC = () => {
                   <select
                     value={playerForm.position}
                     onChange={(e) =>
-                      setPlayerForm((prev) => ({ ...prev, position: e.target.value as any }))
+                      setPlayerForm((prev) => ({ ...prev, position: e.target.value as Position }))
                     }
                     className="w-full bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl px-3 py-2 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >

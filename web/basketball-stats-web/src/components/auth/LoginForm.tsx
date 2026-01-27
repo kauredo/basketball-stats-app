@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import Icon from "../Icon";
 import { LogoIcon } from "../Logo";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 interface LoginFormProps {
   onSwitchToSignup: () => void;
@@ -30,9 +31,9 @@ export default function LoginForm({ onSwitchToSignup, onSwitchToForgotPassword }
     try {
       await login(email.trim().toLowerCase(), password);
       // Navigation will be handled by the auth state change
-    } catch (err: any) {
+    } catch (err) {
       console.error("Login error:", err);
-      setError(err.message || "Failed to sign in. Please check your credentials.");
+      setError(getErrorMessage(err, "Failed to sign in. Please check your credentials."));
     } finally {
       setIsLoading(false);
     }

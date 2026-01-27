@@ -97,22 +97,21 @@ export function QuickStatModal({
   };
 
   const getStatValue = (player: OnCourtPlayer): number => {
-    const p = player as any;
     switch (statType) {
       case "rebound":
-        return p.rebounds || 0;
+        return player.rebounds || 0;
       case "assist":
-        return p.assists || 0;
+        return player.assists || 0;
       case "steal":
-        return p.steals || 0;
+        return player.steals || 0;
       case "block":
-        return p.blocks || 0;
+        return player.blocks || 0;
       case "turnover":
-        return p.turnovers || 0;
+        return player.turnovers || 0;
       case "foul":
-        return p.fouls || 0;
+        return player.fouls || 0;
       case "freethrow":
-        return p.freeThrowsMade || 0;
+        return player.freeThrowsMade || 0;
       default:
         return 0;
     }

@@ -16,7 +16,7 @@
       "warn",
       { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
     ],
-    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/consistent-type-imports": ["warn", { "prefer": "type-imports" }],
     "@react/no-unescaped-entities": "off",
     "eqeqeq": ["error", "always", { "null": "ignore" }],

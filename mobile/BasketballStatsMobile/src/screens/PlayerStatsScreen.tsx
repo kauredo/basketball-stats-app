@@ -289,47 +289,60 @@ export default function PlayerStatsScreen() {
         <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
           Recent Games
         </Text>
-        {recentGames.slice(0, 5).map((game: any, index: number) => (
-          <View
-            key={game.gameId || index}
-            className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-2"
-          >
-            <View className="flex-row justify-between items-center mb-2">
-              <Text className="text-surface-600 dark:text-surface-400 text-xs">
-                {game.gameDate ? new Date(game.gameDate).toLocaleDateString() : ""}
-              </Text>
-              <Text className="text-surface-900 dark:text-white text-xs font-semibold">
-                vs {game.opponent || "Opponent"}
-              </Text>
+        {recentGames.slice(0, 5).map(
+          (
+            game: {
+              gameId?: string;
+              gameDate?: number;
+              opponent?: string;
+              points?: number;
+              rebounds?: number;
+              assists?: number;
+              fieldGoalPercentage?: number;
+            },
+            index: number
+          ) => (
+            <View
+              key={game.gameId || index}
+              className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-2"
+            >
+              <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-surface-600 dark:text-surface-400 text-xs">
+                  {game.gameDate ? new Date(game.gameDate).toLocaleDateString() : ""}
+                </Text>
+                <Text className="text-surface-900 dark:text-white text-xs font-semibold">
+                  vs {game.opponent || "Opponent"}
+                </Text>
+              </View>
+              <View className="flex-row justify-around">
+                <View className="items-center">
+                  <Text className="text-surface-900 dark:text-white text-base font-bold">
+                    {game.points || 0}
+                  </Text>
+                  <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">PTS</Text>
+                </View>
+                <View className="items-center">
+                  <Text className="text-surface-900 dark:text-white text-base font-bold">
+                    {game.rebounds || 0}
+                  </Text>
+                  <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">REB</Text>
+                </View>
+                <View className="items-center">
+                  <Text className="text-surface-900 dark:text-white text-base font-bold">
+                    {game.assists || 0}
+                  </Text>
+                  <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">AST</Text>
+                </View>
+                <View className="items-center">
+                  <Text className="text-surface-900 dark:text-white text-base font-bold">
+                    {game.fieldGoalPercentage?.toFixed(0) || 0}%
+                  </Text>
+                  <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">FG%</Text>
+                </View>
+              </View>
             </View>
-            <View className="flex-row justify-around">
-              <View className="items-center">
-                <Text className="text-surface-900 dark:text-white text-base font-bold">
-                  {game.points || 0}
-                </Text>
-                <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">PTS</Text>
-              </View>
-              <View className="items-center">
-                <Text className="text-surface-900 dark:text-white text-base font-bold">
-                  {game.rebounds || 0}
-                </Text>
-                <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">REB</Text>
-              </View>
-              <View className="items-center">
-                <Text className="text-surface-900 dark:text-white text-base font-bold">
-                  {game.assists || 0}
-                </Text>
-                <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">AST</Text>
-              </View>
-              <View className="items-center">
-                <Text className="text-surface-900 dark:text-white text-base font-bold">
-                  {game.fieldGoalPercentage?.toFixed(0) || 0}%
-                </Text>
-                <Text className="text-surface-600 dark:text-surface-400 text-xs mt-0.5">FG%</Text>
-              </View>
-            </View>
-          </View>
-        ))}
+          )
+        )}
       </View>
     );
   };

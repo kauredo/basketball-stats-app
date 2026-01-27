@@ -19,7 +19,7 @@ import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { MiniCourt } from "../components/court/MiniCourt";
 import type { RootStackParamList } from "../navigation/AppNavigator";
-import { TOUCH_TARGETS } from "@basketball-stats/shared";
+import { TOUCH_TARGETS, getErrorMessage, type GameSettings } from "@basketball-stats/shared";
 
 // Import components
 import EnhancedScoreboard from "../components/livegame/EnhancedScoreboard";
@@ -43,6 +43,20 @@ import useSoundFeedback from "../hooks/useSoundFeedback";
 import useShotClock from "../hooks/useShotClock";
 
 type LiveGameRouteProp = RouteProp<RootStackParamList, "LiveGame">;
+
+// StatType for recordStat mutation - matches Convex schema
+type RecordStatType =
+  | "shot2"
+  | "shot3"
+  | "freethrow"
+  | "rebound"
+  | "offensiveRebound"
+  | "defensiveRebound"
+  | "assist"
+  | "steal"
+  | "block"
+  | "turnover"
+  | "foul";
 
 interface PlayerStat {
   id: Id<"playerStats">;
@@ -303,17 +317,20 @@ export default function LiveGameScreen() {
   useEffect(() => {
     if (game?.status === "scheduled" && homePlayerStats.length > 0 && awayPlayerStats.length > 0) {
       // Check if starters are already configured
-      const settings = game.gameSettings as any;
+      const settings = (game.gameSettings ?? {}) as GameSettings;
       const existingStarters = settings?.startingFive;
 
-      if (existingStarters?.homeTeam?.length > 0) {
-        setHomeStarters(existingStarters.homeTeam);
+      const homeStartersList = existingStarters?.homeTeam ?? existingStarters?.home;
+      const awayStartersList = existingStarters?.awayTeam ?? existingStarters?.away;
+
+      if (homeStartersList && homeStartersList.length > 0) {
+        setHomeStarters(homeStartersList as Id<"players">[]);
       } else if (homeStarters.length === 0) {
         setHomeStarters(homePlayerStats.slice(0, 5).map((s) => s.playerId));
       }
 
-      if (existingStarters?.awayTeam?.length > 0) {
-        setAwayStarters(existingStarters.awayTeam);
+      if (awayStartersList && awayStartersList.length > 0) {
+        setAwayStarters(awayStartersList as Id<"players">[]);
       } else if (awayStarters.length === 0) {
         setAwayStarters(awayPlayerStats.slice(0, 5).map((s) => s.playerId));
       }
@@ -413,9 +430,9 @@ export default function LiveGameScreen() {
       await startGame({ token, gameId });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       soundFeedback.buzzer?.();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to start game:", error);
-      Alert.alert("Error", error.message || "Failed to start game");
+      Alert.alert("Error", getErrorMessage(error, "Failed to start game"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
@@ -461,7 +478,7 @@ export default function LiveGameScreen() {
           break;
       }
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } catch (error: any) {
+    } catch (error) {
       console.error(`Failed to ${action} game:`, error);
       Alert.alert("Error", `Failed to ${action} game`);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -475,7 +492,7 @@ export default function LiveGameScreen() {
     try {
       await setQuarterMutation({ token, gameId, quarter, resetTime: true });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to change quarter:", error);
       Alert.alert("Error", "Failed to change quarter");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -514,7 +531,7 @@ export default function LiveGameScreen() {
             try {
               await endGame({ token: token!, gameId, forceEnd: true });
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-            } catch (error: any) {
+            } catch (error) {
               console.error("Failed to end game:", error);
               Alert.alert("Error", "Failed to end game");
             }
@@ -543,7 +560,7 @@ export default function LiveGameScreen() {
               });
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
               soundFeedback.buzzer?.();
-            } catch (error: any) {
+            } catch (error) {
               console.error("Failed to end period:", error);
               Alert.alert("Error", "Failed to end period");
             }
@@ -578,7 +595,7 @@ export default function LiveGameScreen() {
 
   const handleRecordStat = async (
     playerId: Id<"players">,
-    statType: string,
+    statType: RecordStatType,
     made?: boolean,
     shotLocation?: { x: number; y: number }
   ) => {
@@ -589,7 +606,7 @@ export default function LiveGameScreen() {
         token,
         gameId,
         playerId,
-        statType: statType as any,
+        statType,
         made,
       });
 
@@ -646,7 +663,7 @@ export default function LiveGameScreen() {
       }
 
       return { player, made };
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to record stat:", error);
       Alert.alert("Error", "Failed to record stat");
       soundFeedback.error();
@@ -831,7 +848,7 @@ export default function LiveGameScreen() {
 
       setPendingFoulPlayerId(null);
       setShowFoulTypeModal(false);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to record foul:", error);
       Alert.alert("Error", "Failed to record foul");
       soundFeedback.error();
@@ -865,7 +882,7 @@ export default function LiveGameScreen() {
       }
 
       return { sequenceContinues: result.sequenceContinues };
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to record free throw:", error);
       soundFeedback.error();
       return { sequenceContinues: false };
@@ -880,13 +897,13 @@ export default function LiveGameScreen() {
         token,
         gameId,
         playerId: action.playerId,
-        statType: action.statType as any,
+        statType: action.statType as RecordStatType,
         wasMade: action.wasMade,
       });
 
       soundFeedback.success();
       setLastAction(null);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to undo:", error);
       Alert.alert("Error", "Failed to undo action");
       soundFeedback.error();
@@ -902,9 +919,9 @@ export default function LiveGameScreen() {
     try {
       await recordTimeout({ token, gameId, teamId: teamId as Id<"teams"> });
       soundFeedback.timeout();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to record timeout:", error);
-      Alert.alert("Error", error.message || "Failed to record timeout");
+      Alert.alert("Error", getErrorMessage(error, "Failed to record timeout"));
       soundFeedback.error();
     }
   };
@@ -916,7 +933,7 @@ export default function LiveGameScreen() {
       await startOvertime({ token, gameId });
       setShowOvertimePrompt(false);
       soundFeedback.overtime();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to start overtime:", error);
       Alert.alert("Error", "Failed to start overtime");
       soundFeedback.error();
@@ -929,7 +946,7 @@ export default function LiveGameScreen() {
     try {
       await endGame({ token, gameId, forceEnd: true });
       setShowOvertimePrompt(false);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to end game:", error);
       Alert.alert("Error", "Failed to end game");
       soundFeedback.error();
@@ -942,9 +959,9 @@ export default function LiveGameScreen() {
     try {
       await substituteMutation({ token, gameId, playerId, isOnCourt: !isOnCourt });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to substitute:", error);
-      Alert.alert("Error", error.message || "Failed to substitute player");
+      Alert.alert("Error", getErrorMessage(error, "Failed to substitute player"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
@@ -958,9 +975,9 @@ export default function LiveGameScreen() {
       await substituteMutation({ token, gameId, playerId: playerOut, isOnCourt: false });
       await substituteMutation({ token, gameId, playerId: playerIn, isOnCourt: true });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to swap players:", error);
-      Alert.alert("Error", error.message || "Failed to swap players");
+      Alert.alert("Error", getErrorMessage(error, "Failed to swap players"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
@@ -972,9 +989,9 @@ export default function LiveGameScreen() {
     try {
       await substituteMutation({ token, gameId, playerId, isOnCourt: true });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to sub in player:", error);
-      Alert.alert("Error", error.message || "Failed to add player to court");
+      Alert.alert("Error", getErrorMessage(error, "Failed to add player to court"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
@@ -1316,7 +1333,7 @@ export default function LiveGameScreen() {
           <TouchableOpacity
             key={tab.key}
             onPress={() => {
-              setActiveTab(tab.key as any);
+              setActiveTab(tab.key as typeof activeTab);
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
             className={`flex-1 ${isLandscape ? "py-1.5" : "py-3"} rounded-xl mx-1 ${
@@ -1325,6 +1342,7 @@ export default function LiveGameScreen() {
           >
             <View className="items-center flex-row justify-center">
               <Icon
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Icon name type is dynamic
                 name={tab.icon as any}
                 size={isLandscape ? 16 : 20}
                 color={activeTab === tab.key ? "#FFFFFF" : "#9CA3AF"}
@@ -1901,7 +1919,7 @@ export default function LiveGameScreen() {
               <QuarterBreakdown
                 homeTeamName={game.homeTeam?.name || "Home"}
                 awayTeamName={game.awayTeam?.name || "Away"}
-                scoreByPeriod={(game.gameSettings as any)?.scoreByPeriod}
+                scoreByPeriod={((game.gameSettings ?? {}) as GameSettings).scoreByPeriod}
                 currentQuarter={game.currentQuarter || 1}
                 homeScore={game.homeScore}
                 awayScore={game.awayScore}

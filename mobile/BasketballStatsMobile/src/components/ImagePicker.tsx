@@ -14,6 +14,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import Icon from "./Icon";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 interface ImagePickerProps {
   currentImageUrl?: string;
@@ -98,8 +99,8 @@ export default function ImagePicker({
 
       const { storageId } = await uploadResponse.json();
       onImageUploaded(storageId as Id<"_storage">);
-    } catch (error: any) {
-      Alert.alert("Upload Failed", error.message || "Failed to upload image");
+    } catch (error) {
+      Alert.alert("Upload Failed", getErrorMessage(error, "Failed to upload image"));
       setPreviewUri(null);
     } finally {
       setIsUploading(false);
@@ -131,7 +132,11 @@ export default function ImagePicker({
       );
     } else {
       // Android - use Alert
-      const buttons: any[] = [
+      const buttons: Array<{
+        text: string;
+        onPress?: () => void;
+        style?: "default" | "cancel" | "destructive";
+      }> = [
         { text: "Take Photo", onPress: () => pickImage(true) },
         { text: "Choose from Library", onPress: () => pickImage(false) },
       ];

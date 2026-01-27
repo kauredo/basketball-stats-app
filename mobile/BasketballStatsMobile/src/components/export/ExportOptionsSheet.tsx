@@ -207,6 +207,7 @@ export function ExportOptionsSheet({
                   }`}
                 >
                   <Icon
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Icon name type is dynamic
                     name={option.icon as any}
                     size={20}
                     color={option.enabled ? "#FFFFFF" : "#64748B"}

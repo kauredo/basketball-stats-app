@@ -9,10 +9,11 @@ import React, {
 import { useMutation, useConvex } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
-import type {
-  User as SharedUser,
-  League as SharedLeague,
-  LeagueRole,
+import {
+  getErrorMessage,
+  type User as SharedUser,
+  type League as SharedLeague,
+  type LeagueRole,
 } from "@basketball-stats/shared";
 
 // Extend shared types with Convex-specific ID types
@@ -192,8 +193,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       try {
         await requestPasswordResetMutation({ email });
-      } catch (err: any) {
-        setError(err.message || "Failed to send reset email");
+      } catch (err) {
+        setError(getErrorMessage(err, "Failed to send reset email"));
         throw err;
       }
     },
@@ -219,8 +220,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         setToken(result.tokens.accessToken);
         localStorage.setItem(TOKEN_KEY, result.tokens.accessToken);
-      } catch (err: any) {
-        setError(err.message || "Failed to reset password");
+      } catch (err) {
+        setError(getErrorMessage(err, "Failed to reset password"));
         throw err;
       }
     },
@@ -242,8 +243,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         setToken(result.tokens.accessToken);
         localStorage.setItem(TOKEN_KEY, result.tokens.accessToken);
-      } catch (err: any) {
-        setError(err.message || "Failed to confirm email");
+      } catch (err) {
+        setError(getErrorMessage(err, "Failed to confirm email"));
         throw err;
       }
     },

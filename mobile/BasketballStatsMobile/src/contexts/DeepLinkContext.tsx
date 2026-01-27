@@ -11,6 +11,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "./AuthContext";
 import { Alert } from "react-native";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 interface DeepLinkContextType {
   pendingInviteCode: string | null;
@@ -142,15 +143,23 @@ export function DeepLinkProvider({ children }: { children: ReactNode }) {
 
       // Auto-select the joined league
       if (result.league) {
-        selectLeague(result.league as any);
+        selectLeague({
+          id: result.league.id,
+          name: result.league.name,
+          season: new Date().getFullYear().toString(),
+          leagueType: "recreational",
+          status: "active",
+          role: "member",
+        });
       }
 
       Alert.alert("Welcome!", `You've joined ${result.league.name}`, [{ text: "OK" }]);
-    } catch (error: any) {
-      if (error.message?.includes("Already a member")) {
+    } catch (error) {
+      const errorMessage = getErrorMessage(error, "Failed to join league");
+      if (errorMessage.includes("Already a member")) {
         Alert.alert("Already Joined", "You're already a member of this league.");
       } else {
-        Alert.alert("Error", error.message || "Failed to join league");
+        Alert.alert("Error", errorMessage);
       }
     } finally {
       setPendingInviteCode(null);

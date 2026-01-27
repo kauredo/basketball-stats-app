@@ -17,6 +17,7 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 type Position = "PG" | "SG" | "SF" | "PF" | "C";
 
@@ -117,8 +118,8 @@ export default function CreatePlayerScreen() {
       Alert.alert("Success", "Player created successfully", [
         { text: "OK", onPress: () => navigation.goBack() },
       ]);
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to create player");
+    } catch (error) {
+      Alert.alert("Error", getErrorMessage(error, "Failed to create player"));
     } finally {
       setIsSubmitting(false);
     }

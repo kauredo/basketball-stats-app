@@ -17,6 +17,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import type { RootStackParamList } from "../navigation/AppNavigator";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 type CreateLeagueNavigationProp = NativeStackNavigationProp<RootStackParamList, "CreateLeague">;
 
@@ -82,10 +83,10 @@ export default function CreateLeagueScreen() {
       }
 
       navigation.goBack();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to create league:", error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Error", error.message || "Failed to create league. Please try again.");
+      Alert.alert("Error", getErrorMessage(error, "Failed to create league. Please try again."));
     } finally {
       setIsCreating(false);
     }

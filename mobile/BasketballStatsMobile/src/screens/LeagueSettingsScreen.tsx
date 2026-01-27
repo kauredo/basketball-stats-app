@@ -15,6 +15,7 @@ import { Picker } from "@react-native-picker/picker";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import { getErrorMessage } from "@basketball-stats/shared";
 import { useTheme } from "../contexts/ThemeContext";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/AppNavigator";
@@ -33,8 +34,8 @@ export default function LeagueSettingsScreen() {
   const canEdit =
     selectedLeague?.role === "admin" ||
     selectedLeague?.role === "owner" ||
-    (selectedLeague as any)?.membership?.role === "admin" ||
-    (selectedLeague as any)?.membership?.role === "owner";
+    selectedLeague?.membership?.role === "admin" ||
+    selectedLeague?.membership?.role === "owner";
 
   // Picker colors based on theme
   const pickerTextColor = isDark ? "#FFFFFF" : "#1f2937";
@@ -111,8 +112,8 @@ export default function LeagueSettingsScreen() {
       Alert.alert("Success", "Settings saved successfully", [
         { text: "OK", onPress: () => navigation.goBack() },
       ]);
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to save settings");
+    } catch (error) {
+      Alert.alert("Error", getErrorMessage(error, "Failed to save settings"));
     } finally {
       setIsSaving(false);
     }

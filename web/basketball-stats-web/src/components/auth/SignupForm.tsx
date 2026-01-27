@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import Icon from "../Icon";
 import { LogoIcon } from "../Logo";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 interface SignupFormProps {
   onSwitchToLogin: () => void;
@@ -76,9 +77,9 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
         formData.lastName.trim()
       );
       // Navigation will be handled by the auth state change
-    } catch (err: any) {
+    } catch (err) {
       console.error("Signup error:", err);
-      setError(err.message || "Failed to create account. Please try again.");
+      setError(getErrorMessage(err, "Failed to create account. Please try again."));
     } finally {
       setIsLoading(false);
     }

@@ -4,6 +4,12 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import {
+  getErrorMessage,
+  type LeagueType,
+  type LeagueRole,
+  type LeagueStatus,
+} from "@basketball-stats/shared";
+import {
   PlusIcon,
   ArrowRightIcon,
   Cog6ToothIcon,
@@ -15,6 +21,22 @@ import {
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
+
+// Local interface for league items returned from the API
+interface LeagueItem {
+  id: Id<"leagues">;
+  name: string;
+  description?: string;
+  season: string;
+  leagueType: LeagueType;
+  status: LeagueStatus;
+  teamsCount?: number;
+  membersCount?: number;
+  role?: LeagueRole;
+  membership?: {
+    role?: LeagueRole;
+  };
+}
 
 const leagueTypes = [
   { value: "recreational", label: "Recreational", shortLabel: "REC" },
@@ -41,10 +63,15 @@ export default function LeagueSelectionPage() {
 
   // Create league state
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createFormData, setCreateFormData] = useState({
+  const [createFormData, setCreateFormData] = useState<{
+    name: string;
+    description: string;
+    leagueType: LeagueType;
+    isPublic: boolean;
+  }>({
     name: "",
     description: "",
-    leagueType: "recreational" as const,
+    leagueType: "recreational",
     isPublic: false,
   });
   const [createError, setCreateError] = useState<string | null>(null);
@@ -89,7 +116,7 @@ export default function LeagueSelectionPage() {
     }
   }, [settingsData]);
 
-  const userLeagues = leaguesData?.leagues || [];
+  const userLeagues = (leaguesData?.leagues || []) as LeagueItem[];
 
   const handleJoinByCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,14 +129,14 @@ export default function LeagueSelectionPage() {
       setInviteCode("");
       setSuccessMessage("Successfully joined the league!");
       setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err: any) {
-      setError(err.message || "Invalid invite code");
+    } catch (err) {
+      setError(getErrorMessage(err, "Invalid invite code"));
     } finally {
       setIsJoining(false);
     }
   };
 
-  const handleSelectLeague = (league: any) => {
+  const handleSelectLeague = (league: LeagueItem) => {
     selectLeague({
       id: league.id,
       name: league.name,
@@ -151,8 +178,8 @@ export default function LeagueSelectionPage() {
         isPublic: false,
       });
       setShowCreateModal(false);
-    } catch (err: any) {
-      setCreateError(err.message || "Failed to create league");
+    } catch (err) {
+      setCreateError(getErrorMessage(err, "Failed to create league"));
     } finally {
       setIsCreating(false);
     }
@@ -180,14 +207,14 @@ export default function LeagueSelectionPage() {
       });
       setShowSettingsModal(false);
       setSettingsLeagueId(null);
-    } catch (err: any) {
-      setSettingsError(err.message || "Failed to save settings");
+    } catch (err) {
+      setSettingsError(getErrorMessage(err, "Failed to save settings"));
     } finally {
       setIsSavingSettings(false);
     }
   };
 
-  const canManageLeague = (league: any) =>
+  const canManageLeague = (league: LeagueItem) =>
     league.membership?.role === "admin" ||
     league.membership?.role === "owner" ||
     league.role === "admin" ||
@@ -279,7 +306,7 @@ export default function LeagueSelectionPage() {
                   <span className="text-xs text-surface-500">{userLeagues.length} total</span>
                 </div>
                 <div className="space-y-3">
-                  {userLeagues.map((league: any) => {
+                  {userLeagues.map((league: LeagueItem) => {
                     const isSelected = selectedLeague?.id === league.id;
                     const role = league.membership?.role || league.role;
                     return (
@@ -471,7 +498,7 @@ export default function LeagueSelectionPage() {
                     <p className="text-2xl font-bold text-surface-900 dark:text-white tabular-nums">
                       {
                         userLeagues.filter(
-                          (l: any) => l.membership?.role === "admin" || l.role === "admin"
+                          (l: LeagueItem) => l.membership?.role === "admin" || l.role === "admin"
                         ).length
                       }
                     </p>
@@ -549,7 +576,10 @@ export default function LeagueSelectionPage() {
                       key={type.value}
                       type="button"
                       onClick={() =>
-                        setCreateFormData((prev) => ({ ...prev, leagueType: type.value as any }))
+                        setCreateFormData((prev) => ({
+                          ...prev,
+                          leagueType: type.value as LeagueType,
+                        }))
                       }
                       className={`py-2 px-1 rounded-lg text-xs font-medium transition-all ${
                         createFormData.leagueType === type.value

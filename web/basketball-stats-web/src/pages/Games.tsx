@@ -21,6 +21,32 @@ import {
 } from "@heroicons/react/24/outline";
 import { exportGameScheduleCSV } from "../utils/export";
 
+// Local interface for game items returned from the API
+interface GameItem {
+  id: Id<"games">;
+  status: string;
+  homeScore: number;
+  awayScore: number;
+  currentQuarter?: number;
+  timeRemainingSeconds?: number;
+  scheduledAt?: number;
+  createdAt?: number;
+  homeTeam?: {
+    id: Id<"teams">;
+    name: string;
+  };
+  awayTeam?: {
+    id: Id<"teams">;
+    name: string;
+  };
+}
+
+// Local interface for team items used in selections
+interface TeamItem {
+  id: Id<"teams">;
+  name: string;
+}
+
 const statusConfig = {
   scheduled: {
     label: "Scheduled",
@@ -93,8 +119,8 @@ const Games: React.FC = () => {
   const createTeam = useMutation(api.teams.create);
   const createPlayer = useMutation(api.players.create);
 
-  const games = gamesData?.games || [];
-  const teams = teamsData?.teams || [];
+  const games = (gamesData?.games || []) as GameItem[];
+  const teams = (teamsData?.teams || []) as TeamItem[];
 
   const handleExportSchedule = () => {
     if (games.length === 0) {
@@ -112,11 +138,13 @@ const Games: React.FC = () => {
 
   // Check for existing or similar team names in quick create
   const normalizedQuickTeamName = quickTeamSettings.teamName.trim().toLowerCase();
-  const exactTeamMatch = teams.find((t: any) => t.name.toLowerCase() === normalizedQuickTeamName);
+  const exactTeamMatch = teams.find(
+    (t: TeamItem) => t.name.toLowerCase() === normalizedQuickTeamName
+  );
   const similarTeamMatch =
     !exactTeamMatch && normalizedQuickTeamName.length >= 3
       ? teams.find(
-          (t: any) =>
+          (t: TeamItem) =>
             t.name.toLowerCase().includes(normalizedQuickTeamName) ||
             normalizedQuickTeamName.includes(t.name.toLowerCase())
         )
@@ -271,7 +299,7 @@ const Games: React.FC = () => {
     }
   };
 
-  const renderGameRow = (game: any) => {
+  const renderGameRow = (game: GameItem) => {
     const isGameLive = game.status === "active";
     const status = statusConfig[game.status as keyof typeof statusConfig];
     const winner =
@@ -347,7 +375,7 @@ const Games: React.FC = () => {
                 className="font-mono font-medium text-surface-900 dark:text-surface-50"
                 data-stat
               >
-                {formatTime(game.timeRemainingSeconds)}
+                {formatTime(game.timeRemainingSeconds ?? 0)}
               </div>
             </div>
           )}
@@ -503,7 +531,7 @@ const Games: React.FC = () => {
                     className="flex-1 bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
                   >
                     <option value="">Select Home Team</option>
-                    {teams.map((team: any) => (
+                    {teams.map((team: TeamItem) => (
                       <option key={team.id} value={team.id}>
                         {team.name}
                       </option>
@@ -536,7 +564,7 @@ const Games: React.FC = () => {
                     className="flex-1 bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-surface-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
                   >
                     <option value="">Select Away Team</option>
-                    {teams.map((team: any) => (
+                    {teams.map((team: TeamItem) => (
                       <option
                         key={team.id}
                         value={team.id}

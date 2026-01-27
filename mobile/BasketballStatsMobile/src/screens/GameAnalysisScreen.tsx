@@ -6,6 +6,7 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import type { GameSettings } from "@basketball-stats/shared";
 import { QuarterBreakdown } from "../components/livegame/QuarterBreakdown";
 import { AdvancedStats } from "../components/livegame/AdvancedStats";
 import PlayByPlayTab from "../components/livegame/PlayByPlayTab";
@@ -191,7 +192,7 @@ export default function GameAnalysisScreen() {
   const isAwayWinner = game.awayScore > game.homeScore;
 
   // Calculate team totals
-  const calculateTeamTotals = (players: any[]) => {
+  const calculateTeamTotals = (players: NonNullable<typeof homeTeam>["players"]) => {
     return players.reduce(
       (acc, p) => ({
         points: acc.points + (p.points || 0),
@@ -234,11 +235,11 @@ export default function GameAnalysisScreen() {
   ];
 
   // Sort players by points (highest first)
-  const sortPlayers = (players: any[]) => {
+  const sortPlayers = (players: NonNullable<typeof homeTeam>["players"]) => {
     return [...players].sort((a, b) => (b.points || 0) - (a.points || 0));
   };
 
-  const renderBoxScore = (team: any, isHome: boolean) => {
+  const renderBoxScore = (team: typeof homeTeam, isHome: boolean) => {
     if (!team) return null;
 
     const sortedPlayers = sortPlayers(team.players);
@@ -311,7 +312,7 @@ export default function GameAnalysisScreen() {
 
               {/* Players */}
               <View className="px-3">
-                {sortedPlayers.map((player: any, index: number) => (
+                {sortedPlayers.map((player, index) => (
                   <PlayerStatRow
                     key={player.player?.id || index}
                     name={player.player?.name || "Unknown"}
@@ -401,7 +402,7 @@ export default function GameAnalysisScreen() {
         <QuarterBreakdown
           homeTeamName={homeTeam?.team?.name || "Home"}
           awayTeamName={awayTeam?.team?.name || "Away"}
-          scoreByPeriod={(game.gameSettings as any)?.scoreByPeriod}
+          scoreByPeriod={(game.gameSettings as GameSettings | undefined)?.scoreByPeriod}
           currentQuarter={game.currentQuarter || 4}
           homeScore={game.homeScore}
           awayScore={game.awayScore}
@@ -540,48 +541,52 @@ export default function GameAnalysisScreen() {
             {/* Advanced Stats */}
             <AdvancedStats
               homeStats={
-                homeTeam?.players?.map((p: any) => ({
-                  id: p.player?.id,
-                  playerId: p.player?.id,
-                  player: p.player || { id: "", name: "Unknown", number: 0, position: "" },
-                  points: p.points || 0,
-                  rebounds: p.rebounds || 0,
-                  assists: p.assists || 0,
-                  steals: p.steals || 0,
-                  blocks: p.blocks || 0,
-                  turnovers: p.turnovers || 0,
-                  fouls: p.fouls || 0,
-                  fieldGoalsMade: p.fieldGoalsMade || 0,
-                  fieldGoalsAttempted: p.fieldGoalsAttempted || 0,
-                  threePointersMade: p.threePointersMade || 0,
-                  threePointersAttempted: p.threePointersAttempted || 0,
-                  freeThrowsMade: p.freeThrowsMade || 0,
-                  freeThrowsAttempted: p.freeThrowsAttempted || 0,
-                  minutesPlayed: p.minutesPlayed || 0,
-                  plusMinus: p.plusMinus || 0,
-                })) || []
+                homeTeam?.players
+                  ?.filter((p) => p.player !== null)
+                  .map((p) => ({
+                    id: p.player!.id as string,
+                    playerId: p.player!.id,
+                    player: p.player,
+                    points: p.points || 0,
+                    rebounds: p.rebounds || 0,
+                    assists: p.assists || 0,
+                    steals: p.steals || 0,
+                    blocks: p.blocks || 0,
+                    turnovers: p.turnovers || 0,
+                    fouls: p.fouls || 0,
+                    fieldGoalsMade: p.fieldGoalsMade || 0,
+                    fieldGoalsAttempted: p.fieldGoalsAttempted || 0,
+                    threePointersMade: p.threePointersMade || 0,
+                    threePointersAttempted: p.threePointersAttempted || 0,
+                    freeThrowsMade: p.freeThrowsMade || 0,
+                    freeThrowsAttempted: p.freeThrowsAttempted || 0,
+                    minutesPlayed: p.minutesPlayed || 0,
+                    plusMinus: p.plusMinus || 0,
+                  })) || []
               }
               awayStats={
-                awayTeam?.players?.map((p: any) => ({
-                  id: p.player?.id,
-                  playerId: p.player?.id,
-                  player: p.player || { id: "", name: "Unknown", number: 0, position: "" },
-                  points: p.points || 0,
-                  rebounds: p.rebounds || 0,
-                  assists: p.assists || 0,
-                  steals: p.steals || 0,
-                  blocks: p.blocks || 0,
-                  turnovers: p.turnovers || 0,
-                  fouls: p.fouls || 0,
-                  fieldGoalsMade: p.fieldGoalsMade || 0,
-                  fieldGoalsAttempted: p.fieldGoalsAttempted || 0,
-                  threePointersMade: p.threePointersMade || 0,
-                  threePointersAttempted: p.threePointersAttempted || 0,
-                  freeThrowsMade: p.freeThrowsMade || 0,
-                  freeThrowsAttempted: p.freeThrowsAttempted || 0,
-                  minutesPlayed: p.minutesPlayed || 0,
-                  plusMinus: p.plusMinus || 0,
-                })) || []
+                awayTeam?.players
+                  ?.filter((p) => p.player !== null)
+                  .map((p) => ({
+                    id: p.player!.id as string,
+                    playerId: p.player!.id,
+                    player: p.player,
+                    points: p.points || 0,
+                    rebounds: p.rebounds || 0,
+                    assists: p.assists || 0,
+                    steals: p.steals || 0,
+                    blocks: p.blocks || 0,
+                    turnovers: p.turnovers || 0,
+                    fouls: p.fouls || 0,
+                    fieldGoalsMade: p.fieldGoalsMade || 0,
+                    fieldGoalsAttempted: p.fieldGoalsAttempted || 0,
+                    threePointersMade: p.threePointersMade || 0,
+                    threePointersAttempted: p.threePointersAttempted || 0,
+                    freeThrowsMade: p.freeThrowsMade || 0,
+                    freeThrowsAttempted: p.freeThrowsAttempted || 0,
+                    minutesPlayed: p.minutesPlayed || 0,
+                    plusMinus: p.plusMinus || 0,
+                  })) || []
               }
               homeTeamName={homeTeam?.team?.name || "Home"}
               awayTeamName={awayTeam?.team?.name || "Away"}
@@ -592,17 +597,17 @@ export default function GameAnalysisScreen() {
         {activeTab === "plays" && (
           <View className="flex-1 p-4">
             <PlayByPlayTab
-              events={events.map((event: any) => ({
-                id: event._id,
+              events={events.map((event) => ({
+                id: event.id,
                 eventType: event.eventType,
                 quarter: event.quarter,
                 gameTime: event.gameTime || 0,
-                gameTimeDisplay: event.gameTimeDisplay || event.gameTime || "--:--",
+                gameTimeDisplay: event.gameTimeDisplay || String(event.gameTime || "--:--"),
                 timestamp: event.timestamp || 0,
                 description: event.description || event.eventType?.replace(/_/g, " "),
                 details: {
                   made: event.details?.made,
-                  points: event.details?.points || event.pointsScored,
+                  points: event.details?.points,
                   shotType: event.details?.shotType,
                   foulType: event.details?.foulType,
                   assisted: event.details?.assisted,
@@ -610,47 +615,36 @@ export default function GameAnalysisScreen() {
                   awayScore: event.details?.awayScore,
                   isHomeTeam: event.details?.isHomeTeam,
                 },
-                player:
-                  event.player ||
-                  (event.playerId
-                    ? {
-                        id: event.playerId,
-                        name: event.playerName || "Unknown",
-                        number: event.playerNumber || 0,
-                      }
-                    : null),
-                team:
-                  event.team ||
-                  (event.teamId
-                    ? {
-                        id: event.teamId,
-                        name: event.teamName || "",
-                      }
-                    : null),
+                player: event.player,
+                team: event.team,
               }))}
               isLoading={false}
               currentQuarter={game.currentQuarter || 4}
               playerStats={[
-                ...(homeTeam?.players?.map((p: any) => ({
-                  playerId: p.player?.id,
-                  points: p.points || 0,
-                  rebounds: p.rebounds || 0,
-                  assists: p.assists || 0,
-                  steals: p.steals || 0,
-                  blocks: p.blocks || 0,
-                  turnovers: p.turnovers || 0,
-                  fouls: p.fouls || 0,
-                })) || []),
-                ...(awayTeam?.players?.map((p: any) => ({
-                  playerId: p.player?.id,
-                  points: p.points || 0,
-                  rebounds: p.rebounds || 0,
-                  assists: p.assists || 0,
-                  steals: p.steals || 0,
-                  blocks: p.blocks || 0,
-                  turnovers: p.turnovers || 0,
-                  fouls: p.fouls || 0,
-                })) || []),
+                ...(homeTeam?.players
+                  ?.filter((p) => p.player !== null)
+                  .map((p) => ({
+                    playerId: p.player!.id,
+                    points: p.points || 0,
+                    rebounds: p.rebounds || 0,
+                    assists: p.assists || 0,
+                    steals: p.steals || 0,
+                    blocks: p.blocks || 0,
+                    turnovers: p.turnovers || 0,
+                    fouls: p.fouls || 0,
+                  })) || []),
+                ...(awayTeam?.players
+                  ?.filter((p) => p.player !== null)
+                  .map((p) => ({
+                    playerId: p.player!.id,
+                    points: p.points || 0,
+                    rebounds: p.rebounds || 0,
+                    assists: p.assists || 0,
+                    steals: p.steals || 0,
+                    blocks: p.blocks || 0,
+                    turnovers: p.turnovers || 0,
+                    fouls: p.fouls || 0,
+                  })) || []),
               ]}
             />
           </View>

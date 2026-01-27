@@ -10,7 +10,7 @@ import { useAuth } from "../contexts/AuthContext";
 import Icon, { type IconName } from "../components/Icon";
 import { MiniCourt, type ShotMarker } from "../components/court/MiniCourt";
 import type { RootStackParamList } from "../navigation/AppNavigator";
-import { BasketballUtils } from "@basketball-stats/shared";
+import { BasketballUtils, type GameSettings } from "@basketball-stats/shared";
 
 type GameReplayRouteProp = RouteProp<RootStackParamList, "GameReplay">;
 type GameReplayNavigationProp = NativeStackNavigationProp<RootStackParamList, "GameReplay">;
@@ -83,7 +83,7 @@ export default function GameReplayScreen() {
   // Calculate total game duration for slider
   const totalDuration = useMemo(() => {
     if (!game) return 0;
-    const quarterMinutes = (game.gameSettings as { quarterMinutes?: number })?.quarterMinutes || 12;
+    const quarterMinutes = ((game.gameSettings ?? {}) as GameSettings).quarterMinutes || 12;
     const totalQuarters = game.currentQuarter || 4;
     return totalQuarters * quarterMinutes * 60;
   }, [game]);
@@ -91,7 +91,7 @@ export default function GameReplayScreen() {
   // Get events up to selected time
   const eventsUpToTime = useMemo((): GameEvent[] => {
     if (!game) return [];
-    const quarterMinutes = (game.gameSettings as { quarterMinutes?: number })?.quarterMinutes || 12;
+    const quarterMinutes = ((game.gameSettings ?? {}) as GameSettings).quarterMinutes || 12;
 
     return sortedEvents.filter((event: GameEvent) => {
       const eventTotalSeconds =
@@ -138,7 +138,7 @@ export default function GameReplayScreen() {
   // Format time display
   const formatSliderTime = (seconds: number) => {
     if (!game) return "0:00";
-    const quarterMinutes = (game.gameSettings as any)?.quarterMinutes || 12;
+    const quarterMinutes = ((game.gameSettings ?? {}) as GameSettings).quarterMinutes || 12;
     const quarterSeconds = quarterMinutes * 60;
 
     const quarter = Math.floor(seconds / quarterSeconds) + 1;
@@ -179,7 +179,7 @@ export default function GameReplayScreen() {
   // Jump to event
   const jumpToEvent = (event: GameEvent) => {
     if (!game) return;
-    const quarterMinutes = (game.gameSettings as { quarterMinutes?: number })?.quarterMinutes || 12;
+    const quarterMinutes = ((game.gameSettings ?? {}) as GameSettings).quarterMinutes || 12;
     const eventTotalSeconds =
       (event.quarter - 1) * quarterMinutes * 60 + (quarterMinutes * 60 - event.gameTime);
     setSelectedTime(eventTotalSeconds);

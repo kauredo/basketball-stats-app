@@ -14,6 +14,7 @@ import { api } from "../../../../../convex/_generated/api";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 import { useAuth } from "../../contexts/AuthContext";
 import Icon from "../../components/Icon";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 interface League {
   id: Id<"leagues">;
@@ -67,9 +68,9 @@ export default function LeagueSelectionScreen() {
     try {
       await joinLeagueMutation({ token, leagueId });
       Alert.alert("Success", "Successfully joined the league!");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to join league:", error);
-      Alert.alert("Error", error.message || "Failed to join league");
+      Alert.alert("Error", getErrorMessage(error, "Failed to join league"));
     } finally {
       setIsJoining(false);
     }
@@ -87,9 +88,9 @@ export default function LeagueSelectionScreen() {
       setInviteCode("");
       setShowJoinForm(false);
       Alert.alert("Success", "Successfully joined the league!");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to join league by code:", error);
-      Alert.alert("Error", error.message || "Failed to join league");
+      Alert.alert("Error", getErrorMessage(error, "Failed to join league"));
     } finally {
       setIsJoining(false);
     }

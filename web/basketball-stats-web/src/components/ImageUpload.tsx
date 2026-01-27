@@ -3,6 +3,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 interface ImageUploadProps {
   currentImageUrl?: string;
@@ -61,9 +62,9 @@ export default function ImageUpload({
 
         const { storageId } = await response.json();
         onImageUploaded(storageId as Id<"_storage">);
-      } catch (error: any) {
+      } catch (error) {
         console.error("Upload failed:", error);
-        alert(error.message || "Failed to upload image");
+        alert(getErrorMessage(error, "Failed to upload image"));
         setPreviewUrl(null);
       } finally {
         setIsUploading(false);

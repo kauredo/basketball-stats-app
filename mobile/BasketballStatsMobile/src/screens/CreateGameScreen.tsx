@@ -17,6 +17,7 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
+import { getErrorMessage } from "@basketball-stats/shared";
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 interface Team {
@@ -199,8 +200,8 @@ function QuickTeamCreateModal({
       setPlayerCount(5);
       setUseDefaultNames(true);
       onClose();
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to create team");
+    } catch (error) {
+      Alert.alert("Error", getErrorMessage(error, "Failed to create team"));
     } finally {
       setIsCreating(false);
     }
@@ -414,8 +415,8 @@ export default function CreateGameScreen() {
       Alert.alert("Success", "Game created successfully", [
         { text: "OK", onPress: () => navigation.goBack() },
       ]);
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to create game");
+    } catch (error) {
+      Alert.alert("Error", getErrorMessage(error, "Failed to create game"));
     } finally {
       setIsSubmitting(false);
     }

@@ -5,6 +5,7 @@ import { api } from "../../../../../convex/_generated/api";
 import Icon from "../../components/Icon";
 import { LogoIcon } from "../../components/Logo";
 import SEOHead from "../../components/seo/SEOHead";
+import { getErrorMessage, isErrorWithMessage } from "@basketball-stats/shared";
 
 type PageState = "loading" | "form" | "success" | "error";
 
@@ -69,14 +70,15 @@ export default function ResetPasswordPage() {
         passwordConfirmation: formData.passwordConfirmation,
       });
       setPageState("success");
-    } catch (err: any) {
+    } catch (err) {
       console.error("Reset password error:", err);
-      if (err.message?.includes("expired")) {
+      const msg = isErrorWithMessage(err) ? err.message : "";
+      if (msg.includes("expired")) {
         setError("This reset link has expired. Please request a new one.");
-      } else if (err.message?.includes("Invalid")) {
+      } else if (msg.includes("Invalid")) {
         setError("This reset link is invalid. Please request a new one.");
       } else {
-        setError(err.message || "Failed to reset password. Please try again.");
+        setError(getErrorMessage(err, "Failed to reset password. Please try again."));
       }
     } finally {
       setIsSubmitting(false);

@@ -29,6 +29,53 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { exportRosterCSV, exportLineupStatsCSV, exportPairStatsCSV } from "../utils/export";
 
 type TeamDetailRouteProp = RouteProp<RootStackParamList, "TeamDetail">;
+
+/** Local interface for team stats from getTeamsStats query */
+interface TeamStat {
+  teamId: Id<"teams">;
+  teamName: string;
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+  winPercentage: number;
+  avgPoints: number;
+  avgPointsAllowed: number;
+  avgRebounds: number;
+  avgOffensiveRebounds: number;
+  avgDefensiveRebounds: number;
+  avgAssists: number;
+  avgSteals: number;
+  avgBlocks: number;
+  fieldGoalPercentage: number;
+  threePointPercentage: number;
+  freeThrowPercentage: number;
+}
+
+/** Local interface for game data from games.list query */
+interface GameListItem {
+  id: Id<"games">;
+  scheduledAt?: number;
+  startedAt?: number;
+  endedAt?: number;
+  status: "scheduled" | "active" | "paused" | "completed";
+  currentQuarter: number;
+  timeRemainingSeconds: number;
+  timeDisplay: string;
+  homeScore: number;
+  awayScore: number;
+  homeTeam: {
+    id: Id<"teams">;
+    name: string;
+    city?: string;
+    logoUrl?: string;
+  } | null;
+  awayTeam: {
+    id: Id<"teams">;
+    name: string;
+    city?: string;
+    logoUrl?: string;
+  } | null;
+}
 type TeamDetailNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface Player {
@@ -108,7 +155,7 @@ export default function TeamDetailScreen() {
   const games = gamesData?.games || [];
 
   // Find this team's stats from the league stats
-  const teamStats = teamsStatsData?.teams?.find((t: any) => t.teamId === teamId);
+  const teamStats = teamsStatsData?.teams?.find((t: TeamStat) => t.teamId === teamId);
 
   // Get win/loss record from team data
   const wins = team?.wins ?? 0;
@@ -420,11 +467,11 @@ export default function TeamDetailScreen() {
             <Text className="text-sm font-semibold text-surface-900 dark:text-white">
               Recent Games
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("Games" as any)}>
+            <TouchableOpacity onPress={() => navigation.navigate("Games" as never)}>
               <Text className="text-xs text-primary-500">View All</Text>
             </TouchableOpacity>
           </View>
-          {games.slice(0, 5).map((game: any) => {
+          {games.slice(0, 5).map((game: GameListItem) => {
             const isHome = game.homeTeam?.id === teamId;
             const opponent = isHome ? game.awayTeam : game.homeTeam;
             const teamScore = isHome ? game.homeScore : game.awayScore;

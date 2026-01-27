@@ -195,6 +195,7 @@ export default function Icon({ name, size = 24, color = "#7a746c", className, st
 
   return (
     <IconComponent
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Icon libraries have incompatible name types
       name={iconConfig.name as any}
       size={size}
       color={color}

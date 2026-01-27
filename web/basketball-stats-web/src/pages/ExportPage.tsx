@@ -14,6 +14,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import type { Id } from "../../../../convex/_generated/dataModel";
+import type { StatsPlayerData, ExportShot } from "@basketball-stats/shared";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -38,6 +39,112 @@ import type {
 import { PrintableShotChart } from "../components/export";
 
 type ExportStatus = "loading" | "preparing" | "generating" | "complete" | "error";
+
+// Local interfaces for box score player data transformation
+interface BoxScorePlayer {
+  player?: {
+    id: string;
+    name: string;
+    number: number;
+    position?: string;
+  } | null;
+  playerId?: string;
+  minutesPlayed?: number;
+  points?: number;
+  rebounds?: number;
+  assists?: number;
+  steals?: number;
+  blocks?: number;
+  turnovers?: number;
+  fouls?: number;
+  fieldGoalsMade?: number;
+  fieldGoalsAttempted?: number;
+  threePointersMade?: number;
+  threePointersAttempted?: number;
+  freeThrowsMade?: number;
+  freeThrowsAttempted?: number;
+  plusMinus?: number;
+}
+
+// Local interface for game events from Convex
+interface GameEventData {
+  /** getGameEvents returns 'id' not '_id' */
+  id: string;
+  quarter: number;
+  gameTime?: number;
+  timeRemaining?: number;
+  eventType: string;
+  description?: string;
+  player?: { id: string; name: string; number?: number } | null;
+  playerId?: string;
+  team?: { id: string; name: string } | null;
+  teamId?: string;
+  details?: { homeScore?: number; awayScore?: number; [key: string]: unknown };
+}
+
+// Local interface for recent game log entries
+interface RecentGameEntry {
+  gameId?: string;
+  /** Can be number (timestamp) or string (formatted date) */
+  gameDate?: number | string;
+  opponent: string;
+  points?: number;
+  rebounds?: number;
+  assists?: number;
+  steals?: number;
+  blocks?: number;
+  turnovers?: number;
+  fouls?: number;
+  fieldGoalsMade?: number;
+  fieldGoalsAttempted?: number;
+  threePointersMade?: number;
+  threePointersAttempted?: number;
+  freeThrowsMade?: number;
+  freeThrowsAttempted?: number;
+  minutes?: number;
+  minutesPlayed?: number;
+}
+
+// Local interface for player list item
+interface PlayerItem {
+  id: string;
+  name: string;
+  number: number;
+  position?: string;
+}
+
+// Extended stats player data with advanced metrics (extends StatsPlayerData from shared)
+interface ExtendedStatsPlayerData extends StatsPlayerData {
+  trueShootingPercentage?: number;
+  effectiveFieldGoalPercentage?: number;
+  playerEfficiencyRating?: number;
+  assistToTurnoverRatio?: number;
+}
+
+// Local interface for shot data from queries
+interface ShotQueryData {
+  x: number;
+  y: number;
+  made: boolean;
+  shotType: "2pt" | "3pt" | "ft";
+}
+
+// Local interface for totals accumulator
+interface TeamTotalsAccumulator {
+  points: number;
+  rebounds: number;
+  assists: number;
+  steals: number;
+  blocks: number;
+  turnovers: number;
+  fouls: number;
+  fieldGoalsMade: number;
+  fieldGoalsAttempted: number;
+  threePointersMade: number;
+  threePointersAttempted: number;
+  freeThrowsMade: number;
+  freeThrowsAttempted: number;
+}
 
 const ExportPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -155,8 +262,8 @@ const ExportPage: React.FC = () => {
     const shots = shotsData?.shots || [];
     const events = gameEventsData?.events || [];
 
-    const transformPlayer = (player: any) => ({
-      id: player.player?.id || player.playerId,
+    const transformPlayer = (player: BoxScorePlayer) => ({
+      id: player.player?.id || player.playerId || "",
       name: player.player?.name || "Unknown",
       number: player.player?.number || 0,
       position: player.player?.position,
@@ -177,8 +284,24 @@ const ExportPage: React.FC = () => {
       plusMinus: player.plusMinus || 0,
     });
 
-    const calculateTotals = (players: any[]) => {
-      const totals = players.reduce(
+    const calculateTotals = (players: BoxScorePlayer[]) => {
+      const initialTotals: TeamTotalsAccumulator = {
+        points: 0,
+        rebounds: 0,
+        assists: 0,
+        steals: 0,
+        blocks: 0,
+        turnovers: 0,
+        fouls: 0,
+        fieldGoalsMade: 0,
+        fieldGoalsAttempted: 0,
+        threePointersMade: 0,
+        threePointersAttempted: 0,
+        freeThrowsMade: 0,
+        freeThrowsAttempted: 0,
+      };
+
+      const totals = players.reduce<TeamTotalsAccumulator>(
         (acc, p) => ({
           points: acc.points + (p.points || 0),
           rebounds: acc.rebounds + (p.rebounds || 0),
@@ -194,21 +317,7 @@ const ExportPage: React.FC = () => {
           freeThrowsMade: acc.freeThrowsMade + (p.freeThrowsMade || 0),
           freeThrowsAttempted: acc.freeThrowsAttempted + (p.freeThrowsAttempted || 0),
         }),
-        {
-          points: 0,
-          rebounds: 0,
-          assists: 0,
-          steals: 0,
-          blocks: 0,
-          turnovers: 0,
-          fouls: 0,
-          fieldGoalsMade: 0,
-          fieldGoalsAttempted: 0,
-          threePointersMade: 0,
-          threePointersAttempted: 0,
-          freeThrowsMade: 0,
-          freeThrowsAttempted: 0,
-        }
+        initialTotals
       );
 
       return {
@@ -253,10 +362,10 @@ const ExportPage: React.FC = () => {
         players: (boxScore.awayTeam?.players || []).map(transformPlayer),
         totals: calculateTotals(boxScore.awayTeam?.players || []),
       },
-      shots: shots.map((shot: any) => ({
-        id: shot._id,
+      shots: shots.map((shot: ExportShot) => ({
+        id: shot._id || shot.id || "",
         playerId: shot.playerId,
-        playerName: shot.player?.name || "Unknown",
+        playerName: shot.player?.name || shot.playerName || "Unknown",
         teamId: shot.teamId,
         teamName:
           (shot.teamId === boxScore.homeTeam?.team?.id
@@ -266,16 +375,16 @@ const ExportPage: React.FC = () => {
         y: shot.y,
         shotType: shot.shotType,
         made: shot.made,
-        zone: shot.shotZone || "unknown",
+        zone: shot.zone || shot.shotZone || "unknown",
         quarter: shot.quarter,
-        timeRemaining: shot.timeRemaining,
+        timeRemaining: shot.timeRemaining || 0,
       })),
-      events: events.map((event: any) => ({
-        id: event._id,
+      events: events.map((event: GameEventData) => ({
+        id: event.id || "",
         quarter: event.quarter,
         timeRemaining: event.gameTime || event.timeRemaining || 0,
         eventType: event.eventType,
-        description: event.description || event.eventType?.replace(/_/g, " "),
+        description: event.description || event.eventType?.replace(/_/g, " ") || "",
         playerId: event.player?.id || event.playerId,
         playerName: event.player?.name,
         teamId: event.team?.id || event.teamId,
@@ -567,9 +676,14 @@ const ExportPage: React.FC = () => {
               effectiveFieldGoalPercentage: stats?.effectiveFieldGoalPercentage,
               playerEfficiencyRating: stats?.playerEfficiencyRating,
             },
-            games: recentGames.map((g: any) => ({
+            games: recentGames.map((g) => ({
               id: g.gameId || "",
-              date: g.gameDate,
+              date:
+                typeof g.gameDate === "number"
+                  ? g.gameDate
+                  : g.gameDate
+                    ? new Date(g.gameDate).getTime()
+                    : undefined,
               opponent: g.opponent,
               points: g.points || 0,
               rebounds: g.rebounds || 0,
@@ -582,7 +696,7 @@ const ExportPage: React.FC = () => {
               threePointersAttempted: g.threePointersAttempted || 0,
               freeThrowsMade: g.freeThrowsMade || 0,
               freeThrowsAttempted: g.freeThrowsAttempted || 0,
-              minutes: g.minutes || 0,
+              minutes: g.minutesPlayed || 0,
             })),
             shotChartImage,
             shootingByZone,
@@ -664,8 +778,8 @@ const ExportPage: React.FC = () => {
               winPercentage: team?.winPercentage || 0,
             },
             season: selectedLeague?.season || new Date().getFullYear().toString(),
-            players: players.map((p: any) => {
-              const pStats = playerStatsMap.get(p.id) as any;
+            players: players.map((p: PlayerItem) => {
+              const pStats = playerStatsMap.get(p.id) as ExtendedStatsPlayerData | undefined;
               return {
                 id: p.id,
                 name: p.name,
@@ -688,7 +802,7 @@ const ExportPage: React.FC = () => {
                   : undefined,
               };
             }),
-            games: games.map((g: any) => {
+            games: games.map((g) => {
               const isHome = g.homeTeam?.name === team?.name;
               return {
                 id: g.id,
@@ -796,7 +910,7 @@ const ExportPage: React.FC = () => {
     }
 
     if (exportType === "player-shot-chart" && playerShotData) {
-      const shots: ExportShotLocation[] = (playerShotData.shots || []).map((s: any) => ({
+      const shots: ExportShotLocation[] = (playerShotData.shots || []).map((s: ShotQueryData) => ({
         x: s.x,
         y: s.y,
         made: s.made,
@@ -819,7 +933,7 @@ const ExportPage: React.FC = () => {
     }
 
     if (exportType === "team-shot-chart" && teamShotData) {
-      const shots: ExportShotLocation[] = (teamShotData.shots || []).map((s: any) => ({
+      const shots: ExportShotLocation[] = (teamShotData.shots || []).map((s: ShotQueryData) => ({
         x: s.x,
         y: s.y,
         made: s.made,
@@ -842,7 +956,7 @@ const ExportPage: React.FC = () => {
     }
 
     if (exportType === "player-season" && playerShotData) {
-      const shots: ExportShotLocation[] = (playerShotData.shots || []).map((s: any) => ({
+      const shots: ExportShotLocation[] = (playerShotData.shots || []).map((s: ShotQueryData) => ({
         x: s.x,
         y: s.y,
         made: s.made,
@@ -867,7 +981,7 @@ const ExportPage: React.FC = () => {
     }
 
     if (exportType === "team-season" && teamShotData) {
-      const shots: ExportShotLocation[] = (teamShotData.shots || []).map((s: any) => ({
+      const shots: ExportShotLocation[] = (teamShotData.shots || []).map((s: ShotQueryData) => ({
         x: s.x,
         y: s.y,
         made: s.made,

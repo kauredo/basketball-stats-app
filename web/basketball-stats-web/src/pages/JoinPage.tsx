@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import SEOHead from "../components/seo/SEOHead";
+import { getErrorMessage, isErrorWithMessage } from "@basketball-stats/shared";
 
 type JoinStatus = "loading" | "confirm" | "joining" | "success" | "error";
 
@@ -70,18 +71,26 @@ export default function JoinPage() {
 
       // Auto-select the joined league
       if (result.league) {
-        selectLeague(result.league as any);
+        selectLeague({
+          id: result.league.id,
+          name: result.league.name,
+          season: new Date().getFullYear().toString(),
+          leagueType: leagueInfo?.leagueType || "recreational",
+          status: "active",
+          role: "member",
+        });
       }
 
       // Redirect to app after short delay
       setTimeout(() => navigate("/app"), 2000);
-    } catch (err: any) {
+    } catch (err) {
       setStatus("error");
-      if (err.message?.includes("Already a member")) {
+      const errorMsg = getErrorMessage(err, "Failed to join league");
+      if (isErrorWithMessage(err) && err.message?.includes("Already a member")) {
         setError("You're already a member of this league.");
         setTimeout(() => navigate("/app"), 2000);
       } else {
-        setError(err.message || "Failed to join league");
+        setError(errorMsg);
       }
     }
   };

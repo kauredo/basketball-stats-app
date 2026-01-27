@@ -4,6 +4,12 @@
 // Export system types
 export * from "./export";
 
+// Export error utilities
+export * from "./errors";
+
+// Export Convex query return types
+export * from "./convex-returns";
+
 // ============================================
 // Authentication & User Types
 // ============================================
@@ -319,8 +325,71 @@ export type ShotType = "2pt" | "3pt" | "ft";
 export type ShotZone = "paint" | "midrange" | "corner3" | "wing3" | "top3" | "ft";
 
 // ============================================
+// Game Settings Types (for live games)
+// ============================================
+
+export interface GameSettings {
+  quarterMinutes?: number;
+  foulLimit?: number;
+  timeoutsPerTeam?: number;
+  overtimeMinutes?: number;
+  overtimePeriods?: number;
+  bonusMode?: "college" | "nba";
+  startingFive?: {
+    home?: string[];
+    away?: string[];
+    homeTeam?: string[];
+    awayTeam?: string[];
+  };
+  scoreByPeriod?: Record<string, { home: number; away: number }>;
+  homeTimeouts?: number;
+  awayTimeouts?: number;
+  isQuickGame?: boolean;
+  customHomeTeamName?: string;
+  customAwayTeamName?: string;
+}
+
+export interface FoulsByQuarter {
+  q1: number;
+  q2: number;
+  q3: number;
+  q4: number;
+  ot: number;
+}
+
+export interface LiveTeamStats {
+  offensiveRebounds: number;
+  defensiveRebounds: number;
+  teamFouls: number;
+  foulsThisQuarter: number;
+  foulsByQuarter?: FoulsByQuarter;
+  timeoutsRemaining: number;
+  inBonus: boolean;
+  inDoubleBonus: boolean;
+}
+
+// ============================================
 // Notification Types
 // ============================================
+
+/**
+ * Strongly-typed notification data payloads
+ */
+export type NotificationData =
+  | {
+      type: "game_reminder" | "game_start" | "game_end";
+      gameId: string;
+      teamIds?: string[];
+    }
+  | {
+      type: "score_update";
+      gameId: string;
+      homeScore: number;
+      awayScore: number;
+    }
+  | { type: "team_update"; teamId: string }
+  | { type: "league_announcement"; leagueId: string }
+  | { type: "system"; action?: string };
 
 export interface Notification {
   id: string;
@@ -329,7 +398,7 @@ export interface Notification {
   type: NotificationType;
   title: string;
   body: string;
-  data?: Record<string, unknown>;
+  data?: NotificationData;
   read: boolean;
   createdAt: number;
   expiresAt?: number;

@@ -13,6 +13,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { SkeletonTable } from "../components/Skeleton";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 interface StandingTeam {
   teamId: string;
@@ -272,8 +273,8 @@ export default function StandingsScreen() {
         message: csv,
         title: `${filename}.csv`,
       });
-    } catch (error: any) {
-      if (error.message !== "User did not share") {
+    } catch (error) {
+      if (getErrorMessage(error, "") !== "User did not share") {
         Alert.alert("Error", "Failed to export standings");
       }
     } finally {

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
+import { getErrorMessage } from "@basketball-stats/shared";
 import NotificationPreferences from "../components/NotificationPreferences";
 import {
   UserCircleIcon,
@@ -53,10 +54,10 @@ const Profile: React.FC = () => {
       setProfileMessage({ type: "success", text: "Profile updated successfully" });
       // Refresh user data
       await initialize();
-    } catch (err: any) {
+    } catch (err) {
       setProfileMessage({
         type: "error",
-        text: err.message || "Failed to update profile",
+        text: getErrorMessage(err, "Failed to update profile"),
       });
     } finally {
       setProfileLoading(false);
@@ -81,10 +82,10 @@ const Profile: React.FC = () => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err: any) {
+    } catch (err) {
       setPasswordMessage({
         type: "error",
-        text: err.message || "Failed to change password",
+        text: getErrorMessage(err, "Failed to change password"),
       });
     } finally {
       setPasswordLoading(false);

@@ -6,6 +6,7 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon, { type IconName } from "../components/Icon";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 interface Member {
   id: Id<"leagueMemberships">;
@@ -85,8 +86,8 @@ export default function LeagueMembersScreen() {
   const canManage =
     selectedLeague?.role === "admin" ||
     selectedLeague?.role === "owner" ||
-    (selectedLeague as any)?.membership?.role === "admin" ||
-    (selectedLeague as any)?.membership?.role === "owner";
+    selectedLeague?.membership?.role === "admin" ||
+    selectedLeague?.membership?.role === "owner";
 
   const membersData = useQuery(
     api.leagues.getMembers,
@@ -181,8 +182,8 @@ export default function LeagueMembersScreen() {
               newRole: role.value as "admin" | "coach" | "scorekeeper" | "member" | "viewer",
             });
             Alert.alert("Success", `Role updated to ${role.label}`);
-          } catch (error: any) {
-            Alert.alert("Error", error.message || "Failed to update role");
+          } catch (error) {
+            Alert.alert("Error", getErrorMessage(error, "Failed to update role"));
           } finally {
             setIsUpdating(false);
           }
@@ -210,8 +211,8 @@ export default function LeagueMembersScreen() {
                 membershipId: member.id,
               });
               Alert.alert("Success", `${member.user?.name} has been removed`);
-            } catch (error: any) {
-              Alert.alert("Error", error.message || "Failed to remove member");
+            } catch (error) {
+              Alert.alert("Error", getErrorMessage(error, "Failed to remove member"));
             } finally {
               setIsUpdating(false);
             }

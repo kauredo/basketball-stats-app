@@ -223,7 +223,7 @@ export interface ShotExportData {
   teamName: string;
   x: number;
   y: number;
-  shotType: "2pt" | "3pt";
+  shotType: "2pt" | "3pt" | "ft";
   made: boolean;
   zone: string;
   quarter: number;

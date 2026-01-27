@@ -15,7 +15,14 @@ import {
   CheckIcon,
 } from "@heroicons/react/24/outline";
 import Icon from "../components/Icon";
-import { COLORS } from "@basketball-stats/shared";
+import { COLORS, type GameSettings, type LiveTeamStats } from "@basketball-stats/shared";
+
+// Declare webkitAudioContext for browser compatibility
+declare global {
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+  }
+}
 
 // Action history item for undo functionality
 interface ActionHistoryItem {
@@ -59,7 +66,7 @@ const useFeedback = () => {
 
   const getAudioContext = () => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
     return audioContextRef.current;
   };
@@ -175,6 +182,13 @@ interface PlayerStat {
   fouledOut: boolean;
   isOnCourt: boolean;
   isHomeTeam: boolean;
+  // Shooting stats
+  fieldGoalsMade?: number;
+  fieldGoalsAttempted?: number;
+  threePointersMade?: number;
+  threePointersAttempted?: number;
+  freeThrowsMade?: number;
+  freeThrowsAttempted?: number;
 }
 
 interface ShotLocation {
@@ -657,7 +671,7 @@ const ReboundPromptModal: React.FC<ReboundPromptModalProps> = ({
       const timer = window.setTimeout(() => {
         onClose();
       }, 8000);
-      setAutoDismissTimer(timer as any);
+      setAutoDismissTimer(timer);
       return () => window.clearTimeout(timer);
     }
     return () => {
@@ -1418,12 +1432,12 @@ const TeamStatsSummary: React.FC<TeamStatsSummaryProps> = ({
   // Calculate team totals
   const totals = stats.reduce(
     (acc, s) => ({
-      fgm: acc.fgm + (s as any).fieldGoalsMade || 0,
-      fga: acc.fga + (s as any).fieldGoalsAttempted || 0,
-      tpm: acc.tpm + (s as any).threePointersMade || 0,
-      tpa: acc.tpa + (s as any).threePointersAttempted || 0,
-      ftm: acc.ftm + (s as any).freeThrowsMade || 0,
-      fta: acc.fta + (s as any).freeThrowsAttempted || 0,
+      fgm: acc.fgm + (s.fieldGoalsMade ?? 0),
+      fga: acc.fga + (s.fieldGoalsAttempted ?? 0),
+      tpm: acc.tpm + (s.threePointersMade ?? 0),
+      tpa: acc.tpa + (s.threePointersAttempted ?? 0),
+      ftm: acc.ftm + (s.freeThrowsMade ?? 0),
+      fta: acc.fta + (s.freeThrowsAttempted ?? 0),
       reb: acc.reb + s.rebounds,
       to: acc.to + s.turnovers,
       ast: acc.ast + s.assists,
@@ -1910,18 +1924,21 @@ const LiveGame: React.FC = () => {
   useEffect(() => {
     if (game?.status === "scheduled" && homeStats.length > 0 && awayStats.length > 0) {
       // Check if starters are already configured in gameSettings
-      const settings = game.gameSettings as any;
-      const existingStarters = settings?.startingFive;
+      const settings = (game.gameSettings ?? {}) as GameSettings;
+      const existingStarters = settings.startingFive;
 
-      if (existingStarters?.homeTeam?.length > 0) {
-        setHomeStarters(existingStarters.homeTeam);
+      const homeStartersList = existingStarters?.homeTeam ?? existingStarters?.home;
+      const awayStartersList = existingStarters?.awayTeam ?? existingStarters?.away;
+
+      if (homeStartersList && homeStartersList.length > 0) {
+        setHomeStarters(homeStartersList as Id<"players">[]);
       } else if (homeStarters.length === 0) {
         // Default to first 5 home players
         setHomeStarters(homeStats.slice(0, 5).map((s) => s.playerId));
       }
 
-      if (existingStarters?.awayTeam?.length > 0) {
-        setAwayStarters(existingStarters.awayTeam);
+      if (awayStartersList && awayStartersList.length > 0) {
+        setAwayStarters(awayStartersList as Id<"players">[]);
       } else if (awayStarters.length === 0) {
         // Default to first 5 away players
         setAwayStarters(awayStats.slice(0, 5).map((s) => s.playerId));
@@ -2210,7 +2227,7 @@ const LiveGame: React.FC = () => {
         token,
         gameId: gameId as Id<"games">,
         playerId,
-        statType: statType as any,
+        statType,
       });
       setPendingRebound(null);
     } catch (error) {
@@ -2540,11 +2557,20 @@ const LiveGame: React.FC = () => {
   const canRecordStats = isActive || isPaused;
 
   // Extract game settings
-  const gameSettings = (game.gameSettings as any) || {};
-  const quartersCompleted = gameSettings.quartersCompleted || [];
+  const gameSettings = (game.gameSettings ?? {}) as GameSettings;
+  const quartersCompleted =
+    ((gameSettings as Record<string, unknown>).quartersCompleted as number[]) || [];
   const isQuickGame = gameSettings.isQuickGame || false;
   const _configuredQuarterMinutes = gameSettings.quarterMinutes || 12;
-  const foulLimit = (liveStats?.game as any)?.foulLimit || gameSettings.foulLimit || 5;
+  const gameFromLiveStats = liveStats?.game as { foulLimit?: number } | undefined;
+  const foulLimit = gameFromLiveStats?.foulLimit || gameSettings.foulLimit || 5;
+
+  // Extract team stats with proper typing
+  const teamStats = liveStats?.teamStats as
+    | { home: LiveTeamStats; away: LiveTeamStats }
+    | undefined;
+  const homeTeamStats = teamStats?.home;
+  const awayTeamStats = teamStats?.away;
 
   // Get stat type label for action history
   const getStatLabel = (statType: StatType, made?: boolean) => {
@@ -2788,22 +2814,18 @@ const LiveGame: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-surface-500">
-                    TF: {(liveStats?.teamStats as any)?.away?.foulsThisQuarter || 0}
+                    TF: {awayTeamStats?.foulsThisQuarter || 0}
                   </span>
                   <BonusIndicator
-                    inBonus={(liveStats?.teamStats as any)?.away?.inBonus || false}
-                    inDoubleBonus={(liveStats?.teamStats as any)?.away?.inDoubleBonus || false}
+                    inBonus={awayTeamStats?.inBonus || false}
+                    inDoubleBonus={awayTeamStats?.inDoubleBonus || false}
                   />
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <TimeoutDots
-                remaining={
-                  (liveStats?.teamStats as any)?.away?.timeoutsRemaining ??
-                  gameSettings.timeoutsPerTeam ??
-                  4
-                }
+                remaining={awayTeamStats?.timeoutsRemaining ?? gameSettings.timeoutsPerTeam ?? 4}
                 total={gameSettings.timeoutsPerTeam || 4}
                 teamSide="left"
               />
@@ -2940,11 +2962,11 @@ const LiveGame: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <BonusIndicator
-                    inBonus={(liveStats?.teamStats as any)?.home?.inBonus || false}
-                    inDoubleBonus={(liveStats?.teamStats as any)?.home?.inDoubleBonus || false}
+                    inBonus={homeTeamStats?.inBonus || false}
+                    inDoubleBonus={homeTeamStats?.inDoubleBonus || false}
                   />
                   <span className="text-[10px] text-surface-500">
-                    TF: {(liveStats?.teamStats as any)?.home?.foulsThisQuarter || 0}
+                    TF: {homeTeamStats?.foulsThisQuarter || 0}
                   </span>
                 </div>
               </div>
@@ -2964,11 +2986,7 @@ const LiveGame: React.FC = () => {
                 </button>
               )}
               <TimeoutDots
-                remaining={
-                  (liveStats?.teamStats as any)?.home?.timeoutsRemaining ??
-                  gameSettings.timeoutsPerTeam ??
-                  4
-                }
+                remaining={homeTeamStats?.timeoutsRemaining ?? gameSettings.timeoutsPerTeam ?? 4}
                 total={gameSettings.timeoutsPerTeam || 4}
                 teamSide="right"
               />

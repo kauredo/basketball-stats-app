@@ -109,8 +109,29 @@ function LeadersBoard({ title, leaders, unit = "" }: LeadersBoardProps) {
   );
 }
 
+/** Recent game item from dashboard data */
+interface DashboardRecentGame {
+  id: string;
+  date?: number;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  totalPoints: number;
+}
+
+/** Standings entry from dashboard data */
+interface StandingsEntry {
+  teamId: string;
+  teamName: string;
+  wins: number;
+  losses: number;
+  winPercentage: number;
+  avgPoints?: number;
+}
+
 interface StandingsTableProps {
-  standings: any[];
+  standings: StandingsEntry[];
 }
 
 function StandingsTable({ standings }: StandingsTableProps) {
@@ -425,7 +446,8 @@ export default function Statistics() {
                 dashboardData?.recentGames?.length > 0
                   ? (
                       dashboardData.recentGames.reduce(
-                        (sum: number, game: any) => sum + (game.homeScore + game.awayScore),
+                        (sum: number, game: DashboardRecentGame) =>
+                          sum + (game.homeScore + game.awayScore),
                         0
                       ) / dashboardData.recentGames.length
                     ).toFixed(1)
@@ -542,7 +564,7 @@ export default function Statistics() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-surface-800 divide-y divide-surface-200 dark:divide-surface-700">
-                {playersData.players?.map((player: any) => (
+                {playersData.players?.map((player) => (
                   <tr
                     key={player.playerId}
                     className="hover:bg-surface-100 dark:hover:bg-surface-700"
@@ -746,7 +768,7 @@ export default function Statistics() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-surface-800 divide-y divide-surface-200 dark:divide-surface-700">
-                {teamsData.teams?.map((team: any, index: number) => (
+                {teamsData.teams?.map((team, index) => (
                   <tr key={team.teamId} className="hover:bg-surface-100 dark:hover:bg-surface-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -876,7 +898,7 @@ export default function Statistics() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={
-                  teamsData.teams?.slice(0, 8).map((team: any) => ({
+                  teamsData.teams?.slice(0, 8).map((team) => ({
                     name: team.teamName,
                     scored: team.avgPoints || 0,
                     allowed: team.avgPointsAllowed || 0,
@@ -954,8 +976,8 @@ export default function Statistics() {
                 >
                   <option value="">Add player...</option>
                   {playersData?.players
-                    ?.filter((p: any) => !selectedRadarPlayers.includes(p.playerId))
-                    .map((player: any) => (
+                    ?.filter((p) => !selectedRadarPlayers.includes(p.playerId))
+                    .map((player) => (
                       <option key={player.playerId} value={player.playerId}>
                         {player.playerName} ({player.teamName})
                       </option>
@@ -975,7 +997,7 @@ export default function Statistics() {
             {selectedRadarPlayers.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {selectedRadarPlayers.map((playerId, index) => {
-                  const player = playersData?.players?.find((p: any) => p.playerId === playerId);
+                  const player = playersData?.players?.find((p) => p.playerId === playerId);
                   const colors = ["#EA580C", "#3B82F6", "#10B981", "#8B5CF6", "#F59E0B"];
                   return (
                     <span
@@ -1005,14 +1027,20 @@ export default function Statistics() {
                 const playersToShow =
                   selectedRadarPlayers.length > 0
                     ? selectedRadarPlayers
-                        .map((id) => playersData?.players?.find((p: any) => p.playerId === id))
-                        .filter(Boolean)
+                        .map((id) => playersData?.players?.find((p) => p.playerId === id))
+                        .filter((p) => p !== undefined)
                     : playersData?.players?.slice(0, 3) || [];
 
                 // Get league-wide max for normalization (so all stats are on 0-100 scale)
                 const allPlayers = playersData?.players || [];
-                const getMax = (key: string) =>
-                  Math.max(...allPlayers.map((p: any) => p[key] || 0), 1);
+                const getMax = (
+                  key:
+                    | "avgPoints"
+                    | "avgRebounds"
+                    | "avgAssists"
+                    | "fieldGoalPercentage"
+                    | "freeThrowPercentage"
+                ) => Math.max(...allPlayers.map((p) => p[key] || 0), 1);
 
                 const maxPoints = getMax("avgPoints");
                 const maxRebounds = getMax("avgRebounds");
@@ -1030,29 +1058,26 @@ export default function Statistics() {
                     metric: "Points",
                     unit: " PPG",
                     ...Object.fromEntries(
-                      playersToShow.map((p: any, i: number) => [
+                      playersToShow.map((p, i) => [
                         `player${i}`,
                         normalize(p?.avgPoints || 0, maxPoints),
                       ])
                     ),
                     ...Object.fromEntries(
-                      playersToShow.map((p: any, i: number) => [
-                        `actual${i}`,
-                        p?.avgPoints?.toFixed(1) || "0.0",
-                      ])
+                      playersToShow.map((p, i) => [`actual${i}`, p?.avgPoints?.toFixed(1) || "0.0"])
                     ),
                   },
                   {
                     metric: "Rebounds",
                     unit: " RPG",
                     ...Object.fromEntries(
-                      playersToShow.map((p: any, i: number) => [
+                      playersToShow.map((p, i) => [
                         `player${i}`,
                         normalize(p?.avgRebounds || 0, maxRebounds),
                       ])
                     ),
                     ...Object.fromEntries(
-                      playersToShow.map((p: any, i: number) => [
+                      playersToShow.map((p, i) => [
                         `actual${i}`,
                         p?.avgRebounds?.toFixed(1) || "0.0",
                       ])
@@ -1062,13 +1087,13 @@ export default function Statistics() {
                     metric: "Assists",
                     unit: " APG",
                     ...Object.fromEntries(
-                      playersToShow.map((p: any, i: number) => [
+                      playersToShow.map((p, i) => [
                         `player${i}`,
                         normalize(p?.avgAssists || 0, maxAssists),
                       ])
                     ),
                     ...Object.fromEntries(
-                      playersToShow.map((p: any, i: number) => [
+                      playersToShow.map((p, i) => [
                         `actual${i}`,
                         p?.avgAssists?.toFixed(1) || "0.0",
                       ])
@@ -1078,13 +1103,13 @@ export default function Statistics() {
                     metric: "FG%",
                     unit: "%",
                     ...Object.fromEntries(
-                      playersToShow.map((p: any, i: number) => [
+                      playersToShow.map((p, i) => [
                         `player${i}`,
                         normalize(p?.fieldGoalPercentage || 0, maxFG),
                       ])
                     ),
                     ...Object.fromEntries(
-                      playersToShow.map((p: any, i: number) => [
+                      playersToShow.map((p, i) => [
                         `actual${i}`,
                         p?.fieldGoalPercentage?.toFixed(1) || "0.0",
                       ])
@@ -1094,13 +1119,13 @@ export default function Statistics() {
                     metric: "FT%",
                     unit: "%",
                     ...Object.fromEntries(
-                      playersToShow.map((p: any, i: number) => [
+                      playersToShow.map((p, i) => [
                         `player${i}`,
                         normalize(p?.freeThrowPercentage || 0, maxFT),
                       ])
                     ),
                     ...Object.fromEntries(
-                      playersToShow.map((p: any, i: number) => [
+                      playersToShow.map((p, i) => [
                         `actual${i}`,
                         p?.freeThrowPercentage?.toFixed(1) || "0.0",
                       ])
@@ -1116,7 +1141,7 @@ export default function Statistics() {
                     {/* @ts-expect-error - recharts types incompatible with React 19 */}
                     <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fill: "#a69f96" }} />
                     <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-                    {playersToShow.map((player: any, index: number) => (
+                    {playersToShow.map((player, index) => (
                       <Radar
                         key={player?.playerId || index}
                         name={player?.playerName || `Player ${index + 1}`}

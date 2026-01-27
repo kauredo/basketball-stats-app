@@ -39,6 +39,49 @@ interface EditFormState {
   description: string;
 }
 
+// Local interface for player items
+interface PlayerItem {
+  id: Id<"players">;
+  name: string;
+  number: number;
+  position?: string;
+  heightCm?: number;
+  weightKg?: number;
+  status?: "active" | "inactive" | "injured";
+  active?: boolean;
+}
+
+// Local interface for game items
+interface GameItem {
+  id: Id<"games">;
+  status: string;
+  homeScore: number;
+  awayScore: number;
+  scheduledAt?: number;
+  startedAt?: number;
+  homeTeam?: {
+    id: Id<"teams">;
+    name: string;
+  };
+  awayTeam?: {
+    id: Id<"teams">;
+    name: string;
+  };
+}
+
+// Local interface for team stats items
+interface TeamStatsItem {
+  teamId: string;
+  avgPoints?: number;
+  avgRebounds?: number;
+  avgAssists?: number;
+  avgSteals?: number;
+  avgBlocks?: number;
+  fieldGoalPercentage?: number;
+  threePointPercentage?: number;
+  freeThrowPercentage?: number;
+}
+
 const TeamDetail: React.FC = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const { token, selectedLeague } = useAuth();
@@ -113,11 +156,11 @@ const TeamDetail: React.FC = () => {
   const removeTeam = useMutation(api.teams.remove);
 
   const team = teamData?.team;
-  const players = playersData?.players || [];
-  const games = gamesData?.games || [];
+  const players = (playersData?.players || []) as PlayerItem[];
+  const games = (gamesData?.games || []) as GameItem[];
 
   // Find this team's stats from the league stats
-  const teamStats = teamsStatsData?.teams?.find((t: any) => t.teamId === teamId);
+  const teamStats = teamsStatsData?.teams?.find((t: TeamStatsItem) => t.teamId === teamId);
 
   // Get win/loss record from team data
   const wins = team?.wins ?? 0;
@@ -633,7 +676,7 @@ const TeamDetail: React.FC = () => {
               </div>
             ) : (
               <div className="divide-y divide-surface-100 dark:divide-surface-800">
-                {players.map((player: any) => (
+                {players.map((player: PlayerItem) => (
                   <Link
                     key={player.id}
                     to={`/app/players/${player.id}`}
@@ -703,7 +746,7 @@ const TeamDetail: React.FC = () => {
               </div>
             ) : (
               <div className="divide-y divide-surface-100 dark:divide-surface-800">
-                {games.slice(0, 5).map((game: any) => {
+                {games.slice(0, 5).map((game: GameItem) => {
                   const isHome = game.homeTeam?.id === teamId;
                   const opponent = isHome ? game.awayTeam : game.homeTeam;
                   const teamScore = isHome ? game.homeScore : game.awayScore;

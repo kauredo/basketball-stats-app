@@ -3,7 +3,11 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import * as SecureStore from "expo-secure-store";
-import type { User as SharedUser, League as SharedLeague } from "@basketball-stats/shared";
+import {
+  getErrorMessage,
+  type User as SharedUser,
+  type League as SharedLeague,
+} from "@basketball-stats/shared";
 
 // Extend shared types with Convex-specific ID types
 interface User extends Omit<SharedUser, "id"> {
@@ -132,8 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: result.user.role,
       });
       setIsAuthenticated(true);
-    } catch (err: any) {
-      const errorMessage = err.message || "Login failed";
+    } catch (err) {
+      const errorMessage = getErrorMessage(err, "Login failed");
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -167,8 +171,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: result.user.role,
       });
       setIsAuthenticated(true);
-    } catch (err: any) {
-      const errorMessage = err.message || "Signup failed";
+    } catch (err) {
+      const errorMessage = getErrorMessage(err, "Signup failed");
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -202,8 +206,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       await requestPasswordResetMutation({ email });
-    } catch (err: any) {
-      const errorMessage = err.message || "Failed to send reset email";
+    } catch (err) {
+      const errorMessage = getErrorMessage(err, "Failed to send reset email");
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {

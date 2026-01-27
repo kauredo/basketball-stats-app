@@ -48,6 +48,26 @@ interface StatRowProps {
   value: string | number;
 }
 
+// Local interface for recent game items
+interface RecentGameItem {
+  gameId?: string;
+  gameDate?: number;
+  opponent?: string;
+  points?: number;
+  rebounds?: number;
+  assists?: number;
+  steals?: number;
+  blocks?: number;
+  fieldGoalsMade?: number;
+  fieldGoalsAttempted?: number;
+  threePointersMade?: number;
+  threePointersAttempted?: number;
+  freeThrowsMade?: number;
+  freeThrowsAttempted?: number;
+  minutes?: number;
+  fieldGoalPercentage?: number;
+}
+
 function StatRow({ label, value }: StatRowProps) {
   return (
     <div className="flex justify-between items-center py-2 border-b border-surface-200 dark:border-surface-700 last:border-b-0">
@@ -114,7 +134,7 @@ const PlayerDetail: React.FC = () => {
 
   const player = playerData?.player;
   const stats = playerStats?.stats;
-  const recentGames = playerStats?.recentGames || [];
+  const recentGames = (playerStats?.recentGames || []) as RecentGameItem[];
 
   const handleExportGameLog = () => {
     if (!recentGames || recentGames.length === 0) {
@@ -210,7 +230,7 @@ const PlayerDetail: React.FC = () => {
         effectiveFieldGoalPercentage: stats.effectiveFieldGoalPercentage,
         playerEfficiencyRating: stats.playerEfficiencyRating,
       },
-      games: recentGames.map((g: any) => ({
+      games: recentGames.map((g: RecentGameItem) => ({
         id: g.gameId || "",
         date: g.gameDate,
         opponent: g.opponent,
@@ -524,7 +544,7 @@ const PlayerDetail: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-200 dark:divide-surface-700">
-                {recentGames.slice(0, 10).map((game: any, index: number) => (
+                {recentGames.slice(0, 10).map((game: RecentGameItem, index: number) => (
                   <tr
                     key={game.gameId || index}
                     className="hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors"

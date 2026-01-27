@@ -33,11 +33,7 @@ export default function LeagueSettings() {
   const [playersPerRoster, setPlayersPerRoster] = useState(12);
   const [trackAdvancedStats, setTrackAdvancedStats] = useState(true);
 
-  const canManage =
-    selectedLeague?.role === "admin" ||
-    selectedLeague?.role === "owner" ||
-    (selectedLeague as any)?.membership?.role === "admin" ||
-    (selectedLeague as any)?.membership?.role === "owner";
+  const canManage = selectedLeague?.role === "admin" || selectedLeague?.role === "owner";
 
   const settingsData = useQuery(
     api.leagues.getSettings,

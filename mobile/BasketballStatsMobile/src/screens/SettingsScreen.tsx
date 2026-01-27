@@ -8,6 +8,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme, type ThemeMode } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import type { RootStackParamList } from "../navigation/AppNavigator";
+import { getErrorMessage } from "@basketball-stats/shared";
 
 // Column definitions for export
 const playerStatsColumns = [
@@ -77,6 +78,7 @@ function SettingRow({ icon, title, subtitle, onPress, rightElement }: SettingRow
       disabled={!onPress && !rightElement}
     >
       <View className="w-10 h-10 bg-surface-100 dark:bg-surface-600 rounded-full justify-center items-center mr-4">
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- Icon name type is dynamic */}
         <Icon name={icon as any} size={20} color="#9CA3AF" />
       </View>
       <View className="flex-1">
@@ -192,8 +194,8 @@ export default function SettingsScreen() {
         message: csv,
         title: `${filename}.csv`,
       });
-    } catch (error: any) {
-      if (error.message !== "User did not share") {
+    } catch (error) {
+      if (getErrorMessage(error) !== "User did not share") {
         Alert.alert("Error", "Failed to export player statistics");
       }
     } finally {
@@ -216,8 +218,8 @@ export default function SettingsScreen() {
         message: csv,
         title: `${filename}.csv`,
       });
-    } catch (error: any) {
-      if (error.message !== "User did not share") {
+    } catch (error) {
+      if (getErrorMessage(error) !== "User did not share") {
         Alert.alert("Error", "Failed to export standings");
       }
     } finally {
@@ -255,8 +257,8 @@ export default function SettingsScreen() {
         message: fullExport,
         title: `${filename}.csv`,
       });
-    } catch (error: any) {
-      if (error.message !== "User did not share") {
+    } catch (error) {
+      if (getErrorMessage(error) !== "User did not share") {
         Alert.alert("Error", "Failed to export data");
       }
     } finally {
@@ -284,6 +286,7 @@ export default function SettingsScreen() {
                   }`}
                 >
                   <Icon
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Icon name type is dynamic
                     name={themeModeIcons[themeMode] as any}
                     size={20}
                     color={mode === themeMode ? "#FFFFFF" : "#9CA3AF"}

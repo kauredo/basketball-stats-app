@@ -15,6 +15,13 @@ export interface OnCourtPlayer {
     number: number;
   } | null;
   points: number;
+  rebounds?: number;
+  assists?: number;
+  steals?: number;
+  blocks?: number;
+  turnovers?: number;
+  fouls?: number;
+  freeThrowsMade?: number;
   isOnCourt: boolean;
 }
 

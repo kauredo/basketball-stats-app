@@ -59,7 +59,32 @@ export type {
   // Notifications
   Notification,
   NotificationType,
+  NotificationData,
   NotificationPreferences,
+  // Game Settings & Live Stats
+  GameSettings,
+  FoulsByQuarter,
+  LiveTeamStats,
+  // Error utilities
+  AppError,
+  // Convex return types
+  LivePlayerStat,
+  LiveStatsResponse,
+  StatsPlayerData,
+  StatsTeamData,
+  PlayerStatsResponse,
+  TeamStatsResponse,
+  GameListItem,
+  GameAnalysisPlayerStat,
+  GameEvent,
+  ExportShot,
+  PlayerGameLogEntry,
+  TeamListItem,
+  PlayerListItem,
+  LineupStatsItem,
+  PairStatsItem,
+  LeagueMembershipItem,
+  NotificationItem,
   // Misc
   Position,
   StatType,
@@ -94,3 +119,6 @@ export type {
 
 // Export system utilities
 export { DEFAULT_PDF_SETTINGS, buildExportURL, parseExportURL } from "./types/export";
+
+// Error utilities
+export { getErrorMessage, isErrorWithMessage, isAppError } from "./types/errors";

@@ -6,6 +6,7 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { getErrorMessage } from "../utils/error";
+import type { Position } from "@basketball-stats/shared";
 import {
   PlusIcon,
   UsersIcon,
@@ -17,6 +18,18 @@ import {
 } from "@heroicons/react/24/outline";
 import ImageUpload from "../components/ImageUpload";
 
+// Local interface for team items returned from the API
+interface TeamItem {
+  id: Id<"teams">;
+  name: string;
+  city?: string;
+  description?: string;
+  logoUrl?: string;
+  activePlayersCount?: number;
+  wins?: number;
+  losses?: number;
+}
+
 const Teams: React.FC = () => {
   const { token, selectedLeague } = useAuth();
   const toast = useToast();
@@ -24,7 +37,7 @@ const Teams: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCreatePlayerModal, setShowCreatePlayerModal] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState<any>(null);
+  const [selectedTeam, setSelectedTeam] = useState<TeamItem | null>(null);
   const [teamForm, setTeamForm] = useState({
     name: "",
     city: "",
@@ -78,7 +91,7 @@ const Teams: React.FC = () => {
   const removeTeam = useMutation(api.teams.remove);
   const createPlayer = useMutation(api.players.create);
 
-  const teams = teamsData?.teams || [];
+  const teams = (teamsData?.teams || []) as TeamItem[];
 
   const handleCreateTeam = async () => {
     if (!teamForm.name.trim() || !token || !selectedLeague) return;
@@ -141,7 +154,7 @@ const Teams: React.FC = () => {
     }
   };
 
-  const handleEditTeam = (team: any) => {
+  const handleEditTeam = (team: TeamItem) => {
     setSelectedTeam(team);
     setTeamForm({
       name: team.name,
@@ -212,7 +225,7 @@ const Teams: React.FC = () => {
     }
   };
 
-  const renderTeamCard = (team: any) => (
+  const renderTeamCard = (team: TeamItem) => (
     <div
       key={team.id}
       className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 shadow-soft"
@@ -593,7 +606,7 @@ const Teams: React.FC = () => {
                   <select
                     value={playerForm.position}
                     onChange={(e) =>
-                      setPlayerForm((prev) => ({ ...prev, position: e.target.value as any }))
+                      setPlayerForm((prev) => ({ ...prev, position: e.target.value as Position }))
                     }
                     className="w-full bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl px-3 py-2 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >

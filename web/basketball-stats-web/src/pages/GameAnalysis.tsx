@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import type { Id } from "../../../../convex/_generated/dataModel";
+import type { GameSettings, ExportShot, GameEvent, TeamSummary } from "@basketball-stats/shared";
 import {
   TrophyIcon,
   ChartBarIcon,
@@ -31,6 +32,57 @@ import {
 } from "recharts";
 
 type TabType = "boxscore" | "stats" | "charts" | "plays";
+
+// Local interface for team totals used in calculations
+interface TeamTotals {
+  points: number;
+  rebounds: number;
+  assists: number;
+  steals: number;
+  blocks: number;
+  turnovers: number;
+}
+
+// Box score player structure from getBoxScore query (includes display strings)
+interface BoxScorePlayerStat {
+  player: {
+    id: string;
+    name: string;
+    number: number;
+    position?: string;
+  } | null;
+  playerId?: string;
+  points: number;
+  rebounds: number;
+  offensiveRebounds?: number;
+  defensiveRebounds?: number;
+  assists: number;
+  steals: number;
+  blocks: number;
+  turnovers: number;
+  fouls: number;
+  fouledOut?: boolean;
+  isOnCourt?: boolean;
+  fieldGoalsMade: number;
+  fieldGoalsAttempted: number;
+  threePointersMade: number;
+  threePointersAttempted: number;
+  freeThrowsMade: number;
+  freeThrowsAttempted: number;
+  // String format for display
+  fieldGoals: string;
+  threePointers: string;
+  freeThrows: string;
+  minutesPlayed: number;
+  plusMinus: number;
+}
+
+// Box score team structure from getBoxScore query
+interface BoxScoreTeam {
+  team: TeamSummary | null;
+  score: number;
+  players: BoxScorePlayerStat[];
+}
 
 const GameAnalysis: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -94,8 +146,17 @@ const GameAnalysis: React.FC = () => {
   const isAwayWinner = game.awayScore > game.homeScore;
 
   // Calculate team totals for charts
-  const calculateTeamTotals = (players: any[]) => {
-    return players.reduce(
+  const calculateTeamTotals = (
+    players: Array<{
+      points?: number;
+      rebounds?: number;
+      assists?: number;
+      steals?: number;
+      blocks?: number;
+      turnovers?: number;
+    }>
+  ): TeamTotals => {
+    return players.reduce<TeamTotals>(
       (acc, p) => ({
         points: acc.points + (p.points || 0),
         rebounds: acc.rebounds + (p.rebounds || 0),
@@ -120,10 +181,10 @@ const GameAnalysis: React.FC = () => {
   ];
 
   // Shot chart data
-  const homeShots = shots.filter((s: any) => s.teamId === homeTeam?.team?.id);
-  const awayShots = shots.filter((s: any) => s.teamId === awayTeam?.team?.id);
+  const homeShots = shots.filter((s: ExportShot) => s.teamId === homeTeam?.team?.id);
+  const awayShots = shots.filter((s: ExportShot) => s.teamId === awayTeam?.team?.id);
 
-  const calculateShootingStats = (teamShots: any[]) => {
+  const calculateShootingStats = (teamShots: ExportShot[]) => {
     const made = teamShots.filter((s) => s.made).length;
     const total = teamShots.length;
     const threes = teamShots.filter((s) => s.shotType === "3pt");
@@ -165,7 +226,7 @@ const GameAnalysis: React.FC = () => {
     },
   ];
 
-  const renderBoxScoreTable = (team: any, isHome: boolean) => {
+  const renderBoxScoreTable = (team: BoxScoreTeam | undefined, isHome: boolean) => {
     if (!team) return null;
 
     const sortedPlayers = [...team.players].sort((a, b) => (b.points || 0) - (a.points || 0));
@@ -222,7 +283,7 @@ const GameAnalysis: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-200 dark:divide-surface-700">
-              {sortedPlayers.map((player: any, index: number) => (
+              {sortedPlayers.map((player: BoxScorePlayerStat, index: number) => (
                 <tr
                   key={player.player?.id || index}
                   className="hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors"
@@ -283,12 +344,18 @@ const GameAnalysis: React.FC = () => {
   ];
 
   // Prepare player stats for AdvancedStats component
-  const preparePlayerStats = (players: any[], teamId: Id<"teams">, isHomeTeam: boolean) => {
-    return players.map((p: any) => ({
-      id: p.player?.id || p.playerId,
-      playerId: p.player?.id || p.playerId,
+  const preparePlayerStats = (
+    players: BoxScorePlayerStat[],
+    teamId: Id<"teams">,
+    isHomeTeam: boolean
+  ) => {
+    return players.map((p) => ({
+      id: (p.player?.id || p.playerId || "") as Id<"playerStats">,
+      playerId: (p.player?.id || p.playerId || "") as Id<"players">,
       teamId,
-      player: p.player || { id: p.playerId, name: "Unknown", number: 0 },
+      player: p.player
+        ? { number: p.player.number, name: p.player.name, position: p.player.position }
+        : { number: 0, name: "Unknown" },
       points: p.points || 0,
       rebounds: p.rebounds || 0,
       offensiveRebounds: p.offensiveRebounds || 0,
@@ -323,8 +390,8 @@ const GameAnalysis: React.FC = () => {
   const prepareExportData = (): GameExportData | undefined => {
     if (!homeTeam || !awayTeam) return undefined;
 
-    const transformPlayer = (player: any) => ({
-      id: player.player?.id || player.playerId,
+    const transformPlayer = (player: BoxScorePlayerStat) => ({
+      id: player.player?.id || player.playerId || "",
       name: player.player?.name || "Unknown",
       number: player.player?.number || 0,
       position: player.player?.position,
@@ -345,7 +412,7 @@ const GameAnalysis: React.FC = () => {
       plusMinus: player.plusMinus || 0,
     });
 
-    const calculateTotals = (totals: any) => ({
+    const calculateTotals = (totals: TeamTotals | null) => ({
       points: totals?.points || 0,
       rebounds: totals?.rebounds || 0,
       assists: totals?.assists || 0,
@@ -389,10 +456,10 @@ const GameAnalysis: React.FC = () => {
         players: awayTeam.players.map(transformPlayer),
         totals: calculateTotals(awayTotals),
       },
-      shots: shots.map((shot: any) => ({
-        id: shot._id || shot.id,
+      shots: shots.map((shot: ExportShot) => ({
+        id: shot._id || shot.id || "",
         playerId: shot.playerId,
-        playerName: shot.player?.name || "Unknown",
+        playerName: shot.player?.name || shot.playerName || "Unknown",
         teamId: shot.teamId,
         teamName:
           (shot.teamId === homeTeam.team?.id ? homeTeam.team?.name : awayTeam.team?.name) ||
@@ -401,16 +468,16 @@ const GameAnalysis: React.FC = () => {
         y: shot.y,
         shotType: shot.shotType,
         made: shot.made,
-        zone: shot.shotZone || "unknown",
+        zone: shot.shotZone || shot.zone || "unknown",
         quarter: shot.quarter,
         timeRemaining: shot.timeRemaining || 0,
       })),
-      events: events.map((event: any) => ({
-        id: event._id || event.id,
+      events: events.map((event: GameEvent) => ({
+        id: event._id || event.id || "",
         quarter: event.quarter,
         timeRemaining: event.gameTime || event.timeRemaining || 0,
         eventType: event.eventType,
-        description: event.description || event.eventType?.replace(/_/g, " "),
+        description: event.description || event.eventType?.replace(/_/g, " ") || "",
         playerId: event.player?.id || event.playerId,
         playerName: event.player?.name,
         teamId: event.team?.id || event.teamId,
@@ -496,7 +563,7 @@ const GameAnalysis: React.FC = () => {
       <QuarterBreakdown
         homeTeamName={homeTeam?.team?.name || "Home"}
         awayTeamName={awayTeam?.team?.name || "Away"}
-        scoreByPeriod={(game.gameSettings as any)?.scoreByPeriod}
+        scoreByPeriod={(game.gameSettings as GameSettings | undefined)?.scoreByPeriod}
         currentQuarter={game.currentQuarter || 4}
         homeScore={game.homeScore}
         awayScore={game.awayScore}
@@ -841,17 +908,17 @@ const GameAnalysis: React.FC = () => {
                 </p>
               </div>
             ) : (
-              events.map((event: any) => (
+              events.map((event: GameEvent) => (
                 <GameEventCard
                   key={event.id || event._id}
                   event={{
-                    _id: event.id || event._id,
+                    _id: (event.id || event._id || "") as string,
                     quarter: event.quarter,
                     timeRemaining: event.gameTime || event.timeRemaining || 0,
                     eventType: event.eventType,
-                    description: event.description || event.eventType?.replace(/_/g, " "),
-                    playerId: event.player?.id || event.playerId,
-                    teamId: event.team?.id || event.teamId,
+                    description: event.description || event.eventType?.replace(/_/g, " ") || "",
+                    playerId: (event.player?.id || event.playerId) as Id<"players"> | undefined,
+                    teamId: (event.team?.id || event.teamId) as Id<"teams"> | undefined,
                     details: {
                       made: event.details?.made,
                       points: event.details?.points || event.pointsScored,
@@ -863,8 +930,8 @@ const GameAnalysis: React.FC = () => {
                     },
                   }}
                   playerStats={[
-                    ...(homeTeam?.players?.map((p: any) => ({
-                      playerId: p.player?.id || p.playerId,
+                    ...(homeTeam?.players?.map((p) => ({
+                      playerId: (p.player?.id || "") as Id<"players">,
                       points: p.points || 0,
                       rebounds: p.rebounds || 0,
                       assists: p.assists || 0,
@@ -873,8 +940,8 @@ const GameAnalysis: React.FC = () => {
                       turnovers: p.turnovers || 0,
                       fouls: p.fouls || 0,
                     })) || []),
-                    ...(awayTeam?.players?.map((p: any) => ({
-                      playerId: p.player?.id || p.playerId,
+                    ...(awayTeam?.players?.map((p) => ({
+                      playerId: (p.player?.id || "") as Id<"players">,
                       points: p.points || 0,
                       rebounds: p.rebounds || 0,
                       assists: p.assists || 0,

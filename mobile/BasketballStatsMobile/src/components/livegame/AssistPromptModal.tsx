@@ -59,7 +59,7 @@ export function AssistPromptModal({
             <Text className="text-surface-900 dark:text-white font-medium text-sm">
               {item.player.name}
             </Text>
-            <Text className="text-surface-500 text-xs">{(item as any).assists || 0} AST</Text>
+            <Text className="text-surface-500 text-xs">{item.assists || 0} AST</Text>
           </View>
         </View>
         <View className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-lg">

@@ -16,8 +16,39 @@ import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import type { RootStackParamList } from "../navigation/AppNavigator";
+import type { Id } from "../../../../convex/_generated/dataModel";
 
 type StatisticsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+/** Local interface for leader stats from getDashboard query */
+interface LeaderStat {
+  name: string;
+  value: number;
+  team: string;
+}
+
+/** Local interface for standings from getDashboard query */
+interface StandingTeam {
+  teamId: Id<"teams">;
+  teamName: string;
+  logoUrl?: string;
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+  winPercentage: number;
+  avgPoints: number;
+}
+
+/** Local interface for recent game from getDashboard query */
+interface RecentGame {
+  id: Id<"games">;
+  date?: number;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  totalPoints: number;
+}
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -353,7 +384,7 @@ export default function StatisticsScreen() {
                       recentGames.length > 0
                         ? (
                             recentGames.reduce(
-                              (sum: number, game: any) => sum + (game.totalPoints || 0),
+                              (sum: number, game: RecentGame) => sum + (game.totalPoints || 0),
                               0
                             ) / recentGames.length
                           ).toFixed(1)
@@ -372,7 +403,7 @@ export default function StatisticsScreen() {
                 <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
                   Recent Games
                 </Text>
-                {recentGames.slice(0, 5).map((game: any, index: number) => {
+                {recentGames.slice(0, 5).map((game: RecentGame, index: number) => {
                   const homeWon = game.homeScore > game.awayScore;
                   const awayWon = game.awayScore > game.homeScore;
                   return (
@@ -447,7 +478,7 @@ export default function StatisticsScreen() {
                   Scoring Leaders
                 </Text>
               </View>
-              {(leaders.scoring || []).slice(0, 5).map((leader: any, index: number) => (
+              {(leaders.scoring || []).slice(0, 5).map((leader: LeaderStat, index: number) => (
                 <LeaderItem
                   key={index}
                   rank={index + 1}
@@ -472,7 +503,7 @@ export default function StatisticsScreen() {
                   Rebounding Leaders
                 </Text>
               </View>
-              {(leaders.rebounding || []).slice(0, 5).map((leader: any, index: number) => (
+              {(leaders.rebounding || []).slice(0, 5).map((leader: LeaderStat, index: number) => (
                 <LeaderItem
                   key={index}
                   rank={index + 1}
@@ -497,7 +528,7 @@ export default function StatisticsScreen() {
                   Assists Leaders
                 </Text>
               </View>
-              {(leaders.assists || []).slice(0, 5).map((leader: any, index: number) => (
+              {(leaders.assists || []).slice(0, 5).map((leader: LeaderStat, index: number) => (
                 <LeaderItem
                   key={index}
                   rank={index + 1}
@@ -522,7 +553,7 @@ export default function StatisticsScreen() {
                   Shooting Leaders
                 </Text>
               </View>
-              {(leaders.shooting || []).slice(0, 5).map((leader: any, index: number) => (
+              {(leaders.shooting || []).slice(0, 5).map((leader: LeaderStat, index: number) => (
                 <LeaderItem
                   key={index}
                   rank={index + 1}
@@ -556,7 +587,7 @@ export default function StatisticsScreen() {
                   <Text className="text-sm font-medium text-primary-500">Full View</Text>
                 </TouchableOpacity>
               </View>
-              {standings.slice(0, 5).map((team: any, index: number) => (
+              {standings.slice(0, 5).map((team: StandingTeam, index: number) => (
                 <StandingsItem
                   key={team.teamId || index}
                   rank={index + 1}
@@ -601,14 +632,16 @@ export default function StatisticsScreen() {
                     data={{
                       labels: standings
                         .slice(0, 6)
-                        .map((team: any) =>
+                        .map((team: StandingTeam) =>
                           (team.teamName || "").length > 8
                             ? (team.teamName || "").substring(0, 8) + "..."
                             : team.teamName || ""
                         ),
                       datasets: [
                         {
-                          data: standings.slice(0, 6).map((team: any) => team.avgPoints || 0),
+                          data: standings
+                            .slice(0, 6)
+                            .map((team: StandingTeam) => team.avgPoints || 0),
                         },
                       ],
                     }}
@@ -652,7 +685,7 @@ export default function StatisticsScreen() {
                 </Text>
                 <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-4 mb-4 items-center">
                   <PieChart
-                    data={standings.slice(0, 5).map((team: any, index: number) => ({
+                    data={standings.slice(0, 5).map((team: StandingTeam, index: number) => ({
                       name:
                         (team.teamName || "").length > 10
                           ? (team.teamName || "").substring(0, 10) + "..."
@@ -695,12 +728,16 @@ export default function StatisticsScreen() {
                 <View className="bg-surface-100 dark:bg-surface-700 rounded-xl p-4 mb-4 items-center">
                   <LineChart
                     data={{
-                      labels: recentGames.slice(-7).map((_: any, index: number) => `G${index + 1}`),
+                      labels: recentGames
+                        .slice(-7)
+                        .map((_: RecentGame, index: number) => `G${index + 1}`),
                       datasets: [
                         {
                           data: recentGames
                             .slice(-7)
-                            .map((game: any) => (game.homeScore || 0) + (game.awayScore || 0)),
+                            .map(
+                              (game: RecentGame) => (game.homeScore || 0) + (game.awayScore || 0)
+                            ),
                           strokeWidth: 3,
                         },
                       ],
