@@ -30,6 +30,10 @@ interface MiniCourtProps {
   showHeatmap?: boolean;
   /** Zone statistics for heat map coloring */
   zoneStats?: Record<string, { made: number; attempted: number; percentage: number }>;
+  /** Override maximum court height (for tablet support) */
+  maxCourtHeight?: number;
+  /** Override maximum court width (for tablet support) */
+  maxCourtWidth?: number;
 }
 
 // SVG viewBox dimensions - represents half court with proper proportions
@@ -47,12 +51,18 @@ export function MiniCourt({
   displayMode = "recent",
   showHeatmap = false,
   zoneStats,
+  maxCourtHeight,
+  maxCourtWidth,
 }: MiniCourtProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
   const ASPECT_RATIO = VIEW_WIDTH / VIEW_HEIGHT;
+
+  // Default values (phone) - can be overridden via props for tablet support
+  const defaultMaxHeightLandscape = maxCourtHeight ?? 280;
+  const defaultMaxWidthPortrait = maxCourtWidth ?? 400;
 
   // Calculate court dimensions based on available space
   let courtWidth: number;
@@ -62,10 +72,10 @@ export function MiniCourt({
     // In landscape, maximize court size while leaving room for buttons panel
     // Account for scoreboard (~50px), tabs (~36px), safe areas (~20px), and padding (~16px)
     const availableHeight = screenHeight - 122;
-    // Take up most of the available height
-    courtHeight = Math.min(availableHeight * 0.95, 280);
+    // Take up most of the available height, capped by max height (device-aware)
+    courtHeight = Math.min(availableHeight * 0.95, defaultMaxHeightLandscape);
     courtWidth = courtHeight * ASPECT_RATIO;
-    // Leave room for buttons panel (~144px = w-36) plus gap (~12px)
+    // Leave room for buttons panel plus gap (handled by parent, but provide buffer)
     const maxWidth = screenWidth - 180;
     if (courtWidth > maxWidth) {
       courtWidth = maxWidth;
@@ -73,7 +83,7 @@ export function MiniCourt({
     }
   } else {
     const availableWidth = screenWidth - 48;
-    courtWidth = Math.min(availableWidth, 400);
+    courtWidth = Math.min(availableWidth, defaultMaxWidthPortrait);
     courtHeight = courtWidth / ASPECT_RATIO;
     const minHeight = 200;
     const maxHeight = screenHeight * 0.4;

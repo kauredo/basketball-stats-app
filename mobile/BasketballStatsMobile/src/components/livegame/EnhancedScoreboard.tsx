@@ -44,6 +44,8 @@ interface EnhancedScoreboardProps {
   shotClockSeconds?: number;
   showShotClock?: boolean;
   isLandscape?: boolean;
+  /** Whether the device is a tablet (for larger typography) */
+  isTablet?: boolean;
 }
 
 export default function EnhancedScoreboard({
@@ -59,6 +61,7 @@ export default function EnhancedScoreboard({
   shotClockSeconds = 24,
   showShotClock = false,
   isLandscape = false,
+  isTablet = false,
 }: EnhancedScoreboardProps) {
   const [showQuarterSelector, setShowQuarterSelector] = useState(false);
   const [showEndPeriodModal, setShowEndPeriodModal] = useState(false);
@@ -275,16 +278,25 @@ export default function EnhancedScoreboard({
 
   // Compact landscape layout
   if (isLandscape) {
+    // Tablet-aware typography sizes
+    const scoreTextClass = isTablet ? "text-3xl" : "text-2xl";
+    const teamNameTextClass = isTablet ? "text-sm" : "text-xs";
+    const clockTextClass = isTablet ? "text-xl" : "text-lg";
+    const quarterTextClass = isTablet ? "text-base" : "text-sm";
+
     return (
       <View className="bg-surface-50 dark:bg-surface-800 mx-4 mt-1 rounded-xl px-4 py-2 border border-surface-200 dark:border-surface-700">
         <View className="flex-row items-center justify-between">
           {/* Away Team */}
           <View className="flex-row items-center flex-1">
-            <Text className="text-surface-500 dark:text-surface-400 text-xs mr-2" numberOfLines={1}>
+            <Text
+              className={`text-surface-500 dark:text-surface-400 ${teamNameTextClass} mr-2`}
+              numberOfLines={1}
+            >
               {game.awayTeam?.name || "Away"}
             </Text>
             <Animated.Text
-              className={`text-2xl font-bold ${awayWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
+              className={`${scoreTextClass} font-bold ${awayWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
               style={awayScoreStyle}
             >
               {game.awayScore}
@@ -311,13 +323,15 @@ export default function EnhancedScoreboard({
               onPress={() => onQuarterChange && setShowQuarterSelector(true)}
               disabled={!onQuarterChange}
             >
-              <Text className="text-primary-500 font-bold text-sm">
+              <Text className={`text-primary-500 font-bold ${quarterTextClass}`}>
                 {formatQuarter(game.currentQuarter)}
               </Text>
             </TouchableOpacity>
 
             <View className="bg-surface-100 dark:bg-surface-700/50 px-3 py-1 rounded-lg">
-              <Text className="text-surface-900 dark:text-white text-lg font-bold font-mono">
+              <Text
+                className={`text-surface-900 dark:text-white ${clockTextClass} font-bold font-mono`}
+              >
                 {formatTime(game.timeRemainingSeconds)}
               </Text>
             </View>
@@ -371,12 +385,15 @@ export default function EnhancedScoreboard({
               </View>
             )}
             <Animated.Text
-              className={`text-2xl font-bold ${homeWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
+              className={`${scoreTextClass} font-bold ${homeWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
               style={homeScoreStyle}
             >
               {game.homeScore}
             </Animated.Text>
-            <Text className="text-surface-500 dark:text-surface-400 text-xs ml-2" numberOfLines={1}>
+            <Text
+              className={`text-surface-500 dark:text-surface-400 ${teamNameTextClass} ml-2`}
+              numberOfLines={1}
+            >
               {game.homeTeam?.name || "Home"}
             </Text>
           </View>

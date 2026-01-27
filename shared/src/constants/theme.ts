@@ -122,6 +122,37 @@ export const getStatusColor = (status: string, fallback = "#6B7280"): string => 
 };
 
 /**
+ * Device breakpoints for tablet detection
+ * Based on the shorter dimension (works in both portrait and landscape)
+ */
+export const DEVICE_BREAKPOINTS = {
+  tablet: 600, // >= 600dp = tablet (matches Android's sw600dp standard)
+  largeTablet: 900, // >= 900dp = large tablet
+} as const;
+
+/**
+ * Tablet-specific layout values for adaptive UI
+ * Phone experience uses current hardcoded values as defaults
+ */
+export const TABLET_LAYOUT = {
+  court: {
+    phone: { maxHeightLandscape: 280, maxWidthPortrait: 400 },
+    tablet: { maxHeightLandscape: 420, maxWidthPortrait: 550 },
+    largeTablet: { maxHeightLandscape: 520, maxWidthPortrait: 650 },
+  },
+  buttonPanel: {
+    phone: 144, // Current w-36
+    tablet: 200, // Wider for better touch targets
+    largeTablet: 260, // Even wider
+  },
+  statButton: {
+    phone: { compact: 36, normal: 56 },
+    tablet: { compact: 44, normal: 64 },
+    largeTablet: { compact: 48, normal: 72 },
+  },
+} as const;
+
+/**
  * Court dimensions and scaling constants
  * Based on standard NBA half-court measurements
  */
@@ -515,6 +546,8 @@ export const getThemedColors = (isDark: boolean) => ({
 // Export all theme utilities
 export default {
   COLORS,
+  DEVICE_BREAKPOINTS,
+  TABLET_LAYOUT,
   COURT_DIMENSIONS,
   TOUCH_TARGETS,
   ANIMATIONS,

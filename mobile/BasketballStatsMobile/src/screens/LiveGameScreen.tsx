@@ -1,13 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  SafeAreaView,
-  useWindowDimensions,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert, SafeAreaView } from "react-native";
 import { useRoute, type RouteProp } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
@@ -41,6 +33,7 @@ import AdvancedStats from "../components/livegame/AdvancedStats";
 import SubstitutionPanel from "../components/livegame/SubstitutionPanel";
 import useSoundFeedback from "../hooks/useSoundFeedback";
 import useShotClock from "../hooks/useShotClock";
+import useDeviceType from "../hooks/useDeviceType";
 
 type LiveGameRouteProp = RouteProp<RootStackParamList, "LiveGame">;
 
@@ -96,6 +89,10 @@ interface StatButtonProps {
   onPress: () => void;
   disabled?: boolean;
   size?: "normal" | "large" | "compact";
+  /** Override compact height for tablet support */
+  compactHeight?: number;
+  /** Override normal height for tablet support */
+  normalHeight?: number;
 }
 
 function StatButton({
@@ -105,6 +102,8 @@ function StatButton({
   onPress,
   disabled,
   size = "normal",
+  compactHeight = 36,
+  normalHeight = TOUCH_TARGETS.comfortable,
 }: StatButtonProps) {
   const scale = useSharedValue(1);
 
@@ -121,7 +120,7 @@ function StatButton({
   }));
 
   const buttonHeight =
-    size === "large" ? TOUCH_TARGETS.large : size === "compact" ? 36 : TOUCH_TARGETS.comfortable;
+    size === "large" ? TOUCH_TARGETS.large : size === "compact" ? compactHeight : normalHeight;
   const isCompact = size === "compact";
 
   return (
@@ -195,9 +194,17 @@ export default function LiveGameScreen() {
   // Sound feedback hook
   const soundFeedback = useSoundFeedback();
 
-  // Orientation detection
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-  const isLandscape = screenWidth > screenHeight;
+  // Device type and orientation detection
+  const device = useDeviceType();
+  const {
+    isLandscape,
+    isTablet,
+    courtMaxHeight,
+    courtMaxWidth,
+    buttonPanelWidth,
+    statButtonCompactHeight,
+    statButtonNormalHeight,
+  } = device;
 
   // Tab state
   const [activeTab, setActiveTab] = useState<"court" | "clock" | "stats" | "subs" | "plays">(
@@ -1325,6 +1332,7 @@ export default function LiveGameScreen() {
         onEndPeriod={handleEndPeriod}
         showShotClock={false}
         isLandscape={isLandscape}
+        isTablet={isTablet}
       />
 
       {/* Tab Navigation */}
@@ -1400,6 +1408,8 @@ export default function LiveGameScreen() {
                     shots={persistedShots.length > 0 ? persistedShots : recentShots}
                     displayMode="recent"
                     isLandscape={isLandscape}
+                    maxCourtHeight={courtMaxHeight}
+                    maxCourtWidth={courtMaxWidth}
                   />
                 </View>
               </View>
@@ -1407,8 +1417,9 @@ export default function LiveGameScreen() {
               {/* Stat Buttons Grid */}
               <View
                 className={`bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 ${
-                  isLandscape ? "w-36 p-2 justify-center" : "p-4"
+                  isLandscape ? "p-2 justify-center" : "p-4"
                 }`}
+                style={isLandscape ? { width: buttonPanelWidth } : undefined}
               >
                 {!isLandscape && (
                   <Text className="text-surface-900 dark:text-white font-semibold mb-3">
@@ -1426,6 +1437,7 @@ export default function LiveGameScreen() {
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("rebound")}
                         size="compact"
+                        compactHeight={statButtonCompactHeight}
                       />
                       <StatButton
                         label="AST"
@@ -1434,6 +1446,7 @@ export default function LiveGameScreen() {
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("assist")}
                         size="compact"
+                        compactHeight={statButtonCompactHeight}
                       />
                     </View>
                     <View className="flex-row gap-1">
@@ -1444,6 +1457,7 @@ export default function LiveGameScreen() {
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("steal")}
                         size="compact"
+                        compactHeight={statButtonCompactHeight}
                       />
                       <StatButton
                         label="BLK"
@@ -1452,6 +1466,7 @@ export default function LiveGameScreen() {
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("block")}
                         size="compact"
+                        compactHeight={statButtonCompactHeight}
                       />
                     </View>
                     <View className="flex-row gap-1">
@@ -1462,6 +1477,7 @@ export default function LiveGameScreen() {
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("turnover")}
                         size="compact"
+                        compactHeight={statButtonCompactHeight}
                       />
                       <StatButton
                         label="FOUL"
@@ -1470,6 +1486,7 @@ export default function LiveGameScreen() {
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("foul")}
                         size="compact"
+                        compactHeight={statButtonCompactHeight}
                       />
                     </View>
                     <View className="flex-row gap-1">
@@ -1480,6 +1497,7 @@ export default function LiveGameScreen() {
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("freethrow")}
                         size="compact"
+                        compactHeight={statButtonCompactHeight}
                       />
                     </View>
                     {/* Timeout Buttons - Landscape */}
@@ -1526,6 +1544,7 @@ export default function LiveGameScreen() {
                           disabled={!canRecordStats}
                           onPress={() => setPendingQuickStat("rebound")}
                           size="normal"
+                          normalHeight={statButtonNormalHeight}
                         />
                         <StatButton
                           label="AST"
@@ -1534,6 +1553,7 @@ export default function LiveGameScreen() {
                           disabled={!canRecordStats}
                           onPress={() => setPendingQuickStat("assist")}
                           size="normal"
+                          normalHeight={statButtonNormalHeight}
                         />
                       </View>
                       <View className="flex-1 flex-row">
@@ -1544,6 +1564,7 @@ export default function LiveGameScreen() {
                           disabled={!canRecordStats}
                           onPress={() => setPendingQuickStat("steal")}
                           size="normal"
+                          normalHeight={statButtonNormalHeight}
                         />
                         <StatButton
                           label="BLK"
@@ -1552,6 +1573,7 @@ export default function LiveGameScreen() {
                           disabled={!canRecordStats}
                           onPress={() => setPendingQuickStat("block")}
                           size="normal"
+                          normalHeight={statButtonNormalHeight}
                         />
                       </View>
                     </View>
@@ -1564,6 +1586,7 @@ export default function LiveGameScreen() {
                           disabled={!canRecordStats}
                           onPress={() => setPendingQuickStat("turnover")}
                           size="normal"
+                          normalHeight={statButtonNormalHeight}
                         />
                         <StatButton
                           label="FOUL"
@@ -1572,6 +1595,7 @@ export default function LiveGameScreen() {
                           disabled={!canRecordStats}
                           onPress={() => setPendingQuickStat("foul")}
                           size="normal"
+                          normalHeight={statButtonNormalHeight}
                         />
                       </View>
                     </View>
@@ -1583,6 +1607,7 @@ export default function LiveGameScreen() {
                         disabled={!canRecordStats}
                         onPress={() => setPendingQuickStat("freethrow")}
                         size="normal"
+                        normalHeight={statButtonNormalHeight}
                       />
                     </View>
                     {/* Timeout Buttons - Portrait */}
