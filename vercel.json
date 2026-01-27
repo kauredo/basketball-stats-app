@@ -1,3 +1,9 @@
 {
-  "outputDirectory": "web/basketball-stats-web/dist"
+  "outputDirectory": "web/basketball-stats-web/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
 }
