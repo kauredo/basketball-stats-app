@@ -1503,29 +1503,29 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
     doc.text(`Season: ${data.season}`, 25, y + 28);
 
     // Record stats on right side
-    const recordX = pageWidth - 60;
+    const recordX = pageWidth - 80;
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(24);
     doc.setTextColor(...hexToRgb(COLORS.primary));
-    doc.text(`${data.team.wins}-${data.team.losses}`, recordX, y + 15, { align: "center" });
+    doc.text(`${data.team.wins}-${data.team.losses}`, recordX, y + 20, { align: "center" });
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(...hexToRgb(colors.textSecondary));
-    doc.text("Record", recordX, y + 22, { align: "center" });
+    doc.text("Record", recordX, y + 27, { align: "center" });
 
     // Win percentage
     const winPct = (data.team.winPercentage * 100).toFixed(1);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.setTextColor(...hexToRgb(colors.text));
-    doc.text(`${winPct}%`, recordX + 40, y + 15, { align: "center" });
+    doc.text(`${winPct}%`, recordX + 35, y + 20, { align: "center" });
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(...hexToRgb(colors.textSecondary));
-    doc.text("Win %", recordX + 40, y + 22, { align: "center" });
+    doc.text("Win %", recordX + 35, y + 27, { align: "center" });
 
     y += 45;
   }
@@ -1617,12 +1617,12 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
         stats.avgPoints?.toFixed(1) || "-",
         stats.avgRebounds?.toFixed(1) || "-",
         stats.avgAssists?.toFixed(1) || "-",
-        stats.fieldGoalPercentage ? `${(stats.fieldGoalPercentage * 100).toFixed(1)}` : "-",
-        stats.threePointPercentage ? `${(stats.threePointPercentage * 100).toFixed(1)}` : "-",
-        stats.freeThrowPercentage ? `${(stats.freeThrowPercentage * 100).toFixed(1)}` : "-",
+        stats.fieldGoalPercentage ? `${stats.fieldGoalPercentage.toFixed(1)}` : "-",
+        stats.threePointPercentage ? `${stats.threePointPercentage.toFixed(1)}` : "-",
+        stats.freeThrowPercentage ? `${stats.freeThrowPercentage.toFixed(1)}` : "-",
       ];
 
-      const statWidths = [12, 14, 14, 14, 16, 16, 16];
+      const statWidths = [6, 18, 10, 18, 10, 22, 12];
       for (let j = 0; j < statValues.length; j++) {
         doc.text(statValues[j], xPos + statWidths[j] / 2, y + 3, { align: "center" });
         xPos += statWidths[j];
@@ -1879,6 +1879,8 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
     if (playersWithAdvStats.length > 0) {
       if (y > A4_HEIGHT - 80) {
         y = addNewPage();
+      } else {
+        y += 10;
       }
 
       doc.setFont("helvetica", "bold");
@@ -1950,7 +1952,7 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
         doc.setTextColor(...hexToRgb(colors.text));
         doc.text(player.name.slice(0, 18), xPos, y + 3);
         doc.setFont("helvetica", "normal");
-        xPos += 45;
+        xPos += 40;
 
         // GP
         doc.setTextColor(...hexToRgb(colors.textSecondary));
@@ -2458,33 +2460,33 @@ export async function generatePlayerSeasonPDF(data: PlayerSeasonPDFInput): Promi
 
       // Points
       doc.setFont("helvetica", "bold");
-      doc.text(game.points.toString(), xPos + 7.5, y + 3, { align: "center" });
+      doc.text(game.points.toString(), xPos + 2.5, y + 3, { align: "center" });
       doc.setFont("helvetica", "normal");
       xPos += 15;
 
       // Rebounds
-      doc.text(game.rebounds.toString(), xPos + 7.5, y + 3, { align: "center" });
+      doc.text(game.rebounds.toString(), xPos + 2.5, y + 3, { align: "center" });
       xPos += 15;
 
       // Assists
-      doc.text(game.assists.toString(), xPos + 7.5, y + 3, { align: "center" });
+      doc.text(game.assists.toString(), xPos + 2.5, y + 3, { align: "center" });
       xPos += 15;
 
       // FG
       doc.setTextColor(...hexToRgb(colors.textSecondary));
-      doc.text(`${game.fieldGoalsMade}/${game.fieldGoalsAttempted}`, xPos + 11, y + 3, {
+      doc.text(`${game.fieldGoalsMade}/${game.fieldGoalsAttempted}`, xPos + 2, y + 3, {
         align: "center",
       });
       xPos += 22;
 
       // 3PT
-      doc.text(`${game.threePointersMade}/${game.threePointersAttempted}`, xPos + 11, y + 3, {
+      doc.text(`${game.threePointersMade}/${game.threePointersAttempted}`, xPos + 2.5, y + 3, {
         align: "center",
       });
       xPos += 22;
 
       // Minutes
-      doc.text(Math.round(game.minutes).toString(), xPos + 7.5, y + 3, { align: "center" });
+      doc.text(Math.round(game.minutes).toString(), xPos + 2.5, y + 3, { align: "center" });
 
       y += 6;
     }
