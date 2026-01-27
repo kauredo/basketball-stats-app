@@ -1179,18 +1179,18 @@ export async function generateSeasonSummaryPDF(
   doc.text("STANDINGS", 15, y);
   y += 8;
 
-  // Table header
+  // Table header - total width must fit within A4 margins (180mm usable)
   const standingsColumns = [
-    { label: "#", width: 10 },
-    { label: "Team", width: 55 },
-    { label: "W", width: 15 },
-    { label: "L", width: 15 },
-    { label: "PCT", width: 20 },
-    { label: "GB", width: 15 },
-    { label: "PPG", width: 20 },
-    { label: "OPPG", width: 20 },
-    { label: "DIFF", width: 20 },
-  ];
+    { label: "#", width: 8 },
+    { label: "Team", width: 48 },
+    { label: "W", width: 12 },
+    { label: "L", width: 12 },
+    { label: "PCT", width: 18 },
+    { label: "GB", width: 14 },
+    { label: "PPG", width: 18 },
+    { label: "OPPG", width: 18 },
+    { label: "DIFF", width: 18 },
+  ]; // Total: 166mm (fits with margins)
 
   // Header background
   doc.setFillColor(...hexToRgb(theme === "dark" ? "#3d3835" : "#f3f0ed"));
@@ -1225,42 +1225,42 @@ export async function generateSeasonSummaryPDF(
 
     // Rank
     doc.text(team.rank.toString(), xPos, y + 4);
-    xPos += 10;
+    xPos += 8;
 
     // Team name
     doc.setFont("helvetica", "bold");
-    doc.text(team.teamName.slice(0, 20), xPos, y + 4);
+    doc.text(team.teamName.slice(0, 18), xPos, y + 4);
     doc.setFont("helvetica", "normal");
-    xPos += 55;
+    xPos += 48;
 
     // W
     doc.setTextColor(...hexToRgb(COLORS.success));
     doc.text(team.wins.toString(), xPos, y + 4);
-    xPos += 15;
+    xPos += 12;
 
     // L
     doc.setTextColor(...hexToRgb(COLORS.danger));
     doc.text(team.losses.toString(), xPos, y + 4);
-    xPos += 15;
+    xPos += 12;
 
     // PCT
     doc.setTextColor(...hexToRgb(colors.text));
     doc.text(`.${(team.winPercentage * 10).toFixed(0).padStart(3, "0")}`, xPos, y + 4);
-    xPos += 20;
+    xPos += 18;
 
     // GB
     doc.setTextColor(...hexToRgb(colors.textSecondary));
     doc.text(team.gamesBack === 0 ? "-" : team.gamesBack.toFixed(1), xPos, y + 4);
-    xPos += 15;
+    xPos += 14;
 
     // PPG
     doc.setTextColor(...hexToRgb(colors.text));
     doc.text(team.avgPointsFor?.toFixed(1) || "-", xPos, y + 4);
-    xPos += 20;
+    xPos += 18;
 
     // OPPG
     doc.text(team.avgPointsAgainst?.toFixed(1) || "-", xPos, y + 4);
-    xPos += 20;
+    xPos += 18;
 
     // DIFF
     const diffColor =
@@ -1542,19 +1542,19 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
     doc.text("ROSTER & PLAYER STATISTICS", 15, y);
     y += 8;
 
-    // Table header
+    // Table header - total width must fit within A4 margins (180mm usable)
     const playerColumns = [
-      { label: "#", width: 10 },
-      { label: "Player", width: 45 },
-      { label: "Pos", width: 15 },
+      { label: "#", width: 8 },
+      { label: "Player", width: 40 },
+      { label: "Pos", width: 12 },
       { label: "GP", width: 12 },
-      { label: "PPG", width: 15 },
-      { label: "RPG", width: 15 },
-      { label: "APG", width: 15 },
-      { label: "FG%", width: 18 },
-      { label: "3P%", width: 18 },
-      { label: "FT%", width: 18 },
-    ];
+      { label: "PPG", width: 14 },
+      { label: "RPG", width: 14 },
+      { label: "APG", width: 14 },
+      { label: "FG%", width: 16 },
+      { label: "3P%", width: 16 },
+      { label: "FT%", width: 16 },
+    ]; // Total: 162mm (fits with margins)
 
     // Header background
     doc.setFillColor(...hexToRgb(theme === "dark" ? "#3d3835" : "#f3f0ed"));
@@ -1596,19 +1596,19 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
       // Number
       doc.setTextColor(...hexToRgb(colors.textSecondary));
       doc.text(player.number.toString(), xPos, y + 3);
-      xPos += 10;
+      xPos += 8;
 
       // Name
       doc.setFont("helvetica", "bold");
       doc.setTextColor(...hexToRgb(colors.text));
-      doc.text(player.name.slice(0, 20), xPos, y + 3);
+      doc.text(player.name.slice(0, 18), xPos, y + 3);
       doc.setFont("helvetica", "normal");
-      xPos += 45;
+      xPos += 40;
 
       // Position
       doc.setTextColor(...hexToRgb(colors.textSecondary));
       doc.text(player.position || "-", xPos, y + 3);
-      xPos += 15;
+      xPos += 12;
 
       // Stats (GP, PPG, RPG, APG, FG%, 3P%, FT%)
       const stats = player.stats || {};
@@ -1622,7 +1622,7 @@ export async function generateTeamSeasonPDF(data: TeamSeasonPDFInput): Promise<B
         stats.freeThrowPercentage ? `${(stats.freeThrowPercentage * 100).toFixed(1)}` : "-",
       ];
 
-      const statWidths = [12, 15, 15, 15, 18, 18, 18];
+      const statWidths = [12, 14, 14, 14, 16, 16, 16];
       for (let j = 0; j < statValues.length; j++) {
         doc.text(statValues[j], xPos + statWidths[j] / 2, y + 3, { align: "center" });
         xPos += statWidths[j];
