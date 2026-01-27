@@ -374,6 +374,122 @@ const PlayerDetail: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Inline Shot Chart */}
+          {playerShotChartData &&
+            playerShotChartData.shots &&
+            playerShotChartData.shots.length > 0 && (
+              <div className="surface-card p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-surface-900 dark:text-white">
+                    Shot Chart
+                  </h3>
+                  <button
+                    onClick={() => navigate(`/app/shot-charts?player=${playerId}`)}
+                    className="text-sm text-primary-500 hover:text-primary-600 font-medium"
+                  >
+                    View Full Chart
+                  </button>
+                </div>
+                <div className="flex flex-col lg:flex-row gap-6">
+                  {/* Mini Court */}
+                  <div className="flex-shrink-0 flex justify-center">
+                    <div className="w-[280px]">
+                      <PrintableShotChart
+                        shots={playerShotChartData.shots.map(
+                          (s: { x: number; y: number; made: boolean; shotType: string }) => ({
+                            x: s.x,
+                            y: s.y,
+                            made: s.made,
+                            is3pt: s.shotType === "3pt",
+                          })
+                        )}
+                        theme="light"
+                        showHeatMap={true}
+                        width={280}
+                        height={264}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Zone Stats */}
+                  <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {[
+                      {
+                        label: "Paint",
+                        stats: playerShotChartData.zoneStats?.paint,
+                        benchmark: 60,
+                      },
+                      {
+                        label: "Mid-Range",
+                        stats: playerShotChartData.zoneStats?.midrange,
+                        benchmark: 42,
+                      },
+                      {
+                        label: "Corner 3",
+                        stats: playerShotChartData.zoneStats?.corner3,
+                        benchmark: 38,
+                      },
+                      {
+                        label: "Wing 3",
+                        stats: playerShotChartData.zoneStats?.wing3,
+                        benchmark: 36,
+                      },
+                      {
+                        label: "Top 3",
+                        stats: playerShotChartData.zoneStats?.top3,
+                        benchmark: 36,
+                      },
+                      {
+                        label: "Overall",
+                        stats: {
+                          made: playerShotChartData.stats?.madeShots || 0,
+                          attempted: playerShotChartData.stats?.totalShots || 0,
+                          percentage:
+                            (playerShotChartData.stats?.totalShots || 0) > 0
+                              ? Math.round(
+                                  ((playerShotChartData.stats?.madeShots || 0) /
+                                    (playerShotChartData.stats?.totalShots || 1)) *
+                                    1000
+                                ) / 10
+                              : 0,
+                        },
+                        benchmark: 45,
+                      },
+                    ].map((zone) => {
+                      const pct = zone.stats?.percentage || 0;
+                      const made = zone.stats?.made || 0;
+                      const attempted = zone.stats?.attempted || 0;
+                      const pctColor =
+                        attempted === 0
+                          ? "text-surface-400"
+                          : pct >= zone.benchmark
+                            ? "text-green-500"
+                            : pct < zone.benchmark - 10
+                              ? "text-red-500"
+                              : "text-surface-900 dark:text-white";
+
+                      return (
+                        <div
+                          key={zone.label}
+                          className="bg-surface-50 dark:bg-surface-800 rounded-lg p-3 text-center"
+                        >
+                          <p className="text-xs text-surface-500 dark:text-surface-400 mb-1">
+                            {zone.label}
+                          </p>
+                          <p className={`text-xl font-bold tabular-nums ${pctColor}`} data-stat>
+                            {attempted > 0 ? `${pct}%` : "-"}
+                          </p>
+                          <p className="text-xs text-surface-400 tabular-nums" data-stat>
+                            {made}/{attempted}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
         </>
       )}
 

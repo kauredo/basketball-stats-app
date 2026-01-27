@@ -196,7 +196,9 @@ export function PlayerSeasonExportModal({
           </label>
 
           <div className="flex items-center justify-between">
-            <span className="text-sm text-surface-600 dark:text-surface-400">Select appearance</span>
+            <span className="text-sm text-surface-600 dark:text-surface-400">
+              Select appearance
+            </span>
             <div className="flex gap-2" role="radiogroup" aria-label="PDF theme">
               <button
                 onClick={() => setTheme("light")}

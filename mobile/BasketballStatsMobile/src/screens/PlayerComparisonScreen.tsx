@@ -7,6 +7,7 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { PlayerSelectModal, type PlayerOption } from "../components/PlayerSelectModal";
+import { MiniCourt, type ShotMarker } from "../components/court/MiniCourt";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -105,6 +106,38 @@ export default function PlayerComparisonScreen() {
         }
       : "skip"
   );
+
+  // Fetch shot chart data for all selected players
+  const player1ShotData = useQuery(
+    api.shots.getPlayerShotChart,
+    token && selectedLeague && selectedPlayers[0]
+      ? { token, leagueId: selectedLeague.id, playerId: selectedPlayers[0].id }
+      : "skip"
+  );
+
+  const player2ShotData = useQuery(
+    api.shots.getPlayerShotChart,
+    token && selectedLeague && selectedPlayers[1]
+      ? { token, leagueId: selectedLeague.id, playerId: selectedPlayers[1].id }
+      : "skip"
+  );
+
+  const player3ShotData = useQuery(
+    api.shots.getPlayerShotChart,
+    token && selectedLeague && selectedPlayers[2]
+      ? { token, leagueId: selectedLeague.id, playerId: selectedPlayers[2].id }
+      : "skip"
+  );
+
+  const player4ShotData = useQuery(
+    api.shots.getPlayerShotChart,
+    token && selectedLeague && selectedPlayers[3]
+      ? { token, leagueId: selectedLeague.id, playerId: selectedPlayers[3].id }
+      : "skip"
+  );
+
+  // Combine shot data into array matching selected players
+  const playerShotDataArray = [player1ShotData, player2ShotData, player3ShotData, player4ShotData];
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -336,6 +369,141 @@ export default function PlayerComparisonScreen() {
                   statKey="freeThrowPercentage"
                   unit="%"
                 />
+              </View>
+
+              {/* Shot Chart Comparison */}
+              <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4 mb-4">
+                <View className="flex-row items-center mb-3">
+                  <Icon name="target" size={16} color="#F97316" />
+                  <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 ml-2">
+                    Shot Charts
+                  </Text>
+                </View>
+
+                <View className="flex-row flex-wrap justify-between">
+                  {selectedPlayers.slice(0, comparisonData.players.length).map((player, idx) => {
+                    const shotData = playerShotDataArray[idx];
+                    const shots: ShotMarker[] = shotData?.shots
+                      ? shotData.shots.map((s) => ({
+                          x: s.x,
+                          y: s.y,
+                          made: s.made,
+                          is3pt: s.shotType === "3pt",
+                        }))
+                      : [];
+
+                    return (
+                      <View
+                        key={player.id}
+                        className="mb-4"
+                        style={{
+                          width: selectedPlayers.length <= 2 ? "48%" : "48%",
+                        }}
+                      >
+                        <View className="flex-row items-center mb-2">
+                          <View
+                            className="w-3 h-3 rounded-full mr-2"
+                            style={{ backgroundColor: PLAYER_COLORS[idx] }}
+                          />
+                          <Text
+                            className="text-surface-900 dark:text-white font-medium text-xs"
+                            numberOfLines={1}
+                          >
+                            {player.name.split(" ")[0]}
+                          </Text>
+                        </View>
+
+                        {shots.length > 0 ? (
+                          <View className="bg-surface-200 dark:bg-surface-700 rounded-lg overflow-hidden">
+                            <MiniCourt shots={shots} displayMode="all" showHeatmap={true} />
+                            <View className="p-2">
+                              <Text className="text-surface-500 text-xs text-center">
+                                {shots.length} shots •{" "}
+                                {shotData?.stats?.overallPercentage?.toFixed(1) || "0.0"}% FG
+                              </Text>
+                            </View>
+                          </View>
+                        ) : (
+                          <View className="bg-surface-200 dark:bg-surface-700 rounded-lg p-8 items-center justify-center">
+                            <Text className="text-surface-400 text-xs">No shots</Text>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  })}
+                </View>
+
+                {/* Zone Comparison Summary */}
+                {selectedPlayers.length >= 2 &&
+                  playerShotDataArray[0]?.stats &&
+                  playerShotDataArray[1]?.stats && (
+                    <View className="mt-2 pt-4 border-t border-surface-200 dark:border-surface-600">
+                      <Text className="text-xs font-semibold text-surface-500 dark:text-surface-400 mb-2">
+                        Shooting Breakdown
+                      </Text>
+                      <View className="flex-row justify-between">
+                        <View className="flex-1 items-center">
+                          <Text className="text-xs text-surface-400 mb-1">2PT</Text>
+                          <View className="flex-row items-baseline">
+                            <Text className="font-bold text-sm" style={{ color: PLAYER_COLORS[0] }}>
+                              {playerShotDataArray[0]?.stats?.twoPoint?.percentage?.toFixed(0) ||
+                                "0"}
+                              %
+                            </Text>
+                            {selectedPlayers.length >= 2 && (
+                              <Text
+                                className="font-bold text-sm ml-2"
+                                style={{ color: PLAYER_COLORS[1] }}
+                              >
+                                {playerShotDataArray[1]?.stats?.twoPoint?.percentage?.toFixed(0) ||
+                                  "0"}
+                                %
+                              </Text>
+                            )}
+                          </View>
+                        </View>
+                        <View className="flex-1 items-center">
+                          <Text className="text-xs text-surface-400 mb-1">3PT</Text>
+                          <View className="flex-row items-baseline">
+                            <Text className="font-bold text-sm" style={{ color: PLAYER_COLORS[0] }}>
+                              {playerShotDataArray[0]?.stats?.threePoint?.percentage?.toFixed(0) ||
+                                "0"}
+                              %
+                            </Text>
+                            {selectedPlayers.length >= 2 && (
+                              <Text
+                                className="font-bold text-sm ml-2"
+                                style={{ color: PLAYER_COLORS[1] }}
+                              >
+                                {playerShotDataArray[1]?.stats?.threePoint?.percentage?.toFixed(
+                                  0
+                                ) || "0"}
+                                %
+                              </Text>
+                            )}
+                          </View>
+                        </View>
+                        <View className="flex-1 items-center">
+                          <Text className="text-xs text-surface-400 mb-1">Overall</Text>
+                          <View className="flex-row items-baseline">
+                            <Text className="font-bold text-sm" style={{ color: PLAYER_COLORS[0] }}>
+                              {playerShotDataArray[0]?.stats?.overallPercentage?.toFixed(0) || "0"}%
+                            </Text>
+                            {selectedPlayers.length >= 2 && (
+                              <Text
+                                className="font-bold text-sm ml-2"
+                                style={{ color: PLAYER_COLORS[1] }}
+                              >
+                                {playerShotDataArray[1]?.stats?.overallPercentage?.toFixed(0) ||
+                                  "0"}
+                                %
+                              </Text>
+                            )}
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  )}
               </View>
             </View>
           ) : selectedPlayers.length >= 2 ? (

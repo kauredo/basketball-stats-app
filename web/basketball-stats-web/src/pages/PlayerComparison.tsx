@@ -8,7 +8,10 @@ import {
   ArrowsRightLeftIcon,
   ChartBarIcon,
   ChevronDownIcon,
+  MapIcon,
 } from "@heroicons/react/24/outline";
+import { PrintableShotChart } from "../components/export/PrintableShotChart";
+import type { ShotLocation } from "../types/livegame";
 import {
   ResponsiveContainer,
   RadarChart,
@@ -79,6 +82,21 @@ const PlayerComparison: React.FC = () => {
     api.statistics.comparePlayersStats,
     token && selectedLeague && player1Id && player2Id
       ? { token, leagueId: selectedLeague.id, player1Id, player2Id }
+      : "skip"
+  );
+
+  // Fetch shot chart data for both players
+  const player1ShotData = useQuery(
+    api.shots.getPlayerShotChart,
+    token && selectedLeague && player1Id
+      ? { token, leagueId: selectedLeague.id, playerId: player1Id }
+      : "skip"
+  );
+
+  const player2ShotData = useQuery(
+    api.shots.getPlayerShotChart,
+    token && selectedLeague && player2Id
+      ? { token, leagueId: selectedLeague.id, playerId: player2Id }
       : "skip"
   );
 
@@ -503,6 +521,142 @@ const PlayerComparison: React.FC = () => {
                 </RadarChart>
               </ResponsiveContainer>
             </div>
+          </div>
+
+          {/* Shot Chart Comparison */}
+          <div className="surface-card p-6">
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-2 flex items-center">
+              <MapIcon className="w-5 h-5 mr-2 text-primary-500" />
+              Shot Chart Comparison
+            </h3>
+            <p className="text-sm text-surface-500 dark:text-surface-400 mb-6">
+              Side-by-side shooting locations with heatmap visualization
+            </p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Player 1 Shot Chart */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-3 h-3 rounded-full bg-primary-500"></div>
+                  <span className="font-medium text-surface-900 dark:text-white">
+                    {comparisonData.player1.playerName}
+                  </span>
+                </div>
+                {player1ShotData?.shots && player1ShotData.shots.length > 0 ? (
+                  <div className="flex flex-col items-center">
+                    <PrintableShotChart
+                      shots={
+                        player1ShotData.shots.map((s) => ({
+                          x: s.x,
+                          y: s.y,
+                          made: s.made,
+                          is3pt: s.shotType === "3pt",
+                        })) as ShotLocation[]
+                      }
+                      width={280}
+                      height={264}
+                      showHeatMap={true}
+                      theme="light"
+                    />
+                    <div className="mt-3 text-sm text-surface-600 dark:text-surface-400">
+                      {player1ShotData.shots.length} shots •{" "}
+                      {player1ShotData.stats?.overallPercentage.toFixed(1)}% FG
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-64 bg-surface-100 dark:bg-surface-800 rounded-xl">
+                    <p className="text-surface-500">No shot data available</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Player 2 Shot Chart */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="font-medium text-surface-900 dark:text-white">
+                    {comparisonData.player2.playerName}
+                  </span>
+                </div>
+                {player2ShotData?.shots && player2ShotData.shots.length > 0 ? (
+                  <div className="flex flex-col items-center">
+                    <PrintableShotChart
+                      shots={
+                        player2ShotData.shots.map((s) => ({
+                          x: s.x,
+                          y: s.y,
+                          made: s.made,
+                          is3pt: s.shotType === "3pt",
+                        })) as ShotLocation[]
+                      }
+                      width={280}
+                      height={264}
+                      showHeatMap={true}
+                      theme="light"
+                    />
+                    <div className="mt-3 text-sm text-surface-600 dark:text-surface-400">
+                      {player2ShotData.shots.length} shots •{" "}
+                      {player2ShotData.stats?.overallPercentage.toFixed(1)}% FG
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-64 bg-surface-100 dark:bg-surface-800 rounded-xl">
+                    <p className="text-surface-500">No shot data available</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Zone Comparison */}
+            {player1ShotData?.stats && player2ShotData?.stats && (
+              <div className="mt-6 pt-6 border-t border-surface-200 dark:border-surface-700">
+                <h4 className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-4">
+                  Shooting by Zone
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {/* 2-Point */}
+                  <div className="bg-surface-50 dark:bg-surface-800 rounded-xl p-4">
+                    <p className="text-xs text-surface-500 uppercase tracking-wide mb-2">2-Point</p>
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-lg font-bold text-primary-500">
+                        {player1ShotData.stats.twoPoint?.percentage?.toFixed(1) ?? "0.0"}%
+                      </span>
+                      <span className="text-lg font-bold text-blue-500">
+                        {player2ShotData.stats.twoPoint?.percentage?.toFixed(1) ?? "0.0"}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Three-Point */}
+                  <div className="bg-surface-50 dark:bg-surface-800 rounded-xl p-4">
+                    <p className="text-xs text-surface-500 uppercase tracking-wide mb-2">3-Point</p>
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-lg font-bold text-primary-500">
+                        {player1ShotData.stats.threePoint?.percentage?.toFixed(1) ?? "0.0"}%
+                      </span>
+                      <span className="text-lg font-bold text-blue-500">
+                        {player2ShotData.stats.threePoint?.percentage?.toFixed(1) ?? "0.0"}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Overall FG */}
+                  <div className="bg-surface-50 dark:bg-surface-800 rounded-xl p-4">
+                    <p className="text-xs text-surface-500 uppercase tracking-wide mb-2">
+                      Overall FG
+                    </p>
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-lg font-bold text-primary-500">
+                        {player1ShotData.stats.overallPercentage?.toFixed(1) ?? "0.0"}%
+                      </span>
+                      <span className="text-lg font-bold text-blue-500">
+                        {player2ShotData.stats.overallPercentage?.toFixed(1) ?? "0.0"}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : player1Id && player2Id ? (

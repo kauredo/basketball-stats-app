@@ -23,6 +23,8 @@ import {
 import {
   generateGameReportPDF,
   generateShotChartPDF,
+  generatePlayerSeasonPDF,
+  generateTeamSeasonPDF,
   downloadPDF,
   captureCourtAsImage,
 } from "../utils/export/pdf-export";
@@ -94,6 +96,54 @@ const ExportPage: React.FC = () => {
     token && selectedLeague && teamId
       ? { token, leagueId: selectedLeague.id, teamId: teamId as Id<"teams"> }
       : "skip"
+  );
+
+  // Player season data
+  const playerData = useQuery(
+    api.players.get,
+    token && playerId ? { token, playerId: playerId as Id<"players"> } : "skip"
+  );
+
+  const playerSeasonStats = useQuery(
+    api.statistics.getPlayerSeasonStats,
+    token && selectedLeague && playerId
+      ? { token, leagueId: selectedLeague.id, playerId: playerId as Id<"players"> }
+      : "skip"
+  );
+
+  // Team season data
+  const teamData = useQuery(
+    api.teams.get,
+    token && teamId ? { token, teamId: teamId as Id<"teams"> } : "skip"
+  );
+
+  const teamPlayers = useQuery(
+    api.players.list,
+    token && selectedLeague && teamId
+      ? { token, leagueId: selectedLeague.id, teamId: teamId as Id<"teams"> }
+      : "skip"
+  );
+
+  const teamGames = useQuery(
+    api.games.list,
+    token && selectedLeague && teamId
+      ? { token, leagueId: selectedLeague.id, teamId: teamId as Id<"teams">, limit: 50 }
+      : "skip"
+  );
+
+  const teamLineups = useQuery(
+    api.lineups.getTeamLineupStats,
+    token && teamId ? { token, teamId: teamId as Id<"teams">, limit: 10 } : "skip"
+  );
+
+  const teamPairs = useQuery(
+    api.lineups.getTeamPairStats,
+    token && teamId ? { token, teamId: teamId as Id<"teams">, limit: 20 } : "skip"
+  );
+
+  const playersStats = useQuery(
+    api.statistics.getPlayersStats,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id, perPage: 100 } : "skip"
   );
 
   // Transform data to export format
@@ -269,6 +319,20 @@ const ExportPage: React.FC = () => {
           return;
         }
 
+        if (
+          exportType === "player-season" &&
+          (!playerData || !playerSeasonStats || !playerShotData)
+        ) {
+          return;
+        }
+
+        if (
+          exportType === "team-season" &&
+          (!teamData || !teamPlayers || !teamGames || !teamShotData)
+        ) {
+          return;
+        }
+
         setStatus("preparing");
         setMessage("Preparing export data...");
 
@@ -422,6 +486,248 @@ const ExportPage: React.FC = () => {
 
           const filename = `shot-chart-${teamShotData.team?.name || "team"}`.replace(/\s+/g, "-");
           downloadPDF(blob, filename);
+        } else if (
+          exportType === "player-season" &&
+          playerData &&
+          playerSeasonStats &&
+          playerShotData
+        ) {
+          // Wait for court element to render
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          let shotChartImage: string | undefined;
+          if (singleCourtRef.current) {
+            setMessage("Capturing shot chart...");
+            shotChartImage = await captureCourtAsImage(singleCourtRef.current, {
+              scale: 2,
+              backgroundColor: theme === "dark" ? "#3d3835" : "#fdfcfb",
+            });
+          }
+
+          setStatus("generating");
+          setMessage("Generating player season PDF...");
+
+          const player = playerData.player;
+          const stats = playerSeasonStats.stats;
+          const recentGames = playerSeasonStats.recentGames || [];
+
+          // Transform zone stats
+          const shootingByZone = playerShotData.zoneStats
+            ? {
+                paint: playerShotData.zoneStats.paint || { made: 0, attempted: 0 },
+                midRange: playerShotData.zoneStats.midrange || { made: 0, attempted: 0 },
+                threePoint: {
+                  made:
+                    (playerShotData.zoneStats.corner3?.made || 0) +
+                    (playerShotData.zoneStats.wing3?.made || 0) +
+                    (playerShotData.zoneStats.top3?.made || 0),
+                  attempted:
+                    (playerShotData.zoneStats.corner3?.attempted || 0) +
+                    (playerShotData.zoneStats.wing3?.attempted || 0) +
+                    (playerShotData.zoneStats.top3?.attempted || 0),
+                },
+              }
+            : undefined;
+
+          const blob = await generatePlayerSeasonPDF({
+            player: {
+              id: playerId || "",
+              name: player?.name || "Unknown",
+              number: player?.number || 0,
+              position: player?.position,
+              team: player?.team ? { id: player.team.id || "", name: player.team.name } : undefined,
+            },
+            season: selectedLeague?.season || new Date().getFullYear().toString(),
+            stats: {
+              gamesPlayed: stats?.gamesPlayed || 0,
+              avgPoints: stats?.avgPoints || 0,
+              avgRebounds: stats?.avgRebounds || 0,
+              avgAssists: stats?.avgAssists || 0,
+              avgSteals: stats?.avgSteals || 0,
+              avgBlocks: stats?.avgBlocks || 0,
+              avgTurnovers: stats?.avgTurnovers || 0,
+              avgMinutes: stats?.avgMinutes || 0,
+              totalPoints: stats?.totalPoints || 0,
+              totalRebounds: stats?.totalRebounds || 0,
+              totalAssists: stats?.totalAssists || 0,
+              totalSteals: stats?.totalSteals || 0,
+              totalBlocks: stats?.totalBlocks || 0,
+              totalTurnovers: stats?.totalTurnovers || 0,
+              totalFouls: stats?.totalFouls || 0,
+              totalFieldGoalsMade: stats?.totalFieldGoalsMade || 0,
+              totalFieldGoalsAttempted: stats?.totalFieldGoalsAttempted || 0,
+              totalThreePointersMade: stats?.totalThreePointersMade || 0,
+              totalThreePointersAttempted: stats?.totalThreePointersAttempted || 0,
+              totalFreeThrowsMade: stats?.totalFreeThrowsMade || 0,
+              totalFreeThrowsAttempted: stats?.totalFreeThrowsAttempted || 0,
+              fieldGoalPercentage: stats?.fieldGoalPercentage || 0,
+              threePointPercentage: stats?.threePointPercentage || 0,
+              freeThrowPercentage: stats?.freeThrowPercentage || 0,
+              trueShootingPercentage: stats?.trueShootingPercentage,
+              effectiveFieldGoalPercentage: stats?.effectiveFieldGoalPercentage,
+              playerEfficiencyRating: stats?.playerEfficiencyRating,
+            },
+            games: recentGames.map((g: any) => ({
+              id: g.gameId || "",
+              date: g.gameDate,
+              opponent: g.opponent,
+              points: g.points || 0,
+              rebounds: g.rebounds || 0,
+              assists: g.assists || 0,
+              steals: g.steals || 0,
+              blocks: g.blocks || 0,
+              fieldGoalsMade: g.fieldGoalsMade || 0,
+              fieldGoalsAttempted: g.fieldGoalsAttempted || 0,
+              threePointersMade: g.threePointersMade || 0,
+              threePointersAttempted: g.threePointersAttempted || 0,
+              freeThrowsMade: g.freeThrowsMade || 0,
+              freeThrowsAttempted: g.freeThrowsAttempted || 0,
+              minutes: g.minutes || 0,
+            })),
+            shotChartImage,
+            shootingByZone,
+            options: {
+              sections: {
+                seasonSummary: true,
+                shotChart: true,
+                gameLog: true,
+                advancedStats: true,
+              },
+              theme,
+            },
+          });
+
+          const filename =
+            `${player?.name || "player"}-season-${selectedLeague?.season || "report"}`.replace(
+              /\s+/g,
+              "-"
+            );
+          downloadPDF(blob, filename);
+        } else if (
+          exportType === "team-season" &&
+          teamData &&
+          teamPlayers &&
+          teamGames &&
+          teamShotData
+        ) {
+          // Wait for court element to render
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          let shotChartImage: string | undefined;
+          if (singleCourtRef.current) {
+            setMessage("Capturing shot chart...");
+            shotChartImage = await captureCourtAsImage(singleCourtRef.current, {
+              scale: 2,
+              backgroundColor: theme === "dark" ? "#3d3835" : "#fdfcfb",
+            });
+          }
+
+          setStatus("generating");
+          setMessage("Generating team season PDF...");
+
+          const team = teamData.team;
+          const players = teamPlayers.players || [];
+          const games = teamGames.games || [];
+
+          // Get player stats for this team
+          const teamPlayerStats =
+            playersStats?.players?.filter((ps: { teamId: string }) => ps.teamId === teamId) || [];
+          const playerStatsMap = new Map(
+            teamPlayerStats.map((ps: { playerId: string }) => [ps.playerId, ps])
+          );
+
+          // Transform zone stats
+          const shootingByZone = teamShotData.zoneStats
+            ? {
+                paint: teamShotData.zoneStats.paint || { made: 0, attempted: 0 },
+                midRange: teamShotData.zoneStats.midrange || { made: 0, attempted: 0 },
+                threePoint: {
+                  made:
+                    (teamShotData.zoneStats.corner3?.made || 0) +
+                    (teamShotData.zoneStats.wing3?.made || 0) +
+                    (teamShotData.zoneStats.top3?.made || 0),
+                  attempted:
+                    (teamShotData.zoneStats.corner3?.attempted || 0) +
+                    (teamShotData.zoneStats.wing3?.attempted || 0) +
+                    (teamShotData.zoneStats.top3?.attempted || 0),
+                },
+              }
+            : undefined;
+
+          const blob = await generateTeamSeasonPDF({
+            team: {
+              id: teamId || "",
+              name: team?.name || "Unknown",
+              city: team?.city,
+              wins: team?.wins || 0,
+              losses: team?.losses || 0,
+              winPercentage: team?.winPercentage || 0,
+            },
+            season: selectedLeague?.season || new Date().getFullYear().toString(),
+            players: players.map((p: any) => {
+              const pStats = playerStatsMap.get(p.id) as any;
+              return {
+                id: p.id,
+                name: p.name,
+                number: p.number,
+                position: p.position,
+                gamesPlayed: pStats?.gamesPlayed,
+                stats: pStats
+                  ? {
+                      avgPoints: pStats.avgPoints,
+                      avgRebounds: pStats.avgRebounds,
+                      avgAssists: pStats.avgAssists,
+                      fieldGoalPercentage: pStats.fieldGoalPercentage,
+                      threePointPercentage: pStats.threePointPercentage,
+                      freeThrowPercentage: pStats.freeThrowPercentage,
+                      trueShootingPercentage: pStats.trueShootingPercentage,
+                      effectiveFieldGoalPercentage: pStats.effectiveFieldGoalPercentage,
+                      playerEfficiencyRating: pStats.playerEfficiencyRating,
+                      assistToTurnoverRatio: pStats.assistToTurnoverRatio,
+                    }
+                  : undefined,
+              };
+            }),
+            games: games.map((g: any) => {
+              const isHome = g.homeTeam?.name === team?.name;
+              return {
+                id: g.id,
+                date: g.scheduledAt || g.startedAt,
+                opponent: isHome ? g.awayTeam?.name : g.homeTeam?.name,
+                homeGame: isHome,
+                teamScore: isHome ? g.homeScore : g.awayScore,
+                opponentScore: isHome ? g.awayScore : g.homeScore,
+                result:
+                  g.status === "completed"
+                    ? (isHome ? g.homeScore : g.awayScore) > (isHome ? g.awayScore : g.homeScore)
+                      ? ("W" as const)
+                      : ("L" as const)
+                    : ("N/A" as const),
+              };
+            }),
+            lineups: teamLineups?.lineups || [],
+            pairs: teamPairs?.pairs || [],
+            shootingByZone,
+            shotChartImage,
+            options: {
+              sections: {
+                seasonSummary: true,
+                playerStats: true,
+                gameLog: true,
+                lineupAnalysis: true,
+                shotCharts: true,
+                advancedStats: true,
+              },
+              theme,
+            },
+          });
+
+          const filename =
+            `${team?.name || "team"}-season-${selectedLeague?.season || "report"}`.replace(
+              /\s+/g,
+              "-"
+            );
+          downloadPDF(blob, filename);
         }
 
         setStatus("complete");
@@ -442,9 +748,20 @@ const ExportPage: React.FC = () => {
     gameEventsData,
     playerShotData,
     teamShotData,
+    playerData,
+    playerSeasonStats,
+    teamData,
+    teamPlayers,
+    teamGames,
+    teamLineups,
+    teamPairs,
+    playersStats,
     exportType,
     exportFormat,
     theme,
+    selectedLeague,
+    playerId,
+    teamId,
   ]);
 
   // Render courts for capture (hidden)
@@ -518,6 +835,56 @@ const ExportPage: React.FC = () => {
               showHeatMap={includeHeatmap}
               title={teamShotData.team?.name || "Team"}
               width={300}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (exportType === "player-season" && playerShotData) {
+      const shots: ExportShotLocation[] = (playerShotData.shots || []).map((s: any) => ({
+        x: s.x,
+        y: s.y,
+        made: s.made,
+        is3pt: s.shotType === "3pt",
+      }));
+
+      return (
+        <div className="absolute left-[-9999px] top-0 pointer-events-none">
+          <div ref={singleCourtRef}>
+            <PrintableShotChart
+              shots={shots}
+              theme={theme}
+              showHeatMap={true}
+              title={playerData?.player?.name || "Player"}
+              subtitle={`${selectedLeague?.season || ""} Season`}
+              width={400}
+              height={376}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (exportType === "team-season" && teamShotData) {
+      const shots: ExportShotLocation[] = (teamShotData.shots || []).map((s: any) => ({
+        x: s.x,
+        y: s.y,
+        made: s.made,
+        is3pt: s.shotType === "3pt",
+      }));
+
+      return (
+        <div className="absolute left-[-9999px] top-0 pointer-events-none">
+          <div ref={singleCourtRef}>
+            <PrintableShotChart
+              shots={shots}
+              theme={theme}
+              showHeatMap={true}
+              title={teamData?.team?.name || "Team"}
+              subtitle={`${selectedLeague?.season || ""} Season`}
+              width={400}
+              height={376}
             />
           </div>
         </div>

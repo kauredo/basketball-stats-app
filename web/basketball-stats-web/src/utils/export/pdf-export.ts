@@ -2554,9 +2554,14 @@ export async function generatePlayerSeasonPDF(data: PlayerSeasonPDFInput): Promi
       doc.setFont("helvetica", "bold");
       doc.setFontSize(18);
       doc.setTextColor(...hexToRgb(statColor));
-      doc.text(stat.value !== "N/A" ? `${stat.value}%` : stat.value, advX + advCardWidth / 2, y + 26, {
-        align: "center",
-      });
+      doc.text(
+        stat.value !== "N/A" ? `${stat.value}%` : stat.value,
+        advX + advCardWidth / 2,
+        y + 26,
+        {
+          align: "center",
+        }
+      );
 
       advX += advCardWidth + 5;
     }
