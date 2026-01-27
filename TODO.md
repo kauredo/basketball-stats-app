@@ -1,5 +1,6 @@
 # Basketball Stats App - TODO
 
+> Remember to check TODO-min.md for any TODOs that the user has added. Update this TODO.md TODOs with more details.
 > Last audit: January 26, 2026
 
 ---
@@ -14,7 +15,7 @@ _All P0 issues resolved_
 
 ### Backend
 
-- [ ] **Push notifications - VAPID configuration needed** - Infrastructure implemented in `convex/notifications.ts`. To enable:
+- [x] **Push notifications - VAPID configuration needed** - Infrastructure implemented in `convex/notifications.ts`. To enable:
   1. Generate VAPID keys: `npx web-push generate-vapid-keys`
   2. In Convex dashboard → Settings → Environment Variables, add:
      - `VAPID_PUBLIC_KEY`
