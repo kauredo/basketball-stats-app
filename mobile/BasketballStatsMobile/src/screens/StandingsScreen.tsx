@@ -85,9 +85,7 @@ function StandingsRow({ team, isFirst, isLast, onTeamPress }: StandingsRowProps)
 
         {/* Team Info */}
         <TouchableOpacity className="flex-1 ml-3" onPress={handleTeamPress} activeOpacity={0.7}>
-          <Text className="text-primary-500 font-semibold text-base">
-            {team.teamName}
-          </Text>
+          <Text className="text-primary-500 font-semibold text-base">{team.teamName}</Text>
           {team.city && (
             <Text className="text-surface-500 dark:text-surface-500 text-xs">{team.city}</Text>
           )}

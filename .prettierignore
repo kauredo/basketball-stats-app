@@ -15,3 +15,5 @@ convex/_generated/
 .turbo/
 coverage/
 *.log
+
+*/**/CLAUDE.md

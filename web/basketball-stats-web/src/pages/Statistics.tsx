@@ -95,7 +95,9 @@ function LeadersBoard({ title, leaders, unit = "" }: LeadersBoardProps) {
                     {leader.name}
                   </Link>
                 ) : (
-                  <span className="text-surface-900 dark:text-white font-medium">{leader.name}</span>
+                  <span className="text-surface-900 dark:text-white font-medium">
+                    {leader.name}
+                  </span>
                 )}
                 {leader.team && (
                   <span className="text-surface-500 dark:text-surface-400 text-xs">

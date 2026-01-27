@@ -74,9 +74,7 @@ export function ShotRecordingModal({
     if (!item.player) return null;
 
     // Team-specific colors: home = blue, away = orange
-    const avatarBg = item.isHomeTeam
-      ? "bg-blue-600"
-      : "bg-orange-500";
+    const avatarBg = item.isHomeTeam ? "bg-blue-600" : "bg-orange-500";
 
     return (
       <View

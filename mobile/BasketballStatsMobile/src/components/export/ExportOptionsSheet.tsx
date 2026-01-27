@@ -126,12 +126,7 @@ export function ExportOptionsSheet({
   if (!isOpen) return null;
 
   return (
-    <Modal
-      visible={isOpen}
-      animationType="slide"
-      transparent
-      onRequestClose={onClose}
-    >
+    <Modal visible={isOpen} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 bg-black/50 justify-end">
         <View className="bg-white dark:bg-surface-800 rounded-t-3xl max-h-[90%]">
           {/* Header */}
@@ -148,205 +143,211 @@ export function ExportOptionsSheet({
 
           {/* Content */}
           <ScrollView className="px-4 pt-4" showsVerticalScrollIndicator={false}>
-          {/* Format Selector */}
-          <Text className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">
-            Export Format
-          </Text>
-          <View className="flex-row gap-3 mb-6">
-            <TouchableOpacity
-              onPress={() => setFormat("pdf")}
-              className={`flex-1 flex-row items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 ${
-                format === "pdf"
-                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                  : "border-surface-200 dark:border-surface-700"
-              }`}
-            >
-              <Icon name="file-text" size={20} color={format === "pdf" ? "#F97316" : "#64748B"} />
-              <Text
-                className={`font-medium ${
-                  format === "pdf"
-                    ? "text-primary-600 dark:text-primary-400"
-                    : "text-surface-600 dark:text-surface-400"
-                }`}
-              >
-                PDF
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setFormat("csv")}
-              className={`flex-1 flex-row items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 ${
-                format === "csv"
-                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                  : "border-surface-200 dark:border-surface-700"
-              }`}
-            >
-              <Icon name="table" size={20} color={format === "csv" ? "#F97316" : "#64748B"} />
-              <Text
-                className={`font-medium ${
-                  format === "csv"
-                    ? "text-primary-600 dark:text-primary-400"
-                    : "text-surface-600 dark:text-surface-400"
-                }`}
-              >
-                CSV
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Content Selection */}
-          <Text className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">
-            Include Content
-          </Text>
-          <View className="gap-2 mb-6">
-            {contentOptions.map((option) => (
+            {/* Format Selector */}
+            <Text className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">
+              Export Format
+            </Text>
+            <View className="flex-row gap-3 mb-6">
               <TouchableOpacity
-                key={option.id}
-                onPress={() => toggleContentOption(option.id)}
-                className={`flex-row items-center gap-3 p-3 rounded-xl border-2 ${
-                  option.enabled
+                onPress={() => setFormat("pdf")}
+                className={`flex-1 flex-row items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 ${
+                  format === "pdf"
                     ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
                     : "border-surface-200 dark:border-surface-700"
                 }`}
               >
-                <View
-                  className={`w-10 h-10 rounded-lg items-center justify-center ${
-                    option.enabled ? "bg-primary-500" : "bg-surface-100 dark:bg-surface-800"
+                <Icon name="file-text" size={20} color={format === "pdf" ? "#F97316" : "#64748B"} />
+                <Text
+                  className={`font-medium ${
+                    format === "pdf"
+                      ? "text-primary-600 dark:text-primary-400"
+                      : "text-surface-600 dark:text-surface-400"
                   }`}
                 >
-                  <Icon
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Icon name type is dynamic
-                    name={option.icon as any}
-                    size={20}
-                    color={option.enabled ? "#FFFFFF" : "#64748B"}
-                  />
-                </View>
-                <View className="flex-1">
-                  <Text
-                    className={`font-medium ${
-                      option.enabled
-                        ? "text-primary-600 dark:text-primary-400"
-                        : "text-surface-900 dark:text-white"
+                  PDF
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setFormat("csv")}
+                className={`flex-1 flex-row items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 ${
+                  format === "csv"
+                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                    : "border-surface-200 dark:border-surface-700"
+                }`}
+              >
+                <Icon name="table" size={20} color={format === "csv" ? "#F97316" : "#64748B"} />
+                <Text
+                  className={`font-medium ${
+                    format === "csv"
+                      ? "text-primary-600 dark:text-primary-400"
+                      : "text-surface-600 dark:text-surface-400"
+                  }`}
+                >
+                  CSV
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Content Selection */}
+            <Text className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">
+              Include Content
+            </Text>
+            <View className="gap-2 mb-6">
+              {contentOptions.map((option) => (
+                <TouchableOpacity
+                  key={option.id}
+                  onPress={() => toggleContentOption(option.id)}
+                  className={`flex-row items-center gap-3 p-3 rounded-xl border-2 ${
+                    option.enabled
+                      ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                      : "border-surface-200 dark:border-surface-700"
+                  }`}
+                >
+                  <View
+                    className={`w-10 h-10 rounded-lg items-center justify-center ${
+                      option.enabled ? "bg-primary-500" : "bg-surface-100 dark:bg-surface-800"
                     }`}
                   >
-                    {option.label}
-                  </Text>
-                  <Text className="text-sm text-surface-500 dark:text-surface-400">
-                    {option.description}
-                  </Text>
-                </View>
-                <View
-                  className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
-                    option.enabled
-                      ? "border-primary-500 bg-primary-500"
-                      : "border-surface-300 dark:border-surface-600"
-                  }`}
-                >
-                  {option.enabled && <Icon name="check" size={14} color="#FFFFFF" />}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* PDF Options */}
-          {format === "pdf" && (
-            <>
-              <Text className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">
-                PDF Options
-              </Text>
-              <View className="gap-3 mb-6">
-                {/* Theme Toggle */}
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-surface-600 dark:text-surface-400">Theme</Text>
-                  <View className="flex-row gap-2">
-                    <TouchableOpacity
-                      onPress={() => setTheme("light")}
-                      className={`flex-row items-center gap-2 px-3 py-1.5 rounded-lg ${
-                        theme === "light"
-                          ? "bg-surface-900 dark:bg-white"
-                          : "bg-surface-100 dark:bg-surface-800"
-                      }`}
-                    >
-                      <Icon
-                        name="sun"
-                        size={16}
-                        color={theme === "light" ? "#FFFFFF" : "#64748B"}
-                      />
-                      <Text
-                        className={`text-sm font-medium ${
-                          theme === "light"
-                            ? "text-white dark:text-surface-900"
-                            : "text-surface-600 dark:text-surface-400"
-                        }`}
-                      >
-                        Light
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => setTheme("dark")}
-                      className={`flex-row items-center gap-2 px-3 py-1.5 rounded-lg ${
-                        theme === "dark"
-                          ? "bg-surface-900 dark:bg-white"
-                          : "bg-surface-100 dark:bg-surface-800"
-                      }`}
-                    >
-                      <Icon
-                        name="moon"
-                        size={16}
-                        color={theme === "dark" ? "#FFFFFF" : "#64748B"}
-                      />
-                      <Text
-                        className={`text-sm font-medium ${
-                          theme === "dark"
-                            ? "text-white dark:text-surface-900"
-                            : "text-surface-600 dark:text-surface-400"
-                        }`}
-                      >
-                        Dark
-                      </Text>
-                    </TouchableOpacity>
+                    <Icon
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Icon name type is dynamic
+                      name={option.icon as any}
+                      size={20}
+                      color={option.enabled ? "#FFFFFF" : "#64748B"}
+                    />
                   </View>
-                </View>
-
-                {/* Heatmap Toggle */}
-                {contentOptions.find((o) => o.id === "shotCharts")?.enabled && (
-                  <View className="flex-row items-center justify-between">
-                    <Text className="text-surface-600 dark:text-surface-400">Include Heat Map</Text>
-                    <TouchableOpacity
-                      onPress={() => setIncludeHeatmap(!includeHeatmap)}
-                      className={`flex-row items-center gap-2 px-3 py-1.5 rounded-lg ${
-                        includeHeatmap ? "bg-red-500" : "bg-surface-100 dark:bg-surface-800"
+                  <View className="flex-1">
+                    <Text
+                      className={`font-medium ${
+                        option.enabled
+                          ? "text-primary-600 dark:text-primary-400"
+                          : "text-surface-900 dark:text-white"
                       }`}
                     >
-                      <Icon name="flame" size={16} color={includeHeatmap ? "#FFFFFF" : "#64748B"} />
-                      <Text
-                        className={`text-sm font-medium ${
-                          includeHeatmap ? "text-white" : "text-surface-600 dark:text-surface-400"
-                        }`}
-                      >
-                        {includeHeatmap ? "Enabled" : "Disabled"}
-                      </Text>
-                    </TouchableOpacity>
+                      {option.label}
+                    </Text>
+                    <Text className="text-sm text-surface-500 dark:text-surface-400">
+                      {option.description}
+                    </Text>
                   </View>
-                )}
-              </View>
-            </>
-          )}
-
-          {/* Large Dataset Warning */}
-          {isLargeDataset && (
-            <View className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 flex-row gap-3 mb-4">
-              <Icon name="alert-triangle" size={20} color="#F59E0B" />
-              <View className="flex-1">
-                <Text className="text-amber-800 dark:text-amber-300 text-sm font-medium mb-1">
-                  Large Dataset
-                </Text>
-                <Text className="text-amber-600 dark:text-amber-400 text-xs">
-                  Exporting {dataCount} items may take longer. PDF exports may timeout on very large
-                  datasets - consider using CSV format instead.
-                </Text>
-              </View>
+                  <View
+                    className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+                      option.enabled
+                        ? "border-primary-500 bg-primary-500"
+                        : "border-surface-300 dark:border-surface-600"
+                    }`}
+                  >
+                    {option.enabled && <Icon name="check" size={14} color="#FFFFFF" />}
+                  </View>
+                </TouchableOpacity>
+              ))}
             </View>
-          )}
+
+            {/* PDF Options */}
+            {format === "pdf" && (
+              <>
+                <Text className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">
+                  PDF Options
+                </Text>
+                <View className="gap-3 mb-6">
+                  {/* Theme Toggle */}
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-surface-600 dark:text-surface-400">Theme</Text>
+                    <View className="flex-row gap-2">
+                      <TouchableOpacity
+                        onPress={() => setTheme("light")}
+                        className={`flex-row items-center gap-2 px-3 py-1.5 rounded-lg ${
+                          theme === "light"
+                            ? "bg-surface-900 dark:bg-white"
+                            : "bg-surface-100 dark:bg-surface-800"
+                        }`}
+                      >
+                        <Icon
+                          name="sun"
+                          size={16}
+                          color={theme === "light" ? "#FFFFFF" : "#64748B"}
+                        />
+                        <Text
+                          className={`text-sm font-medium ${
+                            theme === "light"
+                              ? "text-white dark:text-surface-900"
+                              : "text-surface-600 dark:text-surface-400"
+                          }`}
+                        >
+                          Light
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => setTheme("dark")}
+                        className={`flex-row items-center gap-2 px-3 py-1.5 rounded-lg ${
+                          theme === "dark"
+                            ? "bg-surface-900 dark:bg-white"
+                            : "bg-surface-100 dark:bg-surface-800"
+                        }`}
+                      >
+                        <Icon
+                          name="moon"
+                          size={16}
+                          color={theme === "dark" ? "#FFFFFF" : "#64748B"}
+                        />
+                        <Text
+                          className={`text-sm font-medium ${
+                            theme === "dark"
+                              ? "text-white dark:text-surface-900"
+                              : "text-surface-600 dark:text-surface-400"
+                          }`}
+                        >
+                          Dark
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {/* Heatmap Toggle */}
+                  {contentOptions.find((o) => o.id === "shotCharts")?.enabled && (
+                    <View className="flex-row items-center justify-between">
+                      <Text className="text-surface-600 dark:text-surface-400">
+                        Include Heat Map
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => setIncludeHeatmap(!includeHeatmap)}
+                        className={`flex-row items-center gap-2 px-3 py-1.5 rounded-lg ${
+                          includeHeatmap ? "bg-red-500" : "bg-surface-100 dark:bg-surface-800"
+                        }`}
+                      >
+                        <Icon
+                          name="flame"
+                          size={16}
+                          color={includeHeatmap ? "#FFFFFF" : "#64748B"}
+                        />
+                        <Text
+                          className={`text-sm font-medium ${
+                            includeHeatmap ? "text-white" : "text-surface-600 dark:text-surface-400"
+                          }`}
+                        >
+                          {includeHeatmap ? "Enabled" : "Disabled"}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              </>
+            )}
+
+            {/* Large Dataset Warning */}
+            {isLargeDataset && (
+              <View className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 flex-row gap-3 mb-4">
+                <Icon name="alert-triangle" size={20} color="#F59E0B" />
+                <View className="flex-1">
+                  <Text className="text-amber-800 dark:text-amber-300 text-sm font-medium mb-1">
+                    Large Dataset
+                  </Text>
+                  <Text className="text-amber-600 dark:text-amber-400 text-xs">
+                    Exporting {dataCount} items may take longer. PDF exports may timeout on very
+                    large datasets - consider using CSV format instead.
+                  </Text>
+                </View>
+              </View>
+            )}
 
             {/* Info Banner */}
             <View className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 flex-row gap-3 mb-4">

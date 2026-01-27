@@ -80,7 +80,15 @@ interface LeaderItemProps {
   onPress?: (id: string) => void;
 }
 
-function LeaderItem({ rank, playerName, teamName, value, unit = "", playerId, onPress }: LeaderItemProps) {
+function LeaderItem({
+  rank,
+  playerName,
+  teamName,
+  value,
+  unit = "",
+  playerId,
+  onPress,
+}: LeaderItemProps) {
   const handlePress = () => {
     if (playerId && onPress) {
       onPress(playerId);
@@ -89,7 +97,9 @@ function LeaderItem({ rank, playerName, teamName, value, unit = "", playerId, on
 
   const nameContent = (
     <>
-      <Text className={`text-sm font-semibold ${playerId && onPress ? "text-primary-500" : "text-surface-900 dark:text-white"}`}>
+      <Text
+        className={`text-sm font-semibold ${playerId && onPress ? "text-primary-500" : "text-surface-900 dark:text-white"}`}
+      >
         {playerName}
       </Text>
       {teamName && (
@@ -122,9 +132,7 @@ function LeaderItem({ rank, playerName, teamName, value, unit = "", playerId, on
           {nameContent}
         </TouchableOpacity>
       ) : (
-        <View className="flex-1">
-          {nameContent}
-        </View>
+        <View className="flex-1">{nameContent}</View>
       )}
       <Text className="text-primary-500 text-lg font-bold">
         {value.toFixed(1)}
@@ -165,7 +173,9 @@ function StandingsItem({
 
   const teamNameContent = (
     <>
-      <Text className={`text-sm font-semibold ${teamId && onPress ? "text-primary-500" : "text-surface-900 dark:text-white"}`}>
+      <Text
+        className={`text-sm font-semibold ${teamId && onPress ? "text-primary-500" : "text-surface-900 dark:text-white"}`}
+      >
         {teamName}
       </Text>
       {avgPoints !== undefined && avgPoints > 0 && (
@@ -197,9 +207,7 @@ function StandingsItem({
           {teamNameContent}
         </TouchableOpacity>
       ) : (
-        <View className="flex-1">
-          {teamNameContent}
-        </View>
+        <View className="flex-1">{teamNameContent}</View>
       )}
       <View className="flex-row items-center mr-3">
         <Text className="text-green-500 font-semibold">{wins}</Text>

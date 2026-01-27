@@ -609,7 +609,12 @@ export const getDashboard = query({
       .filter((p) => p!.gamesPlayed >= 3)
       .sort((a, b) => b!.fieldGoalPercentage - a!.fieldGoalPercentage)
       .slice(0, 5)
-      .map((p) => ({ id: p!.playerId, name: p!.playerName, value: p!.fieldGoalPercentage, team: p!.team }));
+      .map((p) => ({
+        id: p!.playerId,
+        name: p!.playerName,
+        value: p!.fieldGoalPercentage,
+        team: p!.team,
+      }));
 
     // Calculate standings
     const standings = await Promise.all(
