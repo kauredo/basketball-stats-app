@@ -17,7 +17,6 @@ import {
   TrashIcon,
   PlusIcon,
   CalendarIcon,
-  XMarkIcon,
   UsersIcon,
   UserGroupIcon,
   ArrowTrendingUpIcon,
@@ -31,13 +30,13 @@ import {
 } from "../components/export/TeamSeasonExportModal";
 import { downloadPDF, captureCourtAsImage } from "../utils/export/pdf-export";
 import { PrintableShotChart } from "../components/export/PrintableShotChart";
-import type { ShotLocation } from "../types/livegame";
-
-interface EditFormState {
-  name: string;
-  city: string;
-  description: string;
-}
+import {
+  TeamFormModal,
+  PlayerFormModal,
+  DeleteConfirmationModal,
+  type TeamFormData,
+  type PlayerFormData,
+} from "../components/modals";
 
 // Local interface for player items
 interface PlayerItem {
@@ -90,9 +89,10 @@ const TeamDetail: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [editForm, setEditForm] = useState<EditFormState>({ name: "", city: "", description: "" });
+  const [showCreatePlayerModal, setShowCreatePlayerModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [exportTheme, setExportTheme] = useState<"light" | "dark">("light");
 
   // Ref for capturing shot chart image
@@ -154,6 +154,7 @@ const TeamDetail: React.FC = () => {
 
   const updateTeam = useMutation(api.teams.update);
   const removeTeam = useMutation(api.teams.remove);
+  const createPlayer = useMutation(api.players.create);
 
   const team = teamData?.team;
   const players = (playersData?.players || []) as PlayerItem[];
@@ -374,27 +375,26 @@ const TeamDetail: React.FC = () => {
   };
 
   const openEditModal = () => {
-    if (team) {
-      setEditForm({
-        name: team.name || "",
-        city: team.city || "",
-        description: team.description || "",
-      });
-    }
     setShowEditModal(true);
   };
 
-  const handleUpdateTeam = async () => {
-    if (!editForm.name.trim() || !token || !teamId) return;
+  const handleUpdateTeam = async (
+    data: TeamFormData,
+    logoStorageId?: Id<"_storage"> | null,
+    clearLogo?: boolean
+  ) => {
+    if (!token || !teamId) return;
 
     setIsUpdating(true);
     try {
       await updateTeam({
         token,
         teamId: teamId as Id<"teams">,
-        name: editForm.name.trim(),
-        city: editForm.city.trim() || undefined,
-        description: editForm.description.trim() || undefined,
+        name: data.name.trim(),
+        city: data.city.trim() || undefined,
+        description: data.description.trim() || undefined,
+        logoStorageId: logoStorageId || undefined,
+        clearLogo: clearLogo || undefined,
       });
       toast.success("Team updated successfully");
       setShowEditModal(false);
@@ -423,6 +423,31 @@ const TeamDetail: React.FC = () => {
       const message = getErrorMessage(error, "Failed to delete team. Please try again.");
       toast.error(message);
       setIsDeleting(false);
+    }
+  };
+
+  const handleCreatePlayer = async (data: PlayerFormData) => {
+    if (!token || !teamId) return;
+
+    setIsCreating(true);
+    try {
+      await createPlayer({
+        token,
+        teamId: teamId as Id<"teams">,
+        name: data.name.trim(),
+        number: parseInt(data.number),
+        position: data.position,
+        heightCm: data.heightCm ? parseInt(data.heightCm) : undefined,
+        weightKg: data.weightKg ? parseInt(data.weightKg) : undefined,
+      });
+      toast.success(`Player "${data.name.trim()}" added to ${team?.name}`);
+      setShowCreatePlayerModal(false);
+    } catch (error) {
+      console.error("Failed to create player:", error);
+      const message = getErrorMessage(error, "Failed to add player. Please try again.");
+      toast.error(message);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -652,13 +677,13 @@ const TeamDetail: React.FC = () => {
                   <ArrowDownTrayIcon className="w-4 h-4" />
                   Export
                 </button>
-                <Link
-                  to={`/app/teams/${teamId}/players/new`}
+                <button
+                  onClick={() => setShowCreatePlayerModal(true)}
                   className="btn-primary px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5"
                 >
                   <PlusIcon className="w-4 h-4" />
                   Add Player
-                </Link>
+                </button>
               </div>
             </div>
 
@@ -865,126 +890,44 @@ const TeamDetail: React.FC = () => {
       </section>
 
       {/* Edit Team Modal */}
-      {showEditModal && (
-        <div
-          className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          onClick={(e) => e.target === e.currentTarget && setShowEditModal(false)}
-        >
-          <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md shadow-dramatic border border-surface-200 dark:border-surface-700 animate-scale-in">
-            <div className="flex items-center justify-between p-6 border-b border-surface-200 dark:border-surface-700">
-              <h3 className="text-lg font-semibold text-surface-900 dark:text-white">Edit Team</h3>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="p-2 -m-2 rounded-lg text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
+      <TeamFormModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleUpdateTeam}
+        isSubmitting={isUpdating}
+        mode="edit"
+        initialData={
+          team
+            ? {
+                name: team.name || "",
+                city: team.city || "",
+                description: team.description || "",
+                logoUrl: team.logoUrl,
+              }
+            : undefined
+        }
+      />
 
-            <div className="p-6 space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                  Team Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
-                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
-                  placeholder="Enter team name"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={editForm.city}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, city: e.target.value }))}
-                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
-                  placeholder="Enter city (optional)"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={editForm.description}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, description: e.target.value }))
-                  }
-                  rows={3}
-                  className="w-full bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow resize-none"
-                  placeholder="Enter description (optional)"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 p-6 border-t border-surface-200 dark:border-surface-700 bg-surface-50/50 dark:bg-surface-900/50">
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="btn-secondary px-4 py-2.5 rounded-xl"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdateTeam}
-                disabled={!editForm.name.trim() || isUpdating}
-                className="btn-primary px-5 py-2.5 rounded-xl"
-              >
-                {isUpdating ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Add Player Modal */}
+      <PlayerFormModal
+        isOpen={showCreatePlayerModal}
+        onClose={() => setShowCreatePlayerModal(false)}
+        onSubmit={handleCreatePlayer}
+        isSubmitting={isCreating}
+        mode="create"
+        teamName={team?.name}
+      />
 
       {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div
-          className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          onClick={(e) => e.target === e.currentTarget && setShowDeleteConfirm(false)}
-        >
-          <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-sm shadow-dramatic border border-surface-200 dark:border-surface-700 animate-scale-in">
-            <div className="p-6 text-center">
-              <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TrashIcon className="w-7 h-7 text-red-500" />
-              </div>
-              <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-2">
-                Delete Team?
-              </h3>
-              <p className="text-surface-500 text-sm leading-relaxed">
-                Are you sure you want to delete{" "}
-                <span className="font-medium text-surface-700 dark:text-surface-300">
-                  "{team.name}"
-                </span>
-                ? This action cannot be undone and will remove all associated player data.
-              </p>
-            </div>
-
-            <div className="flex gap-3 p-6 border-t border-surface-200 dark:border-surface-700 bg-surface-50/50 dark:bg-surface-900/50">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 btn-secondary px-4 py-2.5 rounded-xl"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteTeam}
-                disabled={isDeleting}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-surface-800 transition-colors disabled:opacity-50"
-              >
-                {isDeleting ? "Deleting..." : "Delete Team"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmationModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteTeam}
+        isDeleting={isDeleting}
+        title="Delete Team?"
+        itemName={team?.name || ""}
+        warningMessage="This action cannot be undone and will remove all associated player data."
+      />
 
       {/* Export Season Modal */}
       <TeamSeasonExportModal

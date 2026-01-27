@@ -7,7 +7,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { getErrorMessage } from "../utils/error";
 import type { Position } from "@basketball-stats/shared";
-import ImageUpload from "../components/ImageUpload";
 import {
   UserIcon,
   ChartBarIcon,
@@ -15,10 +14,14 @@ import {
   FunnelIcon,
   PencilIcon,
   TrashIcon,
-  ExclamationTriangleIcon,
   EyeIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import {
+  PlayerFormModal,
+  DeleteConfirmationModal,
+  type PlayerFormData,
+} from "../components/modals";
 
 // Local interface for player items returned from the API
 interface PlayerItem {
@@ -57,34 +60,8 @@ const Players: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerItem | null>(null);
-  const [playerForm, setPlayerForm] = useState({
-    name: "",
-    number: "",
-    position: "PG" as "PG" | "SG" | "SF" | "PF" | "C",
-    heightCm: "",
-    weightKg: "",
-    active: true,
-  });
-  const [playerFormErrors, setPlayerFormErrors] = useState<{ name?: string; number?: string }>({});
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [pendingImageStorageId, setPendingImageStorageId] = useState<Id<"_storage"> | null>(null);
-  const [clearImage, setClearImage] = useState(false);
-
-  // Validation functions
-  const validatePlayerName = (name: string) => {
-    if (!name.trim()) return "Player name is required";
-    if (name.trim().length < 2) return "Player name must be at least 2 characters";
-    return undefined;
-  };
-
-  const validateJerseyNumber = (number: string) => {
-    if (!number) return "Jersey number is required";
-    const num = parseInt(number);
-    if (isNaN(num)) return "Jersey number must be a valid number";
-    if (num < 0 || num > 99) return "Jersey number must be between 0 and 99";
-    return undefined;
-  };
 
   const playersData = useQuery(
     api.players.list,
@@ -114,22 +91,15 @@ const Players: React.FC = () => {
 
   const handleEditPlayer = (player: PlayerItem) => {
     setSelectedPlayer(player);
-    setPlayerForm({
-      name: player.name,
-      number: player.number.toString(),
-      position: player.position || "PG",
-      heightCm: player.heightCm?.toString() || "",
-      weightKg: player.weightKg?.toString() || "",
-      active: player.active !== false,
-    });
-    setPlayerFormErrors({});
-    setPendingImageStorageId(null);
-    setClearImage(false);
     setShowEditModal(true);
   };
 
-  const handleUpdatePlayer = async () => {
-    if (!selectedPlayer || !playerForm.name.trim() || !playerForm.number || !token) return;
+  const handleUpdatePlayer = async (
+    data: PlayerFormData,
+    imageStorageId?: Id<"_storage"> | null,
+    clearImage?: boolean
+  ) => {
+    if (!selectedPlayer || !token) return;
 
     setIsUpdating(true);
     try {
@@ -137,20 +107,20 @@ const Players: React.FC = () => {
       await updatePlayer({
         token,
         playerId: selectedPlayer.id as Id<"players">,
-        name: playerForm.name.trim(),
-        number: parseInt(playerForm.number),
-        position: playerForm.position,
-        heightCm: playerForm.heightCm ? parseInt(playerForm.heightCm) : undefined,
-        weightKg: playerForm.weightKg ? parseInt(playerForm.weightKg) : undefined,
-        active: playerForm.active,
+        name: data.name.trim(),
+        number: parseInt(data.number),
+        position: data.position,
+        heightCm: data.heightCm ? parseInt(data.heightCm) : undefined,
+        weightKg: data.weightKg ? parseInt(data.weightKg) : undefined,
+        active: data.active,
       });
 
       // Handle image changes
-      if (pendingImageStorageId) {
+      if (imageStorageId) {
         await setPlayerImage({
           token,
           playerId: selectedPlayer.id as Id<"players">,
-          storageId: pendingImageStorageId,
+          storageId: imageStorageId,
         });
       } else if (clearImage && selectedPlayer.imageUrl) {
         await removePlayerImage({
@@ -159,20 +129,9 @@ const Players: React.FC = () => {
         });
       }
 
-      toast.success(`Player "${playerForm.name.trim()}" updated successfully`);
+      toast.success(`Player "${data.name.trim()}" updated successfully`);
       setShowEditModal(false);
       setSelectedPlayer(null);
-      setPlayerForm({
-        name: "",
-        number: "",
-        position: "PG",
-        heightCm: "",
-        weightKg: "",
-        active: true,
-      });
-      setPlayerFormErrors({});
-      setPendingImageStorageId(null);
-      setClearImage(false);
     } catch (error) {
       console.error("Failed to update player:", error);
       const message = getErrorMessage(error, "Failed to update player. Please try again.");
@@ -488,290 +447,43 @@ const Players: React.FC = () => {
       )}
 
       {/* Edit Player Modal */}
-      {showEditModal && selectedPlayer && (
-        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 w-full max-w-md border border-surface-200 dark:border-surface-700 animate-scale-in">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-surface-900 dark:text-white">Edit Player</h3>
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setSelectedPlayer(null);
-                  setPlayerForm({
-                    name: "",
-                    number: "",
-                    position: "PG",
-                    heightCm: "",
-                    weightKg: "",
-                    active: true,
-                  });
-                  setPlayerFormErrors({});
-                  setPendingImageStorageId(null);
-                  setClearImage(false);
-                }}
-                className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                  Player Name *
-                </label>
-                <input
-                  type="text"
-                  value={playerForm.name}
-                  onChange={(e) => {
-                    setPlayerForm((prev) => ({ ...prev, name: e.target.value }));
-                    if (playerFormErrors.name) {
-                      setPlayerFormErrors((prev) => ({
-                        ...prev,
-                        name: validatePlayerName(e.target.value),
-                      }));
-                    }
-                  }}
-                  onBlur={(e) =>
-                    setPlayerFormErrors((prev) => ({
-                      ...prev,
-                      name: validatePlayerName(e.target.value),
-                    }))
-                  }
-                  className={`w-full bg-surface-100 dark:bg-surface-700 border rounded-xl px-3 py-2 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                    playerFormErrors.name
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-surface-300 dark:border-surface-600"
-                  }`}
-                  placeholder="Enter player name"
-                />
-                {playerFormErrors.name && (
-                  <p className="mt-1 text-sm text-red-500 flex items-center">
-                    <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
-                    {playerFormErrors.name}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                    Jersey # *
-                  </label>
-                  <input
-                    type="number"
-                    value={playerForm.number}
-                    onChange={(e) => {
-                      setPlayerForm((prev) => ({ ...prev, number: e.target.value }));
-                      if (playerFormErrors.number) {
-                        setPlayerFormErrors((prev) => ({
-                          ...prev,
-                          number: validateJerseyNumber(e.target.value),
-                        }));
-                      }
-                    }}
-                    onBlur={(e) =>
-                      setPlayerFormErrors((prev) => ({
-                        ...prev,
-                        number: validateJerseyNumber(e.target.value),
-                      }))
-                    }
-                    className={`w-full bg-surface-100 dark:bg-surface-700 border rounded-xl px-3 py-2 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                      playerFormErrors.number
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-surface-300 dark:border-surface-600"
-                    }`}
-                    placeholder="00"
-                    min="0"
-                    max="99"
-                  />
-                  {playerFormErrors.number && (
-                    <p className="mt-1 text-sm text-red-500 flex items-center">
-                      <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
-                      {playerFormErrors.number}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                    Position *
-                  </label>
-                  <select
-                    value={playerForm.position}
-                    onChange={(e) =>
-                      setPlayerForm((prev) => ({ ...prev, position: e.target.value as Position }))
-                    }
-                    className="w-full bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl px-3 py-2 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  >
-                    <option value="PG">Point Guard</option>
-                    <option value="SG">Shooting Guard</option>
-                    <option value="SF">Small Forward</option>
-                    <option value="PF">Power Forward</option>
-                    <option value="C">Center</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                    Height (cm)
-                  </label>
-                  <input
-                    type="number"
-                    value={playerForm.heightCm}
-                    onChange={(e) =>
-                      setPlayerForm((prev) => ({ ...prev, heightCm: e.target.value }))
-                    }
-                    className="w-full bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl px-3 py-2 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="183"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                    Weight (kg)
-                  </label>
-                  <input
-                    type="number"
-                    value={playerForm.weightKg}
-                    onChange={(e) =>
-                      setPlayerForm((prev) => ({ ...prev, weightKg: e.target.value }))
-                    }
-                    className="w-full bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl px-3 py-2 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="82"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="activeStatus"
-                  checked={playerForm.active}
-                  onChange={(e) => setPlayerForm((prev) => ({ ...prev, active: e.target.checked }))}
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-surface-300 rounded"
-                />
-                <label
-                  htmlFor="activeStatus"
-                  className="ml-2 block text-sm text-surface-700 dark:text-surface-300"
-                >
-                  Active player
-                </label>
-              </div>
-
-              <ImageUpload
-                currentImageUrl={clearImage ? undefined : selectedPlayer.imageUrl}
-                onImageUploaded={(storageId) => {
-                  setPendingImageStorageId(storageId);
-                  setClearImage(false);
-                }}
-                onImageCleared={() => {
-                  setPendingImageStorageId(null);
-                  setClearImage(true);
-                }}
-                label="Player Photo"
-                placeholder="Click to upload player photo"
-              />
-            </div>
-
-            <div className="flex justify-end space-x-3 mt-6">
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setSelectedPlayer(null);
-                  setPlayerForm({
-                    name: "",
-                    number: "",
-                    position: "PG",
-                    heightCm: "",
-                    weightKg: "",
-                    active: true,
-                  });
-                  setPlayerFormErrors({});
-                  setPendingImageStorageId(null);
-                  setClearImage(false);
-                }}
-                className="btn-secondary px-4 py-2 rounded-xl"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdatePlayer}
-                disabled={
-                  !playerForm.name.trim() ||
-                  !playerForm.number ||
-                  !!playerFormErrors.name ||
-                  !!playerFormErrors.number ||
-                  isUpdating
-                }
-                className="btn-primary px-4 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isUpdating ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PlayerFormModal
+        isOpen={showEditModal && !!selectedPlayer}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedPlayer(null);
+        }}
+        onSubmit={handleUpdatePlayer}
+        isSubmitting={isUpdating}
+        mode="edit"
+        initialData={
+          selectedPlayer
+            ? {
+                name: selectedPlayer.name,
+                number: selectedPlayer.number.toString(),
+                position: selectedPlayer.position || "PG",
+                heightCm: selectedPlayer.heightCm?.toString() || "",
+                weightKg: selectedPlayer.weightKg?.toString() || "",
+                active: selectedPlayer.active !== false,
+                imageUrl: selectedPlayer.imageUrl,
+              }
+            : undefined
+        }
+      />
 
       {/* Delete Player Confirmation Modal */}
-      {showDeleteModal && selectedPlayer && (
-        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-surface-800 rounded-2xl p-6 w-full max-w-md border border-surface-200 dark:border-surface-700 animate-scale-in">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                  <ExclamationTriangleIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
-                </div>
-                <h3 className="text-lg font-medium text-surface-900 dark:text-white">
-                  Delete Player
-                </h3>
-              </div>
-              <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setSelectedPlayer(null);
-                }}
-                className="p-2 text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            <p className="text-surface-600 dark:text-surface-400 mb-2">
-              Are you sure you want to delete{" "}
-              <span className="font-semibold text-surface-900 dark:text-white">
-                {selectedPlayer.name}
-              </span>
-              ?
-            </p>
-            <p className="text-sm text-surface-500 dark:text-surface-500 mb-6">
-              This action cannot be undone. If the player has game statistics, they will be set to
-              inactive instead.
-            </p>
-
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setSelectedPlayer(null);
-                }}
-                className="btn-secondary px-4 py-2 rounded-xl"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeletePlayer}
-                disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isDeleting ? "Deleting..." : "Delete Player"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal && !!selectedPlayer}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedPlayer(null);
+        }}
+        onConfirm={handleDeletePlayer}
+        isDeleting={isDeleting}
+        title="Delete Player"
+        itemName={selectedPlayer?.name || ""}
+        warningMessage="This action cannot be undone. If the player has game statistics, they will be set to inactive instead."
+      />
     </div>
   );
 };
