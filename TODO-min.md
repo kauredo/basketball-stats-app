@@ -91,3 +91,5 @@ Call Stack
 ```
 
 - [ ] Lists with users or teams, or game cards (even scheduled games) should be clickable. This should work across the app, in both web and mobile.
+- [ ] When we are adding a stat, through the quick actions or the shot recording, we should add separation between players of different teams. This should also be colour coded.
+- [ ] On the shot recording, we should be able to filter by team or player, plus the icons should be different for each team. (does this make sense, or should this view-only section only be in the stats or something?)
