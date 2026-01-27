@@ -7,7 +7,9 @@ import {
   Linking,
   Alert,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Icon from "../Icon";
 import { buildExportURL, type ExportFormat, type ExportType } from "@basketball-stats/shared";
 import { WEB_APP_BASE_URL, EXPORT_CONFIG } from "../../constants/config";
@@ -44,6 +46,7 @@ export function ExportOptionsSheet({
   title = "Export Data",
   dataCount,
 }: ExportOptionsSheetProps) {
+  const insets = useSafeAreaInsets();
   const isLargeDataset =
     dataCount !== undefined && dataCount > EXPORT_CONFIG.LARGE_DATASET_THRESHOLD;
   const [format, setFormat] = useState<ExportFormat>("pdf");
@@ -126,21 +129,25 @@ export function ExportOptionsSheet({
     <Modal
       visible={isOpen}
       animationType="slide"
-      presentationStyle="pageSheet"
+      transparent
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-surface-50 dark:bg-surface-950">
-        {/* Header */}
-        <View className="flex-row items-center justify-between px-4 py-4 border-b border-surface-200 dark:border-surface-800">
-          <TouchableOpacity onPress={onClose} className="p-2">
-            <Icon name="x" size={24} color="#64748B" />
-          </TouchableOpacity>
-          <Text className="text-lg font-bold text-surface-900 dark:text-white">{title}</Text>
-          <View className="w-10" />
-        </View>
+      <View className="flex-1 bg-black/50 justify-end">
+        <View className="bg-white dark:bg-surface-800 rounded-t-3xl max-h-[90%]">
+          {/* Header */}
+          <View className="flex-row items-center justify-between px-4 py-4 border-b border-surface-200 dark:border-surface-700">
+            <Text className="text-lg font-bold text-surface-900 dark:text-white">{title}</Text>
+            <TouchableOpacity
+              onPress={onClose}
+              className="p-2 -mr-2 rounded-lg"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Icon name="close" size={24} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
 
-        {/* Content */}
-        <View className="flex-1 p-4">
+          {/* Content */}
+          <ScrollView className="px-4 pt-4" showsVerticalScrollIndicator={false}>
           {/* Format Selector */}
           <Text className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">
             Export Format
@@ -341,43 +348,47 @@ export function ExportOptionsSheet({
             </View>
           )}
 
-          {/* Info Banner */}
-          <View className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 flex-row gap-3">
-            <Icon name="info" size={20} color="#3B82F6" />
-            <View className="flex-1">
-              <Text className="text-blue-800 dark:text-blue-300 text-sm font-medium mb-1">
-                Export via Web
-              </Text>
-              <Text className="text-blue-600 dark:text-blue-400 text-xs">
-                This will open the web app to generate and download your export file.
-              </Text>
+            {/* Info Banner */}
+            <View className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 flex-row gap-3 mb-4">
+              <Icon name="info" size={20} color="#3B82F6" />
+              <View className="flex-1">
+                <Text className="text-blue-800 dark:text-blue-300 text-sm font-medium mb-1">
+                  Export via Web
+                </Text>
+                <Text className="text-blue-600 dark:text-blue-400 text-xs">
+                  This will open the web app to generate and download your export file.
+                </Text>
+              </View>
             </View>
-          </View>
-        </View>
+          </ScrollView>
 
-        {/* Footer */}
-        <View className="p-4 border-t border-surface-200 dark:border-surface-800">
-          <TouchableOpacity
-            onPress={handleExport}
-            disabled={isExporting || !hasSelectedContent}
-            className={`flex-row items-center justify-center gap-2 py-4 rounded-xl ${
-              isExporting || !hasSelectedContent
-                ? "bg-surface-200 dark:bg-surface-700"
-                : "bg-primary-500"
-            }`}
+          {/* Footer */}
+          <View
+            className="px-4 pt-4 border-t border-surface-200 dark:border-surface-700"
+            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
           >
-            {isExporting ? (
-              <>
-                <ActivityIndicator size="small" color="#FFFFFF" />
-                <Text className="text-white font-semibold">Opening...</Text>
-              </>
-            ) : (
-              <>
-                <Icon name="download" size={20} color="#FFFFFF" />
-                <Text className="text-white font-semibold">Export {format.toUpperCase()}</Text>
-              </>
-            )}
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleExport}
+              disabled={isExporting || !hasSelectedContent}
+              className={`flex-row items-center justify-center gap-2 py-4 rounded-xl ${
+                isExporting || !hasSelectedContent
+                  ? "bg-surface-200 dark:bg-surface-700"
+                  : "bg-primary-500"
+              }`}
+            >
+              {isExporting ? (
+                <>
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <Text className="text-white font-semibold">Opening...</Text>
+                </>
+              ) : (
+                <>
+                  <Icon name="download" size={20} color="#FFFFFF" />
+                  <Text className="text-white font-semibold">Export {format.toUpperCase()}</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>

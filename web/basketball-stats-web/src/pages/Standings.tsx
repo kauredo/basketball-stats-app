@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -275,9 +275,12 @@ const Standings: React.FC = () => {
                           </span>
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-surface-900 dark:text-white">
+                          <Link
+                            to={`/app/teams/${team.teamId}`}
+                            className="text-sm font-medium text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                          >
                             {team.teamName}
-                          </div>
+                          </Link>
                           {team.city && <div className="text-xs text-surface-500">{team.city}</div>}
                         </div>
                       </div>

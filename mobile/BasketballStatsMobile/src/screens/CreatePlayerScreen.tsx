@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -64,12 +64,15 @@ export default function CreatePlayerScreen() {
     token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
   );
 
-  const teams: Team[] =
-    teamsData?.teams.map((t) => ({
-      id: t.id,
-      name: t.name,
-      city: t.city,
-    })) || [];
+  const teams: Team[] = useMemo(
+    () =>
+      teamsData?.teams.map((t) => ({
+        id: t.id,
+        name: t.name,
+        city: t.city,
+      })) || [],
+    [teamsData?.teams]
+  );
 
   // Pre-select team if passed via route params
   React.useEffect(() => {

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Modal, TouchableOpacity, FlatList, useColorScheme } from "react-native";
+import { View, Text, Modal, TouchableOpacity, ScrollView, useColorScheme } from "react-native";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
 import type { Id } from "../../../../../convex/_generated/dataModel";
@@ -32,6 +32,8 @@ interface ShotRecordingModalProps {
   shotType: "2pt" | "3pt";
   zoneName: string;
   onCourtPlayers: OnCourtPlayer[];
+  homeTeamName?: string;
+  awayTeamName?: string;
 }
 
 /**
@@ -46,11 +48,18 @@ export function ShotRecordingModal({
   shotType,
   zoneName,
   onCourtPlayers,
+  homeTeamName = "Home",
+  awayTeamName = "Away",
 }: ShotRecordingModalProps) {
   const colorScheme = useColorScheme();
   const _isDark = colorScheme === "dark";
 
   const points = shotType === "3pt" ? 3 : 2;
+
+  // Group players by team
+  const activePlayers = onCourtPlayers.filter((p) => p.isOnCourt);
+  const homePlayers = activePlayers.filter((p) => p.isHomeTeam);
+  const awayPlayers = activePlayers.filter((p) => !p.isHomeTeam);
 
   const handleRecord = (playerId: Id<"players">, made: boolean) => {
     if (made) {
@@ -61,13 +70,21 @@ export function ShotRecordingModal({
     onRecord(playerId, made);
   };
 
-  const renderPlayer = ({ item }: { item: OnCourtPlayer }) => {
+  const renderPlayer = (item: OnCourtPlayer) => {
     if (!item.player) return null;
 
+    // Team-specific colors: home = blue, away = orange
+    const avatarBg = item.isHomeTeam
+      ? "bg-blue-600"
+      : "bg-orange-500";
+
     return (
-      <View className="flex-row items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700">
+      <View
+        key={item.id}
+        className="flex-row items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700"
+      >
         <View className="flex-row items-center flex-1">
-          <View className="w-10 h-10 bg-primary-500 rounded-full justify-center items-center mr-3">
+          <View className={`w-10 h-10 rounded-full justify-center items-center mr-3 ${avatarBg}`}>
             <Text className="text-white font-bold text-sm">#{item.player.number}</Text>
           </View>
           <View>
@@ -93,6 +110,28 @@ export function ShotRecordingModal({
             <Text className="text-white text-sm font-bold">MISS</Text>
           </TouchableOpacity>
         </View>
+      </View>
+    );
+  };
+
+  const renderTeamSection = (players: OnCourtPlayer[], teamName: string, isHome: boolean) => {
+    if (players.length === 0) return null;
+
+    const headerBg = isHome
+      ? "bg-blue-100 dark:bg-blue-900/30"
+      : "bg-orange-100 dark:bg-orange-900/30";
+    const headerText = isHome
+      ? "text-blue-700 dark:text-blue-300"
+      : "text-orange-700 dark:text-orange-300";
+
+    return (
+      <View key={isHome ? "home" : "away"}>
+        <View className={`px-4 py-2 ${headerBg}`}>
+          <Text className={`text-xs font-bold uppercase tracking-wide ${headerText}`}>
+            {teamName}
+          </Text>
+        </View>
+        {players.map(renderPlayer)}
       </View>
     );
   };
@@ -135,19 +174,17 @@ export function ShotRecordingModal({
             </View>
           </View>
 
-          {/* Player list with made/missed buttons */}
-          {onCourtPlayers.length === 0 ? (
+          {/* Player list grouped by team */}
+          {activePlayers.length === 0 ? (
             <View className="p-8 items-center">
               <Icon name="users" size={32} color="#9CA3AF" />
               <Text className="text-surface-500 mt-2">No players on court</Text>
             </View>
           ) : (
-            <FlatList
-              data={onCourtPlayers.filter((p) => p.isOnCourt)}
-              keyExtractor={(item) => item.id}
-              renderItem={renderPlayer}
-              className="max-h-80"
-            />
+            <ScrollView className="max-h-80">
+              {renderTeamSection(homePlayers, homeTeamName, true)}
+              {renderTeamSection(awayPlayers, awayTeamName, false)}
+            </ScrollView>
           )}
 
           {/* Cancel button */}

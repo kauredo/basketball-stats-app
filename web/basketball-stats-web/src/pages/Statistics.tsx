@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -71,7 +71,7 @@ function StatCard({ title, value, subtitle, icon, trend }: StatCardProps) {
 
 interface LeadersBoardProps {
   title: string;
-  leaders: Array<{ name: string; value: number; team?: string }>;
+  leaders: Array<{ id?: string; name: string; value: number; team?: string }>;
   unit?: string;
 }
 
@@ -81,13 +81,22 @@ function LeadersBoard({ title, leaders, unit = "" }: LeadersBoardProps) {
       <h3 className="section-header mb-4">{title}</h3>
       <div className="space-y-3">
         {leaders.slice(0, 5).map((leader, index) => (
-          <div key={leader.name} className="flex items-center justify-between">
+          <div key={leader.id || leader.name} className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-6 h-6 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center mr-3">
                 {index + 1}
               </div>
               <div className="flex flex-col">
-                <span className="text-surface-900 dark:text-white font-medium">{leader.name}</span>
+                {leader.id ? (
+                  <Link
+                    to={`/app/players/${leader.id}`}
+                    className="text-surface-900 dark:text-white font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  >
+                    {leader.name}
+                  </Link>
+                ) : (
+                  <span className="text-surface-900 dark:text-white font-medium">{leader.name}</span>
+                )}
                 {leader.team && (
                   <span className="text-surface-500 dark:text-surface-400 text-xs">
                     {leader.team}

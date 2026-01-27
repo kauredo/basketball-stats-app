@@ -22,6 +22,7 @@ type StatisticsScreenNavigationProp = NativeStackNavigationProp<RootStackParamLi
 
 /** Local interface for leader stats from getDashboard query */
 interface LeaderStat {
+  id?: string;
   name: string;
   value: number;
   team: string;
@@ -75,9 +76,28 @@ interface LeaderItemProps {
   teamName?: string;
   value: number;
   unit?: string;
+  playerId?: string;
+  onPress?: (id: string) => void;
 }
 
-function LeaderItem({ rank, playerName, teamName, value, unit = "" }: LeaderItemProps) {
+function LeaderItem({ rank, playerName, teamName, value, unit = "", playerId, onPress }: LeaderItemProps) {
+  const handlePress = () => {
+    if (playerId && onPress) {
+      onPress(playerId);
+    }
+  };
+
+  const nameContent = (
+    <>
+      <Text className={`text-sm font-semibold ${playerId && onPress ? "text-primary-500" : "text-surface-900 dark:text-white"}`}>
+        {playerName}
+      </Text>
+      {teamName && (
+        <Text className="text-surface-500 dark:text-surface-400 text-xs">{teamName}</Text>
+      )}
+    </>
+  );
+
   return (
     <View className="flex-row items-center bg-surface-100 dark:bg-surface-800/50 p-4 rounded-xl mb-2">
       <View
@@ -97,12 +117,15 @@ function LeaderItem({ rank, playerName, teamName, value, unit = "" }: LeaderItem
           {rank}
         </Text>
       </View>
-      <View className="flex-1">
-        <Text className="text-surface-900 dark:text-white text-sm font-semibold">{playerName}</Text>
-        {teamName && (
-          <Text className="text-surface-500 dark:text-surface-400 text-xs">{teamName}</Text>
-        )}
-      </View>
+      {playerId && onPress ? (
+        <TouchableOpacity className="flex-1" onPress={handlePress} activeOpacity={0.7}>
+          {nameContent}
+        </TouchableOpacity>
+      ) : (
+        <View className="flex-1">
+          {nameContent}
+        </View>
+      )}
       <Text className="text-primary-500 text-lg font-bold">
         {value.toFixed(1)}
         {unit}
@@ -114,22 +137,45 @@ function LeaderItem({ rank, playerName, teamName, value, unit = "" }: LeaderItem
 interface StandingsItemProps {
   rank: number;
   teamName: string;
+  teamId?: string;
   logoUrl?: string;
   wins: number;
   losses: number;
   winPercentage: number;
   avgPoints?: number;
+  onPress?: (teamId: string, teamName: string) => void;
 }
 
 function StandingsItem({
   rank,
   teamName,
+  teamId,
   logoUrl,
   wins,
   losses,
   winPercentage,
   avgPoints,
+  onPress,
 }: StandingsItemProps) {
+  const handlePress = () => {
+    if (teamId && onPress) {
+      onPress(teamId, teamName);
+    }
+  };
+
+  const teamNameContent = (
+    <>
+      <Text className={`text-sm font-semibold ${teamId && onPress ? "text-primary-500" : "text-surface-900 dark:text-white"}`}>
+        {teamName}
+      </Text>
+      {avgPoints !== undefined && avgPoints > 0 && (
+        <Text className="text-surface-500 dark:text-surface-400 text-xs">
+          {avgPoints.toFixed(1)} PPG
+        </Text>
+      )}
+    </>
+  );
+
   return (
     <View className="flex-row items-center bg-surface-100 dark:bg-surface-800/50 p-4 rounded-xl mb-2">
       <View className="w-8">
@@ -146,14 +192,15 @@ function StandingsItem({
           <Icon name="basketball" size={20} color="#9CA3AF" />
         )}
       </View>
-      <View className="flex-1">
-        <Text className="text-surface-900 dark:text-white text-sm font-semibold">{teamName}</Text>
-        {avgPoints !== undefined && avgPoints > 0 && (
-          <Text className="text-surface-500 dark:text-surface-400 text-xs">
-            {avgPoints.toFixed(1)} PPG
-          </Text>
-        )}
-      </View>
+      {teamId && onPress ? (
+        <TouchableOpacity className="flex-1" onPress={handlePress} activeOpacity={0.7}>
+          {teamNameContent}
+        </TouchableOpacity>
+      ) : (
+        <View className="flex-1">
+          {teamNameContent}
+        </View>
+      )}
       <View className="flex-row items-center mr-3">
         <Text className="text-green-500 font-semibold">{wins}</Text>
         <Text className="text-surface-400 mx-1">-</Text>
@@ -184,6 +231,14 @@ export default function StatisticsScreen() {
     setRefreshing(true);
     // Data auto-refreshes with Convex
     setTimeout(() => setRefreshing(false), 500);
+  };
+
+  const handlePlayerPress = (playerId: string) => {
+    navigation.navigate("PlayerStats", { playerId: playerId as Id<"players"> });
+  };
+
+  const handleTeamPress = (teamId: string, teamName: string) => {
+    navigation.navigate("TeamDetail", { teamId, teamName });
   };
 
   if (dashboardData === undefined) {
@@ -486,6 +541,8 @@ export default function StatisticsScreen() {
                   teamName={leader.team}
                   value={leader.value || 0}
                   unit=" PPG"
+                  playerId={leader.id}
+                  onPress={handlePlayerPress}
                 />
               ))}
               {(!leaders.scoring || leaders.scoring.length === 0) && (
@@ -511,6 +568,8 @@ export default function StatisticsScreen() {
                   teamName={leader.team}
                   value={leader.value || 0}
                   unit=" RPG"
+                  playerId={leader.id}
+                  onPress={handlePlayerPress}
                 />
               ))}
               {(!leaders.rebounding || leaders.rebounding.length === 0) && (
@@ -536,6 +595,8 @@ export default function StatisticsScreen() {
                   teamName={leader.team}
                   value={leader.value || 0}
                   unit=" APG"
+                  playerId={leader.id}
+                  onPress={handlePlayerPress}
                 />
               ))}
               {(!leaders.assists || leaders.assists.length === 0) && (
@@ -561,6 +622,8 @@ export default function StatisticsScreen() {
                   teamName={leader.team}
                   value={leader.value || 0}
                   unit="%"
+                  playerId={leader.id}
+                  onPress={handlePlayerPress}
                 />
               ))}
               {(!leaders.shooting || leaders.shooting.length === 0) && (
@@ -592,11 +655,13 @@ export default function StatisticsScreen() {
                   key={team.teamId || index}
                   rank={index + 1}
                   teamName={team.teamName || "Unknown"}
+                  teamId={team.teamId}
                   logoUrl={team.logoUrl}
                   wins={team.wins || 0}
                   losses={team.losses || 0}
                   winPercentage={team.winPercentage || 0}
                   avgPoints={team.avgPoints}
+                  onPress={handleTeamPress}
                 />
               ))}
               {standings.length > 5 && (

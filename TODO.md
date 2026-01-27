@@ -1,7 +1,7 @@
 # Basketball Stats App - TODO
 
 > Remember to check TODO-min.md for any TODOs that the user has added. Update this TODO.md TODOs with more details.
-> Last audit: January 26, 2026
+> Last audit: January 27, 2026
 
 ---
 
@@ -77,6 +77,23 @@ _All P3 backend issues resolved_
 | Haptic Feedback    | ❌  | ✅     | Consider for web       |
 | Sound Feedback     | ❌  | ✅     | Consider for web       |
 | Advanced Analytics | ✅  | ✅     | PER, A/TO added mobile |
+
+---
+
+## Recently Completed (January 27, 2026)
+
+### Bug Fixes
+
+- [x] **CreatePlayerScreen infinite loop** - Fixed Maximum update depth exceeded error by memoizing teams array with `useMemo`
+- [x] **Notification subscription warnings** - Updated `NotificationContext.tsx` to use `subscription.remove()` instead of deprecated `removeNotificationSubscription()`
+- [x] **Mobile export modal styling** - Refactored `ExportOptionsSheet` to use transparent bottom sheet pattern consistent with other modals in the app
+
+### UX Improvements
+
+- [x] **Scheduled games now clickable** - Updated `GamesScreen.tsx` to make upcoming/scheduled games tappable, navigating to LiveGame screen
+- [x] **Team separation in stat recording** - Added team headers with color coding (blue for home, orange for away) in `QuickStatModal` and `ShotRecordingModal`
+- [x] **Shot chart team filtering** - Added team filter pills to `LiveGameScreen` court view with "All", "Home", and "Away" options
+- [x] **Team-specific shot markers** - Updated `MiniCourt` to render circles for home team shots and diamonds for away team shots
 
 ---
 

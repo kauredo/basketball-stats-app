@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
-import { useRoute, type RouteProp } from "@react-navigation/native";
+import { useRoute, useNavigation, type RouteProp } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
@@ -49,6 +50,7 @@ function StatRow({ label, homeValue, awayValue, homeWins }: StatRowProps) {
 }
 
 interface PlayerStatRowProps {
+  playerId?: string;
   name: string;
   number: number;
   minutesPlayed: number;
@@ -65,9 +67,11 @@ interface PlayerStatRowProps {
   threePa: number;
   ftm: number;
   fta: number;
+  onPlayerPress?: (playerId: string) => void;
 }
 
 function PlayerStatRow({
+  playerId,
   name,
   number,
   minutesPlayed,
@@ -84,15 +88,30 @@ function PlayerStatRow({
   threePa,
   ftm,
   fta,
+  onPlayerPress,
 }: PlayerStatRowProps) {
+  const playerNameContent = (
+    <>
+      <Text className="text-surface-500 dark:text-surface-400 text-xs mr-1">#{number}</Text>
+      <Text className="text-surface-900 dark:text-white text-xs font-medium" numberOfLines={1}>
+        {name}
+      </Text>
+    </>
+  );
+
   return (
     <View className="flex-row items-center py-2.5 border-b border-surface-200 dark:border-surface-700">
-      <View className="w-28 flex-row items-center pr-2">
-        <Text className="text-surface-500 dark:text-surface-400 text-xs mr-1">#{number}</Text>
-        <Text className="text-surface-900 dark:text-white text-xs font-medium" numberOfLines={1}>
-          {name}
-        </Text>
-      </View>
+      {playerId && onPlayerPress ? (
+        <TouchableOpacity
+          className="w-28 flex-row items-center pr-2"
+          onPress={() => onPlayerPress(playerId)}
+          activeOpacity={0.7}
+        >
+          {playerNameContent}
+        </TouchableOpacity>
+      ) : (
+        <View className="w-28 flex-row items-center pr-2">{playerNameContent}</View>
+      )}
       <Text className="w-9 text-center text-surface-600 dark:text-surface-400 text-xs tabular-nums">
         {minutesPlayed}
       </Text>
@@ -132,11 +151,16 @@ function PlayerStatRow({
 
 export default function GameAnalysisScreen() {
   const route = useRoute<GameAnalysisRouteProp>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { gameId } = route.params;
   const { token, selectedLeague } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("boxscore");
   const [refreshing, setRefreshing] = useState(false);
   const [showExportSheet, setShowExportSheet] = useState(false);
+
+  const handlePlayerPress = (playerId: string) => {
+    navigation.navigate("PlayerStats", { playerId });
+  };
 
   const gameData = useQuery(
     api.games.get,
@@ -315,6 +339,7 @@ export default function GameAnalysisScreen() {
                 {sortedPlayers.map((player, index) => (
                   <PlayerStatRow
                     key={player.player?.id || index}
+                    playerId={player.player?.id}
                     name={player.player?.name || "Unknown"}
                     number={player.player?.number || 0}
                     minutesPlayed={player.minutesPlayed || 0}
@@ -331,6 +356,7 @@ export default function GameAnalysisScreen() {
                     threePa={player.threePointersAttempted || 0}
                     ftm={player.freeThrowsMade || 0}
                     fta={player.freeThrowsAttempted || 0}
+                    onPlayerPress={handlePlayerPress}
                   />
                 ))}
               </View>

@@ -217,6 +217,9 @@ export default function LiveGameScreen() {
     []
   );
 
+  // Shot chart filter state
+  const [shotTeamFilter, setShotTeamFilter] = useState<"all" | "home" | "away">("all");
+
   // Auto-prompt states for assist and rebound
   const [pendingAssist, setPendingAssist] = useState<PendingAssist | null>(null);
   const [pendingRebound, setPendingRebound] = useState<PendingRebound | null>(null);
@@ -318,6 +321,7 @@ export default function LiveGameScreen() {
     y: shot.y,
     made: shot.made,
     is3pt: shot.shotType === "3pt",
+    isHomeTeam: game?.homeTeam?.id ? shot.teamId === game.homeTeam.id : undefined,
   }));
 
   // Initialize starters when data loads for scheduled games
@@ -1401,6 +1405,76 @@ export default function LiveGameScreen() {
                     Shot Location (Tap to Record Shot)
                   </Text>
                 )}
+                {/* Team filter pills */}
+                {!isLandscape && persistedShots.length > 0 && (
+                  <View className="flex-row justify-center gap-2 mb-2">
+                    <TouchableOpacity
+                      onPress={() => setShotTeamFilter("all")}
+                      className={`px-3 py-1.5 rounded-full ${
+                        shotTeamFilter === "all"
+                          ? "bg-surface-700 dark:bg-surface-200"
+                          : "bg-surface-200 dark:bg-surface-700"
+                      }`}
+                    >
+                      <Text
+                        className={`text-xs font-medium ${
+                          shotTeamFilter === "all"
+                            ? "text-white dark:text-surface-900"
+                            : "text-surface-600 dark:text-surface-400"
+                        }`}
+                      >
+                        All
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => setShotTeamFilter("home")}
+                      className={`px-3 py-1.5 rounded-full flex-row items-center gap-1.5 ${
+                        shotTeamFilter === "home"
+                          ? "bg-blue-600"
+                          : "bg-surface-200 dark:bg-surface-700"
+                      }`}
+                    >
+                      <View
+                        className={`w-2 h-2 rounded-full ${
+                          shotTeamFilter === "home" ? "bg-white" : "bg-blue-600"
+                        }`}
+                      />
+                      <Text
+                        className={`text-xs font-medium ${
+                          shotTeamFilter === "home"
+                            ? "text-white"
+                            : "text-surface-600 dark:text-surface-400"
+                        }`}
+                      >
+                        {game?.homeTeam?.name || "Home"}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => setShotTeamFilter("away")}
+                      className={`px-3 py-1.5 rounded-full flex-row items-center gap-1.5 ${
+                        shotTeamFilter === "away"
+                          ? "bg-orange-500"
+                          : "bg-surface-200 dark:bg-surface-700"
+                      }`}
+                    >
+                      <View
+                        className={`w-2 h-2 ${
+                          shotTeamFilter === "away" ? "bg-white" : "bg-orange-500"
+                        }`}
+                        style={{ transform: [{ rotate: "45deg" }] }}
+                      />
+                      <Text
+                        className={`text-xs font-medium ${
+                          shotTeamFilter === "away"
+                            ? "text-white"
+                            : "text-surface-600 dark:text-surface-400"
+                        }`}
+                      >
+                        {game?.awayTeam?.name || "Away"}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
                 <View className="flex-1 items-center justify-center">
                   <MiniCourt
                     onCourtTap={handleCourtTap}
@@ -1410,6 +1484,7 @@ export default function LiveGameScreen() {
                     isLandscape={isLandscape}
                     maxCourtHeight={courtMaxHeight}
                     maxCourtWidth={courtMaxWidth}
+                    teamFilter={shotTeamFilter}
                   />
                 </View>
               </View>
@@ -2023,6 +2098,8 @@ export default function LiveGameScreen() {
         shotType={pendingShot?.is3pt ? "3pt" : "2pt"}
         zoneName={pendingShot?.zone || "Unknown"}
         onCourtPlayers={onCourtPlayersForModal}
+        homeTeamName={game?.homeTeam?.name || "Home"}
+        awayTeamName={game?.awayTeam?.name || "Away"}
       />
 
       {/* Assist Prompt Modal - Auto-shows after made shots */}
@@ -2061,6 +2138,8 @@ export default function LiveGameScreen() {
         onRecord={handleQuickStatRecord}
         statType={pendingQuickStat || "rebound"}
         onCourtPlayers={onCourtPlayersForModal}
+        homeTeamName={game?.homeTeam?.name || "Home"}
+        awayTeamName={game?.awayTeam?.name || "Away"}
       />
 
       {/* Foul Type Modal */}

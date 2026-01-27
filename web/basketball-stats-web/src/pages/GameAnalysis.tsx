@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
@@ -288,11 +288,22 @@ const GameAnalysis: React.FC = () => {
                   key={player.player?.id || index}
                   className="hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors"
                 >
-                  <td className="px-3 py-2 text-surface-900 dark:text-white">
-                    <span className="font-medium">{player.player?.name || "Unknown"}</span>
-                    <span className="text-surface-500 dark:text-surface-400 ml-1">
-                      #{player.player?.number}
-                    </span>
+                  <td className="px-3 py-2">
+                    {player.player?.id ? (
+                      <Link
+                        to={`/app/players/${player.player.id}`}
+                        className="text-surface-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                      >
+                        <span className="font-medium">{player.player?.name || "Unknown"}</span>
+                        <span className="text-surface-500 dark:text-surface-400 ml-1">
+                          #{player.player?.number}
+                        </span>
+                      </Link>
+                    ) : (
+                      <span className="text-surface-900 dark:text-white">
+                        <span className="font-medium">Unknown</span>
+                      </span>
+                    )}
                   </td>
                   <td className="px-2 py-2 text-center text-surface-600 dark:text-surface-400 tabular-nums">
                     {player.minutesPlayed || 0}

@@ -113,6 +113,9 @@ export default function GamesScreen() {
       navigation.navigate("LiveGame", { gameId: game.id });
     } else if (game.status === "completed") {
       navigation.navigate("GameAnalysis", { gameId: game.id });
+    } else if (game.status === "scheduled") {
+      // Navigate to live game to allow starting the game
+      navigation.navigate("LiveGame", { gameId: game.id });
     }
   };
 
@@ -239,36 +242,48 @@ export default function GamesScreen() {
   };
 
   const renderUpcomingGame = (game: Game) => (
-    <View
+    <TouchableOpacity
       key={game.id}
+      onPress={() => handleGamePress(game)}
+      activeOpacity={0.7}
       className="p-4 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800/30 mb-2"
     >
-      <View className="flex-row items-center mb-3">
-        <Icon name="calendar" size={14} color="#F97316" />
-        <Text className="text-sm font-medium text-surface-600 dark:text-surface-300 ml-2">
-          {game.scheduledAt
-            ? new Date(game.scheduledAt).toLocaleDateString("en-US", {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-              })
-            : "TBD"}
-        </Text>
-      </View>
-      <View>
-        <View className="flex-row justify-between items-center">
-          <Text className="font-medium text-surface-900 dark:text-surface-100">
-            {game.awayTeam?.name || "Away"}
+      <View className="flex-row items-center justify-between mb-3">
+        <View className="flex-row items-center">
+          <Icon name="calendar" size={14} color="#F97316" />
+          <Text className="text-sm font-medium text-surface-600 dark:text-surface-300 ml-2">
+            {game.scheduledAt
+              ? new Date(game.scheduledAt).toLocaleDateString("en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "TBD"}
           </Text>
-          <Text className="text-xs text-surface-400">@</Text>
         </View>
-        <View className="flex-row justify-between items-center mt-1">
-          <Text className="font-medium text-surface-900 dark:text-surface-100">
-            {game.homeTeam?.name || "Home"}
+        <View className="px-2 py-0.5 rounded bg-primary-100 dark:bg-primary-900/30">
+          <Text className="text-xs font-medium text-primary-600 dark:text-primary-400">
+            Scheduled
           </Text>
         </View>
       </View>
-    </View>
+      <View className="flex-row items-center justify-between">
+        <View className="flex-1">
+          <View className="flex-row justify-between items-center">
+            <Text className="font-medium text-surface-900 dark:text-surface-100">
+              {game.awayTeam?.name || "Away"}
+            </Text>
+            <Text className="text-xs text-surface-400">@</Text>
+          </View>
+          <View className="flex-row justify-between items-center mt-1">
+            <Text className="font-medium text-surface-900 dark:text-surface-100">
+              {game.homeTeam?.name || "Home"}
+            </Text>
+          </View>
+        </View>
+        <Icon name="chevron-right" size={16} color="#94a3b8" style={{ marginLeft: 8 }} />
+      </View>
+    </TouchableOpacity>
   );
 
   const renderGame = ({ item: game, section }: { item: Game; section: GameSection }) => {

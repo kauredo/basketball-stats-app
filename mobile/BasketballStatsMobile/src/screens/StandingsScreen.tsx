@@ -8,12 +8,17 @@ import {
   Share,
   Alert,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import { SkeletonTable } from "../components/Skeleton";
 import { getErrorMessage } from "@basketball-stats/shared";
+import type { RootStackParamList } from "../navigation/AppNavigator";
+
+type StandingsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface StandingTeam {
   teamId: string;
@@ -39,10 +44,17 @@ interface StandingsRowProps {
   team: StandingTeam;
   isFirst: boolean;
   isLast: boolean;
+  onTeamPress?: (teamId: string, teamName: string) => void;
 }
 
-function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
+function StandingsRow({ team, isFirst, isLast, onTeamPress }: StandingsRowProps) {
   const [expanded, setExpanded] = useState(false);
+
+  const handleTeamPress = () => {
+    if (onTeamPress) {
+      onTeamPress(team.teamId, team.teamName);
+    }
+  };
 
   return (
     <TouchableOpacity
@@ -72,14 +84,14 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
         </View>
 
         {/* Team Info */}
-        <View className="flex-1 ml-3">
-          <Text className="text-surface-900 dark:text-white font-semibold text-base">
+        <TouchableOpacity className="flex-1 ml-3" onPress={handleTeamPress} activeOpacity={0.7}>
+          <Text className="text-primary-500 font-semibold text-base">
             {team.teamName}
           </Text>
           {team.city && (
             <Text className="text-surface-500 dark:text-surface-500 text-xs">{team.city}</Text>
           )}
-        </View>
+        </TouchableOpacity>
 
         {/* Record */}
         <View className="flex-row items-center">
@@ -217,6 +229,7 @@ function StandingsRow({ team, isFirst, isLast }: StandingsRowProps) {
 }
 
 export default function StandingsScreen() {
+  const navigation = useNavigation<StandingsScreenNavigationProp>();
   const { token, selectedLeague } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -229,6 +242,10 @@ export default function StandingsScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 500);
+  };
+
+  const handleTeamPress = (teamId: string, teamName: string) => {
+    navigation.navigate("TeamDetail", { teamId, teamName });
   };
 
   const handleExport = async () => {
@@ -388,6 +405,7 @@ export default function StandingsScreen() {
                     team={team}
                     isFirst={index === 0}
                     isLast={index === standings.length - 1}
+                    onTeamPress={handleTeamPress}
                   />
                 </View>
               ))}

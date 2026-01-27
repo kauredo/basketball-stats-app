@@ -11,6 +11,8 @@ export interface ShotMarker {
   y: number;
   made: boolean;
   is3pt?: boolean;
+  /** Whether this shot is from the home team (for team-based styling) */
+  isHomeTeam?: boolean;
 }
 
 interface MiniCourtProps {
@@ -34,6 +36,8 @@ interface MiniCourtProps {
   maxCourtHeight?: number;
   /** Override maximum court width (for tablet support) */
   maxCourtWidth?: number;
+  /** Filter shots by team: "home", "away", or "all" (default) */
+  teamFilter?: "home" | "away" | "all";
 }
 
 // SVG viewBox dimensions - represents half court with proper proportions
@@ -53,6 +57,7 @@ export function MiniCourt({
   zoneStats,
   maxCourtHeight,
   maxCourtWidth,
+  teamFilter = "all",
 }: MiniCourtProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -138,12 +143,20 @@ export function MiniCourt({
       runOnJS(handleTap)(event.x, event.y);
     });
 
+  // Apply team filter
+  const filteredShots = shots.filter((shot) => {
+    if (teamFilter === "all") return true;
+    if (teamFilter === "home") return shot.isHomeTeam === true;
+    if (teamFilter === "away") return shot.isHomeTeam === false;
+    return true;
+  });
+
   // Determine which shots to show
-  const defaultMaxShots = displayMode === "all" ? shots.length : 5;
+  const defaultMaxShots = displayMode === "all" ? filteredShots.length : 5;
   const shotsToDisplay =
     displayMode === "all"
-      ? shots.slice(-(maxShots ?? defaultMaxShots))
-      : shots.slice(-(maxShots ?? defaultMaxShots));
+      ? filteredShots.slice(-(maxShots ?? defaultMaxShots))
+      : filteredShots.slice(-(maxShots ?? defaultMaxShots));
 
   return (
     <GestureDetector gesture={tapGesture}>
@@ -241,7 +254,7 @@ export function MiniCourt({
             strokeWidth="0.4"
           />
 
-          {/* Shot markers */}
+          {/* Shot markers - circles for home team, diamonds for away team */}
           {shotsToDisplay.map((shot, index) => {
             // Convert from basket-origin coordinates to SVG coordinates
             const svgX = BASKET_X + shot.x;
@@ -257,18 +270,34 @@ export function MiniCourt({
               : courtColors.shotMissed;
 
             const markerSize = displayMode === "all" ? 1.2 : 1.5;
+            const isAwayTeam = shot.isHomeTeam === false;
+
+            // Away team uses diamond shape (rotated square)
+            const diamondPath = `M ${svgX} ${svgY - markerSize} L ${svgX + markerSize} ${svgY} L ${svgX} ${svgY + markerSize} L ${svgX - markerSize} ${svgY} Z`;
 
             return (
               <G key={index}>
-                <Circle
-                  cx={svgX}
-                  cy={svgY}
-                  r={markerSize}
-                  fill={shotColor}
-                  opacity={opacity}
-                  stroke="#fff"
-                  strokeWidth={0.2}
-                />
+                {isAwayTeam ? (
+                  // Away team: diamond shape
+                  <Path
+                    d={diamondPath}
+                    fill={shotColor}
+                    opacity={opacity}
+                    stroke="#fff"
+                    strokeWidth={0.2}
+                  />
+                ) : (
+                  // Home team (or unknown): circle shape
+                  <Circle
+                    cx={svgX}
+                    cy={svgY}
+                    r={markerSize}
+                    fill={shotColor}
+                    opacity={opacity}
+                    stroke="#fff"
+                    strokeWidth={0.2}
+                  />
+                )}
                 {!shot.made && (
                   <G>
                     <Line

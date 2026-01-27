@@ -589,27 +589,27 @@ export const getDashboard = query({
 
     const validPlayerStats = playerStatsForLeaders.filter((s) => s !== null);
 
-    // Top 5 in each category - include team info
+    // Top 5 in each category - include team info and player ID for navigation
     const scoringLeaders = [...validPlayerStats]
       .sort((a, b) => b!.avgPoints - a!.avgPoints)
       .slice(0, 5)
-      .map((p) => ({ name: p!.playerName, value: p!.avgPoints, team: p!.team }));
+      .map((p) => ({ id: p!.playerId, name: p!.playerName, value: p!.avgPoints, team: p!.team }));
 
     const reboundingLeaders = [...validPlayerStats]
       .sort((a, b) => b!.avgRebounds - a!.avgRebounds)
       .slice(0, 5)
-      .map((p) => ({ name: p!.playerName, value: p!.avgRebounds, team: p!.team }));
+      .map((p) => ({ id: p!.playerId, name: p!.playerName, value: p!.avgRebounds, team: p!.team }));
 
     const assistsLeaders = [...validPlayerStats]
       .sort((a, b) => b!.avgAssists - a!.avgAssists)
       .slice(0, 5)
-      .map((p) => ({ name: p!.playerName, value: p!.avgAssists, team: p!.team }));
+      .map((p) => ({ id: p!.playerId, name: p!.playerName, value: p!.avgAssists, team: p!.team }));
 
     const shootingLeaders = [...validPlayerStats]
       .filter((p) => p!.gamesPlayed >= 3)
       .sort((a, b) => b!.fieldGoalPercentage - a!.fieldGoalPercentage)
       .slice(0, 5)
-      .map((p) => ({ name: p!.playerName, value: p!.fieldGoalPercentage, team: p!.team }));
+      .map((p) => ({ id: p!.playerId, name: p!.playerName, value: p!.fieldGoalPercentage, team: p!.team }));
 
     // Calculate standings
     const standings = await Promise.all(
