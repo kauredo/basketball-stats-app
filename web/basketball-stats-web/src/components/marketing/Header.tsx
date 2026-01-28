@@ -127,7 +127,7 @@ export default function Header() {
 
             {isAuthenticated ? (
               <Link
-                to="/dashboard"
+                to="app"
                 className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
               >
                 Go to Dashboard
@@ -270,7 +270,7 @@ export default function Header() {
               <div className="flex flex-col space-y-3 pt-2">
                 {isAuthenticated ? (
                   <Link
-                    to="/dashboard"
+                    to="/app"
                     className="inline-flex items-center justify-center px-4 py-2 text-base font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg"
                     onClick={() => setMobileMenuOpen(false)}
                   >
