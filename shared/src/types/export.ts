@@ -199,6 +199,8 @@ export interface PlayerExportData {
 export interface TeamTotalsData {
   points: number;
   rebounds: number;
+  offensiveRebounds?: number;
+  defensiveRebounds?: number;
   assists: number;
   steals: number;
   blocks: number;

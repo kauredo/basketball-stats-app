@@ -12,6 +12,7 @@ import {
   type PlayerExportData,
   type ExportShotLocation,
 } from "./types";
+import { BasketballUtils } from "@basketball-stats/shared";
 
 // ============================================
 // Constants
@@ -506,6 +507,195 @@ function addAdvancedStatsSection(
 }
 
 // ============================================
+// Four Factors Section
+// ============================================
+
+function addFourFactorsSection(
+  doc: jsPDF,
+  homeTeam: { name: string; players: PlayerExportData[]; totals: { turnovers: number; fieldGoalsMade: number; fieldGoalsAttempted: number; threePointersMade: number; freeThrowsAttempted: number; offensiveRebounds?: number; defensiveRebounds?: number; points: number } },
+  awayTeam: { name: string; players: PlayerExportData[]; totals: { turnovers: number; fieldGoalsMade: number; fieldGoalsAttempted: number; threePointersMade: number; freeThrowsAttempted: number; offensiveRebounds?: number; defensiveRebounds?: number; points: number } },
+  y: number,
+  theme: "light" | "dark"
+): number {
+  const colors = getColors(theme);
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const marginLeft = 15;
+
+  // Section header
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...hexToRgb(colors.text));
+  doc.text("FOUR FACTORS ANALYSIS", marginLeft, y);
+  y += 3;
+
+  // Subheader
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(...hexToRgb(colors.textSecondary));
+  doc.text("Dean Oliver's key indicators of team success", marginLeft, y);
+  y += 8;
+
+  // Calculate Four Factors for each team
+  // Get offensive/defensive rebounds from player data if not in totals
+  const homeOreb = homeTeam.totals.offensiveRebounds ?? homeTeam.players.reduce((sum, p) => sum + ((p as { offensiveRebounds?: number }).offensiveRebounds || 0), 0);
+  const homeDreb = homeTeam.totals.defensiveRebounds ?? homeTeam.players.reduce((sum, p) => sum + ((p as { defensiveRebounds?: number }).defensiveRebounds || 0), 0);
+  const awayOreb = awayTeam.totals.offensiveRebounds ?? awayTeam.players.reduce((sum, p) => sum + ((p as { offensiveRebounds?: number }).offensiveRebounds || 0), 0);
+  const awayDreb = awayTeam.totals.defensiveRebounds ?? awayTeam.players.reduce((sum, p) => sum + ((p as { defensiveRebounds?: number }).defensiveRebounds || 0), 0);
+
+  // Home team factors
+  const homeEfg = homeTeam.totals.fieldGoalsAttempted > 0
+    ? ((homeTeam.totals.fieldGoalsMade + 0.5 * homeTeam.totals.threePointersMade) / homeTeam.totals.fieldGoalsAttempted) * 100
+    : 0;
+  const homeTORate = BasketballUtils.turnoverRate(
+    homeTeam.totals.turnovers,
+    homeTeam.totals.fieldGoalsAttempted,
+    homeTeam.totals.freeThrowsAttempted
+  );
+  const homeOrebPct = BasketballUtils.offensiveReboundPercent(homeOreb, awayDreb);
+  const homeFTRate = BasketballUtils.freeThrowRate(
+    homeTeam.totals.freeThrowsAttempted,
+    homeTeam.totals.fieldGoalsAttempted
+  );
+
+  // Away team factors
+  const awayEfg = awayTeam.totals.fieldGoalsAttempted > 0
+    ? ((awayTeam.totals.fieldGoalsMade + 0.5 * awayTeam.totals.threePointersMade) / awayTeam.totals.fieldGoalsAttempted) * 100
+    : 0;
+  const awayTORate = BasketballUtils.turnoverRate(
+    awayTeam.totals.turnovers,
+    awayTeam.totals.fieldGoalsAttempted,
+    awayTeam.totals.freeThrowsAttempted
+  );
+  const awayOrebPct = BasketballUtils.offensiveReboundPercent(awayOreb, homeDreb);
+  const awayFTRate = BasketballUtils.freeThrowRate(
+    awayTeam.totals.freeThrowsAttempted,
+    awayTeam.totals.fieldGoalsAttempted
+  );
+
+  // Possession-based metrics
+  const homePoss = BasketballUtils.estimatePossessions(
+    homeTeam.totals.fieldGoalsAttempted,
+    homeOreb,
+    homeTeam.totals.turnovers,
+    homeTeam.totals.freeThrowsAttempted
+  );
+  const awayPoss = BasketballUtils.estimatePossessions(
+    awayTeam.totals.fieldGoalsAttempted,
+    awayOreb,
+    awayTeam.totals.turnovers,
+    awayTeam.totals.freeThrowsAttempted
+  );
+
+  const homeOffRtg = BasketballUtils.offensiveRating(homeTeam.totals.points, homePoss);
+  const homeDefRtg = BasketballUtils.defensiveRating(awayTeam.totals.points, awayPoss);
+  const awayOffRtg = BasketballUtils.offensiveRating(awayTeam.totals.points, awayPoss);
+  const awayDefRtg = BasketballUtils.defensiveRating(homeTeam.totals.points, homePoss);
+
+  // Draw comparison table
+  const tableWidth = 160;
+  const tableX = (pageWidth - tableWidth) / 2;
+  const barWidth = 50;
+  const valueWidth = 20;
+
+  // Header row
+  doc.setFillColor(...hexToRgb(colors.card));
+  doc.rect(tableX, y, tableWidth, 7, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setTextColor(...hexToRgb(COLORS.primary));
+  doc.text(homeTeam.name, tableX + valueWidth / 2, y + 5, { align: "center" });
+  doc.setTextColor(...hexToRgb(colors.text));
+  doc.text("FACTOR", tableX + valueWidth + barWidth + 10, y + 5, { align: "center" });
+  doc.setTextColor(...hexToRgb(COLORS.info));
+  doc.text(awayTeam.name, tableX + tableWidth - valueWidth / 2, y + 5, { align: "center" });
+  y += 9;
+
+  // Factor rows
+  const factors = [
+    { label: "eFG%", home: homeEfg, away: awayEfg, higherBetter: true, description: "Shooting Efficiency" },
+    { label: "TO Rate", home: homeTORate, away: awayTORate, higherBetter: false, description: "Turnover %" },
+    { label: "OREB%", home: homeOrebPct, away: awayOrebPct, higherBetter: true, description: "Second Chances" },
+    { label: "FT Rate", home: homeFTRate, away: awayFTRate, higherBetter: true, description: "Free Throws" },
+  ];
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+
+  for (const factor of factors) {
+    // Row background
+    doc.setFillColor(...hexToRgb(theme === "dark" ? "#2d2a27" : "#f5f3f0"));
+    doc.rect(tableX, y, tableWidth, 8, "F");
+
+    // Determine advantage
+    const homeWins = factor.higherBetter ? factor.home > factor.away : factor.home < factor.away;
+    const awayWins = factor.higherBetter ? factor.away > factor.home : factor.away < factor.home;
+
+    // Home value
+    doc.setTextColor(...hexToRgb(homeWins ? COLORS.success : colors.text));
+    doc.text(`${factor.home.toFixed(1)}%`, tableX + valueWidth / 2, y + 5.5, { align: "center" });
+
+    // Home bar
+    const maxValue = Math.max(factor.home, factor.away, 0.1);
+    const homeBarWidth = (factor.home / maxValue) * barWidth * 0.9;
+    doc.setFillColor(...hexToRgb(COLORS.primary + "80"));
+    doc.rect(tableX + valueWidth + barWidth - homeBarWidth, y + 2, homeBarWidth, 4, "F");
+
+    // Label
+    doc.setTextColor(...hexToRgb(colors.text));
+    doc.setFont("helvetica", "bold");
+    doc.text(factor.label, tableX + valueWidth + barWidth + 10, y + 5.5, { align: "center" });
+    doc.setFont("helvetica", "normal");
+
+    // Away bar
+    const awayBarWidth = (factor.away / maxValue) * barWidth * 0.9;
+    doc.setFillColor(...hexToRgb(COLORS.info + "80"));
+    doc.rect(tableX + valueWidth + barWidth + 20, y + 2, awayBarWidth, 4, "F");
+
+    // Away value
+    doc.setTextColor(...hexToRgb(awayWins ? COLORS.success : colors.text));
+    doc.text(`${factor.away.toFixed(1)}%`, tableX + tableWidth - valueWidth / 2, y + 5.5, { align: "center" });
+
+    y += 9;
+  }
+
+  // Efficiency ratings row
+  y += 3;
+  doc.setFillColor(...hexToRgb(colors.card));
+  doc.rect(tableX, y, tableWidth, 18, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setTextColor(...hexToRgb(colors.text));
+  doc.text("EFFICIENCY RATINGS (pts/100 poss)", tableX + tableWidth / 2, y + 4, { align: "center" });
+
+  // Home efficiency
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6);
+  doc.setTextColor(...hexToRgb(COLORS.primary));
+  doc.text(`Off: ${homeOffRtg.toFixed(1)}  Def: ${homeDefRtg.toFixed(1)}`, tableX + 25, y + 10, { align: "center" });
+
+  const homeNetRtg = homeOffRtg - homeDefRtg;
+  doc.setTextColor(...hexToRgb(homeNetRtg > 0 ? COLORS.success : homeNetRtg < 0 ? COLORS.danger : colors.text));
+  doc.setFont("helvetica", "bold");
+  doc.text(`Net: ${homeNetRtg > 0 ? "+" : ""}${homeNetRtg.toFixed(1)}`, tableX + 25, y + 15, { align: "center" });
+
+  // Away efficiency
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...hexToRgb(COLORS.info));
+  doc.text(`Off: ${awayOffRtg.toFixed(1)}  Def: ${awayDefRtg.toFixed(1)}`, tableX + tableWidth - 25, y + 10, { align: "center" });
+
+  const awayNetRtg = awayOffRtg - awayDefRtg;
+  doc.setTextColor(...hexToRgb(awayNetRtg > 0 ? COLORS.success : awayNetRtg < 0 ? COLORS.danger : colors.text));
+  doc.setFont("helvetica", "bold");
+  doc.text(`Net: ${awayNetRtg > 0 ? "+" : ""}${awayNetRtg.toFixed(1)}`, tableX + tableWidth - 25, y + 15, { align: "center" });
+
+  y += 22;
+
+  return y;
+}
+
+// ============================================
 // Per-Player Shot Charts Section
 // ============================================
 
@@ -908,6 +1098,12 @@ export async function generateGameReportPDF(
       y = addNewPage();
     }
     y = addAdvancedStatsSection(doc, gameData.homeTeam, gameData.awayTeam, y, theme);
+
+    // Four Factors Analysis
+    if (y > A4_HEIGHT - 80) {
+      y = addNewPage();
+    }
+    y = addFourFactorsSection(doc, gameData.homeTeam, gameData.awayTeam, y, theme);
   }
 
   // Team Shot charts (if images provided)

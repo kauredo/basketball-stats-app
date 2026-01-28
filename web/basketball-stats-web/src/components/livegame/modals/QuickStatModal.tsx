@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
-import { Id } from "../../../../../../convex/_generated/dataModel";
-import { PlayerStat, StatType } from "../../../types/livegame";
+import type { Id } from "../../../../../../convex/_generated/dataModel";
+import type { PlayerStat, StatType } from "../../../types/livegame";
 import { BaseModal, ModalBody, ModalFooter, ModalCancelButton } from "../../ui/BaseModal";
 import { PlayerListEmpty } from "../../ui/PlayerListItem";
 

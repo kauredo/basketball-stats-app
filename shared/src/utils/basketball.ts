@@ -92,6 +92,133 @@ export class BasketballUtils {
     return Math.round((stat.assists / turnovers) * 10) / 10;
   }
 
+  // =====================
+  // Four Factors Metrics
+  // =====================
+
+  /**
+   * Turnover Rate: Percentage of possessions ending in a turnover
+   * Formula: TO / (FGA + 0.44*FTA + TO)
+   */
+  static turnoverRate(turnovers: number, fga: number, fta: number): number {
+    const possessionEndings = fga + 0.44 * fta + turnovers;
+    if (possessionEndings === 0) return 0;
+    return Math.round((turnovers / possessionEndings) * 100 * 10) / 10;
+  }
+
+  /**
+   * Offensive Rebound Percentage: Share of available offensive rebounds grabbed
+   * Formula: OReb / (OReb + Opp DReb)
+   * Note: When opponent DReb is unavailable, use total rebound opportunities estimate
+   */
+  static offensiveReboundPercent(offensiveRebounds: number, opponentDefensiveRebounds: number): number {
+    const totalOpportunities = offensiveRebounds + opponentDefensiveRebounds;
+    if (totalOpportunities === 0) return 0;
+    return Math.round((offensiveRebounds / totalOpportunities) * 100 * 10) / 10;
+  }
+
+  /**
+   * Defensive Rebound Percentage: Share of available defensive rebounds grabbed
+   * Formula: DReb / (DReb + Opp OReb)
+   */
+  static defensiveReboundPercent(defensiveRebounds: number, opponentOffensiveRebounds: number): number {
+    const totalOpportunities = defensiveRebounds + opponentOffensiveRebounds;
+    if (totalOpportunities === 0) return 0;
+    return Math.round((defensiveRebounds / totalOpportunities) * 100 * 10) / 10;
+  }
+
+  /**
+   * Free Throw Rate: Measures ability to get to the free throw line
+   * Formula: FTA / FGA
+   */
+  static freeThrowRate(fta: number, fga: number): number {
+    if (fga === 0) return 0;
+    return Math.round((fta / fga) * 100 * 10) / 10;
+  }
+
+  // =====================
+  // Possession-Based Metrics
+  // =====================
+
+  /**
+   * Estimate possessions using the standard formula
+   * Formula: FGA - OReb + TO + (0.44 × FTA)
+   */
+  static estimatePossessions(fga: number, offensiveRebounds: number, turnovers: number, fta: number): number {
+    return Math.round(fga - offensiveRebounds + turnovers + 0.44 * fta);
+  }
+
+  /**
+   * Offensive Rating: Points scored per 100 possessions
+   * Formula: (Points / Possessions) × 100
+   */
+  static offensiveRating(points: number, possessions: number): number {
+    if (possessions === 0) return 0;
+    return Math.round((points / possessions) * 100 * 10) / 10;
+  }
+
+  /**
+   * Defensive Rating: Points allowed per 100 possessions
+   * Formula: (Points Allowed / Possessions) × 100
+   */
+  static defensiveRating(pointsAllowed: number, possessions: number): number {
+    if (possessions === 0) return 0;
+    return Math.round((pointsAllowed / possessions) * 100 * 10) / 10;
+  }
+
+  /**
+   * Net Rating: Offensive Rating - Defensive Rating
+   */
+  static netRating(offRating: number, defRating: number): number {
+    return Math.round((offRating - defRating) * 10) / 10;
+  }
+
+  /**
+   * Pace: Possessions per 40 minutes (standard game length)
+   */
+  static pace(possessions: number, minutesPlayed: number): number {
+    if (minutesPlayed === 0) return 0;
+    return Math.round((possessions / minutesPlayed) * 40 * 10) / 10;
+  }
+
+  // =====================
+  // Four Factors Summary
+  // =====================
+
+  /**
+   * Calculate all Four Factors for a team
+   * Returns: eFG%, TO Rate, OREB%, FT Rate
+   */
+  static calculateFourFactors(teamStats: {
+    fieldGoalsMade: number;
+    fieldGoalsAttempted: number;
+    threePointersMade: number;
+    freeThrowsAttempted: number;
+    turnovers: number;
+    offensiveRebounds: number;
+    opponentDefensiveRebounds: number;
+  }): {
+    effectiveFieldGoalPct: number;
+    turnoverRate: number;
+    offensiveReboundPct: number;
+    freeThrowRate: number;
+  } {
+    const fga = teamStats.fieldGoalsAttempted;
+    const fta = teamStats.freeThrowsAttempted;
+
+    return {
+      effectiveFieldGoalPct: fga > 0
+        ? Math.round(((teamStats.fieldGoalsMade + 0.5 * teamStats.threePointersMade) / fga) * 100 * 10) / 10
+        : 0,
+      turnoverRate: this.turnoverRate(teamStats.turnovers, fga, fta),
+      offensiveReboundPct: this.offensiveReboundPercent(
+        teamStats.offensiveRebounds,
+        teamStats.opponentDefensiveRebounds
+      ),
+      freeThrowRate: this.freeThrowRate(fta, fga),
+    };
+  }
+
   // Game flow utilities
   static formatGameTime(seconds: number): string {
     const minutes = Math.floor(seconds / 60);

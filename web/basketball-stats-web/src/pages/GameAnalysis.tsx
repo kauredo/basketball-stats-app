@@ -20,6 +20,8 @@ import Breadcrumb from "../components/Breadcrumb";
 import { QuarterBreakdown } from "../components/livegame/stats/QuarterBreakdown";
 import { AdvancedStats } from "../components/livegame/stats/AdvancedStats";
 import { GameEventCard } from "../components/livegame/playbyplay/GameEventCard";
+import { FourFactors } from "../components/FourFactors";
+import { GameFlowChart } from "../components/GameFlowChart";
 import {
   BarChart,
   Bar,
@@ -41,6 +43,17 @@ interface TeamTotals {
   steals: number;
   blocks: number;
   turnovers: number;
+}
+
+// Extended team totals for Four Factors
+interface ExtendedTeamTotals extends TeamTotals {
+  fieldGoalsMade: number;
+  fieldGoalsAttempted: number;
+  threePointersMade: number;
+  freeThrowsMade: number;
+  freeThrowsAttempted: number;
+  offensiveRebounds: number;
+  defensiveRebounds: number;
 }
 
 // Box score player structure from getBoxScore query (includes display strings)
@@ -112,6 +125,11 @@ const GameAnalysis: React.FC = () => {
     token && gameId ? { token, gameId: gameId as Id<"games"> } : "skip"
   );
 
+  const scoringTimelineData = useQuery(
+    api.games.getScoringTimeline,
+    token && gameId ? { token, gameId: gameId as Id<"games"> } : "skip"
+  );
+
   if (gameData === undefined || boxScoreData === undefined) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -150,22 +168,50 @@ const GameAnalysis: React.FC = () => {
     players: Array<{
       points?: number;
       rebounds?: number;
+      offensiveRebounds?: number;
+      defensiveRebounds?: number;
       assists?: number;
       steals?: number;
       blocks?: number;
       turnovers?: number;
+      fieldGoalsMade?: number;
+      fieldGoalsAttempted?: number;
+      threePointersMade?: number;
+      freeThrowsMade?: number;
+      freeThrowsAttempted?: number;
     }>
-  ): TeamTotals => {
-    return players.reduce<TeamTotals>(
+  ): ExtendedTeamTotals => {
+    return players.reduce<ExtendedTeamTotals>(
       (acc, p) => ({
         points: acc.points + (p.points || 0),
         rebounds: acc.rebounds + (p.rebounds || 0),
+        offensiveRebounds: acc.offensiveRebounds + (p.offensiveRebounds || 0),
+        defensiveRebounds: acc.defensiveRebounds + (p.defensiveRebounds || 0),
         assists: acc.assists + (p.assists || 0),
         steals: acc.steals + (p.steals || 0),
         blocks: acc.blocks + (p.blocks || 0),
         turnovers: acc.turnovers + (p.turnovers || 0),
+        fieldGoalsMade: acc.fieldGoalsMade + (p.fieldGoalsMade || 0),
+        fieldGoalsAttempted: acc.fieldGoalsAttempted + (p.fieldGoalsAttempted || 0),
+        threePointersMade: acc.threePointersMade + (p.threePointersMade || 0),
+        freeThrowsMade: acc.freeThrowsMade + (p.freeThrowsMade || 0),
+        freeThrowsAttempted: acc.freeThrowsAttempted + (p.freeThrowsAttempted || 0),
       }),
-      { points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0, turnovers: 0 }
+      {
+        points: 0,
+        rebounds: 0,
+        offensiveRebounds: 0,
+        defensiveRebounds: 0,
+        assists: 0,
+        steals: 0,
+        blocks: 0,
+        turnovers: 0,
+        fieldGoalsMade: 0,
+        fieldGoalsAttempted: 0,
+        threePointersMade: 0,
+        freeThrowsMade: 0,
+        freeThrowsAttempted: 0,
+      }
     );
   };
 
@@ -610,6 +656,28 @@ const GameAnalysis: React.FC = () => {
 
       {activeTab === "stats" && (
         <div className="space-y-6">
+          {/* Game Flow Chart */}
+          {scoringTimelineData && (
+            <GameFlowChart
+              timeline={scoringTimelineData.timeline}
+              quarterBoundaries={scoringTimelineData.quarterBoundaries}
+              runs={scoringTimelineData.runs}
+              homeTeamName={homeTeam?.team?.name || "Home"}
+              awayTeamName={awayTeam?.team?.name || "Away"}
+              summary={scoringTimelineData.summary}
+            />
+          )}
+
+          {/* Four Factors Analysis */}
+          {homeTotals && awayTotals && (
+            <FourFactors
+              homeTeamName={homeTeam?.team?.name || "Home"}
+              awayTeamName={awayTeam?.team?.name || "Away"}
+              homeStats={homeTotals}
+              awayStats={awayTotals}
+            />
+          )}
+
           {/* Team Comparison */}
           <div className="surface-card overflow-hidden">
             <div className="px-4 py-3 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50">

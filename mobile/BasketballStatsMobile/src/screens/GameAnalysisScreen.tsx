@@ -12,6 +12,8 @@ import { QuarterBreakdown } from "../components/livegame/QuarterBreakdown";
 import { AdvancedStats } from "../components/livegame/AdvancedStats";
 import PlayByPlayTab from "../components/livegame/PlayByPlayTab";
 import { ExportOptionsSheet } from "../components/export/ExportOptionsSheet";
+import { FourFactors } from "../components/FourFactors";
+import { GameFlowChart } from "../components/GameFlowChart";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 
 type GameAnalysisRouteProp = RouteProp<RootStackParamList, "GameAnalysis">;
@@ -177,6 +179,11 @@ export default function GameAnalysisScreen() {
     token && gameId ? { token, gameId: gameId as Id<"games"> } : "skip"
   );
 
+  const scoringTimelineData = useQuery(
+    api.games.getScoringTimeline,
+    token && gameId ? { token, gameId: gameId as Id<"games"> } : "skip"
+  );
+
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 500);
@@ -221,6 +228,8 @@ export default function GameAnalysisScreen() {
       (acc, p) => ({
         points: acc.points + (p.points || 0),
         rebounds: acc.rebounds + (p.rebounds || 0),
+        offensiveRebounds: acc.offensiveRebounds + (p.offensiveRebounds || 0),
+        defensiveRebounds: acc.defensiveRebounds + (p.defensiveRebounds || 0),
         assists: acc.assists + (p.assists || 0),
         steals: acc.steals + (p.steals || 0),
         blocks: acc.blocks + (p.blocks || 0),
@@ -231,10 +240,18 @@ export default function GameAnalysisScreen() {
         threePa: acc.threePa + (p.threePointersAttempted || 0),
         ftm: acc.ftm + (p.freeThrowsMade || 0),
         fta: acc.fta + (p.freeThrowsAttempted || 0),
+        // For FourFactors component
+        fieldGoalsMade: acc.fieldGoalsMade + (p.fieldGoalsMade || 0),
+        fieldGoalsAttempted: acc.fieldGoalsAttempted + (p.fieldGoalsAttempted || 0),
+        threePointersMade: acc.threePointersMade + (p.threePointersMade || 0),
+        freeThrowsMade: acc.freeThrowsMade + (p.freeThrowsMade || 0),
+        freeThrowsAttempted: acc.freeThrowsAttempted + (p.freeThrowsAttempted || 0),
       }),
       {
         points: 0,
         rebounds: 0,
+        offensiveRebounds: 0,
+        defensiveRebounds: 0,
         assists: 0,
         steals: 0,
         blocks: 0,
@@ -245,6 +262,11 @@ export default function GameAnalysisScreen() {
         threePa: 0,
         ftm: 0,
         fta: 0,
+        fieldGoalsMade: 0,
+        fieldGoalsAttempted: 0,
+        threePointersMade: 0,
+        freeThrowsMade: 0,
+        freeThrowsAttempted: 0,
       }
     );
   };
@@ -469,8 +491,30 @@ export default function GameAnalysisScreen() {
 
         {activeTab === "stats" && (
           <View className="p-4">
+            {/* Game Flow Chart */}
+            {scoringTimelineData && (
+              <GameFlowChart
+                timeline={scoringTimelineData.timeline}
+                quarterBoundaries={scoringTimelineData.quarterBoundaries}
+                runs={scoringTimelineData.runs}
+                homeTeamName={homeTeam?.team?.name || "Home"}
+                awayTeamName={awayTeam?.team?.name || "Away"}
+                summary={scoringTimelineData.summary}
+              />
+            )}
+
+            {/* Four Factors Analysis */}
+            {homeTotals && awayTotals && (
+              <FourFactors
+                homeTeamName={homeTeam?.team?.name || "Home"}
+                awayTeamName={awayTeam?.team?.name || "Away"}
+                homeStats={homeTotals}
+                awayStats={awayTotals}
+              />
+            )}
+
             {/* Team Comparison */}
-            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl overflow-hidden mb-4">
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl overflow-hidden mb-4 mt-4">
               {/* Team Headers */}
               <View className="flex-row items-center py-3 px-4 border-b border-surface-200 dark:border-surface-700">
                 <Text className="flex-1 text-right text-sm font-bold text-primary-500">

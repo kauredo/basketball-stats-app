@@ -7,5 +7,5 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
-| #607 | 9:48 AM | 🔵 | Mobile Advanced Stats Component Displays Five Metrics Including PER and A/TO | ~531 |
+| #597 | 9:45 AM | 🔵 | Basketball Utilities Module Reveals Existing Analytics Capabilities | ~623 |
 </claude-mem-context>

@@ -1606,6 +1606,281 @@ export const resetShotClock = mutation({
 });
 
 /**
+ * Get scoring timeline for game flow chart
+ * Returns scoring events with cumulative scores at each point
+ */
+export const getScoringTimeline = query({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const hasAccess = await canAccessLeague(ctx, user._id, game.leagueId);
+    if (!hasAccess) throw new Error("Access denied");
+
+    // Get all scoring events (shots and free throws)
+    const events = await ctx.db
+      .query("gameEvents")
+      .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
+      .collect();
+
+    // Filter to scoring events and sort by timestamp
+    const scoringEvents = events
+      .filter((e) => {
+        // Include made shots and made free throws
+        if (e.eventType === "shot" && e.details?.made) return true;
+        if (e.eventType === "freethrow" && e.details?.made) return true;
+        return false;
+      })
+      .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+    // Get game settings for quarter length
+    const settings = (game.gameSettings as any) || {};
+    const quarterMinutes = settings.quarterMinutes || 12;
+    const totalGameSeconds = quarterMinutes * 60 * 4;
+
+    // Build timeline with cumulative scores
+    let homeScore = 0;
+    let awayScore = 0;
+
+    const timeline = scoringEvents.map((event) => {
+      const points = event.details?.points || 0;
+      const isHomeTeam = event.details?.isHomeTeam;
+
+      if (isHomeTeam) {
+        homeScore += points;
+      } else {
+        awayScore += points;
+      }
+
+      // Calculate game elapsed time in seconds
+      const quarter = event.quarter || 1;
+      const gameTimeRemaining = event.gameTime || 0;
+      const quarterSeconds = quarterMinutes * 60;
+      const elapsedInQuarter = quarterSeconds - gameTimeRemaining;
+      const totalElapsed = (quarter - 1) * quarterSeconds + elapsedInQuarter;
+
+      return {
+        id: event._id,
+        quarter: event.quarter,
+        gameTime: event.gameTime,
+        gameTimeElapsed: totalElapsed,
+        gameTimeElapsedFormatted: formatTime(totalElapsed),
+        timestamp: event.timestamp,
+        eventType: event.eventType,
+        points,
+        isHomeTeam,
+        homeScore,
+        awayScore,
+        scoreDifferential: homeScore - awayScore,
+        description: event.description,
+      };
+    });
+
+    // Add initial point at start of game
+    const timelineWithStart = [
+      {
+        id: "start",
+        quarter: 1,
+        gameTime: quarterMinutes * 60,
+        gameTimeElapsed: 0,
+        gameTimeElapsedFormatted: "0:00",
+        timestamp: game.startedAt || 0,
+        eventType: "game_start",
+        points: 0,
+        isHomeTeam: null,
+        homeScore: 0,
+        awayScore: 0,
+        scoreDifferential: 0,
+        description: "Game Start",
+      },
+      ...timeline,
+    ];
+
+    // Calculate quarter boundaries for chart markers
+    const quarterBoundaries = [];
+    for (let q = 1; q <= 4; q++) {
+      quarterBoundaries.push({
+        quarter: q,
+        gameTimeElapsed: (q - 1) * quarterMinutes * 60,
+        label: `Q${q}`,
+      });
+    }
+
+    // Add overtime boundaries if applicable
+    const currentQuarter = game.currentQuarter || 4;
+    if (currentQuarter > 4) {
+      const overtimeMinutes = settings.overtimeMinutes || 5;
+      for (let ot = 1; ot <= currentQuarter - 4; ot++) {
+        quarterBoundaries.push({
+          quarter: 4 + ot,
+          gameTimeElapsed: 4 * quarterMinutes * 60 + (ot - 1) * overtimeMinutes * 60,
+          label: `OT${ot}`,
+        });
+      }
+    }
+
+    // Identify scoring runs (sequences where one team outscores the other significantly)
+    const runs = identifyScoringRuns(timeline, 8); // 8+ point runs
+
+    return {
+      timeline: timelineWithStart,
+      quarterBoundaries,
+      runs,
+      summary: {
+        finalHomeScore: game.homeScore,
+        finalAwayScore: game.awayScore,
+        largestLead: {
+          home: Math.max(0, ...timeline.map((t) => t.scoreDifferential)),
+          away: Math.max(0, ...timeline.map((t) => -t.scoreDifferential)),
+        },
+        leadChanges: countLeadChanges(timeline),
+        timesTied: countTimesTied(timeline),
+      },
+    };
+  },
+});
+
+// Helper function to identify scoring runs
+function identifyScoringRuns(
+  timeline: Array<{
+    homeScore: number;
+    awayScore: number;
+    quarter: number;
+    gameTimeElapsed: number;
+    points: number;
+    isHomeTeam?: boolean | null;
+  }>,
+  minRunPoints: number
+): Array<{
+  startIndex: number;
+  endIndex: number;
+  team: "home" | "away";
+  points: number;
+  opponentPoints: number;
+  quarter: number;
+  description: string;
+}> {
+  const runs: Array<{
+    startIndex: number;
+    endIndex: number;
+    team: "home" | "away";
+    points: number;
+    opponentPoints: number;
+    quarter: number;
+    description: string;
+  }> = [];
+
+  if (timeline.length < 2) return runs;
+
+  let runStart = 0;
+  let currentTeam: "home" | "away" | null = null;
+  let teamPoints = 0;
+  let opponentPoints = 0;
+
+  for (let i = 0; i < timeline.length; i++) {
+    const event = timeline[i];
+    const scoringTeam = event.isHomeTeam ? "home" : "away";
+
+    if (currentTeam === null) {
+      currentTeam = scoringTeam;
+      teamPoints = event.points;
+      opponentPoints = 0;
+      runStart = i;
+    } else if (scoringTeam === currentTeam) {
+      teamPoints += event.points;
+    } else {
+      opponentPoints += event.points;
+      // Check if run ended (opponent scored more than threshold)
+      if (opponentPoints >= minRunPoints / 2) {
+        // Save run if significant
+        if (teamPoints >= minRunPoints) {
+          runs.push({
+            startIndex: runStart,
+            endIndex: i - 1,
+            team: currentTeam,
+            points: teamPoints,
+            opponentPoints: opponentPoints - event.points,
+            quarter: timeline[runStart].quarter,
+            description: `${teamPoints}-${opponentPoints - event.points} run`,
+          });
+        }
+        // Start new potential run
+        currentTeam = scoringTeam;
+        teamPoints = event.points;
+        opponentPoints = 0;
+        runStart = i;
+      }
+    }
+  }
+
+  // Check final run
+  if (currentTeam && teamPoints >= minRunPoints) {
+    runs.push({
+      startIndex: runStart,
+      endIndex: timeline.length - 1,
+      team: currentTeam,
+      points: teamPoints,
+      opponentPoints,
+      quarter: timeline[runStart].quarter,
+      description: `${teamPoints}-${opponentPoints} run`,
+    });
+  }
+
+  return runs;
+}
+
+// Helper to count lead changes
+function countLeadChanges(
+  timeline: Array<{ scoreDifferential: number }>
+): number {
+  let changes = 0;
+  let lastLeader: "home" | "away" | "tied" = "tied";
+
+  for (const event of timeline) {
+    let currentLeader: "home" | "away" | "tied";
+    if (event.scoreDifferential > 0) currentLeader = "home";
+    else if (event.scoreDifferential < 0) currentLeader = "away";
+    else currentLeader = "tied";
+
+    if (
+      lastLeader !== "tied" &&
+      currentLeader !== "tied" &&
+      lastLeader !== currentLeader
+    ) {
+      changes++;
+    }
+    lastLeader = currentLeader;
+  }
+
+  return changes;
+}
+
+// Helper to count times tied
+function countTimesTied(
+  timeline: Array<{ scoreDifferential: number }>
+): number {
+  let tiedCount = 0;
+  let wasTied = true; // Start tied at 0-0
+
+  for (const event of timeline) {
+    const isTied = event.scoreDifferential === 0;
+    if (isTied && !wasTied) {
+      tiedCount++;
+    }
+    wasTied = isTied;
+  }
+
+  return tiedCount;
+}
+
+/**
  * Set the game clock time manually (for corrections during game)
  */
 export const setGameTime = mutation({
