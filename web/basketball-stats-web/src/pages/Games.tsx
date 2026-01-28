@@ -299,6 +299,120 @@ const Games: React.FC = () => {
     }
   };
 
+  // Mobile card layout for games
+  const renderGameCard = (game: GameItem) => {
+    const isGameLive = game.status === "active";
+    const status = statusConfig[game.status as keyof typeof statusConfig];
+    const winner =
+      game.status === "completed"
+        ? game.homeScore > game.awayScore
+          ? "home"
+          : game.awayScore > game.homeScore
+            ? "away"
+            : "tie"
+        : null;
+    const canGoToLive = game.status !== "completed";
+
+    return (
+      <div
+        key={game.id}
+        className="bg-white dark:bg-surface-800 rounded-2xl p-4 border border-surface-200 dark:border-surface-700 shadow-soft"
+      >
+        {/* Header: Status + Actions */}
+        <div className="flex items-center justify-between mb-3">
+          <div
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${status.classes}`}
+          >
+            {status.animate && (
+              <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse-live" />
+            )}
+            {status.label}
+          </div>
+          <div className="flex items-center gap-1">
+            {canGoToLive && (
+              <Link
+                to={`/app/games/${game.id}/live`}
+                className="btn-primary p-2 rounded-xl"
+                title="Live Game"
+              >
+                <PlayIcon className="w-4 h-4" />
+              </Link>
+            )}
+            <Link
+              to={`/app/games/${game.id}/analysis`}
+              className="btn-secondary p-2 rounded-xl"
+              title="Analysis"
+            >
+              <ChartBarIcon className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Teams + Score */}
+        <div className="flex items-center justify-between gap-3">
+          {/* Matchup */}
+          <div className="min-w-0 flex-1">
+            <div
+              className={`font-medium truncate ${winner === "away" ? "text-surface-900 dark:text-surface-50" : "text-surface-600 dark:text-surface-300"}`}
+            >
+              {game.awayTeam?.name || "Away Team"}
+            </div>
+            <div className="text-sm text-surface-500 dark:text-surface-400 truncate">
+              @ {game.homeTeam?.name || "Home Team"}
+            </div>
+          </div>
+
+          {/* Score */}
+          <div className="flex items-center gap-2 font-mono text-xl flex-shrink-0" data-stat>
+            <span
+              className={
+                winner === "away"
+                  ? "font-bold text-surface-900 dark:text-surface-50"
+                  : "text-surface-500 dark:text-surface-400"
+              }
+            >
+              {game.awayScore}
+            </span>
+            <span className="text-surface-300 dark:text-surface-600">–</span>
+            <span
+              className={
+                winner === "home"
+                  ? "font-bold text-surface-900 dark:text-surface-50"
+                  : "text-surface-500 dark:text-surface-400"
+              }
+            >
+              {game.homeScore}
+            </span>
+          </div>
+        </div>
+
+        {/* Time/Schedule info (if applicable) */}
+        {(isGameLive || (game.status === "scheduled" && game.scheduledAt)) && (
+          <div className="mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
+            {isGameLive && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-surface-500 dark:text-surface-400">Q{game.currentQuarter}</span>
+                <span
+                  className="font-mono font-medium text-surface-900 dark:text-surface-50"
+                  data-stat
+                >
+                  {formatTime(game.timeRemainingSeconds ?? 0)}
+                </span>
+              </div>
+            )}
+            {game.status === "scheduled" && game.scheduledAt && (
+              <div className="flex items-center gap-1.5 text-sm text-surface-500 dark:text-surface-400">
+                <CalendarIcon className="w-4 h-4" />
+                {new Date(game.scheduledAt).toLocaleDateString()}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Desktop table row layout for games
   const renderGameRow = (game: GameItem) => {
     const isGameLive = game.status === "active";
     const status = statusConfig[game.status as keyof typeof statusConfig];
@@ -388,11 +502,11 @@ const Games: React.FC = () => {
         </td>
 
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {canGoToLive && (
               <Link
                 to={`/app/games/${game.id}/live`}
-                className="btn-primary p-2 rounded-lg"
+                className="btn-primary p-2.5 rounded-xl"
                 title="Live Game"
               >
                 <PlayIcon className="w-4 h-4" />
@@ -400,7 +514,7 @@ const Games: React.FC = () => {
             )}
             <Link
               to={`/app/games/${game.id}/analysis`}
-              className="btn-secondary p-2 rounded-lg"
+              className="btn-secondary p-2.5 rounded-xl"
               title="Analysis"
             >
               <ChartBarIcon className="w-4 h-4" />
@@ -429,51 +543,61 @@ const Games: React.FC = () => {
             Manage and monitor your basketball games
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <button
             onClick={handleExportSchedule}
             disabled={games.length === 0}
-            className="group flex items-center gap-2 px-4 py-2.5 bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 text-sm font-medium rounded-xl border border-surface-200 dark:border-surface-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 text-sm font-medium rounded-xl border border-surface-200 dark:border-surface-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Export Schedule"
           >
             <ArrowDownTrayIcon className="w-4 h-4" />
-            Export
+            <span className="hidden xs:inline">Export</span>
           </button>
           <button
             onClick={() => setShowQuickGameModal(true)}
-            className="group flex items-center gap-2 px-4 py-2.5 bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 text-sm font-medium rounded-xl border border-surface-200 dark:border-surface-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900"
+            className="group flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 text-sm font-medium rounded-xl border border-surface-200 dark:border-surface-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900"
           >
             <BoltIcon className="w-4 h-4 text-primary-500" />
-            Quick Game
+            <span className="hidden xs:inline">Quick</span>
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white text-sm font-medium rounded-xl shadow-soft hover:shadow-glow-orange transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900"
+            className="group flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white text-sm font-medium rounded-xl shadow-soft hover:shadow-glow-orange transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-900"
           >
             <PlusIcon className="w-4 h-4" />
-            Create Game
+            <span className="hidden xs:inline">Create</span>
           </button>
         </div>
       </div>
 
-      {/* Games Table */}
-      <div className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden shadow-soft">
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr className="bg-surface-50 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700">
-                <th className="px-6 py-3 text-left section-header">Status</th>
-                <th className="px-6 py-3 text-left section-header">Matchup</th>
-                <th className="px-6 py-3 text-left section-header">Score</th>
-                <th className="px-6 py-3 text-left section-header">Time</th>
-                <th className="px-6 py-3 text-left section-header">Actions</th>
-              </tr>
-            </thead>
-            <tbody>{sortedGames.map(renderGameRow)}</tbody>
-          </table>
-        </div>
+      {/* Games List - Cards on mobile, Table on desktop */}
+      {games.length > 0 ? (
+        <>
+          {/* Mobile: Card Grid */}
+          <div className="md:hidden grid grid-cols-1 gap-4">
+            {sortedGames.map(renderGameCard)}
+          </div>
 
-        {games.length === 0 && (
+          {/* Desktop: Table */}
+          <div className="hidden md:block bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden shadow-soft">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-surface-50 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700">
+                    <th className="px-6 py-3 text-left section-header">Status</th>
+                    <th className="px-6 py-3 text-left section-header">Matchup</th>
+                    <th className="px-6 py-3 text-left section-header">Score</th>
+                    <th className="px-6 py-3 text-left section-header">Time</th>
+                    <th className="px-6 py-3 text-left section-header">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>{sortedGames.map(renderGameRow)}</tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden shadow-soft">
           <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-surface-100 dark:bg-surface-800 mb-4">
               <ClockIcon className="w-7 h-7 text-surface-400" />
@@ -492,8 +616,8 @@ const Games: React.FC = () => {
               Create your first game
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Create Game Modal */}
       {showCreateModal && (

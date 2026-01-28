@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
@@ -14,9 +14,9 @@ import {
   FunnelIcon,
   PencilIcon,
   TrashIcon,
-  EyeIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { ActionMenu } from "../components/ui/ActionMenu";
 import {
   PlayerFormModal,
   DeleteConfirmationModal,
@@ -83,10 +83,6 @@ const Players: React.FC = () => {
 
   const handleViewStats = (player: PlayerItem) => {
     navigate(`/app/shot-charts?player=${player.id}`);
-  };
-
-  const handleViewPlayer = (player: PlayerItem) => {
-    navigate(`/app/players/${player.id}`);
   };
 
   const handleEditPlayer = (player: PlayerItem) => {
@@ -187,61 +183,59 @@ const Players: React.FC = () => {
       key={player.id}
       className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 hover:border-surface-300 dark:hover:border-surface-600 transition-colors"
     >
-      <div className="flex items-start justify-between mb-4 gap-2">
+      <div className="flex items-start justify-between mb-4 gap-3">
         <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-surface-100 dark:bg-surface-700 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+          <Link
+            to={`/app/players/${player.id}`}
+            className="w-12 h-12 sm:w-16 sm:h-16 bg-surface-100 dark:bg-surface-700 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 hover:ring-2 hover:ring-primary-500 transition-all"
+          >
             {player.imageUrl ? (
               <img src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" />
             ) : (
               <UserIcon className="w-6 h-6 sm:w-8 sm:h-8 text-surface-600 dark:text-surface-400" />
             )}
-          </div>
+          </Link>
           <div className="min-w-0">
-            <h3 className="text-base sm:text-lg font-bold text-surface-900 dark:text-white">
+            <Link
+              to={`/app/players/${player.id}`}
+              className="text-base sm:text-lg font-bold text-surface-900 dark:text-white hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
+            >
               {player.name}
-            </h3>
-            <p className="text-primary-500 dark:text-primary-400 font-medium ">#{player.number}</p>
-            <p className="text-surface-600 dark:text-surface-400 text-sm">
+            </Link>
+            <p className="text-primary-500 dark:text-primary-400 font-medium">#{player.number}</p>
+            <p className="text-surface-600 dark:text-surface-400 text-sm truncate">
               {player.team?.name || "Unknown Team"}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center flex-shrink-0 max-w-[40%] justify-end">
-          <div className="flex items-center gap-1 sm:gap-2 flex-wrap ml-auto justify-end">
-            <button
-              onClick={() => handleViewPlayer(player)}
-              className="btn-primary p-2.5 rounded-xl"
-              title="View Profile"
-            >
-              <EyeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-            <button
-              onClick={() => handleViewStats(player)}
-              className="btn-secondary p-2.5 rounded-xl"
-              title="Shot Chart"
-            >
-              <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-            <button
-              onClick={() => handleEditPlayer(player)}
-              className="p-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
-              title="Edit player"
-            >
-              <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-            <button
-              onClick={() => {
+        <ActionMenu
+          ariaLabel={`Actions for ${player.name}`}
+          items={[
+            {
+              id: "shot-chart",
+              label: "Shot Chart",
+              icon: ChartBarIcon,
+              onClick: () => handleViewStats(player),
+            },
+            {
+              id: "edit",
+              label: "Edit Player",
+              icon: PencilIcon,
+              onClick: () => handleEditPlayer(player),
+            },
+            {
+              id: "delete",
+              label: "Delete Player",
+              icon: TrashIcon,
+              variant: "danger",
+              onClick: () => {
                 setSelectedPlayer(player);
                 setShowDeleteModal(true);
-              }}
-              className="p-2.5 text-surface-500 dark:text-surface-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
-              title="Delete player"
-            >
-              <TrashIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-          </div>
-        </div>
+              },
+            },
+          ]}
+        />
       </div>
 
       <div className="space-y-3">

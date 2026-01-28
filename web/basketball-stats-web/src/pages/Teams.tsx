@@ -13,6 +13,7 @@ import {
   PencilIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
+import { ActionMenu } from "../components/ui/ActionMenu";
 import {
   TeamFormModal,
   PlayerFormModal,
@@ -169,8 +170,8 @@ const Teams: React.FC = () => {
       key={team.id}
       className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 shadow-soft"
     >
-      <div className="flex justify-between items-start mb-4">
-        <div>
+      <div className="flex justify-between items-start mb-4 gap-3">
+        <div className="min-w-0">
           <Link
             to={`/app/teams/${team.id}`}
             className="text-xl font-bold text-surface-900 dark:text-white hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
@@ -178,28 +179,30 @@ const Teams: React.FC = () => {
             {team.name}
           </Link>
           {team.city && (
-            <p className="text-surface-600 dark:text-surface-400 text-sm mt-1">{team.city}</p>
+            <p className="text-surface-600 dark:text-surface-400 text-sm mt-1 truncate">{team.city}</p>
           )}
         </div>
-        <div className="flex items-center space-x-1">
-          <button
-            onClick={() => handleEditTeam(team)}
-            className="p-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
-            title="Edit team"
-          >
-            <PencilIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => {
-              setSelectedTeam(team);
-              setShowDeleteModal(true);
-            }}
-            className="p-2.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-xl transition-colors"
-            title="Delete team"
-          >
-            <TrashIcon className="w-4 h-4" />
-          </button>
-        </div>
+        <ActionMenu
+          ariaLabel={`Actions for ${team.name}`}
+          items={[
+            {
+              id: "edit",
+              label: "Edit Team",
+              icon: PencilIcon,
+              onClick: () => handleEditTeam(team),
+            },
+            {
+              id: "delete",
+              label: "Delete Team",
+              icon: TrashIcon,
+              variant: "danger",
+              onClick: () => {
+                setSelectedTeam(team);
+                setShowDeleteModal(true);
+              },
+            },
+          ]}
+        />
       </div>
 
       {team.description && (
