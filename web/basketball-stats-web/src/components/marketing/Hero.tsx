@@ -57,10 +57,10 @@ export default function Hero() {
               },
               {
                 icon: "stats",
-                label: "Detailed analytics",
-                desc: "Shot charts & player comparisons",
+                label: "Advanced analytics",
+                desc: "Four Factors, game flow & more",
               },
-              { icon: "users", label: "Team management", desc: "Multiple leagues & seasons" },
+              { icon: "activity", label: "Game replay", desc: "Relive games with timeline playback" },
             ].map((feature) => (
               <div
                 key={feature.label}

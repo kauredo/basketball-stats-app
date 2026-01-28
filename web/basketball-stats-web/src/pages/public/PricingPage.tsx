@@ -6,19 +6,20 @@ const features = [
   { name: "Live game tracking", included: true },
   { name: "Shot charts with location mapping", included: true },
   { name: "Player statistics & averages", included: true },
+  { name: "Advanced analytics (Four Factors, game flow)", included: true },
+  { name: "Game replay with timeline scrubbing", included: true },
+  { name: "PDF reports (games, players, teams)", included: true },
   { name: "Team management", included: true },
   { name: "League standings", included: true },
-  { name: "Player comparison tools", included: true },
   { name: "Role-based access control", included: true },
-  { name: "CSV data export", included: true },
-  { name: "Unlimited games", included: true },
-  { name: "Unlimited players", included: true },
+  { name: "CSV & PDF exports", included: true },
+  { name: "Unlimited games & players", included: true },
 ];
 
 const comingSoon = [
   { name: "iOS mobile app", status: "In Development" },
   { name: "Android mobile app", status: "In Development" },
-  { name: "Advanced analytics dashboard", status: "Planned" },
+  { name: "Video integration", status: "Planned" },
   { name: "Season-over-season comparisons", status: "Planned" },
 ];
 

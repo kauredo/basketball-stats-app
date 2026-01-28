@@ -48,14 +48,14 @@ const features: Feature[] = [
   },
   {
     icon: "activity",
-    title: "Player Comparison",
-    description: "Compare any players side-by-side to identify strengths.",
+    title: "Advanced Analytics",
+    description: "Go deeper with professional-level basketball analytics.",
     details: [
-      "Select any players from your league",
-      "Compare across all statistical categories",
-      "Visual bar charts for easy comparison",
-      "Identify top performers at each position",
-      "Track improvement over time",
+      "Four Factors analysis (eFG%, TO rate, ORB%, FT rate)",
+      "Game flow charts showing scoring runs",
+      "Quarter-by-quarter performance breakdowns",
+      "Player efficiency and plus/minus tracking",
+      "Team comparison visualizations",
     ],
   },
   {
@@ -95,15 +95,39 @@ const features: Feature[] = [
     ],
   },
   {
+    icon: "play",
+    title: "Game Replay",
+    description: "Relive any game with interactive timeline playback.",
+    details: [
+      "Scrub through the game timeline",
+      "Watch shots appear on the court as they happened",
+      "Jump to any quarter or key moment",
+      "See score progression in real-time",
+      "Review plays for coaching insights",
+    ],
+  },
+  {
     icon: "activity",
     title: "Game Analysis",
     description: "Review games with detailed breakdowns and insights.",
     details: [
       "Complete play-by-play history",
-      "Quarter-by-quarter scoring",
-      "Individual player box scores",
+      "Box scores with full stat lines",
       "Shot chart visualization per game",
-      "Export game data to CSV",
+      "Compare team performance head-to-head",
+      "Identify turning points and scoring runs",
+    ],
+  },
+  {
+    icon: "stats",
+    title: "Export & Reports",
+    description: "Generate professional reports and export your data.",
+    details: [
+      "PDF game reports with box scores and shot charts",
+      "Player season summary PDFs",
+      "Team season summary PDFs",
+      "CSV exports for box scores and play-by-play",
+      "Share reports with parents and players",
     ],
   },
 ];
@@ -111,8 +135,8 @@ const features: Feature[] = [
 const comingSoon = [
   { title: "iOS App", description: "Native app optimized for courtside use" },
   { title: "Android App", description: "Full-featured mobile experience" },
-  { title: "Advanced Analytics", description: "Deeper insights and trends" },
   { title: "Video Integration", description: "Link stats to game footage" },
+  { title: "Season Comparisons", description: "Track progress year over year" },
 ];
 
 export default function FeaturesPage() {

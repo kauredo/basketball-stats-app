@@ -29,11 +29,12 @@ const softwareAppSchema = {
     "Track basketball game statistics in real-time, analyze player performance, and gain insights to improve your team's game.",
   featureList: [
     "Live game tracking",
+    "Game replay",
     "Advanced analytics",
+    "Shot charts",
+    "PDF reports",
     "Team management",
     "League standings",
-    "Shot charts",
-    "Player comparison",
   ],
 };
 

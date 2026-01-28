@@ -310,7 +310,7 @@ const PlayerDetail: React.FC = () => {
               </Link>
             </div>
           </div>
-          <div className="grid grid-cols-2 sm:flex gap-2 sm:flex-shrink-0">
+          <div className="grid grid-cols-2 sm:flex gap-2 flex-wrap sm:gap-4 mt-2 sm:mt-0">
             <button
               onClick={() => navigate(`/app/shot-charts?player=${playerId}`)}
               className="px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center justify-center gap-2 transition-colors text-sm"

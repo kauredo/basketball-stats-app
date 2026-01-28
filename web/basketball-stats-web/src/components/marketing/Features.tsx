@@ -14,10 +14,22 @@ const features: Feature[] = [
       "Record stats in real-time during games with our intuitive interface. Track points, rebounds, assists, and more.",
   },
   {
+    icon: "play",
+    title: "Game Replay",
+    description:
+      "Relive any game with interactive timeline playback. Watch shots appear on the court as they happened.",
+  },
+  {
     icon: "stats",
     title: "Advanced Analytics",
     description:
-      "Get detailed insights into player and team performance with comprehensive statistical analysis.",
+      "Four Factors analysis, game flow charts, and efficiency metrics give you professional-level insights.",
+  },
+  {
+    icon: "target",
+    title: "Shot Charts",
+    description:
+      "Visualize shooting patterns with interactive shot charts showing made and missed attempts by zone.",
   },
   {
     icon: "users",
@@ -26,22 +38,10 @@ const features: Feature[] = [
       "Easily manage multiple teams, players, and leagues all in one place with role-based access.",
   },
   {
-    icon: "trophy",
-    title: "League Standings",
-    description:
-      "Automatic standings calculation with customizable point systems and tiebreaker rules.",
-  },
-  {
-    icon: "target",
-    title: "Shot Charts",
-    description:
-      "Visualize shooting patterns with interactive shot charts showing made and missed attempts.",
-  },
-  {
     icon: "activity",
-    title: "Player Comparison",
+    title: "Export & Reports",
     description:
-      "Compare player statistics side-by-side to identify strengths and areas for improvement.",
+      "Generate PDF game reports, player summaries, and CSV exports to share with your team.",
   },
 ];
 
