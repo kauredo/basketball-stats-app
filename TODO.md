@@ -97,6 +97,13 @@ _All P3 backend issues resolved_
   - Updated `TeamBoxScore` (header backgrounds)
   - Updated `GameEventCard` (play-by-play border colors)
   - Updated `GameFlowChart` (scoring run fills, line gradient)
+- [x] **Play-by-play team colors** - Fixed GameEventCard to properly determine team from event details or teamId fallback
+- [x] **Substitution events in play-by-play** - Now logged when players enter/exit game or swap
+- [x] **Quarter start/end events in play-by-play** - Comprehensive game flow logging:
+  - Game start logs Q1 start event
+  - Quarter timer expiration logs quarter end + next quarter start
+  - Game end logs final quarter end with final score
+  - Manual quarter changes via setQuarter also log transition events
 
 ---
 

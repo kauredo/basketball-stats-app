@@ -628,6 +628,25 @@ export const substitute = mutation({
       });
     }
 
+    // Log the substitution event
+    const isHomeTeam = player.teamId === game.homeTeamId;
+    await ctx.db.insert("gameEvents", {
+      gameId: args.gameId,
+      eventType: "substitution",
+      playerId: args.playerId,
+      teamId: player.teamId,
+      quarter: game.currentQuarter,
+      gameTime: game.timeRemainingSeconds,
+      timestamp: Date.now(),
+      details: {
+        action: args.isOnCourt ? "in" : "out",
+        isHomeTeam,
+      },
+      description: args.isOnCourt
+        ? `#${player.number} ${player.name} entered the game`
+        : `#${player.number} ${player.name} left the game`,
+    });
+
     return {
       message: args.isOnCourt ? `${player.name} entered the game` : `${player.name} left the game`,
       isOnCourt: args.isOnCourt,
@@ -731,6 +750,24 @@ export const swapSubstitute = mutation({
         gameTime: game.timeRemainingSeconds,
       });
     }
+
+    // Log the substitution event (single event for swap)
+    const isHomeTeam = playerOut.teamId === game.homeTeamId;
+    await ctx.db.insert("gameEvents", {
+      gameId: args.gameId,
+      eventType: "substitution",
+      teamId: playerOut.teamId,
+      quarter: game.currentQuarter,
+      gameTime: game.timeRemainingSeconds,
+      timestamp: Date.now(),
+      details: {
+        action: "swap",
+        playerOutId: args.playerOutId,
+        playerInId: args.playerInId,
+        isHomeTeam,
+      },
+      description: `#${playerIn.number} ${playerIn.name} in for #${playerOut.number} ${playerOut.name}`,
+    });
 
     return {
       message: `${playerIn.name} substituted for ${playerOut.name}`,

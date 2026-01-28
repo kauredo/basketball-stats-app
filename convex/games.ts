@@ -493,6 +493,26 @@ export const start = mutation({
       },
     });
 
+    // Log game start and Q1 start events
+    const settings = game.gameSettings as any;
+    const quarterMinutes = settings?.quarterMinutes || 12;
+    const startingGameTime = quarterMinutes * 60;
+
+    await ctx.db.insert("gameEvents", {
+      gameId: args.gameId,
+      eventType: "quarter_start",
+      quarter: 1,
+      gameTime: startingGameTime,
+      timestamp: Date.now(),
+      details: {
+        homeScore: 0,
+        awayScore: 0,
+        isOvertime: false,
+        isGameStart: true,
+      },
+      description: `Game Started - ${homeTeamName} vs ${awayTeamName}`,
+    });
+
     return { message: "Game ready - press play to start clock", status: "paused" };
   },
 });
@@ -726,6 +746,47 @@ export const setQuarter = mutation({
 
     await ctx.db.patch(args.gameId, updates);
 
+    // Log quarter change event if quarter actually changed
+    if (args.quarter !== game.currentQuarter) {
+      const isOvertime = args.quarter > 4;
+      const periodLabel = isOvertime ? `OT${args.quarter - 4}` : `Q${args.quarter}`;
+
+      // Log end of previous quarter (if not first quarter)
+      if (game.currentQuarter >= 1) {
+        const prevPeriodLabel = game.currentQuarter > 4
+          ? `OT${game.currentQuarter - 4}`
+          : `Q${game.currentQuarter}`;
+        await ctx.db.insert("gameEvents", {
+          gameId: args.gameId,
+          eventType: "quarter_end",
+          quarter: game.currentQuarter,
+          gameTime: game.timeRemainingSeconds,
+          timestamp: Date.now(),
+          details: {
+            homeScore: game.homeScore,
+            awayScore: game.awayScore,
+          },
+          description: `End of ${prevPeriodLabel}`,
+        });
+      }
+
+      // Log start of new quarter
+      const newTime = updates.timeRemainingSeconds || game.timeRemainingSeconds;
+      await ctx.db.insert("gameEvents", {
+        gameId: args.gameId,
+        eventType: "quarter_start",
+        quarter: args.quarter,
+        gameTime: newTime,
+        timestamp: Date.now(),
+        details: {
+          homeScore: game.homeScore,
+          awayScore: game.awayScore,
+          isOvertime,
+        },
+        description: `${periodLabel} Starting`,
+      });
+    }
+
     return {
       message: `Changed to quarter ${args.quarter}`,
       quarter: args.quarter,
@@ -842,18 +903,52 @@ export const timerTick = internalMutation({
       }
       const newSettings = { ...settings, quartersCompleted };
 
+      // Log quarter end event
+      const periodLabel = game.currentQuarter > 4
+        ? `OT${game.currentQuarter - 4}`
+        : `Q${game.currentQuarter}`;
+      await ctx.db.insert("gameEvents", {
+        gameId: args.gameId,
+        eventType: "quarter_end",
+        quarter: game.currentQuarter,
+        gameTime: 0,
+        timestamp: Date.now(),
+        details: {
+          homeScore: game.homeScore,
+          awayScore: game.awayScore,
+        },
+        description: `End of ${periodLabel} - ${game.homeScore}-${game.awayScore}`,
+      });
+
       if (game.currentQuarter < 4) {
         // Quarter ended - move to next quarter
+        const nextQuarter = game.currentQuarter + 1;
         await ctx.db.patch(args.gameId, {
           timeRemainingSeconds: quarterMinutes * 60,
-          currentQuarter: game.currentQuarter + 1,
+          currentQuarter: nextQuarter,
           status: "paused", // Pause for quarter break
           gameSettings: newSettings,
         });
+
+        // Log next quarter start event
+        await ctx.db.insert("gameEvents", {
+          gameId: args.gameId,
+          eventType: "quarter_start",
+          quarter: nextQuarter,
+          gameTime: quarterMinutes * 60,
+          timestamp: Date.now(),
+          details: {
+            homeScore: game.homeScore,
+            awayScore: game.awayScore,
+            isOvertime: false,
+          },
+          description: `Q${nextQuarter} Starting`,
+        });
+
         // Don't schedule next tick - game is paused
         return;
       } else {
-        // Game ended - all 4 quarters completed
+        // Game ended - all 4 quarters completed (or OT ended with score difference)
         await ctx.db.patch(args.gameId, {
           status: "completed",
           endedAt: Date.now(),
@@ -866,6 +961,21 @@ export const timerTick = internalMutation({
         const awayTeam = await ctx.db.get(game.awayTeamId);
         const homeTeamName = homeTeam?.name || "Home Team";
         const awayTeamName = awayTeam?.name || "Away Team";
+
+        // Log game end event
+        await ctx.db.insert("gameEvents", {
+          gameId: args.gameId,
+          eventType: "quarter_end",
+          quarter: game.currentQuarter,
+          gameTime: 0,
+          timestamp: Date.now(),
+          details: {
+            homeScore: game.homeScore,
+            awayScore: game.awayScore,
+            isGameEnd: true,
+          },
+          description: `Game Over - Final: ${homeTeamName} ${game.homeScore}, ${awayTeamName} ${game.awayScore}`,
+        });
 
         await ctx.runMutation(api.notifications.notifyLeagueMembers, {
           leagueId: game.leagueId,
