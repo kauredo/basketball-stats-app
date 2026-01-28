@@ -168,33 +168,286 @@ import type { Player, Game, PlayerStat } from "@basketball-stats/shared";
 - Both apps share the same Convex backend and use similar hooks patterns
 - Styling: Mobile uses NativeWind (Tailwind for RN), Web uses Tailwind CSS
 
-### Creation Flows: Web vs Mobile
+---
 
-The apps handle entity creation (games, teams, players) differently based on platform conventions:
+## Development Workflow
 
-**Web: Inline Modals**
+### Running Checks
 
-- Uses overlay modals that appear on top of the current page
-- Found in `Games.tsx`, `Teams.tsx` pages
-- State managed with `useState` hooks (e.g., `showCreateModal`)
-- Modal components render inline within the page component
-- Pattern: `{showCreateModal && <ModalComponent />}`
+Before committing, run the full check to ensure code quality:
 
-**Mobile: Dedicated Screens**
+```bash
+npm run full_check    # Runs typecheck + lint + format (must pass before commit)
+npm run typecheck     # TypeScript only (all packages + Convex)
+npm run lint          # ESLint only
+npm run format        # Prettier formatting
+npm run convex:dev    # Start Convex dev server
+```
 
-- Uses full-screen forms with navigation stack
-- Located at `screens/CreateGameScreen.tsx`, `CreateTeamScreen.tsx`, `CreatePlayerScreen.tsx`
-- Navigation via React Navigation (push to stack)
-- Pattern: `navigation.navigate('CreateGame', { params })`
+Warnings are acceptable but errors must be zero.
 
-**Why the difference:**
+### Type Patterns
 
-- Web modals keep context visible (see the list behind the form)
-- Mobile screens maximize input space on smaller displays
-- Both achieve the same outcome with platform-appropriate UX
+**Extending Convex return types**: When a query returns data that needs additional computed fields in the frontend, extend the type:
 
-**When adding new creation flows:**
+```typescript
+// Convex query returns Team, but we add computed fields
+interface ExtendedTeamData extends Team {
+  wins: number;
+  losses: number;
+  canManage: boolean; // Permission check result from backend
+}
+```
 
-1. Web: Add a modal state to the relevant page, render modal inline
-2. Mobile: Create a new screen, add to navigation stack in `AppNavigator.tsx`
-3. Both: Use the same Convex mutation for the actual creation
+**Prefer backend computation**: Add computed fields like `canManage` in the Convex query rather than computing permissions client-side.
+
+---
+
+## Permission System
+
+### Backend Authorization
+
+Use helpers from `convex/lib/auth.ts` for permission checks:
+
+```typescript
+import { canManageTeam, canManageLeague } from "./lib/auth";
+
+// In mutations - check before allowing changes
+const hasPermission = await canManageTeam(ctx, user._id, args.teamId);
+if (!hasPermission) {
+  throw new Error("Access denied");
+}
+```
+
+**Permission hierarchy** (checked by `canManageTeam`):
+
+1. League admin/owner → can manage all teams in their league
+2. Team owner (`team.userId`) → can manage their own team
+3. Team coach (via `teamMemberships`) → can manage teams they coach
+
+### Frontend Permission-Based UI
+
+Add `canManage` to query responses, then conditionally render actions:
+
+```tsx
+// Only show edit/delete buttons if user has permission
+{
+  team?.canManage && <button onClick={handleEdit}>Edit Team</button>;
+}
+```
+
+---
+
+## Shared Utilities
+
+The `shared/src/utils/` directory contains cross-platform helpers:
+
+| Utility         | Purpose                                                                  |
+| --------------- | ------------------------------------------------------------------------ |
+| `teamColors.ts` | `resolveTeamColor()`, `isLightColor()`, `TEAM_COLOR_PALETTE`             |
+| `youtube.ts`    | `extractYouTubeId()`, `getYouTubeEmbedUrl()`, `getYouTubeThumbnailUrl()` |
+| `social.ts`     | `SOCIAL_PLATFORMS` array with icons and URL patterns                     |
+
+Import from the shared package:
+
+```typescript
+import { resolveTeamColor, extractYouTubeId, TEAM_COLOR_PALETTE } from "@basketball-stats/shared";
+```
+
+---
+
+## Convex Backend Patterns
+
+### File Organization
+
+Each Convex module (`teams.ts`, `players.ts`, etc.) follows this structure:
+
+1. Imports from `convex/values`, `_generated/server`, and `lib/auth`
+2. Helper functions (private to module)
+3. Queries (read operations)
+4. Mutations (write operations)
+
+### Authentication Pattern
+
+**Every query and mutation requires a token:**
+
+```typescript
+import { getUserFromToken, canAccessLeague } from "./lib/auth";
+
+export const list = query({
+  args: {
+    token: v.string(), // Required for all operations
+    leagueId: v.id("leagues"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const hasAccess = await canAccessLeague(ctx, user._id, args.leagueId);
+    if (!hasAccess) throw new Error("Access denied");
+
+    // ... rest of handler
+  },
+});
+```
+
+### Common Query Patterns
+
+```typescript
+// Index-based filtering (preferred - uses database indexes)
+const teams = await ctx.db
+  .query("teams")
+  .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
+  .collect();
+
+// Additional filtering after index
+const activeGames = await ctx.db
+  .query("games")
+  .withIndex("by_home_team", (q) => q.eq("homeTeamId", teamId))
+  .filter((q) => q.eq(q.field("status"), "active"))
+  .collect();
+```
+
+### Validation
+
+Use helpers from `./lib/validation`:
+
+```typescript
+import { validateName, validateEntityFields } from "./lib/validation";
+
+// In mutation handler
+validateName(args.name); // Throws on invalid
+validateEntityFields(args);
+```
+
+---
+
+## Web Component Patterns
+
+### Modal System
+
+Use the `BaseModal` composition pattern from `components/ui/BaseModal.tsx`:
+
+```tsx
+import { BaseModal, ModalHeader, ModalBody, ModalFooter, ModalCancelButton } from "../ui/BaseModal";
+
+<BaseModal
+  isOpen={showModal}
+  onClose={() => setShowModal(false)}
+  title="Edit Team"
+  maxWidth="lg" // sm | md | lg | xl
+>
+  <ModalHeader title="Edit Team" subtitle="Update team details" />
+  <ModalBody padding="lg">{/* Form content */}</ModalBody>
+  <ModalFooter>
+    <ModalCancelButton onClick={() => setShowModal(false)} />
+    <button onClick={handleSave}>Save</button>
+  </ModalFooter>
+</BaseModal>;
+```
+
+### Using Convex in Components
+
+```tsx
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api"; // Relative path from component
+import type { Id } from "../../../../convex/_generated/dataModel";
+
+function MyComponent() {
+  const { token, selectedLeague } = useAuth();
+
+  // Queries - use "skip" when dependencies aren't ready
+  const teams = useQuery(
+    api.teams.list,
+    token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
+  );
+
+  // Mutations
+  const updateTeam = useMutation(api.teams.update);
+
+  const handleUpdate = async () => {
+    await updateTeam({ token, teamId, name: "New Name" });
+  };
+}
+```
+
+### Context Usage
+
+The `AuthContext` provides authentication state:
+
+```tsx
+import { useAuth } from "../contexts/AuthContext";
+
+function MyComponent() {
+  const {
+    user, // Current user or null
+    isAuthenticated, // Boolean
+    token, // Auth token for API calls
+    selectedLeague, // Currently selected league
+    isLoading, // True during auth initialization
+  } = useAuth();
+}
+```
+
+---
+
+## Mobile Patterns
+
+### Screen vs Component
+
+- **Screens** (`screens/`): Full-page views, receive navigation props
+- **Components** (`components/`): Reusable UI pieces
+
+### Navigation
+
+```tsx
+// Navigate to screen
+navigation.navigate("TeamDetail", { teamId: team.id });
+
+// Go back
+navigation.goBack();
+
+// In screen component
+function TeamDetailScreen({ route, navigation }) {
+  const { teamId } = route.params;
+}
+```
+
+### Bottom Sheets (Mobile Modals)
+
+Use `components/common/BottomSheet.tsx` for mobile modal-like UI.
+
+---
+
+## Naming Conventions
+
+### Cross-Platform Component Pairs
+
+When the same feature exists on both platforms, use matching names:
+
+| Web                                          | Mobile                                       |
+| -------------------------------------------- | -------------------------------------------- |
+| `components/ui/ColorPicker.tsx`              | `components/ui/ColorPicker.tsx`              |
+| `components/livegame/EnhancedScoreboard.tsx` | `components/livegame/EnhancedScoreboard.tsx` |
+| `pages/TeamDetail.tsx`                       | `screens/TeamDetailScreen.tsx`               |
+
+### File Naming
+
+- Components: `PascalCase.tsx`
+- Utilities: `camelCase.ts`
+- Constants: `camelCase.ts` (exports SCREAMING_SNAKE_CASE)
+- Types: `camelCase.ts` (exports PascalCase types)
+
+---
+
+## Adding Dependencies
+
+```bash
+# Add to specific workspace
+npm install package-name -w web/basketball-stats-web
+npm install package-name -w mobile/BasketballStatsMobile
+npm install package-name -w shared
+
+# Add to root (dev tools like prettier, turbo)
+npm install -D package-name
+```
