@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Alert, SafeAreaView } from "react-native";
 import { useRoute, type RouteProp } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
@@ -860,13 +860,13 @@ export default function LiveGameScreen() {
   };
 
   // Handle rebound recording
-  const handlePlayerRebound = async (playerId: Id<"players">, type: "offensive" | "defensive") => {
+  const handlePlayerRebound = async (playerId: Id<"players">, _type: "offensive" | "defensive") => {
     await handleRecordStat(playerId, "rebound");
     setPendingRebound(null);
   };
 
   // Handle team rebound (just dismiss for now - could add team rebound tracking later)
-  const handleTeamRebound = (teamId: Id<"teams">, type: "offensive" | "defensive") => {
+  const handleTeamRebound = (_teamId: Id<"teams">, _type: "offensive" | "defensive") => {
     // Team rebounds could be tracked separately if needed
     setPendingRebound(null);
   };
@@ -901,14 +901,6 @@ export default function LiveGameScreen() {
 
     await handleRecordStat(playerId, pendingQuickStat);
     setPendingQuickStat(null);
-  };
-
-  // Handle foul button press - opens foul type modal
-  const handleFoulPress = (playerId?: Id<"players">) => {
-    if (playerId) {
-      setPendingFoulPlayerId(playerId);
-      setShowFoulTypeModal(true);
-    }
   };
 
   const handleFoulTypeSelect = async (
@@ -1074,19 +1066,6 @@ export default function LiveGameScreen() {
       console.error("Failed to end game:", error);
       Alert.alert("Error", "Failed to end game");
       soundFeedback.error();
-    }
-  };
-
-  const handleSubstitute = async (playerId: Id<"players">, isOnCourt: boolean) => {
-    if (!token) return;
-
-    try {
-      await substituteMutation({ token, gameId, playerId, isOnCourt: !isOnCourt });
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } catch (error) {
-      console.error("Failed to substitute:", error);
-      Alert.alert("Error", getErrorMessage(error, "Failed to substitute player"));
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
 

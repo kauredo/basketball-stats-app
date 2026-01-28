@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import type { Id } from "../../../../../convex/_generated/dataModel";
-import Icon, { IconName } from "../Icon";
+import Icon, { type IconName } from "../Icon";
 
 interface GameEvent {
   id: Id<"gameEvents">;

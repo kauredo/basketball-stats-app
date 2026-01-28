@@ -180,8 +180,6 @@ export const PlayerAvatarRow: React.FC<{
 }> = ({ players, size = "sm", maxDisplay = 5, style }) => {
   const displayPlayers = players.slice(0, maxDisplay);
   const overflow = players.length - maxDisplay;
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
 
   return (
     <View className="flex-row items-center" style={style}>

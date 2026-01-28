@@ -11,7 +11,6 @@ import {
 } from "@basketball-stats/shared";
 import {
   PlusIcon,
-  ArrowRightIcon,
   Cog6ToothIcon,
   XMarkIcon,
   CheckIcon,

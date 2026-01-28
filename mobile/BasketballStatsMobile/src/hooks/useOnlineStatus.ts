@@ -16,7 +16,7 @@ export interface OnlineStatus {
 export function useOnlineStatus(): OnlineStatus {
   const [isOnline, setIsOnline] = useState(true);
   const [wasOffline, setWasOffline] = useState(false);
-  const [connectionType, setConnectionType] = useState<string | null>("wifi");
+  const [connectionType, _setConnectionType] = useState<string | null>("wifi");
   const previousOnline = useRef(true);
 
   useEffect(() => {

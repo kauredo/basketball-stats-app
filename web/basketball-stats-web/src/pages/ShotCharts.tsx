@@ -46,7 +46,7 @@ const ShotCharts: React.FC = () => {
 
   // Export functionality
   const courtRef = useRef<HTMLDivElement>(null);
-  const { progress, isExporting, actions } = useExport();
+  const { isExporting, actions } = useExport();
 
   // Fetch teams and players
   const teamsData = useQuery(

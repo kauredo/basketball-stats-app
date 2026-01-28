@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from "react";
-import { View, Text, ScrollView, TouchableOpacity, FlatList, Dimensions } from "react-native";
-import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { useRoute, useNavigation, type RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useQuery } from "convex/react";
 import Slider from "@react-native-community/slider";
@@ -228,8 +228,6 @@ export default function GameReplayScreen() {
       </View>
     );
   }
-
-  const screenWidth = Dimensions.get("window").width;
 
   return (
     <View className="flex-1 bg-surface-50 dark:bg-surface-950">

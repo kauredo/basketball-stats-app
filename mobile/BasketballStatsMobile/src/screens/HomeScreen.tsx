@@ -11,7 +11,7 @@ import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
 import EmptyState from "../components/EmptyState";
 import type { RootStackParamList } from "../navigation/AppNavigator";
-import { SkeletonCard, SkeletonGameCard } from "../components/Skeleton";
+import { SkeletonGameCard } from "../components/Skeleton";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 

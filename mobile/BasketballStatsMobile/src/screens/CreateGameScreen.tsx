@@ -131,7 +131,7 @@ function QuickTeamCreateModal({
   const { token, selectedLeague } = useAuth();
   const [teamName, setTeamName] = useState("");
   const [playerCount, setPlayerCount] = useState(5);
-  const [useDefaultNames, setUseDefaultNames] = useState(true);
+  const [_useDefaultNames, setUseDefaultNames] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 
   const createTeamMutation = useMutation(api.teams.create);

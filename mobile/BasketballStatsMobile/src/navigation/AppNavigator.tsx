@@ -2,13 +2,13 @@ import React from "react";
 import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, Text, TouchableOpacity, Image, useColorScheme } from "react-native";
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { View, Text, Image } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import { NAV_COLORS } from "@basketball-stats/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
-import Icon from "../components/Icon";
+// Icon import moved to where needed
 import NotificationBell from "../components/NotificationBell";
 import { OfflineBanner } from "../components/OfflineBanner";
 
@@ -78,7 +78,7 @@ function TabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ color, size }) => {
           // Set the icon based on the route name
           if (route.name === "Home") {
             return <FontAwesome5 name="home" size={size} color={color} />;

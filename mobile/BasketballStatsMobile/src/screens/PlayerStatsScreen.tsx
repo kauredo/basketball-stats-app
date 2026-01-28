@@ -19,7 +19,6 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
-import Icon from "../components/Icon";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { exportPlayerGameLogCSV } from "../utils/export";

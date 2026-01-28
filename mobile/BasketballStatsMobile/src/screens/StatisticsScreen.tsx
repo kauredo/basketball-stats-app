@@ -57,10 +57,9 @@ interface StatCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
-  color?: string;
 }
 
-function StatCard({ title, value, subtitle, color = "#EA580C" }: StatCardProps) {
+function StatCard({ title, value, subtitle }: StatCardProps) {
   return (
     <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
       <Text className="text-surface-500 dark:text-surface-400 text-xs uppercase mb-1">{title}</Text>
@@ -421,7 +420,6 @@ export default function StatisticsScreen() {
                     title="Total Games"
                     value={leagueInfo.totalGames}
                     subtitle="Completed games"
-                    color="#10B981"
                   />
                 </View>
                 <View className="w-[48%] mb-3">
@@ -429,7 +427,6 @@ export default function StatisticsScreen() {
                     title="Total Teams"
                     value={leagueInfo.totalTeams}
                     subtitle="Active teams"
-                    color="#3B82F6"
                   />
                 </View>
                 <View className="w-[48%] mb-3">
@@ -437,7 +434,6 @@ export default function StatisticsScreen() {
                     title="Total Players"
                     value={leagueInfo.totalPlayers}
                     subtitle="Registered players"
-                    color="#8B5CF6"
                   />
                 </View>
                 <View className="w-[48%] mb-3">
@@ -454,7 +450,6 @@ export default function StatisticsScreen() {
                         : "0.0"
                     }
                     subtitle="Points per game"
-                    color="#EF4444"
                   />
                 </View>
               </View>

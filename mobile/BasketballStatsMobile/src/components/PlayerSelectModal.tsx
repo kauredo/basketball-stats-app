@@ -1,13 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  FlatList,
-  TextInput,
-  SectionList,
-} from "react-native";
+import { View, Text, Modal, TouchableOpacity, TextInput, SectionList } from "react-native";
 import Icon from "./Icon";
 import type { Id } from "../../../../convex/_generated/dataModel";
 

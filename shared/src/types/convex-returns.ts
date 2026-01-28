@@ -4,7 +4,7 @@
  * callback parameters and array iterations in web/mobile apps.
  */
 
-import type { Position, GameStatus, TeamSummary } from "./index";
+import type { Position, GameStatus, TeamSummary, LiveTeamStats } from "./index";
 
 // ============================================
 // Live Game Types
@@ -60,8 +60,8 @@ export interface LiveStatsResponse {
   homePlayers: LivePlayerStat[];
   awayPlayers: LivePlayerStat[];
   teamStats?: {
-    home: import("./index").LiveTeamStats;
-    away: import("./index").LiveTeamStats;
+    home: LiveTeamStats;
+    away: LiveTeamStats;
   };
 }
 

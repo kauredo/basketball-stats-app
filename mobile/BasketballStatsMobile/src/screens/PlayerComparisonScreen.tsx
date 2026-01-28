@@ -55,7 +55,7 @@ function StatRow({ label, players, statKey, unit = "", higherIsBetter = true }: 
       <View className="w-20">
         <Text className="text-xs text-surface-500 dark:text-surface-400">{label}</Text>
       </View>
-      {players.map((player, idx) => {
+      {players.map((player) => {
         const value = player[statKey] as number;
         const isBest = values.filter((v) => v === bestValue).length === 1 && value === bestValue;
         return (

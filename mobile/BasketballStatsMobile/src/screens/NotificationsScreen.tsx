@@ -6,7 +6,6 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { useNotifications } from "../contexts/NotificationContext";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { RootStackParamList } from "../navigation/AppNavigator";
-import Icon from "../components/Icon";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -55,7 +54,7 @@ function getNotificationIcon(type: string): { name: string; color: string } {
 
 export default function NotificationsScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead, deleteNotification } =
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } =
     useNotifications();
   const [refreshing, setRefreshing] = React.useState(false);
 

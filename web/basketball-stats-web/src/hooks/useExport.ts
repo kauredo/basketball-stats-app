@@ -5,7 +5,6 @@
 
 import { useState, useCallback, useRef } from "react";
 import type {
-  ExportStatus,
   ExportProgress,
   ExportFormat,
   ExportType,
@@ -88,16 +87,7 @@ export function useExport(options: UseExportOptions = {}): UseExportReturn {
   const [progress, setProgress] = useState<ExportProgress>(initialProgress);
   const abortRef = useRef(false);
 
-  const { onProgress, onComplete, onError } = options;
-
-  const updateProgress = useCallback(
-    (update: Partial<ExportProgress>) => {
-      const newProgress = { ...progress, ...update };
-      setProgress(newProgress);
-      onProgress?.(newProgress);
-    },
-    [progress, onProgress]
-  );
+  const { onComplete, onError } = options;
 
   const handleError = useCallback(
     (error: Error) => {

@@ -8,7 +8,7 @@ import type { Id } from "../../../../../convex/_generated/dataModel";
 const POSITIONS = ["PG", "SG", "SF", "PF", "C"] as const;
 type Position = (typeof POSITIONS)[number];
 
-const POSITION_NAMES: Record<Position, string> = {
+const _POSITION_NAMES: Record<Position, string> = {
   PG: "Point Guard",
   SG: "Shooting Guard",
   SF: "Small Forward",
@@ -93,7 +93,7 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
     });
   }, [onCourt]);
 
-  const handleCourtPlayerPress = (player: PlayerStat | null, positionIndex: number) => {
+  const handleCourtPlayerPress = (player: PlayerStat | null, _positionIndex: number) => {
     if (disabled) return;
 
     if (!player) {

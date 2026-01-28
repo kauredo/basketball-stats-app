@@ -21,7 +21,6 @@ export default function AuthNavigator() {
 
   const navigateToLogin = () => setCurrentScreen("Login");
   const navigateToSignup = () => setCurrentScreen("Signup");
-  const navigateToLeagueSelection = () => setCurrentScreen("LeagueSelection");
   const navigateToForgotPassword = () => setCurrentScreen("ForgotPassword");
 
   const renderCurrentScreen = () => {

@@ -7,7 +7,6 @@ import {
   Switch,
   Alert,
   ActivityIndicator,
-  useColorScheme,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useQuery, useMutation } from "convex/react";

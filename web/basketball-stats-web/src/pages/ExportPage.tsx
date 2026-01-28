@@ -82,29 +82,6 @@ interface GameEventData {
   details?: { homeScore?: number; awayScore?: number; [key: string]: unknown };
 }
 
-// Local interface for recent game log entries
-interface RecentGameEntry {
-  gameId?: string;
-  /** Can be number (timestamp) or string (formatted date) */
-  gameDate?: number | string;
-  opponent: string;
-  points?: number;
-  rebounds?: number;
-  assists?: number;
-  steals?: number;
-  blocks?: number;
-  turnovers?: number;
-  fouls?: number;
-  fieldGoalsMade?: number;
-  fieldGoalsAttempted?: number;
-  threePointersMade?: number;
-  threePointersAttempted?: number;
-  freeThrowsMade?: number;
-  freeThrowsAttempted?: number;
-  minutes?: number;
-  minutesPlayed?: number;
-}
-
 // Local interface for player list item
 interface PlayerItem {
   id: string;

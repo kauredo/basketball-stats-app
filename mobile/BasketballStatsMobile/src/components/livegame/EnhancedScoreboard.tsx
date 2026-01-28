@@ -57,7 +57,7 @@ export default function EnhancedScoreboard({
   onTimeoutHome,
   onTimeoutAway,
   onQuarterChange,
-  onEndPeriod,
+  onEndPeriod: _onEndPeriod,
   shotClockSeconds = 24,
   showShotClock = false,
   isLandscape = false,
