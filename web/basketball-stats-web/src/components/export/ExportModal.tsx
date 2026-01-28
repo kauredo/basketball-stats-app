@@ -11,9 +11,11 @@ import {
   SunIcon,
   MoonIcon,
   FireIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 import { useExport } from "../../hooks/useExport";
 import { PrintableShotChart } from "./PrintableShotChart";
+import { PDFPreviewModal } from "./PDFPreviewModal";
 import type {
   ExportFormat,
   ExportType,
@@ -47,6 +49,8 @@ export function ExportModal({
   const [format, setFormat] = useState<ExportFormat>(defaultFormat);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [includeHeatmap, setIncludeHeatmap] = useState(false);
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
   const [contentOptions, setContentOptions] = useState<ContentOption[]>([
     {
       id: "boxScore",
@@ -137,6 +141,34 @@ export function ExportModal({
         awayCourtRef: shotsEnabled ? awayCourtRef : undefined,
       });
     }
+  };
+
+  const handlePreview = async () => {
+    if (!gameData || format !== "pdf") return;
+
+    const shotsEnabled = contentOptions.find((o) => o.id === "shotCharts")?.enabled;
+
+    const blob = await actions.previewGameReportPDF(gameData, {
+      theme,
+      homeCourtRef: shotsEnabled ? homeCourtRef : undefined,
+      awayCourtRef: shotsEnabled ? awayCourtRef : undefined,
+    });
+
+    if (blob) {
+      setPreviewBlob(blob);
+      setShowPreview(true);
+    }
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setPreviewBlob(null);
+    actions.reset();
+  };
+
+  const getPreviewFilename = () => {
+    if (!gameData) return "game-report";
+    return `game-report-${gameData.homeTeam.name}-vs-${gameData.awayTeam.name}`.replace(/\s+/g, "-");
   };
 
   const hasSelectedContent = contentOptions.some((opt) => opt.enabled);
@@ -398,19 +430,44 @@ export function ExportModal({
 
       <ModalFooter align="between">
         <ModalCancelButton onClick={onClose}>Cancel</ModalCancelButton>
-        <button
-          onClick={handleExport}
-          disabled={!gameData || isExporting || !hasSelectedContent}
-          className={`px-6 py-2.5 rounded-xl font-semibold transition-colors duration-150 flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-800 ${
-            !gameData || isExporting || !hasSelectedContent
-              ? "bg-surface-200 dark:bg-surface-700 text-surface-400 cursor-not-allowed"
-              : "bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white"
-          }`}
-        >
-          <DocumentArrowDownIcon className="w-5 h-5" aria-hidden="true" />
-          {isExporting ? "Exporting..." : `Export ${format.toUpperCase()}`}
-        </button>
+        <div className="flex gap-3">
+          {format === "pdf" && (
+            <button
+              onClick={handlePreview}
+              disabled={!gameData || isExporting || !hasSelectedContent}
+              className={`px-6 py-2.5 rounded-xl font-semibold transition-colors duration-150 flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-800 ${
+                !gameData || isExporting || !hasSelectedContent
+                  ? "bg-surface-200 dark:bg-surface-700 text-surface-400 cursor-not-allowed"
+                  : "bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-300 border border-surface-300 dark:border-surface-600"
+              }`}
+            >
+              <EyeIcon className="w-5 h-5" aria-hidden="true" />
+              {isExporting ? "Loading..." : "Preview"}
+            </button>
+          )}
+          <button
+            onClick={handleExport}
+            disabled={!gameData || isExporting || !hasSelectedContent}
+            className={`px-6 py-2.5 rounded-xl font-semibold transition-colors duration-150 flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-800 ${
+              !gameData || isExporting || !hasSelectedContent
+                ? "bg-surface-200 dark:bg-surface-700 text-surface-400 cursor-not-allowed"
+                : "bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white"
+            }`}
+          >
+            <DocumentArrowDownIcon className="w-5 h-5" aria-hidden="true" />
+            {isExporting ? "Exporting..." : `Export ${format.toUpperCase()}`}
+          </button>
+        </div>
       </ModalFooter>
+
+      {/* PDF Preview Modal */}
+      <PDFPreviewModal
+        isOpen={showPreview}
+        onClose={handleClosePreview}
+        pdfBlob={previewBlob}
+        filename={getPreviewFilename()}
+        title="Game Report Preview"
+      />
     </BaseModal>
   );
 }

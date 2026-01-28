@@ -30,6 +30,12 @@ interface UseExportOptions {
   onError?: (error: Error) => void;
 }
 
+interface PDFExportOptions {
+  theme?: "light" | "dark";
+  homeCourtRef?: React.RefObject<HTMLElement | null>;
+  awayCourtRef?: React.RefObject<HTMLElement | null>;
+}
+
 interface ExportActions {
   // CSV exports
   exportBoxScore: (gameData: GameExportData) => Promise<void>;
@@ -40,12 +46,14 @@ interface ExportActions {
   // PDF exports
   exportGameReportPDF: (
     gameData: GameExportData,
-    options?: {
-      theme?: "light" | "dark";
-      homeCourtRef?: React.RefObject<HTMLElement | null>;
-      awayCourtRef?: React.RefObject<HTMLElement | null>;
-    }
+    options?: PDFExportOptions
   ) => Promise<void>;
+
+  // PDF preview (returns blob instead of downloading)
+  previewGameReportPDF: (
+    gameData: GameExportData,
+    options?: PDFExportOptions
+  ) => Promise<Blob | null>;
 
   exportShotChartPDF: (
     courtRef: React.RefObject<HTMLElement | null>,
@@ -184,62 +192,92 @@ export function useExport(options: UseExportOptions = {}): UseExportReturn {
     [handleError, onComplete]
   );
 
+  // Helper to generate PDF blob (shared by export and preview)
+  const generatePDFBlob = useCallback(
+    async (
+      gameData: GameExportData,
+      exportOptions?: PDFExportOptions
+    ): Promise<Blob | null> => {
+      const theme = exportOptions?.theme || "light";
+      let homeCourtImage: string | null = null;
+      let awayCourtImage: string | null = null;
+
+      setProgress({ status: "preparing", progress: 10, message: "Preparing export..." });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Capture court images if refs provided
+      if (exportOptions?.homeCourtRef?.current) {
+        setProgress({
+          status: "generating",
+          progress: 30,
+          message: "Capturing home team shot chart...",
+        });
+        homeCourtImage = await captureCourtAsImage(exportOptions.homeCourtRef.current, {
+          scale: 2,
+          backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
+        });
+      }
+
+      if (abortRef.current) return null;
+
+      if (exportOptions?.awayCourtRef?.current) {
+        setProgress({
+          status: "generating",
+          progress: 50,
+          message: "Capturing away team shot chart...",
+        });
+        awayCourtImage = await captureCourtAsImage(exportOptions.awayCourtRef.current, {
+          scale: 2,
+          backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
+        });
+      }
+
+      if (abortRef.current) return null;
+
+      setProgress({ status: "generating", progress: 70, message: "Generating PDF..." });
+
+      const blob = await generateGameReportPDF(gameData, {
+        settings: { theme },
+        homeCourtImage,
+        awayCourtImage,
+      });
+
+      return blob;
+    },
+    []
+  );
+
+  // PDF Preview (returns blob without downloading)
+  const previewGameReportPDF = useCallback(
+    async (
+      gameData: GameExportData,
+      exportOptions?: PDFExportOptions
+    ): Promise<Blob | null> => {
+      try {
+        const blob = await generatePDFBlob(gameData, exportOptions);
+
+        if (abortRef.current || !blob) return null;
+
+        setProgress({ status: "complete", progress: 100, message: "Preview ready" });
+        return blob;
+      } catch (error) {
+        handleError(error instanceof Error ? error : new Error("Unknown error"));
+        return null;
+      }
+    },
+    [generatePDFBlob, handleError]
+  );
+
   // PDF Exports
   const exportGameReportPDF = useCallback(
     async (
       gameData: GameExportData,
-      exportOptions?: {
-        theme?: "light" | "dark";
-        homeCourtRef?: React.RefObject<HTMLElement | null>;
-        awayCourtRef?: React.RefObject<HTMLElement | null>;
-      }
+      exportOptions?: PDFExportOptions
     ) => {
       try {
-        const theme = exportOptions?.theme || "light";
-        let homeCourtImage: string | null = null;
-        let awayCourtImage: string | null = null;
+        const blob = await generatePDFBlob(gameData, exportOptions);
 
-        setProgress({ status: "preparing", progress: 10, message: "Preparing export..." });
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        // Capture court images if refs provided
-        if (exportOptions?.homeCourtRef?.current) {
-          setProgress({
-            status: "generating",
-            progress: 30,
-            message: "Capturing home team shot chart...",
-          });
-          homeCourtImage = await captureCourtAsImage(exportOptions.homeCourtRef.current, {
-            scale: 2,
-            backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
-          });
-        }
-
-        if (abortRef.current) return;
-
-        if (exportOptions?.awayCourtRef?.current) {
-          setProgress({
-            status: "generating",
-            progress: 50,
-            message: "Capturing away team shot chart...",
-          });
-          awayCourtImage = await captureCourtAsImage(exportOptions.awayCourtRef.current, {
-            scale: 2,
-            backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
-          });
-        }
-
-        if (abortRef.current) return;
-
-        setProgress({ status: "generating", progress: 70, message: "Generating PDF..." });
-
-        const blob = await generateGameReportPDF(gameData, {
-          settings: { theme },
-          homeCourtImage,
-          awayCourtImage,
-        });
-
-        if (abortRef.current) return;
+        if (abortRef.current || !blob) return;
 
         setProgress({ status: "generating", progress: 90, message: "Downloading..." });
 
@@ -253,7 +291,7 @@ export function useExport(options: UseExportOptions = {}): UseExportReturn {
         handleError(error instanceof Error ? error : new Error("Unknown error"));
       }
     },
-    [handleError, onComplete]
+    [generatePDFBlob, handleError, onComplete]
   );
 
   const exportShotChartPDF = useCallback(
@@ -324,6 +362,7 @@ export function useExport(options: UseExportOptions = {}): UseExportReturn {
       exportPlayByPlay,
       exportAllCSV,
       exportGameReportPDF,
+      previewGameReportPDF,
       exportShotChartPDF,
       reset,
     },
