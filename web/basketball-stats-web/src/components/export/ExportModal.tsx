@@ -200,7 +200,10 @@ export function ExportModal({
 
   const getPreviewFilename = () => {
     if (!gameData) return "game-report";
-    return `game-report-${gameData.homeTeam.name}-vs-${gameData.awayTeam.name}`.replace(/\s+/g, "-");
+    return `game-report-${gameData.homeTeam.name}-vs-${gameData.awayTeam.name}`.replace(
+      /\s+/g,
+      "-"
+    );
   };
 
   const hasSelectedContent = contentOptions.some((opt) => opt.enabled);

@@ -111,7 +111,10 @@ export class BasketballUtils {
    * Formula: OReb / (OReb + Opp DReb)
    * Note: When opponent DReb is unavailable, use total rebound opportunities estimate
    */
-  static offensiveReboundPercent(offensiveRebounds: number, opponentDefensiveRebounds: number): number {
+  static offensiveReboundPercent(
+    offensiveRebounds: number,
+    opponentDefensiveRebounds: number
+  ): number {
     const totalOpportunities = offensiveRebounds + opponentDefensiveRebounds;
     if (totalOpportunities === 0) return 0;
     return Math.round((offensiveRebounds / totalOpportunities) * 100 * 10) / 10;
@@ -121,7 +124,10 @@ export class BasketballUtils {
    * Defensive Rebound Percentage: Share of available defensive rebounds grabbed
    * Formula: DReb / (DReb + Opp OReb)
    */
-  static defensiveReboundPercent(defensiveRebounds: number, opponentOffensiveRebounds: number): number {
+  static defensiveReboundPercent(
+    defensiveRebounds: number,
+    opponentOffensiveRebounds: number
+  ): number {
     const totalOpportunities = defensiveRebounds + opponentOffensiveRebounds;
     if (totalOpportunities === 0) return 0;
     return Math.round((defensiveRebounds / totalOpportunities) * 100 * 10) / 10;
@@ -144,7 +150,12 @@ export class BasketballUtils {
    * Estimate possessions using the standard formula
    * Formula: FGA - OReb + TO + (0.44 × FTA)
    */
-  static estimatePossessions(fga: number, offensiveRebounds: number, turnovers: number, fta: number): number {
+  static estimatePossessions(
+    fga: number,
+    offensiveRebounds: number,
+    turnovers: number,
+    fta: number
+  ): number {
     return Math.round(fga - offensiveRebounds + turnovers + 0.44 * fta);
   }
 
@@ -207,9 +218,12 @@ export class BasketballUtils {
     const fta = teamStats.freeThrowsAttempted;
 
     return {
-      effectiveFieldGoalPct: fga > 0
-        ? Math.round(((teamStats.fieldGoalsMade + 0.5 * teamStats.threePointersMade) / fga) * 100 * 10) / 10
-        : 0,
+      effectiveFieldGoalPct:
+        fga > 0
+          ? Math.round(
+              ((teamStats.fieldGoalsMade + 0.5 * teamStats.threePointersMade) / fga) * 100 * 10
+            ) / 10
+          : 0,
       turnoverRate: this.turnoverRate(teamStats.turnovers, fga, fta),
       offensiveReboundPct: this.offensiveReboundPercent(
         teamStats.offensiveRebounds,

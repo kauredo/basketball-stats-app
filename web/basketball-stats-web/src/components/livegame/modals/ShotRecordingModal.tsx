@@ -44,9 +44,7 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
 
   const renderPlayer = (player: PlayerStat) => {
     // Team-specific avatar colors: home = blue, away = orange
-    const avatarBg = player.isHomeTeam
-      ? "bg-blue-600"
-      : "bg-orange-500";
+    const avatarBg = player.isHomeTeam ? "bg-blue-600" : "bg-orange-500";
 
     return (
       <div
@@ -54,16 +52,16 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
         className="flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0"
       >
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 ${avatarBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+          <div
+            className={`w-10 h-10 ${avatarBg} rounded-full flex items-center justify-center flex-shrink-0`}
+          >
             <span className="text-white font-bold text-sm">#{player.player?.number}</span>
           </div>
           <div className="text-left">
             <div className="text-surface-900 dark:text-white font-medium text-sm">
               {player.player?.name}
             </div>
-            <div className="text-surface-500 text-xs">
-              {player.points} PTS
-            </div>
+            <div className="text-surface-500 text-xs">{player.points} PTS</div>
           </div>
         </div>
         <div className="flex gap-2">

@@ -132,9 +132,7 @@ const TeamPanel: React.FC<TeamPanelProps> = ({
   isHome = false,
 }) => {
   // Team color: Home = Blue, Away = Orange (consistent across app)
-  const teamColorClass = isHome
-    ? "bg-blue-500"
-    : "bg-orange-500";
+  const teamColorClass = isHome ? "bg-blue-500" : "bg-orange-500";
 
   return (
     <div className={`flex items-center gap-3 sm:gap-4 ${isHome ? "flex-row-reverse" : ""}`}>

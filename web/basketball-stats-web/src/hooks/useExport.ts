@@ -44,10 +44,7 @@ interface ExportActions {
   exportAllCSV: (gameData: GameExportData) => Promise<void>;
 
   // PDF exports
-  exportGameReportPDF: (
-    gameData: GameExportData,
-    options?: PDFExportOptions
-  ) => Promise<void>;
+  exportGameReportPDF: (gameData: GameExportData, options?: PDFExportOptions) => Promise<void>;
 
   // PDF preview (returns blob instead of downloading)
   previewGameReportPDF: (
@@ -194,10 +191,7 @@ export function useExport(options: UseExportOptions = {}): UseExportReturn {
 
   // Helper to generate PDF blob (shared by export and preview)
   const generatePDFBlob = useCallback(
-    async (
-      gameData: GameExportData,
-      exportOptions?: PDFExportOptions
-    ): Promise<Blob | null> => {
+    async (gameData: GameExportData, exportOptions?: PDFExportOptions): Promise<Blob | null> => {
       const theme = exportOptions?.theme || "light";
       let homeCourtImage: string | null = null;
       let awayCourtImage: string | null = null;
@@ -249,10 +243,7 @@ export function useExport(options: UseExportOptions = {}): UseExportReturn {
 
   // PDF Preview (returns blob without downloading)
   const previewGameReportPDF = useCallback(
-    async (
-      gameData: GameExportData,
-      exportOptions?: PDFExportOptions
-    ): Promise<Blob | null> => {
+    async (gameData: GameExportData, exportOptions?: PDFExportOptions): Promise<Blob | null> => {
       try {
         const blob = await generatePDFBlob(gameData, exportOptions);
 
@@ -270,10 +261,7 @@ export function useExport(options: UseExportOptions = {}): UseExportReturn {
 
   // PDF Exports
   const exportGameReportPDF = useCallback(
-    async (
-      gameData: GameExportData,
-      exportOptions?: PDFExportOptions
-    ) => {
+    async (gameData: GameExportData, exportOptions?: PDFExportOptions) => {
       try {
         const blob = await generatePDFBlob(gameData, exportOptions);
 

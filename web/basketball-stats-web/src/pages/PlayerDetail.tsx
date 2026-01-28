@@ -289,7 +289,9 @@ const PlayerDetail: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
           <div className="flex items-center gap-4 sm:gap-6">
             <div className="w-16 h-16 sm:w-24 sm:h-24 bg-white/20 backdrop-blur rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl sm:text-4xl font-bold tracking-tight">#{player.number}</span>
+              <span className="text-2xl sm:text-4xl font-bold tracking-tight">
+                #{player.number}
+              </span>
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-xl sm:text-display-sm truncate">{player.name}</h1>

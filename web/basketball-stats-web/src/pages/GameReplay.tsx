@@ -1,11 +1,10 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { GameSettings, ExportShot } from "@basketball-stats/shared";
-import { BasketballUtils } from "@basketball-stats/shared";
 import {
   ArrowLeftIcon,
   PlayIcon,
@@ -313,11 +312,7 @@ const GameReplay: React.FC = () => {
               Shot Chart at {formatSliderTime(selectedTime)}
             </h3>
             <div className="h-[350px]">
-              <InteractiveCourt
-                allShots={courtShots}
-                displayMode="all"
-                compact
-              />
+              <InteractiveCourt allShots={courtShots} displayMode="all" compact />
             </div>
           </div>
         </div>
@@ -445,7 +440,8 @@ const GameReplay: React.FC = () => {
                           quarter: event.quarter,
                           timeRemaining: event.gameTime,
                           eventType: event.eventType,
-                          description: event.description || event.eventType?.replace(/_/g, " ") || "",
+                          description:
+                            event.description || event.eventType?.replace(/_/g, " ") || "",
                           playerId: event.player?.id as Id<"players"> | undefined,
                           teamId: event.team?.id as Id<"teams"> | undefined,
                           details: {

@@ -396,7 +396,11 @@ const ExportPage: React.FC = () => {
   };
 
   // Get team shots for court rendering
-  const getTeamShots = (teamId: string, data: GameExportData | null, isHomeTeam: boolean): ExportShotLocation[] => {
+  const getTeamShots = (
+    teamId: string,
+    data: GameExportData | null,
+    isHomeTeam: boolean
+  ): ExportShotLocation[] => {
     if (!data) return [];
     return data.shots
       .filter((s) => s.teamId === teamId)

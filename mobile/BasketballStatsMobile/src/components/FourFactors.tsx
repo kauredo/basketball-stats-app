@@ -51,16 +51,22 @@ function FactorBar({
   const getAdvantageClass = (value: number, otherValue: number) => {
     if (value === otherValue) return "text-surface-900 dark:text-white";
     const hasAdvantage = higherIsBetter ? value > otherValue : value < otherValue;
-    return hasAdvantage ? "text-green-600 dark:text-green-400" : "text-surface-600 dark:text-surface-400";
+    return hasAdvantage
+      ? "text-green-600 dark:text-green-400"
+      : "text-surface-600 dark:text-surface-400";
   };
 
   return (
     <View className="py-2.5">
-      <Text className="text-xs font-medium text-surface-700 dark:text-surface-300 mb-1.5">{label}</Text>
+      <Text className="text-xs font-medium text-surface-700 dark:text-surface-300 mb-1.5">
+        {label}
+      </Text>
 
       <View className="flex-row items-center gap-2">
         {/* Home value */}
-        <Text className={`w-12 text-right text-sm font-semibold ${getAdvantageClass(homeValue, awayValue)}`}>
+        <Text
+          className={`w-12 text-right text-sm font-semibold ${getAdvantageClass(homeValue, awayValue)}`}
+        >
           {formatValue(homeValue)}
         </Text>
 
@@ -68,10 +74,7 @@ function FactorBar({
         <View className="flex-1 flex-row items-center gap-0.5">
           {/* Home bar (grows right to left) */}
           <View className="flex-1 flex-row justify-end">
-            <View
-              className="h-3 bg-primary-500 rounded-l"
-              style={{ width: `${homeWidth}%` }}
-            />
+            <View className="h-3 bg-primary-500 rounded-l" style={{ width: `${homeWidth}%` }} />
           </View>
 
           {/* Center divider */}
@@ -79,15 +82,14 @@ function FactorBar({
 
           {/* Away bar (grows left to right) */}
           <View className="flex-1">
-            <View
-              className="h-3 bg-blue-500 rounded-r"
-              style={{ width: `${awayWidth}%` }}
-            />
+            <View className="h-3 bg-blue-500 rounded-r" style={{ width: `${awayWidth}%` }} />
           </View>
         </View>
 
         {/* Away value */}
-        <Text className={`w-12 text-left text-sm font-semibold ${getAdvantageClass(awayValue, homeValue)}`}>
+        <Text
+          className={`w-12 text-left text-sm font-semibold ${getAdvantageClass(awayValue, homeValue)}`}
+        >
           {formatValue(awayValue)}
         </Text>
       </View>
@@ -102,9 +104,12 @@ export function FourFactors({
   awayStats,
 }: FourFactorsProps) {
   // Calculate Four Factors for home team
-  const homeEfg = homeStats.fieldGoalsAttempted > 0
-    ? ((homeStats.fieldGoalsMade + 0.5 * homeStats.threePointersMade) / homeStats.fieldGoalsAttempted) * 100
-    : 0;
+  const homeEfg =
+    homeStats.fieldGoalsAttempted > 0
+      ? ((homeStats.fieldGoalsMade + 0.5 * homeStats.threePointersMade) /
+          homeStats.fieldGoalsAttempted) *
+        100
+      : 0;
   const homeTORate = BasketballUtils.turnoverRate(
     homeStats.turnovers,
     homeStats.fieldGoalsAttempted,
@@ -120,9 +125,12 @@ export function FourFactors({
   );
 
   // Calculate Four Factors for away team
-  const awayEfg = awayStats.fieldGoalsAttempted > 0
-    ? ((awayStats.fieldGoalsMade + 0.5 * awayStats.threePointersMade) / awayStats.fieldGoalsAttempted) * 100
-    : 0;
+  const awayEfg =
+    awayStats.fieldGoalsAttempted > 0
+      ? ((awayStats.fieldGoalsMade + 0.5 * awayStats.threePointersMade) /
+          awayStats.fieldGoalsAttempted) *
+        100
+      : 0;
   const awayTORate = BasketballUtils.turnoverRate(
     awayStats.turnovers,
     awayStats.fieldGoalsAttempted,
@@ -194,7 +202,9 @@ export function FourFactors({
       <View className="px-4 pb-4">
         {/* Team headers */}
         <View className="flex-row items-center py-2">
-          <Text className="w-12 text-right text-xs font-semibold text-primary-500">{homeTeamName}</Text>
+          <Text className="w-12 text-right text-xs font-semibold text-primary-500">
+            {homeTeamName}
+          </Text>
           <View className="flex-1" />
           <Text className="w-12 text-left text-xs font-semibold text-blue-500">{awayTeamName}</Text>
         </View>
@@ -253,14 +263,17 @@ export function FourFactors({
               </View>
               <View className="flex-row justify-between pt-1 mt-1 border-t border-primary-200 dark:border-primary-800">
                 <Text className="text-xs text-surface-600 dark:text-surface-400">Net</Text>
-                <Text className={`text-xs font-bold ${
-                  homeOffRtg - homeDefRtg > 0
-                    ? "text-green-600 dark:text-green-400"
-                    : homeOffRtg - homeDefRtg < 0
-                    ? "text-red-600 dark:text-red-400"
-                    : "text-surface-900 dark:text-white"
-                }`}>
-                  {homeOffRtg - homeDefRtg > 0 ? "+" : ""}{(homeOffRtg - homeDefRtg).toFixed(1)}
+                <Text
+                  className={`text-xs font-bold ${
+                    homeOffRtg - homeDefRtg > 0
+                      ? "text-green-600 dark:text-green-400"
+                      : homeOffRtg - homeDefRtg < 0
+                        ? "text-red-600 dark:text-red-400"
+                        : "text-surface-900 dark:text-white"
+                  }`}
+                >
+                  {homeOffRtg - homeDefRtg > 0 ? "+" : ""}
+                  {(homeOffRtg - homeDefRtg).toFixed(1)}
                 </Text>
               </View>
             </View>
@@ -284,14 +297,17 @@ export function FourFactors({
               </View>
               <View className="flex-row justify-between pt-1 mt-1 border-t border-blue-200 dark:border-blue-800">
                 <Text className="text-xs text-surface-600 dark:text-surface-400">Net</Text>
-                <Text className={`text-xs font-bold ${
-                  awayOffRtg - awayDefRtg > 0
-                    ? "text-green-600 dark:text-green-400"
-                    : awayOffRtg - awayDefRtg < 0
-                    ? "text-red-600 dark:text-red-400"
-                    : "text-surface-900 dark:text-white"
-                }`}>
-                  {awayOffRtg - awayDefRtg > 0 ? "+" : ""}{(awayOffRtg - awayDefRtg).toFixed(1)}
+                <Text
+                  className={`text-xs font-bold ${
+                    awayOffRtg - awayDefRtg > 0
+                      ? "text-green-600 dark:text-green-400"
+                      : awayOffRtg - awayDefRtg < 0
+                        ? "text-red-600 dark:text-red-400"
+                        : "text-surface-900 dark:text-white"
+                  }`}
+                >
+                  {awayOffRtg - awayDefRtg > 0 ? "+" : ""}
+                  {(awayOffRtg - awayDefRtg).toFixed(1)}
                 </Text>
               </View>
             </View>

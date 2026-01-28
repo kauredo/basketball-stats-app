@@ -77,7 +77,12 @@ export const PlayByPlayList: React.FC<PlayByPlayListProps> = ({
   return (
     <div ref={listRef} className="h-full overflow-auto">
       {sortedEvents.map((event) => (
-        <GameEventCard key={event._id} event={event} playerStats={playerStats} homeTeamId={homeTeamId} />
+        <GameEventCard
+          key={event._id}
+          event={event}
+          playerStats={playerStats}
+          homeTeamId={homeTeamId}
+        />
       ))}
     </div>
   );

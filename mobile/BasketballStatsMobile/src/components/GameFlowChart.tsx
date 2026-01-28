@@ -171,11 +171,15 @@ export function GameFlowChart({
         <View className="flex-row items-center justify-center gap-4 py-2">
           <View className="flex-row items-center gap-1">
             <View className="w-2.5 h-2.5 rounded-full bg-primary-500" />
-            <Text className="text-xs text-surface-600 dark:text-surface-400">{homeTeamName} lead</Text>
+            <Text className="text-xs text-surface-600 dark:text-surface-400">
+              {homeTeamName} lead
+            </Text>
           </View>
           <View className="flex-row items-center gap-1">
             <View className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-            <Text className="text-xs text-surface-600 dark:text-surface-400">{awayTeamName} lead</Text>
+            <Text className="text-xs text-surface-600 dark:text-surface-400">
+              {awayTeamName} lead
+            </Text>
           </View>
         </View>
 
@@ -237,11 +241,15 @@ export function GameFlowChart({
             <Text className="text-xs text-surface-500 dark:text-surface-400">{awayTeamName}</Text>
           </View>
           <View className="flex-1 items-center">
-            <Text className="text-lg font-bold text-surface-900 dark:text-white">{summary.leadChanges}</Text>
+            <Text className="text-lg font-bold text-surface-900 dark:text-white">
+              {summary.leadChanges}
+            </Text>
             <Text className="text-xs text-surface-500 dark:text-surface-400">Lead chg</Text>
           </View>
           <View className="flex-1 items-center">
-            <Text className="text-lg font-bold text-surface-900 dark:text-white">{summary.timesTied}</Text>
+            <Text className="text-lg font-bold text-surface-900 dark:text-white">
+              {summary.timesTied}
+            </Text>
             <Text className="text-xs text-surface-500 dark:text-surface-400">Ties</Text>
           </View>
         </View>

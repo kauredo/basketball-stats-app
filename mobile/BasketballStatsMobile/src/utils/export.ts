@@ -645,8 +645,12 @@ export async function exportBoxScoreCSV(
   };
 
   const rows: BoxScoreRow[] = [
-    ...homeTeam.players.map((p) => transformPlayer(p, homeTeam.team?.name || gameInfo.homeTeamName)),
-    ...awayTeam.players.map((p) => transformPlayer(p, awayTeam.team?.name || gameInfo.awayTeamName)),
+    ...homeTeam.players.map((p) =>
+      transformPlayer(p, homeTeam.team?.name || gameInfo.homeTeamName)
+    ),
+    ...awayTeam.players.map((p) =>
+      transformPlayer(p, awayTeam.team?.name || gameInfo.awayTeamName)
+    ),
   ];
 
   // Sort by team then by points
@@ -738,7 +742,12 @@ export async function exportShotsCSV(
       team: teamName,
       player: shot.player?.name || shot.playerName || "Unknown",
       number: shot.player?.number || shot.playerNumber || 0,
-      shotType: shot.shotType === "3pt" ? "3-pointer" : shot.shotType === "2pt" ? "2-pointer" : "Free Throw",
+      shotType:
+        shot.shotType === "3pt"
+          ? "3-pointer"
+          : shot.shotType === "2pt"
+            ? "2-pointer"
+            : "Free Throw",
       result: shot.made ? "Made" : "Missed",
       zone: shot.shotZone || shot.zone || "Unknown",
       x: Math.round(shot.x * 100) / 100,
@@ -752,7 +761,7 @@ export async function exportShotsCSV(
     // Time is formatted as MM:SS, need to compare numerically
     const [aMins, aSecs] = a.time.split(":").map(Number);
     const [bMins, bSecs] = b.time.split(":").map(Number);
-    return (bMins * 60 + bSecs) - (aMins * 60 + aSecs);
+    return bMins * 60 + bSecs - (aMins * 60 + aSecs);
   });
 
   const dateStr = gameInfo.date
@@ -835,8 +844,10 @@ export async function exportPlayByPlayCSV(
 
   const rows: PlayByPlayRow[] = events.map((event) => {
     const time = event.gameTime ?? event.timeRemaining ?? 0;
-    const isHomeTeam = event.details?.isHomeTeam ?? (event.team?.id === homeTeamId || event.teamId === homeTeamId);
-    const teamName = event.team?.name || (isHomeTeam ? gameInfo.homeTeamName : gameInfo.awayTeamName);
+    const isHomeTeam =
+      event.details?.isHomeTeam ?? (event.team?.id === homeTeamId || event.teamId === homeTeamId);
+    const teamName =
+      event.team?.name || (isHomeTeam ? gameInfo.homeTeamName : gameInfo.awayTeamName);
 
     return {
       quarter: event.quarter,
@@ -857,7 +868,7 @@ export async function exportPlayByPlayCSV(
     // Time is formatted as MM:SS, compare numerically (higher time = earlier in quarter)
     const [aMins, aSecs] = a.time.split(":").map(Number);
     const [bMins, bSecs] = b.time.split(":").map(Number);
-    return (bMins * 60 + bSecs) - (aMins * 60 + aSecs);
+    return bMins * 60 + bSecs - (aMins * 60 + aSecs);
   });
 
   const dateStr = gameInfo.date

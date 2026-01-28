@@ -76,7 +76,9 @@ const CustomTooltip = ({
 
   return (
     <div className="bg-surface-900 dark:bg-surface-700 text-white rounded-lg p-3 shadow-lg border border-surface-700 dark:border-surface-600">
-      <p className="text-xs text-surface-300 mb-1">Q{data.quarter} - {data.gameTimeElapsedFormatted}</p>
+      <p className="text-xs text-surface-300 mb-1">
+        Q{data.quarter} - {data.gameTimeElapsedFormatted}
+      </p>
       <div className="flex items-center gap-4 mb-2">
         <div className="text-center">
           <p className="text-xs text-primary-400">{homeTeamName}</p>
@@ -88,9 +90,15 @@ const CustomTooltip = ({
           <p className="text-lg font-bold">{data.awayScore}</p>
         </div>
       </div>
-      <p className={`text-xs font-medium ${
-        differential > 0 ? "text-primary-400" : differential < 0 ? "text-blue-400" : "text-surface-300"
-      }`}>
+      <p
+        className={`text-xs font-medium ${
+          differential > 0
+            ? "text-primary-400"
+            : differential < 0
+              ? "text-blue-400"
+              : "text-surface-300"
+        }`}
+      >
         {differential === 0 ? "Tied" : `${leader} +${Math.abs(differential)}`}
       </p>
       {data.description && data.points && (
@@ -166,20 +174,21 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
         <div className="flex items-center justify-center gap-6 mb-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-primary-500" />
-            <span className="text-sm text-surface-600 dark:text-surface-400">{homeTeamName} lead</span>
+            <span className="text-sm text-surface-600 dark:text-surface-400">
+              {homeTeamName} lead
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-500" />
-            <span className="text-sm text-surface-600 dark:text-surface-400">{awayTeamName} lead</span>
+            <span className="text-sm text-surface-600 dark:text-surface-400">
+              {awayTeamName} lead
+            </span>
           </div>
         </div>
 
         {/* Chart */}
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart
-            data={timeline}
-            margin={{ top: 10, right: 10, left: -10, bottom: 10 }}
-          >
+          <LineChart data={timeline} margin={{ top: 10, right: 10, left: -10, bottom: 10 }}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="var(--color-surface-200)"
@@ -203,30 +212,27 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
             ))}
 
             {/* Zero line (tie game) */}
-            <ReferenceLine
-              y={0}
-              stroke="var(--color-surface-600)"
-              strokeWidth={2}
-            />
+            <ReferenceLine y={0} stroke="var(--color-surface-600)" strokeWidth={2} />
 
             {/* Scoring runs highlights */}
-            {showRuns && runs.map((run, index) => {
-              const startEvent = timeline[run.startIndex];
-              const endEvent = timeline[run.endIndex];
-              if (!startEvent || !endEvent) return null;
+            {showRuns &&
+              runs.map((run, index) => {
+                const startEvent = timeline[run.startIndex];
+                const endEvent = timeline[run.endIndex];
+                if (!startEvent || !endEvent) return null;
 
-              return (
-                <ReferenceArea
-                  key={index}
-                  x1={startEvent.gameTimeElapsed}
-                  x2={endEvent.gameTimeElapsed}
-                  y1={run.team === "home" ? 0 : yDomain[0]}
-                  y2={run.team === "home" ? yDomain[1] : 0}
-                  fill={run.team === "home" ? "#3b82f6" : "#f97316"}
-                  fillOpacity={0.1}
-                />
-              );
-            })}
+                return (
+                  <ReferenceArea
+                    key={index}
+                    x1={startEvent.gameTimeElapsed}
+                    x2={endEvent.gameTimeElapsed}
+                    y1={run.team === "home" ? 0 : yDomain[0]}
+                    y2={run.team === "home" ? yDomain[1] : 0}
+                    fill={run.team === "home" ? "#3b82f6" : "#f97316"}
+                    fillOpacity={0.1}
+                  />
+                );
+              })}
 
             <XAxis
               dataKey="gameTimeElapsed"
@@ -243,12 +249,7 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
               tickFormatter={(value) => (value > 0 ? `+${value}` : value.toString())}
             />
             <Tooltip
-              content={
-                <CustomTooltip
-                  homeTeamName={homeTeamName}
-                  awayTeamName={awayTeamName}
-                />
-              }
+              content={<CustomTooltip homeTeamName={homeTeamName} awayTeamName={awayTeamName} />}
             />
 
             {/* Main line with gradient based on score differential */}
@@ -280,18 +281,26 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
           <div className="grid grid-cols-4 gap-4 text-center">
             <div>
               <p className="text-2xl font-bold text-primary-500">+{summary.largestLead.home}</p>
-              <p className="text-xs text-surface-500 dark:text-surface-400">{homeTeamName} largest</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">
+                {homeTeamName} largest
+              </p>
             </div>
             <div>
               <p className="text-2xl font-bold text-blue-500">+{summary.largestLead.away}</p>
-              <p className="text-xs text-surface-500 dark:text-surface-400">{awayTeamName} largest</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">
+                {awayTeamName} largest
+              </p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-surface-900 dark:text-white">{summary.leadChanges}</p>
+              <p className="text-2xl font-bold text-surface-900 dark:text-white">
+                {summary.leadChanges}
+              </p>
               <p className="text-xs text-surface-500 dark:text-surface-400">Lead changes</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-surface-900 dark:text-white">{summary.timesTied}</p>
+              <p className="text-2xl font-bold text-surface-900 dark:text-white">
+                {summary.timesTied}
+              </p>
               <p className="text-xs text-surface-500 dark:text-surface-400">Times tied</p>
             </div>
           </div>
@@ -313,7 +322,8 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
                       : "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
                   }`}
                 >
-                  Q{run.quarter}: {run.team === "home" ? homeTeamName : awayTeamName} {run.description}
+                  Q{run.quarter}: {run.team === "home" ? homeTeamName : awayTeamName}{" "}
+                  {run.description}
                 </div>
               ))}
             </div>

@@ -512,8 +512,34 @@ function addAdvancedStatsSection(
 
 function addFourFactorsSection(
   doc: jsPDF,
-  homeTeam: { name: string; players: PlayerExportData[]; totals: { turnovers: number; fieldGoalsMade: number; fieldGoalsAttempted: number; threePointersMade: number; freeThrowsAttempted: number; offensiveRebounds?: number; defensiveRebounds?: number; points: number } },
-  awayTeam: { name: string; players: PlayerExportData[]; totals: { turnovers: number; fieldGoalsMade: number; fieldGoalsAttempted: number; threePointersMade: number; freeThrowsAttempted: number; offensiveRebounds?: number; defensiveRebounds?: number; points: number } },
+  homeTeam: {
+    name: string;
+    players: PlayerExportData[];
+    totals: {
+      turnovers: number;
+      fieldGoalsMade: number;
+      fieldGoalsAttempted: number;
+      threePointersMade: number;
+      freeThrowsAttempted: number;
+      offensiveRebounds?: number;
+      defensiveRebounds?: number;
+      points: number;
+    };
+  },
+  awayTeam: {
+    name: string;
+    players: PlayerExportData[];
+    totals: {
+      turnovers: number;
+      fieldGoalsMade: number;
+      fieldGoalsAttempted: number;
+      threePointersMade: number;
+      freeThrowsAttempted: number;
+      offensiveRebounds?: number;
+      defensiveRebounds?: number;
+      points: number;
+    };
+  },
   y: number,
   theme: "light" | "dark"
 ): number {
@@ -537,15 +563,38 @@ function addFourFactorsSection(
 
   // Calculate Four Factors for each team
   // Get offensive/defensive rebounds from player data if not in totals
-  const homeOreb = homeTeam.totals.offensiveRebounds ?? homeTeam.players.reduce((sum, p) => sum + ((p as { offensiveRebounds?: number }).offensiveRebounds || 0), 0);
-  const homeDreb = homeTeam.totals.defensiveRebounds ?? homeTeam.players.reduce((sum, p) => sum + ((p as { defensiveRebounds?: number }).defensiveRebounds || 0), 0);
-  const awayOreb = awayTeam.totals.offensiveRebounds ?? awayTeam.players.reduce((sum, p) => sum + ((p as { offensiveRebounds?: number }).offensiveRebounds || 0), 0);
-  const awayDreb = awayTeam.totals.defensiveRebounds ?? awayTeam.players.reduce((sum, p) => sum + ((p as { defensiveRebounds?: number }).defensiveRebounds || 0), 0);
+  const homeOreb =
+    homeTeam.totals.offensiveRebounds ??
+    homeTeam.players.reduce(
+      (sum, p) => sum + ((p as { offensiveRebounds?: number }).offensiveRebounds || 0),
+      0
+    );
+  const homeDreb =
+    homeTeam.totals.defensiveRebounds ??
+    homeTeam.players.reduce(
+      (sum, p) => sum + ((p as { defensiveRebounds?: number }).defensiveRebounds || 0),
+      0
+    );
+  const awayOreb =
+    awayTeam.totals.offensiveRebounds ??
+    awayTeam.players.reduce(
+      (sum, p) => sum + ((p as { offensiveRebounds?: number }).offensiveRebounds || 0),
+      0
+    );
+  const awayDreb =
+    awayTeam.totals.defensiveRebounds ??
+    awayTeam.players.reduce(
+      (sum, p) => sum + ((p as { defensiveRebounds?: number }).defensiveRebounds || 0),
+      0
+    );
 
   // Home team factors
-  const homeEfg = homeTeam.totals.fieldGoalsAttempted > 0
-    ? ((homeTeam.totals.fieldGoalsMade + 0.5 * homeTeam.totals.threePointersMade) / homeTeam.totals.fieldGoalsAttempted) * 100
-    : 0;
+  const homeEfg =
+    homeTeam.totals.fieldGoalsAttempted > 0
+      ? ((homeTeam.totals.fieldGoalsMade + 0.5 * homeTeam.totals.threePointersMade) /
+          homeTeam.totals.fieldGoalsAttempted) *
+        100
+      : 0;
   const homeTORate = BasketballUtils.turnoverRate(
     homeTeam.totals.turnovers,
     homeTeam.totals.fieldGoalsAttempted,
@@ -558,9 +607,12 @@ function addFourFactorsSection(
   );
 
   // Away team factors
-  const awayEfg = awayTeam.totals.fieldGoalsAttempted > 0
-    ? ((awayTeam.totals.fieldGoalsMade + 0.5 * awayTeam.totals.threePointersMade) / awayTeam.totals.fieldGoalsAttempted) * 100
-    : 0;
+  const awayEfg =
+    awayTeam.totals.fieldGoalsAttempted > 0
+      ? ((awayTeam.totals.fieldGoalsMade + 0.5 * awayTeam.totals.threePointersMade) /
+          awayTeam.totals.fieldGoalsAttempted) *
+        100
+      : 0;
   const awayTORate = BasketballUtils.turnoverRate(
     awayTeam.totals.turnovers,
     awayTeam.totals.fieldGoalsAttempted,
@@ -613,10 +665,34 @@ function addFourFactorsSection(
 
   // Factor rows
   const factors = [
-    { label: "eFG%", home: homeEfg, away: awayEfg, higherBetter: true, description: "Shooting Efficiency" },
-    { label: "TO Rate", home: homeTORate, away: awayTORate, higherBetter: false, description: "Turnover %" },
-    { label: "OREB%", home: homeOrebPct, away: awayOrebPct, higherBetter: true, description: "Second Chances" },
-    { label: "FT Rate", home: homeFTRate, away: awayFTRate, higherBetter: true, description: "Free Throws" },
+    {
+      label: "eFG%",
+      home: homeEfg,
+      away: awayEfg,
+      higherBetter: true,
+      description: "Shooting Efficiency",
+    },
+    {
+      label: "TO Rate",
+      home: homeTORate,
+      away: awayTORate,
+      higherBetter: false,
+      description: "Turnover %",
+    },
+    {
+      label: "OREB%",
+      home: homeOrebPct,
+      away: awayOrebPct,
+      higherBetter: true,
+      description: "Second Chances",
+    },
+    {
+      label: "FT Rate",
+      home: homeFTRate,
+      away: awayFTRate,
+      higherBetter: true,
+      description: "Free Throws",
+    },
   ];
 
   doc.setFont("helvetica", "normal");
@@ -654,7 +730,9 @@ function addFourFactorsSection(
 
     // Away value
     doc.setTextColor(...hexToRgb(awayWins ? COLORS.success : colors.text));
-    doc.text(`${factor.away.toFixed(1)}%`, tableX + tableWidth - valueWidth / 2, y + 5.5, { align: "center" });
+    doc.text(`${factor.away.toFixed(1)}%`, tableX + tableWidth - valueWidth / 2, y + 5.5, {
+      align: "center",
+    });
 
     y += 9;
   }
@@ -667,28 +745,48 @@ function addFourFactorsSection(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setTextColor(...hexToRgb(colors.text));
-  doc.text("EFFICIENCY RATINGS (pts/100 poss)", tableX + tableWidth / 2, y + 4, { align: "center" });
+  doc.text("EFFICIENCY RATINGS (pts/100 poss)", tableX + tableWidth / 2, y + 4, {
+    align: "center",
+  });
 
   // Home efficiency
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6);
   doc.setTextColor(...hexToRgb(COLORS.primary));
-  doc.text(`Off: ${homeOffRtg.toFixed(1)}  Def: ${homeDefRtg.toFixed(1)}`, tableX + 25, y + 10, { align: "center" });
+  doc.text(`Off: ${homeOffRtg.toFixed(1)}  Def: ${homeDefRtg.toFixed(1)}`, tableX + 25, y + 10, {
+    align: "center",
+  });
 
   const homeNetRtg = homeOffRtg - homeDefRtg;
-  doc.setTextColor(...hexToRgb(homeNetRtg > 0 ? COLORS.success : homeNetRtg < 0 ? COLORS.danger : colors.text));
+  doc.setTextColor(
+    ...hexToRgb(homeNetRtg > 0 ? COLORS.success : homeNetRtg < 0 ? COLORS.danger : colors.text)
+  );
   doc.setFont("helvetica", "bold");
-  doc.text(`Net: ${homeNetRtg > 0 ? "+" : ""}${homeNetRtg.toFixed(1)}`, tableX + 25, y + 15, { align: "center" });
+  doc.text(`Net: ${homeNetRtg > 0 ? "+" : ""}${homeNetRtg.toFixed(1)}`, tableX + 25, y + 15, {
+    align: "center",
+  });
 
   // Away efficiency
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...hexToRgb(COLORS.info));
-  doc.text(`Off: ${awayOffRtg.toFixed(1)}  Def: ${awayDefRtg.toFixed(1)}`, tableX + tableWidth - 25, y + 10, { align: "center" });
+  doc.text(
+    `Off: ${awayOffRtg.toFixed(1)}  Def: ${awayDefRtg.toFixed(1)}`,
+    tableX + tableWidth - 25,
+    y + 10,
+    { align: "center" }
+  );
 
   const awayNetRtg = awayOffRtg - awayDefRtg;
-  doc.setTextColor(...hexToRgb(awayNetRtg > 0 ? COLORS.success : awayNetRtg < 0 ? COLORS.danger : colors.text));
+  doc.setTextColor(
+    ...hexToRgb(awayNetRtg > 0 ? COLORS.success : awayNetRtg < 0 ? COLORS.danger : colors.text)
+  );
   doc.setFont("helvetica", "bold");
-  doc.text(`Net: ${awayNetRtg > 0 ? "+" : ""}${awayNetRtg.toFixed(1)}`, tableX + tableWidth - 25, y + 15, { align: "center" });
+  doc.text(
+    `Net: ${awayNetRtg > 0 ? "+" : ""}${awayNetRtg.toFixed(1)}`,
+    tableX + tableWidth - 25,
+    y + 15,
+    { align: "center" }
+  );
 
   y += 22;
 

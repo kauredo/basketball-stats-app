@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  BaseModal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCancelButton,
-} from "../ui/BaseModal";
+import { BaseModal, ModalHeader, ModalBody, ModalFooter, ModalCancelButton } from "../ui/BaseModal";
 import { DocumentArrowDownIcon } from "@heroicons/react/24/outline";
 
 interface PDFPreviewModalProps {
@@ -53,25 +47,15 @@ export function PDFPreviewModal({
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} title={title} maxWidth="xl">
-      <ModalHeader
-        title={title}
-        subtitle={`${filename}.pdf`}
-        variant="default"
-      />
+      <ModalHeader title={title} subtitle={`${filename}.pdf`} variant="default" />
 
       <ModalBody scrollable={false} className="p-0">
         <div className="w-full h-[70vh] bg-surface-100 dark:bg-surface-900 relative">
           {pdfUrl ? (
-            <iframe
-              src={pdfUrl}
-              className="w-full h-full border-0"
-              title="PDF Preview"
-            />
+            <iframe src={pdfUrl} className="w-full h-full border-0" title="PDF Preview" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <div className="text-surface-500 dark:text-surface-400">
-                Loading preview...
-              </div>
+              <div className="text-surface-500 dark:text-surface-400">Loading preview...</div>
             </div>
           )}
           {/* Regenerating overlay */}

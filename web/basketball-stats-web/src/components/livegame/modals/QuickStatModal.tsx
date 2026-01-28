@@ -97,9 +97,7 @@ export const QuickStatModal: React.FC<QuickStatModalProps> = ({
 
   const renderPlayer = (player: PlayerStat) => {
     // Team-specific avatar colors: home = blue, away = orange
-    const avatarBg = player.isHomeTeam
-      ? "bg-blue-600"
-      : "bg-orange-500";
+    const avatarBg = player.isHomeTeam ? "bg-blue-600" : "bg-orange-500";
 
     return (
       <button
@@ -108,16 +106,16 @@ export const QuickStatModal: React.FC<QuickStatModalProps> = ({
         className="w-full flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 ${avatarBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+          <div
+            className={`w-10 h-10 ${avatarBg} rounded-full flex items-center justify-center flex-shrink-0`}
+          >
             <span className="text-white font-bold text-sm">#{player.player?.number}</span>
           </div>
           <div className="text-left">
             <div className="text-surface-900 dark:text-white font-medium text-sm">
               {player.player?.name}
             </div>
-            <div className="text-surface-500 text-xs">
-              {player.points} PTS
-            </div>
+            <div className="text-surface-500 text-xs">{player.points} PTS</div>
           </div>
         </div>
         <div className={`px-3 py-1 text-sm font-medium rounded-lg ${badgeClass}`}>

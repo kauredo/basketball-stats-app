@@ -256,11 +256,7 @@ const FOUL_TYPES = [
   "holding foul",
 ];
 
-function generateFoulDescription(
-  playerName: string,
-  foulCount: number,
-  teamFouls: number
-): string {
+function generateFoulDescription(playerName: string, foulCount: number, teamFouls: number): string {
   const foulType = randomChoice(FOUL_TYPES);
   return `${foulType.charAt(0).toUpperCase() + foulType.slice(1)} on ${playerName} (P${foulCount}, T${teamFouls})`;
 }
@@ -510,7 +506,8 @@ async function generateDetailedGameEvents(
       const scoringBias = needsPoints ? 0.1 : 0;
 
       // Select primary player (weight towards first 5 - starters)
-      const playerIdx = Math.random() < 0.75 ? randomBetween(0, 4) : randomBetween(5, players.length - 1);
+      const playerIdx =
+        Math.random() < 0.75 ? randomBetween(0, 4) : randomBetween(5, players.length - 1);
       const player = players[Math.min(playerIdx, players.length - 1)];
       const playerStats = stats.get(player.id)!;
 
@@ -581,8 +578,21 @@ async function generateDetailedGameEvents(
           quarter,
           gameTime: timeInQuarter,
           timestamp: eventTime,
-          description: generateShotDescription(player.name, zone, made, isThree, made ? playerStats.points : undefined),
-          details: { made, shotType: isThree ? "3pt" : "2pt", zone, x, y, points: made ? points : 0 },
+          description: generateShotDescription(
+            player.name,
+            zone,
+            made,
+            isThree,
+            made ? playerStats.points : undefined
+          ),
+          details: {
+            made,
+            shotType: isThree ? "3pt" : "2pt",
+            zone,
+            x,
+            y,
+            points: made ? points : 0,
+          },
         });
 
         // Rebound on miss
@@ -613,7 +623,11 @@ async function generateDetailedGameEvents(
             quarter,
             gameTime: timeInQuarter - 1,
             timestamp: eventTime + 2000,
-            description: generateReboundDescription(rebounder.name, isOffensiveReb, rebounderStats.rebounds),
+            description: generateReboundDescription(
+              rebounder.name,
+              isOffensiveReb,
+              rebounderStats.rebounds
+            ),
             details: { isOffensive: isOffensiveReb },
           });
         }
@@ -667,8 +681,15 @@ async function generateDetailedGameEvents(
           quarter,
           gameTime: timeInQuarter,
           timestamp: eventTime,
-          description: generateFoulDescription(fouler.name, foulerStats.fouls, oppTeamStatRef.fouls),
-          details: { foulCount: foulerStats.fouls, teamFouls: oppTeamStatRef.foulsByQuarter[quarterKey] },
+          description: generateFoulDescription(
+            fouler.name,
+            foulerStats.fouls,
+            oppTeamStatRef.fouls
+          ),
+          details: {
+            foulCount: foulerStats.fouls,
+            teamFouls: oppTeamStatRef.foulsByQuarter[quarterKey],
+          },
         });
 
         // Free throws if shooting foul (60% of fouls)
@@ -923,7 +944,8 @@ export const seedDatabase = mutation({
     // Create main league
     const leagueId = await ctx.db.insert("leagues", {
       name: "City Basketball League",
-      description: "Premier recreational basketball league for all skill levels. Season runs September through March with playoffs in April.",
+      description:
+        "Premier recreational basketball league for all skill levels. Season runs September through March with playoffs in April.",
       leagueType: "recreational",
       season: "2024-2025",
       status: "active",
@@ -945,7 +967,8 @@ export const seedDatabase = mutation({
     // Create youth league
     const youthLeagueId = await ctx.db.insert("leagues", {
       name: "Junior Hoops Academy",
-      description: "Youth development basketball league for ages 10-14. Focus on fundamentals, sportsmanship, and fun.",
+      description:
+        "Youth development basketball league for ages 10-14. Focus on fundamentals, sportsmanship, and fun.",
       leagueType: "youth",
       season: "2024-2025",
       status: "active",
@@ -1120,7 +1143,7 @@ export const seedDatabase = mutation({
           // Mix of completed, scheduled (past), and scheduled (future) games
           // 60% completed, 15% scheduled (past - missed), 25% scheduled (future)
           const gameTypeRand = Math.random();
-          const isCompleted = gameTypeRand < 0.60;
+          const isCompleted = gameTypeRand < 0.6;
           const isFutureGame = gameTypeRand > 0.75;
 
           let scheduledAt: number;
@@ -1152,12 +1175,12 @@ export const seedDatabase = mutation({
               awayScore = baseScore + randomBetween(0, 5);
               // Ensure scores are different
               if (homeScore === awayScore) homeScore += randomBetween(1, 3);
-            } else if (scenarioRand < 0.30) {
+            } else if (scenarioRand < 0.3) {
               // Close game (within 5 points)
               const baseScore = randomBetween(90, 110);
               homeScore = baseScore + randomBetween(-2, 2);
               awayScore = baseScore + randomBetween(-5, 5);
-              if (homeScore === awayScore) homeScore += (Math.random() > 0.5 ? 1 : -1);
+              if (homeScore === awayScore) homeScore += Math.random() > 0.5 ? 1 : -1;
             } else if (scenarioRand < 0.45) {
               // Blowout (15+ point difference)
               homeScore = randomBetween(95, 125);
@@ -1171,7 +1194,7 @@ export const seedDatabase = mutation({
               homeScore = randomBetween(85, 115);
               awayScore = homeScore + randomBetween(-15, 15);
               if (Math.abs(homeScore - awayScore) < 5) {
-                awayScore += (Math.random() > 0.5 ? 7 : -7);
+                awayScore += Math.random() > 0.5 ? 7 : -7;
               }
             }
             // Ensure positive scores
@@ -1185,7 +1208,9 @@ export const seedDatabase = mutation({
             leagueId,
             scheduledAt,
             startedAt: isCompleted ? scheduledAt : undefined,
-            endedAt: isCompleted ? scheduledAt + (2 + (numQuarters - 4) * 0.1) * 60 * 60 * 1000 : undefined,
+            endedAt: isCompleted
+              ? scheduledAt + (2 + (numQuarters - 4) * 0.1) * 60 * 60 * 1000
+              : undefined,
             status,
             currentQuarter: isCompleted ? numQuarters : 1,
             timeRemainingSeconds: isCompleted ? 0 : 720,
@@ -1203,7 +1228,14 @@ export const seedDatabase = mutation({
                     q2: { home: Math.round(homeScore * 0.26), away: Math.round(awayScore * 0.26) },
                     q3: { home: Math.round(homeScore * 0.24), away: Math.round(awayScore * 0.24) },
                     q4: { home: Math.round(homeScore * 0.22), away: Math.round(awayScore * 0.22) },
-                    ...(isOvertime ? { ot1: { home: Math.round(homeScore * 0.05), away: Math.round(awayScore * 0.05) } } : {}),
+                    ...(isOvertime
+                      ? {
+                          ot1: {
+                            home: Math.round(homeScore * 0.05),
+                            away: Math.round(awayScore * 0.05),
+                          },
+                        }
+                      : {}),
                   }
                 : undefined,
             },
@@ -1395,7 +1427,9 @@ export const seedDatabase = mutation({
                   const players = isHome ? homePlayers : awayPlayers;
                   const playerId = randomChoice(players);
                   const playerName = playerNamesMap.get(playerId) || "Player";
-                  const timeInQuarter = Math.round((720 / eventsThisQuarter) * (eventsThisQuarter - e));
+                  const timeInQuarter = Math.round(
+                    (720 / eventsThisQuarter) * (eventsThisQuarter - e)
+                  );
 
                   // Weighted event types
                   const rand = Math.random();
@@ -1407,13 +1441,15 @@ export const seedDatabase = mutation({
                     eventType = "shot";
                     const made = Math.random() > 0.45;
                     const isThree = Math.random() < 0.35;
-                    const zone = isThree ? "three-pointer" : randomChoice(["layup", "jumper", "floater"]);
+                    const zone = isThree
+                      ? "three-pointer"
+                      : randomChoice(["layup", "jumper", "floater"]);
                     description = `${playerName} ${made ? "makes" : "misses"} ${zone}`;
-                  } else if (rand < 0.50) {
+                  } else if (rand < 0.5) {
                     eventType = "rebound";
                     const isOff = Math.random() < 0.3;
                     description = `${playerName} grabs ${isOff ? "offensive" : "defensive"} rebound`;
-                  } else if (rand < 0.60) {
+                  } else if (rand < 0.6) {
                     eventType = "assist";
                     description = `${playerName} assist on the basket`;
                   } else if (rand < 0.75) {
@@ -1422,7 +1458,7 @@ export const seedDatabase = mutation({
                   } else if (rand < 0.85) {
                     eventType = "turnover";
                     description = `${playerName} turnover`;
-                  } else if (rand < 0.90) {
+                  } else if (rand < 0.9) {
                     eventType = "steal";
                     description = `${playerName} steal`;
                   } else if (rand < 0.95) {
@@ -2001,7 +2037,7 @@ export const seedRich = mutation({
     return {
       message: `Cleared ${totalDeleted} records. Now run seedDatabase with clearExisting: false`,
       clearedRecords: totalDeleted,
-      hint: "For full rich seed, run: npx convex run seed:seedDatabase '{\"clearExisting\": true, \"numTeams\": 6, \"detailedEvents\": false}'",
+      hint: 'For full rich seed, run: npx convex run seed:seedDatabase \'{"clearExisting": true, "numTeams": 6, "detailedEvents": false}\'',
     };
   },
 });

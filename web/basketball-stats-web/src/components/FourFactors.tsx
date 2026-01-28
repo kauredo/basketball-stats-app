@@ -52,7 +52,9 @@ function FactorBar({
   const getAdvantageClass = (value: number, otherValue: number) => {
     if (value === otherValue) return "text-surface-900 dark:text-white";
     const hasAdvantage = higherIsBetter ? value > otherValue : value < otherValue;
-    return hasAdvantage ? "text-green-600 dark:text-green-400" : "text-surface-600 dark:text-surface-400";
+    return hasAdvantage
+      ? "text-green-600 dark:text-green-400"
+      : "text-surface-600 dark:text-surface-400";
   };
 
   return (
@@ -73,7 +75,9 @@ function FactorBar({
 
       <div className="flex items-center gap-3">
         {/* Home value */}
-        <span className={`w-14 text-right text-sm font-semibold tabular-nums ${getAdvantageClass(homeValue, awayValue)}`}>
+        <span
+          className={`w-14 text-right text-sm font-semibold tabular-nums ${getAdvantageClass(homeValue, awayValue)}`}
+        >
           {formatValue(homeValue)}
         </span>
 
@@ -100,7 +104,9 @@ function FactorBar({
         </div>
 
         {/* Away value */}
-        <span className={`w-14 text-left text-sm font-semibold tabular-nums ${getAdvantageClass(awayValue, homeValue)}`}>
+        <span
+          className={`w-14 text-left text-sm font-semibold tabular-nums ${getAdvantageClass(awayValue, homeValue)}`}
+        >
           {formatValue(awayValue)}
         </span>
       </div>
@@ -115,9 +121,12 @@ export const FourFactors: React.FC<FourFactorsProps> = ({
   awayStats,
 }) => {
   // Calculate Four Factors for home team
-  const homeEfg = homeStats.fieldGoalsAttempted > 0
-    ? ((homeStats.fieldGoalsMade + 0.5 * homeStats.threePointersMade) / homeStats.fieldGoalsAttempted) * 100
-    : 0;
+  const homeEfg =
+    homeStats.fieldGoalsAttempted > 0
+      ? ((homeStats.fieldGoalsMade + 0.5 * homeStats.threePointersMade) /
+          homeStats.fieldGoalsAttempted) *
+        100
+      : 0;
   const homeTORate = BasketballUtils.turnoverRate(
     homeStats.turnovers,
     homeStats.fieldGoalsAttempted,
@@ -133,9 +142,12 @@ export const FourFactors: React.FC<FourFactorsProps> = ({
   );
 
   // Calculate Four Factors for away team
-  const awayEfg = awayStats.fieldGoalsAttempted > 0
-    ? ((awayStats.fieldGoalsMade + 0.5 * awayStats.threePointersMade) / awayStats.fieldGoalsAttempted) * 100
-    : 0;
+  const awayEfg =
+    awayStats.fieldGoalsAttempted > 0
+      ? ((awayStats.fieldGoalsMade + 0.5 * awayStats.threePointersMade) /
+          awayStats.fieldGoalsAttempted) *
+        100
+      : 0;
   const awayTORate = BasketballUtils.turnoverRate(
     awayStats.turnovers,
     awayStats.fieldGoalsAttempted,
@@ -194,7 +206,9 @@ export const FourFactors: React.FC<FourFactorsProps> = ({
       <div className="p-4">
         {/* Team headers */}
         <div className="flex items-center mb-2">
-          <span className="w-14 text-right text-xs font-semibold text-primary-500">{homeTeamName}</span>
+          <span className="w-14 text-right text-xs font-semibold text-primary-500">
+            {homeTeamName}
+          </span>
           <div className="flex-1" />
           <span className="w-14 text-left text-xs font-semibold text-blue-500">{awayTeamName}</span>
         </div>
@@ -259,14 +273,17 @@ export const FourFactors: React.FC<FourFactorsProps> = ({
                 </div>
                 <div className="flex justify-between pt-1 border-t border-primary-200 dark:border-primary-800">
                   <span className="text-xs text-surface-600 dark:text-surface-400">Net Rtg</span>
-                  <span className={`text-sm font-bold tabular-nums ${
-                    homeOffRtg - homeDefRtg > 0
-                      ? "text-green-600 dark:text-green-400"
-                      : homeOffRtg - homeDefRtg < 0
-                      ? "text-red-600 dark:text-red-400"
-                      : "text-surface-900 dark:text-white"
-                  }`}>
-                    {homeOffRtg - homeDefRtg > 0 ? "+" : ""}{(homeOffRtg - homeDefRtg).toFixed(1)}
+                  <span
+                    className={`text-sm font-bold tabular-nums ${
+                      homeOffRtg - homeDefRtg > 0
+                        ? "text-green-600 dark:text-green-400"
+                        : homeOffRtg - homeDefRtg < 0
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-surface-900 dark:text-white"
+                    }`}
+                  >
+                    {homeOffRtg - homeDefRtg > 0 ? "+" : ""}
+                    {(homeOffRtg - homeDefRtg).toFixed(1)}
                   </span>
                 </div>
               </div>
@@ -292,14 +309,17 @@ export const FourFactors: React.FC<FourFactorsProps> = ({
                 </div>
                 <div className="flex justify-between pt-1 border-t border-blue-200 dark:border-blue-800">
                   <span className="text-xs text-surface-600 dark:text-surface-400">Net Rtg</span>
-                  <span className={`text-sm font-bold tabular-nums ${
-                    awayOffRtg - awayDefRtg > 0
-                      ? "text-green-600 dark:text-green-400"
-                      : awayOffRtg - awayDefRtg < 0
-                      ? "text-red-600 dark:text-red-400"
-                      : "text-surface-900 dark:text-white"
-                  }`}>
-                    {awayOffRtg - awayDefRtg > 0 ? "+" : ""}{(awayOffRtg - awayDefRtg).toFixed(1)}
+                  <span
+                    className={`text-sm font-bold tabular-nums ${
+                      awayOffRtg - awayDefRtg > 0
+                        ? "text-green-600 dark:text-green-400"
+                        : awayOffRtg - awayDefRtg < 0
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-surface-900 dark:text-white"
+                    }`}
+                  >
+                    {awayOffRtg - awayDefRtg > 0 ? "+" : ""}
+                    {(awayOffRtg - awayDefRtg).toFixed(1)}
                   </span>
                 </div>
               </div>

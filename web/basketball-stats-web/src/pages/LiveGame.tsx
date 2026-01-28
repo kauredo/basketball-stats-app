@@ -445,7 +445,9 @@ const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
         className="flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0"
       >
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 ${avatarBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+          <div
+            className={`w-10 h-10 ${avatarBg} rounded-full flex items-center justify-center flex-shrink-0`}
+          >
             <span className="text-white font-bold text-sm">#{player.player?.number}</span>
           </div>
           <div>
@@ -898,16 +900,16 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
         className="w-full flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
       >
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 ${avatarBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+          <div
+            className={`w-10 h-10 ${avatarBg} rounded-full flex items-center justify-center flex-shrink-0`}
+          >
             <span className="text-white font-bold text-sm">#{player.player?.number}</span>
           </div>
           <div className="text-left">
             <div className="text-surface-900 dark:text-white font-medium text-sm">
               {player.player?.name}
             </div>
-            <div className="text-surface-500 text-xs">
-              {player.points} PTS
-            </div>
+            <div className="text-surface-500 text-xs">{player.points} PTS</div>
           </div>
         </div>
         <div className={`px-3 py-1 text-sm font-medium rounded-lg ${styles.badgeClass}`}>

@@ -762,9 +762,8 @@ export const setQuarter = mutation({
 
       // Log end of previous quarter (if not first quarter)
       if (game.currentQuarter >= 1) {
-        const prevPeriodLabel = game.currentQuarter > 4
-          ? `OT${game.currentQuarter - 4}`
-          : `Q${game.currentQuarter}`;
+        const prevPeriodLabel =
+          game.currentQuarter > 4 ? `OT${game.currentQuarter - 4}` : `Q${game.currentQuarter}`;
         await ctx.db.insert("gameEvents", {
           gameId: args.gameId,
           eventType: "quarter_end",
@@ -944,9 +943,8 @@ export const timerTick = internalMutation({
       const newSettings = { ...settings, quartersCompleted };
 
       // Log quarter end event
-      const periodLabel = game.currentQuarter > 4
-        ? `OT${game.currentQuarter - 4}`
-        : `Q${game.currentQuarter}`;
+      const periodLabel =
+        game.currentQuarter > 4 ? `OT${game.currentQuarter - 4}` : `Q${game.currentQuarter}`;
       await ctx.db.insert("gameEvents", {
         gameId: args.gameId,
         eventType: "quarter_end",
@@ -1989,9 +1987,7 @@ function identifyScoringRuns(
 }
 
 // Helper to count lead changes
-function countLeadChanges(
-  timeline: Array<{ scoreDifferential: number }>
-): number {
+function countLeadChanges(timeline: Array<{ scoreDifferential: number }>): number {
   let changes = 0;
   let lastLeader: "home" | "away" | "tied" = "tied";
 
@@ -2001,11 +1997,7 @@ function countLeadChanges(
     else if (event.scoreDifferential < 0) currentLeader = "away";
     else currentLeader = "tied";
 
-    if (
-      lastLeader !== "tied" &&
-      currentLeader !== "tied" &&
-      lastLeader !== currentLeader
-    ) {
+    if (lastLeader !== "tied" && currentLeader !== "tied" && lastLeader !== currentLeader) {
       changes++;
     }
     lastLeader = currentLeader;
@@ -2015,9 +2007,7 @@ function countLeadChanges(
 }
 
 // Helper to count times tied
-function countTimesTied(
-  timeline: Array<{ scoreDifferential: number }>
-): number {
+function countTimesTied(timeline: Array<{ scoreDifferential: number }>): number {
   let tiedCount = 0;
   let wasTied = true; // Start tied at 0-0
 

@@ -389,7 +389,13 @@ export default function LiveGameScreen() {
         setOverrideRosterLimit(true);
       }
     }
-  }, [game?.status, game?.gameSettings, homeRosterPlayers.length, awayRosterPlayers.length, effectiveRosterLimit]);
+  }, [
+    game?.status,
+    game?.gameSettings,
+    homeRosterPlayers.length,
+    awayRosterPlayers.length,
+    effectiveRosterLimit,
+  ]);
 
   // Initialize starters from active roster
   useEffect(() => {

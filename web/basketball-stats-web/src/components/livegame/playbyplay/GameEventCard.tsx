@@ -146,7 +146,11 @@ const DEFAULT_CONFIG = {
  * Shows cumulative player stats for relevant events.
  * Colored left border indicates team (orange=home, blue=away).
  */
-export const GameEventCard: React.FC<GameEventCardProps> = ({ event, playerStats = [], homeTeamId }) => {
+export const GameEventCard: React.FC<GameEventCardProps> = ({
+  event,
+  playerStats = [],
+  homeTeamId,
+}) => {
   // Format time remaining as MM:SS
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -221,11 +225,12 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({ event, playerStats
   // Team colors: blue for home, orange for away, neutral gray for game events
   // If isHomeTeam is still undefined (game-level events like quarter_start, overtime_start, note)
   // use a neutral color
-  const teamBorderColor = isHomeTeam === true
-    ? "#3b82f6" // Home = Blue
-    : isHomeTeam === false
-      ? "#f97316" // Away = Orange
-      : "#6b7280"; // Neutral gray for game-level events
+  const teamBorderColor =
+    isHomeTeam === true
+      ? "#3b82f6" // Home = Blue
+      : isHomeTeam === false
+        ? "#f97316" // Away = Orange
+        : "#6b7280"; // Neutral gray for game-level events
 
   return (
     <div className="flex items-stretch border-b border-surface-200 dark:border-surface-700 last:border-b-0">

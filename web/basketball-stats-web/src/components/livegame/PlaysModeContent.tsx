@@ -47,7 +47,12 @@ export const PlaysModeContent: React.FC<PlaysModeContentProps> = ({
 
       {/* Events list */}
       <div className="flex-1 min-h-0">
-        <PlayByPlayList events={events} filterQuarter={selectedQuarter} playerStats={playerStats} homeTeamId={homeTeamId} />
+        <PlayByPlayList
+          events={events}
+          filterQuarter={selectedQuarter}
+          playerStats={playerStats}
+          homeTeamId={homeTeamId}
+        />
       </div>
     </div>
   );
