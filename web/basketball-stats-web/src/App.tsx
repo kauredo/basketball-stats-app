@@ -46,6 +46,7 @@ import TeamDetail from "./pages/TeamDetail";
 import LeagueSettings from "./pages/LeagueSettings";
 import JoinPage from "./pages/JoinPage";
 import ExportPage from "./pages/ExportPage";
+import GameReplay from "./pages/GameReplay";
 
 function LoadingScreen() {
   return (
@@ -104,6 +105,7 @@ function AuthenticatedApp() {
           <Route path="/compare" element={<PlayerComparison />} />
           <Route path="/shot-charts" element={<ShotCharts />} />
           <Route path="/games/:gameId/analysis" element={<GameAnalysis />} />
+          <Route path="/games/:gameId/replay" element={<GameReplay />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/league-settings" element={<LeagueSettings />} />
           <Route path="/leagues" element={<LeagueSelectionPage />} />

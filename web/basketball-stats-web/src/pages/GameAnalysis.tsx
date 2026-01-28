@@ -13,6 +13,7 @@ import {
   PresentationChartBarIcon,
   ClipboardDocumentListIcon,
   ArrowDownTrayIcon,
+  FilmIcon,
 } from "@heroicons/react/24/outline";
 import { ExportModal } from "../components/export";
 import type { GameExportData } from "../utils/export/types";
@@ -565,13 +566,24 @@ const GameAnalysis: React.FC = () => {
             {game.status === "completed" ? "Final" : game.status}
           </p>
         </div>
-        <button
-          onClick={() => setShowExportModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors"
-        >
-          <ArrowDownTrayIcon className="w-5 h-5" />
-          Export
-        </button>
+        <div className="flex items-center gap-3">
+          {game.status === "completed" && (
+            <Link
+              to={`/app/games/${gameId}/replay`}
+              className="flex items-center gap-2 px-4 py-2 bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 font-medium rounded-xl transition-colors"
+            >
+              <FilmIcon className="w-5 h-5" />
+              Watch Replay
+            </Link>
+          )}
+          <button
+            onClick={() => setShowExportModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors"
+          >
+            <ArrowDownTrayIcon className="w-5 h-5" />
+            Export
+          </button>
+        </div>
       </div>
 
       {/* Score Card */}

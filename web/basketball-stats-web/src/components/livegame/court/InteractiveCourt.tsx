@@ -371,8 +371,10 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
               ? COURT_COLORS.shot3pt
               : COURT_COLORS.shotMade
             : COURT_COLORS.shotMissed;
+          // Use shot.id if available for stable keys, fallback to index
+          const shotKey = shot.id || `shot-${index}-${shot.x.toFixed(2)}-${shot.y.toFixed(2)}`;
           return (
-            <g key={index}>
+            <g key={shotKey}>
               {/* Shot marker */}
               <circle
                 cx={svgX}

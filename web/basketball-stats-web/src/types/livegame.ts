@@ -106,6 +106,7 @@ export interface GameData {
 // ============================================================================
 
 export interface ShotLocation {
+  id?: string;
   x: number;
   y: number;
   made: boolean;

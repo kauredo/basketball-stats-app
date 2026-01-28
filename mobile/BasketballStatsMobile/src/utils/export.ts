@@ -509,6 +509,366 @@ export async function exportPairStatsCSV(pairs: PairStatsInput[], teamName: stri
 }
 
 // ============================================
+// Box Score Export (Game-specific)
+// ============================================
+
+interface BoxScoreRow {
+  [key: string]: string | number;
+  team: string;
+  number: number;
+  name: string;
+  min: number;
+  pts: number;
+  reb: number;
+  ast: number;
+  stl: number;
+  blk: number;
+  to: number;
+  pf: number;
+  fgm: number;
+  fga: number;
+  "fg%": string;
+  "3pm": number;
+  "3pa": number;
+  "3p%": string;
+  ftm: number;
+  fta: number;
+  "ft%": string;
+  "+/-": number;
+}
+
+const boxScoreColumns: { key: keyof BoxScoreRow; label: string }[] = [
+  { key: "team", label: "Team" },
+  { key: "number", label: "#" },
+  { key: "name", label: "Player" },
+  { key: "min", label: "MIN" },
+  { key: "pts", label: "PTS" },
+  { key: "reb", label: "REB" },
+  { key: "ast", label: "AST" },
+  { key: "stl", label: "STL" },
+  { key: "blk", label: "BLK" },
+  { key: "to", label: "TO" },
+  { key: "pf", label: "PF" },
+  { key: "fgm", label: "FGM" },
+  { key: "fga", label: "FGA" },
+  { key: "fg%", label: "FG%" },
+  { key: "3pm", label: "3PM" },
+  { key: "3pa", label: "3PA" },
+  { key: "3p%", label: "3P%" },
+  { key: "ftm", label: "FTM" },
+  { key: "fta", label: "FTA" },
+  { key: "ft%", label: "FT%" },
+  { key: "+/-", label: "+/-" },
+];
+
+export interface BoxScorePlayerInput {
+  player?: {
+    id?: string;
+    name: string;
+    number: number;
+  } | null;
+  minutesPlayed?: number;
+  points?: number;
+  rebounds?: number;
+  assists?: number;
+  steals?: number;
+  blocks?: number;
+  turnovers?: number;
+  fouls?: number;
+  fieldGoalsMade?: number;
+  fieldGoalsAttempted?: number;
+  threePointersMade?: number;
+  threePointersAttempted?: number;
+  freeThrowsMade?: number;
+  freeThrowsAttempted?: number;
+  plusMinus?: number;
+}
+
+export interface BoxScoreTeamInput {
+  team?: { name: string } | null;
+  players: BoxScorePlayerInput[];
+}
+
+export interface GameInfoInput {
+  homeTeamName: string;
+  awayTeamName: string;
+  homeScore: number;
+  awayScore: number;
+  date?: string | number;
+}
+
+/**
+ * Export box score to CSV and share
+ */
+export async function exportBoxScoreCSV(
+  homeTeam: BoxScoreTeamInput,
+  awayTeam: BoxScoreTeamInput,
+  gameInfo: GameInfoInput
+): Promise<void> {
+  const transformPlayer = (player: BoxScorePlayerInput, teamName: string): BoxScoreRow => {
+    const fgPct =
+      player.fieldGoalsAttempted && player.fieldGoalsAttempted > 0
+        ? (((player.fieldGoalsMade || 0) / player.fieldGoalsAttempted) * 100).toFixed(1)
+        : "0.0";
+    const threePct =
+      player.threePointersAttempted && player.threePointersAttempted > 0
+        ? (((player.threePointersMade || 0) / player.threePointersAttempted) * 100).toFixed(1)
+        : "0.0";
+    const ftPct =
+      player.freeThrowsAttempted && player.freeThrowsAttempted > 0
+        ? (((player.freeThrowsMade || 0) / player.freeThrowsAttempted) * 100).toFixed(1)
+        : "0.0";
+
+    return {
+      team: teamName,
+      number: player.player?.number || 0,
+      name: player.player?.name || "Unknown",
+      min: player.minutesPlayed || 0,
+      pts: player.points || 0,
+      reb: player.rebounds || 0,
+      ast: player.assists || 0,
+      stl: player.steals || 0,
+      blk: player.blocks || 0,
+      to: player.turnovers || 0,
+      pf: player.fouls || 0,
+      fgm: player.fieldGoalsMade || 0,
+      fga: player.fieldGoalsAttempted || 0,
+      "fg%": fgPct,
+      "3pm": player.threePointersMade || 0,
+      "3pa": player.threePointersAttempted || 0,
+      "3p%": threePct,
+      ftm: player.freeThrowsMade || 0,
+      fta: player.freeThrowsAttempted || 0,
+      "ft%": ftPct,
+      "+/-": player.plusMinus || 0,
+    };
+  };
+
+  const rows: BoxScoreRow[] = [
+    ...homeTeam.players.map((p) => transformPlayer(p, homeTeam.team?.name || gameInfo.homeTeamName)),
+    ...awayTeam.players.map((p) => transformPlayer(p, awayTeam.team?.name || gameInfo.awayTeamName)),
+  ];
+
+  // Sort by team then by points
+  rows.sort((a, b) => {
+    if (a.team !== b.team) return a.team.localeCompare(b.team);
+    return b.pts - a.pts;
+  });
+
+  const dateStr = gameInfo.date
+    ? new Date(gameInfo.date).toISOString().split("T")[0]
+    : new Date().toISOString().split("T")[0];
+  const filename = `box-score-${gameInfo.homeTeamName.replace(/\s+/g, "-")}-vs-${gameInfo.awayTeamName.replace(/\s+/g, "-")}-${dateStr}`;
+
+  await exportAndShareCSV(rows, boxScoreColumns, filename);
+}
+
+// ============================================
+// Shots Export (Game-specific)
+// ============================================
+
+interface ShotRow {
+  [key: string]: string | number;
+  quarter: number;
+  time: string;
+  team: string;
+  player: string;
+  number: number;
+  shotType: string;
+  result: string;
+  zone: string;
+  x: number;
+  y: number;
+}
+
+const shotColumns: { key: keyof ShotRow; label: string }[] = [
+  { key: "quarter", label: "Quarter" },
+  { key: "time", label: "Time" },
+  { key: "team", label: "Team" },
+  { key: "player", label: "Player" },
+  { key: "number", label: "#" },
+  { key: "shotType", label: "Shot Type" },
+  { key: "result", label: "Result" },
+  { key: "zone", label: "Zone" },
+  { key: "x", label: "X" },
+  { key: "y", label: "Y" },
+];
+
+export interface ShotInput {
+  id?: string;
+  playerId?: string;
+  player?: { name?: string; number?: number } | null;
+  playerName?: string;
+  playerNumber?: number;
+  teamId?: string;
+  teamName?: string;
+  x: number;
+  y: number;
+  shotType: string;
+  made: boolean;
+  shotZone?: string;
+  zone?: string;
+  quarter: number;
+  timeRemaining?: number;
+  gameTime?: number;
+}
+
+/**
+ * Export shots to CSV and share
+ */
+export async function exportShotsCSV(
+  shots: ShotInput[],
+  homeTeamId: string | undefined,
+  gameInfo: GameInfoInput
+): Promise<void> {
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const rows: ShotRow[] = shots.map((shot) => {
+    const time = shot.timeRemaining ?? shot.gameTime ?? 0;
+    const isHomeTeam = shot.teamId === homeTeamId;
+    const teamName = shot.teamName || (isHomeTeam ? gameInfo.homeTeamName : gameInfo.awayTeamName);
+
+    return {
+      quarter: shot.quarter,
+      time: formatTime(time),
+      team: teamName,
+      player: shot.player?.name || shot.playerName || "Unknown",
+      number: shot.player?.number || shot.playerNumber || 0,
+      shotType: shot.shotType === "3pt" ? "3-pointer" : shot.shotType === "2pt" ? "2-pointer" : "Free Throw",
+      result: shot.made ? "Made" : "Missed",
+      zone: shot.shotZone || shot.zone || "Unknown",
+      x: Math.round(shot.x * 100) / 100,
+      y: Math.round(shot.y * 100) / 100,
+    };
+  });
+
+  // Sort by quarter then by time (descending within quarter)
+  rows.sort((a, b) => {
+    if (a.quarter !== b.quarter) return a.quarter - b.quarter;
+    // Time is formatted as MM:SS, need to compare numerically
+    const [aMins, aSecs] = a.time.split(":").map(Number);
+    const [bMins, bSecs] = b.time.split(":").map(Number);
+    return (bMins * 60 + bSecs) - (aMins * 60 + aSecs);
+  });
+
+  const dateStr = gameInfo.date
+    ? new Date(gameInfo.date).toISOString().split("T")[0]
+    : new Date().toISOString().split("T")[0];
+  const filename = `shots-${gameInfo.homeTeamName.replace(/\s+/g, "-")}-vs-${gameInfo.awayTeamName.replace(/\s+/g, "-")}-${dateStr}`;
+
+  await exportAndShareCSV(rows, shotColumns, filename);
+}
+
+// ============================================
+// Play-by-Play Export (Game-specific)
+// ============================================
+
+interface PlayByPlayRow {
+  [key: string]: string | number;
+  quarter: number;
+  time: string;
+  homeScore: number;
+  awayScore: number;
+  team: string;
+  player: string;
+  eventType: string;
+  description: string;
+  points: number;
+}
+
+const playByPlayColumns: { key: keyof PlayByPlayRow; label: string }[] = [
+  { key: "quarter", label: "Quarter" },
+  { key: "time", label: "Time" },
+  { key: "homeScore", label: "Home Score" },
+  { key: "awayScore", label: "Away Score" },
+  { key: "team", label: "Team" },
+  { key: "player", label: "Player" },
+  { key: "eventType", label: "Event" },
+  { key: "description", label: "Description" },
+  { key: "points", label: "Points" },
+];
+
+export interface PlayByPlayEventInput {
+  id?: string;
+  eventType: string;
+  quarter: number;
+  gameTime?: number;
+  timeRemaining?: number;
+  description?: string;
+  details?: {
+    points?: number;
+    homeScore?: number;
+    awayScore?: number;
+    isHomeTeam?: boolean;
+  };
+  player?: { name?: string; number?: number; id?: string } | null;
+  team?: { name?: string; id?: string } | null;
+  playerId?: string;
+  teamId?: string;
+}
+
+/**
+ * Export play-by-play to CSV and share
+ */
+export async function exportPlayByPlayCSV(
+  events: PlayByPlayEventInput[],
+  homeTeamId: string | undefined,
+  gameInfo: GameInfoInput
+): Promise<void> {
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const formatEventType = (eventType: string): string => {
+    return eventType
+      .replace(/_/g, " ")
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const rows: PlayByPlayRow[] = events.map((event) => {
+    const time = event.gameTime ?? event.timeRemaining ?? 0;
+    const isHomeTeam = event.details?.isHomeTeam ?? (event.team?.id === homeTeamId || event.teamId === homeTeamId);
+    const teamName = event.team?.name || (isHomeTeam ? gameInfo.homeTeamName : gameInfo.awayTeamName);
+
+    return {
+      quarter: event.quarter,
+      time: formatTime(time),
+      homeScore: event.details?.homeScore ?? 0,
+      awayScore: event.details?.awayScore ?? 0,
+      team: teamName || "-",
+      player: event.player?.name || "-",
+      eventType: formatEventType(event.eventType),
+      description: event.description || formatEventType(event.eventType),
+      points: event.details?.points || 0,
+    };
+  });
+
+  // Sort by quarter then by time (descending within quarter = earliest events first in quarter)
+  rows.sort((a, b) => {
+    if (a.quarter !== b.quarter) return a.quarter - b.quarter;
+    // Time is formatted as MM:SS, compare numerically (higher time = earlier in quarter)
+    const [aMins, aSecs] = a.time.split(":").map(Number);
+    const [bMins, bSecs] = b.time.split(":").map(Number);
+    return (bMins * 60 + bSecs) - (aMins * 60 + aSecs);
+  });
+
+  const dateStr = gameInfo.date
+    ? new Date(gameInfo.date).toISOString().split("T")[0]
+    : new Date().toISOString().split("T")[0];
+  const filename = `play-by-play-${gameInfo.homeTeamName.replace(/\s+/g, "-")}-vs-${gameInfo.awayTeamName.replace(/\s+/g, "-")}-${dateStr}`;
+
+  await exportAndShareCSV(rows, playByPlayColumns, filename);
+}
+
+// ============================================
 // Check if sharing is available
 // ============================================
 

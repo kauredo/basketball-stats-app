@@ -11,7 +11,7 @@ import type { GameSettings } from "@basketball-stats/shared";
 import { QuarterBreakdown } from "../components/livegame/QuarterBreakdown";
 import { AdvancedStats } from "../components/livegame/AdvancedStats";
 import PlayByPlayTab from "../components/livegame/PlayByPlayTab";
-import { ExportOptionsSheet } from "../components/export/ExportOptionsSheet";
+import { ExportOptionsSheet, type GameExportData } from "../components/export/ExportOptionsSheet";
 import { FourFactors } from "../components/FourFactors";
 import { GameFlowChart } from "../components/GameFlowChart";
 import type { RootStackParamList } from "../navigation/AppNavigator";
@@ -184,6 +184,11 @@ export default function GameAnalysisScreen() {
     token && gameId ? { token, gameId: gameId as Id<"games"> } : "skip"
   );
 
+  const shotsData = useQuery(
+    api.shots.getGameShots,
+    token && gameId ? { token, gameId: gameId as Id<"games"> } : "skip"
+  );
+
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 500);
@@ -218,6 +223,88 @@ export default function GameAnalysisScreen() {
   const homeTeam = boxScore?.homeTeam;
   const awayTeam = boxScore?.awayTeam;
   const events = gameEventsData?.events || [];
+  const shots = shotsData?.shots || [];
+
+  // Prepare export data for native CSV exports
+  const exportData: GameExportData | undefined =
+    homeTeam && awayTeam
+      ? {
+          homeTeam: {
+            team: homeTeam.team,
+            players: homeTeam.players.map((p) => ({
+              player: p.player,
+              minutesPlayed: p.minutesPlayed,
+              points: p.points,
+              rebounds: p.rebounds,
+              assists: p.assists,
+              steals: p.steals,
+              blocks: p.blocks,
+              turnovers: p.turnovers,
+              fouls: p.fouls,
+              fieldGoalsMade: p.fieldGoalsMade,
+              fieldGoalsAttempted: p.fieldGoalsAttempted,
+              threePointersMade: p.threePointersMade,
+              threePointersAttempted: p.threePointersAttempted,
+              freeThrowsMade: p.freeThrowsMade,
+              freeThrowsAttempted: p.freeThrowsAttempted,
+              plusMinus: p.plusMinus,
+            })),
+          },
+          awayTeam: {
+            team: awayTeam.team,
+            players: awayTeam.players.map((p) => ({
+              player: p.player,
+              minutesPlayed: p.minutesPlayed,
+              points: p.points,
+              rebounds: p.rebounds,
+              assists: p.assists,
+              steals: p.steals,
+              blocks: p.blocks,
+              turnovers: p.turnovers,
+              fouls: p.fouls,
+              fieldGoalsMade: p.fieldGoalsMade,
+              fieldGoalsAttempted: p.fieldGoalsAttempted,
+              threePointersMade: p.threePointersMade,
+              threePointersAttempted: p.threePointersAttempted,
+              freeThrowsMade: p.freeThrowsMade,
+              freeThrowsAttempted: p.freeThrowsAttempted,
+              plusMinus: p.plusMinus,
+            })),
+          },
+          shots: shots.map((s) => ({
+            id: s._id,
+            playerId: s.playerId,
+            playerName: s.playerName,
+            playerNumber: s.playerNumber,
+            teamId: s.teamId,
+            x: s.x,
+            y: s.y,
+            shotType: s.shotType,
+            made: s.made,
+            shotZone: s.shotZone,
+            quarter: s.quarter,
+            timeRemaining: s.timeRemaining,
+          })),
+          events: events.map((e) => ({
+            id: e.id,
+            eventType: e.eventType,
+            quarter: e.quarter,
+            gameTime: e.gameTime,
+            description: e.description,
+            details: e.details,
+            player: e.player,
+            team: e.team,
+          })),
+          gameInfo: {
+            homeTeamName: homeTeam.team?.name || "Home",
+            awayTeamName: awayTeam.team?.name || "Away",
+            homeScore: game.homeScore,
+            awayScore: game.awayScore,
+            date: game.startedAt || game.scheduledAt,
+          },
+          homeTeamId: homeTeam.team?.id,
+        }
+      : undefined;
 
   const isHomeWinner = game.homeScore > game.awayScore;
   const isAwayWinner = game.awayScore > game.homeScore;
@@ -729,6 +816,7 @@ export default function GameAnalysisScreen() {
         leagueId={selectedLeague?.id}
         exportType="game-report"
         title="Export Game Report"
+        gameData={exportData}
       />
     </View>
   );

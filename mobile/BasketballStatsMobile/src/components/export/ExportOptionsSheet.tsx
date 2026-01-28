@@ -13,6 +13,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Icon from "../Icon";
 import { buildExportURL, type ExportFormat, type ExportType } from "@basketball-stats/shared";
 import { WEB_APP_BASE_URL, EXPORT_CONFIG } from "../../constants/config";
+import {
+  exportBoxScoreCSV,
+  exportShotsCSV,
+  exportPlayByPlayCSV,
+  type BoxScoreTeamInput,
+  type ShotInput,
+  type PlayByPlayEventInput,
+  type GameInfoInput,
+} from "../../utils/export";
 
 interface ExportOption {
   id: string;
@@ -20,6 +29,16 @@ interface ExportOption {
   description: string;
   icon: string;
   enabled: boolean;
+}
+
+/** Game data for native CSV exports */
+export interface GameExportData {
+  homeTeam: BoxScoreTeamInput;
+  awayTeam: BoxScoreTeamInput;
+  shots: ShotInput[];
+  events: PlayByPlayEventInput[];
+  gameInfo: GameInfoInput;
+  homeTeamId?: string;
 }
 
 interface ExportOptionsSheetProps {
@@ -33,6 +52,8 @@ interface ExportOptionsSheetProps {
   title?: string;
   /** Number of items being exported (for large dataset warnings) */
   dataCount?: number;
+  /** Game data for native CSV exports (when available, CSV exports are done natively) */
+  gameData?: GameExportData;
 }
 
 export function ExportOptionsSheet({
@@ -45,6 +66,7 @@ export function ExportOptionsSheet({
   exportType = "game-report",
   title = "Export Data",
   dataCount,
+  gameData,
 }: ExportOptionsSheetProps) {
   const insets = useSafeAreaInsets();
   const isLargeDataset =
@@ -83,11 +105,33 @@ export function ExportOptionsSheet({
     );
   };
 
+  // Check if native CSV export is available (gameData is provided and CSV format is selected)
+  const canExportNativeCSV = format === "csv" && gameData !== undefined;
+
   const handleExport = async () => {
     try {
       setIsExporting(true);
 
-      // Build the export URL
+      // If CSV format and we have game data, export natively
+      if (format === "csv" && gameData) {
+        const selectedContent = contentOptions.filter((opt) => opt.enabled);
+
+        // Export each selected content type
+        for (const content of selectedContent) {
+          if (content.id === "boxScore") {
+            await exportBoxScoreCSV(gameData.homeTeam, gameData.awayTeam, gameData.gameInfo);
+          } else if (content.id === "shotCharts" && gameData.shots.length > 0) {
+            await exportShotsCSV(gameData.shots, gameData.homeTeamId, gameData.gameInfo);
+          } else if (content.id === "playByPlay" && gameData.events.length > 0) {
+            await exportPlayByPlayCSV(gameData.events, gameData.homeTeamId, gameData.gameInfo);
+          }
+        }
+
+        onClose();
+        return;
+      }
+
+      // Otherwise, delegate to web app for PDF or when no game data
       const exportUrl = buildExportURL(WEB_APP_BASE_URL, {
         type: exportType,
         format,
@@ -350,17 +394,31 @@ export function ExportOptionsSheet({
             )}
 
             {/* Info Banner */}
-            <View className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 flex-row gap-3 mb-4">
-              <Icon name="info" size={20} color="#3B82F6" />
-              <View className="flex-1">
-                <Text className="text-blue-800 dark:text-blue-300 text-sm font-medium mb-1">
-                  Export via Web
-                </Text>
-                <Text className="text-blue-600 dark:text-blue-400 text-xs">
-                  This will open the web app to generate and download your export file.
-                </Text>
+            {canExportNativeCSV ? (
+              <View className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 flex-row gap-3 mb-4">
+                <Icon name="check-circle" size={20} color="#22C55E" />
+                <View className="flex-1">
+                  <Text className="text-green-800 dark:text-green-300 text-sm font-medium mb-1">
+                    Native Export
+                  </Text>
+                  <Text className="text-green-600 dark:text-green-400 text-xs">
+                    CSV will be generated locally and shared via the native share sheet.
+                  </Text>
+                </View>
               </View>
-            </View>
+            ) : (
+              <View className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 flex-row gap-3 mb-4">
+                <Icon name="info" size={20} color="#3B82F6" />
+                <View className="flex-1">
+                  <Text className="text-blue-800 dark:text-blue-300 text-sm font-medium mb-1">
+                    Export via Web
+                  </Text>
+                  <Text className="text-blue-600 dark:text-blue-400 text-xs">
+                    This will open the web app to generate and download your export file.
+                  </Text>
+                </View>
+              </View>
+            )}
           </ScrollView>
 
           {/* Footer */}
