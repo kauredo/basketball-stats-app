@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getUserFromToken, canAccessLeague, canManageLeague } from "./lib/auth";
+import { getUserFromToken, canAccessLeague, canManageTeam } from "./lib/auth";
 
 // List team memberships
 export const list = query({
@@ -80,11 +80,10 @@ export const add = mutation({
     const team = await ctx.db.get(args.teamId);
     if (!team) throw new Error("Team not found");
 
-    // Must be league admin/owner or team coach to add members
-    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
-    const isTeamCoach = await isCoachOfTeam(ctx, user._id, args.teamId);
-    if (!canManage && !isTeamCoach) {
-      throw new Error("Access denied - must be league admin or team coach");
+    // Must be league admin/owner, team owner, or team coach to add members
+    const hasPermission = await canManageTeam(ctx, user._id, args.teamId);
+    if (!hasPermission) {
+      throw new Error("Access denied - must be league admin, team owner, or team coach");
     }
 
     // Check if membership already exists
@@ -134,12 +133,7 @@ export const update = mutation({
     token: v.string(),
     membershipId: v.id("teamMemberships"),
     role: v.optional(
-      v.union(
-        v.literal("coach"),
-        v.literal("assistant"),
-        v.literal("player"),
-        v.literal("manager")
-      )
+      v.union(v.literal("coach"), v.literal("assistant"), v.literal("player"), v.literal("manager"))
     ),
     playerId: v.optional(v.id("players")),
   },
@@ -153,11 +147,10 @@ export const update = mutation({
     const team = await ctx.db.get(membership.teamId);
     if (!team) throw new Error("Team not found");
 
-    // Must be league admin/owner or team coach
-    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
-    const isTeamCoach = await isCoachOfTeam(ctx, user._id, membership.teamId);
-    if (!canManage && !isTeamCoach) {
-      throw new Error("Access denied");
+    // Must be league admin/owner, team owner, or team coach
+    const hasPermission = await canManageTeam(ctx, user._id, membership.teamId);
+    if (!hasPermission) {
+      throw new Error("Access denied - must be league admin, team owner, or team coach");
     }
 
     const updates: any = {};
@@ -186,11 +179,10 @@ export const remove = mutation({
     const team = await ctx.db.get(membership.teamId);
     if (!team) throw new Error("Team not found");
 
-    // Must be league admin/owner or team coach
-    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
-    const isTeamCoach = await isCoachOfTeam(ctx, user._id, membership.teamId);
-    if (!canManage && !isTeamCoach) {
-      throw new Error("Access denied");
+    // Must be league admin/owner, team owner, or team coach
+    const hasPermission = await canManageTeam(ctx, user._id, membership.teamId);
+    if (!hasPermission) {
+      throw new Error("Access denied - must be league admin, team owner, or team coach");
     }
 
     // Soft delete by setting status to removed
@@ -235,17 +227,3 @@ export const getUserTeams = query({
     return { teams: teams.filter(Boolean) };
   },
 });
-
-// Helper function to check if user is a coach of a team
-async function isCoachOfTeam(
-  ctx: any,
-  userId: any,
-  teamId: any
-): Promise<boolean> {
-  const membership = await ctx.db
-    .query("teamMemberships")
-    .withIndex("by_team_user", (q: any) => q.eq("teamId", teamId).eq("userId", userId))
-    .first();
-
-  return membership?.status === "active" && membership?.role === "coach";
-}

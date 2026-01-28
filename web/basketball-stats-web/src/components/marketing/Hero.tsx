@@ -60,7 +60,11 @@ export default function Hero() {
                 label: "Advanced analytics",
                 desc: "Four Factors, game flow & more",
               },
-              { icon: "activity", label: "Game replay", desc: "Relive games with timeline playback" },
+              {
+                icon: "activity",
+                label: "Game replay",
+                desc: "Relive games with timeline playback",
+              },
             ].map((feature) => (
               <div
                 key={feature.label}

@@ -8,12 +8,7 @@ interface ColorPickerProps {
   allowCustom?: boolean;
 }
 
-export function ColorPicker({
-  value,
-  onChange,
-  label,
-  allowCustom = true,
-}: ColorPickerProps) {
+export function ColorPicker({ value, onChange, label, allowCustom = true }: ColorPickerProps) {
   const selectedColor = value?.toUpperCase();
 
   return (

@@ -601,7 +601,10 @@ const GameAnalysis: React.FC = () => {
             <FilmIcon className="w-5 h-5 text-surface-500" />
             <h3 className="text-lg font-semibold text-surface-900 dark:text-white">Game Video</h3>
           </div>
-          <YouTubeEmbed url={game.videoUrl} title={`${homeTeam?.team?.name} vs ${awayTeam?.team?.name}`} />
+          <YouTubeEmbed
+            url={game.videoUrl}
+            title={`${homeTeam?.team?.name} vs ${awayTeam?.team?.name}`}
+          />
         </div>
       )}
 
@@ -623,7 +626,12 @@ const GameAnalysis: React.FC = () => {
             <p
               className="text-stat-xl mt-2"
               data-stat
-              style={{ color: resolveTeamColor((homeTeam?.team as { primaryColor?: string })?.primaryColor, true) }}
+              style={{
+                color: resolveTeamColor(
+                  (homeTeam?.team as { primaryColor?: string })?.primaryColor,
+                  true
+                ),
+              }}
             >
               {game.homeScore}
             </p>
@@ -656,7 +664,12 @@ const GameAnalysis: React.FC = () => {
             <p
               className="text-stat-xl mt-2"
               data-stat
-              style={{ color: resolveTeamColor((awayTeam?.team as { primaryColor?: string })?.primaryColor, false) }}
+              style={{
+                color: resolveTeamColor(
+                  (awayTeam?.team as { primaryColor?: string })?.primaryColor,
+                  false
+                ),
+              }}
             >
               {game.awayScore}
             </p>

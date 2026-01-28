@@ -7,7 +7,8 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "../contexts/AuthContext";
 import Icon from "../components/Icon";
-import type { GameSettings } from "@basketball-stats/shared";
+import YouTubeEmbed from "../components/ui/YouTubeEmbed";
+import { extractYouTubeId, type GameSettings } from "@basketball-stats/shared";
 import { QuarterBreakdown } from "../components/livegame/QuarterBreakdown";
 import { AdvancedStats } from "../components/livegame/AdvancedStats";
 import PlayByPlayTab from "../components/livegame/PlayByPlayTab";
@@ -488,6 +489,13 @@ export default function GameAnalysisScreen() {
           <Text className="text-white font-semibold text-sm">Export</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Game Video */}
+      {game.videoUrl && extractYouTubeId(game.videoUrl) && (
+        <View className="px-4 pt-4">
+          <YouTubeEmbed url={game.videoUrl} title="Game Video" />
+        </View>
+      )}
 
       {/* Score Header */}
       <View className="bg-surface-100 dark:bg-surface-800/50 p-4 mx-4 mt-2 rounded-xl">

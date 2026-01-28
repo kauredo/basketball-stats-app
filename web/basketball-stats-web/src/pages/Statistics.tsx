@@ -874,7 +874,9 @@ export default function Statistics() {
                   angle={-45}
                   textAnchor="end"
                   height={80}
-                  tickFormatter={(value: string) => value.length > 12 ? `${value.slice(0, 10)}…` : value}
+                  tickFormatter={(value: string) =>
+                    value.length > 12 ? `${value.slice(0, 10)}…` : value
+                  }
                 />
                 <YAxis stroke="#a69f96" fontSize={12} />
                 <Tooltip
@@ -928,7 +930,9 @@ export default function Statistics() {
                   stroke="#a69f96"
                   fontSize={10}
                   tickLine={false}
-                  tickFormatter={(value: string) => value.length > 10 ? `${value.slice(0, 8)}…` : value}
+                  tickFormatter={(value: string) =>
+                    value.length > 10 ? `${value.slice(0, 8)}…` : value
+                  }
                 />
                 <Tooltip
                   contentStyle={{

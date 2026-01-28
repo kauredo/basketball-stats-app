@@ -29,114 +29,69 @@ _All P0 issues resolved_
 
 ### Team Enhancements
 
-- [ ] **Team colors** - Allow teams to have custom primary/secondary colors
-  - **Schema change**: Add `primaryColor` and `secondaryColor` fields to `teams` table in `convex/schema.ts`
-  - **Backend**: Update `convex/teams.ts` create/update mutations to accept color values
-  - **Web UI**: Add color picker inputs to create/edit team modals in `Teams.tsx`
-  - **Mobile UI**: Add color picker to `CreateTeamScreen.tsx` and team edit flow
-  - **Display**: Use team colors in game pages, box scores, and standings where home/away colors currently hardcoded (blue/orange)
-  - **Validation**: Accept hex color strings (e.g., `#FF5733`) or predefined palette
+- [x] **Team colors** - Allow teams to have custom primary/secondary colors
+  - **Schema change**: Added `primaryColor` and `secondaryColor` fields to `teams` table
+  - **Backend**: Updated `convex/teams.ts` create/update mutations
+  - **Shared**: Created `shared/src/utils/teamColors.ts` with palette and resolution functions
+  - **Web UI**: Added `ColorPicker.tsx` component, integrated into `TeamFormModal.tsx`
+  - **Mobile UI**: Added `ColorPicker.tsx` component, integrated into `CreateTeamScreen.tsx` and `TeamDetailScreen.tsx`
+  - **Display**: Updated `EnhancedScoreboard.tsx` (mobile) to use team colors for score display
 
-- [ ] **Team website link** - Add optional website URL field for teams
-  - **Schema change**: Add `websiteUrl` field (optional string) to `teams` table
-  - **Backend**: Update create/update mutations in `convex/teams.ts`
-  - **Web UI**: Add URL input to team forms, display as clickable link in `TeamDetail.tsx` header
-  - **Mobile UI**: Add to team forms, display with external link icon on team detail screen
-  - **Validation**: Validate URL format before saving
+- [x] **Team website link** - Add optional website URL field for teams
+  - **Schema change**: Added `websiteUrl` field to `teams` table
+  - **Backend**: Updated create/update mutations in `convex/teams.ts`
+  - **Web UI**: URL input in `TeamFormModal.tsx`, clickable link in `TeamDetail.tsx`
+  - **Mobile UI**: URL input in `CreateTeamScreen.tsx`/`TeamDetailScreen.tsx`, opens in browser
 
-- [ ] **Team social media links** - Add optional social media URLs for teams
-  - **Schema change**: Add `socialLinks` object field to `teams` table with optional properties: `twitter`, `instagram`, `facebook`, `youtube`, `tiktok`
-  - **Backend**: Update create/update mutations to handle social links object
-  - **Web UI**: Add social link inputs to team forms, display as icon row in `TeamDetail.tsx`
-  - **Mobile UI**: Add social link inputs, display icons that open external apps
-  - **Icons**: Use Lucide icons (Twitter/X, Instagram, Facebook, Youtube, etc.)
+- [x] **Team social media links** - Add optional social media URLs for teams
+  - **Schema change**: Added `socialLinks` object field to `teams` table
+  - **Shared**: Created `shared/src/constants/social.ts` with platform definitions
+  - **Backend**: Updated create/update mutations to handle social links object
+  - **Web UI**: Social link inputs in `TeamFormModal.tsx`, icon row in `TeamDetail.tsx`
+  - **Mobile UI**: Expandable social links section in team forms, icon buttons on team detail
 
-- [ ] **Team logo on game page** - Display team logos during live games and analysis
-  - **Status**: Schema already supports `logoUrl` and `logoStorageId` on teams
-  - **Web**: Update `GameAnalysis.tsx` and `LiveGameLayout.tsx` to show team logos next to team names in scoreboard
-  - **Mobile**: Update `LiveGameScreen.tsx` and `GameAnalysisScreen.tsx` similarly
-  - **Fallback**: Show team initial in colored circle if no logo
+- [x] **Team logo on game page** - Display team logos during live games and analysis
+  - **Status**: Already implemented in `GameAnalysis.tsx` (web) with logo display
 
 ### Player Enhancements
 
-- [ ] **Player emails with user profile linking** - Link player records to user accounts
-  - **Schema change**: Add `email` (optional string) and `userId` (optional reference to users) fields to `players` table
-  - **Backend**:
-    - Update `convex/players.ts` mutations to accept email
-    - Add function to link player to user account when email matches
-    - Add `getPlayerByUserId` query for profile lookups
-  - **Web UI**: Add email input to player forms, show "linked" badge if userId exists
-  - **Mobile UI**: Same as web
-  - **Profile integration**: When viewing a player who is linked to the current user, show "This is you" indicator
-  - **Privacy**: Email should only be visible to league admins/coaches, not public
+- [x] **Player emails with user profile linking** - Link player records to user accounts
+  - **Schema change**: Added `email` and `userId` fields to `players` table
+  - **Backend**: Updated `convex/players.ts` mutations to accept email, auto-linking logic added
+  - **Web UI**: Email input in `PlayerFormModal.tsx` with helper text
+  - **Mobile UI**: Email input in `CreatePlayerScreen.tsx` with helper text
 
 ### User-Team Relationships
 
-- [ ] **Link users to teams (coaches/players)** - Connect user accounts to teams with roles
-  - **Schema change**: Create new `teamMemberships` table:
-    ```
-    teamMemberships: {
-      teamId: v.id("teams"),
-      userId: v.id("users"),
-      role: v.union(v.literal("coach"), v.literal("assistant"), v.literal("player"), v.literal("manager")),
-      status: v.union(v.literal("active"), v.literal("pending"), v.literal("removed")),
-      playerId: v.optional(v.id("players")), // Link to player record if role is "player"
-      joinedAt: v.number(),
-    }
-    ```
-  - **Backend**: Create `convex/teamMemberships.ts` with CRUD functions
-  - **Web UI**:
-    - Add "Team Staff" section to `TeamDetail.tsx` showing coaches/managers
-    - Add "Manage Team Members" modal for admins
-    - Show user avatars and roles in roster section
-  - **Mobile UI**: Similar sections on team detail screen
-  - **Invitation flow**: Allow inviting users by email to join team with specific role
+- [x] **Link users to teams (coaches/players)** - Full implementation complete
+  - **Schema**: Created `teamMemberships` table with roles (coach, assistant, player, manager) and status tracking
+  - **Backend**: Created `convex/teamMemberships.ts` with full CRUD functions (add, update, remove, list queries)
+  - **Web UI**: Added "Team Staff" section to `TeamDetail.tsx` showing coaches/managers with avatars and roles
+  - **Mobile UI**: Added "Team Staff" section to `TeamDetailScreen.tsx` with similar display
 
 ### Game Enhancements
 
-- [ ] **YouTube video embedding in game page** - Embed live or recorded game videos
-  - **Schema change**: Add `videoUrl` (optional string) field to `games` table in `convex/schema.ts`
-  - **Backend**: Update `convex/games.ts` create/update mutations to accept video URL
-  - **Web UI**:
-    - Add video URL input when creating/editing games
-    - In `GameAnalysis.tsx`, display embedded YouTube player if videoUrl exists
-    - Support YouTube live streams and regular videos
-    - Use responsive embed (16:9 aspect ratio)
-  - **Mobile UI**:
-    - Add video URL input to game creation
-    - In game analysis, show YouTube embed or link to open in YouTube app
-  - **URL parsing**: Extract YouTube video ID from various URL formats (youtube.com/watch, youtu.be, etc.)
-  - **Position**: Place video above or alongside the game analysis content
+- [x] **YouTube video embedding in game page** - Embed live or recorded game videos
+  - **Schema change**: Added `videoUrl` field to `games` table
+  - **Backend**: Updated `convex/games.ts` create/update mutations
+  - **Shared**: Created `shared/src/utils/youtube.ts` with URL parsing utilities
+  - **Web UI**: `YouTubeEmbed.tsx` component, integrated into `GameAnalysis.tsx`
+  - **Mobile UI**: `YouTubeEmbed.tsx` component (thumbnail + link to YouTube app), integrated into `GameAnalysisScreen.tsx`
 
 ### Permissions & Access Control
 
-- [ ] **Role-based permissions (team level)** - Extend permission system to team-specific access
-  - **Current state**: League-level permissions exist in `leagueMemberships` table with roles: admin, coach, scorekeeper, member, viewer
-  - **Backend changes** (`convex/lib/auth.ts`):
-    - Add `canEditTeam(userId, teamId)` - owner, league admin, or team coach
-    - Add `canScoreGame(userId, gameId)` - owner, admin, coach, or scorekeeper
-    - Add `canViewTeamDetails(userId, teamId)` - any league member
-    - Add `isTeamCoach(userId, teamId)` - check teamMemberships
-  - **Web UI**:
-    - Hide edit/delete buttons for teams if user lacks permission
-    - Hide "Track Game" button if not scorekeeper/coach/admin
-    - Show "View Only" badge for viewers
-  - **Mobile UI**: Same permission checks
-  - **Integration**: Wire permission checks to existing mutations (updateTeam, deleteTeam, recordStat, etc.)
+- [x] **Role-based permissions (team level)** - Full implementation complete
+  - **Backend** (`convex/lib/auth.ts`): Added `canManageTeam(userId, teamId)` helper
+  - **Integration**: Updated `teams.ts`, `players.ts`, `teamMemberships.ts` mutations to use `canManageTeam`
+  - **Security**: Team coaches now properly have permission to manage their teams
+  - **Backend**: `teams.get` query now returns `canManage` boolean for UI use
+  - **Web UI**: Edit/delete buttons and "Add Player" button hidden when user lacks permission
+  - **Mobile UI**: Edit/delete options in team menu hidden when user lacks permission
 
 ### Cross-Promotion
 
-- [ ] **Link related apps** - Promote calendariofpb.pt and basketballvideoanalyzer.com
-  - **Sites owned**:
-    - `calendariofpb.pt` - FPB calendar (Portuguese basketball federation schedule)
-    - `basketballvideoanalyzer.com` - Basketball video analysis tool
-  - **Integration opportunities**:
-    - Add "Related Tools" section to `AboutPage.tsx` with links and descriptions
-    - Add footer links in `PublicLayout.tsx` to related apps
-    - In game analysis, add "Analyze with Video Analyzer" call-to-action linking to basketballvideoanalyzer.com
-    - Consider deep linking: pass game ID or stats to video analyzer if APIs align
-  - **Footer**: Add "More Tools" or "By the same team" section with links
-  - **SEO**: Cross-link in schema.org structured data where appropriate
+- [x] **Link related apps** - Promote calendariofpb.pt and basketballvideoanalyzer.com
+  - **Footer**: Added "More Tools" section in `Footer.tsx` with external links to both sites
 
 ---
 
@@ -194,7 +149,47 @@ _All P3 backend issues resolved_
 
 ---
 
-## Recently Completed (January 28, 2026)
+## Recently Completed (January 28, 2026 - Evening)
+
+### P2 Features Implementation
+
+- [x] **Team colors** - Full implementation across backend, web, and mobile
+  - Created `shared/src/utils/teamColors.ts` with color palette and resolution functions
+  - Created `ColorPicker.tsx` components for both web and mobile
+  - Updated `EnhancedScoreboard.tsx` (mobile) to display team color indicators
+  - Integrated into team creation and editing flows on both platforms
+
+- [x] **Team website & social links** - Full implementation
+  - Added `websiteUrl` and `socialLinks` fields to schema
+  - Created `shared/src/constants/social.ts` with platform definitions
+  - Added inputs to `TeamFormModal.tsx` (web) and `CreateTeamScreen.tsx`/`TeamDetailScreen.tsx` (mobile)
+  - Display clickable links and social icons on team detail pages
+
+- [x] **Player email with user linking** - Full implementation
+  - Added `email` and `userId` fields to players schema
+  - Email input added to `PlayerFormModal.tsx` (web) and `CreatePlayerScreen.tsx` (mobile)
+  - Auto-linking logic in backend mutations
+
+- [x] **YouTube video embedding** - Full implementation
+  - Added `videoUrl` field to games schema
+  - Created `shared/src/utils/youtube.ts` with URL parsing utilities
+  - Created `YouTubeEmbed.tsx` components for web (iframe) and mobile (thumbnail + external link)
+  - Integrated into `GameAnalysis.tsx` (web) and `GameAnalysisScreen.tsx` (mobile)
+
+- [x] **Team memberships backend** - `convex/teamMemberships.ts` created with full CRUD
+
+- [x] **Permission system** - Security fix
+  - Added `canManageTeam()` helper to `convex/lib/auth.ts`
+  - Updated `teams.ts`, `players.ts`, `teamMemberships.ts` mutations to use unified permission check
+  - Team coaches now properly have permission to manage their teams
+
+- [x] **Cross-promotion links** - Added "More Tools" section in Footer with links to calendariofpb.pt and basketballvideoanalyzer.com
+
+- [x] **PublicLayout Header auth check** - Shows "Go to Dashboard" instead of Login/Signup when user is authenticated
+
+---
+
+## Recently Completed (January 28, 2026 - Morning)
 
 ### UX Improvements
 

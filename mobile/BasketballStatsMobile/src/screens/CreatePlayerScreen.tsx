@@ -54,6 +54,7 @@ export default function CreatePlayerScreen() {
   const [showPositionModal, setShowPositionModal] = useState(false);
   const [heightCm, setHeightCm] = useState("");
   const [weightKg, setWeightKg] = useState("");
+  const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const createPlayerMutation = useMutation(api.players.create);
@@ -116,6 +117,7 @@ export default function CreatePlayerScreen() {
         position: position || undefined,
         heightCm: heightCm ? parseInt(heightCm) : undefined,
         weightKg: weightKg ? parseInt(weightKg) : undefined,
+        email: email.trim() || undefined,
       });
 
       Alert.alert("Success", "Player created successfully", [
@@ -233,6 +235,24 @@ export default function CreatePlayerScreen() {
             </Text>
             <Icon name="chevron-right" size={20} color="#9CA3AF" />
           </TouchableOpacity>
+        </View>
+
+        {/* Email */}
+        <View className="mb-4">
+          <Text className="text-surface-600 dark:text-surface-400 text-sm mb-2">
+            Email (optional)
+          </Text>
+          <TextInput
+            className="bg-white dark:bg-surface-700 rounded-xl p-4 text-surface-900 dark:text-white text-base border border-surface-200 dark:border-surface-600"
+            placeholder="player@example.com"
+            placeholderTextColor="#6B7280"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <Text className="text-surface-500 text-xs mt-1">Used for account linking</Text>
         </View>
 
         {/* Height & Weight */}

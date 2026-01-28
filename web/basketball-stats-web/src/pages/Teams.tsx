@@ -206,7 +206,9 @@ const Teams: React.FC = () => {
             {team.name}
           </Link>
           {team.city && (
-            <p className="text-surface-600 dark:text-surface-400 text-sm mt-1 truncate">{team.city}</p>
+            <p className="text-surface-600 dark:text-surface-400 text-sm mt-1 truncate">
+              {team.city}
+            </p>
           )}
         </div>
         <ActionMenu

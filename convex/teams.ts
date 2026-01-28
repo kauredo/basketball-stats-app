@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getUserFromToken, canAccessLeague, canManageLeague } from "./lib/auth";
+import { getUserFromToken, canAccessLeague, canManageLeague, canManageTeam } from "./lib/auth";
 import { validateName, validateEntityFields } from "./lib/validation";
 
 // Helper to resolve logo URL from either logoUrl or logoStorageId
@@ -174,6 +174,9 @@ export const get = query({
     // Resolve logo URL
     const logoUrl = await resolveLogoUrl(ctx, team.logoUrl, team.logoStorageId);
 
+    // Check if user can manage this team
+    const userCanManage = await canManageTeam(ctx, user._id, args.teamId);
+
     return {
       team: {
         id: team._id,
@@ -215,6 +218,8 @@ export const get = query({
         // Team links
         websiteUrl: team.websiteUrl,
         socialLinks: team.socialLinks,
+        // Permission flag for UI
+        canManage: userCanManage,
       },
     };
   },
@@ -332,9 +337,9 @@ export const update = mutation({
     const team = await ctx.db.get(args.teamId);
     if (!team) throw new Error("Team not found");
 
-    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
-    if (!canManage && team.userId !== user._id) {
-      throw new Error("Access denied");
+    const hasPermission = await canManageTeam(ctx, user._id, args.teamId);
+    if (!hasPermission) {
+      throw new Error("Access denied - must be league admin, team owner, or team coach");
     }
 
     // Validate input lengths
@@ -424,9 +429,9 @@ export const remove = mutation({
     const team = await ctx.db.get(args.teamId);
     if (!team) throw new Error("Team not found");
 
-    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
-    if (!canManage && team.userId !== user._id) {
-      throw new Error("Access denied");
+    const hasPermission = await canManageTeam(ctx, user._id, args.teamId);
+    if (!hasPermission) {
+      throw new Error("Access denied - must be league admin, team owner, or team coach");
     }
 
     // Check if team has games

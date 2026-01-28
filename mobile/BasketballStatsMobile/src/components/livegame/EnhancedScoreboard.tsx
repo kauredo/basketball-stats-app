@@ -12,6 +12,7 @@ import TimeoutDots from "./TimeoutDots";
 import BonusIndicator from "./BonusIndicator";
 import TeamFoulsDisplay from "./TeamFoulsDisplay";
 import ShotClock from "./ShotClock";
+import { resolveTeamColor, isLightColor } from "@basketball-stats/shared";
 
 interface TeamStats {
   foulsThisQuarter: number;
@@ -27,8 +28,8 @@ interface GameData {
   timeRemainingSeconds: number;
   homeScore: number;
   awayScore: number;
-  homeTeam?: { name: string } | null;
-  awayTeam?: { name: string } | null;
+  homeTeam?: { name: string; primaryColor?: string; secondaryColor?: string } | null;
+  awayTeam?: { name: string; primaryColor?: string; secondaryColor?: string } | null;
 }
 
 interface EnhancedScoreboardProps {
@@ -218,6 +219,12 @@ export default function EnhancedScoreboard({
   const homeWinning = game.homeScore > game.awayScore;
   const awayWinning = game.awayScore > game.homeScore;
 
+  // Resolve team colors
+  const homeTeamColor = resolveTeamColor(game.homeTeam?.primaryColor, true);
+  const awayTeamColor = resolveTeamColor(game.awayTeam?.primaryColor, false);
+  const homeTextColor = isLightColor(homeTeamColor) ? "#000000" : "#ffffff";
+  const awayTextColor = isLightColor(awayTeamColor) ? "#000000" : "#ffffff";
+
   const handleReactivateGame = () => {
     Alert.alert("Resume Game", "This game has ended. Do you want to resume it?", [
       { text: "Cancel", style: "cancel" },
@@ -289,6 +296,7 @@ export default function EnhancedScoreboard({
         <View className="flex-row items-center justify-between">
           {/* Away Team */}
           <View className="flex-row items-center flex-1">
+            <View className="w-3 h-6 rounded-l mr-2" style={{ backgroundColor: awayTeamColor }} />
             <Text
               className={`text-surface-500 dark:text-surface-400 ${teamNameTextClass} mr-2`}
               numberOfLines={1}
@@ -296,8 +304,8 @@ export default function EnhancedScoreboard({
               {game.awayTeam?.name || "Away"}
             </Text>
             <Animated.Text
-              className={`${scoreTextClass} font-bold ${awayWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
-              style={awayScoreStyle}
+              className={`${scoreTextClass} font-bold`}
+              style={[awayScoreStyle, { color: awayWinning ? "#10B981" : awayTeamColor }]}
             >
               {game.awayScore}
             </Animated.Text>
@@ -385,8 +393,8 @@ export default function EnhancedScoreboard({
               </View>
             )}
             <Animated.Text
-              className={`${scoreTextClass} font-bold ${homeWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
-              style={homeScoreStyle}
+              className={`${scoreTextClass} font-bold`}
+              style={[homeScoreStyle, { color: homeWinning ? "#10B981" : homeTeamColor }]}
             >
               {game.homeScore}
             </Animated.Text>
@@ -396,6 +404,7 @@ export default function EnhancedScoreboard({
             >
               {game.homeTeam?.name || "Home"}
             </Text>
+            <View className="w-3 h-6 rounded-r ml-2" style={{ backgroundColor: homeTeamColor }} />
           </View>
         </View>
 
@@ -529,12 +538,18 @@ export default function EnhancedScoreboard({
       <View className="flex-row items-center justify-between">
         {/* Away Team */}
         <View className="flex-1 items-center">
-          <Text className="text-surface-500 dark:text-surface-400 text-xs mb-1" numberOfLines={1}>
-            {game.awayTeam?.name || "Away"}
-          </Text>
+          <View className="flex-row items-center mb-1">
+            <View
+              className="w-3 h-3 rounded-full mr-1.5"
+              style={{ backgroundColor: awayTeamColor }}
+            />
+            <Text className="text-surface-500 dark:text-surface-400 text-xs" numberOfLines={1}>
+              {game.awayTeam?.name || "Away"}
+            </Text>
+          </View>
           <Animated.Text
-            className={`text-4xl font-bold ${awayWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
-            style={awayScoreStyle}
+            className="text-4xl font-bold"
+            style={[awayScoreStyle, { color: awayWinning ? "#10B981" : awayTeamColor }]}
           >
             {game.awayScore}
           </Animated.Text>
@@ -623,12 +638,18 @@ export default function EnhancedScoreboard({
 
         {/* Home Team */}
         <View className="flex-1 items-center">
-          <Text className="text-surface-500 dark:text-surface-400 text-xs mb-1" numberOfLines={1}>
-            {game.homeTeam?.name || "Home"}
-          </Text>
+          <View className="flex-row items-center mb-1">
+            <Text className="text-surface-500 dark:text-surface-400 text-xs" numberOfLines={1}>
+              {game.homeTeam?.name || "Home"}
+            </Text>
+            <View
+              className="w-3 h-3 rounded-full ml-1.5"
+              style={{ backgroundColor: homeTeamColor }}
+            />
+          </View>
           <Animated.Text
-            className={`text-4xl font-bold ${homeWinning ? "text-emerald-600 dark:text-emerald-400" : "text-surface-900 dark:text-white"}`}
-            style={homeScoreStyle}
+            className="text-4xl font-bold"
+            style={[homeScoreStyle, { color: homeWinning ? "#10B981" : homeTeamColor }]}
           >
             {game.homeScore}
           </Animated.Text>

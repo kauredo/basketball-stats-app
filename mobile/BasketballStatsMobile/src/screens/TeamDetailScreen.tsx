@@ -11,6 +11,7 @@ import {
   Platform,
   ScrollView,
   Image,
+  Linking,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
@@ -22,11 +23,13 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Icon from "../components/Icon";
 import ImagePicker from "../components/ImagePicker";
+import ColorPicker from "../components/ui/ColorPicker";
 import LineupStatsCard from "../components/LineupStatsCard";
 import PairStatsCard from "../components/PairStatsCard";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { exportRosterCSV, exportLineupStatsCSV, exportPairStatsCSV } from "../utils/export";
+import { SOCIAL_PLATFORMS, type SocialLinks } from "@basketball-stats/shared";
 
 type TeamDetailRouteProp = RouteProp<RootStackParamList, "TeamDetail">;
 
@@ -86,6 +89,23 @@ interface Player {
   active?: boolean;
 }
 
+interface TeamMembershipItem {
+  id: string;
+  role: "coach" | "assistant" | "player" | "manager";
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | null;
+  player: {
+    id: string;
+    name: string;
+    number: number;
+  } | null;
+  joinedAt: number;
+}
+
 export default function TeamDetailScreen() {
   const navigation = useNavigation<TeamDetailNavigationProp>();
   const route = useRoute<TeamDetailRouteProp>();
@@ -102,7 +122,12 @@ export default function TeamDetailScreen() {
     logoUrl: "",
     logoStorageId: null as Id<"_storage"> | null,
     clearLogo: false,
+    primaryColor: undefined as string | undefined,
+    secondaryColor: undefined as string | undefined,
+    websiteUrl: "",
+    socialLinks: {} as SocialLinks,
   });
+  const [showSocialLinksEdit, setShowSocialLinksEdit] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -146,6 +171,12 @@ export default function TeamDetailScreen() {
     token && teamId ? { token, teamId: teamId as Id<"teams">, limit: 20 } : "skip"
   );
 
+  // Fetch team memberships (coaches, managers, etc.)
+  const teamMembershipsData = useQuery(
+    api.teamMemberships.list,
+    token && teamId ? { token, teamId: teamId as Id<"teams"> } : "skip"
+  );
+
   // Mutations
   const updateTeam = useMutation(api.teams.update);
   const removeTeam = useMutation(api.teams.remove);
@@ -172,6 +203,10 @@ export default function TeamDetailScreen() {
         logoUrl: team.logoUrl || "",
         logoStorageId: null,
         clearLogo: false,
+        primaryColor: team.primaryColor,
+        secondaryColor: team.secondaryColor,
+        websiteUrl: team.websiteUrl || "",
+        socialLinks: team.socialLinks || {},
       });
     }
   }, [team, teamName]);
@@ -184,6 +219,11 @@ export default function TeamDetailScreen() {
   const handleEditTeam = async () => {
     if (!editForm.name.trim() || !token) return;
 
+    // Filter out empty social links
+    const filteredSocialLinks = Object.fromEntries(
+      Object.entries(editForm.socialLinks).filter(([, url]) => url && url.trim() !== "")
+    );
+
     setIsUpdating(true);
     try {
       await updateTeam({
@@ -194,8 +234,13 @@ export default function TeamDetailScreen() {
         description: editForm.description.trim() || undefined,
         logoStorageId: editForm.logoStorageId || undefined,
         clearLogo: editForm.clearLogo || undefined,
+        primaryColor: editForm.primaryColor || undefined,
+        secondaryColor: editForm.secondaryColor || undefined,
+        websiteUrl: editForm.websiteUrl.trim() || undefined,
+        socialLinks: Object.keys(filteredSocialLinks).length > 0 ? filteredSocialLinks : undefined,
       });
       setShowEditModal(false);
+      setShowSocialLinksEdit(false);
       navigation.setParams({ teamName: editForm.name.trim() });
       Alert.alert("Success", "Team updated successfully");
     } catch (error) {
@@ -361,6 +406,65 @@ export default function TeamDetailScreen() {
             )}
           </View>
         </View>
+
+        {/* Team Colors */}
+        {(team?.primaryColor || team?.secondaryColor) && (
+          <View className="flex-row items-center mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
+            <Text className="text-surface-500 text-xs mr-2">Team Colors:</Text>
+            {team?.primaryColor && (
+              <View
+                className="w-6 h-6 rounded-lg mr-2 border border-surface-300 dark:border-surface-600"
+                style={{ backgroundColor: team.primaryColor }}
+              />
+            )}
+            {team?.secondaryColor && (
+              <View
+                className="w-6 h-6 rounded-lg border border-surface-300 dark:border-surface-600"
+                style={{ backgroundColor: team.secondaryColor }}
+              />
+            )}
+          </View>
+        )}
+
+        {/* Links Row */}
+        {(team?.websiteUrl ||
+          (team?.socialLinks && Object.values(team.socialLinks).some((v) => v))) && (
+          <View className="flex-row flex-wrap items-center gap-2 mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
+            {team?.websiteUrl && (
+              <TouchableOpacity
+                onPress={() => Linking.openURL(team.websiteUrl!)}
+                className="flex-row items-center bg-surface-100 dark:bg-surface-700 px-3 py-1.5 rounded-lg"
+              >
+                <Icon name="globe" size={14} color="#F97316" />
+                <Text className="text-primary-500 text-xs ml-1">Website</Text>
+              </TouchableOpacity>
+            )}
+            {team?.socialLinks &&
+              SOCIAL_PLATFORMS.map((platform) => {
+                const url = team.socialLinks?.[platform.key as keyof typeof team.socialLinks];
+                if (!url) return null;
+                return (
+                  <TouchableOpacity
+                    key={platform.key}
+                    onPress={() => Linking.openURL(url)}
+                    className="bg-surface-100 dark:bg-surface-700 p-2 rounded-lg"
+                  >
+                    <FontAwesome5
+                      name={
+                        platform.key === "twitter"
+                          ? "twitter"
+                          : platform.key === "tiktok"
+                            ? "tiktok"
+                            : platform.key
+                      }
+                      size={14}
+                      color="#F97316"
+                    />
+                  </TouchableOpacity>
+                );
+              })}
+          </View>
+        )}
       </View>
 
       {/* Stats Overview */}
@@ -612,6 +716,52 @@ export default function TeamDetailScreen() {
           </View>
         )}
       </View>
+
+      {/* Team Staff Section */}
+      {(teamMembershipsData?.memberships?.length ?? 0) > 0 && (
+        <View className="bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden mb-4">
+          <View className="flex-row items-center px-4 py-3 border-b border-surface-200 dark:border-surface-700">
+            <Icon name="users" size={18} color="#F97316" />
+            <Text className="text-base font-semibold text-surface-900 dark:text-white ml-2">
+              Team Staff
+            </Text>
+            <View className="ml-2 px-2 py-0.5 rounded-full bg-surface-100 dark:bg-surface-700">
+              <Text className="text-xs font-medium text-surface-600 dark:text-surface-400">
+                {teamMembershipsData?.memberships?.length ?? 0}
+              </Text>
+            </View>
+          </View>
+          <View className="divide-y divide-surface-100 dark:divide-surface-700">
+            {(teamMembershipsData?.memberships as TeamMembershipItem[] | undefined)?.map(
+              (membership) => (
+                <View key={membership.id} className="flex-row items-center px-4 py-3">
+                  <View className="w-10 h-10 rounded-full bg-primary-500 items-center justify-center">
+                    <Text className="text-white font-semibold text-sm">
+                      {membership.user?.firstName?.[0]?.toUpperCase() || "?"}
+                      {membership.user?.lastName?.[0]?.toUpperCase() || ""}
+                    </Text>
+                  </View>
+                  <View className="flex-1 ml-3">
+                    <Text className="text-surface-900 dark:text-white text-sm font-semibold">
+                      {membership.user
+                        ? `${membership.user.firstName} ${membership.user.lastName}`
+                        : "Unknown"}
+                    </Text>
+                    <Text className="text-surface-500 text-xs capitalize">{membership.role}</Text>
+                  </View>
+                  {membership.player && (
+                    <View className="px-2 py-1 rounded-lg bg-surface-100 dark:bg-surface-700">
+                      <Text className="text-xs text-surface-600 dark:text-surface-400">
+                        #{membership.player.number}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )
+            )}
+          </View>
+        </View>
+      )}
     </View>
   );
 
@@ -644,16 +794,18 @@ export default function TeamDetailScreen() {
               Team Options
             </Text>
 
-            <TouchableOpacity
-              className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-700/50 rounded-xl mb-3"
-              onPress={() => {
-                setShowOptionsMenu(false);
-                setShowEditModal(true);
-              }}
-            >
-              <FontAwesome5 name="edit" size={18} color="#3B82F6" />
-              <Text className="text-surface-900 dark:text-white font-medium ml-3">Edit Team</Text>
-            </TouchableOpacity>
+            {team?.canManage && (
+              <TouchableOpacity
+                className="flex-row items-center p-4 bg-surface-100 dark:bg-surface-700/50 rounded-xl mb-3"
+                onPress={() => {
+                  setShowOptionsMenu(false);
+                  setShowEditModal(true);
+                }}
+              >
+                <FontAwesome5 name="edit" size={18} color="#3B82F6" />
+                <Text className="text-surface-900 dark:text-white font-medium ml-3">Edit Team</Text>
+              </TouchableOpacity>
+            )}
 
             {/* Export Options */}
             <View className="border-t border-surface-200 dark:border-surface-700 my-3 pt-3">
@@ -694,19 +846,21 @@ export default function TeamDetailScreen() {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity
-              className="flex-row items-center p-4 bg-red-500/10 rounded-xl"
-              onPress={() => {
-                setShowOptionsMenu(false);
-                handleDeleteTeam();
-              }}
-              disabled={isDeleting}
-            >
-              <FontAwesome5 name="trash" size={18} color="#EF4444" />
-              <Text className="text-red-600 dark:text-red-400 font-medium ml-3">
-                {isDeleting ? "Deleting..." : "Delete Team"}
-              </Text>
-            </TouchableOpacity>
+            {team?.canManage && (
+              <TouchableOpacity
+                className="flex-row items-center p-4 bg-red-500/10 rounded-xl"
+                onPress={() => {
+                  setShowOptionsMenu(false);
+                  handleDeleteTeam();
+                }}
+                disabled={isDeleting}
+              >
+                <FontAwesome5 name="trash" size={18} color="#EF4444" />
+                <Text className="text-red-600 dark:text-red-400 font-medium ml-3">
+                  {isDeleting ? "Deleting..." : "Delete Team"}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </TouchableOpacity>
       </Modal>
@@ -793,6 +947,83 @@ export default function TeamDetailScreen() {
                 label="Team Logo"
                 placeholder="Tap to add team logo"
               />
+
+              {/* Team Colors */}
+              <ColorPicker
+                value={editForm.primaryColor}
+                onChange={(color) => setEditForm((prev) => ({ ...prev, primaryColor: color }))}
+                label="Primary Color"
+              />
+
+              <ColorPicker
+                value={editForm.secondaryColor}
+                onChange={(color) => setEditForm((prev) => ({ ...prev, secondaryColor: color }))}
+                label="Secondary Color"
+              />
+
+              {/* Website URL */}
+              <View className="mb-4">
+                <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium mb-2">
+                  Website URL
+                </Text>
+                <TextInput
+                  className="bg-surface-50 dark:bg-surface-700 text-surface-900 dark:text-white p-4 rounded-xl text-base border border-surface-200 dark:border-surface-600"
+                  value={editForm.websiteUrl}
+                  onChangeText={(text) => setEditForm((prev) => ({ ...prev, websiteUrl: text }))}
+                  placeholder="https://example.com"
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="url"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+
+              {/* Social Links (Expandable) */}
+              <View className="mb-4">
+                <TouchableOpacity
+                  onPress={() => setShowSocialLinksEdit(!showSocialLinksEdit)}
+                  className="flex-row items-center justify-between bg-surface-50 dark:bg-surface-700 rounded-xl px-4 py-3.5 border border-surface-200 dark:border-surface-600"
+                >
+                  <View className="flex-row items-center">
+                    <Icon name="globe" size={18} color="#F97316" />
+                    <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium ml-2">
+                      Social Links
+                    </Text>
+                  </View>
+                  <Icon
+                    name={showSocialLinksEdit ? "chevron-up" : "chevron-down"}
+                    size={18}
+                    color="#9CA3AF"
+                  />
+                </TouchableOpacity>
+
+                {showSocialLinksEdit && (
+                  <View className="mt-2 bg-surface-50 dark:bg-surface-700 rounded-xl p-4 border border-surface-200 dark:border-surface-600">
+                    {SOCIAL_PLATFORMS.map((platform) => (
+                      <View key={platform.key} className="mb-3 last:mb-0">
+                        <Text className="text-surface-600 dark:text-surface-400 text-xs mb-1">
+                          {platform.label}
+                        </Text>
+                        <TextInput
+                          className="bg-white dark:bg-surface-600 rounded-lg px-3 py-2.5 text-surface-900 dark:text-white text-sm border border-surface-200 dark:border-surface-500"
+                          placeholder={platform.placeholder}
+                          placeholderTextColor="#9CA3AF"
+                          value={editForm.socialLinks[platform.key as keyof SocialLinks] || ""}
+                          onChangeText={(text) =>
+                            setEditForm((prev) => ({
+                              ...prev,
+                              socialLinks: { ...prev.socialLinks, [platform.key]: text },
+                            }))
+                          }
+                          keyboardType="url"
+                          autoCapitalize="none"
+                          autoCorrect={false}
+                        />
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
 
               {/* Description */}
               <View>

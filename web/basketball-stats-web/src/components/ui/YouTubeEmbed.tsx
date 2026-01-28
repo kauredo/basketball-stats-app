@@ -6,16 +6,14 @@ interface YouTubeEmbedProps {
   className?: string;
 }
 
-export function YouTubeEmbed({
-  url,
-  title = "Game Video",
-  className = "",
-}: YouTubeEmbedProps) {
+export function YouTubeEmbed({ url, title = "Game Video", className = "" }: YouTubeEmbedProps) {
   const videoId = extractYouTubeId(url);
 
   if (!videoId) {
     return (
-      <div className={`bg-surface-100 dark:bg-surface-800 rounded-lg p-4 text-center text-surface-500 ${className}`}>
+      <div
+        className={`bg-surface-100 dark:bg-surface-800 rounded-lg p-4 text-center text-surface-500 ${className}`}
+      >
         Invalid YouTube URL
       </div>
     );

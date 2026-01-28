@@ -35,15 +35,9 @@ export type TeamColorPalette = (typeof TEAM_COLOR_PALETTE)[number];
  * @param isHomeTeam - Whether this is the home team (affects default color)
  * @returns The hex color string to use
  */
-export function resolveTeamColor(
-  teamColor: string | undefined,
-  isHomeTeam: boolean
-): string {
+export function resolveTeamColor(teamColor: string | undefined, isHomeTeam: boolean): string {
   return (
-    teamColor ||
-    (isHomeTeam
-      ? DEFAULT_TEAM_COLORS.home.primary
-      : DEFAULT_TEAM_COLORS.away.primary)
+    teamColor || (isHomeTeam ? DEFAULT_TEAM_COLORS.home.primary : DEFAULT_TEAM_COLORS.away.primary)
   );
 }
 
@@ -59,9 +53,7 @@ export function resolveTeamColors(
   secondaryColor: string | undefined,
   isHomeTeam: boolean
 ): { primary: string; secondary: string } {
-  const defaults = isHomeTeam
-    ? DEFAULT_TEAM_COLORS.home
-    : DEFAULT_TEAM_COLORS.away;
+  const defaults = isHomeTeam ? DEFAULT_TEAM_COLORS.home : DEFAULT_TEAM_COLORS.away;
   return {
     primary: primaryColor || defaults.primary,
     secondary: secondaryColor || defaults.secondary,

@@ -416,11 +416,7 @@ export default defineSchema({
       v.literal("player"),
       v.literal("manager")
     ),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("active"),
-      v.literal("removed")
-    ),
+    status: v.union(v.literal("pending"), v.literal("active"), v.literal("removed")),
     playerId: v.optional(v.id("players")), // Link to player record if role is "player"
     joinedAt: v.optional(v.number()),
   })

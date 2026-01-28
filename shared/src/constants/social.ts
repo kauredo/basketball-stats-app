@@ -5,12 +5,32 @@
  * Used for team social links forms and display
  */
 export const SOCIAL_PLATFORMS = [
-  { key: "instagram", label: "Instagram", icon: "Instagram", placeholder: "https://instagram.com/teamname" },
+  {
+    key: "instagram",
+    label: "Instagram",
+    icon: "Instagram",
+    placeholder: "https://instagram.com/teamname",
+  },
   { key: "twitter", label: "X / Twitter", icon: "Twitter", placeholder: "https://x.com/teamname" },
-  { key: "facebook", label: "Facebook", icon: "Facebook", placeholder: "https://facebook.com/teamname" },
-  { key: "youtube", label: "YouTube", icon: "Youtube", placeholder: "https://youtube.com/@teamname" },
+  {
+    key: "facebook",
+    label: "Facebook",
+    icon: "Facebook",
+    placeholder: "https://facebook.com/teamname",
+  },
+  {
+    key: "youtube",
+    label: "YouTube",
+    icon: "Youtube",
+    placeholder: "https://youtube.com/@teamname",
+  },
   { key: "tiktok", label: "TikTok", icon: "Music2", placeholder: "https://tiktok.com/@teamname" },
-  { key: "linkedin", label: "LinkedIn", icon: "Linkedin", placeholder: "https://linkedin.com/company/teamname" },
+  {
+    key: "linkedin",
+    label: "LinkedIn",
+    icon: "Linkedin",
+    placeholder: "https://linkedin.com/company/teamname",
+  },
 ] as const;
 
 export type SocialPlatformKey = (typeof SOCIAL_PLATFORMS)[number]["key"];

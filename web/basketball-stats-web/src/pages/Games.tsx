@@ -391,7 +391,9 @@ const Games: React.FC = () => {
           <div className="mt-3 pt-3 border-t border-surface-200 dark:border-surface-700">
             {isGameLive && (
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-surface-500 dark:text-surface-400">Q{game.currentQuarter}</span>
+                <span className="text-surface-500 dark:text-surface-400">
+                  Q{game.currentQuarter}
+                </span>
                 <span
                   className="font-mono font-medium text-surface-900 dark:text-surface-50"
                   data-stat
@@ -574,9 +576,7 @@ const Games: React.FC = () => {
       {games.length > 0 ? (
         <>
           {/* Mobile: Card Grid */}
-          <div className="md:hidden grid grid-cols-1 gap-4">
-            {sortedGames.map(renderGameCard)}
-          </div>
+          <div className="md:hidden grid grid-cols-1 gap-4">{sortedGames.map(renderGameCard)}</div>
 
           {/* Desktop: Table */}
           <div className="hidden md:block bg-white dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden shadow-soft">

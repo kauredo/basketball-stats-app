@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { BaseModal, ModalHeader, ModalFooter } from "../ui/BaseModal";
-import { ExclamationTriangleIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import {
+  ExclamationTriangleIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from "@heroicons/react/24/outline";
 import ImageUpload from "../ImageUpload";
 import { ColorPicker } from "../ui/ColorPicker";
 import { SOCIAL_PLATFORMS, type SocialLinks } from "@basketball-stats/shared";
@@ -255,7 +259,9 @@ export function TeamFormModal({
               <input
                 type="url"
                 value={form.websiteUrl || ""}
-                onChange={(e) => setForm((prev) => ({ ...prev, websiteUrl: e.target.value || undefined }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, websiteUrl: e.target.value || undefined }))
+                }
                 className="w-full bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl px-3 py-2 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="https://example.com"
               />
@@ -272,7 +278,10 @@ export function TeamFormModal({
                     <span className="text-xs text-surface-500 w-20">{platform.label}</span>
                     <input
                       type="url"
-                      value={(form.socialLinks as Record<string, string | undefined>)?.[platform.key] || ""}
+                      value={
+                        (form.socialLinks as Record<string, string | undefined>)?.[platform.key] ||
+                        ""
+                      }
                       onChange={(e) => updateSocialLink(platform.key, e.target.value)}
                       className="flex-1 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-lg px-3 py-1.5 text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                       placeholder={platform.placeholder}

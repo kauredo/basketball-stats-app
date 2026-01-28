@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getUserFromToken, canAccessLeague, canManageLeague } from "./lib/auth";
+import { getUserFromToken, canAccessLeague, canManageTeam } from "./lib/auth";
 import { validateName } from "./lib/validation";
 
 // Helper to resolve image URL from either imageUrl or imageStorageId
@@ -352,9 +352,9 @@ export const create = mutation({
     const team = await ctx.db.get(args.teamId);
     if (!team) throw new Error("Team not found");
 
-    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
-    if (!canManage && team.userId !== user._id) {
-      throw new Error("Access denied");
+    const hasPermission = await canManageTeam(ctx, user._id, args.teamId);
+    if (!hasPermission) {
+      throw new Error("Access denied - must be league admin, team owner, or team coach");
     }
 
     // Validate input
@@ -442,9 +442,9 @@ export const update = mutation({
     const team = await ctx.db.get(player.teamId);
     if (!team) throw new Error("Team not found");
 
-    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
-    if (!canManage && team.userId !== user._id) {
-      throw new Error("Access denied");
+    const hasPermission = await canManageTeam(ctx, user._id, player.teamId);
+    if (!hasPermission) {
+      throw new Error("Access denied - must be league admin, team owner, or team coach");
     }
 
     // Validate input
@@ -529,9 +529,9 @@ export const remove = mutation({
     const team = await ctx.db.get(player.teamId);
     if (!team) throw new Error("Team not found");
 
-    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
-    if (!canManage && team.userId !== user._id) {
-      throw new Error("Access denied");
+    const hasPermission = await canManageTeam(ctx, user._id, player.teamId);
+    if (!hasPermission) {
+      throw new Error("Access denied - must be league admin, team owner, or team coach");
     }
 
     // Check if player has any stats
@@ -567,9 +567,9 @@ export const setPlayerImage = mutation({
     const team = await ctx.db.get(player.teamId);
     if (!team) throw new Error("Team not found");
 
-    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
-    if (!canManage && team.userId !== user._id) {
-      throw new Error("Access denied");
+    const hasPermission = await canManageTeam(ctx, user._id, player.teamId);
+    if (!hasPermission) {
+      throw new Error("Access denied - must be league admin, team owner, or team coach");
     }
 
     // Delete old image if exists
@@ -613,9 +613,9 @@ export const removePlayerImage = mutation({
     const team = await ctx.db.get(player.teamId);
     if (!team) throw new Error("Team not found");
 
-    const canManage = await canManageLeague(ctx, user._id, team.leagueId);
-    if (!canManage && team.userId !== user._id) {
-      throw new Error("Access denied");
+    const hasPermission = await canManageTeam(ctx, user._id, player.teamId);
+    if (!hasPermission) {
+      throw new Error("Access denied - must be league admin, team owner, or team coach");
     }
 
     // Delete image from storage if exists
