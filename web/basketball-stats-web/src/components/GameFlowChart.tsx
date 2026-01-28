@@ -222,7 +222,7 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
                   x2={endEvent.gameTimeElapsed}
                   y1={run.team === "home" ? 0 : yDomain[0]}
                   y2={run.team === "home" ? yDomain[1] : 0}
-                  fill={run.team === "home" ? "#f97316" : "#3b82f6"}
+                  fill={run.team === "home" ? "#3b82f6" : "#f97316"}
                   fillOpacity={0.1}
                 />
               );
@@ -254,9 +254,9 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
             {/* Main line with gradient based on score differential */}
             <defs>
               <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f97316" />
+                <stop offset="0%" stopColor="#3b82f6" />
                 <stop offset="50%" stopColor="#6b7280" />
-                <stop offset="100%" stopColor="#3b82f6" />
+                <stop offset="100%" stopColor="#f97316" />
               </linearGradient>
             </defs>
             <Line

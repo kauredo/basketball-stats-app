@@ -414,6 +414,8 @@ interface ShotRecordingModalProps {
   shotType: "2pt" | "3pt";
   zoneName: string;
   onCourtPlayers: PlayerStat[];
+  homeTeamName?: string;
+  awayTeamName?: string;
 }
 
 const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
@@ -423,10 +425,75 @@ const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
   shotType,
   zoneName,
   onCourtPlayers,
+  homeTeamName = "Home",
+  awayTeamName = "Away",
 }) => {
   if (!isOpen) return null;
 
   const points = shotType === "3pt" ? 3 : 2;
+
+  // Group players by team
+  const homePlayers = onCourtPlayers.filter((p) => p.isHomeTeam);
+  const awayPlayers = onCourtPlayers.filter((p) => !p.isHomeTeam);
+
+  const renderPlayer = (player: PlayerStat) => {
+    const avatarBg = player.isHomeTeam ? "bg-blue-600" : "bg-orange-500";
+
+    return (
+      <div
+        key={player.id}
+        className="flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0"
+      >
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 ${avatarBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+            <span className="text-white font-bold text-sm">#{player.player?.number}</span>
+          </div>
+          <div>
+            <div className="text-surface-900 dark:text-white font-medium text-sm">
+              {player.player?.name}
+            </div>
+            <div className="text-surface-500 text-xs">{player.points} PTS</div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => onRecord(player.playerId, true)}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition-colors"
+          >
+            MADE
+          </button>
+          <button
+            onClick={() => onRecord(player.playerId, false)}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition-colors"
+          >
+            MISS
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderTeamSection = (players: PlayerStat[], teamName: string, isHome: boolean) => {
+    if (players.length === 0) return null;
+
+    const headerBg = isHome
+      ? "bg-blue-100 dark:bg-blue-900/30"
+      : "bg-orange-100 dark:bg-orange-900/30";
+    const headerText = isHome
+      ? "text-blue-700 dark:text-blue-300"
+      : "text-orange-700 dark:text-orange-300";
+
+    return (
+      <div key={isHome ? "home" : "away"}>
+        <div className={`px-4 py-2 ${headerBg}`}>
+          <span className={`text-xs font-bold uppercase tracking-wide ${headerText}`}>
+            {teamName}
+          </span>
+        </div>
+        {players.map(renderPlayer)}
+      </div>
+    );
+  };
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -462,38 +529,10 @@ const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
           {onCourtPlayers.length === 0 ? (
             <div className="p-8 text-center text-surface-500">No players on court</div>
           ) : (
-            onCourtPlayers.map((player) => (
-              <div
-                key={player.id}
-                className="flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm">#{player.player?.number}</span>
-                  </div>
-                  <div>
-                    <div className="text-surface-900 dark:text-white font-medium text-sm">
-                      {player.player?.name}
-                    </div>
-                    <div className="text-surface-500 text-xs">{player.points} PTS</div>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => onRecord(player.playerId, true)}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition-colors"
-                  >
-                    MADE
-                  </button>
-                  <button
-                    onClick={() => onRecord(player.playerId, false)}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition-colors"
-                  >
-                    MISS
-                  </button>
-                </div>
-              </div>
-            ))
+            <>
+              {renderTeamSection(homePlayers, homeTeamName, true)}
+              {renderTeamSection(awayPlayers, awayTeamName, false)}
+            </>
           )}
         </div>
 
@@ -771,6 +810,8 @@ interface QuickStatModalProps {
   onRecord: (playerId: Id<"players">) => void;
   statType: StatType | null;
   onCourtPlayers: PlayerStat[];
+  homeTeamName?: string;
+  awayTeamName?: string;
 }
 
 // Static class mappings for Tailwind (dynamic classes don't work with Tailwind's purge)
@@ -836,10 +877,67 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
   onRecord,
   statType,
   onCourtPlayers,
+  homeTeamName = "Home",
+  awayTeamName = "Away",
 }) => {
   if (!isOpen || !statType) return null;
 
   const styles = STAT_STYLES[statType] || STAT_STYLES.default;
+
+  // Group players by team
+  const homePlayers = onCourtPlayers.filter((p) => p.isHomeTeam);
+  const awayPlayers = onCourtPlayers.filter((p) => !p.isHomeTeam);
+
+  const renderPlayer = (player: PlayerStat) => {
+    const avatarBg = player.isHomeTeam ? "bg-blue-600" : "bg-orange-500";
+
+    return (
+      <button
+        key={player.id}
+        onClick={() => onRecord(player.playerId)}
+        className="w-full flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+      >
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 ${avatarBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+            <span className="text-white font-bold text-sm">#{player.player?.number}</span>
+          </div>
+          <div className="text-left">
+            <div className="text-surface-900 dark:text-white font-medium text-sm">
+              {player.player?.name}
+            </div>
+            <div className="text-surface-500 text-xs">
+              {player.points} PTS
+            </div>
+          </div>
+        </div>
+        <div className={`px-3 py-1 text-sm font-medium rounded-lg ${styles.badgeClass}`}>
+          +{styles.label.toUpperCase().slice(0, 3)}
+        </div>
+      </button>
+    );
+  };
+
+  const renderTeamSection = (players: PlayerStat[], teamName: string, isHome: boolean) => {
+    if (players.length === 0) return null;
+
+    const headerBg = isHome
+      ? "bg-blue-100 dark:bg-blue-900/30"
+      : "bg-orange-100 dark:bg-orange-900/30";
+    const headerText = isHome
+      ? "text-blue-700 dark:text-blue-300"
+      : "text-orange-700 dark:text-orange-300";
+
+    return (
+      <div key={isHome ? "home" : "away"}>
+        <div className={`px-4 py-2 ${headerBg}`}>
+          <span className={`text-xs font-bold uppercase tracking-wide ${headerText}`}>
+            {teamName}
+          </span>
+        </div>
+        {players.map(renderPlayer)}
+      </div>
+    );
+  };
 
   return (
     <div
@@ -863,30 +961,10 @@ const QuickStatModal: React.FC<QuickStatModalProps> = ({
           {onCourtPlayers.length === 0 ? (
             <div className="p-8 text-center text-surface-500">No players on court</div>
           ) : (
-            onCourtPlayers.map((player) => (
-              <button
-                key={player.id}
-                onClick={() => onRecord(player.playerId)}
-                className="w-full flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm">#{player.player?.number}</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="text-surface-900 dark:text-white font-medium text-sm">
-                      {player.player?.name}
-                    </div>
-                    <div className="text-surface-500 text-xs">
-                      {player.isHomeTeam ? "Home" : "Away"}
-                    </div>
-                  </div>
-                </div>
-                <div className={`px-3 py-1 text-sm font-medium rounded-lg ${styles.badgeClass}`}>
-                  +{styles.label.toUpperCase().slice(0, 3)}
-                </div>
-              </button>
-            ))
+            <>
+              {renderTeamSection(homePlayers, homeTeamName, true)}
+              {renderTeamSection(awayPlayers, awayTeamName, false)}
+            </>
           )}
         </div>
 
@@ -3327,6 +3405,8 @@ const LiveGame: React.FC = () => {
         shotType={pendingShot?.is3pt ? "3pt" : "2pt"}
         zoneName={pendingShot?.zoneName || ""}
         onCourtPlayers={allOnCourtPlayers}
+        homeTeamName={game?.homeTeam?.name || "Home"}
+        awayTeamName={game?.awayTeam?.name || "Away"}
       />
 
       {/* Quick Stat Modal */}
@@ -3336,6 +3416,8 @@ const LiveGame: React.FC = () => {
         onRecord={handleQuickStatFromModal}
         statType={pendingQuickStat}
         onCourtPlayers={allOnCourtPlayers}
+        homeTeamName={game?.homeTeam?.name || "Home"}
+        awayTeamName={game?.awayTeam?.name || "Away"}
       />
 
       {/* Rebound Prompt Modal */}

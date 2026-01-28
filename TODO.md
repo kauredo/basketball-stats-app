@@ -1,7 +1,7 @@
 # Basketball Stats App - TODO
 
 > Remember to check TODO-min.md for any TODOs that the user has added. Update this TODO.md TODOs with more details.
-> Last audit: January 27, 2026
+> Last audit: January 28, 2026
 
 ---
 
@@ -36,6 +36,11 @@ _All P2 issues resolved_
 ### Web
 
 - [ ] **No undo outside live game** - Only live game has undo capability. Would require audit logging and backend changes.
+
+### Mobile
+
+- [ ] **Expo notifications warnings** - expo-notifications shows warnings in Expo Go. Requires building a development client to resolve.
+- [ ] **Source map ENOENT warnings** - Metro bundler shows cosmetic path resolution warnings. Does not affect functionality.
 
 ### Backend
 
@@ -77,6 +82,21 @@ _All P3 backend issues resolved_
 | Haptic Feedback    | ❌  | ✅     | Consider for web       |
 | Sound Feedback     | ❌  | ✅     | Consider for web       |
 | Advanced Analytics | ✅  | ✅     | PER, A/TO added mobile |
+
+---
+
+## Recently Completed (January 28, 2026)
+
+### UX Improvements
+
+- [x] **Team separation in web stat modals** - Added team headers with color coding (blue for home, orange for away) to `QuickStatModal` and `ShotRecordingModal` on web, matching mobile implementation
+- [x] **PlayerDetail mobile responsive** - Optimized header layout with stacking buttons on mobile, smaller avatar, and proper text sizing
+- [x] **Standardized team colors** - Unified team colors across all components: **Home = Blue, Away = Orange**
+  - Updated `ActiveLineupPanel` (position labels, jerseys, header accent)
+  - Updated `EnhancedScoreboard` (added team color indicator bars next to team names)
+  - Updated `TeamBoxScore` (header backgrounds)
+  - Updated `GameEventCard` (play-by-play border colors)
+  - Updated `GameFlowChart` (scoring run fills, line gradient)
 
 ---
 

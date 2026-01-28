@@ -285,58 +285,61 @@ const PlayerDetail: React.FC = () => {
       <Breadcrumb items={[{ label: "Players", href: "/players" }, { label: player.name }]} />
 
       {/* Header */}
-      <div className="bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 rounded-2xl p-8 text-white shadow-elevated">
-        <div className="flex items-center gap-6">
-          <div className="w-24 h-24 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
-            <span className="text-4xl font-bold tracking-tight">#{player.number}</span>
-          </div>
-          <div className="flex-1">
-            <h1 className="text-display-sm">{player.name}</h1>
-            <div className="flex items-center gap-4 mt-2 text-white/80">
-              <span className="font-medium">{player.position || "N/A"}</span>
-              {player.heightCm && <span>{player.heightCm} cm</span>}
-              {player.weightKg && <span>{player.weightKg} kg</span>}
+      <div className="bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 rounded-2xl p-4 sm:p-8 text-white shadow-elevated">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-white/20 backdrop-blur rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-2xl sm:text-4xl font-bold tracking-tight">#{player.number}</span>
             </div>
-            <Link
-              to={`/app/teams`}
-              className="text-white/90 hover:text-white mt-1 inline-block transition-colors"
-            >
-              {player.team?.name || "No Team"}
-            </Link>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-display-sm truncate">{player.name}</h1>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 sm:mt-2 text-sm sm:text-base text-white/80">
+                <span className="font-medium">{player.position || "N/A"}</span>
+                {player.heightCm && <span>{player.heightCm} cm</span>}
+                {player.weightKg && <span>{player.weightKg} kg</span>}
+              </div>
+              <Link
+                to={`/app/teams`}
+                className="text-white/90 hover:text-white mt-1 inline-block transition-colors text-sm sm:text-base"
+              >
+                {player.team?.name || "No Team"}
+              </Link>
+            </div>
           </div>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 sm:flex gap-2 sm:flex-shrink-0">
             <button
               onClick={() => navigate(`/app/shot-charts?player=${playerId}`)}
-              className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center gap-2 transition-colors"
+              className="px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center justify-center gap-2 transition-colors text-sm"
             >
-              <ChartBarIcon className="w-5 h-5" />
-              Shot Chart
+              <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline">Shot Chart</span>
+              <span className="xs:hidden">Shots</span>
             </button>
             <button
               onClick={() => navigate(`/app/compare?player1=${playerId}`)}
-              className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center gap-2 transition-colors"
+              className="px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center justify-center gap-2 transition-colors text-sm"
             >
-              <TrophyIcon className="w-5 h-5" />
+              <TrophyIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               Compare
             </button>
             <button
               onClick={() => setShowExportModal(true)}
               disabled={!stats}
-              className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               title="Export Season Report"
             >
-              <DocumentArrowDownIcon className="w-5 h-5" />
-              <span className="hidden sm:inline">Export Season</span>
-              <span className="sm:hidden">Export</span>
+              <DocumentArrowDownIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">Export</span>
+              <span className="sm:hidden">PDF</span>
             </button>
             <button
               onClick={handleExportGameLog}
               disabled={recentGames.length === 0}
-              className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               title="Export Game Log CSV"
             >
-              <ArrowDownTrayIcon className="w-5 h-5" />
-              <span className="hidden sm:inline">CSV</span>
+              <ArrowDownTrayIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              CSV
             </button>
           </div>
         </div>

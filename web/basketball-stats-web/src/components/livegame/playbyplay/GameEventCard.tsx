@@ -30,6 +30,7 @@ interface PlayerStat {
 interface GameEventCardProps {
   event: PlayByPlayEvent;
   playerStats?: PlayerStat[];
+  homeTeamId?: Id<"teams">; // Used to determine team color when isHomeTeam not in event details
 }
 
 // Event styling configuration with Heroicons
@@ -145,7 +146,7 @@ const DEFAULT_CONFIG = {
  * Shows cumulative player stats for relevant events.
  * Colored left border indicates team (orange=home, blue=away).
  */
-export const GameEventCard: React.FC<GameEventCardProps> = ({ event, playerStats = [] }) => {
+export const GameEventCard: React.FC<GameEventCardProps> = ({ event, playerStats = [], homeTeamId }) => {
   // Format time remaining as MM:SS
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -208,12 +209,23 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({ event, playerStats
   const statLine = getPlayerStatLine();
   const scoreDisplay = getScoreDisplay();
 
-  // Get isHomeTeam from event details
+  // Get isHomeTeam from event details, or fallback to comparing teamId with homeTeamId
   const details = event.details as { isHomeTeam?: boolean } | undefined;
-  const isHomeTeam = details?.isHomeTeam ?? false;
+  let isHomeTeam: boolean | undefined = details?.isHomeTeam;
 
-  // Team colors: orange for home, blue for away
-  const teamBorderColor = isHomeTeam ? "#f97316" : "#3b82f6";
+  // Fallback: if isHomeTeam not in details but we have teamId and homeTeamId, compute it
+  if (isHomeTeam === undefined && event.teamId && homeTeamId) {
+    isHomeTeam = event.teamId === homeTeamId;
+  }
+
+  // Team colors: blue for home, orange for away, neutral gray for game events
+  // If isHomeTeam is still undefined (game-level events like quarter_start, overtime_start, note)
+  // use a neutral color
+  const teamBorderColor = isHomeTeam === true
+    ? "#3b82f6" // Home = Blue
+    : isHomeTeam === false
+      ? "#f97316" // Away = Orange
+      : "#6b7280"; // Neutral gray for game-level events
 
   return (
     <div className="flex items-stretch border-b border-surface-200 dark:border-surface-700 last:border-b-0">

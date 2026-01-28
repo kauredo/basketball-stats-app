@@ -19,6 +19,7 @@ interface PlaysModeContentProps {
   events: PlayByPlayEvent[];
   currentQuarter: number;
   playerStats?: PlayerStat[];
+  homeTeamId?: Id<"teams">;
 }
 
 /**
@@ -29,6 +30,7 @@ export const PlaysModeContent: React.FC<PlaysModeContentProps> = ({
   events,
   currentQuarter,
   playerStats = [],
+  homeTeamId,
 }) => {
   const [selectedQuarter, setSelectedQuarter] = useState<number | "all">("all");
 
@@ -45,7 +47,7 @@ export const PlaysModeContent: React.FC<PlaysModeContentProps> = ({
 
       {/* Events list */}
       <div className="flex-1 min-h-0">
-        <PlayByPlayList events={events} filterQuarter={selectedQuarter} playerStats={playerStats} />
+        <PlayByPlayList events={events} filterQuarter={selectedQuarter} playerStats={playerStats} homeTeamId={homeTeamId} />
       </div>
     </div>
   );

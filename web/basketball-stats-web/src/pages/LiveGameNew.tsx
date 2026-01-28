@@ -59,6 +59,7 @@ interface GameEventItem {
     id: Id<"teams">;
     name?: string;
   };
+  details?: Record<string, unknown>;
 }
 
 // Import hooks
@@ -847,6 +848,7 @@ const LiveGameNew: React.FC = () => {
       playerId: e.player?.id,
       teamId: e.team?.id,
       points: e.points,
+      details: e.details,
     })
   );
 
@@ -972,6 +974,7 @@ const LiveGameNew: React.FC = () => {
           events={formattedEvents}
           currentQuarter={game.currentQuarter}
           playerStats={stats}
+          homeTeamId={game.homeTeam?.id as Id<"teams">}
         />
       )}
 
@@ -1022,6 +1025,8 @@ const LiveGameNew: React.FC = () => {
         shotType={pendingShot?.is3pt ? "3pt" : "2pt"}
         zoneName={pendingShot?.zoneName || ""}
         onCourtPlayers={allOnCourtPlayers}
+        homeTeamName={game?.homeTeam?.name || "Home"}
+        awayTeamName={game?.awayTeam?.name || "Away"}
       />
 
       <QuickStatModal
@@ -1030,6 +1035,8 @@ const LiveGameNew: React.FC = () => {
         onRecord={handleQuickStatFromModal}
         statType={pendingQuickStat}
         onCourtPlayers={allOnCourtPlayers}
+        homeTeamName={game?.homeTeam?.name || "Home"}
+        awayTeamName={game?.awayTeam?.name || "Away"}
       />
 
       {pendingRebound && game && (

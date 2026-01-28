@@ -107,7 +107,7 @@ const PositionSlot: React.FC<{
     [onDropFromBench, onDropFromCourt, canAcceptDrop, positionIndex]
   );
 
-  const primaryColor = isHomeTeam ? "#f97316" : "#3b82f6";
+  const primaryColor = isHomeTeam ? "#3b82f6" : "#f97316";
   const isEmpty = !player;
 
   return (
@@ -165,8 +165,8 @@ const PositionSlot: React.FC<{
               : isEmpty
                 ? "bg-surface-400 dark:bg-surface-600 text-white"
                 : isHomeTeam
-                  ? "bg-primary-500 text-white"
-                  : "bg-blue-500 text-white"
+                  ? "bg-blue-500 text-white"
+                  : "bg-orange-500 text-white"
           }
         `}
       >
@@ -240,7 +240,7 @@ const BenchPlayerCard: React.FC<{
   onClick,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
-  const primaryColor = isHomeTeam ? "#f97316" : "#3b82f6";
+  const primaryColor = isHomeTeam ? "#3b82f6" : "#f97316";
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -600,7 +600,7 @@ export const ActiveLineupPanel: React.FC<ActiveLineupPanelProps> = ({
       <div className="flex items-center justify-between mb-2 sm:mb-3">
         <div className="flex items-center gap-2">
           <div
-            className={`w-1 h-5 sm:h-6 rounded-full ${isHomeTeam ? "bg-primary-500" : "bg-blue-500"}`}
+            className={`w-1 h-5 sm:h-6 rounded-full ${isHomeTeam ? "bg-blue-500" : "bg-orange-500"}`}
           />
           <h3
             className={`font-bold text-surface-900 dark:text-surface-200 uppercase tracking-wide ${compact ? "text-[10px] sm:text-xs" : "text-xs sm:text-sm"}`}

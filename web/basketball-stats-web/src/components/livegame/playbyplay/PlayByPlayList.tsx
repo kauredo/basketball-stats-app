@@ -20,6 +20,7 @@ interface PlayByPlayListProps {
   filterQuarter?: number | "all";
   autoScrollToLatest?: boolean;
   playerStats?: PlayerStat[];
+  homeTeamId?: Id<"teams">;
 }
 
 /**
@@ -31,6 +32,7 @@ export const PlayByPlayList: React.FC<PlayByPlayListProps> = ({
   filterQuarter = "all",
   autoScrollToLatest = true,
   playerStats = [],
+  homeTeamId,
 }) => {
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -75,7 +77,7 @@ export const PlayByPlayList: React.FC<PlayByPlayListProps> = ({
   return (
     <div ref={listRef} className="h-full overflow-auto">
       {sortedEvents.map((event) => (
-        <GameEventCard key={event._id} event={event} playerStats={playerStats} />
+        <GameEventCard key={event._id} event={event} playerStats={playerStats} homeTeamId={homeTeamId} />
       ))}
     </div>
   );

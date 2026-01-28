@@ -131,6 +131,11 @@ const TeamPanel: React.FC<TeamPanelProps> = ({
   disabled,
   isHome = false,
 }) => {
+  // Team color: Home = Blue, Away = Orange (consistent across app)
+  const teamColorClass = isHome
+    ? "bg-blue-500"
+    : "bg-orange-500";
+
   return (
     <div className={`flex items-center gap-3 sm:gap-4 ${isHome ? "flex-row-reverse" : ""}`}>
       {/* Score */}
@@ -138,13 +143,16 @@ const TeamPanel: React.FC<TeamPanelProps> = ({
 
       {/* Team Info */}
       <div className={`flex flex-col gap-1 ${isHome ? "items-end" : "items-start"}`}>
-        {/* Team Name */}
-        <span
-          className="text-sm font-semibold text-surface-700 dark:text-surface-300 uppercase tracking-wide truncate max-w-[100px] sm:max-w-[120px]"
-          title={name}
-        >
-          {name}
-        </span>
+        {/* Team Name with color indicator */}
+        <div className={`flex items-center gap-2 ${isHome ? "flex-row-reverse" : ""}`}>
+          <div className={`w-1 h-4 rounded-full ${teamColorClass}`} />
+          <span
+            className="text-sm font-semibold text-surface-700 dark:text-surface-300 uppercase tracking-wide truncate max-w-[100px] sm:max-w-[120px]"
+            title={name}
+          >
+            {name}
+          </span>
+        </div>
 
         {/* Stats Row */}
         <div className={`flex items-center gap-2 ${isHome ? "flex-row-reverse" : ""}`}>

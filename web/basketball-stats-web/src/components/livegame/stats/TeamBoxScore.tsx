@@ -77,7 +77,7 @@ export const TeamBoxScore: React.FC<TeamBoxScoreProps> = ({
     <div className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
       {/* Header */}
       <div
-        className={`px-3 py-2 ${isHomeTeam ? "bg-primary-50 dark:bg-primary-900/20" : "bg-surface-50 dark:bg-surface-700/50"}`}
+        className={`px-3 py-2 ${isHomeTeam ? "bg-blue-50 dark:bg-blue-900/20" : "bg-orange-50 dark:bg-orange-900/20"}`}
       >
         <h3 className="font-semibold text-surface-900 dark:text-white text-sm">{teamName}</h3>
       </div>

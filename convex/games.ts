@@ -1188,6 +1188,7 @@ export const recordTimeout = mutation({
     }
 
     // Log the event
+    const isHomeTeam = args.teamId === game.homeTeamId;
     await ctx.db.insert("gameEvents", {
       gameId: args.gameId,
       eventType: "timeout",
@@ -1197,6 +1198,7 @@ export const recordTimeout = mutation({
       timestamp: Date.now(),
       details: {
         timeoutsRemaining: newTimeoutsRemaining,
+        isHomeTeam,
       },
       description: `Timeout - ${team.name} (${newTimeoutsRemaining} remaining)`,
     });

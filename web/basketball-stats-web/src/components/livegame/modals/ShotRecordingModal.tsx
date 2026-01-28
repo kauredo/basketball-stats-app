@@ -17,6 +17,8 @@ interface ShotRecordingModalProps {
   shotType: "2pt" | "3pt";
   zoneName: string;
   onCourtPlayers: PlayerStat[];
+  homeTeamName?: string;
+  awayTeamName?: string;
 }
 
 /**
@@ -30,9 +32,69 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
   shotType,
   zoneName,
   onCourtPlayers,
+  homeTeamName = "Home",
+  awayTeamName = "Away",
 }) => {
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const points = shotType === "3pt" ? 3 : 2;
+
+  // Group players by team
+  const homePlayers = onCourtPlayers.filter((p) => p.isHomeTeam);
+  const awayPlayers = onCourtPlayers.filter((p) => !p.isHomeTeam);
+
+  const renderPlayer = (player: PlayerStat) => {
+    // Team-specific avatar colors: home = blue, away = orange
+    const avatarBg = player.isHomeTeam
+      ? "bg-blue-600"
+      : "bg-orange-500";
+
+    return (
+      <div
+        key={player.id}
+        className="flex items-center justify-between px-4 py-3 border-b border-surface-100 dark:border-surface-700 last:border-0"
+      >
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 ${avatarBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+            <span className="text-white font-bold text-sm">#{player.player?.number}</span>
+          </div>
+          <div className="text-left">
+            <div className="text-surface-900 dark:text-white font-medium text-sm">
+              {player.player?.name}
+            </div>
+            <div className="text-surface-500 text-xs">
+              {player.points} PTS
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <MadeButton onClick={() => onRecord(player.playerId, true)} />
+          <MissButton onClick={() => onRecord(player.playerId, false)} />
+        </div>
+      </div>
+    );
+  };
+
+  const renderTeamSection = (players: PlayerStat[], teamName: string, isHome: boolean) => {
+    if (players.length === 0) return null;
+
+    const headerBg = isHome
+      ? "bg-blue-100 dark:bg-blue-900/30"
+      : "bg-orange-100 dark:bg-orange-900/30";
+    const headerText = isHome
+      ? "text-blue-700 dark:text-blue-300"
+      : "text-orange-700 dark:text-orange-300";
+
+    return (
+      <div key={isHome ? "home" : "away"}>
+        <div className={`px-4 py-2 ${headerBg}`}>
+          <span className={`text-xs font-bold uppercase tracking-wide ${headerText}`}>
+            {teamName}
+          </span>
+        </div>
+        {players.map(renderPlayer)}
+      </div>
+    );
+  };
 
   return (
     <BaseModal
@@ -66,19 +128,10 @@ export const ShotRecordingModal: React.FC<ShotRecordingModalProps> = ({
         {onCourtPlayers.length === 0 ? (
           <PlayerListEmpty message="No players on court" />
         ) : (
-          onCourtPlayers.map((player) => (
-            <PlayerListItem
-              key={player.id}
-              player={player.player}
-              stats={`${player.points} PTS`}
-              actions={
-                <>
-                  <MadeButton onClick={() => onRecord(player.playerId, true)} />
-                  <MissButton onClick={() => onRecord(player.playerId, false)} />
-                </>
-              }
-            />
-          ))
+          <>
+            {renderTeamSection(homePlayers, homeTeamName, true)}
+            {renderTeamSection(awayPlayers, awayTeamName, false)}
+          </>
         )}
       </ModalBody>
 
