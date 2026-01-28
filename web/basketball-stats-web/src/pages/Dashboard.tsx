@@ -336,21 +336,25 @@ const Dashboard: React.FC = () => {
           {upcomingGames.length > 0 ? (
             <div className="space-y-3">
               {upcomingGames.map((game) => (
-                <div
+                <Link
                   key={game.id}
-                  className="p-4 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800/30"
+                  to={`/app/games/${game.id}/live`}
+                  className="group block p-4 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800/30 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <CalendarIcon className="w-4 h-4 text-primary-500" />
-                    <span className="text-sm font-medium text-surface-600 dark:text-surface-300">
-                      {game.scheduledAt
-                        ? new Date(game.scheduledAt).toLocaleDateString("en-US", {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                          })
-                        : "TBD"}
-                    </span>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <CalendarIcon className="w-4 h-4 text-primary-500" />
+                      <span className="text-sm font-medium text-surface-600 dark:text-surface-300">
+                        {game.scheduledAt
+                          ? new Date(game.scheduledAt).toLocaleDateString("en-US", {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                            })
+                          : "TBD"}
+                      </span>
+                    </div>
+                    <ArrowRightIcon className="w-4 h-4 text-surface-400 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all" />
                   </div>
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
@@ -365,7 +369,7 @@ const Dashboard: React.FC = () => {
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

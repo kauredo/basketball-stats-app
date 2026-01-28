@@ -132,8 +132,9 @@ export default function GameReplayScreen() {
         made: e.details.made || false,
         is3pt: e.details.shotType === "3pt",
         playerId: e.player?.id,
+        isHomeTeam: e.team?.id === game?.homeTeam?.id,
       }));
-  }, [eventsUpToTime]);
+  }, [eventsUpToTime, game?.homeTeam?.id]);
 
   // Format time display
   const formatSliderTime = (seconds: number) => {

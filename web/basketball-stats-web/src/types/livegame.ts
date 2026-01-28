@@ -111,7 +111,9 @@ export interface ShotLocation {
   y: number;
   made: boolean;
   playerId?: Id<"players">;
+  teamId?: Id<"teams">;
   is3pt?: boolean;
+  isHomeTeam?: boolean;
 }
 
 export interface PendingShot {

@@ -396,15 +396,17 @@ const ExportPage: React.FC = () => {
   };
 
   // Get team shots for court rendering
-  const getTeamShots = (teamId: string, data: GameExportData | null): ExportShotLocation[] => {
+  const getTeamShots = (teamId: string, data: GameExportData | null, isHomeTeam: boolean): ExportShotLocation[] => {
     if (!data) return [];
     return data.shots
       .filter((s) => s.teamId === teamId)
       .map((s) => ({
+        id: s.id,
         x: s.x,
         y: s.y,
         made: s.made,
         is3pt: s.shotType === "3pt",
+        isHomeTeam,
       }));
   };
 
@@ -889,7 +891,7 @@ const ExportPage: React.FC = () => {
         <div className="absolute left-[-9999px] top-0 pointer-events-none">
           <div ref={homeCourtRef}>
             <PrintableShotChart
-              shots={getTeamShots(exportData.homeTeam.id, exportData)}
+              shots={getTeamShots(exportData.homeTeam.id, exportData, true)}
               theme={theme}
               showHeatMap={includeHeatmap}
               title={exportData.homeTeam.name}
@@ -898,7 +900,7 @@ const ExportPage: React.FC = () => {
           </div>
           <div ref={awayCourtRef}>
             <PrintableShotChart
-              shots={getTeamShots(exportData.awayTeam.id, exportData)}
+              shots={getTeamShots(exportData.awayTeam.id, exportData, false)}
               theme={theme}
               showHeatMap={includeHeatmap}
               title={exportData.awayTeam.name}

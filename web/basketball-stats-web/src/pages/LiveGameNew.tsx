@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -93,6 +93,7 @@ const LiveGameNew: React.FC = () => {
   const [selectedAwayStarters, setSelectedAwayStarters] = useState<Id<"players">[]>([]);
   const [isStartingGame, setIsStartingGame] = useState(false);
   const [isCreatingPlayers, setIsCreatingPlayers] = useState(false);
+  const isCreatingPlayersRef = useRef(false);
   const [showGameClockEdit, setShowGameClockEdit] = useState(false);
   const [showShotClockEdit, setShowShotClockEdit] = useState(false);
 
@@ -117,6 +118,20 @@ const LiveGameNew: React.FC = () => {
     token && gameId ? { token, gameId: gameId as Id<"games"> } : "skip"
   );
 
+  // Get the game first to access team IDs
+  const game = gameData?.game;
+
+  // Query actual team rosters to find max jersey numbers (not just game stats)
+  const homeTeamPlayersData = useQuery(
+    api.players.list,
+    token && game?.homeTeam?.id ? { token, teamId: game.homeTeam.id } : "skip"
+  );
+
+  const awayTeamPlayersData = useQuery(
+    api.players.list,
+    token && game?.awayTeam?.id ? { token, teamId: game.awayTeam.id } : "skip"
+  );
+
   // Convex mutations
   const startGame = useMutation(api.games.start);
   const pauseGame = useMutation(api.games.pause);
@@ -136,15 +151,14 @@ const LiveGameNew: React.FC = () => {
   const recordShotMutation = useMutation(api.shots.recordShot);
   const updateGameSettingsMutation = useMutation(api.games.updateGameSettings);
   const setGameTimeMutation = useMutation(api.games.setGameTime);
-  const createPlayerMutation = useMutation(api.players.create);
   const initializePlayerForGameMutation = useMutation(api.stats.initializePlayerForGame);
+  const createPlayerMutation = useMutation(api.players.create);
 
   // Hooks
   const feedback = useFeedback();
   const toast = useToast();
 
   // Derived data
-  const game = gameData?.game;
   const stats = (liveStats?.stats || []) as PlayerStat[];
   const homeStats = stats.filter((s) => s.isHomeTeam);
   const awayStats = stats.filter((s) => !s.isHomeTeam);
@@ -190,11 +204,14 @@ const LiveGameNew: React.FC = () => {
 
   // Transform persisted shots to ShotLocation format for heat maps
   const persistedShots: ShotLocation[] = (gameShotsData?.shots || []).map((shot) => ({
+    id: shot._id,
     x: shot.x,
     y: shot.y,
     made: shot.made,
     playerId: shot.playerId as Id<"players">,
+    teamId: shot.teamId as Id<"teams">,
     is3pt: shot.shotType === "3pt",
+    isHomeTeam: shot.teamId === game?.homeTeam?.id,
   }));
 
   // Game clock (for optional local countdown)
@@ -330,7 +347,14 @@ const LiveGameNew: React.FC = () => {
         const is3pt = statType === "shot3";
         setRecentShots((prev) => [
           ...prev.slice(-4),
-          { ...shotLocation, made: made || false, playerId, is3pt },
+          {
+            ...shotLocation,
+            made: made || false,
+            playerId,
+            teamId: playerStat.teamId,
+            is3pt,
+            isHomeTeam: playerStat.isHomeTeam,
+          },
         ]);
 
         // Persist shot location to database for heat maps
@@ -677,54 +701,50 @@ const LiveGameNew: React.FC = () => {
     }
   };
 
-  // Handler for creating missing players
+  // Handler for creating missing players (when team has fewer than 5)
   const handleCreatePlayers = useCallback(
     async (teamId: Id<"teams">, count: number) => {
       if (!token || !gameId) return;
 
+      // Use ref to prevent race conditions on rapid clicks
+      if (isCreatingPlayersRef.current) return;
+      isCreatingPlayersRef.current = true;
+
       setIsCreatingPlayers(true);
       try {
-        // Get current player count to determine starting number
-        const teamPlayers = teamId === game?.homeTeam?.id ? homeStats : awayStats;
-        const startingNumber = teamPlayers.length + 1;
+        // Get max jersey number from actual team roster
+        const isHomeTeam = teamId === game?.homeTeam?.id;
+        const rosterPlayers = isHomeTeam
+          ? homeTeamPlayersData?.players
+          : awayTeamPlayersData?.players;
+
+        // Find the highest jersey number currently on the team
+        const maxJerseyNumber =
+          rosterPlayers?.reduce((max, player) => Math.max(max, player.number ?? 0), 0) ?? 0;
+
+        // Start from the next available number
+        const startingNumber = maxJerseyNumber + 1;
 
         for (let i = 0; i < count; i++) {
           const playerNumber = startingNumber + i;
-          // Create the player
-          const result = await createPlayerMutation({
+          await createPlayerMutation({
             token,
             teamId,
             name: `Player ${playerNumber}`,
             number: playerNumber,
             active: true,
           });
-          // Initialize player stats for this game so they appear in the lineup
-          if (result.player?.id) {
-            await initializePlayerForGameMutation({
-              token,
-              gameId: gameId as Id<"games">,
-              playerId: result.player.id,
-            });
-          }
         }
-        toast.success(`Created ${count} player${count > 1 ? "s" : ""}`);
+        toast.success(`Added ${count} player${count > 1 ? "s" : ""}`);
       } catch (error) {
         console.error("Failed to create players:", error);
-        toast.error("Failed to create players");
+        toast.error("Failed to add players");
       } finally {
+        isCreatingPlayersRef.current = false;
         setIsCreatingPlayers(false);
       }
     },
-    [
-      token,
-      gameId,
-      game,
-      homeStats,
-      awayStats,
-      createPlayerMutation,
-      initializePlayerForGameMutation,
-      toast,
-    ]
+    [token, gameId, game, homeTeamPlayersData, awayTeamPlayersData, createPlayerMutation, toast]
   );
 
   // Handler for starting lineup changes
@@ -759,7 +779,41 @@ const LiveGameNew: React.FC = () => {
 
     setIsStartingGame(true);
     try {
-      // Save the starters first (in case they weren't saved yet)
+      // Initialize all roster players for this game (so they can be subbed in)
+      const allHomePlayers = homeTeamPlayersData?.players ?? [];
+      const allAwayPlayers = awayTeamPlayersData?.players ?? [];
+
+      // Initialize home team players
+      for (const player of allHomePlayers) {
+        if (player.active !== false) {
+          try {
+            await initializePlayerForGameMutation({
+              token,
+              gameId: gameId as Id<"games">,
+              playerId: player.id,
+            });
+          } catch {
+            // Player might already be initialized, continue
+          }
+        }
+      }
+
+      // Initialize away team players
+      for (const player of allAwayPlayers) {
+        if (player.active !== false) {
+          try {
+            await initializePlayerForGameMutation({
+              token,
+              gameId: gameId as Id<"games">,
+              playerId: player.id,
+            });
+          } catch {
+            // Player might already be initialized, continue
+          }
+        }
+      }
+
+      // Save the starters
       await updateGameSettingsMutation({
         token,
         gameId: gameId as Id<"games">,
@@ -773,6 +827,7 @@ const LiveGameNew: React.FC = () => {
       await startGame({ token, gameId: gameId as Id<"games"> });
     } catch (error) {
       console.error("Failed to start game:", error);
+      toast.error("Failed to start game");
     } finally {
       setIsStartingGame(false);
     }
@@ -781,8 +836,12 @@ const LiveGameNew: React.FC = () => {
     gameId,
     selectedHomeStarters,
     selectedAwayStarters,
+    homeTeamPlayersData,
+    awayTeamPlayersData,
+    initializePlayerForGameMutation,
     updateGameSettingsMutation,
     startGame,
+    toast,
   ]);
 
   const handleEndPeriod = async () => {
@@ -879,16 +938,33 @@ const LiveGameNew: React.FC = () => {
             <StartingLineupSelector
               homeTeamName={game.homeTeam?.name || "Home"}
               awayTeamName={game.awayTeam?.name || "Away"}
-              homeTeamId={game.homeTeam?.id as Id<"teams">}
-              awayTeamId={game.awayTeam?.id as Id<"teams">}
-              homeStats={homeStats}
-              awayStats={awayStats}
+              homeTeamId={game.homeTeam?.id}
+              awayTeamId={game.awayTeam?.id}
+              homePlayers={
+                homeTeamPlayersData?.players?.map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                  number: p.number,
+                  position: p.position,
+                  active: p.active,
+                })) ?? []
+              }
+              awayPlayers={
+                awayTeamPlayersData?.players?.map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                  number: p.number,
+                  position: p.position,
+                  active: p.active,
+                })) ?? []
+              }
               initialHomeStarters={selectedHomeStarters}
               initialAwayStarters={selectedAwayStarters}
               onStartersChange={handleStartersChange}
               onStartGame={handleStartGameWithStarters}
               onCreatePlayers={handleCreatePlayers}
               isStarting={isStartingGame}
+              isLoading={!homeTeamPlayersData || !awayTeamPlayersData}
               isCreatingPlayers={isCreatingPlayers}
             />
           </div>

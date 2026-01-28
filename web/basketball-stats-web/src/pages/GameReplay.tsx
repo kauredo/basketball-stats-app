@@ -152,9 +152,11 @@ const GameReplay: React.FC = () => {
       y: shot.y,
       made: shot.made,
       playerId: shot.playerId as Id<"players"> | undefined,
+      teamId: shot.teamId as Id<"teams"> | undefined,
       is3pt: shot.shotType === "3pt",
+      isHomeTeam: shot.teamId === game?.homeTeam?.id,
     }));
-  }, [shotsUpToTime]);
+  }, [shotsUpToTime, game?.homeTeam?.id]);
 
   // Format time display
   const formatSliderTime = (seconds: number) => {

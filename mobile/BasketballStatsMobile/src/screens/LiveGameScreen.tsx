@@ -213,9 +213,9 @@ export default function LiveGameScreen() {
 
   // Court tap state - for ShotRecordingModal
   const [pendingShot, setPendingShot] = useState<PendingShot | null>(null);
-  const [recentShots, setRecentShots] = useState<Array<{ x: number; y: number; made: boolean }>>(
-    []
-  );
+  const [recentShots, setRecentShots] = useState<
+    Array<{ x: number; y: number; made: boolean; is3pt?: boolean; isHomeTeam?: boolean }>
+  >([]);
 
   // Shot chart filter state
   const [shotTeamFilter, setShotTeamFilter] = useState<"all" | "home" | "away">("all");
@@ -638,7 +638,10 @@ export default function LiveGameScreen() {
       // Add to recent shots for visualization AND persist to database
       if (shotLocation && (statType === "shot2" || statType === "shot3")) {
         const is3pt = statType === "shot3";
-        setRecentShots((prev) => [...prev.slice(-4), { ...shotLocation, made: made || false }]);
+        setRecentShots((prev) => [
+          ...prev.slice(-4),
+          { ...shotLocation, made: made || false, is3pt, isHomeTeam: player?.isHomeTeam },
+        ]);
 
         // Persist shot location to database for heat maps
         try {

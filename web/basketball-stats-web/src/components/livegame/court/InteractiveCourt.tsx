@@ -64,10 +64,12 @@ const COURT_COLORS = {
     rim: "#f97316",
     backboard: "#64748b",
   },
-  // Shared colors
+  // Team colors for shots
+  homeTeam: "#3b82f6", // Blue
+  awayTeam: "#f97316", // Orange
+  // Fallback when team is unknown
   shotMade: "#22c55e",
   shotMissed: "#ef4444",
-  shot3pt: "#8b5cf6",
 };
 
 // ============================================================================
@@ -366,49 +368,81 @@ export const InteractiveCourt: React.FC<InteractiveCourtProps> = ({
           const is3pt = shot.is3pt;
           // For "recent" mode, fade older shots; for "all" mode, use consistent opacity
           const opacity = displayMode === "all" ? 0.85 : 0.6 + (index / 8) * 0.4;
-          const shotColor = shot.made
-            ? is3pt
-              ? COURT_COLORS.shot3pt
-              : COURT_COLORS.shotMade
-            : COURT_COLORS.shotMissed;
+          // Use team colors: blue for home, orange for away
+          // Fall back to made/missed colors if team is unknown
+          const shotColor =
+            shot.isHomeTeam === true
+              ? COURT_COLORS.homeTeam
+              : shot.isHomeTeam === false
+                ? COURT_COLORS.awayTeam
+                : shot.made
+                  ? COURT_COLORS.shotMade
+                  : COURT_COLORS.shotMissed;
           // Use shot.id if available for stable keys, fallback to index
           const shotKey = shot.id || `shot-${index}-${shot.x.toFixed(2)}-${shot.y.toFixed(2)}`;
+          const markerSize = displayMode === "all" ? 6 : 7;
           return (
             <g key={shotKey}>
-              {/* Shot marker */}
-              <circle
-                cx={svgX}
-                cy={svgY}
-                r={displayMode === "all" ? 6 : 7}
-                fill={shotColor}
-                stroke="rgba(255,255,255,0.9)"
-                strokeWidth={displayMode === "all" ? 1.5 : 2}
-                opacity={opacity}
-                className="transition-all duration-300"
-              />
-              {!shot.made && (
-                <text
-                  x={svgX}
-                  y={svgY + 4}
-                  textAnchor="middle"
-                  fill="#fff"
-                  fontSize={displayMode === "all" ? 8 : 10}
-                  fontWeight="bold"
-                >
-                  X
-                </text>
-              )}
-              {shot.made && is3pt && (
-                <text
-                  x={svgX}
-                  y={svgY + 4}
-                  textAnchor="middle"
-                  fill="#fff"
-                  fontSize={displayMode === "all" ? 6 : 8}
-                  fontWeight="bold"
-                >
-                  3
-                </text>
+              {shot.made ? (
+                // Made shot: filled circle
+                <>
+                  <circle
+                    cx={svgX}
+                    cy={svgY}
+                    r={markerSize}
+                    fill={shotColor}
+                    stroke="rgba(255,255,255,0.9)"
+                    strokeWidth={displayMode === "all" ? 1.5 : 2}
+                    opacity={opacity}
+                    className="transition-all duration-300"
+                  />
+                  {is3pt && (
+                    <text
+                      x={svgX}
+                      y={svgY + (displayMode === "all" ? 2.5 : 3)}
+                      textAnchor="middle"
+                      fill="#fff"
+                      fontSize={displayMode === "all" ? 7 : 9}
+                      fontWeight="bold"
+                    >
+                      3
+                    </text>
+                  )}
+                </>
+              ) : (
+                // Missed shot: X marker with team color
+                <g opacity={opacity}>
+                  <line
+                    x1={svgX - markerSize + 1}
+                    y1={svgY - markerSize + 1}
+                    x2={svgX + markerSize - 1}
+                    y2={svgY + markerSize - 1}
+                    stroke={shotColor}
+                    strokeWidth={displayMode === "all" ? 2.5 : 3}
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1={svgX + markerSize - 1}
+                    y1={svgY - markerSize + 1}
+                    x2={svgX - markerSize + 1}
+                    y2={svgY + markerSize - 1}
+                    stroke={shotColor}
+                    strokeWidth={displayMode === "all" ? 2.5 : 3}
+                    strokeLinecap="round"
+                  />
+                  {is3pt && (
+                    <text
+                      x={svgX}
+                      y={svgY - markerSize - 3}
+                      textAnchor="middle"
+                      fill={shotColor}
+                      fontSize={displayMode === "all" ? 7 : 9}
+                      fontWeight="bold"
+                    >
+                      3
+                    </text>
+                  )}
+                </g>
               )}
             </g>
           );

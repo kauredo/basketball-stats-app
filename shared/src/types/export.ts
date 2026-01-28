@@ -261,10 +261,12 @@ export interface PDFGenerationOptions {
 // ============================================
 
 export interface ExportShotLocation {
+  id?: string;
   x: number;
   y: number;
   made: boolean;
   is3pt: boolean;
+  isHomeTeam?: boolean;
 }
 
 // ============================================

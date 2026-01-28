@@ -101,9 +101,12 @@ export function MiniCourt({
     background: isDark ? "#57534e" : "#d4a574",
     lines: isDark ? "rgba(255,255,255,0.8)" : "#ffffff",
     rim: "#ea580c",
+    // Team colors for shots
+    homeTeam: "#3b82f6", // Blue
+    awayTeam: "#f97316", // Orange
+    // Fallback when team is unknown
     shotMade: "#22c55e",
     shotMissed: "#ef4444",
-    shot3pt: "#8b5cf6",
     paint: isDark ? "rgba(234,88,12,0.15)" : "rgba(234,88,12,0.1)",
   };
 
@@ -254,7 +257,7 @@ export function MiniCourt({
             strokeWidth="0.4"
           />
 
-          {/* Shot markers - circles for home team, diamonds for away team */}
+          {/* Shot markers - team colors (blue=home, orange=away), shape differentiates made/missed */}
           {shotsToDisplay.map((shot, index) => {
             // Convert from basket-origin coordinates to SVG coordinates
             const svgX = BASKET_X + shot.x;
@@ -262,59 +265,59 @@ export function MiniCourt({
             const opacity =
               displayMode === "all" ? 0.85 : 0.5 + (index / shotsToDisplay.length) * 0.5;
 
-            // Color: green for made, violet for made 3pt, red for missed
-            const shotColor = shot.made
-              ? shot.is3pt
-                ? courtColors.shot3pt
-                : courtColors.shotMade
-              : courtColors.shotMissed;
+            // Use team colors: blue for home, orange for away
+            // Fall back to made/missed colors if team is unknown
+            const shotColor =
+              shot.isHomeTeam === true
+                ? courtColors.homeTeam
+                : shot.isHomeTeam === false
+                  ? courtColors.awayTeam
+                  : shot.made
+                    ? courtColors.shotMade
+                    : courtColors.shotMissed;
 
             const markerSize = displayMode === "all" ? 1.2 : 1.5;
-            const isAwayTeam = shot.isHomeTeam === false;
-
-            // Away team uses diamond shape (rotated square)
-            const diamondPath = `M ${svgX} ${svgY - markerSize} L ${svgX + markerSize} ${svgY} L ${svgX} ${svgY + markerSize} L ${svgX - markerSize} ${svgY} Z`;
 
             return (
               <G key={index}>
-                {isAwayTeam ? (
-                  // Away team: diamond shape
-                  <Path
-                    d={diamondPath}
-                    fill={shotColor}
-                    opacity={opacity}
-                    stroke="#fff"
-                    strokeWidth={0.2}
-                  />
-                ) : (
-                  // Home team (or unknown): circle shape
-                  <Circle
-                    cx={svgX}
-                    cy={svgY}
-                    r={markerSize}
-                    fill={shotColor}
-                    opacity={opacity}
-                    stroke="#fff"
-                    strokeWidth={0.2}
-                  />
-                )}
-                {!shot.made && (
-                  <G>
-                    <Line
-                      x1={svgX - 0.6}
-                      y1={svgY - 0.6}
-                      x2={svgX + 0.6}
-                      y2={svgY + 0.6}
+                {shot.made ? (
+                  // Made shot: filled circle
+                  <>
+                    <Circle
+                      cx={svgX}
+                      cy={svgY}
+                      r={markerSize}
+                      fill={shotColor}
+                      opacity={opacity}
                       stroke="#fff"
                       strokeWidth={0.2}
                     />
+                    {shot.is3pt && (
+                      <Svg x={svgX - 0.6} y={svgY - 0.6} width={1.2} height={1.2}>
+                        {/* 3pt label handled by text below */}
+                      </Svg>
+                    )}
+                  </>
+                ) : (
+                  // Missed shot: X marker with team color
+                  <G opacity={opacity}>
                     <Line
-                      x1={svgX + 0.6}
-                      y1={svgY - 0.6}
-                      x2={svgX - 0.6}
-                      y2={svgY + 0.6}
-                      stroke="#fff"
-                      strokeWidth={0.2}
+                      x1={svgX - markerSize + 0.3}
+                      y1={svgY - markerSize + 0.3}
+                      x2={svgX + markerSize - 0.3}
+                      y2={svgY + markerSize - 0.3}
+                      stroke={shotColor}
+                      strokeWidth={0.5}
+                      strokeLinecap="round"
+                    />
+                    <Line
+                      x1={svgX + markerSize - 0.3}
+                      y1={svgY - markerSize + 0.3}
+                      x2={svgX - markerSize + 0.3}
+                      y2={svgY + markerSize - 0.3}
+                      stroke={shotColor}
+                      strokeWidth={0.5}
+                      strokeLinecap="round"
                     />
                   </G>
                 )}
