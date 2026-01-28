@@ -187,56 +187,60 @@ const Players: React.FC = () => {
       key={player.id}
       className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 hover:border-surface-300 dark:hover:border-surface-600 transition-colors"
     >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-surface-100 dark:bg-surface-700 rounded-full flex items-center justify-center overflow-hidden">
+      <div className="flex items-start justify-between mb-4 gap-2">
+        <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-surface-100 dark:bg-surface-700 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
             {player.imageUrl ? (
               <img src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" />
             ) : (
-              <UserIcon className="w-8 h-8 text-surface-600 dark:text-surface-400" />
+              <UserIcon className="w-6 h-6 sm:w-8 sm:h-8 text-surface-600 dark:text-surface-400" />
             )}
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-surface-900 dark:text-white">{player.name}</h3>
-            <p className="text-primary-500 dark:text-primary-400 font-medium">#{player.number}</p>
+          <div className="min-w-0">
+            <h3 className="text-base sm:text-lg font-bold text-surface-900 dark:text-white">
+              {player.name}
+            </h3>
+            <p className="text-primary-500 dark:text-primary-400 font-medium ">#{player.number}</p>
             <p className="text-surface-600 dark:text-surface-400 text-sm">
               {player.team?.name || "Unknown Team"}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-1">
-          <button
-            onClick={() => handleViewPlayer(player)}
-            className="btn-primary p-2 rounded-xl"
-            title="View Profile"
-          >
-            <EyeIcon className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => handleViewStats(player)}
-            className="btn-secondary p-2 rounded-xl"
-            title="Shot Chart"
-          >
-            <ChartBarIcon className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => handleEditPlayer(player)}
-            className="p-2 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
-            title="Edit player"
-          >
-            <PencilIcon className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => {
-              setSelectedPlayer(player);
-              setShowDeleteModal(true);
-            }}
-            className="p-2 text-surface-500 dark:text-surface-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
-            title="Delete player"
-          >
-            <TrashIcon className="w-5 h-5" />
-          </button>
+        <div className="flex items-center flex-shrink-0 max-w-[40%] justify-end">
+          <div className="flex items-center gap-1 sm:gap-2 flex-wrap ml-auto justify-end">
+            <button
+              onClick={() => handleViewPlayer(player)}
+              className="btn-primary p-2.5 rounded-xl"
+              title="View Profile"
+            >
+              <EyeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+            <button
+              onClick={() => handleViewStats(player)}
+              className="btn-secondary p-2.5 rounded-xl"
+              title="Shot Chart"
+            >
+              <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+            <button
+              onClick={() => handleEditPlayer(player)}
+              className="p-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
+              title="Edit player"
+            >
+              <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+            <button
+              onClick={() => {
+                setSelectedPlayer(player);
+                setShowDeleteModal(true);
+              }}
+              className="p-2.5 text-surface-500 dark:text-surface-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
+              title="Delete player"
+            >
+              <TrashIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -414,7 +418,7 @@ const Players: React.FC = () => {
               {filteredPlayers.length} player{filteredPlayers.length !== 1 ? "s" : ""} found
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredPlayers.map(renderPlayerCard)}
           </div>
         </>

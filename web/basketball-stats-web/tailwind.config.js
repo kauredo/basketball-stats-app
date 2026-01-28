@@ -55,6 +55,9 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
+      screens: {
+        xs: "375px",
+      },
       colors: {
         ...sharedColors,
       },

@@ -332,7 +332,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Mobile sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-surface-900 border-r border-surface-200 dark:border-surface-800 transform transition-transform duration-300 ease-out lg:hidden flex flex-col ${
+        className={`fixed inset-y-0 left-0 z-50 w-[min(18rem,85vw)] bg-white dark:bg-surface-900 border-r border-surface-200 dark:border-surface-800 transform transition-transform duration-300 ease-out lg:hidden flex flex-col ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         role="dialog"
@@ -342,7 +342,7 @@ export default function Layout({ children }: LayoutProps) {
         {/* Close button for mobile */}
         <button
           onClick={() => setSidebarOpen(false)}
-          className="absolute top-4 right-4 p-2 rounded-lg text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="absolute top-3 right-3 p-2.5 rounded-lg text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
           aria-label="Close navigation menu"
         >
           <XMarkIcon className="h-5 w-5" />

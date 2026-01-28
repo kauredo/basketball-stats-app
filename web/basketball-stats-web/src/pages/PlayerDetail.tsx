@@ -282,7 +282,9 @@ const PlayerDetail: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Breadcrumb */}
-      <Breadcrumb items={[{ label: "Players", href: "/players" }, { label: player.name }]} />
+      <div className="overflow-hidden">
+        <Breadcrumb items={[{ label: "Players", href: "/players" }, { label: player.name }]} />
+      </div>
 
       {/* Header */}
       <div className="bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 rounded-2xl p-4 sm:p-8 text-white shadow-elevated">
@@ -497,15 +499,21 @@ const PlayerDetail: React.FC = () => {
                       return (
                         <div
                           key={zone.label}
-                          className="bg-surface-50 dark:bg-surface-800 rounded-lg p-3 text-center"
+                          className="bg-surface-50 dark:bg-surface-800 rounded-lg p-2 sm:p-3 text-center"
                         >
-                          <p className="text-xs text-surface-500 dark:text-surface-400 mb-1">
+                          <p className="text-[10px] sm:text-xs text-surface-500 dark:text-surface-400 mb-1 truncate">
                             {zone.label}
                           </p>
-                          <p className={`text-xl font-bold tabular-nums ${pctColor}`} data-stat>
+                          <p
+                            className={`text-lg sm:text-xl font-bold tabular-nums ${pctColor}`}
+                            data-stat
+                          >
                             {attempted > 0 ? `${pct}%` : "-"}
                           </p>
-                          <p className="text-xs text-surface-400 tabular-nums" data-stat>
+                          <p
+                            className="text-[10px] sm:text-xs text-surface-400 tabular-nums"
+                            data-stat
+                          >
                             {made}/{attempted}
                           </p>
                         </div>

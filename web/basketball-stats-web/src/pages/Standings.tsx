@@ -154,7 +154,7 @@ const Standings: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
           <h1 className="text-display-lg text-surface-900 dark:text-white mb-2">
             League Standings
@@ -163,9 +163,9 @@ const Standings: React.FC = () => {
             {standingsData?.league?.name} - {standingsData?.league?.season}
           </p>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-3 xs:gap-4">
           {/* Export Buttons */}
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => {
                 if (sortedStandings.length > 0) {
@@ -174,7 +174,7 @@ const Standings: React.FC = () => {
                 }
               }}
               disabled={sortedStandings.length === 0}
-              className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               title="Export to CSV"
             >
               <ArrowDownTrayIcon className="w-4 h-4" />
@@ -183,22 +183,25 @@ const Standings: React.FC = () => {
             <button
               onClick={handleExportSeasonPDF}
               disabled={sortedStandings.length === 0 || isExportingPDF}
-              className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               title="Export Season Summary PDF"
             >
               <DocumentArrowDownIcon className="w-4 h-4" />
-              <span>{isExportingPDF ? "Exporting..." : "Season PDF"}</span>
+              <span className="hidden xs:inline">
+                {isExportingPDF ? "Exporting..." : "Season PDF"}
+              </span>
+              <span className="xs:hidden">{isExportingPDF ? "..." : "PDF"}</span>
             </button>
             <button
               onClick={printPage}
-              className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-xl text-sm"
+              className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-xl text-sm whitespace-nowrap"
               title="Print / Save as PDF"
             >
               <PrinterIcon className="w-4 h-4" />
               <span>Print</span>
             </button>
           </div>
-          <div className="bg-white dark:bg-surface-800 rounded-xl px-4 py-2 border border-surface-200 dark:border-surface-700">
+          <div className="bg-white dark:bg-surface-800 rounded-xl px-4 py-2 border border-surface-200 dark:border-surface-700 flex-shrink-0">
             <div className="text-sm text-surface-600 dark:text-surface-400">Total Games</div>
             <div className="text-2xl font-bold text-surface-900 dark:text-white" data-stat>
               {standingsData?.totalGames || 0}
@@ -412,7 +415,7 @@ const Standings: React.FC = () => {
       {/* Legend */}
       <div className="bg-white dark:bg-surface-800 rounded-2xl shadow-soft p-4 border border-surface-200 dark:border-surface-700">
         <h4 className="section-header mb-3">Legend</h4>
-        <div className="flex flex-wrap gap-6 text-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-3 sm:gap-4 lg:gap-6 text-sm">
           <div className="flex items-center space-x-2">
             <span className="text-surface-600 dark:text-surface-400">W</span>
             <span className="text-surface-500">- Wins</span>

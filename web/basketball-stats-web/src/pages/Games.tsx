@@ -497,7 +497,7 @@ const Games: React.FC = () => {
 
       {/* Create Game Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6">
           <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md shadow-dramatic border border-surface-200 dark:border-surface-700 animate-scale-in">
             <div className="flex items-center justify-between p-6 border-b border-surface-200 dark:border-surface-700">
               <h3 className="text-lg font-semibold text-surface-900 dark:text-surface-50">
@@ -692,7 +692,7 @@ const Games: React.FC = () => {
 
       {/* Quick Game Modal */}
       {showQuickGameModal && (
-        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6">
           <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md shadow-dramatic border border-surface-200 dark:border-surface-700 animate-scale-in">
             <div className="flex items-center justify-between p-6 border-b border-surface-200 dark:border-surface-700">
               <div className="flex items-center gap-3">
@@ -815,7 +815,7 @@ const Games: React.FC = () => {
 
       {/* Quick Team Create Modal */}
       {showQuickTeamModal && (
-        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6">
           <div className="bg-white dark:bg-surface-800 rounded-2xl w-full max-w-md shadow-dramatic border border-surface-200 dark:border-surface-700 animate-scale-in">
             <div className="flex items-center justify-between p-6 border-b border-surface-200 dark:border-surface-700">
               <div className="flex items-center gap-3">

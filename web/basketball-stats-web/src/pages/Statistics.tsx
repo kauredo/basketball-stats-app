@@ -337,7 +337,7 @@ export default function Statistics() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
           <h1 className="text-display-lg text-surface-900 dark:text-white">Statistics Dashboard</h1>
           <p className="text-surface-600 dark:text-surface-400">
@@ -345,7 +345,7 @@ export default function Statistics() {
           </p>
         </div>
         {/* Export Buttons */}
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 flex-shrink-0">
           <button
             onClick={() => {
               if (playersData?.players && playersData.players.length > 0) {
@@ -354,15 +354,16 @@ export default function Statistics() {
               }
             }}
             disabled={!playersData?.players?.length}
-            className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-lg text-sm"
+            className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-lg text-sm whitespace-nowrap"
             title="Export Player Stats to CSV"
           >
             <ArrowDownTrayIcon className="w-4 h-4" />
-            <span>Export CSV</span>
+            <span className="hidden xs:inline">Export CSV</span>
+            <span className="xs:hidden">CSV</span>
           </button>
           <button
             onClick={printPage}
-            className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-lg text-sm"
+            className="btn-secondary flex items-center space-x-1 px-3 py-2 rounded-lg text-sm whitespace-nowrap"
             title="Print / Save as PDF"
           >
             <PrinterIcon className="w-4 h-4" />
@@ -373,7 +374,7 @@ export default function Statistics() {
 
       {/* Tab Navigation */}
       <div
-        className="flex space-x-4 border-b border-surface-200 dark:border-surface-700"
+        className="flex space-x-4 border-b border-surface-200 dark:border-surface-700 overflow-x-auto"
         role="tablist"
         aria-label="Statistics views"
       >
@@ -869,10 +870,11 @@ export default function Statistics() {
                 <XAxis
                   dataKey="teamName"
                   stroke="#a69f96"
-                  fontSize={12}
+                  fontSize={11}
                   angle={-45}
                   textAnchor="end"
                   height={80}
+                  tickFormatter={(value: string) => value.length > 12 ? `${value.slice(0, 10)}…` : value}
                 />
                 <YAxis stroke="#a69f96" fontSize={12} />
                 <Tooltip
@@ -922,10 +924,11 @@ export default function Statistics() {
                 <YAxis
                   dataKey="name"
                   type="category"
-                  width={100}
+                  width={90}
                   stroke="#a69f96"
-                  fontSize={11}
+                  fontSize={10}
                   tickLine={false}
+                  tickFormatter={(value: string) => value.length > 10 ? `${value.slice(0, 8)}…` : value}
                 />
                 <Tooltip
                   contentStyle={{

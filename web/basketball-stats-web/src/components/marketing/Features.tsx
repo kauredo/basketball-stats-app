@@ -60,7 +60,7 @@ export default function Features() {
         </div>
 
         {/* Feature grid with varied layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {features.map((feature, index) => {
             // First feature spans 2 columns on large screens for visual variety
             const isHighlighted = index === 0;

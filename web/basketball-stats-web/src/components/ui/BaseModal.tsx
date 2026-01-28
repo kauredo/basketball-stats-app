@@ -100,7 +100,7 @@ export function BaseModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 !mt-0"
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 sm:p-6 !mt-0"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"

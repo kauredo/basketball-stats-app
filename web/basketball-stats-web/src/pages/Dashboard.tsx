@@ -95,8 +95,8 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Stats row skeleton */}
-        <div className="grid grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
             <div key={i} className="space-y-2">
               <div className="h-12 w-16 bg-surface-200 dark:bg-surface-800 rounded animate-pulse" />
               <div className="h-4 w-20 bg-surface-200 dark:bg-surface-800 rounded animate-pulse" />
@@ -145,8 +145,8 @@ const Dashboard: React.FC = () => {
 
                 <div className="relative flex items-center justify-between">
                   {/* Away Team */}
-                  <div className="flex-1 text-center">
-                    <div className="text-lg font-semibold text-surface-100 mb-1">
+                  <div className="flex-1 text-center min-w-0">
+                    <div className="text-base sm:text-lg font-semibold text-surface-100 mb-1 truncate px-2">
                       {game.awayTeam?.name || "Away"}
                     </div>
                     <div className="stat-display-xl text-white" data-stat>
@@ -155,7 +155,7 @@ const Dashboard: React.FC = () => {
                   </div>
 
                   {/* Center - Game Info */}
-                  <div className="px-8 text-center">
+                  <div className="px-4 sm:px-8 text-center flex-shrink-0">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-status-active/20 text-status-active text-xs font-bold uppercase tracking-wider mb-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-status-active animate-pulse-live" />
                       Live
@@ -169,8 +169,8 @@ const Dashboard: React.FC = () => {
                   </div>
 
                   {/* Home Team */}
-                  <div className="flex-1 text-center">
-                    <div className="text-lg font-semibold text-surface-100 mb-1">
+                  <div className="flex-1 text-center min-w-0">
+                    <div className="text-base sm:text-lg font-semibold text-surface-100 mb-1 truncate px-2">
                       {game.homeTeam?.name || "Home"}
                     </div>
                     <div className="stat-display-xl text-white" data-stat>
@@ -276,13 +276,16 @@ const Dashboard: React.FC = () => {
                     className="group flex items-center gap-4 p-4 rounded-xl bg-surface-100 dark:bg-surface-800/50 hover:bg-surface-200 dark:hover:bg-surface-800 transition-colors"
                   >
                     {/* Teams and Scores */}
-                    <div className="flex-1 grid grid-cols-[1fr,auto,1fr] items-center gap-4">
+                    <div className="flex-1 grid grid-cols-[1fr,auto,1fr] items-center gap-2 sm:gap-4 min-w-0">
                       <div
-                        className={`text-right ${awayWon ? "font-semibold text-surface-900 dark:text-surface-50" : "text-surface-500 dark:text-surface-400"}`}
+                        className={`text-right truncate ${awayWon ? "font-semibold text-surface-900 dark:text-surface-50" : "text-surface-500 dark:text-surface-400"}`}
                       >
                         {game.awayTeam?.name || "Away"}
                       </div>
-                      <div className="flex items-center gap-2 font-mono text-lg" data-stat>
+                      <div
+                        className="flex items-center gap-2 font-mono text-lg flex-shrink-0"
+                        data-stat
+                      >
                         <span
                           className={
                             awayWon
@@ -304,7 +307,7 @@ const Dashboard: React.FC = () => {
                         </span>
                       </div>
                       <div
-                        className={`text-left ${homeWon ? "font-semibold text-surface-900 dark:text-surface-50" : "text-surface-500 dark:text-surface-400"}`}
+                        className={`text-left truncate ${homeWon ? "font-semibold text-surface-900 dark:text-surface-50" : "text-surface-500 dark:text-surface-400"}`}
                       >
                         {game.homeTeam?.name || "Home"}
                       </div>

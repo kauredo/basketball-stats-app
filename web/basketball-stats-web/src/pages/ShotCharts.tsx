@@ -170,30 +170,30 @@ const ShotCharts: React.FC = () => {
 
       {/* Controls */}
       <div className="surface-card p-4">
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           {/* View Mode Toggle */}
-          <div className="flex bg-surface-100 dark:bg-surface-700 rounded-xl p-1">
+          <div className="flex bg-surface-100 dark:bg-surface-700 rounded-xl p-1 flex-shrink-0">
             <button
               onClick={() => setViewMode("player")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors ${
                 viewMode === "player"
                   ? "bg-primary-500 text-white shadow-soft"
                   : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white"
               }`}
             >
               <UserIcon className="w-4 h-4" />
-              <span>Player</span>
+              <span className="hidden sm:inline">Player</span>
             </button>
             <button
               onClick={() => setViewMode("team")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors ${
                 viewMode === "team"
                   ? "bg-primary-500 text-white shadow-soft"
                   : "text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white"
               }`}
             >
               <UsersIcon className="w-4 h-4" />
-              <span>Team</span>
+              <span className="hidden sm:inline">Team</span>
             </button>
           </div>
 
@@ -201,12 +201,14 @@ const ShotCharts: React.FC = () => {
           {viewMode === "player" ? (
             <button
               onClick={() => setShowPlayerModal(true)}
-              className="flex-1 max-w-xs px-3 py-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl text-left flex items-center justify-between hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+              className="flex-1 min-w-0 sm:max-w-xs px-3 py-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl text-left flex items-center justify-between hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
             >
               {selectedPlayerInfo ? (
                 <span className="text-surface-900 dark:text-white truncate">
                   #{selectedPlayerInfo.number} {selectedPlayerInfo.name}
-                  <span className="text-surface-500 ml-1">({selectedPlayerInfo.team})</span>
+                  <span className="text-surface-500 ml-1 hidden xs:inline">
+                    ({selectedPlayerInfo.team})
+                  </span>
                 </span>
               ) : (
                 <span className="text-surface-400">Select a player</span>
@@ -217,7 +219,7 @@ const ShotCharts: React.FC = () => {
             <select
               value={selectedTeamId || ""}
               onChange={(e) => setSelectedTeamId((e.target.value as Id<"teams">) || null)}
-              className="flex-1 max-w-xs px-3 py-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex-1 min-w-0 sm:max-w-xs px-3 py-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">Select a team</option>
               {teamOptions.map((team) => (
@@ -231,14 +233,14 @@ const ShotCharts: React.FC = () => {
           {/* Heatmap Toggle */}
           <button
             onClick={() => setShowHeatmap(!showHeatmap)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-colors ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl font-medium transition-colors flex-shrink-0 ${
               showHeatmap
                 ? "bg-red-600 text-white"
                 : "bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white"
             }`}
           >
             <FireIcon className="w-4 h-4" />
-            <span>Heat Map</span>
+            <span className="hidden sm:inline">Heat Map</span>
           </button>
         </div>
       </div>

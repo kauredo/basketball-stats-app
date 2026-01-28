@@ -181,10 +181,10 @@ const Teams: React.FC = () => {
             <p className="text-surface-600 dark:text-surface-400 text-sm mt-1">{team.city}</p>
           )}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1">
           <button
             onClick={() => handleEditTeam(team)}
-            className="p-2 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
+            className="p-2.5 text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-700 rounded-xl transition-colors"
             title="Edit team"
           >
             <PencilIcon className="w-4 h-4" />
@@ -194,7 +194,7 @@ const Teams: React.FC = () => {
               setSelectedTeam(team);
               setShowDeleteModal(true);
             }}
-            className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-xl transition-colors"
+            className="p-2.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-xl transition-colors"
             title="Delete team"
           >
             <TrashIcon className="w-4 h-4" />
@@ -278,7 +278,7 @@ const Teams: React.FC = () => {
       </div>
 
       {teams.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {teams.map(renderTeamCard)}
         </div>
       ) : (
