@@ -176,6 +176,15 @@ export default defineSchema({
         isQuickGame: v.optional(v.boolean()),
         customHomeTeamName: v.optional(v.string()),
         customAwayTeamName: v.optional(v.string()),
+        // Active roster for this game (players who can play, limited by league settings)
+        activeRoster: v.optional(
+          v.object({
+            homeTeam: v.optional(v.array(v.id("players"))),
+            awayTeam: v.optional(v.array(v.id("players"))),
+          })
+        ),
+        // Override the league roster limit for this game
+        rosterLimitOverride: v.optional(v.number()),
       })
     ),
     userId: v.optional(v.id("users")),

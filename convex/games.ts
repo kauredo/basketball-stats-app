@@ -114,6 +114,10 @@ export const get = query({
     const hasAccess = await canAccessLeague(ctx, user._id, game.leagueId);
     if (!hasAccess) throw new Error("Access denied");
 
+    // Get league settings
+    const league = await ctx.db.get(game.leagueId);
+    const leagueSettings = league?.settings || {};
+
     const homeTeam = await ctx.db.get(game.homeTeamId);
     const awayTeam = await ctx.db.get(game.awayTeamId);
 
@@ -209,6 +213,11 @@ export const get = query({
         homeScore: game.homeScore,
         awayScore: game.awayScore,
         gameSettings: game.gameSettings,
+        leagueSettings: {
+          playersPerRoster: leagueSettings.playersPerRoster ?? 15,
+          quarterMinutes: leagueSettings.quarterMinutes,
+          foulLimit: leagueSettings.foulLimit,
+        },
         // Shot clock state for cross-instance sync
         shotClockSeconds,
         shotClockStartedAt: game.shotClockStartedAt,
@@ -808,6 +817,13 @@ export const updateGameSettings = mutation({
         awayTeam: v.array(v.id("players")),
       })
     ),
+    activeRoster: v.optional(
+      v.object({
+        homeTeam: v.array(v.id("players")),
+        awayTeam: v.array(v.id("players")),
+      })
+    ),
+    rosterLimitOverride: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
@@ -862,6 +878,30 @@ export const updateGameSettings = mutation({
       }
 
       newSettings.startingFive = args.startingFive;
+    }
+
+    if (args.activeRoster) {
+      // Validate players belong to the correct teams
+      for (const playerId of args.activeRoster.homeTeam) {
+        const player = await ctx.db.get(playerId);
+        if (!player || player.teamId !== game.homeTeamId) {
+          throw new Error("Invalid home team player in active roster");
+        }
+      }
+      for (const playerId of args.activeRoster.awayTeam) {
+        const player = await ctx.db.get(playerId);
+        if (!player || player.teamId !== game.awayTeamId) {
+          throw new Error("Invalid away team player in active roster");
+        }
+      }
+      newSettings.activeRoster = args.activeRoster;
+    }
+
+    if (args.rosterLimitOverride !== undefined) {
+      if (args.rosterLimitOverride < 5 || args.rosterLimitOverride > 20) {
+        throw new Error("Roster limit must be between 5 and 20");
+      }
+      newSettings.rosterLimitOverride = args.rosterLimitOverride;
     }
 
     // Update time remaining if quarter minutes changed

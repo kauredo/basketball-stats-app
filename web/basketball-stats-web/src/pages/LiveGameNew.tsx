@@ -91,6 +91,8 @@ const LiveGameNew: React.FC = () => {
   const [lastAction, setLastAction] = useState<LastAction | null>(null);
   const [selectedHomeStarters, setSelectedHomeStarters] = useState<Id<"players">[]>([]);
   const [selectedAwayStarters, setSelectedAwayStarters] = useState<Id<"players">[]>([]);
+  const [homeActiveRoster, setHomeActiveRoster] = useState<Id<"players">[]>([]);
+  const [awayActiveRoster, setAwayActiveRoster] = useState<Id<"players">[]>([]);
   const [isStartingGame, setIsStartingGame] = useState(false);
   const [isCreatingPlayers, setIsCreatingPlayers] = useState(false);
   const isCreatingPlayersRef = useRef(false);
@@ -772,6 +774,15 @@ const LiveGameNew: React.FC = () => {
     [token, gameId, updateGameSettingsMutation]
   );
 
+  // Handler for active roster changes
+  const handleActiveRosterChange = useCallback(
+    (homeRoster: Id<"players">[], awayRoster: Id<"players">[]) => {
+      setHomeActiveRoster(homeRoster);
+      setAwayActiveRoster(awayRoster);
+    },
+    []
+  );
+
   // Handler for starting game with selected starters
   const handleStartGameWithStarters = useCallback(async () => {
     if (!token || !gameId) return;
@@ -779,44 +790,41 @@ const LiveGameNew: React.FC = () => {
 
     setIsStartingGame(true);
     try {
-      // Initialize all roster players for this game (so they can be subbed in)
-      const allHomePlayers = homeTeamPlayersData?.players ?? [];
-      const allAwayPlayers = awayTeamPlayersData?.players ?? [];
-
-      // Initialize home team players
-      for (const player of allHomePlayers) {
-        if (player.active !== false) {
-          try {
-            await initializePlayerForGameMutation({
-              token,
-              gameId: gameId as Id<"games">,
-              playerId: player.id,
-            });
-          } catch {
-            // Player might already be initialized, continue
-          }
+      // Initialize only active roster players for this game (so they can be subbed in)
+      // Initialize home team active roster
+      for (const playerId of homeActiveRoster) {
+        try {
+          await initializePlayerForGameMutation({
+            token,
+            gameId: gameId as Id<"games">,
+            playerId,
+          });
+        } catch {
+          // Player might already be initialized, continue
         }
       }
 
-      // Initialize away team players
-      for (const player of allAwayPlayers) {
-        if (player.active !== false) {
-          try {
-            await initializePlayerForGameMutation({
-              token,
-              gameId: gameId as Id<"games">,
-              playerId: player.id,
-            });
-          } catch {
-            // Player might already be initialized, continue
-          }
+      // Initialize away team active roster
+      for (const playerId of awayActiveRoster) {
+        try {
+          await initializePlayerForGameMutation({
+            token,
+            gameId: gameId as Id<"games">,
+            playerId,
+          });
+        } catch {
+          // Player might already be initialized, continue
         }
       }
 
-      // Save the starters
+      // Save the active roster and starters
       await updateGameSettingsMutation({
         token,
         gameId: gameId as Id<"games">,
+        activeRoster: {
+          homeTeam: homeActiveRoster,
+          awayTeam: awayActiveRoster,
+        },
         startingFive: {
           homeTeam: selectedHomeStarters,
           awayTeam: selectedAwayStarters,
@@ -836,8 +844,8 @@ const LiveGameNew: React.FC = () => {
     gameId,
     selectedHomeStarters,
     selectedAwayStarters,
-    homeTeamPlayersData,
-    awayTeamPlayersData,
+    homeActiveRoster,
+    awayActiveRoster,
     initializePlayerForGameMutation,
     updateGameSettingsMutation,
     startGame,
@@ -960,7 +968,9 @@ const LiveGameNew: React.FC = () => {
               }
               initialHomeStarters={selectedHomeStarters}
               initialAwayStarters={selectedAwayStarters}
+              rosterLimit={game.leagueSettings?.playersPerRoster ?? 15}
               onStartersChange={handleStartersChange}
+              onActiveRosterChange={handleActiveRosterChange}
               onStartGame={handleStartGameWithStarters}
               onCreatePlayers={handleCreatePlayers}
               isStarting={isStartingGame}

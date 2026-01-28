@@ -243,8 +243,12 @@ export default function LiveGameScreen() {
   // Pre-game lineup selection state
   const [homeStarters, setHomeStarters] = useState<Id<"players">[]>([]);
   const [awayStarters, setAwayStarters] = useState<Id<"players">[]>([]);
+  const [homeActiveRoster, setHomeActiveRoster] = useState<Id<"players">[]>([]);
+  const [awayActiveRoster, setAwayActiveRoster] = useState<Id<"players">[]>([]);
   const [isCreatingPlayers, setIsCreatingPlayers] = useState(false);
   const [quarterMinutes, setQuarterMinutes] = useState(12);
+  const [overrideRosterLimit, setOverrideRosterLimit] = useState(false);
+  const [showRosterSettings, setShowRosterSettings] = useState(false);
 
   // Real-time game data from Convex
   const gameData = useQuery(api.games.get, token && gameId ? { token, gameId } : "skip");
@@ -257,6 +261,23 @@ export default function LiveGameScreen() {
     api.shots.getGameShots,
     token && gameId ? { token, gameId } : "skip"
   );
+
+  // Get the game first to access team IDs
+  const game = gameData?.game;
+
+  // Query actual team rosters for pre-game setup
+  const homeTeamPlayersData = useQuery(
+    api.players.list,
+    token && game?.homeTeam?.id ? { token, teamId: game.homeTeam.id } : "skip"
+  );
+  const awayTeamPlayersData = useQuery(
+    api.players.list,
+    token && game?.awayTeam?.id ? { token, teamId: game.awayTeam.id } : "skip"
+  );
+
+  // Get roster limit from league settings
+  const rosterLimit = game?.leagueSettings?.playersPerRoster ?? 15;
+  const effectiveRosterLimit = overrideRosterLimit ? 20 : rosterLimit;
 
   // Shot clock synced with Convex
   const shotClock = useShotClock({
@@ -291,7 +312,6 @@ export default function LiveGameScreen() {
   const createPlayerMutation = useMutation(api.players.create);
   const initializePlayerForGameMutation = useMutation(api.stats.initializePlayerForGame);
 
-  const game = gameData?.game;
   const allStats = liveStats?.stats || [];
   const teamStats = liveStats?.teamStats;
   const homePlayerStats = allStats.filter((s: PlayerStat) => s.isHomeTeam);
@@ -324,43 +344,113 @@ export default function LiveGameScreen() {
     isHomeTeam: game?.homeTeam?.id ? shot.teamId === game.homeTeam.id : undefined,
   }));
 
-  // Initialize starters when data loads for scheduled games
+  // Get roster players (active players from team roster)
+  const homeRosterPlayers = (homeTeamPlayersData?.players ?? []).filter((p) => p.active !== false);
+  const awayRosterPlayers = (awayTeamPlayersData?.players ?? []).filter((p) => p.active !== false);
+
+  // Initialize active roster when roster data loads
   useEffect(() => {
-    if (game?.status === "scheduled" && homePlayerStats.length > 0 && awayPlayerStats.length > 0) {
-      // Check if starters are already configured
-      const settings = (game.gameSettings ?? {}) as GameSettings;
-      const existingStarters = settings?.startingFive;
-
-      const homeStartersList = existingStarters?.homeTeam ?? existingStarters?.home;
-      const awayStartersList = existingStarters?.awayTeam ?? existingStarters?.away;
-
-      if (homeStartersList && homeStartersList.length > 0) {
-        setHomeStarters(homeStartersList as Id<"players">[]);
-      } else if (homeStarters.length === 0) {
-        setHomeStarters(homePlayerStats.slice(0, 5).map((s) => s.playerId));
+    if (game?.status === "scheduled") {
+      // Initialize home active roster
+      if (homeActiveRoster.length === 0 && homeRosterPlayers.length > 0) {
+        const settings = (game.gameSettings ?? {}) as GameSettings & {
+          activeRoster?: { homeTeam?: Id<"players">[]; awayTeam?: Id<"players">[] };
+        };
+        const existingActiveRoster = settings?.activeRoster?.homeTeam;
+        if (existingActiveRoster && existingActiveRoster.length > 0) {
+          setHomeActiveRoster(existingActiveRoster);
+        } else {
+          // Default to first N players up to roster limit
+          setHomeActiveRoster(homeRosterPlayers.slice(0, effectiveRosterLimit).map((p) => p.id));
+        }
       }
 
-      if (awayStartersList && awayStartersList.length > 0) {
-        setAwayStarters(awayStartersList as Id<"players">[]);
-      } else if (awayStarters.length === 0) {
-        setAwayStarters(awayPlayerStats.slice(0, 5).map((s) => s.playerId));
+      // Initialize away active roster
+      if (awayActiveRoster.length === 0 && awayRosterPlayers.length > 0) {
+        const settings = (game.gameSettings ?? {}) as GameSettings & {
+          activeRoster?: { homeTeam?: Id<"players">[]; awayTeam?: Id<"players">[] };
+        };
+        const existingActiveRoster = settings?.activeRoster?.awayTeam;
+        if (existingActiveRoster && existingActiveRoster.length > 0) {
+          setAwayActiveRoster(existingActiveRoster);
+        } else {
+          setAwayActiveRoster(awayRosterPlayers.slice(0, effectiveRosterLimit).map((p) => p.id));
+        }
       }
 
+      // Initialize quarter minutes and roster limit override from settings
+      const settings = (game.gameSettings ?? {}) as GameSettings & {
+        rosterLimitOverride?: number;
+      };
       if (settings?.quarterMinutes && quarterMinutes === 12) {
         setQuarterMinutes(settings.quarterMinutes);
       }
+      if (settings?.rosterLimitOverride && !overrideRosterLimit) {
+        setOverrideRosterLimit(true);
+      }
     }
-  }, [game?.status, game?.gameSettings, homePlayerStats.length, awayPlayerStats.length]);
+  }, [game?.status, game?.gameSettings, homeRosterPlayers.length, awayRosterPlayers.length, effectiveRosterLimit]);
 
-  // Toggle starter selection
+  // Initialize starters from active roster
+  useEffect(() => {
+    if (game?.status === "scheduled") {
+      const settings = (game.gameSettings ?? {}) as GameSettings;
+      const existingStarters = settings?.startingFive;
+
+      // Home starters
+      if (homeStarters.length === 0 && homeActiveRoster.length >= 5) {
+        const homeStartersList = existingStarters?.homeTeam ?? existingStarters?.home;
+        if (homeStartersList && homeStartersList.length > 0) {
+          setHomeStarters(homeStartersList as Id<"players">[]);
+        } else {
+          setHomeStarters(homeActiveRoster.slice(0, 5));
+        }
+      }
+
+      // Away starters
+      if (awayStarters.length === 0 && awayActiveRoster.length >= 5) {
+        const awayStartersList = existingStarters?.awayTeam ?? existingStarters?.away;
+        if (awayStartersList && awayStartersList.length > 0) {
+          setAwayStarters(awayStartersList as Id<"players">[]);
+        } else {
+          setAwayStarters(awayActiveRoster.slice(0, 5));
+        }
+      }
+    }
+  }, [game?.status, game?.gameSettings, homeActiveRoster.length, awayActiveRoster.length]);
+
+  // Toggle active roster selection
+  const toggleActiveRoster = (playerId: Id<"players">, isHome: boolean) => {
+    if (isHome) {
+      if (homeActiveRoster.includes(playerId)) {
+        // Remove from active roster and starters
+        setHomeActiveRoster(homeActiveRoster.filter((id) => id !== playerId));
+        setHomeStarters(homeStarters.filter((id) => id !== playerId));
+      } else if (homeActiveRoster.length < effectiveRosterLimit) {
+        setHomeActiveRoster([...homeActiveRoster, playerId]);
+      }
+    } else {
+      if (awayActiveRoster.includes(playerId)) {
+        setAwayActiveRoster(awayActiveRoster.filter((id) => id !== playerId));
+        setAwayStarters(awayStarters.filter((id) => id !== playerId));
+      } else if (awayActiveRoster.length < effectiveRosterLimit) {
+        setAwayActiveRoster([...awayActiveRoster, playerId]);
+      }
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  // Toggle starter selection (only for players in active roster)
   const toggleStarter = (playerId: Id<"players">, isHome: boolean) => {
     if (isHome) {
+      if (!homeActiveRoster.includes(playerId)) return; // Must be in active roster
       if (homeStarters.includes(playerId)) {
         setHomeStarters(homeStarters.filter((id) => id !== playerId));
       } else if (homeStarters.length < 5) {
         setHomeStarters([...homeStarters, playerId]);
       }
     } else {
+      if (!awayActiveRoster.includes(playerId)) return;
       if (awayStarters.includes(playerId)) {
         setAwayStarters(awayStarters.filter((id) => id !== playerId));
       } else if (awayStarters.length < 5) {
@@ -376,9 +466,10 @@ export default function LiveGameScreen() {
 
     setIsCreatingPlayers(true);
     try {
-      // Get current player count to determine starting number
-      const teamPlayers = teamId === game?.homeTeam?.id ? homePlayerStats : awayPlayerStats;
-      const startingNumber = teamPlayers.length + 1;
+      // Get max jersey number from team roster
+      const rosterPlayers = teamId === game?.homeTeam?.id ? homeRosterPlayers : awayRosterPlayers;
+      const maxJerseyNumber = rosterPlayers.reduce((max, p) => Math.max(max, p.number ?? 0), 0);
+      const startingNumber = maxJerseyNumber + 1;
 
       for (let i = 0; i < count; i++) {
         const playerNumber = startingNumber + i;
@@ -418,26 +509,39 @@ export default function LiveGameScreen() {
     }
 
     try {
-      // Save settings first
+      // Initialize all active roster players for this game (so they can be subbed in)
+      for (const playerId of homeActiveRoster) {
+        try {
+          await initializePlayerForGameMutation({ token, gameId, playerId });
+        } catch {
+          // Player might already be initialized, continue
+        }
+      }
+      for (const playerId of awayActiveRoster) {
+        try {
+          await initializePlayerForGameMutation({ token, gameId, playerId });
+        } catch {
+          // Player might already be initialized, continue
+        }
+      }
+
+      // Save active roster, starting lineup, and roster limit override
       await updateGameSettings({
         token,
         gameId,
         quarterMinutes,
+        activeRoster: {
+          homeTeam: homeActiveRoster,
+          awayTeam: awayActiveRoster,
+        },
         startingFive: {
           homeTeam: homeStarters,
           awayTeam: awayStarters,
         },
+        rosterLimitOverride: overrideRosterLimit ? 20 : undefined,
       });
 
-      // Set starters on court
-      for (const playerId of homeStarters) {
-        await substituteMutation({ token, gameId, playerId, isOnCourt: true });
-      }
-      for (const playerId of awayStarters) {
-        await substituteMutation({ token, gameId, playerId, isOnCourt: true });
-      }
-
-      // Start the game
+      // Start the game (this will set starters on court)
       await startGame({ token, gameId });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       soundFeedback.buzzer?.();
@@ -1104,30 +1208,93 @@ export default function LiveGameScreen() {
             </View>
           </View>
 
-          {/* Away Team Starters */}
+          {/* Roster Settings */}
           <View className="bg-white dark:bg-surface-800 mx-4 mt-4 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-            <View className="flex-row justify-between items-center mb-3">
+            <TouchableOpacity
+              onPress={() => setShowRosterSettings(!showRosterSettings)}
+              className="flex-row items-center justify-between"
+            >
+              <View className="flex-row items-center">
+                <Icon name="settings" size={20} color="#6B7280" />
+                <Text className="text-surface-900 dark:text-white text-base font-semibold ml-2">
+                  Roster Settings
+                </Text>
+              </View>
+              <Icon
+                name={showRosterSettings ? "chevron-up" : "chevron-down"}
+                size={20}
+                color="#6B7280"
+              />
+            </TouchableOpacity>
+
+            {showRosterSettings && (
+              <View className="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-1">
+                    <Text className="text-surface-700 dark:text-surface-300 text-sm font-medium">
+                      Override Roster Limit
+                    </Text>
+                    <Text className="text-surface-500 dark:text-surface-400 text-xs mt-0.5">
+                      League limit: {rosterLimit} players per game
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setOverrideRosterLimit(!overrideRosterLimit);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }}
+                    className={`w-12 h-7 rounded-full justify-center ${
+                      overrideRosterLimit ? "bg-primary-500" : "bg-surface-300 dark:bg-surface-600"
+                    }`}
+                  >
+                    <View
+                      className={`w-5 h-5 rounded-full bg-white shadow-sm ${
+                        overrideRosterLimit ? "ml-6" : "ml-1"
+                      }`}
+                    />
+                  </TouchableOpacity>
+                </View>
+                {overrideRosterLimit && (
+                  <Text className="text-amber-600 dark:text-amber-400 text-xs mt-2">
+                    Roster limit increased to 20 players for this game
+                  </Text>
+                )}
+              </View>
+            )}
+          </View>
+
+          {/* Away Team Roster & Starters */}
+          <View className="bg-white dark:bg-surface-800 mx-4 mt-4 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+            <View className="flex-row justify-between items-center mb-1">
               <Text className="text-surface-900 dark:text-white text-base font-semibold">
-                {game.awayTeam?.name} Starters
+                {game.awayTeam?.name}
               </Text>
-              <Text
-                className={`text-sm font-medium ${
-                  awayStarters.length === 5 ? "text-green-500" : "text-primary-500"
-                }`}
-              >
-                {awayStarters.length}/5 selected
-              </Text>
+              <View className="flex-row items-center">
+                <Text className="text-blue-500 text-xs font-medium mr-3">
+                  Roster: {awayActiveRoster.length}/{effectiveRosterLimit}
+                </Text>
+                <Text
+                  className={`text-xs font-medium ${
+                    awayStarters.length === 5 ? "text-green-500" : "text-primary-500"
+                  }`}
+                >
+                  Starters: {awayStarters.length}/5
+                </Text>
+              </View>
             </View>
+            <Text className="text-surface-500 dark:text-surface-400 text-xs mb-3">
+              Tap checkbox for roster, tap player for starter
+            </Text>
 
             {/* Not enough players warning */}
-            {awayPlayerStats.length < 5 && (
+            {awayRosterPlayers.length < 5 && (
               <View className="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center flex-1">
                     <Icon name="alert" size={16} color="#F59E0B" />
                     <Text className="text-amber-700 dark:text-amber-300 text-sm ml-2">
-                      Need {5 - awayPlayerStats.length} more player
-                      {5 - awayPlayerStats.length > 1 ? "s" : ""}
+                      Need {5 - awayRosterPlayers.length} more player
+                      {5 - awayRosterPlayers.length > 1 ? "s" : ""}
                     </Text>
                   </View>
                   <TouchableOpacity
@@ -1135,7 +1302,7 @@ export default function LiveGameScreen() {
                       game.awayTeam?.id &&
                       handleCreatePlayers(
                         game.awayTeam.id as Id<"teams">,
-                        5 - awayPlayerStats.length
+                        5 - awayRosterPlayers.length
                       )
                     }
                     disabled={isCreatingPlayers}
@@ -1143,64 +1310,99 @@ export default function LiveGameScreen() {
                   >
                     <Icon name="plus" size={14} color="#FFFFFF" />
                     <Text className="text-white text-sm font-medium ml-1">
-                      {isCreatingPlayers ? "Adding..." : `Add ${5 - awayPlayerStats.length}`}
+                      {isCreatingPlayers ? "Adding..." : `Add ${5 - awayRosterPlayers.length}`}
                     </Text>
                   </TouchableOpacity>
                 </View>
               </View>
             )}
 
-            {awayPlayerStats.length === 0 ? (
+            {awayRosterPlayers.length === 0 ? (
               <View className="py-6 items-center">
                 <Icon name="users" size={32} color="#9CA3AF" />
                 <Text className="text-surface-500 mt-2">No players on this team</Text>
               </View>
             ) : (
-              awayPlayerStats.map((stat) => (
-                <TouchableOpacity
-                  key={stat.id}
-                  onPress={() => toggleStarter(stat.playerId, false)}
-                  className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
-                    awayStarters.includes(stat.playerId)
-                      ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
-                      : "bg-surface-100 dark:bg-surface-700"
-                  }`}
-                >
-                  <Text className="text-surface-900 dark:text-white font-medium">
-                    #{stat.player?.number} {stat.player?.name}
-                  </Text>
-                  {awayStarters.includes(stat.playerId) && (
-                    <Icon name="check" size={20} color="#F97316" />
-                  )}
-                </TouchableOpacity>
-              ))
+              awayRosterPlayers.map((player) => {
+                const isInActiveRoster = awayActiveRoster.includes(player.id);
+                const isStarter = awayStarters.includes(player.id);
+                return (
+                  <View
+                    key={player.id}
+                    className={`flex-row items-center p-3 rounded-lg mb-2 ${
+                      isStarter
+                        ? "bg-green-100 dark:bg-green-900/30 border-2 border-green-500"
+                        : isInActiveRoster
+                          ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700"
+                          : "bg-surface-100 dark:bg-surface-700"
+                    }`}
+                  >
+                    {/* Active Roster Checkbox */}
+                    <TouchableOpacity
+                      onPress={() => toggleActiveRoster(player.id, false)}
+                      className={`w-6 h-6 rounded border-2 mr-3 items-center justify-center ${
+                        isInActiveRoster
+                          ? "bg-blue-500 border-blue-500"
+                          : "border-surface-400 dark:border-surface-500"
+                      }`}
+                    >
+                      {isInActiveRoster && <Icon name="check" size={14} color="#FFFFFF" />}
+                    </TouchableOpacity>
+
+                    {/* Player Info - Tap to toggle starter */}
+                    <TouchableOpacity
+                      onPress={() => toggleStarter(player.id, false)}
+                      disabled={!isInActiveRoster}
+                      className="flex-1 flex-row items-center justify-between"
+                      style={{ opacity: isInActiveRoster ? 1 : 0.5 }}
+                    >
+                      <Text className="text-surface-900 dark:text-white font-medium">
+                        #{player.number} {player.name}
+                      </Text>
+                      {isStarter && (
+                        <View className="bg-green-500 px-2 py-0.5 rounded">
+                          <Text className="text-white text-xs font-medium">START</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                );
+              })
             )}
           </View>
 
-          {/* Home Team Starters */}
+          {/* Home Team Roster & Starters */}
           <View className="bg-white dark:bg-surface-800 mx-4 mt-4 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-            <View className="flex-row justify-between items-center mb-3">
+            <View className="flex-row justify-between items-center mb-1">
               <Text className="text-surface-900 dark:text-white text-base font-semibold">
-                {game.homeTeam?.name} Starters
+                {game.homeTeam?.name}
               </Text>
-              <Text
-                className={`text-sm font-medium ${
-                  homeStarters.length === 5 ? "text-green-500" : "text-primary-500"
-                }`}
-              >
-                {homeStarters.length}/5 selected
-              </Text>
+              <View className="flex-row items-center">
+                <Text className="text-blue-500 text-xs font-medium mr-3">
+                  Roster: {homeActiveRoster.length}/{effectiveRosterLimit}
+                </Text>
+                <Text
+                  className={`text-xs font-medium ${
+                    homeStarters.length === 5 ? "text-green-500" : "text-primary-500"
+                  }`}
+                >
+                  Starters: {homeStarters.length}/5
+                </Text>
+              </View>
             </View>
+            <Text className="text-surface-500 dark:text-surface-400 text-xs mb-3">
+              Tap checkbox for roster, tap player for starter
+            </Text>
 
             {/* Not enough players warning */}
-            {homePlayerStats.length < 5 && (
+            {homeRosterPlayers.length < 5 && (
               <View className="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center flex-1">
                     <Icon name="alert" size={16} color="#F59E0B" />
                     <Text className="text-amber-700 dark:text-amber-300 text-sm ml-2">
-                      Need {5 - homePlayerStats.length} more player
-                      {5 - homePlayerStats.length > 1 ? "s" : ""}
+                      Need {5 - homeRosterPlayers.length} more player
+                      {5 - homeRosterPlayers.length > 1 ? "s" : ""}
                     </Text>
                   </View>
                   <TouchableOpacity
@@ -1208,7 +1410,7 @@ export default function LiveGameScreen() {
                       game.homeTeam?.id &&
                       handleCreatePlayers(
                         game.homeTeam.id as Id<"teams">,
-                        5 - homePlayerStats.length
+                        5 - homeRosterPlayers.length
                       )
                     }
                     disabled={isCreatingPlayers}
@@ -1216,37 +1418,64 @@ export default function LiveGameScreen() {
                   >
                     <Icon name="plus" size={14} color="#FFFFFF" />
                     <Text className="text-white text-sm font-medium ml-1">
-                      {isCreatingPlayers ? "Adding..." : `Add ${5 - homePlayerStats.length}`}
+                      {isCreatingPlayers ? "Adding..." : `Add ${5 - homeRosterPlayers.length}`}
                     </Text>
                   </TouchableOpacity>
                 </View>
               </View>
             )}
 
-            {homePlayerStats.length === 0 ? (
+            {homeRosterPlayers.length === 0 ? (
               <View className="py-6 items-center">
                 <Icon name="users" size={32} color="#9CA3AF" />
                 <Text className="text-surface-500 mt-2">No players on this team</Text>
               </View>
             ) : (
-              homePlayerStats.map((stat) => (
-                <TouchableOpacity
-                  key={stat.id}
-                  onPress={() => toggleStarter(stat.playerId, true)}
-                  className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
-                    homeStarters.includes(stat.playerId)
-                      ? "bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500"
-                      : "bg-surface-100 dark:bg-surface-700"
-                  }`}
-                >
-                  <Text className="text-surface-900 dark:text-white font-medium">
-                    #{stat.player?.number} {stat.player?.name}
-                  </Text>
-                  {homeStarters.includes(stat.playerId) && (
-                    <Icon name="check" size={20} color="#F97316" />
-                  )}
-                </TouchableOpacity>
-              ))
+              homeRosterPlayers.map((player) => {
+                const isInActiveRoster = homeActiveRoster.includes(player.id);
+                const isStarter = homeStarters.includes(player.id);
+                return (
+                  <View
+                    key={player.id}
+                    className={`flex-row items-center p-3 rounded-lg mb-2 ${
+                      isStarter
+                        ? "bg-green-100 dark:bg-green-900/30 border-2 border-green-500"
+                        : isInActiveRoster
+                          ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700"
+                          : "bg-surface-100 dark:bg-surface-700"
+                    }`}
+                  >
+                    {/* Active Roster Checkbox */}
+                    <TouchableOpacity
+                      onPress={() => toggleActiveRoster(player.id, true)}
+                      className={`w-6 h-6 rounded border-2 mr-3 items-center justify-center ${
+                        isInActiveRoster
+                          ? "bg-blue-500 border-blue-500"
+                          : "border-surface-400 dark:border-surface-500"
+                      }`}
+                    >
+                      {isInActiveRoster && <Icon name="check" size={14} color="#FFFFFF" />}
+                    </TouchableOpacity>
+
+                    {/* Player Info - Tap to toggle starter */}
+                    <TouchableOpacity
+                      onPress={() => toggleStarter(player.id, true)}
+                      disabled={!isInActiveRoster}
+                      className="flex-1 flex-row items-center justify-between"
+                      style={{ opacity: isInActiveRoster ? 1 : 0.5 }}
+                    >
+                      <Text className="text-surface-900 dark:text-white font-medium">
+                        #{player.number} {player.name}
+                      </Text>
+                      {isStarter && (
+                        <View className="bg-green-500 px-2 py-0.5 rounded">
+                          <Text className="text-white text-xs font-medium">START</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                );
+              })
             )}
           </View>
 
