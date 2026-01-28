@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { BaseModal, ModalHeader, ModalBody, ModalFooter, ModalCancelButton } from "../ui/BaseModal";
 import {
   DocumentArrowDownIcon,
@@ -51,6 +51,7 @@ export function ExportModal({
   const [includeHeatmap, setIncludeHeatmap] = useState(false);
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [contentOptions, setContentOptions] = useState<ContentOption[]>([
     {
       id: "boxScore",
@@ -94,6 +95,37 @@ export function ExportModal({
       actions.reset();
     }
   }, [isOpen, actions]);
+
+  // Regenerate preview when options change (if preview is open)
+  const regeneratePreview = useCallback(async () => {
+    if (!showPreview || !gameData || isRegenerating) return;
+
+    setIsRegenerating(true);
+    const shotsEnabled = contentOptions.find((o) => o.id === "shotCharts")?.enabled;
+
+    // Small delay to let the PrintableShotChart update with new theme/heatmap
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const blob = await actions.previewGameReportPDF(gameData, {
+      theme,
+      homeCourtRef: shotsEnabled ? homeCourtRef : undefined,
+      awayCourtRef: shotsEnabled ? awayCourtRef : undefined,
+    });
+
+    if (blob) {
+      setPreviewBlob(blob);
+    }
+    setIsRegenerating(false);
+  }, [showPreview, gameData, theme, contentOptions, actions, isRegenerating]);
+
+  // Auto-refresh preview when theme or content options change
+  useEffect(() => {
+    if (showPreview && gameData && !isRegenerating) {
+      regeneratePreview();
+    }
+    // Only trigger on theme/contentOptions/includeHeatmap changes, not on every dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [theme, includeHeatmap]);
 
   const toggleContentOption = (id: string) => {
     setContentOptions((prev) =>
@@ -467,6 +499,7 @@ export function ExportModal({
         pdfBlob={previewBlob}
         filename={getPreviewFilename()}
         title="Game Report Preview"
+        isRegenerating={isRegenerating}
       />
     </BaseModal>
   );

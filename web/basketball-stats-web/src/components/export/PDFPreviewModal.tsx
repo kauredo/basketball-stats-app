@@ -14,6 +14,7 @@ interface PDFPreviewModalProps {
   pdfBlob: Blob | null;
   filename: string;
   title?: string;
+  isRegenerating?: boolean;
 }
 
 export function PDFPreviewModal({
@@ -22,6 +23,7 @@ export function PDFPreviewModal({
   pdfBlob,
   filename,
   title = "PDF Preview",
+  isRegenerating = false,
 }: PDFPreviewModalProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
@@ -58,7 +60,7 @@ export function PDFPreviewModal({
       />
 
       <ModalBody scrollable={false} className="p-0">
-        <div className="w-full h-[70vh] bg-surface-100 dark:bg-surface-900">
+        <div className="w-full h-[70vh] bg-surface-100 dark:bg-surface-900 relative">
           {pdfUrl ? (
             <iframe
               src={pdfUrl}
@@ -69,6 +71,17 @@ export function PDFPreviewModal({
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-surface-500 dark:text-surface-400">
                 Loading preview...
+              </div>
+            </div>
+          )}
+          {/* Regenerating overlay */}
+          {isRegenerating && (
+            <div className="absolute inset-0 bg-white/80 dark:bg-surface-900/80 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent" />
+                <span className="text-sm font-medium text-surface-600 dark:text-surface-400">
+                  Updating preview...
+                </span>
               </div>
             </div>
           )}
