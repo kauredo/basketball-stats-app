@@ -47,6 +47,8 @@ interface GameFlowChartProps {
   runs: ScoringRun[];
   homeTeamName: string;
   awayTeamName: string;
+  homeTeamColor?: string;
+  awayTeamColor?: string;
   summary: {
     finalHomeScore: number;
     finalAwayScore: number;
@@ -116,6 +118,8 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
   runs,
   homeTeamName,
   awayTeamName,
+  homeTeamColor = "#f97316", // Default orange for home
+  awayTeamColor = "#3b82f6", // Default blue for away
   summary,
 }) => {
   const [showRuns, setShowRuns] = useState(true);
@@ -228,7 +232,7 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
                     x2={endEvent.gameTimeElapsed}
                     y1={run.team === "home" ? 0 : yDomain[0]}
                     y2={run.team === "home" ? yDomain[1] : 0}
-                    fill={run.team === "home" ? "#3b82f6" : "#f97316"}
+                    fill={run.team === "home" ? homeTeamColor : awayTeamColor}
                     fillOpacity={0.1}
                   />
                 );
@@ -255,9 +259,9 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
             {/* Main line with gradient based on score differential */}
             <defs>
               <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" />
+                <stop offset="0%" stopColor={awayTeamColor} />
                 <stop offset="50%" stopColor="#6b7280" />
-                <stop offset="100%" stopColor="#f97316" />
+                <stop offset="100%" stopColor={homeTeamColor} />
               </linearGradient>
             </defs>
             <Line
@@ -268,7 +272,7 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
               dot={false}
               activeDot={{
                 r: 6,
-                fill: "#f97316",
+                fill: homeTeamColor,
                 stroke: "#fff",
                 strokeWidth: 2,
               }}
@@ -280,13 +284,17 @@ export const GameFlowChart: React.FC<GameFlowChartProps> = ({
         <div className="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
           <div className="grid grid-cols-4 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-primary-500">+{summary.largestLead.home}</p>
+              <p className="text-2xl font-bold" style={{ color: homeTeamColor }}>
+                +{summary.largestLead.home}
+              </p>
               <p className="text-xs text-surface-500 dark:text-surface-400">
                 {homeTeamName} largest
               </p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-blue-500">+{summary.largestLead.away}</p>
+              <p className="text-2xl font-bold" style={{ color: awayTeamColor }}>
+                +{summary.largestLead.away}
+              </p>
               <p className="text-xs text-surface-500 dark:text-surface-400">
                 {awayTeamName} largest
               </p>

@@ -343,6 +343,7 @@ export const create = mutation({
     weightKg: v.optional(v.number()),
     birthDate: v.optional(v.string()),
     active: v.optional(v.boolean()),
+    email: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
@@ -369,6 +370,18 @@ export const create = mutation({
       throw new Error("Jersey number already taken on this team");
     }
 
+    // Try to auto-link to user if email provided
+    let userId: any = undefined;
+    if (args.email) {
+      const matchingUser = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", args.email!.toLowerCase()))
+        .first();
+      if (matchingUser) {
+        userId = matchingUser._id;
+      }
+    }
+
     const playerId = await ctx.db.insert("players", {
       teamId: args.teamId,
       name: args.name,
@@ -378,6 +391,8 @@ export const create = mutation({
       weightKg: args.weightKg,
       birthDate: args.birthDate,
       active: args.active ?? true,
+      email: args.email?.toLowerCase(),
+      userId,
     });
 
     const player = await ctx.db.get(playerId);
@@ -392,6 +407,8 @@ export const create = mutation({
         weightKg: player!.weightKg,
         birthDate: player!.birthDate,
         active: player!.active,
+        email: player!.email,
+        userId: player!.userId,
         createdAt: player!._creationTime,
       },
       message: "Player created successfully",
@@ -413,6 +430,7 @@ export const update = mutation({
     weightKg: v.optional(v.number()),
     birthDate: v.optional(v.string()),
     active: v.optional(v.boolean()),
+    email: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
@@ -455,6 +473,23 @@ export const update = mutation({
     if (args.birthDate !== undefined) updates.birthDate = args.birthDate;
     if (args.active !== undefined) updates.active = args.active;
 
+    // Handle email update with auto-linking
+    if (args.email !== undefined) {
+      const newEmail = args.email?.toLowerCase();
+      updates.email = newEmail;
+
+      // Try to auto-link to user if email changed
+      if (newEmail && newEmail !== player.email) {
+        const matchingUser = await ctx.db
+          .query("users")
+          .withIndex("by_email", (q) => q.eq("email", newEmail))
+          .first();
+        updates.userId = matchingUser?._id;
+      } else if (!newEmail) {
+        updates.userId = undefined;
+      }
+    }
+
     await ctx.db.patch(args.playerId, updates);
 
     const updatedPlayer = await ctx.db.get(args.playerId);
@@ -469,6 +504,8 @@ export const update = mutation({
         weightKg: updatedPlayer!.weightKg,
         birthDate: updatedPlayer!.birthDate,
         active: updatedPlayer!.active,
+        email: updatedPlayer!.email,
+        userId: updatedPlayer!.userId,
         createdAt: updatedPlayer!._creationTime,
       },
       message: "Player updated successfully",

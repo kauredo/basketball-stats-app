@@ -95,6 +95,12 @@ export const list = query({
               }
             : null,
           createdAt: team._creationTime,
+          // Team colors
+          primaryColor: team.primaryColor,
+          secondaryColor: team.secondaryColor,
+          // Team links
+          websiteUrl: team.websiteUrl,
+          socialLinks: team.socialLinks,
           // Include players for frontend use (player comparison, shot charts, etc.)
           players: players.map((p) => ({
             id: p._id,
@@ -203,6 +209,12 @@ export const get = query({
           active: player.active,
         })),
         createdAt: team._creationTime,
+        // Team colors
+        primaryColor: team.primaryColor,
+        secondaryColor: team.secondaryColor,
+        // Team links
+        websiteUrl: team.websiteUrl,
+        socialLinks: team.socialLinks,
       },
     };
   },
@@ -218,6 +230,19 @@ export const create = mutation({
     logoUrl: v.optional(v.string()),
     logoStorageId: v.optional(v.id("_storage")),
     description: v.optional(v.string()),
+    primaryColor: v.optional(v.string()),
+    secondaryColor: v.optional(v.string()),
+    websiteUrl: v.optional(v.string()),
+    socialLinks: v.optional(
+      v.object({
+        instagram: v.optional(v.string()),
+        twitter: v.optional(v.string()),
+        facebook: v.optional(v.string()),
+        youtube: v.optional(v.string()),
+        tiktok: v.optional(v.string()),
+        linkedin: v.optional(v.string()),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
@@ -248,6 +273,10 @@ export const create = mutation({
       description: args.description,
       leagueId: args.leagueId,
       userId: user._id,
+      primaryColor: args.primaryColor,
+      secondaryColor: args.secondaryColor,
+      websiteUrl: args.websiteUrl,
+      socialLinks: args.socialLinks,
     });
 
     const team = await ctx.db.get(teamId);
@@ -260,6 +289,10 @@ export const create = mutation({
         city: team!.city,
         logoUrl,
         description: team!.description,
+        primaryColor: team!.primaryColor,
+        secondaryColor: team!.secondaryColor,
+        websiteUrl: team!.websiteUrl,
+        socialLinks: team!.socialLinks,
         createdAt: team!._creationTime,
       },
       message: "Team created successfully",
@@ -278,6 +311,19 @@ export const update = mutation({
     logoStorageId: v.optional(v.id("_storage")),
     clearLogo: v.optional(v.boolean()),
     description: v.optional(v.string()),
+    primaryColor: v.optional(v.string()),
+    secondaryColor: v.optional(v.string()),
+    websiteUrl: v.optional(v.string()),
+    socialLinks: v.optional(
+      v.object({
+        instagram: v.optional(v.string()),
+        twitter: v.optional(v.string()),
+        facebook: v.optional(v.string()),
+        youtube: v.optional(v.string()),
+        tiktok: v.optional(v.string()),
+        linkedin: v.optional(v.string()),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
@@ -312,6 +358,10 @@ export const update = mutation({
     if (args.name !== undefined) updates.name = args.name;
     if (args.city !== undefined) updates.city = args.city;
     if (args.description !== undefined) updates.description = args.description;
+    if (args.primaryColor !== undefined) updates.primaryColor = args.primaryColor;
+    if (args.secondaryColor !== undefined) updates.secondaryColor = args.secondaryColor;
+    if (args.websiteUrl !== undefined) updates.websiteUrl = args.websiteUrl;
+    if (args.socialLinks !== undefined) updates.socialLinks = args.socialLinks;
 
     // Handle logo updates
     if (args.clearLogo) {
@@ -349,6 +399,10 @@ export const update = mutation({
         city: updatedTeam!.city,
         logoUrl,
         description: updatedTeam!.description,
+        primaryColor: updatedTeam!.primaryColor,
+        secondaryColor: updatedTeam!.secondaryColor,
+        websiteUrl: updatedTeam!.websiteUrl,
+        socialLinks: updatedTeam!.socialLinks,
         createdAt: updatedTeam!._creationTime,
       },
       message: "Team updated successfully",

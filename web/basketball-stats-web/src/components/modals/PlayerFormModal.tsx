@@ -12,6 +12,7 @@ export interface PlayerFormData {
   heightCm: string;
   weightKg: string;
   active?: boolean;
+  email?: string;
 }
 
 export interface PlayerFormModalProps {
@@ -24,7 +25,7 @@ export interface PlayerFormModalProps {
   ) => Promise<void>;
   isSubmitting?: boolean;
   /** If provided, modal is in edit mode */
-  initialData?: Partial<PlayerFormData> & { imageUrl?: string };
+  initialData?: Partial<PlayerFormData> & { imageUrl?: string; email?: string; userId?: string };
   /** Team name to show in create mode title */
   teamName?: string;
   /** Mode determines title and button text */
@@ -69,6 +70,7 @@ export function PlayerFormModal({
     heightCm: "",
     weightKg: "",
     active: true,
+    email: "",
   });
   const [errors, setErrors] = useState<{ name?: string; number?: string }>({});
   const [pendingImageStorageId, setPendingImageStorageId] = useState<Id<"_storage"> | null>(null);
@@ -84,6 +86,7 @@ export function PlayerFormModal({
         heightCm: initialData?.heightCm?.toString() || "",
         weightKg: initialData?.weightKg?.toString() || "",
         active: initialData?.active ?? true,
+        email: initialData?.email || "",
       });
       setErrors({});
       setPendingImageStorageId(null);
@@ -99,6 +102,7 @@ export function PlayerFormModal({
       heightCm: "",
       weightKg: "",
       active: true,
+      email: "",
     });
     setErrors({});
     setPendingImageStorageId(null);
@@ -246,6 +250,32 @@ export function PlayerFormModal({
               placeholder="82"
             />
           </div>
+        </div>
+
+        {/* Email (for user account linking) */}
+        <div>
+          <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+            Email
+            <span className="text-surface-500 font-normal ml-1">(for account linking)</span>
+          </label>
+          <input
+            type="email"
+            value={form.email || ""}
+            onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+            className="w-full bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl px-3 py-2 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="player@example.com"
+          />
+          <p className="mt-1 text-xs text-surface-500">
+            If the player has an account with this email, their profile will be linked automatically.
+          </p>
+          {initialData?.userId && (
+            <p className="mt-1 text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              Linked to user account
+            </p>
+          )}
         </div>
 
         {/* Active Status (edit mode only) */}

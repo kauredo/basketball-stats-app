@@ -104,6 +104,21 @@ export default defineSchema({
     description: v.optional(v.string()),
     userId: v.optional(v.id("users")),
     leagueId: v.id("leagues"),
+    // Team colors
+    primaryColor: v.optional(v.string()), // Hex color "#3B82F6"
+    secondaryColor: v.optional(v.string()), // Hex color "#FFFFFF"
+    // Team links
+    websiteUrl: v.optional(v.string()),
+    socialLinks: v.optional(
+      v.object({
+        instagram: v.optional(v.string()),
+        twitter: v.optional(v.string()),
+        facebook: v.optional(v.string()),
+        youtube: v.optional(v.string()),
+        tiktok: v.optional(v.string()),
+        linkedin: v.optional(v.string()),
+      })
+    ),
   })
     .index("by_league", ["leagueId"])
     .index("by_name_league", ["leagueId", "name"])
@@ -123,10 +138,15 @@ export default defineSchema({
     active: v.boolean(),
     imageUrl: v.optional(v.string()), // External URL (legacy support)
     imageStorageId: v.optional(v.id("_storage")), // Convex file storage ID
+    // User linking
+    email: v.optional(v.string()),
+    userId: v.optional(v.id("users")), // Links player to user account
   })
     .index("by_team", ["teamId"])
     .index("by_team_number", ["teamId", "number"])
-    .index("by_team_active", ["teamId", "active"]),
+    .index("by_team_active", ["teamId", "active"])
+    .index("by_email", ["email"])
+    .index("by_user", ["userId"]),
 
   // Games
   games: defineTable({
@@ -191,6 +211,8 @@ export default defineSchema({
     // Shot clock state (for cross-instance sync)
     shotClockSeconds: v.optional(v.number()), // Seconds remaining when paused/reset
     shotClockStartedAt: v.optional(v.number()), // Server timestamp when clock started (null = paused)
+    // Game video
+    videoUrl: v.optional(v.string()), // YouTube URL for game recording
   })
     .index("by_league", ["leagueId"])
     .index("by_league_status", ["leagueId", "status"])
@@ -383,4 +405,27 @@ export default defineSchema({
     .index("by_game_team", ["gameId", "teamId"])
     .index("by_team", ["teamId"])
     .index("by_game_active", ["gameId", "isActive"]),
+
+  // Team Memberships - links users to teams with roles
+  teamMemberships: defineTable({
+    teamId: v.id("teams"),
+    userId: v.id("users"),
+    role: v.union(
+      v.literal("coach"),
+      v.literal("assistant"),
+      v.literal("player"),
+      v.literal("manager")
+    ),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("active"),
+      v.literal("removed")
+    ),
+    playerId: v.optional(v.id("players")), // Link to player record if role is "player"
+    joinedAt: v.optional(v.number()),
+  })
+    .index("by_team", ["teamId"])
+    .index("by_user", ["userId"])
+    .index("by_team_user", ["teamId", "userId"])
+    .index("by_team_status", ["teamId", "status"]),
 });

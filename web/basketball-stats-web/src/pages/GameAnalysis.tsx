@@ -4,7 +4,14 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "../contexts/AuthContext";
 import type { Id } from "../../../../convex/_generated/dataModel";
-import type { GameSettings, ExportShot, GameEvent, TeamSummary } from "@basketball-stats/shared";
+import {
+  extractYouTubeId,
+  resolveTeamColor,
+  type GameSettings,
+  type ExportShot,
+  type GameEvent,
+  type TeamSummary,
+} from "@basketball-stats/shared";
 import {
   TrophyIcon,
   ChartBarIcon,
@@ -33,6 +40,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { YouTubeEmbed } from "../components/ui/YouTubeEmbed";
 
 type TabType = "boxscore" | "stats" | "charts" | "plays";
 
@@ -586,15 +594,37 @@ const GameAnalysis: React.FC = () => {
         </div>
       </div>
 
+      {/* Video Embed (if available) */}
+      {game.videoUrl && extractYouTubeId(game.videoUrl) && (
+        <div className="surface-card p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <FilmIcon className="w-5 h-5 text-surface-500" />
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white">Game Video</h3>
+          </div>
+          <YouTubeEmbed url={game.videoUrl} title={`${homeTeam?.team?.name} vs ${awayTeam?.team?.name}`} />
+        </div>
+      )}
+
       {/* Score Card */}
       <div className="surface-card p-8">
         <div className="flex items-center justify-between">
           <div className={`text-center flex-1 ${isAwayWinner ? "opacity-60" : ""}`}>
+            {homeTeam?.team?.logoUrl && (
+              <img
+                src={homeTeam.team.logoUrl}
+                alt={`${homeTeam.team.name} logo`}
+                className="w-16 h-16 mx-auto mb-2 object-contain"
+              />
+            )}
             <p className="text-lg text-surface-600 dark:text-surface-400">{homeTeam?.team?.city}</p>
             <p className="text-2xl font-bold text-surface-900 dark:text-white">
               {homeTeam?.team?.name}
             </p>
-            <p className="text-stat-xl text-primary-500 mt-2" data-stat>
+            <p
+              className="text-stat-xl mt-2"
+              data-stat
+              style={{ color: resolveTeamColor((homeTeam?.team as { primaryColor?: string })?.primaryColor, true) }}
+            >
               {game.homeScore}
             </p>
             {isHomeWinner && (
@@ -612,11 +642,22 @@ const GameAnalysis: React.FC = () => {
           </div>
 
           <div className={`text-center flex-1 ${isHomeWinner ? "opacity-60" : ""}`}>
+            {awayTeam?.team?.logoUrl && (
+              <img
+                src={awayTeam.team.logoUrl}
+                alt={`${awayTeam.team.name} logo`}
+                className="w-16 h-16 mx-auto mb-2 object-contain"
+              />
+            )}
             <p className="text-lg text-surface-600 dark:text-surface-400">{awayTeam?.team?.city}</p>
             <p className="text-2xl font-bold text-surface-900 dark:text-white">
               {awayTeam?.team?.name}
             </p>
-            <p className="text-stat-xl text-blue-500 mt-2" data-stat>
+            <p
+              className="text-stat-xl mt-2"
+              data-stat
+              style={{ color: resolveTeamColor((awayTeam?.team as { primaryColor?: string })?.primaryColor, false) }}
+            >
               {game.awayScore}
             </p>
             {isAwayWinner && (
@@ -676,6 +717,8 @@ const GameAnalysis: React.FC = () => {
               runs={scoringTimelineData.runs}
               homeTeamName={homeTeam?.team?.name || "Home"}
               awayTeamName={awayTeam?.team?.name || "Away"}
+              homeTeamColor={(homeTeam?.team as { primaryColor?: string })?.primaryColor}
+              awayTeamColor={(awayTeam?.team as { primaryColor?: string })?.primaryColor}
               summary={scoringTimelineData.summary}
             />
           )}

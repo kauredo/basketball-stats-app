@@ -73,12 +73,15 @@ export const list = query({
           timeDisplay: formatTime(game.timeRemainingSeconds),
           homeScore: game.homeScore,
           awayScore: game.awayScore,
+          videoUrl: game.videoUrl,
           homeTeam: homeTeam
             ? {
                 id: homeTeam._id,
                 name: homeTeam.name,
                 city: homeTeam.city,
                 logoUrl: homeTeam.logoUrl,
+                primaryColor: homeTeam.primaryColor,
+                secondaryColor: homeTeam.secondaryColor,
               }
             : null,
           awayTeam: awayTeam
@@ -87,6 +90,8 @@ export const list = query({
                 name: awayTeam.name,
                 city: awayTeam.city,
                 logoUrl: awayTeam.logoUrl,
+                primaryColor: awayTeam.primaryColor,
+                secondaryColor: awayTeam.secondaryColor,
               }
             : null,
           createdAt: game._creationTime,
@@ -228,6 +233,8 @@ export const get = query({
               name: homeTeam.name,
               city: homeTeam.city,
               logoUrl: homeTeam.logoUrl,
+              primaryColor: homeTeam.primaryColor,
+              secondaryColor: homeTeam.secondaryColor,
               players: homePlayers.map((p) => ({
                 id: p._id,
                 name: p.name,
@@ -242,6 +249,8 @@ export const get = query({
               name: awayTeam.name,
               city: awayTeam.city,
               logoUrl: awayTeam.logoUrl,
+              primaryColor: awayTeam.primaryColor,
+              secondaryColor: awayTeam.secondaryColor,
               players: awayPlayers.map((p) => ({
                 id: p._id,
                 name: p.name,
@@ -250,6 +259,7 @@ export const get = query({
               })),
             }
           : null,
+        videoUrl: game.videoUrl,
         playerStats: formattedStats,
         createdAt: game._creationTime,
       },
@@ -265,6 +275,7 @@ export const create = mutation({
     awayTeamId: v.id("teams"),
     scheduledAt: v.optional(v.number()),
     quarterMinutes: v.optional(v.number()),
+    videoUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await getUserFromToken(ctx, args.token);
@@ -312,6 +323,7 @@ export const create = mutation({
         bonusMode: leagueSettings.bonusMode,
       },
       userId: user._id,
+      videoUrl: args.videoUrl,
     });
 
     // Initialize player stats for all active players from both teams
@@ -1122,15 +1134,34 @@ export const getBoxScore = query({
         timeDisplay: formatTime(game.timeRemainingSeconds),
         homeScore: game.homeScore,
         awayScore: game.awayScore,
+        videoUrl: game.videoUrl,
       },
       boxScore: {
         homeTeam: {
-          team: homeTeam ? { id: homeTeam._id, name: homeTeam.name, city: homeTeam.city } : null,
+          team: homeTeam
+            ? {
+                id: homeTeam._id,
+                name: homeTeam.name,
+                city: homeTeam.city,
+                logoUrl: homeTeam.logoUrl,
+                primaryColor: homeTeam.primaryColor,
+                secondaryColor: homeTeam.secondaryColor,
+              }
+            : null,
           score: game.homeScore,
           players: await formatStats(homeStats),
         },
         awayTeam: {
-          team: awayTeam ? { id: awayTeam._id, name: awayTeam.name, city: awayTeam.city } : null,
+          team: awayTeam
+            ? {
+                id: awayTeam._id,
+                name: awayTeam.name,
+                city: awayTeam.city,
+                logoUrl: awayTeam.logoUrl,
+                primaryColor: awayTeam.primaryColor,
+                secondaryColor: awayTeam.secondaryColor,
+              }
+            : null,
           score: game.awayScore,
           players: await formatStats(awayStats),
         },
@@ -2048,5 +2079,34 @@ export const setGameTime = mutation({
     });
 
     return { message: "Game time updated", timeRemainingSeconds: newTime };
+  },
+});
+
+/**
+ * Update game video URL
+ */
+export const updateVideoUrl = mutation({
+  args: {
+    token: v.string(),
+    gameId: v.id("games"),
+    videoUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUserFromToken(ctx, args.token);
+    if (!user) throw new Error("Unauthorized");
+
+    const game = await ctx.db.get(args.gameId);
+    if (!game) throw new Error("Game not found");
+
+    const role = await getUserLeagueRole(ctx, user._id, game.leagueId);
+    if (!role || !["owner", "admin", "coach", "scorekeeper"].includes(role)) {
+      throw new Error("Access denied");
+    }
+
+    await ctx.db.patch(args.gameId, {
+      videoUrl: args.videoUrl,
+    });
+
+    return { message: "Video URL updated", videoUrl: args.videoUrl };
   },
 });

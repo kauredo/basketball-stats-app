@@ -32,6 +32,17 @@ interface TeamItem {
   activePlayersCount?: number;
   wins?: number;
   losses?: number;
+  primaryColor?: string;
+  secondaryColor?: string;
+  websiteUrl?: string;
+  socialLinks?: {
+    instagram?: string;
+    twitter?: string;
+    facebook?: string;
+    youtube?: string;
+    tiktok?: string;
+    linkedin?: string;
+  };
 }
 
 const Teams: React.FC = () => {
@@ -70,6 +81,10 @@ const Teams: React.FC = () => {
         city: data.city.trim() || undefined,
         description: data.description.trim() || undefined,
         logoStorageId: logoStorageId || undefined,
+        primaryColor: data.primaryColor || undefined,
+        secondaryColor: data.secondaryColor || undefined,
+        websiteUrl: data.websiteUrl?.trim() || undefined,
+        socialLinks: data.socialLinks,
       });
       setShowCreateModal(false);
       toast.success(`Team "${data.name.trim()}" created successfully`);
@@ -95,6 +110,7 @@ const Teams: React.FC = () => {
         position: data.position,
         heightCm: data.heightCm ? parseInt(data.heightCm) : undefined,
         weightKg: data.weightKg ? parseInt(data.weightKg) : undefined,
+        email: data.email?.trim() || undefined,
       });
       toast.success(`Player "${data.name.trim()}" added to ${selectedTeam.name}`);
       setShowCreatePlayerModal(false);
@@ -130,6 +146,10 @@ const Teams: React.FC = () => {
         description: data.description.trim() || undefined,
         logoStorageId: logoStorageId || undefined,
         clearLogo: clearLogo || undefined,
+        primaryColor: data.primaryColor || undefined,
+        secondaryColor: data.secondaryColor || undefined,
+        websiteUrl: data.websiteUrl?.trim() || undefined,
+        socialLinks: data.socialLinks,
       });
       toast.success(`Team "${data.name.trim()}" updated successfully`);
       setShowEditModal(false);
@@ -168,8 +188,15 @@ const Teams: React.FC = () => {
   const renderTeamCard = (team: TeamItem) => (
     <div
       key={team.id}
-      className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 shadow-soft"
+      className="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-surface-200 dark:border-surface-700 shadow-soft relative overflow-hidden"
     >
+      {/* Team Color Accent */}
+      {team.primaryColor && (
+        <div
+          className="absolute top-0 left-0 w-full h-1"
+          style={{ backgroundColor: team.primaryColor }}
+        />
+      )}
       <div className="flex justify-between items-start mb-4 gap-3">
         <div className="min-w-0">
           <Link
@@ -329,6 +356,10 @@ const Teams: React.FC = () => {
                 city: selectedTeam.city || "",
                 description: selectedTeam.description || "",
                 logoUrl: selectedTeam.logoUrl,
+                primaryColor: selectedTeam.primaryColor,
+                secondaryColor: selectedTeam.secondaryColor,
+                websiteUrl: selectedTeam.websiteUrl,
+                socialLinks: selectedTeam.socialLinks,
               }
             : undefined
         }

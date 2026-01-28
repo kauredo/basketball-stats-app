@@ -93,6 +93,9 @@ export interface LeagueMembership {
 // Team Types
 // ============================================
 
+// Note: SocialLinks type is exported from constants/social.ts
+import type { SocialLinks } from "../constants/social";
+
 export interface Team {
   id: string;
   name: string;
@@ -102,6 +105,12 @@ export interface Team {
   leagueId: string;
   activePlayersCount?: number;
   players?: Player[];
+  // Team colors
+  primaryColor?: string;
+  secondaryColor?: string;
+  // Team links
+  websiteUrl?: string;
+  socialLinks?: SocialLinks;
 }
 
 export interface TeamSummary {
@@ -109,6 +118,8 @@ export interface TeamSummary {
   name: string;
   city?: string;
   logoUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 
 // ============================================
@@ -128,6 +139,9 @@ export interface Player {
   team?: TeamSummary;
   seasonAverages?: PlayerAverages;
   gamesPlayed?: number;
+  // User linking
+  email?: string;
+  userId?: string;
 }
 
 export interface PlayerAverages {
@@ -159,6 +173,8 @@ export interface Game {
   homeTeam?: TeamSummary;
   awayTeam?: TeamSummary;
   playerStats?: PlayerStat[];
+  // Game video
+  videoUrl?: string;
 }
 
 export interface GameSummary {
@@ -424,6 +440,32 @@ export interface NotificationPreferences {
 }
 
 // ============================================
+// Team Membership Types
+// ============================================
+
+export interface TeamMembership {
+  id: string;
+  teamId: string;
+  userId: string;
+  role: TeamMembershipRole;
+  status: TeamMembershipStatus;
+  playerId?: string;
+  joinedAt?: number;
+  // Populated fields
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  player?: {
+    id: string;
+    name: string;
+    number: number;
+  };
+}
+
+// ============================================
 // Enums / Union Types
 // ============================================
 
@@ -436,6 +478,10 @@ export type LeagueStatus = "draft" | "active" | "completed" | "archived";
 export type LeagueRole = "owner" | "admin" | "coach" | "scorekeeper" | "member" | "viewer";
 
 export type MembershipStatus = "pending" | "active" | "suspended" | "removed";
+
+export type TeamMembershipRole = "coach" | "assistant" | "player" | "manager";
+
+export type TeamMembershipStatus = "pending" | "active" | "removed";
 
 export type Position = "PG" | "SG" | "SF" | "PF" | "C";
 

@@ -169,3 +169,55 @@ export async function getUserLeagueRole(
 
   return membership.role;
 }
+
+// Check if user can manage a team (league admin/owner or team coach)
+export async function canManageTeam(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<"users">,
+  teamId: Id<"teams">
+): Promise<boolean> {
+  const team = await ctx.db.get(teamId);
+  if (!team) return false;
+
+  // Check league-level permission first
+  const canManageLeagueResult = await canManageLeague(ctx, userId, team.leagueId);
+  if (canManageLeagueResult) return true;
+
+  // Check if user is the team owner
+  if (team.userId === userId) return true;
+
+  // Check team membership for coach role
+  const teamMembership = await ctx.db
+    .query("teamMemberships")
+    .withIndex("by_team_user", (q) => q.eq("teamId", teamId).eq("userId", userId))
+    .first();
+
+  return teamMembership?.status === "active" && teamMembership?.role === "coach";
+}
+
+// Get user's role in a team
+export async function getTeamRole(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<"users">,
+  teamId: Id<"teams">
+): Promise<string | null> {
+  const team = await ctx.db.get(teamId);
+  if (!team) return null;
+
+  // Check if user is the team owner
+  if (team.userId === userId) return "owner";
+
+  // Check team membership
+  const teamMembership = await ctx.db
+    .query("teamMemberships")
+    .withIndex("by_team_user", (q) => q.eq("teamId", teamId).eq("userId", userId))
+    .first();
+
+  if (!teamMembership || teamMembership.status !== "active") {
+    // Fall back to league role if no team membership
+    const leagueRole = await getUserLeagueRole(ctx, userId, team.leagueId);
+    return leagueRole;
+  }
+
+  return teamMembership.role;
+}

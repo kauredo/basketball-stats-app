@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { BaseModal, ModalHeader, ModalFooter } from "../ui/BaseModal";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { ExclamationTriangleIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import ImageUpload from "../ImageUpload";
+import { ColorPicker } from "../ui/ColorPicker";
+import { SOCIAL_PLATFORMS, type SocialLinks } from "@basketball-stats/shared";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 
 export interface TeamFormData {
   name: string;
   city: string;
   description: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  websiteUrl?: string;
+  socialLinks?: SocialLinks;
 }
 
 export interface TeamFormModalProps {
@@ -20,7 +26,13 @@ export interface TeamFormModalProps {
   ) => Promise<void>;
   isSubmitting?: boolean;
   /** If provided, modal is in edit mode */
-  initialData?: Partial<TeamFormData> & { logoUrl?: string };
+  initialData?: Partial<TeamFormData> & {
+    logoUrl?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+    websiteUrl?: string;
+    socialLinks?: SocialLinks;
+  };
   /** Mode determines title and button text */
   mode: "create" | "edit";
 }
@@ -44,10 +56,15 @@ export function TeamFormModal({
     name: "",
     city: "",
     description: "",
+    primaryColor: undefined,
+    secondaryColor: undefined,
+    websiteUrl: undefined,
+    socialLinks: undefined,
   });
   const [errors, setErrors] = useState<{ name?: string }>({});
   const [logoStorageId, setLogoStorageId] = useState<Id<"_storage"> | null>(null);
   const [clearLogo, setClearLogo] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
@@ -56,19 +73,50 @@ export function TeamFormModal({
         name: initialData?.name || "",
         city: initialData?.city || "",
         description: initialData?.description || "",
+        primaryColor: initialData?.primaryColor,
+        secondaryColor: initialData?.secondaryColor,
+        websiteUrl: initialData?.websiteUrl,
+        socialLinks: initialData?.socialLinks,
       });
       setErrors({});
       setLogoStorageId(null);
       setClearLogo(false);
+      // Show advanced if any advanced field is set
+      setShowAdvanced(
+        !!(
+          initialData?.primaryColor ||
+          initialData?.websiteUrl ||
+          (initialData?.socialLinks && Object.values(initialData.socialLinks).some(Boolean))
+        )
+      );
     }
   }, [isOpen, initialData]);
 
   const handleClose = () => {
-    setForm({ name: "", city: "", description: "" });
+    setForm({
+      name: "",
+      city: "",
+      description: "",
+      primaryColor: undefined,
+      secondaryColor: undefined,
+      websiteUrl: undefined,
+      socialLinks: undefined,
+    });
     setErrors({});
     setLogoStorageId(null);
     setClearLogo(false);
+    setShowAdvanced(false);
     onClose();
+  };
+
+  const updateSocialLink = (key: string, value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      socialLinks: {
+        ...prev.socialLinks,
+        [key]: value || undefined,
+      },
+    }));
   };
 
   const handleSubmit = async () => {
@@ -168,6 +216,73 @@ export function TeamFormModal({
             rows={3}
           />
         </div>
+
+        {/* Advanced Options Toggle */}
+        <button
+          type="button"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="flex items-center gap-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+        >
+          {showAdvanced ? (
+            <ChevronUpIcon className="w-4 h-4" />
+          ) : (
+            <ChevronDownIcon className="w-4 h-4" />
+          )}
+          {showAdvanced ? "Hide" : "Show"} advanced options
+        </button>
+
+        {showAdvanced && (
+          <div className="space-y-4 pt-2 border-t border-surface-200 dark:border-surface-700">
+            {/* Team Colors */}
+            <div className="grid grid-cols-2 gap-4">
+              <ColorPicker
+                label="Primary Color"
+                value={form.primaryColor}
+                onChange={(color) => setForm((prev) => ({ ...prev, primaryColor: color }))}
+              />
+              <ColorPicker
+                label="Secondary Color"
+                value={form.secondaryColor}
+                onChange={(color) => setForm((prev) => ({ ...prev, secondaryColor: color }))}
+              />
+            </div>
+
+            {/* Website URL */}
+            <div>
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                Website
+              </label>
+              <input
+                type="url"
+                value={form.websiteUrl || ""}
+                onChange={(e) => setForm((prev) => ({ ...prev, websiteUrl: e.target.value || undefined }))}
+                className="w-full bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl px-3 py-2 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="https://example.com"
+              />
+            </div>
+
+            {/* Social Links */}
+            <div>
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                Social Media Links
+              </label>
+              <div className="space-y-2">
+                {SOCIAL_PLATFORMS.map((platform) => (
+                  <div key={platform.key} className="flex items-center gap-2">
+                    <span className="text-xs text-surface-500 w-20">{platform.label}</span>
+                    <input
+                      type="url"
+                      value={(form.socialLinks as Record<string, string | undefined>)?.[platform.key] || ""}
+                      onChange={(e) => updateSocialLink(platform.key, e.target.value)}
+                      className="flex-1 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-lg px-3 py-1.5 text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder={platform.placeholder}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <ModalFooter align="right">

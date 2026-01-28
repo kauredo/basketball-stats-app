@@ -24,8 +24,8 @@ interface GameData {
   timeRemainingSeconds: number;
   homeScore: number;
   awayScore: number;
-  homeTeam?: { _id?: Id<"teams">; name: string } | null;
-  awayTeam?: { _id?: Id<"teams">; name: string } | null;
+  homeTeam?: { _id?: Id<"teams">; name: string; primaryColor?: string } | null;
+  awayTeam?: { _id?: Id<"teams">; name: string; primaryColor?: string } | null;
 }
 
 interface EnhancedScoreboardProps {
@@ -116,6 +116,7 @@ interface TeamPanelProps {
   onTimeout?: () => void;
   disabled: boolean;
   isHome?: boolean;
+  primaryColor?: string;
 }
 
 const TeamPanel: React.FC<TeamPanelProps> = ({
@@ -130,9 +131,10 @@ const TeamPanel: React.FC<TeamPanelProps> = ({
   onTimeout,
   disabled,
   isHome = false,
+  primaryColor,
 }) => {
-  // Team color: Home = Blue, Away = Orange (consistent across app)
-  const teamColorClass = isHome ? "bg-blue-500" : "bg-orange-500";
+  // Use team's custom color if provided, otherwise fall back to blue/orange
+  const defaultColor = isHome ? "#3b82f6" : "#f97316";
 
   return (
     <div className={`flex items-center gap-3 sm:gap-4 ${isHome ? "flex-row-reverse" : ""}`}>
@@ -143,7 +145,10 @@ const TeamPanel: React.FC<TeamPanelProps> = ({
       <div className={`flex flex-col gap-1 ${isHome ? "items-end" : "items-start"}`}>
         {/* Team Name with color indicator */}
         <div className={`flex items-center gap-2 ${isHome ? "flex-row-reverse" : ""}`}>
-          <div className={`w-1 h-4 rounded-full ${teamColorClass}`} />
+          <div
+            className="w-1 h-4 rounded-full"
+            style={{ backgroundColor: primaryColor || defaultColor }}
+          />
           <span
             className="text-sm font-semibold text-surface-700 dark:text-surface-300 uppercase tracking-wide truncate max-w-[100px] sm:max-w-[120px]"
             title={name}
@@ -372,6 +377,7 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
             totalTimeouts={timeoutsPerTeam}
             onTimeout={onTimeoutAway}
             disabled={isCompleted}
+            primaryColor={game.awayTeam?.primaryColor}
           />
 
           {/* Center: Clock & Controls */}
@@ -561,6 +567,7 @@ export const EnhancedScoreboard: React.FC<EnhancedScoreboardProps> = ({
             onTimeout={onTimeoutHome}
             disabled={isCompleted}
             isHome
+            primaryColor={game.homeTeam?.primaryColor}
           />
         </div>
       </div>

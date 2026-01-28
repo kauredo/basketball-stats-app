@@ -12,6 +12,25 @@ export type { StatInput } from "./utils/basketball";
 export { toCSV } from "./utils/csv";
 export type { CSVColumn } from "./utils/csv";
 
+// Utils - Team colors
+export {
+  DEFAULT_TEAM_COLORS,
+  TEAM_COLOR_PALETTE,
+  resolveTeamColor,
+  resolveTeamColors,
+  isLightColor,
+  getContrastingTextColor,
+} from "./utils/teamColors";
+export type { TeamColorPalette } from "./utils/teamColors";
+
+// Utils - YouTube
+export {
+  extractYouTubeId,
+  getYouTubeEmbedUrl,
+  getYouTubeThumbnailUrl,
+  isValidYouTubeUrl,
+} from "./utils/youtube";
+
 // Constants - basketball-related constants
 export * from "./constants/basketball";
 export { default as CONSTANTS } from "./constants/basketball";
@@ -19,6 +38,15 @@ export { default as CONSTANTS } from "./constants/basketball";
 // Theme - unified design system constants
 export * from "./constants/theme";
 export { default as THEME } from "./constants/theme";
+
+// Social platforms
+export {
+  SOCIAL_PLATFORMS,
+  getSocialPlatform,
+  isValidSocialUrl,
+  countSocialLinks,
+} from "./constants/social";
+export type { SocialPlatformKey, SocialLinks } from "./constants/social";
 
 // Re-export commonly used types for convenience
 export type {
@@ -85,6 +113,10 @@ export type {
   PairStatsItem,
   LeagueMembershipItem,
   NotificationItem,
+  // Team Membership
+  TeamMembership,
+  TeamMembershipRole,
+  TeamMembershipStatus,
   // Misc
   Position,
   StatType,
