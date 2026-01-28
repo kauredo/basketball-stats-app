@@ -15,5 +15,7 @@ This is a minimum, user-managed TODO. As an agent, you should read this file, an
 ## TODO
 
 - [ ] Cleanup TODO.md TODOs
+- [ ] PlayerDetail in web not optimized for mobile
+- [ ] All ShotRecordingModal, Quick stat modal, assist modal, etc should be splitting into sections for each team. Both web and mobile
 - [ ] ERROR in mobile app - expo-notifications warnings in Expo Go (requires dev build)
 - [ ] ERROR in mobile app - ENOENT source map issue (Metro bundler path resolution - cosmetic)
