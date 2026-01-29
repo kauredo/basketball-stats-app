@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 import Icon from "../Icon";
 import {
   BasketballUtils,
@@ -52,6 +53,8 @@ export function AdvancedStats({
   homeTeamName,
   awayTeamName,
 }: AdvancedStatsProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   // Sort players by points (highest first)
   const sortedHome = [...homeStats].sort((a, b) => b.points - a.points);
   const sortedAway = [...awayStats].sort((a, b) => b.points - a.points);
@@ -113,91 +116,102 @@ export function AdvancedStats({
 
   return (
     <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden mt-4">
-      {/* Header */}
-      <View className="flex-row items-center px-4 py-3 bg-surface-50 dark:bg-surface-700/50">
+      {/* Header - Clickable to expand/collapse */}
+      <Pressable
+        onPress={() => setIsExpanded(!isExpanded)}
+        className="flex-row items-center px-4 py-3 bg-surface-50 dark:bg-surface-700/50"
+      >
         <Icon name="stats" size={18} color="#F97316" />
-        <Text className="font-semibold text-surface-900 dark:text-white text-sm ml-2">
+        <Text className="font-semibold text-surface-900 dark:text-white text-sm ml-2 flex-1">
           Advanced Stats
         </Text>
         {!hasData && (
-          <Text className="text-xs text-surface-400 dark:text-surface-500 ml-2">(no data yet)</Text>
+          <Text className="text-xs text-surface-400 dark:text-surface-500 mr-2">(no data yet)</Text>
         )}
-      </View>
+        <Icon
+          name={isExpanded ? "chevron-up" : "chevron-down"}
+          size={18}
+          color="#7a746c"
+        />
+      </Pressable>
 
-      <View className="px-3 pb-3">
-        {!hasData ? (
-          <View className="py-4 items-center">
-            <Text className="text-sm text-surface-500 dark:text-surface-400">
-              Advanced stats will appear once players record stats
+      {/* Collapsible Content */}
+      {isExpanded && (
+        <View className="px-3 pb-3">
+          {!hasData ? (
+            <View className="py-4 items-center">
+              <Text className="text-sm text-surface-500 dark:text-surface-400">
+                Advanced stats will appear once players record stats
+              </Text>
+            </View>
+          ) : (
+            <>
+              {/* Legend */}
+              <View className="flex-row items-center py-2 border-b border-surface-200 dark:border-surface-600">
+                <View className="w-20" />
+                <View className="flex-1 items-center">
+                  <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
+                    TS%
+                  </Text>
+                </View>
+                <View className="flex-1 items-center">
+                  <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
+                    eFG%
+                  </Text>
+                </View>
+                <View className="flex-1 items-center">
+                  <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
+                    GER
+                  </Text>
+                </View>
+                <View className="flex-1 items-center">
+                  <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
+                    PER
+                  </Text>
+                </View>
+                <View className="flex-1 items-center">
+                  <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
+                    A/TO
+                  </Text>
+                </View>
+              </View>
+
+              {/* Away Team */}
+              {sortedAway.length > 0 && (
+                <>
+                  <Text className="text-xs text-surface-600 dark:text-surface-400 mt-2 mb-1 font-medium">
+                    {awayTeamName}
+                  </Text>
+                  {sortedAway.map(renderPlayerRow)}
+                </>
+              )}
+
+              {/* Home Team */}
+              {sortedHome.length > 0 && (
+                <>
+                  <Text className="text-xs text-surface-600 dark:text-surface-400 mt-3 mb-1 font-medium">
+                    {homeTeamName}
+                  </Text>
+                  {sortedHome.map(renderPlayerRow)}
+                </>
+              )}
+            </>
+          )}
+
+          {/* Stat Definitions */}
+          <View className="mt-3 pt-2 border-t border-surface-200 dark:border-surface-700">
+            <Text className="text-xs text-surface-400 dark:text-surface-500">
+              TS% = True Shooting % | eFG% = Effective FG %
+            </Text>
+            <Text className="text-xs text-surface-400 dark:text-surface-500">
+              GER = Game Efficiency | PER = Player Efficiency (per minute)
+            </Text>
+            <Text className="text-xs text-surface-400 dark:text-surface-500">
+              A/TO = Assist-to-Turnover Ratio
             </Text>
           </View>
-        ) : (
-          <>
-            {/* Legend */}
-            <View className="flex-row items-center py-2 border-b border-surface-200 dark:border-surface-600">
-              <View className="w-20" />
-              <View className="flex-1 items-center">
-                <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
-                  TS%
-                </Text>
-              </View>
-              <View className="flex-1 items-center">
-                <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
-                  eFG%
-                </Text>
-              </View>
-              <View className="flex-1 items-center">
-                <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
-                  GER
-                </Text>
-              </View>
-              <View className="flex-1 items-center">
-                <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
-                  PER
-                </Text>
-              </View>
-              <View className="flex-1 items-center">
-                <Text className="text-xs text-surface-500 dark:text-surface-400 font-medium">
-                  A/TO
-                </Text>
-              </View>
-            </View>
-
-            {/* Away Team */}
-            {sortedAway.length > 0 && (
-              <>
-                <Text className="text-xs text-surface-600 dark:text-surface-400 mt-2 mb-1 font-medium">
-                  {awayTeamName}
-                </Text>
-                {sortedAway.map(renderPlayerRow)}
-              </>
-            )}
-
-            {/* Home Team */}
-            {sortedHome.length > 0 && (
-              <>
-                <Text className="text-xs text-surface-600 dark:text-surface-400 mt-3 mb-1 font-medium">
-                  {homeTeamName}
-                </Text>
-                {sortedHome.map(renderPlayerRow)}
-              </>
-            )}
-          </>
-        )}
-
-        {/* Stat Definitions */}
-        <View className="mt-3 pt-2 border-t border-surface-200 dark:border-surface-700">
-          <Text className="text-xs text-surface-400 dark:text-surface-500">
-            TS% = True Shooting % | eFG% = Effective FG %
-          </Text>
-          <Text className="text-xs text-surface-400 dark:text-surface-500">
-            GER = Game Efficiency | PER = Player Efficiency (per minute)
-          </Text>
-          <Text className="text-xs text-surface-400 dark:text-surface-500">
-            A/TO = Assist-to-Turnover Ratio
-          </Text>
         </View>
-      </View>
+      )}
     </View>
   );
 }
