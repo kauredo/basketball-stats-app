@@ -14,6 +14,7 @@ import {
 import { exportToCSV, standingsColumns, printPage } from "../utils/export";
 import { generateSeasonSummaryPDF, downloadPDF } from "../utils/export/pdf-export";
 import { useToast } from "../contexts/ToastContext";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 
 type SortField =
   | "rank"
@@ -131,24 +132,33 @@ const Standings: React.FC = () => {
     className?: string;
   }> = ({ field, label, className = "" }) => (
     <th
-      className={`px-4 py-3 text-left text-xs font-medium text-surface-600 dark:text-surface-400 uppercase tracking-wider cursor-pointer hover:text-surface-900 dark:hover:text-white transition-colors ${className}`}
+      className={`px-4 py-3 text-left text-xs font-medium text-surface-600 dark:text-surface-400 uppercase tracking-wider cursor-pointer hover:text-surface-900 dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 ${className}`}
       onClick={() => handleSort(field)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleSort(field);
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-sort={
+        sortField === field ? (sortDirection === "asc" ? "ascending" : "descending") : "none"
+      }
     >
       <div className="flex items-center space-x-1">
         <span>{label}</span>
         {sortField === field && (
-          <span className="text-primary-500">{sortDirection === "asc" ? "↑" : "↓"}</span>
+          <span className="text-primary-500" aria-hidden="true">
+            {sortDirection === "asc" ? "↑" : "↓"}
+          </span>
         )}
       </div>
     </th>
   );
 
   if (standingsData === undefined) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-      </div>
-    );
+    return <LoadingSpinner label="Loading standings" />;
   }
 
   return (

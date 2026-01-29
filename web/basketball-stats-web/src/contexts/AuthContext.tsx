@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 import { useMutation, useConvex } from "convex/react";
@@ -240,23 +241,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
   }, []);
 
-  const value: AuthContextType = {
-    user,
-    isAuthenticated: !!user && !!token,
-    isLoading,
-    error,
-    token,
-    selectedLeague,
-    login,
-    signup,
-    logout,
-    forgotPassword,
-    resetPassword,
-    confirmEmail,
-    selectLeague,
-    clearError,
-    initialize,
-  };
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      isAuthenticated: !!user && !!token,
+      isLoading,
+      error,
+      token,
+      selectedLeague,
+      login,
+      signup,
+      logout,
+      forgotPassword,
+      resetPassword,
+      confirmEmail,
+      selectLeague,
+      clearError,
+      initialize,
+    }),
+    [
+      user,
+      token,
+      isLoading,
+      error,
+      selectedLeague,
+      login,
+      signup,
+      logout,
+      forgotPassword,
+      resetPassword,
+      confirmEmail,
+      selectLeague,
+      clearError,
+      initialize,
+    ]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

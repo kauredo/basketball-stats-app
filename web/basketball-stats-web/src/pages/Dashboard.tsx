@@ -385,19 +385,21 @@ const Dashboard: React.FC = () => {
 
       {/* Empty State - When no games at all */}
       {games.length === 0 && (
-        <section className="py-16 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-500/10 mb-6">
-            <ChartBarIcon className="w-8 h-8 text-primary-500" />
+        <section className="py-12">
+          <div className="bg-surface-50 dark:bg-surface-900/50 rounded-2xl p-10 text-center max-w-lg mx-auto">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary-500/10 mb-6">
+              <ChartBarIcon className="w-10 h-10 text-primary-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-surface-900 dark:text-surface-50 mb-3">
+              No games yet
+            </h3>
+            <p className="text-surface-500 dark:text-surface-400 mb-8 max-w-sm mx-auto leading-relaxed">
+              Create your first game to start tracking stats and building your season history.
+            </p>
+            <Link to="/app/games" className="btn-primary px-6 py-3 rounded-xl text-base">
+              Create your first game
+            </Link>
           </div>
-          <h3 className="text-xl font-semibold text-surface-900 dark:text-surface-50 mb-2">
-            No games yet
-          </h3>
-          <p className="text-surface-500 dark:text-surface-400 mb-6 max-w-sm mx-auto">
-            Create your first game to start tracking stats and building your season history.
-          </p>
-          <Link to="/app/games" className="btn-primary px-6 py-3 rounded-xl text-base">
-            Create your first game
-          </Link>
         </section>
       )}
 

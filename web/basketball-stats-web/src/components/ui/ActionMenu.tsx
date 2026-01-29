@@ -185,7 +185,7 @@ export function ActionMenu({
                 tabIndex={focusedIndex === index ? 0 : -1}
                 onClick={() => handleItemClick(item)}
                 disabled={isDisabled}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-left transition-colors focus:outline-none
+                className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500
                   ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
                   ${
                     isDanger

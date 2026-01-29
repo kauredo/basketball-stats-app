@@ -41,6 +41,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { YouTubeEmbed } from "../components/ui/YouTubeEmbed";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 
 type TabType = "boxscore" | "stats" | "charts" | "plays";
 
@@ -140,11 +141,7 @@ const GameAnalysis: React.FC = () => {
   );
 
   if (gameData === undefined || boxScoreData === undefined) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-      </div>
-    );
+    return <LoadingSpinner label="Loading game analysis" />;
   }
 
   if (!gameData?.game) {

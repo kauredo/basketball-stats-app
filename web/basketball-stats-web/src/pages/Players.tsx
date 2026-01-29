@@ -17,6 +17,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { ActionMenu } from "../components/ui/ActionMenu";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import {
   PlayerFormModal,
   DeleteConfirmationModal,
@@ -190,7 +191,14 @@ const Players: React.FC = () => {
             className="w-12 h-12 sm:w-16 sm:h-16 bg-surface-100 dark:bg-surface-700 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 hover:ring-2 hover:ring-primary-500 transition-all"
           >
             {player.imageUrl ? (
-              <img src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" />
+              <img
+                src={player.imageUrl}
+                alt={player.name}
+                width={64}
+                height={64}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
             ) : (
               <UserIcon className="w-6 h-6 sm:w-8 sm:h-8 text-surface-600 dark:text-surface-400" />
             )}
@@ -304,11 +312,7 @@ const Players: React.FC = () => {
   );
 
   if (playersData === undefined || teamsData === undefined) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-      </div>
-    );
+    return <LoadingSpinner label="Loading players" />;
   }
 
   return (
@@ -335,10 +339,14 @@ const Players: React.FC = () => {
           </div>
 
           <div className="relative">
-            <FunnelIcon className="absolute left-3 top-3 h-5 w-5 text-surface-600 dark:text-surface-400" />
+            <FunnelIcon
+              className="absolute left-3 top-3 h-5 w-5 text-surface-600 dark:text-surface-400 pointer-events-none"
+              aria-hidden="true"
+            />
             <select
               value={selectedTeam}
               onChange={(e) => setSelectedTeam(e.target.value)}
+              aria-label="Filter by team"
               className="w-full pl-10 pr-4 py-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none"
             >
               <option value="">All Teams</option>
@@ -354,6 +362,7 @@ const Players: React.FC = () => {
             <select
               value={selectedPosition}
               onChange={(e) => setSelectedPosition(e.target.value)}
+              aria-label="Filter by position"
               className="w-full px-4 py-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">All Positions</option>

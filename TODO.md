@@ -20,35 +20,35 @@
 
 ## Feature Parity Checklist
 
-| Feature            | Web | Mobile | Notes                  |
-| ------------------ | --- | ------ | ---------------------- |
-| Dashboard          | ✅  | ✅     | -                      |
-| Games List         | ✅  | ✅     | -                      |
-| Create Game        | ✅  | ✅     | -                      |
-| Live Game          | ✅  | ✅     | -                      |
-| Teams List         | ✅  | ✅     | -                      |
-| Create Team        | ✅  | ✅     | -                      |
-| Edit Team          | ✅  | ✅     | -                      |
-| Delete Team        | ✅  | ✅     | -                      |
-| Players List       | ✅  | ✅     | -                      |
-| Create Player      | ✅  | ✅     | -                      |
-| Edit Player        | ✅  | ✅     | -                      |
-| Delete Player      | ✅  | ✅     | -                      |
-| Player Detail      | ✅  | ✅     | -                      |
-| Statistics         | ✅  | ✅     | -                      |
-| Standings          | ✅  | ✅     | -                      |
-| Shot Charts        | ✅  | ✅     | -                      |
-| Player Comparison  | ✅  | ✅     | -                      |
-| Game Analysis      | ✅  | ✅     | -                      |
-| Game Replay        | ✅  | ✅     | -                      |
-| Notifications Bell | ✅  | ✅     | -                      |
-| Notification Prefs | ✅  | ✅     | -                      |
-| Profile/Settings   | ✅  | ✅     | -                      |
-| League Selection   | ✅  | ✅     | -                      |
-| League Management  | ✅  | ✅     | -                      |
-| CSV Export         | ✅  | ✅     | -                      |
-| Print/PDF          | ✅  | ❌     | Delegated to web       |
-| Dark Mode          | ✅  | ✅     | -                      |
-| Haptic Feedback    | ❌  | ✅     | Consider for web       |
-| Sound Feedback     | ❌  | ✅     | Consider for web       |
-| Advanced Analytics | ✅  | ✅     | -                      |
+| Feature            | Web | Mobile | Notes            |
+| ------------------ | --- | ------ | ---------------- |
+| Dashboard          | ✅  | ✅     | -                |
+| Games List         | ✅  | ✅     | -                |
+| Create Game        | ✅  | ✅     | -                |
+| Live Game          | ✅  | ✅     | -                |
+| Teams List         | ✅  | ✅     | -                |
+| Create Team        | ✅  | ✅     | -                |
+| Edit Team          | ✅  | ✅     | -                |
+| Delete Team        | ✅  | ✅     | -                |
+| Players List       | ✅  | ✅     | -                |
+| Create Player      | ✅  | ✅     | -                |
+| Edit Player        | ✅  | ✅     | -                |
+| Delete Player      | ✅  | ✅     | -                |
+| Player Detail      | ✅  | ✅     | -                |
+| Statistics         | ✅  | ✅     | -                |
+| Standings          | ✅  | ✅     | -                |
+| Shot Charts        | ✅  | ✅     | -                |
+| Player Comparison  | ✅  | ✅     | -                |
+| Game Analysis      | ✅  | ✅     | -                |
+| Game Replay        | ✅  | ✅     | -                |
+| Notifications Bell | ✅  | ✅     | -                |
+| Notification Prefs | ✅  | ✅     | -                |
+| Profile/Settings   | ✅  | ✅     | -                |
+| League Selection   | ✅  | ✅     | -                |
+| League Management  | ✅  | ✅     | -                |
+| CSV Export         | ✅  | ✅     | -                |
+| Print/PDF          | ✅  | ❌     | Delegated to web |
+| Dark Mode          | ✅  | ✅     | -                |
+| Haptic Feedback    | ❌  | ✅     | Consider for web |
+| Sound Feedback     | ❌  | ✅     | Consider for web |
+| Advanced Analytics | ✅  | ✅     | -                |

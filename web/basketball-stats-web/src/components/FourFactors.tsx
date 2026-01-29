@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { BasketballUtils } from "@basketball-stats/shared";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
@@ -114,225 +114,259 @@ function FactorBar({
   );
 }
 
-export const FourFactors: React.FC<FourFactorsProps> = ({
-  homeTeamName,
-  awayTeamName,
-  homeStats,
-  awayStats,
-}) => {
-  // Calculate Four Factors for home team
-  const homeEfg =
-    homeStats.fieldGoalsAttempted > 0
-      ? ((homeStats.fieldGoalsMade + 0.5 * homeStats.threePointersMade) /
-          homeStats.fieldGoalsAttempted) *
-        100
-      : 0;
-  const homeTORate = BasketballUtils.turnoverRate(
-    homeStats.turnovers,
-    homeStats.fieldGoalsAttempted,
-    homeStats.freeThrowsAttempted
-  );
-  const homeOrebPct = BasketballUtils.offensiveReboundPercent(
-    homeStats.offensiveRebounds,
-    awayStats.defensiveRebounds
-  );
-  const homeFTRate = BasketballUtils.freeThrowRate(
-    homeStats.freeThrowsAttempted,
-    homeStats.fieldGoalsAttempted
-  );
+export const FourFactors: React.FC<FourFactorsProps> = memo(
+  ({ homeTeamName, awayTeamName, homeStats, awayStats }) => {
+    // Memoize all calculations
+    const calculations = useMemo(() => {
+      // Calculate Four Factors for home team
+      const homeEfg =
+        homeStats.fieldGoalsAttempted > 0
+          ? ((homeStats.fieldGoalsMade + 0.5 * homeStats.threePointersMade) /
+              homeStats.fieldGoalsAttempted) *
+            100
+          : 0;
+      const homeTORate = BasketballUtils.turnoverRate(
+        homeStats.turnovers,
+        homeStats.fieldGoalsAttempted,
+        homeStats.freeThrowsAttempted
+      );
+      const homeOrebPct = BasketballUtils.offensiveReboundPercent(
+        homeStats.offensiveRebounds,
+        awayStats.defensiveRebounds
+      );
+      const homeFTRate = BasketballUtils.freeThrowRate(
+        homeStats.freeThrowsAttempted,
+        homeStats.fieldGoalsAttempted
+      );
 
-  // Calculate Four Factors for away team
-  const awayEfg =
-    awayStats.fieldGoalsAttempted > 0
-      ? ((awayStats.fieldGoalsMade + 0.5 * awayStats.threePointersMade) /
-          awayStats.fieldGoalsAttempted) *
-        100
-      : 0;
-  const awayTORate = BasketballUtils.turnoverRate(
-    awayStats.turnovers,
-    awayStats.fieldGoalsAttempted,
-    awayStats.freeThrowsAttempted
-  );
-  const awayOrebPct = BasketballUtils.offensiveReboundPercent(
-    awayStats.offensiveRebounds,
-    homeStats.defensiveRebounds
-  );
-  const awayFTRate = BasketballUtils.freeThrowRate(
-    awayStats.freeThrowsAttempted,
-    awayStats.fieldGoalsAttempted
-  );
+      // Calculate Four Factors for away team
+      const awayEfg =
+        awayStats.fieldGoalsAttempted > 0
+          ? ((awayStats.fieldGoalsMade + 0.5 * awayStats.threePointersMade) /
+              awayStats.fieldGoalsAttempted) *
+            100
+          : 0;
+      const awayTORate = BasketballUtils.turnoverRate(
+        awayStats.turnovers,
+        awayStats.fieldGoalsAttempted,
+        awayStats.freeThrowsAttempted
+      );
+      const awayOrebPct = BasketballUtils.offensiveReboundPercent(
+        awayStats.offensiveRebounds,
+        homeStats.defensiveRebounds
+      );
+      const awayFTRate = BasketballUtils.freeThrowRate(
+        awayStats.freeThrowsAttempted,
+        awayStats.fieldGoalsAttempted
+      );
 
-  // Calculate possession-based metrics
-  const homePoss = BasketballUtils.estimatePossessions(
-    homeStats.fieldGoalsAttempted,
-    homeStats.offensiveRebounds,
-    homeStats.turnovers,
-    homeStats.freeThrowsAttempted
-  );
-  const awayPoss = BasketballUtils.estimatePossessions(
-    awayStats.fieldGoalsAttempted,
-    awayStats.offensiveRebounds,
-    awayStats.turnovers,
-    awayStats.freeThrowsAttempted
-  );
+      // Calculate possession-based metrics
+      const homePoss = BasketballUtils.estimatePossessions(
+        homeStats.fieldGoalsAttempted,
+        homeStats.offensiveRebounds,
+        homeStats.turnovers,
+        homeStats.freeThrowsAttempted
+      );
+      const awayPoss = BasketballUtils.estimatePossessions(
+        awayStats.fieldGoalsAttempted,
+        awayStats.offensiveRebounds,
+        awayStats.turnovers,
+        awayStats.freeThrowsAttempted
+      );
 
-  const homeOffRtg = BasketballUtils.offensiveRating(homeStats.points, homePoss);
-  const homeDefRtg = BasketballUtils.defensiveRating(awayStats.points, awayPoss);
-  const awayOffRtg = BasketballUtils.offensiveRating(awayStats.points, awayPoss);
-  const awayDefRtg = BasketballUtils.defensiveRating(homeStats.points, homePoss);
+      const homeOffRtg = BasketballUtils.offensiveRating(homeStats.points, homePoss);
+      const homeDefRtg = BasketballUtils.defensiveRating(awayStats.points, awayPoss);
+      const awayOffRtg = BasketballUtils.offensiveRating(awayStats.points, awayPoss);
+      const awayDefRtg = BasketballUtils.defensiveRating(homeStats.points, homePoss);
 
-  const hasData = homeStats.fieldGoalsAttempted > 0 || awayStats.fieldGoalsAttempted > 0;
+      return {
+        homeEfg,
+        homeTORate,
+        homeOrebPct,
+        homeFTRate,
+        awayEfg,
+        awayTORate,
+        awayOrebPct,
+        awayFTRate,
+        homeOffRtg,
+        homeDefRtg,
+        awayOffRtg,
+        awayDefRtg,
+      };
+    }, [homeStats, awayStats]);
 
-  if (!hasData) {
+    const {
+      homeEfg,
+      homeTORate,
+      homeOrebPct,
+      homeFTRate,
+      awayEfg,
+      awayTORate,
+      awayOrebPct,
+      awayFTRate,
+      homeOffRtg,
+      homeDefRtg,
+      awayOffRtg,
+      awayDefRtg,
+    } = calculations;
+
+    const hasData = homeStats.fieldGoalsAttempted > 0 || awayStats.fieldGoalsAttempted > 0;
+
+    if (!hasData) {
+      return (
+        <div className="surface-card p-6">
+          <h3 className="text-lg font-bold text-surface-900 dark:text-white mb-4">Four Factors</h3>
+          <p className="text-sm text-surface-500 dark:text-surface-400 text-center py-4">
+            Four Factors analysis will appear once teams record stats
+          </p>
+        </div>
+      );
+    }
+
     return (
-      <div className="surface-card p-6">
-        <h3 className="text-lg font-bold text-surface-900 dark:text-white mb-4">Four Factors</h3>
-        <p className="text-sm text-surface-500 dark:text-surface-400 text-center py-4">
-          Four Factors analysis will appear once teams record stats
-        </p>
+      <div className="surface-card overflow-hidden">
+        <div className="px-4 py-3 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50">
+          <h3 className="font-bold text-surface-900 dark:text-white">Four Factors Analysis</h3>
+          <p className="text-xs text-surface-500 dark:text-surface-400 mt-0.5">
+            Dean Oliver's key indicators of team success
+          </p>
+        </div>
+
+        <div className="p-4">
+          {/* Team headers */}
+          <div className="flex items-center mb-2">
+            <span className="w-14 text-right text-xs font-semibold text-primary-500">
+              {homeTeamName}
+            </span>
+            <div className="flex-1" />
+            <span className="w-14 text-left text-xs font-semibold text-blue-500">
+              {awayTeamName}
+            </span>
+          </div>
+
+          <div className="divide-y divide-surface-100 dark:divide-surface-700">
+            <FactorBar
+              label="eFG%"
+              homeValue={homeEfg}
+              awayValue={awayEfg}
+              description="Effective FG%: Shooting efficiency (accounts for 3PT value)"
+              higherIsBetter={true}
+            />
+
+            <FactorBar
+              label="TO Rate"
+              homeValue={homeTORate}
+              awayValue={awayTORate}
+              description="Turnover Rate: % of possessions ending in turnover"
+              higherIsBetter={false}
+            />
+
+            <FactorBar
+              label="OREB%"
+              homeValue={homeOrebPct}
+              awayValue={awayOrebPct}
+              description="Offensive Rebound %: Second chance opportunities"
+              higherIsBetter={true}
+            />
+
+            <FactorBar
+              label="FT Rate"
+              homeValue={homeFTRate}
+              awayValue={awayFTRate}
+              description="Free Throw Rate: Getting to the line (FTA/FGA)"
+              higherIsBetter={true}
+            />
+          </div>
+
+          {/* Efficiency Ratings Section */}
+          <div className="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
+            <h4 className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">
+              Efficiency Ratings
+            </h4>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Home Team */}
+              <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-3">
+                <p className="text-xs font-medium text-primary-600 dark:text-primary-400 mb-2">
+                  {homeTeamName}
+                </p>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-xs text-surface-600 dark:text-surface-400">Off Rtg</span>
+                    <span className="text-sm font-semibold text-surface-900 dark:text-white tabular-nums">
+                      {homeOffRtg.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-surface-600 dark:text-surface-400">Def Rtg</span>
+                    <span className="text-sm font-semibold text-surface-900 dark:text-white tabular-nums">
+                      {homeDefRtg.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between pt-1 border-t border-primary-200 dark:border-primary-800">
+                    <span className="text-xs text-surface-600 dark:text-surface-400">Net Rtg</span>
+                    <span
+                      className={`text-sm font-bold tabular-nums ${
+                        homeOffRtg - homeDefRtg > 0
+                          ? "text-green-600 dark:text-green-400"
+                          : homeOffRtg - homeDefRtg < 0
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-surface-900 dark:text-white"
+                      }`}
+                    >
+                      {homeOffRtg - homeDefRtg > 0 ? "+" : ""}
+                      {(homeOffRtg - homeDefRtg).toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Away Team */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                <p className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2">
+                  {awayTeamName}
+                </p>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-xs text-surface-600 dark:text-surface-400">Off Rtg</span>
+                    <span className="text-sm font-semibold text-surface-900 dark:text-white tabular-nums">
+                      {awayOffRtg.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-surface-600 dark:text-surface-400">Def Rtg</span>
+                    <span className="text-sm font-semibold text-surface-900 dark:text-white tabular-nums">
+                      {awayDefRtg.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between pt-1 border-t border-blue-200 dark:border-blue-800">
+                    <span className="text-xs text-surface-600 dark:text-surface-400">Net Rtg</span>
+                    <span
+                      className={`text-sm font-bold tabular-nums ${
+                        awayOffRtg - awayDefRtg > 0
+                          ? "text-green-600 dark:text-green-400"
+                          : awayOffRtg - awayDefRtg < 0
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-surface-900 dark:text-white"
+                      }`}
+                    >
+                      {awayOffRtg - awayDefRtg > 0 ? "+" : ""}
+                      {(awayOffRtg - awayDefRtg).toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-xs text-surface-400 dark:text-surface-500 mt-3">
+              Ratings = Points per 100 possessions (Off higher is better, Def lower is better)
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
+);
 
-  return (
-    <div className="surface-card overflow-hidden">
-      <div className="px-4 py-3 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50">
-        <h3 className="font-bold text-surface-900 dark:text-white">Four Factors Analysis</h3>
-        <p className="text-xs text-surface-500 dark:text-surface-400 mt-0.5">
-          Dean Oliver's key indicators of team success
-        </p>
-      </div>
-
-      <div className="p-4">
-        {/* Team headers */}
-        <div className="flex items-center mb-2">
-          <span className="w-14 text-right text-xs font-semibold text-primary-500">
-            {homeTeamName}
-          </span>
-          <div className="flex-1" />
-          <span className="w-14 text-left text-xs font-semibold text-blue-500">{awayTeamName}</span>
-        </div>
-
-        <div className="divide-y divide-surface-100 dark:divide-surface-700">
-          <FactorBar
-            label="eFG%"
-            homeValue={homeEfg}
-            awayValue={awayEfg}
-            description="Effective FG%: Shooting efficiency (accounts for 3PT value)"
-            higherIsBetter={true}
-          />
-
-          <FactorBar
-            label="TO Rate"
-            homeValue={homeTORate}
-            awayValue={awayTORate}
-            description="Turnover Rate: % of possessions ending in turnover"
-            higherIsBetter={false}
-          />
-
-          <FactorBar
-            label="OREB%"
-            homeValue={homeOrebPct}
-            awayValue={awayOrebPct}
-            description="Offensive Rebound %: Second chance opportunities"
-            higherIsBetter={true}
-          />
-
-          <FactorBar
-            label="FT Rate"
-            homeValue={homeFTRate}
-            awayValue={awayFTRate}
-            description="Free Throw Rate: Getting to the line (FTA/FGA)"
-            higherIsBetter={true}
-          />
-        </div>
-
-        {/* Efficiency Ratings Section */}
-        <div className="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
-          <h4 className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-3">
-            Efficiency Ratings
-          </h4>
-          <div className="grid grid-cols-2 gap-4">
-            {/* Home Team */}
-            <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-3">
-              <p className="text-xs font-medium text-primary-600 dark:text-primary-400 mb-2">
-                {homeTeamName}
-              </p>
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-xs text-surface-600 dark:text-surface-400">Off Rtg</span>
-                  <span className="text-sm font-semibold text-surface-900 dark:text-white tabular-nums">
-                    {homeOffRtg.toFixed(1)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-xs text-surface-600 dark:text-surface-400">Def Rtg</span>
-                  <span className="text-sm font-semibold text-surface-900 dark:text-white tabular-nums">
-                    {homeDefRtg.toFixed(1)}
-                  </span>
-                </div>
-                <div className="flex justify-between pt-1 border-t border-primary-200 dark:border-primary-800">
-                  <span className="text-xs text-surface-600 dark:text-surface-400">Net Rtg</span>
-                  <span
-                    className={`text-sm font-bold tabular-nums ${
-                      homeOffRtg - homeDefRtg > 0
-                        ? "text-green-600 dark:text-green-400"
-                        : homeOffRtg - homeDefRtg < 0
-                          ? "text-red-600 dark:text-red-400"
-                          : "text-surface-900 dark:text-white"
-                    }`}
-                  >
-                    {homeOffRtg - homeDefRtg > 0 ? "+" : ""}
-                    {(homeOffRtg - homeDefRtg).toFixed(1)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Away Team */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
-              <p className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2">
-                {awayTeamName}
-              </p>
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-xs text-surface-600 dark:text-surface-400">Off Rtg</span>
-                  <span className="text-sm font-semibold text-surface-900 dark:text-white tabular-nums">
-                    {awayOffRtg.toFixed(1)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-xs text-surface-600 dark:text-surface-400">Def Rtg</span>
-                  <span className="text-sm font-semibold text-surface-900 dark:text-white tabular-nums">
-                    {awayDefRtg.toFixed(1)}
-                  </span>
-                </div>
-                <div className="flex justify-between pt-1 border-t border-blue-200 dark:border-blue-800">
-                  <span className="text-xs text-surface-600 dark:text-surface-400">Net Rtg</span>
-                  <span
-                    className={`text-sm font-bold tabular-nums ${
-                      awayOffRtg - awayDefRtg > 0
-                        ? "text-green-600 dark:text-green-400"
-                        : awayOffRtg - awayDefRtg < 0
-                          ? "text-red-600 dark:text-red-400"
-                          : "text-surface-900 dark:text-white"
-                    }`}
-                  >
-                    {awayOffRtg - awayDefRtg > 0 ? "+" : ""}
-                    {(awayOffRtg - awayDefRtg).toFixed(1)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <p className="text-xs text-surface-400 dark:text-surface-500 mt-3">
-            Ratings = Points per 100 possessions (Off higher is better, Def lower is better)
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
+FourFactors.displayName = "FourFactors";
 
 export default FourFactors;

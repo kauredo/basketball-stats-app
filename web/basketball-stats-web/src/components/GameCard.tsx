@@ -129,7 +129,10 @@ const GameCard: React.FC<GameCardProps> = ({
           {awayTeam.logo ? (
             <img
               src={awayTeam.logo}
-              alt=""
+              alt={`${awayTeam.name} logo`}
+              width={40}
+              height={40}
+              loading="lazy"
               className="w-10 h-10 rounded-full object-cover ring-2 ring-surface-100 dark:ring-surface-700"
             />
           ) : (
@@ -202,7 +205,10 @@ const GameCard: React.FC<GameCardProps> = ({
           {homeTeam.logo ? (
             <img
               src={homeTeam.logo}
-              alt=""
+              alt={`${homeTeam.name} logo`}
+              width={40}
+              height={40}
+              loading="lazy"
               className="w-10 h-10 rounded-full object-cover ring-2 ring-surface-100 dark:ring-surface-700"
             />
           ) : (

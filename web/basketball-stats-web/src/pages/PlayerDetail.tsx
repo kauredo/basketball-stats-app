@@ -20,6 +20,7 @@ import {
   type PlayerSeasonExportOptions,
 } from "../components/export/PlayerSeasonExportModal";
 import { PrintableShotChart } from "../components/export/PrintableShotChart";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 
 interface StatCardProps {
   label: string;
@@ -125,11 +126,7 @@ const PlayerDetail: React.FC = () => {
   }
 
   if (playerData === undefined || playerStats === undefined) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-      </div>
-    );
+    return <LoadingSpinner label="Loading player details" containerHeight="h-96" />;
   }
 
   const player = playerData?.player;

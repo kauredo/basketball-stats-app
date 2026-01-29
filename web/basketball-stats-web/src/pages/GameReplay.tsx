@@ -16,6 +16,7 @@ import { InteractiveCourt } from "../components/livegame/court/InteractiveCourt"
 import { GameEventCard } from "../components/livegame/playbyplay/GameEventCard";
 import Breadcrumb from "../components/Breadcrumb";
 import type { ShotLocation } from "../types/livegame";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 
 // Event type from API
 interface GameEvent {
@@ -218,11 +219,7 @@ const GameReplay: React.FC = () => {
 
   // Loading state
   if (gameData === undefined || gameEventsData === undefined) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-      </div>
-    );
+    return <LoadingSpinner label="Loading game replay" />;
   }
 
   if (!game) {

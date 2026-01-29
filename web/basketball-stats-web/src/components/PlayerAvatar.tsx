@@ -74,6 +74,9 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
                 ? `Profile photo of ${name}${number !== undefined ? ` #${number}` : ""}`
                 : "Player profile photo"
             }
+            width={width}
+            height={height}
+            loading="lazy"
             className="w-full h-full object-cover"
             onError={(e) => {
               // Fallback to initials if image fails to load

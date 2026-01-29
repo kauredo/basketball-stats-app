@@ -17,6 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useExport } from "../hooks/useExport";
 import { PrintableShotChart } from "../components/export";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 
 interface PlayerOption {
   id: Id<"players">;
@@ -55,27 +56,31 @@ const ShotCharts: React.FC = () => {
     token && selectedLeague ? { token, leagueId: selectedLeague.id } : "skip"
   );
 
-  // Build options from teams data
-  const playerOptions: PlayerOption[] = [];
-  const teamOptions: TeamOption[] = [];
+  // Build options from teams data (memoized to prevent rebuilding on every render)
+  const { playerOptions, teamOptions } = useMemo(() => {
+    const players: PlayerOption[] = [];
+    const teams: TeamOption[] = [];
 
-  if (teamsData?.teams) {
-    for (const team of teamsData.teams) {
-      teamOptions.push({ id: team.id as Id<"teams">, name: team.name });
-      if (team.players) {
-        for (const player of team.players) {
-          playerOptions.push({
-            id: player.id as Id<"players">,
-            name: player.name,
-            team: team.name,
-            teamId: team.id as Id<"teams">,
-            number: player.number,
-            position: player.position,
-          });
+    if (teamsData?.teams) {
+      for (const team of teamsData.teams) {
+        teams.push({ id: team.id as Id<"teams">, name: team.name });
+        if (team.players) {
+          for (const player of team.players) {
+            players.push({
+              id: player.id as Id<"players">,
+              name: player.name,
+              team: team.name,
+              teamId: team.id as Id<"teams">,
+              number: player.number,
+              position: player.position,
+            });
+          }
         }
       }
     }
-  }
+
+    return { playerOptions: players, teamOptions: teams };
+  }, [teamsData?.teams]);
 
   // Initialize selection from URL params once data is loaded
   useEffect(() => {
@@ -107,7 +112,14 @@ const ShotCharts: React.FC = () => {
     if (!initializedFromUrl) {
       setInitializedFromUrl(true);
     }
-  }, [searchParams, playerOptions, teamOptions, selectedPlayerId, selectedTeamId, initializedFromUrl]);
+  }, [
+    searchParams,
+    playerOptions,
+    teamOptions,
+    selectedPlayerId,
+    selectedTeamId,
+    initializedFromUrl,
+  ]);
 
   // Sync selection changes to URL (only after initial URL params have been processed)
   useEffect(() => {
@@ -234,6 +246,7 @@ const ShotCharts: React.FC = () => {
             <select
               value={selectedTeamId || ""}
               onChange={(e) => setSelectedTeamId((e.target.value as Id<"teams">) || null)}
+              aria-label="Select team for shot chart"
               className="flex-1 min-w-0 sm:max-w-xs px-3 py-2 bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">Select a team</option>
@@ -466,9 +479,7 @@ const ShotCharts: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-          </div>
+          <LoadingSpinner label="Loading shot chart" />
         )
       ) : (
         <div className="surface-card p-12 text-center">

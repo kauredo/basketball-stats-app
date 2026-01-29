@@ -212,6 +212,7 @@ export function PlayerFormModal({
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, position: e.target.value as Position }))
               }
+              aria-label="Player position"
               className="w-full bg-surface-100 dark:bg-surface-700 border border-surface-300 dark:border-surface-600 rounded-xl px-3 py-2 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               {POSITION_OPTIONS.map((opt) => (

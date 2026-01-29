@@ -135,6 +135,7 @@ export function LeagueFormModal({
             onChange={(e) =>
               setForm((prev) => ({ ...prev, leagueType: e.target.value as LeagueType }))
             }
+            aria-label="League type"
             className="w-full px-3 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-900 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             {LEAGUE_TYPES.map((type) => (

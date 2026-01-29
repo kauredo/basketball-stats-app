@@ -14,6 +14,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { ActionMenu } from "../components/ui/ActionMenu";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import {
   TeamFormModal,
   PlayerFormModal,
@@ -284,11 +285,7 @@ const Teams: React.FC = () => {
   );
 
   if (teamsData === undefined) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-      </div>
-    );
+    return <LoadingSpinner label="Loading teams" />;
   }
 
   return (

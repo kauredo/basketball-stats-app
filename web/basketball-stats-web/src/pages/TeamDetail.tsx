@@ -586,7 +586,10 @@ const TeamDetail: React.FC = () => {
               {team.logoUrl ? (
                 <img
                   src={team.logoUrl}
-                  alt={team.name}
+                  alt={`${team.name} logo`}
+                  width={96}
+                  height={96}
+                  loading="lazy"
                   className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover bg-surface-100 dark:bg-surface-700 flex-shrink-0"
                 />
               ) : (
