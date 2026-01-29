@@ -243,7 +243,7 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({
           {formatQuarter(event.quarter)}
         </span>
         <span className="text-xs text-surface-700 dark:text-surface-300 font-semibold font-mono">
-          {formatTime(event.timeRemaining)}
+          {event.gameTimeDisplay || formatTime(event.gameTime)}
         </span>
       </div>
 

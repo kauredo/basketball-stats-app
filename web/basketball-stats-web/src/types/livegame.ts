@@ -277,15 +277,26 @@ export interface MomentumState {
 // ============================================================================
 
 export interface PlayByPlayEvent {
-  _id: string;
+  id: string;
   quarter: number;
-  timeRemaining: number;
+  gameTime: number;
+  gameTimeDisplay?: string;
   eventType: string;
   description: string;
   playerId?: Id<"players">;
   teamId?: Id<"teams">;
   points?: number;
   details?: Record<string, unknown>;
+  player?: {
+    id: Id<"players">;
+    name: string;
+    number: number;
+  } | null;
+  team?: {
+    id: Id<"teams">;
+    name: string;
+  } | null;
+  timestamp?: number;
 }
 
 // ============================================================================
@@ -305,6 +316,8 @@ export interface GameSettings {
   foulLimit: 5 | 6;
   timeoutsPerTeam: number;
   scoreByPeriod?: ScoreByPeriod;
+  quartersCompleted?: number[];
+  isQuickGame?: boolean;
 }
 
 // ============================================================================

@@ -1056,9 +1056,9 @@ const GameAnalysis: React.FC = () => {
                 <GameEventCard
                   key={event.id || event._id}
                   event={{
-                    _id: (event.id || event._id || "") as string,
+                    id: (event.id || event._id || "") as string,
                     quarter: event.quarter,
-                    timeRemaining: event.gameTime || event.timeRemaining || 0,
+                    gameTime: event.gameTime || event.timeRemaining || 0,
                     eventType: event.eventType,
                     description: event.description || event.eventType?.replace(/_/g, " ") || "",
                     playerId: (event.player?.id || event.playerId) as Id<"players"> | undefined,

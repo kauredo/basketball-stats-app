@@ -45,9 +45,9 @@ export const PlayByPlayList: React.FC<PlayByPlayListProps> = ({
   // Sort events by time (most recent first for live view)
   const sortedEvents = useMemo(() => {
     return [...filteredEvents].sort((a, b) => {
-      // Sort by quarter descending, then by time remaining ascending (most recent first)
+      // Sort by quarter descending, then by game time ascending (most recent first)
       if (a.quarter !== b.quarter) return b.quarter - a.quarter;
-      return a.timeRemaining - b.timeRemaining;
+      return a.gameTime - b.gameTime;
     });
   }, [filteredEvents]);
 
@@ -78,7 +78,7 @@ export const PlayByPlayList: React.FC<PlayByPlayListProps> = ({
     <div ref={listRef} className="h-full overflow-auto">
       {sortedEvents.map((event) => (
         <GameEventCard
-          key={event._id}
+          key={event.id}
           event={event}
           playerStats={playerStats}
           homeTeamId={homeTeamId}

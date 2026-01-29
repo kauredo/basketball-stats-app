@@ -47,6 +47,7 @@ interface GameEventItem {
   _id?: string;
   quarter: number;
   timeRemaining?: number;
+  gameTime?: number;
   eventType: string;
   description: string;
   points?: number;
@@ -907,9 +908,9 @@ const LiveGameNew: React.FC = () => {
   // Format events for PlaysModeContent
   const formattedEvents: PlayByPlayEvent[] = ((gameEvents?.events || []) as GameEventItem[]).map(
     (e) => ({
-      _id: e.id || e._id || `event-${e.quarter}-${e.timeRemaining}`,
+      id: e.id || e._id || `event-${e.quarter}-${e.gameTime || e.timeRemaining}`,
       quarter: e.quarter,
-      timeRemaining: e.timeRemaining || 0,
+      gameTime: e.gameTime || e.timeRemaining || 0,
       eventType: e.eventType,
       description: e.description,
       playerId: e.player?.id,

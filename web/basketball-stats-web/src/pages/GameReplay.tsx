@@ -433,9 +433,9 @@ const GameReplay: React.FC = () => {
                     >
                       <GameEventCard
                         event={{
-                          _id: (event.id || event._id || "") as string,
+                          id: (event.id || event._id || "") as string,
                           quarter: event.quarter,
-                          timeRemaining: event.gameTime,
+                          gameTime: event.gameTime,
                           eventType: event.eventType,
                           description:
                             event.description || event.eventType?.replace(/_/g, " ") || "",
