@@ -19,9 +19,12 @@
     "full_check": "npm run typecheck && npm run lint && npm run format"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
     "convex": "^1.31.5",
+    "convex-test": "^0.0.41",
     "prettier": "^3.8.0",
-    "turbo": "^2.7.4"
+    "turbo": "^2.7.4",
+    "vitest": "^4.0.18"
   },
   "dependencies": {
     "@convex-dev/auth": "^0.0.90",
