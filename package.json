@@ -16,7 +16,10 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "convex:dev": "convex dev",
     "convex:deploy": "convex deploy",
-    "full_check": "npm run typecheck && npm run lint && npm run format"
+    "test": "npm run test --workspace=@basketball-stats/shared && npm run test --workspace=basketball-stats-web && npm run test --workspace=basketballstatsmobile && npm run test:convex",
+    "test:convex": "vitest run --config convex/vitest.config.ts",
+    "test:e2e": "playwright test --config e2e/playwright.config.ts",
+    "full_check": "npm run typecheck && npm run lint && npm run format && npm run test"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.18",
