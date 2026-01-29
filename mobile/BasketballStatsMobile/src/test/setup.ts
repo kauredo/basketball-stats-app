@@ -95,6 +95,7 @@ jest.mock("expo-image-picker", () => ({
 
 // Mock react-native-gesture-handler
 jest.mock("react-native-gesture-handler", () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const View = require("react-native/Libraries/Components/View/View");
   return {
     Swipeable: View,
@@ -129,6 +130,7 @@ jest.mock("react-native-gesture-handler", () => {
 
 // Mock react-native-reanimated
 jest.mock("react-native-reanimated", () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const View = require("react-native/Libraries/Components/View/View");
   return {
     default: {
@@ -200,9 +202,7 @@ const originalWarn = console.warn;
 console.warn = (...args: unknown[]) => {
   if (
     typeof args[0] === "string" &&
-    (args[0].includes("Animated:") ||
-      args[0].includes("ReactNative") ||
-      args[0].includes("expo-"))
+    (args[0].includes("Animated:") || args[0].includes("ReactNative") || args[0].includes("expo-"))
   ) {
     return;
   }

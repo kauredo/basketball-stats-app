@@ -9,59 +9,41 @@ import {
 describe("YouTube Utilities", () => {
   describe("extractYouTubeId", () => {
     it("extracts ID from youtu.be short URL", () => {
-      expect(extractYouTubeId("https://youtu.be/dQw4w9WgXcQ")).toBe(
-        "dQw4w9WgXcQ"
-      );
+      expect(extractYouTubeId("https://youtu.be/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
     });
 
     it("extracts ID from youtube.com/watch URL", () => {
-      expect(
-        extractYouTubeId("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-      ).toBe("dQw4w9WgXcQ");
+      expect(extractYouTubeId("https://www.youtube.com/watch?v=dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
     });
 
     it("extracts ID from youtube.com/embed URL", () => {
-      expect(
-        extractYouTubeId("https://www.youtube.com/embed/dQw4w9WgXcQ")
-      ).toBe("dQw4w9WgXcQ");
+      expect(extractYouTubeId("https://www.youtube.com/embed/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
     });
 
     it("extracts ID from youtube.com/live URL", () => {
-      expect(extractYouTubeId("https://www.youtube.com/live/dQw4w9WgXcQ")).toBe(
-        "dQw4w9WgXcQ"
-      );
+      expect(extractYouTubeId("https://www.youtube.com/live/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
     });
 
     it("extracts ID from youtube.com/shorts URL", () => {
-      expect(
-        extractYouTubeId("https://www.youtube.com/shorts/dQw4w9WgXcQ")
-      ).toBe("dQw4w9WgXcQ");
+      expect(extractYouTubeId("https://www.youtube.com/shorts/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
     });
 
     it("extracts ID from youtube.com/v URL", () => {
-      expect(extractYouTubeId("https://www.youtube.com/v/dQw4w9WgXcQ")).toBe(
-        "dQw4w9WgXcQ"
-      );
+      expect(extractYouTubeId("https://www.youtube.com/v/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
     });
 
     it("handles URL with additional query parameters", () => {
       expect(
-        extractYouTubeId(
-          "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=120&list=PLtest"
-        )
+        extractYouTubeId("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=120&list=PLtest")
       ).toBe("dQw4w9WgXcQ");
     });
 
     it("handles URL without www", () => {
-      expect(extractYouTubeId("https://youtube.com/watch?v=dQw4w9WgXcQ")).toBe(
-        "dQw4w9WgXcQ"
-      );
+      expect(extractYouTubeId("https://youtube.com/watch?v=dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
     });
 
     it("handles http URLs", () => {
-      expect(extractYouTubeId("http://youtu.be/dQw4w9WgXcQ")).toBe(
-        "dQw4w9WgXcQ"
-      );
+      expect(extractYouTubeId("http://youtu.be/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
     });
 
     it("returns null for empty string", () => {
@@ -85,23 +67,17 @@ describe("YouTube Utilities", () => {
 
     it("extracts first 11 chars from longer paths", () => {
       // The regex captures exactly 11 characters from the path
-      expect(extractYouTubeId("https://youtu.be/abcdefghijklm")).toBe(
-        "abcdefghijk"
-      );
+      expect(extractYouTubeId("https://youtu.be/abcdefghijklm")).toBe("abcdefghijk");
     });
 
     it("handles video IDs with hyphens and underscores", () => {
-      expect(extractYouTubeId("https://youtu.be/abc-def_123")).toBe(
-        "abc-def_123"
-      );
+      expect(extractYouTubeId("https://youtu.be/abc-def_123")).toBe("abc-def_123");
     });
   });
 
   describe("getYouTubeEmbedUrl", () => {
     it("generates basic embed URL", () => {
-      expect(getYouTubeEmbedUrl("dQw4w9WgXcQ")).toBe(
-        "https://www.youtube.com/embed/dQw4w9WgXcQ"
-      );
+      expect(getYouTubeEmbedUrl("dQw4w9WgXcQ")).toBe("https://www.youtube.com/embed/dQw4w9WgXcQ");
     });
 
     it("adds autoplay parameter", () => {
@@ -194,15 +170,11 @@ describe("YouTube Utilities", () => {
     });
 
     it("returns true for valid youtube.com watch URL", () => {
-      expect(
-        isValidYouTubeUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-      ).toBe(true);
+      expect(isValidYouTubeUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ")).toBe(true);
     });
 
     it("returns true for valid embed URL", () => {
-      expect(
-        isValidYouTubeUrl("https://www.youtube.com/embed/dQw4w9WgXcQ")
-      ).toBe(true);
+      expect(isValidYouTubeUrl("https://www.youtube.com/embed/dQw4w9WgXcQ")).toBe(true);
     });
 
     it("returns false for empty string", () => {

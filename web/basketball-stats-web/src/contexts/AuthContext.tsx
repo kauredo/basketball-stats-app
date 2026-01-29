@@ -21,7 +21,7 @@ interface User extends Omit<SharedUser, "id"> {
 }
 
 // Minimal type for league selection (used when selecting a league to work with)
-interface LeagueSelection {
+export interface LeagueSelection {
   id: Id<"leagues">;
   name: string;
   season?: string;

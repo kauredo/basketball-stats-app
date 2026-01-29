@@ -49,21 +49,15 @@ describe("Team Colors Utilities", () => {
     });
 
     it("returns home default for home team when no custom color", () => {
-      expect(resolveTeamColor(undefined, true)).toBe(
-        DEFAULT_TEAM_COLORS.home.primary
-      );
+      expect(resolveTeamColor(undefined, true)).toBe(DEFAULT_TEAM_COLORS.home.primary);
     });
 
     it("returns away default for away team when no custom color", () => {
-      expect(resolveTeamColor(undefined, false)).toBe(
-        DEFAULT_TEAM_COLORS.away.primary
-      );
+      expect(resolveTeamColor(undefined, false)).toBe(DEFAULT_TEAM_COLORS.away.primary);
     });
 
     it("handles empty string as no color", () => {
-      expect(resolveTeamColor("", true)).toBe(
-        DEFAULT_TEAM_COLORS.home.primary
-      );
+      expect(resolveTeamColor("", true)).toBe(DEFAULT_TEAM_COLORS.home.primary);
     });
   });
 

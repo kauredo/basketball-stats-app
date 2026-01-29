@@ -16,18 +16,20 @@ export function resetConvexMocks() {
 
 // Setup default return values
 export function setupConvexMocks(overrides?: {
-  useQuery?: ReturnType<typeof vi.fn>;
-  useMutation?: ReturnType<typeof vi.fn>;
-  useAction?: ReturnType<typeof vi.fn>;
+  useQuery?: (...args: unknown[]) => unknown;
+  useMutation?: (...args: unknown[]) => unknown;
+  useAction?: (...args: unknown[]) => unknown;
 }) {
   if (overrides?.useQuery) {
     mockUseQuery.mockImplementation(overrides.useQuery);
   }
   if (overrides?.useMutation) {
-    mockUseMutation.mockReturnValue(overrides.useMutation);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockUseMutation.mockReturnValue(overrides.useMutation as any);
   }
   if (overrides?.useAction) {
-    mockUseAction.mockReturnValue(overrides.useAction);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockUseAction.mockReturnValue(overrides.useAction as any);
   }
 }
 

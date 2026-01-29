@@ -29,13 +29,48 @@ import {
   captureCourtAsImage,
 } from "../utils/export/pdf-export";
 
+const mockTeamTotals = {
+  points: 0,
+  rebounds: 0,
+  assists: 0,
+  steals: 0,
+  blocks: 0,
+  turnovers: 0,
+  fouls: 0,
+  fieldGoalsMade: 0,
+  fieldGoalsAttempted: 0,
+  fieldGoalPercentage: 0,
+  threePointersMade: 0,
+  threePointersAttempted: 0,
+  threePointPercentage: 0,
+  freeThrowsMade: 0,
+  freeThrowsAttempted: 0,
+  freeThrowPercentage: 0,
+};
+
 const mockGameData = {
-  gameId: "game-1",
-  date: "2024-01-15",
-  homeTeam: { id: "team-1", name: "Lakers", score: 105 },
-  awayTeam: { id: "team-2", name: "Celtics", score: 98 },
-  homeStats: [],
-  awayStats: [],
+  game: {
+    id: "game-1",
+    homeTeamName: "Lakers",
+    awayTeamName: "Celtics",
+    homeScore: 105,
+    awayScore: 98,
+    status: "completed",
+    currentQuarter: 4,
+    date: "2024-01-15",
+  },
+  homeTeam: {
+    id: "team-1",
+    name: "Lakers",
+    players: [],
+    totals: mockTeamTotals,
+  },
+  awayTeam: {
+    id: "team-2",
+    name: "Celtics",
+    players: [],
+    totals: mockTeamTotals,
+  },
   shots: [],
   events: [],
 };

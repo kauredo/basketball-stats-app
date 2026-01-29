@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import React from "react";
-import { AuthProvider, useAuth } from "./AuthContext";
+import { AuthProvider, useAuth, type LeagueSelection } from "./AuthContext";
 
 // Mock Convex mutations
 const mockLoginMutation = vi.fn();
@@ -51,7 +51,7 @@ vi.mock("../../../../convex/_generated/api", () => ({
 }));
 
 const mockUser = {
-  id: "user-123" as any,
+  id: "user-123" as unknown as string,
   email: "test@example.com",
   firstName: "Test",
   lastName: "User",
@@ -65,10 +65,10 @@ const mockTokens = {
 };
 
 const mockLeague = {
-  id: "league-123" as any,
+  id: "league-123",
   name: "Test League",
   season: "2024",
-};
+} as unknown as LeagueSelection;
 
 function wrapper({ children }: { children: React.ReactNode }) {
   return <AuthProvider>{children}</AuthProvider>;

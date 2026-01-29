@@ -374,20 +374,14 @@ describe("BasketballUtils", () => {
 
   describe("getGameStatusDisplayName", () => {
     it("returns display names for all statuses", () => {
-      expect(BasketballUtils.getGameStatusDisplayName("scheduled")).toBe(
-        "Scheduled"
-      );
+      expect(BasketballUtils.getGameStatusDisplayName("scheduled")).toBe("Scheduled");
       expect(BasketballUtils.getGameStatusDisplayName("active")).toBe("Live");
       expect(BasketballUtils.getGameStatusDisplayName("paused")).toBe("Paused");
-      expect(BasketballUtils.getGameStatusDisplayName("completed")).toBe(
-        "Final"
-      );
+      expect(BasketballUtils.getGameStatusDisplayName("completed")).toBe("Final");
     });
 
     it("returns raw status for unknown values", () => {
-      expect(BasketballUtils.getGameStatusDisplayName("unknown")).toBe(
-        "unknown"
-      );
+      expect(BasketballUtils.getGameStatusDisplayName("unknown")).toBe("unknown");
     });
   });
 
@@ -440,9 +434,7 @@ describe("BasketballUtils", () => {
   });
 
   describe("Game utilities", () => {
-    const createGame = (
-      overrides: Partial<Game> = {}
-    ): Game =>
+    const createGame = (overrides: Partial<Game> = {}): Game =>
       ({
         id: "game-1",
         homeTeamId: "team-1",
@@ -565,9 +557,7 @@ describe("BasketballUtils", () => {
         threePointersAttempted: 5,
       });
       const errors = BasketballUtils.validateStatEntry(stat);
-      expect(errors).toContain(
-        "Three-pointers made cannot exceed total field goals made"
-      );
+      expect(errors).toContain("Three-pointers made cannot exceed total field goals made");
     });
 
     it("catches 3PA > FGA", () => {
@@ -579,9 +569,7 @@ describe("BasketballUtils", () => {
         threePointersAttempted: 5,
       });
       const errors = BasketballUtils.validateStatEntry(stat);
-      expect(errors).toContain(
-        "Three-pointer attempts cannot exceed total field goal attempts"
-      );
+      expect(errors).toContain("Three-pointer attempts cannot exceed total field goal attempts");
     });
 
     it("catches points mismatch", () => {
@@ -601,9 +589,7 @@ describe("BasketballUtils", () => {
   });
 
   describe("Sorting utilities", () => {
-    const createPlayerStat = (
-      overrides: Partial<PlayerStat> = {}
-    ): PlayerStat =>
+    const createPlayerStat = (overrides: Partial<PlayerStat> = {}): PlayerStat =>
       ({
         id: "stat-1",
         playerId: "player-1",
@@ -679,9 +665,7 @@ describe("BasketballUtils", () => {
   });
 
   describe("generateQuickStats", () => {
-    const createPlayerStat = (
-      overrides: Partial<PlayerStat> = {}
-    ): PlayerStat =>
+    const createPlayerStat = (overrides: Partial<PlayerStat> = {}): PlayerStat =>
       ({
         id: "stat-1",
         playerId: "player-1",

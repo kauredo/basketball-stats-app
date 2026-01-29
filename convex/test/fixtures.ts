@@ -3,10 +3,11 @@
  * Provides helper functions to create test data
  */
 
-import type { Id } from "../_generated/dataModel";
+import type { Id, TableNames } from "../_generated/dataModel";
+import type { SystemTableNames } from "convex/server";
 
 // Helper to create a mock ID
-export function mockId<T extends string>(table: T): Id<T> {
+export function mockId<T extends TableNames | SystemTableNames>(table: T): Id<T> {
   return `mock-${table}-${Math.random().toString(36).substr(2, 9)}` as Id<T>;
 }
 
