@@ -1611,7 +1611,7 @@ export default function LiveGameScreen() {
       </View>
 
       {/* Tab Content */}
-      {activeTab !== "plays" && (
+      {activeTab !== "plays" && activeTab !== "subs" && (
         <ScrollView
           className="flex-1 px-4"
           contentContainerStyle={{
@@ -1638,7 +1638,7 @@ export default function LiveGameScreen() {
                   <View className="flex-row justify-center gap-2 mb-2">
                     <TouchableOpacity
                       onPress={() => setShotTeamFilter("all")}
-                      className={`px-3 py-1.5 rounded-full ${
+                      className={`px-3 py-1.5 rounded-full flex-row items-center ${
                         shotTeamFilter === "all"
                           ? "bg-surface-700 dark:bg-surface-200"
                           : "bg-surface-200 dark:bg-surface-700"
@@ -1656,7 +1656,7 @@ export default function LiveGameScreen() {
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => setShotTeamFilter("home")}
-                      className={`px-3 py-1.5 rounded-full flex-row items-center gap-1.5 ${
+                      className={`px-3 py-1.5 rounded-full flex-row items-center space-x-1.5 ${
                         shotTeamFilter === "home"
                           ? "bg-blue-600"
                           : "bg-surface-200 dark:bg-surface-700"
@@ -1679,17 +1679,16 @@ export default function LiveGameScreen() {
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => setShotTeamFilter("away")}
-                      className={`px-3 py-1.5 rounded-full flex-row items-center gap-1.5 ${
+                      className={`px-3 py-1.5 rounded-full flex-row items-center space-x-1.5 ${
                         shotTeamFilter === "away"
                           ? "bg-orange-500"
                           : "bg-surface-200 dark:bg-surface-700"
                       }`}
                     >
                       <View
-                        className={`w-2 h-2 ${
+                        className={`w-2 h-2 rounded-full ${
                           shotTeamFilter === "away" ? "bg-white" : "bg-orange-500"
                         }`}
-                        style={{ transform: [{ rotate: "45deg" }] }}
                       />
                       <Text
                         className={`text-xs font-medium ${
@@ -2277,21 +2276,22 @@ export default function LiveGameScreen() {
               />
             </View>
           )}
+        </ScrollView>
+      )}
 
-          {activeTab === "subs" && (
-            <View className="pb-6 gap-4">
-              {/* Away Team - Position-based substitution panel */}
-              <SubstitutionPanel
-                teamName={game.awayTeam?.name || "Away"}
-                players={awayPlayerStats}
-                foulLimit={liveStats?.game?.foulLimit || 5}
-                onSwap={handleSwap}
-                onSubIn={handleSubIn}
-                disabled={game.status !== "active" && game.status !== "paused"}
-                isHomeTeam={false}
-              />
-
-              {/* Home Team - Position-based substitution panel */}
+      {/* Subs tab */}
+      {activeTab === "subs" && (
+        <ScrollView
+          className="flex-1 px-4"
+          contentContainerStyle={{
+            paddingBottom: 16,
+            flexGrow: isLandscape ? 1 : undefined,
+          }}
+          showsVerticalScrollIndicator={!isLandscape}
+        >
+          <View className={isLandscape ? "flex-1 flex-row gap-3" : ""}>
+            {/* Home Team Panel */}
+            <View className={isLandscape ? "flex-1" : "mb-4"}>
               <SubstitutionPanel
                 teamName={game.homeTeam?.name || "Home"}
                 players={homePlayerStats}
@@ -2302,7 +2302,20 @@ export default function LiveGameScreen() {
                 isHomeTeam={true}
               />
             </View>
-          )}
+
+            {/* Away Team Panel */}
+            <View className={isLandscape ? "flex-1" : "mb-4"}>
+              <SubstitutionPanel
+                teamName={game.awayTeam?.name || "Away"}
+                players={awayPlayerStats}
+                foulLimit={liveStats?.game?.foulLimit || 5}
+                onSwap={handleSwap}
+                onSubIn={handleSubIn}
+                disabled={game.status !== "active" && game.status !== "paused"}
+                isHomeTeam={false}
+              />
+            </View>
+          </View>
         </ScrollView>
       )}
 

@@ -1,20 +1,12 @@
 import React, { useState, useMemo } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { View, Text } from "react-native";
+import { Pressable, ScrollView } from "react-native-gesture-handler";
 import Icon from "../Icon";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 
 // Basketball court positions
 const POSITIONS = ["PG", "SG", "SF", "PF", "C"] as const;
 type Position = (typeof POSITIONS)[number];
-
-const _POSITION_NAMES: Record<Position, string> = {
-  PG: "Point Guard",
-  SG: "Shooting Guard",
-  SF: "Small Forward",
-  PF: "Power Forward",
-  C: "Center",
-};
 
 interface PlayerStat {
   playerId: Id<"players">;
@@ -97,15 +89,17 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
     if (disabled) return;
 
     if (!player) {
-      // Empty slot - if bench player selected, plus them
+      // Empty slot tapped
       if (selectedBenchPlayer && onSubIn) {
+        // Bench player selected → add them to this empty slot
         onSubIn(selectedBenchPlayer);
         setSelectedBenchPlayer(null);
       }
+      // If no bench player selected, do nothing (they need to select one first)
       return;
     }
 
-    // If bench player is selected, swap them
+    // If bench player is selected, swap them with this court player
     if (selectedBenchPlayer) {
       onSwap(player.playerId, selectedBenchPlayer);
       setSelectedBenchPlayer(null);
@@ -113,7 +107,7 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
       return;
     }
 
-    // Toggle selection
+    // Toggle court player selection
     if (selectedCourtPlayer === player.playerId) {
       setSelectedCourtPlayer(null);
     } else {
@@ -132,13 +126,7 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
       return;
     }
 
-    // If there are empty slots, plus directly to court
-    if (needsSubs && onSubIn) {
-      onSubIn(player.playerId);
-      return;
-    }
-
-    // Toggle selection for bench-first flow
+    // Toggle bench player selection (for both swap and add-to-empty-slot flows)
     if (selectedBenchPlayer === player.playerId) {
       setSelectedBenchPlayer(null);
     } else {
@@ -146,7 +134,8 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
     }
   };
 
-  const primaryColor = isHomeTeam ? "#f97316" : "#3b82f6";
+  // Home team = blue, Away team = orange (consistent with shot chart markers)
+  const primaryColor = isHomeTeam ? "#3b82f6" : "#f97316";
 
   const renderPositionSlot = (position: Position, index: number) => {
     const player = positionAssignments[index];
@@ -155,18 +144,19 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
     const needsSub = player && player.fouls >= foulLimit - 1;
 
     return (
-      <TouchableOpacity
+      <Pressable
         key={position}
         onPress={() => handleCourtPlayerPress(player, index)}
         disabled={disabled}
         className={`
-          items-center justify-center rounded-xl p-2 min-w-[60px]
+          flex-1 items-center rounded-xl p-1.5 mx-0.5 overflow-hidden
           ${isSelected ? "bg-primary-100 dark:bg-primary-500/20 border-2 border-primary-500" : ""}
           ${needsSub && !isSelected ? "bg-red-50 dark:bg-red-500/10 border-2 border-red-500" : ""}
-          ${isEmpty ? "border-2 border-dashed border-surface-300 dark:border-surface-600 bg-surface-100 dark:bg-surface-800/50" : ""}
+          ${isEmpty && selectedBenchPlayer ? "bg-green-50 dark:bg-green-500/10 border-2 border-dashed border-green-400 dark:border-green-500" : ""}
+          ${isEmpty && !selectedBenchPlayer ? "bg-amber-50 dark:bg-amber-500/5 border-2 border-dashed border-amber-300 dark:border-amber-500/50" : ""}
           ${!isSelected && !needsSub && !isEmpty ? "bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700" : ""}
         `}
-        activeOpacity={0.7}
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
       >
         {/* Position Label */}
         <Text className="text-[10px] font-bold text-surface-500 dark:text-surface-400 mb-1">
@@ -177,16 +167,17 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
           <>
             {/* Jersey Number */}
             <View
-              className="w-10 h-10 rounded-full items-center justify-center mb-1"
+              className="w-9 h-9 rounded-full items-center justify-center mb-1"
               style={{ backgroundColor: primaryColor }}
             >
-              <Text className="text-white font-bold text-lg">{player.player?.number || "?"}</Text>
+              <Text className="text-white font-bold text-base">{player.player?.number || "?"}</Text>
             </View>
 
-            {/* Player Name */}
+            {/* Player Name - constrained width */}
             <Text
-              className="text-xs font-medium text-surface-900 dark:text-white text-center"
+              className="text-[10px] font-medium text-surface-900 dark:text-white text-center w-full px-0.5"
               numberOfLines={1}
+              ellipsizeMode="tail"
             >
               {player.player?.name?.split(" ").pop() || "Unknown"}
             </Text>
@@ -210,72 +201,104 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
           </>
         ) : (
           <>
-            <View className="w-10 h-10 rounded-full items-center justify-center mb-1 bg-surface-200 dark:bg-surface-700">
-              <Icon name="plus" size={20} color="#9CA3AF" />
+            <View
+              className={`w-9 h-9 rounded-full items-center justify-center mb-1 border-2 border-dashed ${
+                selectedBenchPlayer
+                  ? "bg-green-100 dark:bg-green-500/20 border-green-500"
+                  : "bg-amber-100 dark:bg-amber-500/20 border-amber-400 dark:border-amber-500"
+              }`}
+            >
+              <Icon name="plus" size={18} color={selectedBenchPlayer ? "#22C55E" : "#F59E0B"} />
             </View>
-            <Text className="text-[10px] text-surface-400 dark:text-surface-500">Empty</Text>
+            <Text
+              className={`text-[10px] font-medium ${
+                selectedBenchPlayer
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-amber-600 dark:text-amber-400"
+              }`}
+            >
+              {selectedBenchPlayer ? "Tap" : "Empty"}
+            </Text>
           </>
         )}
-      </TouchableOpacity>
+      </Pressable>
     );
   };
+
+  // Calculate slot width based on 5 slots fitting in the court row
+  // This ensures bench/fouled-out cards match court card widths
+  const CARD_WIDTH = 64;
 
   const renderBenchPlayer = (player: PlayerStat) => {
     const isSelected = selectedBenchPlayer === player.playerId;
 
     return (
-      <TouchableOpacity
+      <Pressable
         key={player.playerId}
         onPress={() => handleBenchPlayerPress(player)}
         disabled={disabled}
         className={`
-          flex-row items-center p-2 rounded-lg mr-2 min-w-[100px]
+          max-w-[60px] items-center p-1.5 rounded-xl overflow-hidden
           ${isSelected ? "bg-primary-100 dark:bg-primary-500/20 border-2 border-primary-500" : "bg-surface-100 dark:bg-surface-700/50 border border-surface-200 dark:border-surface-600"}
         `}
-        activeOpacity={0.7}
+        style={({ pressed }) => ({
+          flexBasis: CARD_WIDTH,
+          maxWidth: CARD_WIDTH,
+          opacity: pressed ? 0.7 : 1,
+        })}
       >
         {/* Jersey Number */}
         <View
-          className="w-8 h-8 rounded-full items-center justify-center mr-2"
+          className="w-9 h-9 rounded-full items-center justify-center mb-1"
           style={{ backgroundColor: isSelected ? primaryColor : "#6B7280" }}
         >
-          <Text className="text-white font-bold text-sm">{player.player?.number || "?"}</Text>
+          <Text className="text-white font-bold text-base">{player.player?.number || "?"}</Text>
         </View>
 
-        {/* Player Info */}
-        <View className="flex-1">
-          <Text className="text-xs font-medium text-surface-900 dark:text-white" numberOfLines={1}>
-            {player.player?.name?.split(" ").pop() || "Unknown"}
-          </Text>
-          <Text className="text-[10px] text-surface-500 dark:text-surface-400">
-            {player.points}pts {player.rebounds}reb
-          </Text>
-        </View>
-      </TouchableOpacity>
+        {/* Player Name */}
+        <Text
+          className="text-[10px] font-medium text-center w-full text-surface-900 dark:text-white"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {player.player?.name?.split(" ").pop() || "Unknown"}
+        </Text>
+
+        {/* Stats */}
+        <Text className="text-[9px] text-surface-500 dark:text-surface-400">
+          {player.points}p {player.rebounds}r
+        </Text>
+      </Pressable>
     );
   };
 
   const renderFouledOutPlayer = (player: PlayerStat) => (
     <View
       key={player.playerId}
-      className="flex-row items-center p-2 rounded-lg mr-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 opacity-60"
+      className="items-center p-1.5 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 opacity-60 overflow-hidden"
+      style={{ flexBasis: CARD_WIDTH, maxWidth: CARD_WIDTH }}
     >
-      <View className="w-8 h-8 rounded-full items-center justify-center mr-2 bg-red-500">
-        <Text className="text-white font-bold text-sm line-through">
+      <View className="w-9 h-9 rounded-full items-center justify-center mb-1 bg-red-500">
+        <Text className="text-white font-bold text-base line-through">
           {player.player?.number || "?"}
         </Text>
       </View>
-      <View className="flex-1">
-        <Text className="text-xs font-medium text-surface-500 dark:text-surface-400 line-through">
-          {player.player?.name?.split(" ").pop() || "Unknown"}
-        </Text>
-        <Text className="text-[10px] text-red-500 font-semibold">Fouled Out</Text>
-      </View>
+      <Text
+        className="text-[10px] font-medium text-surface-500 dark:text-surface-400 line-through text-center w-full"
+        numberOfLines={1}
+        ellipsizeMode="tail"
+      >
+        {player.player?.name?.split(" ").pop() || "Unknown"}
+      </Text>
+      <Text className="text-[9px] text-red-500 font-semibold">Out</Text>
     </View>
   );
 
   return (
-    <View className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+    <View
+      className="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700"
+      collapsable={false}
+    >
       {/* Header */}
       <View
         className="px-3 py-2 border-b border-surface-200 dark:border-surface-700"
@@ -285,37 +308,36 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
       </View>
 
       {/* Substitution Alert */}
-      {needsSubs && (
-        <Animated.View
-          entering={FadeIn}
-          exiting={FadeOut}
-          className="flex-row items-center px-3 py-2 bg-red-50 dark:bg-red-500/10 border-b border-red-200 dark:border-red-500/30"
-        >
-          <Icon name="alert" size={16} color="#EF4444" />
-          <Text className="text-red-600 dark:text-red-400 text-xs font-medium ml-2">
-            {emptySlots} empty slot{emptySlots > 1 ? "s" : ""} - tap bench player to plus
+      {needsSubs && !selectedBenchPlayer && (
+        <View className="flex-row items-center px-3 py-2 bg-amber-50 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/30">
+          <Icon name="alert" size={16} color="#F59E0B" />
+          <Text className="text-amber-700 dark:text-amber-400 text-xs font-medium ml-2 flex-1">
+            {emptySlots} empty slot{emptySlots > 1 ? "s" : ""} — select a bench player, then tap the
+            empty slot
           </Text>
-        </Animated.View>
+        </View>
       )}
 
       {/* Selection Hint */}
       {(selectedCourtPlayer || selectedBenchPlayer) && (
         <View className="flex-row items-center px-3 py-1.5 bg-primary-50 dark:bg-primary-500/10 border-b border-primary-200 dark:border-primary-500/30">
           <Icon name="alert" size={14} color="#F97316" />
-          <Text className="text-primary-600 dark:text-primary-400 text-xs ml-2">
+          <Text className="text-primary-600 dark:text-primary-400 text-xs ml-2 flex-1">
             {selectedCourtPlayer
               ? "Tap a bench player to substitute"
-              : "Tap a court player to swap"}
+              : needsSubs
+                ? "Tap a court player to swap, or tap empty slot to add"
+                : "Tap a court player to swap"}
           </Text>
-          <TouchableOpacity
+          <Pressable
             onPress={() => {
               setSelectedCourtPlayer(null);
               setSelectedBenchPlayer(null);
             }}
-            className="ml-auto"
+            className="ml-auto pl-2"
           >
             <Text className="text-primary-500 text-xs font-semibold">Cancel</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       )}
 
@@ -324,7 +346,7 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
         <Text className="text-[10px] font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wide mb-2">
           On Court ({onCourt.length}/5)
         </Text>
-        <View className="flex-row justify-between">
+        <View className="flex-row justify-around">
           {POSITIONS.map((pos, idx) => renderPositionSlot(pos, idx))}
         </View>
       </View>
@@ -335,7 +357,11 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
           Bench ({onBench.length})
         </Text>
         {onBench.length > 0 ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 6 }}
+          >
             {onBench.map(renderBenchPlayer)}
           </ScrollView>
         ) : (
@@ -351,9 +377,19 @@ export const SubstitutionPanel: React.FC<SubstitutionPanelProps> = ({
           <Text className="text-[10px] font-semibold text-red-500 uppercase tracking-wide mb-2">
             Fouled Out ({fouledOut.length})
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {fouledOut.map(renderFouledOutPlayer)}
-          </ScrollView>
+          {fouledOut.length > 5 ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 6 }}
+            >
+              {fouledOut.map(renderFouledOutPlayer)}
+            </ScrollView>
+          ) : (
+            <View className="flex-row flex-wrap gap-1.5">
+              {fouledOut.map(renderFouledOutPlayer)}
+            </View>
+          )}
         </View>
       )}
     </View>

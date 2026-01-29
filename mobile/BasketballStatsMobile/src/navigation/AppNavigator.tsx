@@ -36,6 +36,7 @@ import LeagueMembersScreen from "../screens/LeagueMembersScreen";
 import GameReplayScreen from "../screens/GameReplayScreen";
 import LeaguesScreen from "../screens/LeaguesScreen";
 import CreateLeagueScreen from "../screens/CreateLeagueScreen";
+import SettingsScreen from "../screens/SettingsScreen";
 
 // Navigation parameter types
 export type RootStackParamList = {
@@ -57,6 +58,7 @@ export type RootStackParamList = {
   CreateLeague: undefined;
   LeagueSettings: undefined;
   LeagueMembers: undefined;
+  Settings: undefined;
 };
 
 export type TabParamList = {
@@ -334,6 +336,11 @@ function AppContent() {
             name="LeagueMembers"
             component={LeagueMembersScreen}
             options={{ title: "League Members" }}
+          />
+          <Stack.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{ title: "Settings" }}
           />
         </Stack.Navigator>
       )}

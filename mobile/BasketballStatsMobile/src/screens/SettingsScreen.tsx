@@ -70,21 +70,39 @@ interface SettingRowProps {
   rightElement?: React.ReactNode;
 }
 
+interface IconColorConfig {
+  bg: string;
+  icon: string;
+}
+
+const iconColors: Record<string, IconColorConfig> = {
+  basketball: { bg: "bg-primary-500/10", icon: "#F97316" },
+  stats: { bg: "bg-blue-500/10", icon: "#3B82F6" },
+  user: { bg: "bg-purple-500/10", icon: "#8B5CF6" },
+  settings: { bg: "bg-surface-200 dark:bg-surface-600", icon: "#6B7280" },
+  default: { bg: "bg-surface-100 dark:bg-surface-600", icon: "#9CA3AF" },
+};
+
 function SettingRow({ icon, title, subtitle, onPress, rightElement }: SettingRowProps) {
+  const colorConfig = iconColors[icon] || iconColors.default;
+
   return (
     <TouchableOpacity
-      className="flex-row items-center py-4 border-b border-surface-200 dark:border-surface-700 last:border-b-0"
+      className="flex-row items-center p-4 border-b border-surface-200 dark:border-surface-700 last:border-b-0"
       onPress={onPress}
       disabled={!onPress && !rightElement}
+      accessibilityRole={onPress ? "button" : undefined}
+      accessibilityLabel={title}
+      accessibilityHint={subtitle}
     >
-      <View className="w-10 h-10 bg-surface-100 dark:bg-surface-600 rounded-full justify-center items-center mr-4">
+      <View className={`w-10 h-10 ${colorConfig.bg} rounded-full justify-center items-center mr-4`}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- Icon name type is dynamic */}
-        <Icon name={icon as any} size={20} color="#9CA3AF" />
+        <Icon name={icon as any} size={20} color={colorConfig.icon} />
       </View>
       <View className="flex-1">
         <Text className="text-surface-900 dark:text-white font-medium text-base">{title}</Text>
         {subtitle && (
-          <Text className="text-surface-600 dark:text-surface-400 text-sm">{subtitle}</Text>
+          <Text className="text-surface-500 dark:text-surface-400 text-sm mt-0.5">{subtitle}</Text>
         )}
       </View>
       {rightElement || (onPress && <Icon name="chevron-right" size={20} color="#9CA3AF" />)}
@@ -267,23 +285,26 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-surface-50 dark:bg-surface-900">
-      <ScrollView className="flex-1 p-4">
+    <View className="flex-1 bg-surface-50 dark:bg-surface-950">
+      <ScrollView className="flex-1 px-4 pt-2">
         {/* Appearance */}
         <View className="mb-6">
-          <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
             Appearance
           </Text>
-          <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-            <Text className="text-surface-900 dark:text-white font-medium mb-3">Theme</Text>
+          <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
+            <Text className="text-surface-700 dark:text-surface-300 font-medium mb-3">Theme</Text>
             <View className="flex-row gap-2">
               {(["system", "light", "dark"] as ThemeMode[]).map((themeMode) => (
                 <TouchableOpacity
                   key={themeMode}
                   onPress={() => setMode(themeMode)}
-                  className={`flex-1 py-3 px-4 rounded-lg items-center ${
-                    mode === themeMode ? "bg-primary-500" : "bg-surface-100 dark:bg-surface-700"
+                  className={`flex-1 py-3 px-2 rounded-lg items-center min-h-[60px] justify-center ${
+                    mode === themeMode ? "bg-primary-500" : "bg-surface-200 dark:bg-surface-700"
                   }`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: mode === themeMode }}
+                  accessibilityLabel={`${themeModeLabels[themeMode]} theme`}
                 >
                   <Icon
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Icon name type is dynamic
@@ -307,10 +328,10 @@ export default function SettingsScreen() {
         {/* League Settings - only for admins/owners */}
         {canManageLeague && selectedLeague && (
           <View className="mb-6">
-            <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
+            <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
               League Management
             </Text>
-            <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl overflow-hidden">
               <SettingRow
                 icon="settings"
                 title="League Settings"
@@ -323,46 +344,60 @@ export default function SettingsScreen() {
 
         {/* Notification Preferences */}
         <View className="mb-6">
-          <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
             Notifications
           </Text>
-          <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-            <SettingRow
-              icon="basketball"
-              title="Game Notifications"
-              subtitle="Alerts when games start, pause, or end"
-              rightElement={
-                <Switch
-                  value={gameNotifications}
-                  onValueChange={(value) => handleTogglePreference("gameStart", value)}
-                  trackColor={{ false: "#374151", true: "#F97316" }}
-                  thumbColor={gameNotifications ? "#FFFFFF" : "#9CA3AF"}
-                />
-              }
-            />
-            <SettingRow
-              icon="stats"
-              title="Score Updates"
-              subtitle="Real-time score notifications during games"
-              rightElement={
-                <Switch
-                  value={scoreUpdates}
-                  onValueChange={(value) => handleTogglePreference("scoreUpdates", value)}
-                  trackColor={{ false: "#374151", true: "#F97316" }}
-                  thumbColor={scoreUpdates ? "#FFFFFF" : "#9CA3AF"}
-                />
-              }
-            />
-            <View className="flex-row items-center py-4">
-              <View className="w-10 h-10 bg-surface-100 dark:bg-surface-600 rounded-full justify-center items-center mr-4">
-                <Icon name="basketball" size={20} color="#9CA3AF" />
+          <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl overflow-hidden">
+            <View className="flex-row items-center p-4">
+              <View className="w-10 h-10 bg-primary-500/10 rounded-full items-center justify-center mr-4">
+                <Icon name="basketball" size={20} color="#F97316" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-surface-900 dark:text-white font-medium text-base">
+                  Game Notifications
+                </Text>
+                <Text className="text-surface-500 dark:text-surface-400 text-sm mt-0.5">
+                  Alerts when games start or end
+                </Text>
+              </View>
+              <Switch
+                value={gameNotifications}
+                onValueChange={(value) => handleTogglePreference("gameStart", value)}
+                trackColor={{ false: "#374151", true: "#F97316" }}
+                thumbColor={gameNotifications ? "#FFFFFF" : "#9CA3AF"}
+              />
+            </View>
+
+            <View className="flex-row items-center p-4 border-t border-surface-200 dark:border-surface-700">
+              <View className="w-10 h-10 bg-blue-500/10 rounded-full items-center justify-center mr-4">
+                <Icon name="stats" size={20} color="#3B82F6" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-surface-900 dark:text-white font-medium text-base">
+                  Score Updates
+                </Text>
+                <Text className="text-surface-500 dark:text-surface-400 text-sm mt-0.5">
+                  Real-time score notifications
+                </Text>
+              </View>
+              <Switch
+                value={scoreUpdates}
+                onValueChange={(value) => handleTogglePreference("scoreUpdates", value)}
+                trackColor={{ false: "#374151", true: "#F97316" }}
+                thumbColor={scoreUpdates ? "#FFFFFF" : "#9CA3AF"}
+              />
+            </View>
+
+            <View className="flex-row items-center p-4 border-t border-surface-200 dark:border-surface-700">
+              <View className="w-10 h-10 bg-purple-500/10 rounded-full items-center justify-center mr-4">
+                <Icon name="basketball" size={20} color="#8B5CF6" />
               </View>
               <View className="flex-1">
                 <Text className="text-surface-900 dark:text-white font-medium text-base">
                   League Announcements
                 </Text>
-                <Text className="text-surface-600 dark:text-surface-400 text-sm">
-                  Important updates from league admins
+                <Text className="text-surface-500 dark:text-surface-400 text-sm mt-0.5">
+                  Updates from league admins
                 </Text>
               </View>
               <Switch
@@ -378,10 +413,10 @@ export default function SettingsScreen() {
         {/* Data Export - Only show if league selected */}
         {selectedLeague && (
           <View className="mb-6">
-            <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
+            <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
               Data Export
             </Text>
-            <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
+            <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl overflow-hidden">
               <SettingRow
                 icon="stats"
                 title="Export Player Statistics"
@@ -402,42 +437,32 @@ export default function SettingsScreen() {
               />
             </View>
             {isExporting && (
-              <Text className="text-surface-600 dark:text-surface-400 text-sm mt-2 text-center">
-                Preparing export...
-              </Text>
+              <View className="flex-row items-center justify-center mt-3 gap-2">
+                <View className="w-4 h-4 rounded-full border-2 border-primary-500 border-t-transparent animate-spin" />
+                <Text className="text-surface-500 dark:text-surface-400 text-sm">
+                  Preparing export...
+                </Text>
+              </View>
             )}
           </View>
         )}
 
         {/* App Info */}
-        <View className="mb-6">
-          <Text className="text-surface-600 dark:text-surface-400 text-sm font-semibold mb-3 uppercase">
+        <View className="mb-8">
+          <Text className="text-sm font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 mb-3">
             About
           </Text>
-          <View className="bg-white dark:bg-surface-800 rounded-xl p-4 border border-surface-200 dark:border-surface-700">
-            <View className="flex-row items-center py-4 border-b border-surface-200 dark:border-surface-700">
-              <View className="w-10 h-10 bg-primary-500/20 rounded-full justify-center items-center mr-4">
+          <View className="bg-surface-100 dark:bg-surface-800/50 rounded-xl p-4">
+            <View className="flex-row items-center">
+              <View className="w-10 h-10 bg-primary-500/10 rounded-full items-center justify-center mr-3">
                 <Icon name="basketball" size={20} color="#F97316" />
               </View>
-              <View className="flex-1">
-                <Text className="text-surface-900 dark:text-white font-medium text-base">
+              <View>
+                <Text className="text-base text-surface-900 dark:text-white font-medium">
                   Basketball Stats
                 </Text>
-                <Text className="text-surface-600 dark:text-surface-400 text-sm">
+                <Text className="text-sm text-surface-500 dark:text-surface-400">
                   Version 1.0.0
-                </Text>
-              </View>
-            </View>
-            <View className="flex-row items-center py-4">
-              <View className="w-10 h-10 bg-surface-100 dark:bg-surface-600 rounded-full justify-center items-center mr-4">
-                <Icon name="user" size={20} color="#9CA3AF" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-surface-900 dark:text-white font-medium text-base">
-                  Powered by Convex
-                </Text>
-                <Text className="text-surface-600 dark:text-surface-400 text-sm">
-                  Real-time database & backend
                 </Text>
               </View>
             </View>
