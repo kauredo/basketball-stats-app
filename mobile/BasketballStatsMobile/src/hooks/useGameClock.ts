@@ -1,5 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { GameClockState } from "../../types/livegame";
+
+export interface GameClockState {
+  displayTime: string;
+  seconds: number;
+  isRunning: boolean;
+  quarter: number;
+  quarterDuration: number;
+}
 
 interface UseGameClockOptions {
   // Server state (from game query)

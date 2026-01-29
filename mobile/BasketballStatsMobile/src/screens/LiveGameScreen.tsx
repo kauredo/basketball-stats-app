@@ -33,6 +33,7 @@ import AdvancedStats from "../components/livegame/AdvancedStats";
 import SubstitutionPanel from "../components/livegame/SubstitutionPanel";
 import useSoundFeedback from "../hooks/useSoundFeedback";
 import useShotClock from "../hooks/useShotClock";
+import useGameClock from "../hooks/useGameClock";
 import useDeviceType from "../hooks/useDeviceType";
 
 type LiveGameRouteProp = RouteProp<RootStackParamList, "LiveGame">;
@@ -279,6 +280,14 @@ export default function LiveGameScreen() {
   const rosterLimit = game?.leagueSettings?.playersPerRoster ?? 15;
   const effectiveRosterLimit = overrideRosterLimit ? 20 : rosterLimit;
 
+  // Game clock synced with Convex (timestamp-based for cross-device sync)
+  const gameClock = useGameClock({
+    serverSeconds: gameData?.game?.timeRemainingSeconds,
+    serverStartedAt: gameData?.game?.gameClockStartedAt,
+    serverIsRunning: gameData?.game?.gameClockIsRunning,
+    quarterDuration: (game?.gameSettings?.quarterMinutes || 12) * 60,
+  });
+
   // Shot clock synced with Convex
   const shotClock = useShotClock({
     gameId,
@@ -286,7 +295,8 @@ export default function LiveGameScreen() {
     serverSeconds: gameData?.game?.shotClockSeconds,
     serverStartedAt: gameData?.game?.shotClockStartedAt,
     serverIsRunning: gameData?.game?.shotClockIsRunning,
-    gameTimeRemainingSeconds: gameData?.game?.timeRemainingSeconds,
+    // Pass the synchronized game clock time for violation tracking
+    gameTimeRemainingSeconds: gameClock.displaySeconds,
     initialSeconds: 24,
     offensiveReboundReset: 14,
     warningThreshold: 5,
@@ -1537,7 +1547,8 @@ export default function LiveGameScreen() {
         game={{
           status: game.status,
           currentQuarter: game.currentQuarter,
-          timeRemainingSeconds: game.timeRemainingSeconds,
+          // Use synchronized game clock for display (calculates from timestamp)
+          timeRemainingSeconds: gameClock.displaySeconds,
           homeScore: game.homeScore,
           awayScore: game.awayScore,
           homeTeam: game.homeTeam,
@@ -1974,14 +1985,14 @@ export default function LiveGameScreen() {
                     >
                       <Text
                         className={`font-mono font-bold ${
-                          game.timeRemainingSeconds <= 60 && isGameActive
+                          gameClock.displaySeconds <= 60 && isGameActive
                             ? "text-red-500"
                             : "text-white"
                         }`}
                         style={{ fontSize: 56 }}
                       >
-                        {Math.floor(game.timeRemainingSeconds / 60)}:
-                        {(game.timeRemainingSeconds % 60).toString().padStart(2, "0")}
+                        {Math.floor(gameClock.displaySeconds / 60)}:
+                        {(gameClock.displaySeconds % 60).toString().padStart(2, "0")}
                       </Text>
                       <Text className="text-surface-500 text-[10px] uppercase tracking-wider">
                         Game
@@ -2099,12 +2110,12 @@ export default function LiveGameScreen() {
                     >
                       <Text
                         className={`font-mono font-bold text-white ${
-                          game.timeRemainingSeconds <= 60 && isGameActive ? "text-red-500" : ""
+                          gameClock.displaySeconds <= 60 && isGameActive ? "text-red-500" : ""
                         }`}
                         style={{ fontSize: 80 }}
                       >
-                        {Math.floor(game.timeRemainingSeconds / 60)}:
-                        {(game.timeRemainingSeconds % 60).toString().padStart(2, "0")}
+                        {Math.floor(gameClock.displaySeconds / 60)}:
+                        {(gameClock.displaySeconds % 60).toString().padStart(2, "0")}
                       </Text>
                     </TouchableOpacity>
                     <Text className="text-surface-400 text-sm mt-2 uppercase tracking-widest">
@@ -2408,7 +2419,7 @@ export default function LiveGameScreen() {
       <TimeEditModal
         visible={showGameClockEdit}
         onClose={() => setShowGameClockEdit(false)}
-        currentSeconds={game.timeRemainingSeconds}
+        currentSeconds={gameClock.displaySeconds}
         onSave={handleSetGameTime}
         title="Edit Game Clock"
         mode="game"

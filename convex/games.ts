@@ -205,6 +205,9 @@ export const get = query({
     const shotClockSeconds = game.shotClockSeconds ?? 24;
     const shotClockIsRunning = !!game.shotClockStartedAt;
 
+    // Game clock state - return raw values, client calculates current time
+    const gameClockIsRunning = !!game.gameClockStartedAt;
+
     return {
       game: {
         id: game._id,
@@ -227,6 +230,9 @@ export const get = query({
         shotClockSeconds,
         shotClockStartedAt: game.shotClockStartedAt,
         shotClockIsRunning,
+        // Game clock state for cross-instance sync
+        gameClockStartedAt: game.gameClockStartedAt,
+        gameClockIsRunning,
         homeTeam: homeTeam
           ? {
               id: homeTeam._id,
@@ -560,15 +566,27 @@ export const pause = mutation({
       throw new Error("Game is not active");
     }
 
+    const now = Date.now();
+
+    // Calculate current game clock value before pausing
+    let gameTimeSeconds = game.timeRemainingSeconds;
+    if (game.gameClockStartedAt) {
+      const elapsed = (now - game.gameClockStartedAt) / 1000;
+      gameTimeSeconds = Math.max(0, gameTimeSeconds - elapsed);
+    }
+
     // Calculate current shot clock value before pausing
     let shotClockSeconds = game.shotClockSeconds ?? 24;
     if (game.shotClockStartedAt) {
-      const elapsed = (Date.now() - game.shotClockStartedAt) / 1000;
+      const elapsed = (now - game.shotClockStartedAt) / 1000;
       shotClockSeconds = Math.max(0, shotClockSeconds - elapsed);
     }
 
     await ctx.db.patch(args.gameId, {
       status: "paused",
+      // Pause game clock (store current value, clear start time)
+      timeRemainingSeconds: Math.floor(gameTimeSeconds),
+      gameClockStartedAt: undefined,
       // Pause shot clock (store current value, clear start time)
       shotClockSeconds,
       shotClockStartedAt: undefined,
@@ -607,13 +625,15 @@ export const resume = mutation({
 
     await ctx.db.patch(args.gameId, {
       status: "active",
-      // Resume shot clock from current value
+      // Resume game clock from current value with same start time
+      gameClockStartedAt: now,
+      // Resume shot clock from current value with same start time
       shotClockSeconds,
       shotClockStartedAt: now,
     });
 
-    // Resume timer ticks
-    await ctx.scheduler.runAfter(1000, internal.games.timerTick, {
+    // Schedule quarter end check (replaces per-second timerTick)
+    await ctx.scheduler.runAfter(1000, internal.games.checkQuarterEnd, {
       gameId: args.gameId,
     });
 
@@ -752,17 +772,23 @@ export const setQuarter = mutation({
 
     const updates: any = {
       currentQuarter: args.quarter,
+      // Clear game clock start time when changing quarters
+      gameClockStartedAt: undefined,
     };
 
     // Reset time to full quarter/overtime if requested
     if (args.resetTime) {
       const periodMinutes = args.quarter > 4 ? overtimeMinutes : quarterMinutes;
       updates.timeRemainingSeconds = periodMinutes * 60;
+      // Also reset shot clock
+      updates.shotClockSeconds = 24;
+      updates.shotClockStartedAt = undefined;
     }
 
     // Pause game when changing quarters
     if (game.status === "active") {
       updates.status = "paused";
+      updates.shotClockStartedAt = undefined;
     }
 
     await ctx.db.patch(args.gameId, updates);
@@ -930,8 +956,9 @@ export const updateGameSettings = mutation({
   },
 });
 
-// Internal: Timer tick - runs every second when game is active
-export const timerTick = internalMutation({
+// Internal: Check if quarter has ended - runs periodically when game is active
+// Uses timestamp-based calculation instead of decrementing for accuracy
+export const checkQuarterEnd = internalMutation({
   args: {
     gameId: v.id("games"),
   },
@@ -942,12 +969,19 @@ export const timerTick = internalMutation({
     // Stop if game is not active
     if (game.status !== "active") return;
 
+    // Calculate current time from timestamp
+    const now = Date.now();
+    let currentTime = game.timeRemainingSeconds;
+    if (game.gameClockStartedAt) {
+      const elapsed = (now - game.gameClockStartedAt) / 1000;
+      currentTime = Math.max(0, game.timeRemainingSeconds - elapsed);
+    }
+
     const settings = (game.gameSettings as any) || {};
-    const newTime = Math.max(0, game.timeRemainingSeconds - 1);
     const quarterMinutes = settings.quarterMinutes || 12;
 
-    if (newTime === 0) {
-      // Track completed quarters
+    if (currentTime <= 0) {
+      // Quarter ended - stop clocks
       const quartersCompleted = settings.quartersCompleted || [];
       if (!quartersCompleted.includes(game.currentQuarter)) {
         quartersCompleted.push(game.currentQuarter);
@@ -962,7 +996,7 @@ export const timerTick = internalMutation({
         eventType: "quarter_end",
         quarter: game.currentQuarter,
         gameTime: 0,
-        timestamp: Date.now(),
+        timestamp: now,
         details: {
           homeScore: game.homeScore,
           awayScore: game.awayScore,
@@ -977,6 +1011,9 @@ export const timerTick = internalMutation({
           timeRemainingSeconds: quarterMinutes * 60,
           currentQuarter: nextQuarter,
           status: "paused", // Pause for quarter break
+          gameClockStartedAt: undefined,
+          shotClockStartedAt: undefined,
+          shotClockSeconds: 24,
           gameSettings: newSettings,
         });
 
@@ -986,7 +1023,7 @@ export const timerTick = internalMutation({
           eventType: "quarter_start",
           quarter: nextQuarter,
           gameTime: quarterMinutes * 60,
-          timestamp: Date.now(),
+          timestamp: now,
           details: {
             homeScore: game.homeScore,
             awayScore: game.awayScore,
@@ -995,14 +1032,16 @@ export const timerTick = internalMutation({
           description: `Q${nextQuarter} Starting`,
         });
 
-        // Don't schedule next tick - game is paused
+        // Don't schedule next check - game is paused
         return;
       } else {
-        // Game ended - all 4 quarters completed (or OT ended with score difference)
+        // Game ended - all 4 quarters completed (or OT ended)
         await ctx.db.patch(args.gameId, {
           status: "completed",
-          endedAt: Date.now(),
+          endedAt: now,
           timeRemainingSeconds: 0,
+          gameClockStartedAt: undefined,
+          shotClockStartedAt: undefined,
           gameSettings: newSettings,
         });
 
@@ -1018,7 +1057,7 @@ export const timerTick = internalMutation({
           eventType: "quarter_end",
           quarter: game.currentQuarter,
           gameTime: 0,
-          timestamp: Date.now(),
+          timestamp: now,
           details: {
             homeScore: game.homeScore,
             awayScore: game.awayScore,
@@ -1044,13 +1083,23 @@ export const timerTick = internalMutation({
       }
     }
 
-    // Update time
-    await ctx.db.patch(args.gameId, {
-      timeRemainingSeconds: newTime,
+    // Game still running - schedule next check
+    // Use adaptive interval: check more frequently when close to quarter end
+    const checkInterval = currentTime <= 5 ? 500 : 1000;
+    await ctx.scheduler.runAfter(checkInterval, internal.games.checkQuarterEnd, {
+      gameId: args.gameId,
     });
+  },
+});
 
-    // Schedule next tick
-    await ctx.scheduler.runAfter(1000, internal.games.timerTick, {
+// Legacy alias for timerTick - redirects to checkQuarterEnd for backwards compatibility
+export const timerTick = internalMutation({
+  args: {
+    gameId: v.id("games"),
+  },
+  handler: async (ctx, args) => {
+    // Redirect to new checkQuarterEnd function
+    await ctx.scheduler.runAfter(0, internal.games.checkQuarterEnd, {
       gameId: args.gameId,
     });
   },
@@ -1461,6 +1510,10 @@ export const startOvertime = mutation({
       timeRemainingSeconds: overtimeMinutes * 60,
       status: "paused",
       gameSettings: newSettings,
+      // Clear clock start times (game starts paused)
+      gameClockStartedAt: undefined,
+      shotClockStartedAt: undefined,
+      shotClockSeconds: 24,
     });
 
     // Log the event
@@ -1659,16 +1712,20 @@ export const retroactivePause = mutation({
       throw new Error("Access denied");
     }
 
+    const now = Date.now();
+
     // Calculate current shot clock value before pausing
     let shotClockSeconds = game.shotClockSeconds ?? 24;
     if (game.shotClockStartedAt) {
-      const elapsed = (Date.now() - game.shotClockStartedAt) / 1000;
+      const elapsed = (now - game.shotClockStartedAt) / 1000;
       shotClockSeconds = Math.max(0, shotClockSeconds - elapsed);
     }
 
     await ctx.db.patch(args.gameId, {
       status: "paused",
       timeRemainingSeconds: Math.max(0, args.timeRemainingSeconds),
+      // Clear game clock start time
+      gameClockStartedAt: undefined,
       // Also pause shot clock
       shotClockSeconds,
       shotClockStartedAt: undefined,
@@ -2076,6 +2133,8 @@ export const setGameTime = mutation({
 
     await ctx.db.patch(args.gameId, {
       timeRemainingSeconds: newTime,
+      // Clear start time so the new time takes effect from next resume
+      gameClockStartedAt: undefined,
     });
 
     return { message: "Game time updated", timeRemainingSeconds: newTime };

@@ -217,9 +217,11 @@ const LiveGameNew: React.FC = () => {
     isHomeTeam: shot.teamId === game?.homeTeam?.id,
   }));
 
-  // Game clock (for optional local countdown)
-  const _gameClock = useGameClock({
-    initialSeconds: game?.timeRemainingSeconds || 0,
+  // Game clock synced with Convex (timestamp-based for cross-device sync)
+  const gameClock = useGameClock({
+    serverSeconds: game?.timeRemainingSeconds,
+    serverStartedAt: game?.gameClockStartedAt,
+    serverIsRunning: game?.gameClockIsRunning,
     quarterDuration: (gameSettings.quarterMinutes || 12) * 60,
   });
 
@@ -230,7 +232,8 @@ const LiveGameNew: React.FC = () => {
     serverSeconds: game?.shotClockSeconds,
     serverStartedAt: game?.shotClockStartedAt,
     serverIsRunning: game?.shotClockIsRunning,
-    gameTimeRemainingSeconds: game?.timeRemainingSeconds,
+    // Pass the synchronized game clock time for violation tracking
+    gameTimeRemainingSeconds: gameClock.displaySeconds,
     initialSeconds: 24,
     offensiveReboundReset: 14,
     warningThreshold: 5,
@@ -990,7 +993,8 @@ const LiveGameNew: React.FC = () => {
       game={{
         status: game.status as GameStatus,
         currentQuarter: game.currentQuarter,
-        timeRemainingSeconds: game.timeRemainingSeconds,
+        // Use synchronized game clock for display (calculates from timestamp)
+        timeRemainingSeconds: gameClock.displaySeconds,
         homeScore: game.homeScore,
         awayScore: game.awayScore,
         homeTeam: game.homeTeam ? { name: game.homeTeam.name } : null,
@@ -1087,7 +1091,7 @@ const LiveGameNew: React.FC = () => {
       {/* Clock Mode */}
       {activeMode === "clock" && (
         <ClockModeContent
-          timeRemainingSeconds={game.timeRemainingSeconds}
+          timeRemainingSeconds={gameClock.displaySeconds}
           shotClockSeconds={shotClock.displaySeconds}
           shotClockFormatted={shotClock.formattedTime}
           shotClockIsWarning={shotClock.isWarning}
@@ -1189,7 +1193,7 @@ const LiveGameNew: React.FC = () => {
       <TimeEditModal
         isOpen={showGameClockEdit}
         onClose={() => setShowGameClockEdit(false)}
-        currentSeconds={game.timeRemainingSeconds}
+        currentSeconds={gameClock.displaySeconds}
         onSave={handleSetGameTime}
         title="Edit Game Clock"
         mode="game"

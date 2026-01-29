@@ -211,6 +211,8 @@ export default defineSchema({
     // Shot clock state (for cross-instance sync)
     shotClockSeconds: v.optional(v.number()), // Seconds remaining when paused/reset
     shotClockStartedAt: v.optional(v.number()), // Server timestamp when clock started (null = paused)
+    // Game clock state (for cross-instance sync)
+    gameClockStartedAt: v.optional(v.number()), // Server timestamp when game clock started (null = paused)
     // Game video
     videoUrl: v.optional(v.string()), // YouTube URL for game recording
   })

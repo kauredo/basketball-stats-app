@@ -66,6 +66,12 @@ export function useShotClock({
   // Store game time in ref to avoid re-creating interval when it changes
   const gameTimeRef = useRef<number | undefined>(gameTimeRemainingSeconds);
 
+  // Track when we started counting on the client side
+  // This avoids issues with server/client clock differences
+  const clientStartTimeRef = useRef<number | null>(null);
+  const startingSecondsRef = useRef<number>(serverSeconds ?? initialSeconds);
+  const lastServerStartedAtRef = useRef<number | undefined>(undefined);
+
   // Convex mutations
   const resetShotClockMutation = useMutation(api.games.resetShotClock);
   const retroactivePauseMutation = useMutation(api.games.retroactivePause);
@@ -79,11 +85,33 @@ export function useShotClock({
   useEffect(() => {
     if (serverSeconds === undefined) return;
 
-    // Calculate current seconds based on server state
+    // Detect if this is a new "start" event (serverStartedAt changed)
+    const isNewStart = serverStartedAt !== undefined &&
+                       serverStartedAt !== lastServerStartedAtRef.current &&
+                       serverIsRunning;
+
+    if (isNewStart) {
+      // Clock just started/resumed - capture client time now
+      clientStartTimeRef.current = Date.now();
+      startingSecondsRef.current = serverSeconds;
+      lastServerStartedAtRef.current = serverStartedAt;
+    } else if (!serverIsRunning) {
+      // Clock stopped - clear client start time
+      clientStartTimeRef.current = null;
+      lastServerStartedAtRef.current = undefined;
+    } else if (serverIsRunning && serverSeconds !== startingSecondsRef.current && clientStartTimeRef.current === null) {
+      // Clock is running but we don't have a client start time (e.g., page reload while clock running)
+      // Fall back to server timestamp in this case
+      clientStartTimeRef.current = Date.now();
+      startingSecondsRef.current = serverSeconds;
+      lastServerStartedAtRef.current = serverStartedAt;
+    }
+
+    // Calculate current seconds
     let currentSeconds = serverSeconds;
-    if (serverStartedAt && serverIsRunning) {
-      const elapsed = (Date.now() - serverStartedAt) / 1000;
-      currentSeconds = Math.max(0, serverSeconds - elapsed);
+    if (serverIsRunning && clientStartTimeRef.current !== null) {
+      const elapsed = (Date.now() - clientStartTimeRef.current) / 1000;
+      currentSeconds = Math.max(0, startingSecondsRef.current - elapsed);
     }
 
     const roundedSeconds = Math.ceil(currentSeconds);
@@ -101,7 +129,7 @@ export function useShotClock({
     if (currentSeconds > 1) {
       hasPlayedViolationRef.current = false;
     }
-  }, [serverSeconds, serverStartedAt, serverIsRunning, warningThreshold]);
+  }, [serverSeconds, serverStartedAt, serverIsRunning, warningThreshold, initialSeconds]);
 
   // Client-side interval for smooth display updates when running
   useEffect(() => {
@@ -111,14 +139,16 @@ export function useShotClock({
       intervalRef.current = null;
     }
 
-    if (!serverIsRunning || serverStartedAt === undefined || serverSeconds === undefined) {
+    if (!serverIsRunning || clientStartTimeRef.current === null) {
       return;
     }
 
     // Update display every 100ms for smooth countdown
     intervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - serverStartedAt) / 1000;
-      const currentSeconds = Math.max(0, serverSeconds - elapsed);
+      if (clientStartTimeRef.current === null) return;
+
+      const elapsed = (Date.now() - clientStartTimeRef.current) / 1000;
+      const currentSeconds = Math.max(0, startingSecondsRef.current - elapsed);
       const roundedSeconds = Math.ceil(currentSeconds);
       const isWarning = roundedSeconds <= warningThreshold && roundedSeconds > 0;
       const isViolation = roundedSeconds === 0;
@@ -170,8 +200,6 @@ export function useShotClock({
     };
   }, [
     serverIsRunning,
-    serverStartedAt,
-    serverSeconds,
     warningThreshold,
     onViolation,
     feedback,
