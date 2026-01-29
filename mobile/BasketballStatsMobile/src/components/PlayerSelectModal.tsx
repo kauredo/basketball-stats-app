@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import { View, Text, Modal, TouchableOpacity, TextInput, SectionList } from "react-native";
+import { View, Text, TouchableOpacity, TextInput, SectionList } from "react-native";
 import Icon from "./Icon";
+import { BaseModal, ModalHeader } from "./ui";
 import type { Id } from "../../../../convex/_generated/dataModel";
 
 export interface PlayerOption {
@@ -147,70 +148,57 @@ export function PlayerSelectModal({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white dark:bg-surface-800 rounded-t-3xl max-h-[85%]">
-          {/* Header */}
-          <View className="flex-row justify-between items-center p-4 border-b border-surface-200 dark:border-surface-700">
-            <Text className="text-surface-900 dark:text-white text-lg font-bold">{title}</Text>
-            <TouchableOpacity
-              onPress={onClose}
-              className="p-2 -mr-2 rounded-lg"
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Icon name="close" size={24} color="#9CA3AF" />
+    <BaseModal visible={visible} onClose={onClose} title={title} maxWidth="lg">
+      <ModalHeader title={title} onClose={onClose} />
+
+      {/* Search */}
+      <View className="px-4 py-3 border-b border-surface-200 dark:border-surface-700">
+        <View className="flex-row items-center bg-surface-100 dark:bg-surface-700 rounded-xl px-3 py-2">
+          <Icon name="search" size={20} color="#9CA3AF" />
+          <TextInput
+            ref={searchInputRef}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search by name, team, or number..."
+            placeholderTextColor="#9CA3AF"
+            className="flex-1 ml-2 text-surface-900 dark:text-white text-base py-1"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <Icon name="close" size={18} color="#9CA3AF" />
             </TouchableOpacity>
-          </View>
-
-          {/* Search */}
-          <View className="px-4 py-3 border-b border-surface-200 dark:border-surface-700">
-            <View className="flex-row items-center bg-surface-100 dark:bg-surface-700 rounded-xl px-3 py-2">
-              <Icon name="search" size={20} color="#9CA3AF" />
-              <TextInput
-                ref={searchInputRef}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Search by name, team, or number..."
-                placeholderTextColor="#9CA3AF"
-                className="flex-1 ml-2 text-surface-900 dark:text-white text-base py-1"
-                autoCapitalize="none"
-                autoCorrect={false}
-                returnKeyType="search"
-              />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery("")}>
-                  <Icon name="close" size={18} color="#9CA3AF" />
-                </TouchableOpacity>
-              )}
-            </View>
-            <Text className="text-xs text-surface-500 dark:text-surface-400 mt-2">
-              {totalFilteredCount} player{totalFilteredCount !== 1 ? "s" : ""} found
-            </Text>
-          </View>
-
-          {/* Player List */}
-          {sections.length === 0 ? (
-            <View className="py-12 items-center">
-              <Icon name="user" size={32} color="#9CA3AF" />
-              <Text className="text-surface-600 dark:text-surface-400 font-medium mt-3">
-                No players found
-              </Text>
-              <Text className="text-surface-500 text-sm mt-1">Try adjusting your search</Text>
-            </View>
-          ) : (
-            <SectionList
-              sections={sections}
-              keyExtractor={(item) => item.id}
-              renderItem={renderPlayer}
-              renderSectionHeader={renderSectionHeader}
-              stickySectionHeadersEnabled
-              contentContainerStyle={{ paddingBottom: 40 }}
-              keyboardShouldPersistTaps="handled"
-            />
           )}
         </View>
+        <Text className="text-xs text-surface-500 dark:text-surface-400 mt-2">
+          {totalFilteredCount} player{totalFilteredCount !== 1 ? "s" : ""} found
+        </Text>
       </View>
-    </Modal>
+
+      {/* Player List */}
+      {sections.length === 0 ? (
+        <View className="py-12 items-center">
+          <Icon name="user" size={32} color="#9CA3AF" />
+          <Text className="text-surface-600 dark:text-surface-400 font-medium mt-3">
+            No players found
+          </Text>
+          <Text className="text-surface-500 text-sm mt-1">Try adjusting your search</Text>
+        </View>
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => item.id}
+          renderItem={renderPlayer}
+          renderSectionHeader={renderSectionHeader}
+          stickySectionHeadersEnabled
+          contentContainerStyle={{ paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+          style={{ maxHeight: 400 }}
+        />
+      )}
+    </BaseModal>
   );
 }
 

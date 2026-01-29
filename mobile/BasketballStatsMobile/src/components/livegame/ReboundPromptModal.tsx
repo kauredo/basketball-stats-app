@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, Modal, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
+import { BaseModal, ModalHeader, ModalBody, ModalFooter, ModalButton } from "../ui";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 import type { OnCourtPlayer } from "./ShotRecordingModal";
 
@@ -77,108 +78,100 @@ export function ReboundPromptModal({
   const opposingOnCourt = opposingTeamPlayers.filter((p) => p.isOnCourt);
 
   return (
-    <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
-      <View className="flex-1 bg-black/70 justify-center items-center px-4 py-2">
-        <View className="bg-surface-50 dark:bg-surface-800 rounded-2xl max-h-[96%] w-full max-w-lg border border-surface-200 dark:border-surface-700 overflow-hidden">
-          {/* Header - Blue to indicate rebound opportunity */}
-          <View className="bg-blue-600 px-6 py-4">
-            <Text className="text-lg font-bold text-white">Rebound</Text>
-            <Text className="text-blue-200 text-sm">Missed {getShotTypeLabel(shotType)}</Text>
-          </View>
+    <BaseModal visible={visible} onClose={onClose} title="Rebound" maxWidth="lg">
+      <ModalHeader
+        title="Rebound"
+        subtitle={`Missed ${getShotTypeLabel(shotType)}`}
+        variant="rebound"
+        showCloseButton={false}
+      />
 
-          <ScrollView className="max-h-80">
-            {/* Offensive Rebound - Shooter's Team */}
-            <View className="px-4 py-3 border-b border-surface-200 dark:border-surface-700">
-              <View className="flex-row items-center justify-between mb-3">
-                <Text className="font-semibold text-orange-600 dark:text-orange-400 text-sm">
-                  OFFENSIVE ({shooterTeamName})
-                </Text>
-                <TouchableOpacity
-                  onPress={() => handleTeamRebound(shooterTeamId, "offensive")}
-                  className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 rounded active:bg-orange-200"
-                  activeOpacity={0.7}
-                >
-                  <Text className="text-orange-700 dark:text-orange-300 text-xs font-medium">
-                    TEAM
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <View className="flex-row flex-wrap gap-2">
-                {shooterOnCourt.map((player) => (
-                  <TouchableOpacity
-                    key={player.id}
-                    onPress={() => handlePlayerRebound(player.playerId, "offensive")}
-                    className="px-3 py-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg active:bg-orange-100 flex-row items-center"
-                    activeOpacity={0.7}
-                  >
-                    <Text className="text-orange-600 dark:text-orange-400 text-xs font-bold mr-1.5">
-                      #{player.player?.number}
-                    </Text>
-                    <Text
-                      className="text-surface-900 dark:text-white text-sm font-medium"
-                      numberOfLines={1}
-                    >
-                      {player.player?.name?.split(" ").pop() || ""}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-                {shooterOnCourt.length === 0 && (
-                  <Text className="text-surface-500 text-sm">No players on court</Text>
-                )}
-              </View>
-            </View>
-
-            {/* Defensive Rebound - Opposing Team */}
-            <View className="px-4 py-3">
-              <View className="flex-row items-center justify-between mb-3">
-                <Text className="font-semibold text-blue-600 dark:text-blue-400 text-sm">
-                  DEFENSIVE ({opposingTeamName})
-                </Text>
-                <TouchableOpacity
-                  onPress={() => handleTeamRebound(opposingTeamId, "defensive")}
-                  className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded active:bg-blue-200"
-                  activeOpacity={0.7}
-                >
-                  <Text className="text-blue-700 dark:text-blue-300 text-xs font-medium">TEAM</Text>
-                </TouchableOpacity>
-              </View>
-              <View className="flex-row flex-wrap gap-2">
-                {opposingOnCourt.map((player) => (
-                  <TouchableOpacity
-                    key={player.id}
-                    onPress={() => handlePlayerRebound(player.playerId, "defensive")}
-                    className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg active:bg-blue-100 flex-row items-center"
-                    activeOpacity={0.7}
-                  >
-                    <Text className="text-blue-600 dark:text-blue-400 text-xs font-bold mr-1.5">
-                      #{player.player?.number}
-                    </Text>
-                    <Text
-                      className="text-surface-900 dark:text-white text-sm font-medium"
-                      numberOfLines={1}
-                    >
-                      {player.player?.name?.split(" ").pop() || ""}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-                {opposingOnCourt.length === 0 && (
-                  <Text className="text-surface-500 text-sm">No players on court</Text>
-                )}
-              </View>
-            </View>
-          </ScrollView>
-
-          {/* Footer */}
-          <View className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
-            <TouchableOpacity onPress={onClose} className="py-3" activeOpacity={0.7}>
-              <Text className="text-surface-600 dark:text-surface-400 font-medium text-center">
-                Dismiss / No Rebound
-              </Text>
+      <ModalBody scrollable={true} maxHeight={320} padding="none">
+        {/* Offensive Rebound - Shooter's Team */}
+        <View className="px-4 py-3 border-b border-surface-200 dark:border-surface-700">
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className="font-semibold text-orange-600 dark:text-orange-400 text-sm">
+              OFFENSIVE ({shooterTeamName})
+            </Text>
+            <TouchableOpacity
+              onPress={() => handleTeamRebound(shooterTeamId, "offensive")}
+              className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 rounded active:bg-orange-200"
+              activeOpacity={0.7}
+            >
+              <Text className="text-orange-700 dark:text-orange-300 text-xs font-medium">TEAM</Text>
             </TouchableOpacity>
           </View>
+          <View className="flex-row flex-wrap gap-2">
+            {shooterOnCourt.map((player) => (
+              <TouchableOpacity
+                key={player.id}
+                onPress={() => handlePlayerRebound(player.playerId, "offensive")}
+                className="px-3 py-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg active:bg-orange-100 flex-row items-center"
+                activeOpacity={0.7}
+              >
+                <Text className="text-orange-600 dark:text-orange-400 text-xs font-bold mr-1.5">
+                  #{player.player?.number}
+                </Text>
+                <Text
+                  className="text-surface-900 dark:text-white text-sm font-medium"
+                  numberOfLines={1}
+                >
+                  {player.player?.name?.split(" ").pop() || ""}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            {shooterOnCourt.length === 0 && (
+              <Text className="text-surface-500 text-sm">No players on court</Text>
+            )}
+          </View>
         </View>
-      </View>
-    </Modal>
+
+        {/* Defensive Rebound - Opposing Team */}
+        <View className="px-4 py-3">
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className="font-semibold text-blue-600 dark:text-blue-400 text-sm">
+              DEFENSIVE ({opposingTeamName})
+            </Text>
+            <TouchableOpacity
+              onPress={() => handleTeamRebound(opposingTeamId, "defensive")}
+              className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded active:bg-blue-200"
+              activeOpacity={0.7}
+            >
+              <Text className="text-blue-700 dark:text-blue-300 text-xs font-medium">TEAM</Text>
+            </TouchableOpacity>
+          </View>
+          <View className="flex-row flex-wrap gap-2">
+            {opposingOnCourt.map((player) => (
+              <TouchableOpacity
+                key={player.id}
+                onPress={() => handlePlayerRebound(player.playerId, "defensive")}
+                className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg active:bg-blue-100 flex-row items-center"
+                activeOpacity={0.7}
+              >
+                <Text className="text-blue-600 dark:text-blue-400 text-xs font-bold mr-1.5">
+                  #{player.player?.number}
+                </Text>
+                <Text
+                  className="text-surface-900 dark:text-white text-sm font-medium"
+                  numberOfLines={1}
+                >
+                  {player.player?.name?.split(" ").pop() || ""}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            {opposingOnCourt.length === 0 && (
+              <Text className="text-surface-500 text-sm">No players on court</Text>
+            )}
+          </View>
+        </View>
+      </ModalBody>
+
+      <ModalFooter layout="single">
+        <ModalButton variant="cancel" onPress={onClose}>
+          Dismiss / No Rebound
+        </ModalButton>
+      </ModalFooter>
+    </BaseModal>
   );
 }
 

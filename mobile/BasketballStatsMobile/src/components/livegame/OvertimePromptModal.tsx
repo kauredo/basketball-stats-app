@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, Modal } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,6 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
+import { BaseModal } from "../ui";
 
 interface OvertimePromptModalProps {
   visible: boolean;
@@ -20,6 +21,10 @@ interface OvertimePromptModalProps {
   onDismiss: () => void;
 }
 
+/**
+ * Alert-style modal that appears when the game is tied at the end of regulation.
+ * Uses custom styling to emphasize the dramatic moment.
+ */
 export default function OvertimePromptModal({
   visible,
   homeScore,
@@ -84,79 +89,87 @@ export default function OvertimePromptModal({
   if (!visible) return null;
 
   return (
-    <Modal visible={visible} animationType="fade" transparent>
-      <View className="flex-1 bg-black/80 justify-center items-center p-6">
-        <View className="bg-surface-800 rounded-3xl p-8 w-full max-w-[340px] items-center border-2 border-amber-500">
-          {/* Close Button */}
-          <TouchableOpacity className="absolute top-4 right-4 p-1" onPress={onDismiss}>
-            <Icon name="close" size={24} color="#9CA3AF" />
-          </TouchableOpacity>
+    <BaseModal
+      visible={visible}
+      onClose={onDismiss}
+      title="Game Tied"
+      maxWidth="sm"
+      closeOnBackdropPress={false}
+    >
+      {/* Custom content without standard header - this is an alert modal */}
+      <View className="p-8 items-center bg-surface-800 border-2 border-amber-500 rounded-2xl">
+        {/* Close Button */}
+        <TouchableOpacity
+          className="absolute top-4 right-4 p-1 min-w-[44px] min-h-[44px] justify-center items-center"
+          onPress={onDismiss}
+          accessibilityLabel="Close"
+          accessibilityRole="button"
+        >
+          <Icon name="close" size={24} color="#9CA3AF" />
+        </TouchableOpacity>
 
-          {/* Icon */}
-          <Animated.View
-            className="w-20 h-20 rounded-full bg-amber-500/20 justify-center items-center mb-4"
-            style={iconAnimatedStyle}
-          >
-            <Icon name="trophy" size={40} color="#F59E0B" />
-          </Animated.View>
+        {/* Icon */}
+        <Animated.View
+          className="w-20 h-20 rounded-full bg-amber-500/20 justify-center items-center mb-4"
+          style={iconAnimatedStyle}
+        >
+          <Icon name="trophy" size={40} color="#F59E0B" />
+        </Animated.View>
 
-          {/* Title */}
-          <Text className="text-amber-500 text-[28px] font-extrabold tracking-widest mb-2">
-            GAME TIED
+        {/* Title */}
+        <Text className="text-amber-500 text-[28px] font-extrabold tracking-widest mb-2">
+          GAME TIED
+        </Text>
+
+        {/* Score Display */}
+        <Animated.View className="flex-row items-center mb-2" style={scoreAnimatedStyle}>
+          <Text className="text-white text-5xl font-bold" style={{ fontVariant: ["tabular-nums"] }}>
+            {awayScore}
           </Text>
+          <Text className="text-surface-400 text-[32px] mx-4">-</Text>
+          <Text className="text-white text-5xl font-bold" style={{ fontVariant: ["tabular-nums"] }}>
+            {homeScore}
+          </Text>
+        </Animated.View>
 
-          {/* Score Display */}
-          <Animated.View className="flex-row items-center mb-2" style={scoreAnimatedStyle}>
-            <Text
-              className="text-white text-5xl font-bold"
-              style={{ fontVariant: ["tabular-nums"] }}
-            >
-              {awayScore}
+        {/* Subtitle */}
+        <Text className="text-surface-400 text-sm mb-8">
+          {currentQuarter === 4 ? "End of Regulation" : `End of ${getOvertimeLabel()}`}
+        </Text>
+
+        {/* Start Overtime Button */}
+        <TouchableOpacity
+          className="bg-primary-500 w-full rounded-2xl py-[18px] items-center mb-3 min-h-[44px]"
+          onPress={handleStartOvertime}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={`Start ${currentQuarter >= 4 ? "overtime" : `overtime ${currentQuarter - 3 + 1}`}`}
+        >
+          <View className="flex-row items-center gap-2">
+            <Icon name="play" size={20} color="#FFFFFF" />
+            <Text className="text-white text-lg font-bold tracking-wide">
+              START {currentQuarter >= 4 ? "OVERTIME" : `OT${currentQuarter - 3 + 1}`}
             </Text>
-            <Text className="text-surface-400 text-[32px] mx-4">-</Text>
-            <Text
-              className="text-white text-5xl font-bold"
-              style={{ fontVariant: ["tabular-nums"] }}
-            >
-              {homeScore}
-            </Text>
-          </Animated.View>
+          </View>
+          <Text className="text-white/70 text-xs mt-1">5 minute period</Text>
+        </TouchableOpacity>
 
-          {/* Subtitle */}
-          <Text className="text-surface-400 text-sm mb-8">
-            {currentQuarter === 4 ? "End of Regulation" : `End of ${getOvertimeLabel()}`}
-          </Text>
+        {/* End as Tie Button */}
+        <TouchableOpacity
+          className="bg-surface-700 w-full rounded-2xl py-4 items-center mb-4 min-h-[44px]"
+          onPress={handleEndAsTie}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="End game as tie"
+        >
+          <Text className="text-white text-base font-semibold">End as Tie</Text>
+        </TouchableOpacity>
 
-          {/* Start Overtime Button */}
-          <TouchableOpacity
-            className="bg-primary-500 w-full rounded-2xl py-[18px] items-center mb-3"
-            onPress={handleStartOvertime}
-            activeOpacity={0.8}
-          >
-            <View className="flex-row items-center gap-2">
-              <Icon name="play" size={20} color="#FFFFFF" />
-              <Text className="text-white text-lg font-bold tracking-wide">
-                START {currentQuarter >= 4 ? "OVERTIME" : `OT${currentQuarter - 3 + 1}`}
-              </Text>
-            </View>
-            <Text className="text-white/70 text-xs mt-1">5 minute period</Text>
-          </TouchableOpacity>
-
-          {/* End as Tie Button */}
-          <TouchableOpacity
-            className="bg-surface-700 w-full rounded-2xl py-4 items-center mb-4"
-            onPress={handleEndAsTie}
-            activeOpacity={0.8}
-          >
-            <Text className="text-white text-base font-semibold">End as Tie</Text>
-          </TouchableOpacity>
-
-          {/* Info Text */}
-          <Text className="text-surface-500 text-xs text-center">
-            Team fouls will reset for overtime
-          </Text>
-        </View>
+        {/* Info Text */}
+        <Text className="text-surface-500 text-xs text-center">
+          Team fouls will reset for overtime
+        </Text>
       </View>
-    </Modal>
+    </BaseModal>
   );
 }

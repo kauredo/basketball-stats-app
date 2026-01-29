@@ -1,7 +1,15 @@
 import React from "react";
-import { View, Text, Modal, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
+import {
+  BaseModal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalButton,
+  type ModalHeaderVariant,
+} from "../ui";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 import type { OnCourtPlayer } from "./ShotRecordingModal";
 
@@ -26,55 +34,53 @@ interface QuickStatModalProps {
 
 const STAT_CONFIG: Record<
   QuickStatType,
-  { label: string; shortLabel: string; color: string; bgClass: string; textClass: string }
+  {
+    label: string;
+    shortLabel: string;
+    headerVariant: ModalHeaderVariant;
+    textClass: string;
+  }
 > = {
   rebound: {
     label: "Rebound",
     shortLabel: "+REB",
-    color: "#2563EB",
-    bgClass: "bg-blue-600",
+    headerVariant: "rebound",
     textClass: "text-blue-700 dark:text-blue-300",
   },
   assist: {
     label: "Assist",
     shortLabel: "+AST",
-    color: "#7C3AED",
-    bgClass: "bg-violet-600",
+    headerVariant: "assist",
     textClass: "text-violet-700 dark:text-violet-300",
   },
   steal: {
     label: "Steal",
     shortLabel: "+STL",
-    color: "#0891B2",
-    bgClass: "bg-cyan-600",
+    headerVariant: "steal",
     textClass: "text-cyan-700 dark:text-cyan-300",
   },
   block: {
     label: "Block",
     shortLabel: "+BLK",
-    color: "#0D9488",
-    bgClass: "bg-teal-600",
+    headerVariant: "block",
     textClass: "text-teal-700 dark:text-teal-300",
   },
   turnover: {
     label: "Turnover",
     shortLabel: "+TO",
-    color: "#F59E0B",
-    bgClass: "bg-amber-500",
+    headerVariant: "turnover",
     textClass: "text-amber-700 dark:text-amber-300",
   },
   foul: {
     label: "Foul",
     shortLabel: "+PF",
-    color: "#DC2626",
-    bgClass: "bg-red-600",
+    headerVariant: "foul",
     textClass: "text-red-700 dark:text-red-300",
   },
   freethrow: {
     label: "Free Throw",
     shortLabel: "FT",
-    color: "#059669",
-    bgClass: "bg-emerald-600",
+    headerVariant: "success",
     textClass: "text-emerald-700 dark:text-emerald-300",
   },
 };
@@ -182,39 +188,34 @@ export function QuickStatModal({
   };
 
   return (
-    <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
-      <View className="flex-1 bg-black/70 justify-center items-center px-4 py-2">
-        <View className="bg-surface-50 dark:bg-surface-800 rounded-2xl max-h-[96%] w-full max-w-lg border border-surface-200 dark:border-surface-700 overflow-hidden">
-          {/* Header with stat type */}
-          <View className={`px-6 py-4 ${config.bgClass}`}>
-            <Text className="text-lg font-bold text-white">{config.label}</Text>
-            <Text className="text-white/70 text-sm">Select player</Text>
-          </View>
+    <BaseModal visible={visible} onClose={onClose} title={config.label} maxWidth="lg">
+      <ModalHeader
+        title={config.label}
+        subtitle="Select player"
+        variant={config.headerVariant}
+        showCloseButton={false}
+      />
 
-          {/* Player list grouped by team */}
-          {activePlayers.length === 0 ? (
-            <View className="p-8 items-center">
-              <Icon name="users" size={32} color="#9CA3AF" />
-              <Text className="text-surface-500 mt-2">No players on court</Text>
-            </View>
-          ) : (
-            <ScrollView className="max-h-80">
-              {renderTeamSection(homePlayers, homeTeamName, true)}
-              {renderTeamSection(awayPlayers, awayTeamName, false)}
-            </ScrollView>
-          )}
-
-          {/* Cancel button */}
-          <View className="px-4 py-3 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700">
-            <TouchableOpacity onPress={onClose} className="py-3" activeOpacity={0.7}>
-              <Text className="text-surface-600 dark:text-surface-400 font-medium text-center">
-                Cancel
-              </Text>
-            </TouchableOpacity>
+      <ModalBody scrollable={true} maxHeight={320} padding="none">
+        {activePlayers.length === 0 ? (
+          <View className="p-8 items-center">
+            <Icon name="users" size={32} color="#9CA3AF" />
+            <Text className="text-surface-500 mt-2">No players on court</Text>
           </View>
-        </View>
-      </View>
-    </Modal>
+        ) : (
+          <>
+            {renderTeamSection(homePlayers, homeTeamName, true)}
+            {renderTeamSection(awayPlayers, awayTeamName, false)}
+          </>
+        )}
+      </ModalBody>
+
+      <ModalFooter layout="single">
+        <ModalButton variant="cancel" onPress={onClose}>
+          Cancel
+        </ModalButton>
+      </ModalFooter>
+    </BaseModal>
   );
 }
 

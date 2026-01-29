@@ -1,15 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, Text, TouchableOpacity, TextInput, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
-import Icon from "../Icon";
+import { BaseModal, ModalHeader, ModalBody, ModalFooter, ModalButton } from "../ui";
 
 interface TimeEditModalProps {
   visible: boolean;
@@ -45,7 +37,6 @@ export default function TimeEditModal({
   const [primaryValue, setPrimaryValue] = useState("0");
   const [secondaryValue, setSecondaryValue] = useState("0");
   const primaryRef = useRef<TextInput>(null);
-  const secondaryRef = useRef<TextInput>(null);
 
   // Initialize values when modal opens
   useEffect(() => {
@@ -143,98 +134,79 @@ export default function TimeEditModal({
     parseInt(primaryValue) === preset && parseInt(secondaryValue) === 0;
 
   return (
-    <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1 bg-black/70 justify-center items-center px-4 py-2"
-      >
-        <View className="bg-surface-800 rounded-3xl w-full max-w-[400px] pb-6 overflow-hidden">
-          {/* Header */}
-          <View className="flex-row justify-between items-center p-4 border-b border-surface-700">
-            <Text className="text-lg font-bold text-white">{title}</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Icon name="close" size={24} color="#9CA3AF" />
-            </TouchableOpacity>
-          </View>
+    <BaseModal visible={visible} onClose={onClose} title={title} maxWidth="md" avoidKeyboard>
+      <ModalHeader title={title} onClose={onClose} />
 
-          {/* Time Input */}
-          <View className="p-6 items-center">
-            <View className="flex-row items-center justify-center gap-2">
-              <View className="items-center">
-                <TextInput
-                  ref={primaryRef}
-                  className="w-20 h-16 bg-surface-700 rounded-xl text-[32px] font-bold text-white text-center"
-                  style={{ fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace" }}
-                  value={primaryValue}
-                  onChangeText={handlePrimaryChange}
-                  keyboardType="number-pad"
-                  maxLength={2}
-                  selectTextOnFocus
-                />
-                <Text className="text-[10px] text-surface-400 mt-1">
-                  {mode === "game" ? "MIN" : "SEC"}
-                </Text>
-              </View>
-              <Text className="text-[32px] font-bold text-surface-500 mb-5">
-                {mode === "game" ? ":" : "."}
+      <ModalBody scrollable={false} padding="lg">
+        {/* Time Input */}
+        <View className="items-center">
+          <View className="flex-row items-center justify-center gap-2">
+            <View className="items-center">
+              <TextInput
+                ref={primaryRef}
+                className="w-20 h-16 bg-surface-200 dark:bg-surface-700 rounded-xl text-[32px] font-bold text-surface-900 dark:text-white text-center"
+                style={{ fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace" }}
+                value={primaryValue}
+                onChangeText={handlePrimaryChange}
+                keyboardType="number-pad"
+                maxLength={2}
+                selectTextOnFocus
+              />
+              <Text className="text-[10px] text-surface-500 mt-1">
+                {mode === "game" ? "MIN" : "SEC"}
               </Text>
-              <View className="items-center">
-                <TextInput
-                  ref={secondaryRef}
-                  className={`h-16 bg-surface-700 rounded-xl text-[32px] font-bold text-white text-center ${mode === "shot" ? "w-14" : "w-20"}`}
-                  style={{ fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace" }}
-                  value={secondaryValue}
-                  onChangeText={handleSecondaryChange}
-                  keyboardType="number-pad"
-                  maxLength={mode === "game" ? 2 : 1}
-                  selectTextOnFocus
-                />
-                <Text className="text-[10px] text-surface-400 mt-1">
-                  {mode === "game" ? "SEC" : "TENTHS"}
-                </Text>
-              </View>
             </View>
+            <Text className="text-[32px] font-bold text-surface-400 mb-5">
+              {mode === "game" ? ":" : "."}
+            </Text>
+            <View className="items-center">
+              <TextInput
+                className={`h-16 bg-surface-200 dark:bg-surface-700 rounded-xl text-[32px] font-bold text-surface-900 dark:text-white text-center ${mode === "shot" ? "w-14" : "w-20"}`}
+                style={{ fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace" }}
+                value={secondaryValue}
+                onChangeText={handleSecondaryChange}
+                keyboardType="number-pad"
+                maxLength={mode === "game" ? 2 : 1}
+                selectTextOnFocus
+              />
+              <Text className="text-[10px] text-surface-500 mt-1">
+                {mode === "game" ? "SEC" : "TENTHS"}
+              </Text>
+            </View>
+          </View>
 
-            {/* Quick presets for shot clock */}
-            {mode === "shot" && (
-              <View className="flex-row gap-3 mt-6">
-                {shotClockPresets.map((preset) => (
-                  <TouchableOpacity
-                    key={preset}
-                    className={`px-5 py-3 rounded-lg ${isPresetActive(preset) ? "bg-primary-500" : "bg-surface-700"}`}
-                    onPress={() => handlePreset(preset)}
+          {/* Quick presets for shot clock */}
+          {mode === "shot" && (
+            <View className="flex-row gap-3 mt-6">
+              {shotClockPresets.map((preset) => (
+                <TouchableOpacity
+                  key={preset}
+                  className={`px-5 py-3 rounded-lg ${isPresetActive(preset) ? "bg-primary-500" : "bg-surface-200 dark:bg-surface-700"}`}
+                  onPress={() => handlePreset(preset)}
+                >
+                  <Text
+                    className={`text-base font-bold ${isPresetActive(preset) ? "text-white" : "text-surface-600 dark:text-surface-300"}`}
                   >
-                    <Text
-                      className={`text-base font-bold ${isPresetActive(preset) ? "text-white" : "text-surface-300"}`}
-                    >
-                      {preset}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
+                    {preset}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
 
-            {/* Current time display */}
-            <Text className="text-sm text-surface-500 mt-4">Current: {formatCurrentTime()}</Text>
-          </View>
-
-          {/* Actions */}
-          <View className="flex-row px-4 gap-3">
-            <TouchableOpacity
-              className="flex-1 p-4 items-center rounded-xl bg-surface-700"
-              onPress={onClose}
-            >
-              <Text className="text-base font-semibold text-surface-400">Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 p-4 items-center rounded-xl bg-primary-500"
-              onPress={handleSave}
-            >
-              <Text className="text-base font-semibold text-white">Set Time</Text>
-            </TouchableOpacity>
-          </View>
+          {/* Current time display */}
+          <Text className="text-sm text-surface-500 mt-4">Current: {formatCurrentTime()}</Text>
         </View>
-      </KeyboardAvoidingView>
-    </Modal>
+      </ModalBody>
+
+      <ModalFooter layout="split">
+        <ModalButton variant="secondary" onPress={onClose}>
+          Cancel
+        </ModalButton>
+        <ModalButton variant="primary" onPress={handleSave}>
+          Set Time
+        </ModalButton>
+      </ModalFooter>
+    </BaseModal>
   );
 }

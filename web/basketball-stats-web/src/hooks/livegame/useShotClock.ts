@@ -86,9 +86,10 @@ export function useShotClock({
     if (serverSeconds === undefined) return;
 
     // Detect if this is a new "start" event (serverStartedAt changed)
-    const isNewStart = serverStartedAt !== undefined &&
-                       serverStartedAt !== lastServerStartedAtRef.current &&
-                       serverIsRunning;
+    const isNewStart =
+      serverStartedAt !== undefined &&
+      serverStartedAt !== lastServerStartedAtRef.current &&
+      serverIsRunning;
 
     if (isNewStart) {
       // Clock just started/resumed - capture client time now
@@ -99,7 +100,11 @@ export function useShotClock({
       // Clock stopped - clear client start time
       clientStartTimeRef.current = null;
       lastServerStartedAtRef.current = undefined;
-    } else if (serverIsRunning && serverSeconds !== startingSecondsRef.current && clientStartTimeRef.current === null) {
+    } else if (
+      serverIsRunning &&
+      serverSeconds !== startingSecondsRef.current &&
+      clientStartTimeRef.current === null
+    ) {
       // Clock is running but we don't have a client start time (e.g., page reload while clock running)
       // Fall back to server timestamp in this case
       clientStartTimeRef.current = Date.now();
@@ -198,13 +203,7 @@ export function useShotClock({
         intervalRef.current = null;
       }
     };
-  }, [
-    serverIsRunning,
-    warningThreshold,
-    onViolation,
-    feedback,
-    violationButtonDuration,
-  ]);
+  }, [serverIsRunning, warningThreshold, onViolation, feedback, violationButtonDuration]);
 
   // Handle retroactive pause (stop clock at violation time)
   const handleViolationPause = useCallback(async () => {

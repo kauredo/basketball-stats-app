@@ -56,9 +56,10 @@ export function useGameClock({
     if (serverSeconds === undefined) return;
 
     // Detect if this is a new "start" event (serverStartedAt changed)
-    const isNewStart = serverStartedAt !== undefined &&
-                       serverStartedAt !== lastServerStartedAtRef.current &&
-                       serverIsRunning;
+    const isNewStart =
+      serverStartedAt !== undefined &&
+      serverStartedAt !== lastServerStartedAtRef.current &&
+      serverIsRunning;
 
     if (isNewStart) {
       // Clock just started/resumed - capture client time now

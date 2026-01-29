@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Modal, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
+import { BaseModal, ModalHeader, ModalBody, ModalFooter, ModalButton } from "../ui";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 
 export type FoulType =
@@ -110,6 +111,12 @@ export default function FoulTypeModal({
     handleClose();
   };
 
+  const handleBack = () => {
+    if (step === "shotType") setStep("foulType");
+    else if (step === "andOne") setStep("shotType");
+    else if (step === "fouledPlayer") setStep("andOne");
+  };
+
   const foulTypes: Array<{
     type: FoulType;
     label: string;
@@ -159,144 +166,132 @@ export default function FoulTypeModal({
   const isFoulLimitReached = player.fouls >= foulLimit - 1;
 
   return (
-    <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
-      <View className="flex-1 bg-black/70 justify-center items-center px-4 py-2">
-        <View className="bg-surface-800 rounded-3xl max-h-[96%] w-full max-w-[500px] pb-4 overflow-hidden">
-          {/* Header with Player Info */}
-          <View className="flex-row justify-between items-center p-3 bg-surface-900 border-b border-surface-700">
-            <View className="flex-row items-center flex-1 gap-2.5">
-              {step !== "foulType" && (
-                <TouchableOpacity
-                  onPress={() => {
-                    if (step === "shotType") setStep("foulType");
-                    else if (step === "andOne") setStep("shotType");
-                    else if (step === "fouledPlayer") setStep("andOne");
-                  }}
-                  className="p-2 -ml-2"
-                >
-                  <Icon name="arrow-left" size={20} color="#FFFFFF" />
-                </TouchableOpacity>
-              )}
-              <View className="w-10 h-10 rounded-full bg-primary-500 justify-center items-center">
-                <Text className="text-white font-bold text-sm">#{player.number}</Text>
-              </View>
-              <View className="flex-1">
-                <Text className="text-white text-[15px] font-semibold">{player.name}</Text>
-                <Text
-                  className={`text-xs mt-0.5 ${isFoulLimitReached ? "text-red-500 font-semibold" : "text-surface-400"}`}
-                >
-                  {player.fouls} fouls{isFoulLimitReached && " • FOUL TROUBLE"}
+    <BaseModal visible={visible} onClose={handleClose} title="Foul Type" maxWidth="lg">
+      <ModalHeader
+        title="Foul Type"
+        variant="foul"
+        playerInfo={{
+          number: player.number,
+          name: player.name,
+          subtitle: `${player.fouls} fouls${isFoulLimitReached ? " • FOUL TROUBLE" : ""}`,
+          subtitleDanger: isFoulLimitReached,
+        }}
+        showBackButton={step !== "foulType"}
+        onBack={handleBack}
+        onClose={handleClose}
+      />
+
+      <ModalBody scrollable={true} maxHeight={320} padding="md">
+        {step === "foulType" && (
+          <View className="flex-row flex-wrap justify-between">
+            {foulTypes.map((foul) => (
+              <TouchableOpacity
+                key={foul.type}
+                className="w-[48%] bg-surface-100 dark:bg-surface-900 border-2 rounded-xl py-3 px-4 items-center mb-3 min-h-[44px]"
+                style={{ borderColor: foul.color }}
+                onPress={() => handleFoulTypeSelect(foul.type)}
+                activeOpacity={0.7}
+              >
+                <Text className="text-base font-bold" style={{ color: foul.color }}>
+                  {foul.label}
                 </Text>
-              </View>
-            </View>
-            <TouchableOpacity onPress={handleClose} className="p-2 -mr-1">
-              <Icon name="close" size={24} color="#9CA3AF" />
-            </TouchableOpacity>
+                <Text className="text-surface-500 dark:text-surface-400 text-[11px] mt-1 text-center">
+                  {foul.description}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
+        )}
 
-          {/* Step Content */}
-          <ScrollView className="p-4">
-            {step === "foulType" && (
-              <View className="flex-row flex-wrap justify-between">
-                {foulTypes.map((foul) => (
-                  <TouchableOpacity
-                    key={foul.type}
-                    className="w-[48%] bg-surface-900 border-2 rounded-xl py-3 px-4 items-center mb-3"
-                    style={{ borderColor: foul.color }}
-                    onPress={() => handleFoulTypeSelect(foul.type)}
-                    activeOpacity={0.7}
-                  >
-                    <Text className="text-base font-bold" style={{ color: foul.color }}>
-                      {foul.label}
-                    </Text>
-                    <Text className="text-surface-400 text-[11px] mt-1 text-center">
-                      {foul.description}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-
-            {step === "shotType" && (
-              <View className="items-center">
-                <Text className="text-white text-base font-semibold mb-4">What type of shot?</Text>
-                <View className="flex-row gap-3 w-full">
-                  <TouchableOpacity
-                    className="flex-1 bg-surface-700 rounded-xl p-5 items-center"
-                    onPress={() => handleShotTypeSelect("2pt")}
-                  >
-                    <Text className="text-white text-base font-bold">2-Point</Text>
-                    <Text className="text-white/70 text-xs mt-1">2 FTs</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    className="flex-1 bg-surface-700 rounded-xl p-5 items-center"
-                    onPress={() => handleShotTypeSelect("3pt")}
-                  >
-                    <Text className="text-white text-base font-bold">3-Point</Text>
-                    <Text className="text-white/70 text-xs mt-1">3 FTs</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-
-            {step === "andOne" && (
-              <View className="items-center">
-                <Text className="text-white text-base font-semibold mb-4">
-                  Was the shot made? (And-1)
+        {step === "shotType" && (
+          <View className="items-center">
+            <Text className="text-surface-900 dark:text-white text-base font-semibold mb-4">
+              What type of shot?
+            </Text>
+            <View className="flex-row gap-3 w-full">
+              <TouchableOpacity
+                className="flex-1 bg-surface-200 dark:bg-surface-700 rounded-xl p-5 items-center min-h-[44px]"
+                onPress={() => handleShotTypeSelect("2pt")}
+              >
+                <Text className="text-surface-900 dark:text-white text-base font-bold">
+                  2-Point
                 </Text>
-                <View className="flex-row gap-3 w-full">
-                  <TouchableOpacity
-                    className="flex-1 bg-green-800 rounded-xl p-5 items-center"
-                    onPress={() => handleAndOneSelect(true)}
-                  >
-                    <Text className="text-white text-base font-bold">Yes (And-1)</Text>
-                    <Text className="text-white/70 text-xs mt-1">
-                      {shotType === "2pt" ? "+2 PTS + 1 FT" : "+3 PTS + 1 FT"}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    className="flex-1 bg-red-900 rounded-xl p-5 items-center"
-                    onPress={() => handleAndOneSelect(false)}
-                  >
-                    <Text className="text-white text-base font-bold">No (Missed)</Text>
-                    <Text className="text-white/70 text-xs mt-1">
-                      {shotType === "2pt" ? "2 FTs" : "3 FTs"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
+                <Text className="text-surface-500 dark:text-surface-400 text-xs mt-1">2 FTs</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-surface-200 dark:bg-surface-700 rounded-xl p-5 items-center min-h-[44px]"
+                onPress={() => handleShotTypeSelect("3pt")}
+              >
+                <Text className="text-surface-900 dark:text-white text-base font-bold">
+                  3-Point
+                </Text>
+                <Text className="text-surface-500 dark:text-surface-400 text-xs mt-1">3 FTs</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
-            {step === "fouledPlayer" && (
-              <View className="items-center">
-                <Text className="text-white text-base font-semibold mb-4">Who was fouled?</Text>
-                <View className="w-full">
-                  {opposingPlayers.map((p) => (
-                    <TouchableOpacity
-                      key={p.playerId}
-                      className="flex-row items-center bg-surface-900 p-3 rounded-lg mb-2"
-                      onPress={() => handleFouledPlayerSelect(p.playerId)}
-                    >
-                      <View className="w-10 h-10 rounded-full bg-surface-700 justify-center items-center mr-3">
-                        <Text className="text-white font-semibold text-sm">
-                          #{p.player?.number}
-                        </Text>
-                      </View>
-                      <Text className="flex-1 text-white text-[15px]">{p.player?.name}</Text>
-                      <Icon name="chevron-right" size={20} color="#6B7280" />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
-          </ScrollView>
+        {step === "andOne" && (
+          <View className="items-center">
+            <Text className="text-surface-900 dark:text-white text-base font-semibold mb-4">
+              Was the shot made? (And-1)
+            </Text>
+            <View className="flex-row gap-3 w-full">
+              <TouchableOpacity
+                className="flex-1 bg-green-600 rounded-xl p-5 items-center min-h-[44px]"
+                onPress={() => handleAndOneSelect(true)}
+              >
+                <Text className="text-white text-base font-bold">Yes (And-1)</Text>
+                <Text className="text-white/70 text-xs mt-1">
+                  {shotType === "2pt" ? "+2 PTS + 1 FT" : "+3 PTS + 1 FT"}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-red-600 rounded-xl p-5 items-center min-h-[44px]"
+                onPress={() => handleAndOneSelect(false)}
+              >
+                <Text className="text-white text-base font-bold">No (Missed)</Text>
+                <Text className="text-white/70 text-xs mt-1">
+                  {shotType === "2pt" ? "2 FTs" : "3 FTs"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
-          {/* Cancel Button */}
-          <TouchableOpacity className="mx-4 mt-2 p-4 items-center" onPress={handleClose}>
-            <Text className="text-surface-400 text-base">Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
+        {step === "fouledPlayer" && (
+          <View className="items-center">
+            <Text className="text-surface-900 dark:text-white text-base font-semibold mb-4">
+              Who was fouled?
+            </Text>
+            <View className="w-full">
+              {opposingPlayers.map((p) => (
+                <TouchableOpacity
+                  key={p.playerId}
+                  className="flex-row items-center bg-surface-100 dark:bg-surface-900 p-3 rounded-lg mb-2 min-h-[44px]"
+                  onPress={() => handleFouledPlayerSelect(p.playerId)}
+                >
+                  <View className="w-10 h-10 rounded-full bg-surface-200 dark:bg-surface-700 justify-center items-center mr-3">
+                    <Text className="text-surface-900 dark:text-white font-semibold text-sm">
+                      #{p.player?.number}
+                    </Text>
+                  </View>
+                  <Text className="flex-1 text-surface-900 dark:text-white text-[15px]">
+                    {p.player?.name}
+                  </Text>
+                  <Icon name="chevron-right" size={20} color="#6B7280" />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+      </ModalBody>
+
+      <ModalFooter layout="single">
+        <ModalButton variant="cancel" onPress={handleClose}>
+          Cancel
+        </ModalButton>
+      </ModalFooter>
+    </BaseModal>
   );
 }

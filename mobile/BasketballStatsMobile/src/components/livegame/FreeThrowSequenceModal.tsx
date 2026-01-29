@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Modal } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -10,6 +10,7 @@ import Animated, {
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
 import Icon from "../Icon";
+import { BaseModal, ModalHeader, ModalFooter, ModalButton } from "../ui";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 
 export interface FreeThrowSequence {
@@ -45,7 +46,6 @@ export default function FreeThrowSequenceModal({
 
   // Animation values
   const translateX = useSharedValue(0);
-  const _scale = useSharedValue(1);
   const madeButtonScale = useSharedValue(1);
   const missedButtonScale = useSharedValue(1);
 
@@ -152,97 +152,95 @@ export default function FreeThrowSequenceModal({
   if (!visible || !sequence) return null;
 
   return (
-    <Modal visible={visible} animationType="fade" transparent>
-      <View className="flex-1 bg-black/70 justify-center items-center p-6">
-        <GestureDetector gesture={swipeGesture}>
-          <Animated.View
-            className="bg-surface-800 rounded-3xl p-6 w-full max-w-[360px]"
-            style={animatedContainerStyle}
-          >
-            {/* Header */}
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-white text-lg font-bold tracking-wide">FREE THROWS</Text>
-              <TouchableOpacity onPress={onClose} className="p-1">
-                <Icon name="close" size={24} color="#9CA3AF" />
-              </TouchableOpacity>
+    <BaseModal
+      visible={visible}
+      onClose={onClose}
+      title="Free Throws"
+      maxWidth="sm"
+      closeOnBackdropPress={false}
+    >
+      <GestureDetector gesture={swipeGesture}>
+        <Animated.View className="bg-surface-50 dark:bg-surface-800" style={animatedContainerStyle}>
+          <ModalHeader title="FREE THROWS" onClose={onClose} />
+
+          {/* Player Info */}
+          <View className="items-center p-6 pb-2">
+            <View className="w-16 h-16 rounded-full bg-primary-500 justify-center items-center mb-2">
+              <Text className="text-white text-xl font-bold">#{sequence.playerNumber}</Text>
             </View>
-
-            {/* Player Info */}
-            <View className="items-center mb-6">
-              <View className="w-16 h-16 rounded-full bg-primary-500 justify-center items-center mb-2">
-                <Text className="text-white text-xl font-bold">#{sequence.playerNumber}</Text>
-              </View>
-              <Text className="text-white text-lg font-semibold">{sequence.playerName}</Text>
-            </View>
-
-            {/* Progress Indicator */}
-            <View className="items-center mb-8">
-              <Text className="text-surface-400 text-sm mb-3">
-                Attempt {currentAttempt} of {sequence.totalAttempts}
-                {sequence.isOneAndOne && " (1-and-1)"}
-              </Text>
-              <View className="flex-row gap-3">
-                {results.map((result, index) => (
-                  <View
-                    key={index}
-                    className={`w-7 h-7 rounded-full justify-center items-center border-2 ${
-                      result === true
-                        ? "bg-green-500 border-green-500"
-                        : result === false
-                          ? "bg-red-500 border-red-500"
-                          : index === currentAttempt - 1
-                            ? "bg-surface-700 border-primary-500 border-[3px]"
-                            : "bg-surface-700 border-surface-600"
-                    }`}
-                  >
-                    {result === true && <Icon name="check" size={12} color="#FFFFFF" />}
-                    {result === false && <Text className="text-white text-xs font-bold">X</Text>}
-                  </View>
-                ))}
-              </View>
-            </View>
-
-            {/* Action Buttons */}
-            <View className="flex-row gap-4 mb-4">
-              <Animated.View className="flex-1" style={madeButtonAnimatedStyle}>
-                <TouchableOpacity
-                  className="h-20 rounded-2xl justify-center items-center bg-green-500"
-                  onPress={() => handleResult(true)}
-                  disabled={isProcessing}
-                  activeOpacity={0.8}
-                >
-                  <Text className="text-white text-lg font-bold">MADE</Text>
-                  <Text className="text-white/80 text-sm mt-0.5">+1 PT</Text>
-                </TouchableOpacity>
-              </Animated.View>
-
-              <Animated.View className="flex-1" style={missedButtonAnimatedStyle}>
-                <TouchableOpacity
-                  className="h-20 rounded-2xl justify-center items-center bg-red-500"
-                  onPress={() => handleResult(false)}
-                  disabled={isProcessing}
-                  activeOpacity={0.8}
-                >
-                  <Text className="text-white text-lg font-bold">MISSED</Text>
-                  <View className="mt-1">
-                    <Icon name="x" size={24} color="#FFFFFF" />
-                  </View>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-
-            {/* Cancel Option */}
-            <TouchableOpacity className="items-center py-3" onPress={onClose}>
-              <Text className="text-surface-400 text-sm">Cancel Free Throws</Text>
-            </TouchableOpacity>
-
-            {/* Swipe Hint */}
-            <Text className="text-surface-500 text-[11px] text-center mt-2">
-              Swipe left to dismiss
+            <Text className="text-surface-900 dark:text-white text-lg font-semibold">
+              {sequence.playerName}
             </Text>
-          </Animated.View>
-        </GestureDetector>
-      </View>
-    </Modal>
+          </View>
+
+          {/* Progress Indicator */}
+          <View className="items-center pb-6 px-6">
+            <Text className="text-surface-500 text-sm mb-3">
+              Attempt {currentAttempt} of {sequence.totalAttempts}
+              {sequence.isOneAndOne && " (1-and-1)"}
+            </Text>
+            <View className="flex-row gap-3">
+              {results.map((result, index) => (
+                <View
+                  key={index}
+                  className={`w-7 h-7 rounded-full justify-center items-center border-2 ${
+                    result === true
+                      ? "bg-green-500 border-green-500"
+                      : result === false
+                        ? "bg-red-500 border-red-500"
+                        : index === currentAttempt - 1
+                          ? "bg-surface-200 dark:bg-surface-700 border-primary-500 border-[3px]"
+                          : "bg-surface-200 dark:bg-surface-700 border-surface-300 dark:border-surface-600"
+                  }`}
+                >
+                  {result === true && <Icon name="check" size={12} color="#FFFFFF" />}
+                  {result === false && <Text className="text-white text-xs font-bold">X</Text>}
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Action Buttons */}
+          <View className="flex-row gap-4 px-6 pb-4">
+            <Animated.View className="flex-1" style={madeButtonAnimatedStyle}>
+              <TouchableOpacity
+                className="h-20 rounded-2xl justify-center items-center bg-green-500 min-h-[44px]"
+                onPress={() => handleResult(true)}
+                disabled={isProcessing}
+                activeOpacity={0.8}
+              >
+                <Text className="text-white text-lg font-bold">MADE</Text>
+                <Text className="text-white/80 text-sm mt-0.5">+1 PT</Text>
+              </TouchableOpacity>
+            </Animated.View>
+
+            <Animated.View className="flex-1" style={missedButtonAnimatedStyle}>
+              <TouchableOpacity
+                className="h-20 rounded-2xl justify-center items-center bg-red-500 min-h-[44px]"
+                onPress={() => handleResult(false)}
+                disabled={isProcessing}
+                activeOpacity={0.8}
+              >
+                <Text className="text-white text-lg font-bold">MISSED</Text>
+                <View className="mt-1">
+                  <Icon name="x" size={24} color="#FFFFFF" />
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+
+          <ModalFooter layout="single" showBorder={false}>
+            <ModalButton variant="cancel" onPress={onClose}>
+              Cancel Free Throws
+            </ModalButton>
+          </ModalFooter>
+
+          {/* Swipe Hint */}
+          <Text className="text-surface-500 text-[11px] text-center pb-4">
+            Swipe left to dismiss
+          </Text>
+        </Animated.View>
+      </GestureDetector>
+    </BaseModal>
   );
 }
