@@ -12,7 +12,7 @@ import {
   DocumentArrowDownIcon,
 } from "@heroicons/react/24/outline";
 import { exportPlayerGameLogCSV } from "../utils/export";
-import { downloadPDF, captureCourtAsImage } from "../utils/export/pdf-export";
+import { captureCourtAsImage } from "../utils/export/pdf-export";
 import { useToast } from "../contexts/ToastContext";
 import Breadcrumb from "../components/Breadcrumb";
 import {
@@ -257,9 +257,9 @@ const PlayerDetail: React.FC = () => {
 
     const dateStr = new Date().toISOString().split("T")[0];
     const filename = `${player.name.replace(/\s+/g, "-")}-season-${selectedLeague?.season || "report"}-${dateStr}.pdf`;
-    downloadPDF(pdfBlob, filename);
 
-    toast.success("Season report exported successfully");
+    // Return blob and filename for preview modal
+    return { blob: pdfBlob, filename };
   };
 
   if (!player) {

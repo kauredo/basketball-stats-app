@@ -6,18 +6,19 @@ import {
   ChartBarSquareIcon,
   CalendarDaysIcon,
   ChartPieIcon,
-  CheckCircleIcon,
   ExclamationCircleIcon,
   SunIcon,
   MoonIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
+import { PDFPreviewModal } from "./PDFPreviewModal";
 
 interface PlayerSeasonExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   playerName: string;
   playerId: string;
-  onExport: (options: PlayerSeasonExportOptions) => Promise<void>;
+  onExport: (options: PlayerSeasonExportOptions) => Promise<{ blob: Blob; filename: string }>;
 }
 
 export interface PlayerSeasonExportOptions {
@@ -46,8 +47,13 @@ export function PlayerSeasonExportModal({
 }: PlayerSeasonExportModalProps) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [isExporting, setIsExporting] = useState(false);
-  const [exportStatus, setExportStatus] = useState<"idle" | "complete" | "error">("idle");
+  const [exportStatus, setExportStatus] = useState<"idle" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // PDF Preview state
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+  const [previewFilename, setPreviewFilename] = useState("");
 
   const [contentOptions, setContentOptions] = useState<ContentOption[]>([
     {
@@ -100,16 +106,15 @@ export function PlayerSeasonExportModal({
         {} as PlayerSeasonExportOptions["sections"]
       );
 
-      await onExport({
+      const { blob, filename } = await onExport({
         theme,
         sections,
       });
 
-      setExportStatus("complete");
-      setTimeout(() => {
-        onClose();
-        setExportStatus("idle");
-      }, 1500);
+      // Show preview instead of downloading directly
+      setPreviewBlob(blob);
+      setPreviewFilename(filename);
+      setShowPreview(true);
     } catch (error) {
       console.error("Export failed:", error);
       setExportStatus("error");
@@ -117,6 +122,12 @@ export function PlayerSeasonExportModal({
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setPreviewBlob(null);
+    setPreviewFilename("");
   };
 
   const hasSelectedContent = contentOptions.some((opt) => opt.enabled);
@@ -241,20 +252,6 @@ export function PlayerSeasonExportModal({
           </p>
         </div>
 
-        {/* Success State */}
-        {exportStatus === "complete" && (
-          <div
-            className="p-4 bg-green-50 dark:bg-green-900/20 flex items-center gap-3"
-            role="status"
-            aria-live="polite"
-          >
-            <CheckCircleIcon className="w-6 h-6 text-green-500 shrink-0" aria-hidden="true" />
-            <span className="text-sm font-medium text-green-600 dark:text-green-400">
-              Export completed successfully!
-            </span>
-          </div>
-        )}
-
         {/* Error State */}
         {exportStatus === "error" && (
           <div className="p-4 bg-red-50 dark:bg-red-900/20 flex items-center gap-3" role="alert">
@@ -277,10 +274,19 @@ export function PlayerSeasonExportModal({
               : "bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white"
           }`}
         >
-          <DocumentArrowDownIcon className="w-5 h-5" aria-hidden="true" />
-          {isExporting ? "Exporting..." : "Export PDF"}
+          <EyeIcon className="w-5 h-5" aria-hidden="true" />
+          {isExporting ? "Generating..." : "Preview PDF"}
         </button>
       </ModalFooter>
+
+      {/* PDF Preview Modal */}
+      <PDFPreviewModal
+        isOpen={showPreview}
+        onClose={handleClosePreview}
+        pdfBlob={previewBlob}
+        filename={previewFilename.replace(/\.pdf$/, "")}
+        title="Player Season Report Preview"
+      />
     </BaseModal>
   );
 }

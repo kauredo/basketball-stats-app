@@ -31,7 +31,7 @@ import {
   TeamSeasonExportModal,
   type TeamSeasonExportOptions,
 } from "../components/export/TeamSeasonExportModal";
-import { downloadPDF, captureCourtAsImage } from "../utils/export/pdf-export";
+import { captureCourtAsImage } from "../utils/export/pdf-export";
 import { PrintableShotChart } from "../components/export/PrintableShotChart";
 import {
   TeamFormModal,
@@ -427,10 +427,15 @@ const TeamDetail: React.FC = () => {
       });
 
       const filename = `${teamName.replace(/\s+/g, "-")}-season-${season}-${dateStr}.pdf`;
-      downloadPDF(pdfBlob, filename);
+
+      // Return blob and filename for preview modal
+      return { blob: pdfBlob, filename };
     }
 
-    toast.success("Season data exported successfully");
+    // CSV-only export - show success toast
+    if (options.format === "csv") {
+      toast.success("Season data exported successfully");
+    }
   };
 
   const openEditModal = () => {

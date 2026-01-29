@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BaseModal, ModalHeader, ModalBody, ModalFooter, ModalCancelButton } from "../ui/BaseModal";
-import { DocumentArrowDownIcon } from "@heroicons/react/24/outline";
+import { DocumentArrowDownIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 interface PDFPreviewModalProps {
   isOpen: boolean;
@@ -73,7 +73,12 @@ export function PDFPreviewModal({
       </ModalBody>
 
       <ModalFooter align="between">
-        <ModalCancelButton onClick={onClose}>Close</ModalCancelButton>
+        <ModalCancelButton onClick={onClose}>
+          <span className="flex items-center gap-2">
+            <ArrowLeftIcon className="w-4 h-4" aria-hidden="true" />
+            Back
+          </span>
+        </ModalCancelButton>
         <button
           onClick={handleDownload}
           disabled={!pdfBlob}

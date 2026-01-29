@@ -13,14 +13,16 @@ import {
   ExclamationCircleIcon,
   SunIcon,
   MoonIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
+import { PDFPreviewModal } from "./PDFPreviewModal";
 
 interface TeamSeasonExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   teamName: string;
   teamId: string;
-  onExport: (options: TeamSeasonExportOptions) => Promise<void>;
+  onExport: (options: TeamSeasonExportOptions) => Promise<{ blob: Blob; filename: string } | void>;
 }
 
 export interface TeamSeasonExportOptions {
@@ -57,6 +59,11 @@ export function TeamSeasonExportModal({
   const [isExporting, setIsExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState<"idle" | "complete" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // PDF Preview state
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+  const [previewFilename, setPreviewFilename] = useState("");
 
   const [contentOptions, setContentOptions] = useState<ContentOption[]>([
     {
@@ -124,17 +131,25 @@ export function TeamSeasonExportModal({
         {} as TeamSeasonExportOptions["sections"]
       );
 
-      await onExport({
+      const result = await onExport({
         format,
         theme,
         sections,
       });
 
-      setExportStatus("complete");
-      setTimeout(() => {
-        onClose();
-        setExportStatus("idle");
-      }, 1500);
+      // If PDF is included, show preview; otherwise close directly
+      if ((format === "pdf" || format === "both") && result?.blob) {
+        setPreviewBlob(result.blob);
+        setPreviewFilename(result.filename);
+        setShowPreview(true);
+      } else {
+        // CSV-only export - close after success
+        setExportStatus("complete");
+        setTimeout(() => {
+          onClose();
+          setExportStatus("idle");
+        }, 1500);
+      }
     } catch (error) {
       console.error("Export failed:", error);
       setExportStatus("error");
@@ -142,6 +157,12 @@ export function TeamSeasonExportModal({
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setPreviewBlob(null);
+    setPreviewFilename("");
   };
 
   const hasSelectedContent = contentOptions.some((opt) => opt.enabled);
@@ -357,10 +378,29 @@ export function TeamSeasonExportModal({
               : "bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white"
           }`}
         >
-          <DocumentArrowDownIcon className="w-5 h-5" aria-hidden="true" />
-          {isExporting ? "Exporting..." : "Export"}
+          {format === "csv" ? (
+            <DocumentArrowDownIcon className="w-5 h-5" aria-hidden="true" />
+          ) : (
+            <EyeIcon className="w-5 h-5" aria-hidden="true" />
+          )}
+          {isExporting
+            ? "Generating..."
+            : format === "csv"
+              ? "Export CSV"
+              : format === "pdf"
+                ? "Preview PDF"
+                : "Preview & Export"}
         </button>
       </ModalFooter>
+
+      {/* PDF Preview Modal */}
+      <PDFPreviewModal
+        isOpen={showPreview}
+        onClose={handleClosePreview}
+        pdfBlob={previewBlob}
+        filename={previewFilename.replace(/\.pdf$/, "")}
+        title="Team Season Report Preview"
+      />
     </BaseModal>
   );
 }
