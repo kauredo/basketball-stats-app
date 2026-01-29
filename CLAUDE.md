@@ -177,14 +177,180 @@ import type { Player, Game, PlayerStat } from "@basketball-stats/shared";
 Before committing, run the full check to ensure code quality:
 
 ```bash
-npm run full_check    # Runs typecheck + lint + format (must pass before commit)
+npm run full_check    # Runs typecheck + lint + format + test (must pass before commit)
 npm run typecheck     # TypeScript only (all packages + Convex)
 npm run lint          # ESLint only
 npm run format        # Prettier formatting
+npm run test          # Run all unit tests
+npm run test:e2e      # Run Playwright E2E tests
 npm run convex:dev    # Start Convex dev server
 ```
 
 Warnings are acceptable but errors must be zero.
+
+---
+
+## Testing
+
+### Test Commands
+
+```bash
+# Run all tests
+npm run test              # All unit tests across packages
+npm run test:e2e          # Playwright E2E tests (requires dev server)
+
+# Run tests by package
+npm run test -w shared                           # Shared utilities only
+npm run test -w web/basketball-stats-web         # Web app only
+npm run test -w mobile/BasketballStatsMobile     # Mobile app only
+npm run test:convex                              # Convex backend only
+
+# Run with coverage
+npm run test:coverage -w shared
+npm run test:coverage -w web/basketball-stats-web
+
+# Watch mode (development)
+npm run test:watch -w shared
+npm run test:watch -w web/basketball-stats-web
+```
+
+### Test Frameworks
+
+| Package | Framework           | Config File                                   |
+| ------- | ------------------- | --------------------------------------------- |
+| shared  | Vitest              | `shared/vitest.config.ts`                     |
+| web     | Vitest              | `web/basketball-stats-web/vitest.config.ts`   |
+| mobile  | Jest + react-native | `mobile/BasketballStatsMobile/jest.config.js` |
+| convex  | Vitest              | `convex/vitest.config.ts`                     |
+| e2e     | Playwright          | `e2e/playwright.config.ts`                    |
+
+### Coverage Tracking
+
+Current test counts (update after adding tests):
+
+| Package   | Tests   | Key Coverage Areas                                         |
+| --------- | ------- | ---------------------------------------------------------- |
+| shared    | 152     | Basketball utils, team colors, YouTube parsing, CSV export |
+| web       | 29      | AuthContext, useExport hook                                |
+| mobile    | 20      | useSoundFeedback hook, mock verification                   |
+| convex    | 35      | Auth utilities (token, validation, formatting)             |
+| **Total** | **236** |                                                            |
+
+**Coverage goals:**
+
+- Shared utilities: 90%+ (pure functions, highest ROI)
+- Convex mutations: 80%+ (business logic and permissions)
+- Web/Mobile hooks: 70%+ (state management)
+- UI components: 50%+ (integration tests)
+
+### Test File Locations
+
+```
+shared/src/utils/
+├── basketball.test.ts      # 78 tests - stats calculations
+├── teamColors.test.ts      # 26 tests - color utilities
+├── youtube.test.ts         # 35 tests - URL parsing
+└── csv.test.ts             # 13 tests - CSV generation
+
+web/basketball-stats-web/src/
+├── test/
+│   └── setup.ts            # Mocks: localStorage, AudioContext, etc.
+├── contexts/
+│   └── AuthContext.test.tsx
+└── hooks/
+    └── useExport.test.ts
+
+mobile/BasketballStatsMobile/src/
+├── test/
+│   └── setup.ts            # Mocks: expo-haptics, expo-audio, etc.
+└── hooks/
+    └── useSoundFeedback.test.ts
+
+convex/
+├── lib/
+│   └── auth.test.ts        # Auth utility tests
+└── test/
+    └── fixtures.ts         # Test data factories
+
+e2e/tests/
+├── auth.spec.ts            # Authentication flow
+└── game-flow.spec.ts       # Navigation, accessibility, performance
+```
+
+### Mocking Strategies
+
+**Web mocks** (`web/.../src/test/setup.ts`):
+
+- `localStorage` - In-memory storage with actual read/write behavior
+- `AudioContext` - Mock Web Audio API for feedback sounds
+- `navigator.vibrate` - Mock for haptic feedback
+- `matchMedia`, `ResizeObserver`, `IntersectionObserver` - Browser APIs
+
+**Mobile mocks** (`mobile/.../src/test/setup.ts`):
+
+- `expo-haptics` - Mock impact/notification feedback
+- `expo-audio` - Mock sound loading and playback
+- `expo-secure-store` - Mock secure credential storage
+- `expo-notifications` - Mock push notification APIs
+- `convex/react` - Mock useQuery/useMutation hooks
+
+**Convex mocks** (`convex/test/fixtures.ts`):
+
+- Factory functions for test data: `createMockUser()`, `createMockGame()`, etc.
+- Generates valid IDs and realistic test data
+
+### Writing New Tests
+
+**For shared utilities** (pure functions):
+
+```typescript
+// shared/src/utils/myUtil.test.ts
+import { describe, it, expect } from "vitest";
+import { myFunction } from "./myUtil";
+
+describe("myFunction", () => {
+  it("should handle normal case", () => {
+    expect(myFunction(input)).toBe(expected);
+  });
+
+  it("should handle edge case", () => {
+    expect(myFunction(null)).toBe(defaultValue);
+  });
+});
+```
+
+**For React hooks** (web/mobile):
+
+```typescript
+// src/hooks/useMyHook.test.ts
+import { renderHook, act } from "@testing-library/react";
+import { useMyHook } from "./useMyHook";
+
+describe("useMyHook", () => {
+  it("should update state on action", () => {
+    const { result } = renderHook(() => useMyHook());
+
+    act(() => {
+      result.current.doSomething();
+    });
+
+    expect(result.current.value).toBe(expected);
+  });
+});
+```
+
+**For E2E tests** (Playwright):
+
+```typescript
+// e2e/tests/myFlow.spec.ts
+import { test, expect } from "@playwright/test";
+
+test("should complete user flow", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /start/i }).click();
+  await expect(page.getByText("Success")).toBeVisible();
+});
+```
 
 ### Type Patterns
 
