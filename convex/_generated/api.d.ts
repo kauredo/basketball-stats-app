@@ -26,6 +26,8 @@ import type * as statistics from "../statistics.js";
 import type * as stats from "../stats.js";
 import type * as teamMemberships from "../teamMemberships.js";
 import type * as teams from "../teams.js";
+import type * as test_fixtures from "../test/fixtures.js";
+import type * as test_setup from "../test/setup.js";
 
 import type {
   ApiFromModules,
@@ -52,6 +54,8 @@ declare const fullApi: ApiFromModules<{
   stats: typeof stats;
   teamMemberships: typeof teamMemberships;
   teams: typeof teams;
+  "test/fixtures": typeof test_fixtures;
+  "test/setup": typeof test_setup;
 }>;
 
 /**
