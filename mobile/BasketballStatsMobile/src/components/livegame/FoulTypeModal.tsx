@@ -197,11 +197,11 @@ export default function FoulTypeModal({
           {/* Step Content */}
           <ScrollView className="p-4">
             {step === "foulType" && (
-              <View className="flex-row flex-wrap gap-3">
+              <View className="flex-row flex-wrap justify-between">
                 {foulTypes.map((foul) => (
                   <TouchableOpacity
                     key={foul.type}
-                    className="w-[47%] bg-surface-900 border-2 rounded-xl py-3 px-4 items-center"
+                    className="w-[48%] bg-surface-900 border-2 rounded-xl py-3 px-4 items-center mb-3"
                     style={{ borderColor: foul.color }}
                     onPress={() => handleFoulTypeSelect(foul.type)}
                     activeOpacity={0.7}

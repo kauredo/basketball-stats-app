@@ -343,6 +343,8 @@ export default function LiveGameScreen() {
     steals: s.steals,
     blocks: s.blocks,
     turnovers: s.turnovers,
+    fouls: s.fouls,
+    freeThrowsMade: s.freeThrowsMade,
   })) as OnCourtPlayer[];
 
   // Transform persisted shots for MiniCourt visualization
