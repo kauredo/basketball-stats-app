@@ -43,6 +43,7 @@ const ShotCharts: React.FC = () => {
   const [selectedTeamId, setSelectedTeamId] = useState<Id<"teams"> | null>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [showPlayerModal, setShowPlayerModal] = useState(false);
+  const [initializedFromUrl, setInitializedFromUrl] = useState(false);
 
   // Export functionality
   const courtRef = useRef<HTMLDivElement>(null);
@@ -78,10 +79,15 @@ const ShotCharts: React.FC = () => {
 
   // Initialize selection from URL params once data is loaded
   useEffect(() => {
+    // Wait until we have player/team options loaded before initializing
+    if (playerOptions.length === 0 && teamOptions.length === 0) {
+      return;
+    }
+
     const playerParam = searchParams.get("player");
     const teamParam = searchParams.get("team");
 
-    if (playerParam && playerOptions.length > 0 && !selectedPlayerId) {
+    if (playerParam && !selectedPlayerId) {
       // Validate player exists in options
       const playerExists = playerOptions.some((p) => p.id === playerParam);
       if (playerExists) {
@@ -89,17 +95,26 @@ const ShotCharts: React.FC = () => {
       }
     }
 
-    if (teamParam && teamOptions.length > 0 && !selectedTeamId) {
+    if (teamParam && !selectedTeamId) {
       // Validate team exists in options
       const teamExists = teamOptions.some((t) => t.id === teamParam);
       if (teamExists) {
         setSelectedTeamId(teamParam as Id<"teams">);
       }
     }
-  }, [searchParams, playerOptions, teamOptions, selectedPlayerId, selectedTeamId]);
 
-  // Sync selection changes to URL
+    // Mark initialization complete after processing URL params
+    if (!initializedFromUrl) {
+      setInitializedFromUrl(true);
+    }
+  }, [searchParams, playerOptions, teamOptions, selectedPlayerId, selectedTeamId, initializedFromUrl]);
+
+  // Sync selection changes to URL (only after initial URL params have been processed)
   useEffect(() => {
+    if (!initializedFromUrl) {
+      return;
+    }
+
     const params = new URLSearchParams();
     if (viewMode === "player" && selectedPlayerId) {
       params.set("player", selectedPlayerId);
@@ -107,7 +122,7 @@ const ShotCharts: React.FC = () => {
       params.set("team", selectedTeamId);
     }
     setSearchParams(params, { replace: true });
-  }, [viewMode, selectedPlayerId, selectedTeamId, setSearchParams]);
+  }, [viewMode, selectedPlayerId, selectedTeamId, setSearchParams, initializedFromUrl]);
 
   // Get selected player info for display
   const selectedPlayerInfo = playerOptions.find((p) => p.id === selectedPlayerId);
